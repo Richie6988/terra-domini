@@ -10,14 +10,14 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from terra_domini.apps.territories.models import Territory, Building
-from terra_domini.apps.territories.serializers import TerritorySerializer, TerritoryDetailSerializer
+from terra_domini.apps.territories.serializers import TerritoryLightSerializer, TerritoryDetailSerializer
 
 logger = logging.getLogger('terra_domini.territories')
 
 
 class TerritoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
-    serializer_class = TerritorySerializer
+    serializer_class = TerritoryLightSerializer
     filterset_fields = ['territory_type', 'country_code', 'is_control_tower']
 
     def get_queryset(self):
@@ -26,7 +26,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return TerritoryDetailSerializer
-        return TerritorySerializer
+        return TerritoryLightSerializer
 
     # ── Map viewport query ────────────────────────────────────────────────────
     @action(detail=False, methods=['GET'], url_path='viewport')
@@ -134,7 +134,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         """GET /api/territories/mine/ — list player's own territories"""
         territories = Territory.objects.filter(owner=request.user).select_related('alliance').order_by('-captured_at')
         return Response({
-            'territories': TerritorySerializer(territories, many=True).data,
+            'territories': TerritoryLightSerializer(territories, many=True).data,
             'count': territories.count(),
         })
 
