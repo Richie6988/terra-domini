@@ -61,7 +61,7 @@ build-frontend:
 
 # Dev: start Django only (serves built React + API on :8000)
 dev:
-	cd backend && python manage.py runserver 0.0.0.0:8000
+	cd backend && daphne -b 0.0.0.0 -p 8000 terra_domini.asgi:application
 
 # Dev with hot reload: start Django + Vite proxy simultaneously
 dev-full:
