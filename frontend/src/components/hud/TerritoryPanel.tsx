@@ -382,20 +382,22 @@ const closeBtn: React.CSSProperties = {
   width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
   flexShrink: 0,
 }
-
 const primaryBtn: React.CSSProperties = {
   width: '100%', padding: '12px', marginTop: 4,
   background: '#059669', border: 'none', borderRadius: 8,
   color: '#fff', fontSize: 14, fontWeight: 500, cursor: 'pointer',
 }
-
 const tagBtn: React.CSSProperties = {
   padding: '6px 12px', borderRadius: 6, border: '1px solid',
   fontSize: 12, cursor: 'pointer', fontWeight: 500,
 }
-
 const numInput: React.CSSProperties = {
   width: 72, padding: '5px 8px',
   background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
   borderRadius: 6, color: '#fff', fontSize: 13, textAlign: 'center',
 }
+
+
+
+
+

@@ -9,6 +9,16 @@ import { TDCShopPanel } from '../shop/TDCShopPanel'
 import { StaminaBar } from './StaminaBar'
 
 // Django DecimalField serializes as string — always parse before arithmetic
+
+const glassPill: React.CSSProperties = {
+  display: 'flex', alignItems: 'center',
+  padding: '7px 12px', borderRadius: 10,
+  background: 'rgba(0,0,0,0.6)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  backdropFilter: 'blur(8px)',
+  flexShrink: 0,
+}
+
 const toNum = (v: unknown): number => parseFloat(String(v ?? 0)) || 0
 
 
@@ -251,11 +261,3 @@ export function GameHUD() {
   )
 }
 
-const glassPill: React.CSSProperties = {
-  display: 'flex', alignItems: 'center',
-  padding: '7px 12px', borderRadius: 10,
-  background: 'rgba(0,0,0,0.6)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  backdropFilter: 'blur(8px)',
-  flexShrink: 0,
-}

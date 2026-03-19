@@ -501,11 +501,13 @@ const panelStyle: React.CSSProperties = {
   borderLeft: '1px solid rgba(255,255,255,0.08)',
   display: 'flex', flexDirection: 'column', overflow: 'hidden',
 }
-
 const tagStyle: React.CSSProperties = {
   fontSize: 10, padding: '3px 8px', borderRadius: 4, fontWeight: 600,
   letterSpacing: '0.05em',
 }
+
+
+
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (

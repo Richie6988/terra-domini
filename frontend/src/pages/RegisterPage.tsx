@@ -8,6 +8,37 @@ import toast from 'react-hot-toast'
 import { authApi } from '../services/api'
 import { useStore } from '../store'
 
+const pageStyle: React.CSSProperties = {
+  display: 'flex', alignItems: 'center', justifyContent: 'center',
+  minHeight: '100vh', background: '#0a0a14', position: 'relative', overflow: 'hidden',
+  padding: '20px 0',
+}
+const bgStyle: React.CSSProperties = {
+  position: 'absolute', inset: 0,
+  backgroundImage: 'radial-gradient(ellipse at 30% 40%, rgba(16,185,129,0.06) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(139,92,246,0.06) 0%, transparent 60%)',
+}
+const cardStyle: React.CSSProperties = {
+  width: 420, padding: '36px 32px',
+  background: 'rgba(255,255,255,0.03)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: 16, position: 'relative', zIndex: 1,
+}
+const labelStyle: React.CSSProperties = {
+  display: 'block', fontSize: 11, color: '#9CA3AF', marginBottom: 5, marginTop: 12,
+}
+const inputStyle: React.CSSProperties = {
+  width: '100%', padding: '10px 13px',
+  background: 'rgba(255,255,255,0.05)',
+  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8,
+  color: '#fff', fontSize: 13, boxSizing: 'border-box',
+}
+const btnStyle: React.CSSProperties = {
+  width: '100%', padding: 13, marginTop: 20,
+  background: '#059669', border: 'none', borderRadius: 10,
+  color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+}
+
+
 export default function RegisterPage() {
   const navigate = useNavigate()
   const setAuth = useStore((s) => s.setAuth)
@@ -91,32 +122,3 @@ export default function RegisterPage() {
   )
 }
 
-const pageStyle: React.CSSProperties = {
-  display: 'flex', alignItems: 'center', justifyContent: 'center',
-  minHeight: '100vh', background: '#0a0a14', position: 'relative', overflow: 'hidden',
-  padding: '20px 0',
-}
-const bgStyle: React.CSSProperties = {
-  position: 'absolute', inset: 0,
-  backgroundImage: 'radial-gradient(ellipse at 30% 40%, rgba(16,185,129,0.06) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(139,92,246,0.06) 0%, transparent 60%)',
-}
-const cardStyle: React.CSSProperties = {
-  width: 420, padding: '36px 32px',
-  background: 'rgba(255,255,255,0.03)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 16, position: 'relative', zIndex: 1,
-}
-const labelStyle: React.CSSProperties = {
-  display: 'block', fontSize: 11, color: '#9CA3AF', marginBottom: 5, marginTop: 12,
-}
-const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '10px 13px',
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8,
-  color: '#fff', fontSize: 13, boxSizing: 'border-box',
-}
-const btnStyle: React.CSSProperties = {
-  width: '100%', padding: 13, marginTop: 20,
-  background: '#059669', border: 'none', borderRadius: 10,
-  color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
-}
