@@ -11,6 +11,9 @@ import { tdcApi } from '../../services/api'
 import { useStore, useTDCBalance } from '../../store'
 import type { ShopItem } from '../../types'
 
+const toNum = (v: unknown): number => parseFloat(String(v ?? 0)) || 0
+
+
 const EUR_PACKAGES = [
   { eur: 1.99, tdc: 200,  bonus: 0,    label: 'Starter' },
   { eur: 4.99, tdc: 550,  bonus: 50,   label: 'Scout' },
@@ -63,7 +66,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
     mutationFn: ({ code, qty }: { code: string; qty: number }) =>
       tdcApi.purchase(code, qty),
     onSuccess: (data, { code }) => {
-      toast.success(`✅ Purchased! ${data.tdc_spent.toFixed(0)} TDC spent`)
+      toast.success(`✅ Purchased! ${toNum(data.tdc_spent).toFixed(0)} TDC spent`)
       qc.invalidateQueries({ queryKey: ['tdc-balance'] })
     },
     onError: (e: any) => {
@@ -75,7 +78,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
   const categories = [...new Set(items.map(i => i.category))]
   const filteredItems = selectedCategory ? items.filter(i => i.category === selectedCategory) : items
 
-  const inGame = balance?.in_game ?? balanceData?.in_game ?? 0
+  const inGame = toNum(balance?.in_game) ?? balanceData?.in_game ?? 0
   const tdcRate = balance?.tdc_eur_rate ?? balanceData?.tdc_eur_rate ?? 100
 
   return (
@@ -112,13 +115,13 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
           <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
             <BalanceCard
               label="In-Game Balance"
-              value={`${inGame.toFixed(2)} TDC`}
-              sub={`≈ €${(inGame / tdcRate).toFixed(2)}`}
+              value={`${toNum(inGame).toFixed(2)} TDC`}
+              sub={`≈ €${(toNum(inGame) / toNum(tdcRate)).toFixed(2)}`}
               color="#10B981"
             />
             <BalanceCard
               label="Wallet Balance"
-              value={balance?.wallet ? `${balance.wallet.toFixed(2)} TDC` : 'Connect wallet'}
+              value={balance?.wallet ? `${toNum(balance.wallet).toFixed(2)} TDC` : 'Connect wallet'}
               sub={balance?.wallet ? `Polygon mainnet` : 'Link in profile'}
               color="#8B5CF6"
             />
@@ -294,7 +297,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
                     fontWeight: 500,
                     color: tx.amount > 0 ? '#10B981' : '#EF4444',
                   }}>
-                    {tx.amount > 0 ? '+' : ''}{tx.amount.toFixed(2)} TDC
+                    {tx.amount > 0 ? '+' : ''}{toNum(tx.amount).toFixed(2)} TDC
                   </div>
                 </div>
               ))}

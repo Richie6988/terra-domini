@@ -550,7 +550,7 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
   const items: DigestItem[] = [
     { icon: '⏰', text: `You were away for ${Math.round(offlineHours)} hours`, color: 'rgba(255,255,255,0.4)' },
     { icon: '⚙️', text: 'Resources accumulated (40% offline rate)', value: `+${totalResources.toLocaleString()}`, color: '#10B981' },
-    ...(newTDC > 0 ? [{ icon: '🪙', text: 'Ad revenue earned while offline', value: `+${newTDC.toFixed(0)} TDC`, color: '#FFB800' }] : []),
+    ...(newTDC > 0 ? [{ icon: '🪙', text: 'Ad revenue earned while offline', value: `+${parseFloat(String(newTDC ?? 0)).toFixed(0)} TDC`, color: '#FFB800' }] : []),
     ...battles.map(b => ({
       icon: b.won ? '🏆' : '💀',
       text: b.won ? `Battle won: captured ${b.territory}` : `Defense failed: lost ${b.territory}`,

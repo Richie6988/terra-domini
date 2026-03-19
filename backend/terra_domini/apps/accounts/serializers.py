@@ -31,6 +31,11 @@ class PlayerPublicSerializer(serializers.ModelSerializer):
 
 
 class PlayerMeSerializer(serializers.ModelSerializer):
+    # Override Decimal fields → float so JS .toFixed() works without parsing
+    tdc_in_game = serializers.FloatField(read_only=True)
+    total_tdc_purchased = serializers.FloatField(read_only=True)
+    total_tdc_earned = serializers.FloatField(read_only=True)
+
     stats = PlayerStatsSerializer(read_only=True)
     alliance_tag = serializers.SerializerMethodField()
 

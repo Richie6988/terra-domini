@@ -7,6 +7,10 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { usePlayer, useTDCBalance, useActiveBattles, useWsConnected, useNotifications, useStore } from '../../store'
 import { TDCShopPanel } from '../shop/TDCShopPanel'
 
+// Django DecimalField serializes as string — always parse before arithmetic
+const toNum = (v: unknown): number => parseFloat(String(v ?? 0)) || 0
+
+
 function useBattleCountdown(resolves_at: string): string {
   const [time, setTime] = useState('')
   useEffect(() => {
@@ -93,9 +97,9 @@ export function GameHUD() {
           <span style={{ fontSize: 16 }}>🪙</span>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, color: '#F59E0B' }}>
-              {(balance?.in_game ?? player.tdc_in_game).toFixed(0)} TDC
+              {toNum(balance?.in_game ?? player.tdc_in_game).toFixed(0)} TDC
             </div>
-            <div style={{ fontSize: 10, color: '#6B7280' }}>≈ €{((balance?.in_game ?? player.tdc_in_game) / (balance?.tdc_eur_rate ?? 100)).toFixed(2)}</div>
+            <div style={{ fontSize: 10, color: '#6B7280' }}>≈ €{(toNum(balance?.in_game ?? player.tdc_in_game) / toNum(balance?.tdc_eur_rate ?? 100)).toFixed(2)}</div>
           </div>
           <span style={{ fontSize: 10, color: '#8B5CF6', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: 8 }}>Buy +</span>
         </button>

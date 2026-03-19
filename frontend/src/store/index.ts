@@ -176,7 +176,7 @@ export const useStore = create<Store>()(
           ? { ...state.balance, in_game: state.balance.in_game + amount }
           : null,
         player: state.player
-          ? { ...state.player, tdc_in_game: state.player.tdc_in_game + amount }
+          ? { ...state.player, tdc_in_game: parseFloat(String(state.player.tdc_in_game ?? 0)) + amount }
           : null,
       })),
 

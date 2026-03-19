@@ -17,6 +17,9 @@ import { api } from '../../services/api'
 import { useStore } from '../../store'
 import toast from 'react-hot-toast'
 
+const toNum = (v: unknown): number => parseFloat(String(v ?? 0)) || 0
+
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface DashboardData {
@@ -160,9 +163,9 @@ function DashboardSection() {
       {/* Economy */}
       <div style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgba(123,47,255,0.5)', letterSpacing: '0.15em', marginBottom: 8 }}>ECONOMY</div>
       <div style={S.grid}>
-        <KPI n={`${(data.economy.tdc_in_game_total / 1000).toFixed(1)}K`} l="TDC in Circulation" color="#7B2FFF" />
+        <KPI n={`${(toNum(data.economy.tdc_in_game_total) / 1000).toFixed(1)}K`} l="TDC in Circulation" color="#7B2FFF" />
         <KPI n={data.economy.purchases_today_count} l="Purchases Today"  color="#C084FC" />
-        <KPI n={`${data.economy.purchases_today_tdc.toFixed(0)} TDC`} l="Revenue Today" color="#FFB800" />
+        <KPI n={`${toNum(data.economy.purchases_today_tdc).toFixed(0)} TDC`} l="Revenue Today" color="#FFB800" />
         <KPI n={data.events.towers_upcoming} l="Towers Scheduled" color="#06B6D4" />
       </div>
     </div>
@@ -238,7 +241,7 @@ function PlayersSection() {
                 <td style={S.td}>
                   <span style={S.badge('#00FF87')}>R{p.rank}</span>
                 </td>
-                <td style={{ ...S.td, fontFamily: 'monospace' }}>{p.tdc.toFixed(0)}</td>
+                <td style={{ ...S.td, fontFamily: 'monospace' }}>{toNum(p.tdc).toFixed(0)}</td>
                 <td style={S.td}>{p.territories}</td>
                 <td style={S.td}>
                   <span style={S.badge(p.is_online ? '#10B981' : '#6B7280')}>
@@ -573,7 +576,7 @@ function EconomySection() {
 
       <div style={{ ...S.grid, gridTemplateColumns: 'repeat(3, 1fr)' }}>
         <KPI n={`€${data?.tdc_eur_rate ?? 0.01}`}          l="TDC → EUR Rate" color="#FFB800" />
-        <KPI n={`${((data?.total_tdc_supply ?? 0)/1000).toFixed(1)}K`} l="Total TDC Supply" color="#7B2FFF" />
+        <KPI n={`${(toNum(data?.total_tdc_supply) / 1000).toFixed(1)}K`} l="Total TDC Supply" color="#7B2FFF" />
         <KPI n={data?.max_withdrawal_daily ?? 500}           l="Max Withdrawal/Day" color="#60A5FA" />
       </div>
 
