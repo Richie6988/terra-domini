@@ -148,7 +148,7 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
         {/* Player hero */}
         <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', gap: 14, alignItems: 'center' }}>
           <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'linear-gradient(135deg, #10B981, #3B82F6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20, fontWeight: 700, color: '#fff', flexShrink: 0 }}>
-            {player.username.slice(0, 2).toUpperCase()}
+            {player?.username?.slice(0, 2)?.toUpperCase() ?? '??'}
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>

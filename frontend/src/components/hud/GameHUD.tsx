@@ -40,7 +40,7 @@ function BattleTimer({ battle }: { battle: { id: string; territory_h3: string; r
     }}>
       <Sword size={13} color="#EF4444" />
       <span style={{ fontSize: 12, color: '#FCA5A5' }}>
-        {battle.territory_h3.slice(0, 8)}…
+        {(battle.territory_name || battle.territory_h3 || 'Zone').slice(0, 12)}
       </span>
       <span style={{ fontSize: 12, fontWeight: 600, color: '#EF4444' }}>{countdown}</span>
     </div>
@@ -81,7 +81,7 @@ export function GameHUD() {
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 13, fontWeight: 700, color: '#fff',
           }}>
-            {player.username.slice(0, 2).toUpperCase()}
+            {player?.username?.slice(0, 2)?.toUpperCase() ?? '??'}
           </div>
           <div>
             <div style={{ fontSize: 13, fontWeight: 500, color: '#fff' }}>{player.username}</div>

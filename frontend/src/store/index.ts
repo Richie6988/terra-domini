@@ -161,7 +161,7 @@ export const useStore = create<Store>()(
         return {
           activeBattles: state.activeBattles.filter(b => b.id !== battleId),
           recentBattleResults: battle
-            ? [battle, ...state.recentBattleResults.slice(0, 9)]
+            ? [battle, ...(state.recentBattleResults ?? []).slice(0, 9)]
             : state.recentBattleResults,
         }
       }),
@@ -190,7 +190,7 @@ export const useStore = create<Store>()(
       setSidebarOpen: (open) => set({ sidebarOpen: open }),
       setActivePanel: (panel) => set({ activePanel: panel, sidebarOpen: panel !== null }),
       addNotification: (n) => set((state) => ({
-        notifications: [n, ...state.notifications.slice(0, 19)],
+        notifications: [n, ...(state.notifications ?? []).slice(0, 19)],
       })),
       dismissNotification: (index) => set((state) => ({
         notifications: state.notifications.filter((_, i) => i !== index),

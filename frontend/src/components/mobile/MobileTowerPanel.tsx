@@ -187,7 +187,7 @@ function TowerCard({ tower, onPress, urgent, muted }: {
         {/* Registered alliances preview */}
         {tower.registered_alliances?.length > 0 && !muted && (
           <div style={{ marginTop: 10, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {tower.registered_alliances.slice(0, 4).map(a => (
+            {(tower.registered_alliances ?? []).slice(0, 4).map(a => (
               <span key={a.id} style={{
                 fontSize: 11, padding: '2px 8px', borderRadius: 4,
                 background: tower.my_alliance_registered && a.tag === tower.registered_alliances[0]?.tag

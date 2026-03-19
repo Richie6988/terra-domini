@@ -6,6 +6,7 @@ class BattleSerializer(serializers.ModelSerializer):
     attacker_username = serializers.SerializerMethodField()
     defender_username = serializers.SerializerMethodField()
     territory_name    = serializers.SerializerMethodField()
+    territory_h3      = serializers.SerializerMethodField()
     status_display    = serializers.CharField(source='get_status_display', read_only=True)
     type_display      = serializers.CharField(source='get_battle_type_display', read_only=True)
     time_remaining_s  = serializers.SerializerMethodField()
@@ -16,7 +17,7 @@ class BattleSerializer(serializers.ModelSerializer):
             'id', 'attacker_username', 'defender_username', 'territory_name',
             'status', 'status_display', 'battle_type', 'type_display',
             'started_at', 'resolves_at', 'completed_at',
-            'winner', 'resources_looted', 'time_remaining_s',
+            'winner', 'resources_looted', 'time_remaining_s', 'territory_h3',
         ]
 
     def get_attacker_username(self, obj):
@@ -33,6 +34,9 @@ class BattleSerializer(serializers.ModelSerializer):
 
     def get_territory_name(self, obj):
         return obj.target_territory.place_name or obj.target_territory.h3_index
+
+    def get_territory_h3(self, obj):
+        return obj.target_territory.h3_index
 
     def get_time_remaining_s(self, obj):
         if not obj.resolves_at:

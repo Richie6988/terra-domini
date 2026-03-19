@@ -107,7 +107,7 @@ export function TerritoryPanel() {
           <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
             <div>
               <div style={{ fontSize: 18, fontWeight: 500, color: '#fff', marginBottom: 4 }}>
-                {territory.landmark_name || territory.place_name || territory.h3.slice(0, 10) + '…'}
+                {territory.landmark_name || territory.place_name || (territory.h3 || territory.h3_index || '').slice(0, 10) + '…'}
               </div>
               <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                 <Tag color={getTerritoryTypeColor(territory.type)}>{territory.type}</Tag>

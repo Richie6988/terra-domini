@@ -195,7 +195,7 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 14, color: '#C084FC', fontWeight: 600,
                     }}>
-                      {req.from_player.username.slice(0, 2).toUpperCase()}
+                      {(req.from_player?.username ?? '??').slice(0, 2).toUpperCase()}
                     </div>
                     <div>
                       <div style={{ fontSize: 13, fontWeight: 500, color: '#fff' }}>{req.from_player.username}</div>
@@ -242,7 +242,7 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 12, color: '#00FF87', fontWeight: 600, flexShrink: 0,
                 }}>
-                  {p.username.slice(0, 2).toUpperCase()}
+                  {(p.username ?? '??').slice(0, 2).toUpperCase()}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, color: '#E5E7EB', fontWeight: 500 }}>{p.username}</div>
@@ -313,7 +313,7 @@ function FriendRow({ friend }: { friend: Friend }) {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 12, color: friend.is_online ? '#00FF87' : '#6B7280', fontWeight: 600,
         }}>
-          {friend.username.slice(0, 2).toUpperCase()}
+          {(friend.username ?? '??').slice(0, 2).toUpperCase()}
         </div>
         <div style={{
           position: 'absolute', bottom: 0, right: 0,
@@ -482,7 +482,7 @@ export function ShareCard({ type, data, onClose }: ShareCardProps) {
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 14, color: config.color, fontWeight: 700,
                 }}>
-                  {player?.username.slice(0, 2).toUpperCase()}
+                  {player?.username?.slice(0, 2)?.toUpperCase() ?? '??'}
                 </div>
                 <div style={{ textAlign: 'left' }}>
                   <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{player?.username}</div>

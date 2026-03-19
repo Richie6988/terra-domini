@@ -90,7 +90,7 @@ export function WarTicker() {
 
     // World events
     const wevts = Array.isArray(worldEvents) ? worldEvents : []
-    wevts.slice(0, 3).forEach((e: any) => {
+    (wevts ?? []).slice(0, 3).forEach((e: any) => {
       all.push({
         id: `world_${e.id}`,
         icon: e.name?.slice(0, 2) ?? '🌍',
@@ -101,7 +101,7 @@ export function WarTicker() {
     })
 
     // Notifications
-    notifications.slice(0, 2).forEach((n: any, i) => {
+    (notifications ?? []).slice(0, 2).forEach((n: any, i) => {
       all.push({
         id: `notif_${i}`,
         icon: n.type === 'attack_incoming' ? '🚨' : '📢',
