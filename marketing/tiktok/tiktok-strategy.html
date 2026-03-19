@@ -3,504 +3,552 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Terra Domini — TikTok Content Strategy</title>
+<title>Terra Domini — TikTok Content Playbook</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
 <style>
 :root{
-  --g:#00FF87;--r:#FF3B30;--gold:#FFB800;--pk:#EC4899;--pu:#7B2FFF;
+  --g:#00FF87;--r:#FF3B30;--gold:#FFB800;--pu:#7B2FFF;--pk:#EC4899;
   --dark:#050508;--d2:#0A0A12;--border:rgba(255,255,255,0.08);
   --fd:'Bebas Neue',sans-serif;--fb:'Space Grotesk',sans-serif;--fm:'IBM Plex Mono',monospace;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{background:var(--dark);color:#E8E8F0;font-family:var(--fb);}
-.header{padding:60px 60px 40px;border-bottom:1px solid var(--border);}
-.header h1{font-family:var(--fd);font-size:52px;letter-spacing:3px;color:#fff;}
-.header h1 span{color:var(--pk);}
-.header p{font-size:15px;color:rgba(255,255,255,0.45);max-width:700px;line-height:1.7;margin-top:10px;}
-.stats-bar{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--d2);}
-.stat{padding:16px 32px;border-right:1px solid var(--border);text-align:center;}
-.stat-n{font-family:var(--fd);font-size:28px;letter-spacing:1px;}
-.stat-l{font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-top:2px;}
-.section{padding:48px 60px;border-bottom:1px solid var(--border);}
-.section h2{font-family:var(--fd);font-size:32px;letter-spacing:2px;color:#fff;margin-bottom:28px;}
-.angle-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:0;}
-.angle-card{padding:24px;border:1px solid var(--border);border-radius:8px;background:var(--d2);}
-.angle-emoji{font-size:28px;margin-bottom:12px;display:block;}
-.angle-hook{font-family:var(--fd);font-size:20px;letter-spacing:1px;color:#fff;margin-bottom:8px;line-height:1.1;}
-.angle-why{font-size:12px;color:rgba(255,255,255,0.45);line-height:1.6;margin-bottom:10px;}
-.angle-viral{font-family:var(--fm);font-size:10px;letter-spacing:0.1em;}
-.videos-grid{display:flex;flex-direction:column;gap:24px;}
-.video-card{border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-.video-header{padding:16px 20px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--border);}
-.vid-num{font-family:var(--fd);font-size:28px;letter-spacing:1px;width:40px;flex-shrink:0;}
-.vid-meta{flex:1;}
-.vid-title{font-weight:600;font-size:15px;color:#fff;margin-bottom:3px;}
-.vid-tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px;}
-.vtag{font-family:var(--fm);font-size:9px;padding:2px 8px;border-radius:2px;letter-spacing:0.08em;}
-.vid-viral{font-family:var(--fm);font-size:11px;color:var(--g);margin-left:auto;flex-shrink:0;}
-.video-body{padding:20px;display:grid;grid-template-columns:1fr 1fr;gap:24px;}
-.script-block{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:6px;padding:16px;}
-.script-label{font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.12em;margin-bottom:10px;}
-.script-line{display:flex;gap:10px;margin-bottom:8px;font-size:12px;line-height:1.6;}
-.script-tc{font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.2);width:32px;flex-shrink:0;padding-top:1px;}
-.script-type{font-family:var(--fm);font-size:9px;padding:1px 6px;border-radius:2px;align-self:flex-start;white-space:nowrap;flex-shrink:0;margin-top:2px;}
-.st-vo{background:rgba(0,255,135,0.12);color:var(--g);}
-.st-vis{background:rgba(59,130,246,0.12);color:#60A5FA;}
-.st-sfx{background:rgba(255,184,0,0.12);color:var(--gold);}
-.st-text{background:rgba(236,72,153,0.12);color:var(--pk);}
-.script-content{color:rgba(255,255,255,0.65);}
-.tips-block{display:flex;flex-direction:column;gap:10px;}
-.tip{padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:4px;font-size:12px;color:rgba(255,255,255,0.5);line-height:1.6;display:flex;gap:8px;}
-.tip::before{content:'→';color:var(--g);flex-shrink:0;}
-.hashtags{font-family:var(--fm);font-size:11px;color:var(--pk);margin-top:8px;line-height:1.8;}
-.calendar-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border:1px solid var(--border);border-radius:8px;overflow:hidden;}
-.cal-week{border-right:1px solid var(--border);}
-.cal-week:last-child{border-right:none;}
-.cal-header{padding:12px 16px;border-bottom:1px solid var(--border);font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;}
-.cal-body{padding:12px;}
-.cal-item{padding:6px 8px;margin-bottom:6px;border-radius:4px;font-size:11px;line-height:1.4;}
-.cal-item .day{font-family:var(--fm);font-size:9px;color:rgba(255,255,255,0.25);margin-bottom:2px;}
-.cal-item .content{color:rgba(255,255,255,0.7);}
-@media(max-width:900px){.header,.section{padding:32px 20px;}.angle-grid,.video-body{grid-template-columns:1fr;}.calendar-grid{grid-template-columns:1fr 1fr;}}
+
+/* HEADER */
+.hdr{padding:48px 60px 32px;border-bottom:1px solid var(--border);}
+.hdr h1{font-family:var(--fd);font-size:52px;letter-spacing:3px;color:#fff;}
+.hdr h1 span{color:var(--pk);}
+.hdr p{font-size:15px;color:rgba(255,255,255,0.45);max-width:700px;margin-top:10px;line-height:1.7;}
+
+/* STRATEGY PILLARS */
+.pillars{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--border);margin:0;}
+.pillar{padding:20px 16px;background:var(--d2);}
+.p-icon{font-size:24px;margin-bottom:8px;}
+.p-acc{font-family:var(--fm);font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.35);margin-bottom:4px;}
+.p-name{font-family:var(--fd);font-size:18px;letter-spacing:1px;color:#fff;margin-bottom:6px;}
+.p-desc{font-size:11px;color:rgba(255,255,255,0.4);line-height:1.6;}
+.p-tag{display:inline-block;margin-top:8px;font-family:var(--fm);font-size:9px;padding:2px 7px;border-radius:2px;}
+
+/* METRICS */
+.metrics{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--dark);}
+.metric{padding:20px 28px;border-right:1px solid var(--border);text-align:center;}
+.metric-n{font-family:var(--fd);font-size:32px;letter-spacing:1px;}
+.metric-l{font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-top:2px;}
+
+/* SCRIPTS SECTION */
+.scripts-section{padding:40px 60px;}
+.week-header{
+  display:flex;align-items:center;gap:16px;margin:32px 0 16px;
+  padding-bottom:10px;border-bottom:1px solid rgba(255,255,255,0.06);
+}
+.week-num{font-family:var(--fd);font-size:36px;letter-spacing:2px;color:rgba(255,255,255,0.2);}
+.week-title{font-size:16px;font-weight:600;color:#fff;}
+.week-sub{font-size:12px;color:rgba(255,255,255,0.35);}
+
+/* VIDEO CARD */
+.vid-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:8px;}
+.vid-card{border:1px solid var(--border);border-radius:8px;overflow:hidden;background:var(--d2);}
+.vid-header{padding:12px 14px;border-bottom:1px solid rgba(255,255,255,0.05);display:flex;gap:10px;align-items:flex-start;}
+.vid-num{font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.2);margin-top:1px;flex-shrink:0;}
+.vid-title{font-weight:600;font-size:13px;color:#fff;line-height:1.3;}
+.vid-hook-label{font-family:var(--fm);font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;text-transform:uppercase;margin:10px 14px 4px;}
+.vid-hook{font-size:13px;color:var(--g);padding:8px 14px 0;font-style:italic;font-weight:500;line-height:1.5;}
+.vid-body{padding:8px 14px 14px;}
+.vid-script{font-size:11px;color:rgba(255,255,255,0.5);line-height:1.7;border-left:2px solid rgba(0,255,135,0.2);padding-left:10px;margin:8px 0;}
+.vid-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.meta-tag{font-family:var(--fm);font-size:9px;padding:2px 7px;border-radius:2px;background:rgba(255,255,255,0.06);color:rgba(255,255,255,0.4);}
+.meta-tag.hot{background:rgba(255,59,48,0.12);color:#FF8A80;}
+.meta-tag.viral{background:rgba(0,255,135,0.10);color:var(--g);}
+.meta-tag.niche{background:rgba(123,47,255,0.12);color:#C084FC;}
+
+/* HASHTAG SECTION */
+.hashtags-section{padding:0 60px 40px;}
+.ht-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.ht-card{padding:16px;background:var(--d2);border:1px solid var(--border);border-radius:6px;}
+.ht-type{font-family:var(--fm);font-size:9px;color:rgba(255,255,255,0.25);letter-spacing:0.1em;margin-bottom:8px;}
+.ht-tags{display:flex;flex-wrap:wrap;gap:4px;}
+.ht-tag{font-family:var(--fm);font-size:10px;color:var(--g);padding:2px 6px;background:rgba(0,255,135,0.08);border-radius:2px;}
+
+/* GROWTH TIMELINE */
+.timeline-section{padding:40px 60px;border-top:1px solid var(--border);background:var(--d2);}
+.tl-row{display:flex;gap:16px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.tl-row:last-child{border-bottom:none;}
+.tl-week{font-family:var(--fm);font-size:10px;color:rgba(0,255,135,0.5);min-width:48px;flex-shrink:0;margin-top:2px;}
+.tl-num{font-family:var(--fd);font-size:20px;letter-spacing:1px;min-width:80px;flex-shrink:0;}
+.tl-title{font-weight:500;font-size:13px;color:#fff;margin-bottom:3px;}
+.tl-detail{font-size:12px;color:rgba(255,255,255,0.4);line-height:1.5;}
+
+/* PLAYBOOK */
+.playbook-section{padding:40px 60px;border-top:1px solid var(--border);}
+.pb-row{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.pb-row:last-child{border-bottom:none;}
+.pb-icon{font-size:16px;flex-shrink:0;margin-top:2px;}
+.pb-title{font-weight:500;font-size:13px;color:#fff;margin-bottom:3px;}
+.pb-detail{font-size:12px;color:rgba(255,255,255,0.4);line-height:1.5;}
+
+@media(max-width:900px){
+  .hdr,.scripts-section,.hashtags-section,.timeline-section,.playbook-section{padding:32px 20px;}
+  .vid-grid,.ht-grid{grid-template-columns:1fr;}
+  .pillars{grid-template-columns:1fr 1fr;}
+}
 </style>
 </head>
 <body>
 
-<div class="header">
-  <h1>TIKTOK STRATEGY<br>TERRA <span>DOMINI</span></h1>
-  <p>20 scripts vidéo prêts à tourner. Objectif : 40k joueurs organiques via TikTok en 30 jours. Aucun budget pub — juste des angles viraux natifs sur des hooks géopolitiques réels.</p>
+<div class="hdr">
+  <h1>TIKTOK <span>PLAYBOOK</span></h1>
+  <p>30 video scripts, 5 account strategy, content calendar semaine par semaine pour atteindre 100k joueurs en 6 mois. Basé sur les données réelles TikTok gaming 2026 : hook 2 secondes, rythme cut toutes les 3s, modèle Paid Organic ($200 sur les posts qui décollent).</p>
 </div>
 
-<div class="stats-bar">
-  <div class="stat"><div class="stat-n" style="color:var(--pk);">20</div><div class="stat-l">Scripts prêts</div></div>
-  <div class="stat"><div class="stat-n" style="color:var(--g);">40k</div><div class="stat-l">MAU cible TikTok</div></div>
-  <div class="stat"><div class="stat-n" style="color:var(--gold);">€0</div><div class="stat-l">Budget pub</div></div>
-  <div class="stat"><div class="stat-n">30s</div><div class="stat-l">Format optimal</div></div>
-  <div class="stat"><div class="stat-n" style="color:var(--pk);">8×</div><div class="stat-l">Viral coeff estimé</div></div>
-</div>
-
-<!-- ANGLES VIRAUX -->
-<div class="section">
-  <h2>4 ANGLES VIRAUX</h2>
-  <div class="angle-grid">
-    <div class="angle-card" style="border-color:rgba(255,59,48,0.3);">
-      <span class="angle-emoji">🔥</span>
-      <div class="angle-hook">CE JEU REFLÈTE L'ACTU EN TEMPS RÉEL</div>
-      <div class="angle-why">Le Détroit d'Ormuz bloqué = énergie qui baisse dans le jeu. Personne d'autre ne peut faire ça. Angle unique mondial. Les viewers vérifient l'actu et reviennent.</div>
-      <div class="angle-viral" style="color:var(--r);">↑ Reach estimé : 2-5M views par vidéo · Actu toujours chaude</div>
-    </div>
-    <div class="angle-card" style="border-color:rgba(0,255,135,0.3);">
-      <span class="angle-emoji">🗺️</span>
-      <div class="angle-hook">J'AI CAPTURÉ MON QUARTIER / MA VILLE</div>
-      <div class="angle-why">Identité géographique = partage maximum. "Mon immeuble est dans ce jeu." Chaque viewer cherche son adresse. Touche universellement toutes les villes.</div>
-      <div class="angle-viral" style="color:var(--g);">↑ Partage organique × 3 vs vidéo gaming normale</div>
-    </div>
-    <div class="angle-card" style="border-color:rgba(255,184,0,0.3);">
-      <span class="angle-emoji">🪙</span>
-      <div class="angle-hook">J'AI GAGNÉ DE LA VRAIE CRYPTO EN JOUANT</div>
-      <div class="angle-why">Screen de withdrawal MetaMask en live. Proof of earning = conversions immédiates. Attire massivement la communauté crypto + GameFi sur TikTok.</div>
-      <div class="angle-viral" style="color:var(--gold);">↑ Audience crypto TikTok : 12M followers cumulés</div>
-    </div>
-    <div class="angle-card" style="border-color:rgba(236,72,153,0.3);">
-      <span class="angle-emoji">⚔️</span>
-      <div class="angle-hook">ON A ATTAQUÉ 500 PERSONNES EN MÊME TEMPS</div>
-      <div class="angle-why">Alliance warfare cinématique. Carte qui change de couleur en time-lapse. Moments épiques de Control Tower. La stratégie collective rend jaloux ceux qui ne jouent pas encore.</div>
-      <div class="angle-viral" style="color:var(--pk);">↑ FOMO maximal · Pousse à rejoindre une alliance</div>
-    </div>
+<!-- 5 ACCOUNT STRATEGY -->
+<div class="pillars">
+  <div class="pillar">
+    <div class="p-icon">🌍</div>
+    <div class="p-acc">@terradomini</div>
+    <div class="p-name">BRAND MAIN</div>
+    <div class="p-desc">Compte officiel. Actualité geopo + gros moments de jeu. 2 posts/jour.</div>
+    <div class="p-tag" style="background:rgba(0,255,135,0.1);color:var(--g);">FLAGSHIP</div>
+  </div>
+  <div class="pillar">
+    <div class="p-icon">⚔️</div>
+    <div class="p-acc">@tdwarclips</div>
+    <div class="p-name">WAR HIGHLIGHTS</div>
+    <div class="p-desc">Clips de batailles épiques, retournements de situation, tower wars. Pur gameplay satisfaisant.</div>
+    <div class="p-tag" style="background:rgba(255,59,48,0.12);color:var(--r);">VIRAL DRIVER</div>
+  </div>
+  <div class="pillar">
+    <div class="p-icon">💰</div>
+    <div class="p-acc">@tdcrypto</div>
+    <div class="p-name">EARN & CRYPTO</div>
+    <div class="p-desc">TDC earnings, ad revenue, crypto angle. Cible les joueurs P2E et les crypto-curieux.</div>
+    <div class="p-tag" style="background:rgba(255,184,0,0.1);color:var(--gold);">MONETIZATION</div>
+  </div>
+  <div class="pillar">
+    <div class="p-icon">📡</div>
+    <div class="p-acc">@tdgeopolitics</div>
+    <div class="p-name">REAL WORLD POI</div>
+    <div class="p-desc">Hormuz, Ukraine, Taiwan — quand l'actualité change le jeu. Angle unique au monde. Croise avec l'actu.</div>
+    <div class="p-tag" style="background:rgba(239,68,68,0.12);color:#EF4444;">UNIQUE ANGLE</div>
+  </div>
+  <div class="pillar">
+    <div class="p-icon">🗼</div>
+    <div class="p-acc">@tdcities</div>
+    <div class="p-name">LOCAL PRIDE</div>
+    <div class="p-desc">"I own [Eiffel Tower / Burj Khalifa / Shibuya]" — share cards locales par ville. Viral hyper-local.</div>
+    <div class="p-tag" style="background:rgba(123,47,255,0.12);color:var(--pu);">LOCAL PRIDE</div>
   </div>
 </div>
 
-<!-- SCRIPTS VIDÉOS -->
-<div class="section">
-  <h2>20 SCRIPTS PRÊTS À TOURNER</h2>
-
-  <div class="videos-grid">
-
-    <!-- V1 -->
-    <div class="video-card">
-      <div class="video-header">
-        <div class="vid-num" style="color:var(--r);">01</div>
-        <div class="vid-meta">
-          <div class="vid-title">LE VRAI DÉTROIT D'ORMUZ EST DANS CE JEU</div>
-          <div class="vid-tags">
-            <span class="vtag" style="background:rgba(255,59,48,0.15);color:var(--r);">GÉOPOLITIQUE</span>
-            <span class="vtag" style="background:rgba(255,184,0,0.12);color:var(--gold);">HOOK FORT</span>
-            <span class="vtag" style="background:rgba(0,255,135,0.1);color:var(--g);">PREMIÈRE VIDÉO</span>
-          </div>
-        </div>
-        <div class="vid-viral">🔥 PRIORITÉ #1</div>
-      </div>
-      <div class="video-body">
-        <div class="script-block">
-          <div class="script-label">SCRIPT · 30 SECONDES</div>
-          <div class="script-line"><span class="script-tc">0:00</span><span class="script-type st-vis">VIS</span><span class="script-content">Écran noir. Une ligne de texte apparaît mot par mot.</span></div>
-          <div class="script-line"><span class="script-tc">0:02</span><span class="script-type st-text">TEXT</span><span class="script-content">"Le Détroit d'Ormuz est bloqué. 20% du pétrole mondial. Brent à $105."</span></div>
-          <div class="script-line"><span class="script-tc">0:05</span><span class="script-type st-vis">VIS</span><span class="script-content">Cut brutal vers la carte du jeu — Golfe Persique. POI rouge "🔥 HORMUZ BLOCKADE" pulse.</span></div>
-          <div class="script-line"><span class="script-tc">0:07</span><span class="script-type st-vis">VIS</span><span class="script-content">Zoom sur les territoires Gulf : icônes ⚡ qui tombent de -60%. Chiffres qui dégringolent.</span></div>
-          <div class="script-line"><span class="script-tc">0:12</span><span class="script-type st-vo">VO</span><span class="script-content">"Ouais. Ce jeu reflète l'actualité en temps réel."</span></div>
-          <div class="script-line"><span class="script-tc">0:15</span><span class="script-type st-vis">VIS</span><span class="script-content">Split screen : news TV Iran war / carte jeu côte à côte.</span></div>
-          <div class="script-line"><span class="script-tc">0:20</span><span class="script-type st-vo">VO</span><span class="script-content">"Quand la géopolitique change, ton empire ressent l'impact."</span></div>
-          <div class="script-line"><span class="script-tc">0:24</span><span class="script-type st-vis">VIS</span><span class="script-content">Reveal du logo. "terradomini.io" en bio.</span></div>
-          <div class="script-line"><span class="script-tc">0:27</span><span class="script-type st-text">TEXT</span><span class="script-content">"Lien en bio → joue gratis"</span></div>
-        </div>
-        <div>
-          <div class="tips-block">
-            <div class="tip">Filmer avec un vrai écran de news en background pour la crédibilité</div>
-            <div class="tip">Cut à 5s BRUTAL — pas de fade, pas de transition. TikTok punit les débuts lents.</div>
-            <div class="tip">Musique : tension dramatique (pas de son de jeu)</div>
-            <div class="tip">Caption : "Ce jeu est trop réaliste 😭" → engage les commentaires "comment ça marche ?"</div>
-            <div class="tip">Répondre à TOUS les commentaires dans les 30 premières minutes = boost algo</div>
-          </div>
-          <div class="hashtags">#terradomiini #geopolitique #ormuz #iran #strategygame #webgame #cryptocurrency</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- V2 -->
-    <div class="video-card">
-      <div class="video-header">
-        <div class="vid-num" style="color:var(--g);">02</div>
-        <div class="vid-meta">
-          <div class="vid-title">J'AI CAPTURÉ LA TOUR EIFFEL ET JE GAGNE DE L'ARGENT</div>
-          <div class="vid-tags">
-            <span class="vtag" style="background:rgba(255,184,0,0.15);color:var(--gold);">CRYPTO EARN</span>
-            <span class="vtag" style="background:rgba(0,255,135,0.1);color:var(--g);">PARIS</span>
-          </div>
-        </div>
-        <div class="vid-viral" style="color:var(--gold);">💰 CONVERSION</div>
-      </div>
-      <div class="video-body">
-        <div class="script-block">
-          <div class="script-label">SCRIPT · 45 SECONDES</div>
-          <div class="script-line"><span class="script-tc">0:00</span><span class="script-type st-vo">VO</span><span class="script-content">"Je vais vous montrer combien j'ai gagné aujourd'hui en possédant la Tour Eiffel."</span></div>
-          <div class="script-line"><span class="script-tc">0:05</span><span class="script-type st-vis">VIS</span><span class="script-content">Carte du jeu centrée sur Paris. Tour Eiffel hex en surbrillance verte. Badge "YOURS".</span></div>
-          <div class="script-line"><span class="script-tc">0:08</span><span class="script-type st-vis">VIS</span><span class="script-content">Ouvrir le panel territoire : "47 842 vues · Revenus pub aujourd'hui : +312 TDC"</span></div>
-          <div class="script-line"><span class="script-tc">0:13</span><span class="script-type st-vo">VO</span><span class="script-content">"312 TDC. Des marques paient pour afficher des pubs sur mon territoire."</span></div>
-          <div class="script-line"><span class="script-tc">0:18</span><span class="script-type st-vis">VIS</span><span class="script-content">Ouvrir le wallet : "Balance : 5 847 TDC · ≈ €58.47"</span></div>
-          <div class="script-line"><span class="script-tc">0:22</span><span class="script-type st-vo">VO</span><span class="script-content">"70% des revenus pubs vont directement dans ma poche."</span></div>
-          <div class="script-line"><span class="script-tc">0:26</span><span class="script-type st-vis">VIS</span><span class="script-content">Withdrawal vers MetaMask — transaction confirmée sur Polygon.</span></div>
-          <div class="script-line"><span class="script-tc">0:33</span><span class="script-type st-vo">VO</span><span class="script-content">"C'est de la vraie crypto. Sur Polygon. Je peux l'échanger sur un DEX."</span></div>
-          <div class="script-line"><span class="script-tc">0:38</span><span class="script-type st-text">TEXT</span><span class="script-content">"Lien bio → prends Paris avant les autres"</span></div>
-        </div>
-        <div>
-          <div class="tips-block">
-            <div class="tip">Montrer les VRAIS chiffres — pas mockup. Crédibilité absolue.</div>
-            <div class="tip">La transaction MetaMask en live = proof. Ça convertit 5× mieux qu'une promesse.</div>
-            <div class="tip">Commentaire épinglé : "Le lien de Paris est encore libre, dépêche-toi"</div>
-            <div class="tip">Duet challenge : "Montre ta ville dans ce jeu" → UGC massif</div>
-          </div>
-          <div class="hashtags">#crypto #tdc #polygon #passifincome #paris #toureiffel #gaming #web3</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- V3 -->
-    <div class="video-card">
-      <div class="video-header">
-        <div class="vid-num" style="color:var(--pk);">03</div>
-        <div class="vid-meta">
-          <div class="vid-title">MON QUARTIER EST DANS CE JEU — POV</div>
-          <div class="vid-tags">
-            <span class="vtag" style="background:rgba(236,72,153,0.15);color:var(--pk);">GEO-IDENTITY</span>
-            <span class="vtag" style="background:rgba(236,72,153,0.1);color:var(--pk);">UGC TRIGGER</span>
-          </div>
-        </div>
-        <div class="vid-viral" style="color:var(--pk);">📍 PARTAGE MASSIF</div>
-      </div>
-      <div class="video-body">
-        <div class="script-block">
-          <div class="script-label">SCRIPT · 20 SECONDES</div>
-          <div class="script-line"><span class="script-tc">0:00</span><span class="script-type st-text">TEXT</span><span class="script-content">"POV : tu cherches ton quartier dans ce jeu"</span></div>
-          <div class="script-line"><span class="script-tc">0:02</span><span class="script-type st-vis">VIS</span><span class="script-content">Mains tapent une adresse IRL sur le clavier. Carte qui zoom vers le quartier en temps réel.</span></div>
-          <div class="script-line"><span class="script-tc">0:08</span><span class="script-type st-vis">VIS</span><span class="script-content">La grille hexagonale s'affiche sur le quartier. L'immeuble du créateur est dans un hex vert.</span></div>
-          <div class="script-line"><span class="script-tc">0:12</span><span class="script-type st-sfx">SFX</span><span class="script-content">Son de notification satisfaisant quand le hex s'illumine.</span></div>
-          <div class="script-line"><span class="script-tc">0:14</span><span class="script-type st-text">TEXT</span><span class="script-content">"Mon immeuble vaut 312 TDC/jour 👀"</span></div>
-          <div class="script-line"><span class="script-tc">0:17</span><span class="script-type st-text">TEXT</span><span class="script-content">"Lien bio · prends ton quartier avant les autres"</span></div>
-        </div>
-        <div>
-          <div class="tips-block">
-            <div class="tip">Filmer en vrai sur mobile — authenticité &gt; production</div>
-            <div class="tip">Son "ding" quand le hex s'allume = dopamine sonore partageable</div>
-            <div class="tip">Stitch challenge : "Montre ton quartier dans @terradomiini" → viral UGC chain</div>
-            <div class="tip">Caption : "Cherche ton adresse 👀" — call to action direct</div>
-          </div>
-          <div class="hashtags">#monquartier #paris #lyon #lille #marseille #carte #jeu</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- V4 -->
-    <div class="video-card">
-      <div class="video-header">
-        <div class="vid-num" style="color:var(--gold);">04</div>
-        <div class="vid-meta">
-          <div class="vid-title">500 JOUEURS ON A ATTAQUÉ UN PAYS ENTIER</div>
-          <div class="vid-tags">
-            <span class="vtag" style="background:rgba(255,59,48,0.15);color:var(--r);">ALLIANCE WAR</span>
-            <span class="vtag" style="background:rgba(255,184,0,0.12);color:var(--gold);">EPIC MOMENT</span>
-          </div>
-        </div>
-        <div class="vid-viral" style="color:var(--r);">⚔️ FOMO MAXIMAL</div>
-      </div>
-      <div class="video-body">
-        <div class="script-block">
-          <div class="script-label">SCRIPT · 30 SECONDES</div>
-          <div class="script-line"><span class="script-tc">0:00</span><span class="script-type st-vo">VO</span><span class="script-content">"Notre alliance de 500 joueurs vient de lancer une attaque coordonnée sur toute l'Espagne."</span></div>
-          <div class="script-line"><span class="script-tc">0:06</span><span class="script-type st-vis">VIS</span><span class="script-content">Time-lapse de la carte Espagne qui passe du rouge (enemy) au vert (alliance) hex par hex. 20 secondes en 8 secondes.</span></div>
-          <div class="script-line"><span class="script-tc">0:14</span><span class="script-type st-sfx">SFX</span><span class="script-content">Sons de bataille + notifications qui défilent.</span></div>
-          <div class="script-line"><span class="script-tc">0:16</span><span class="script-type st-vis">VIS</span><span class="script-content">Compteur en bas : "47 territoires capturés · +12 membres actifs · War score +48,200"</span></div>
-          <div class="script-line"><span class="script-tc">0:20</span><span class="script-type st-vo">VO</span><span class="script-content">"C'est de la géopolitique. C'est de la stratégie. C'est Terra Domini."</span></div>
-          <div class="script-line"><span class="script-tc">0:25</span><span class="script-type st-text">TEXT</span><span class="script-content">"Rejoins notre alliance · Lien bio"</span></div>
-        </div>
-        <div>
-          <div class="tips-block">
-            <div class="tip">Time-lapse de capture = moment le plus viral du jeu. Enregistre en screen capture native.</div>
-            <div class="tip">Caption : "L'Espagne vient de tomber 🇪🇸" → géo-provocation intentionnelle = commentaires</div>
-            <div class="tip">Commentaire provocateur : "France next 🇫🇷" pour déclencher les Français à rejoindre pour défendre</div>
-            <div class="tip">Post à 19h vendredi — pic d'engagement gaming TikTok</div>
-          </div>
-          <div class="hashtags">#alliancewar #strategygame #geopolitics #timelapse #espagne #conquest</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- V5 -->
-    <div class="video-card">
-      <div class="video-header">
-        <div class="vid-num" style="color:var(--pu);">05</div>
-        <div class="vid-meta">
-          <div class="vid-title">CE JEU A DES VRAIES CRISES MONDIALES — THREAD</div>
-          <div class="vid-tags">
-            <span class="vtag" style="background:rgba(123,47,255,0.15);color:var(--pu);">EDUCATIONAL</span>
-            <span class="vtag" style="background:rgba(123,47,255,0.1);color:var(--pu);">SÉRIE</span>
-          </div>
-        </div>
-        <div class="vid-viral" style="color:var(--pu);">🧵 SÉRIE 10 EP.</div>
-      </div>
-      <div class="video-body">
-        <div class="script-block">
-          <div class="script-label">SÉRIE DE 10 ÉPISODES · 15s chacun</div>
-          <div class="script-line"><span class="script-tc">EP.1</span><span class="script-type st-vis">VIS</span><span class="script-content">Détroit d'Ormuz → énergie -60% dans le jeu. "Ce jeu a des vraies crises mondiales 🧵"</span></div>
-          <div class="script-line"><span class="script-tc">EP.2</span><span class="script-type st-vis">VIS</span><span class="script-content">Guerre Ukraine → blé -40% dans les territoires russes/ukrainiens</span></div>
-          <div class="script-line"><span class="script-tc">EP.3</span><span class="script-type st-vis">VIS</span><span class="script-content">Taiwan Strait tension → tech +200% intel, unités navales débloquées</span></div>
-          <div class="script-line"><span class="script-tc">EP.4</span><span class="script-type st-vis">VIS</span><span class="script-content">Suez Canal blockage → commerce mondial perturbé sur la carte</span></div>
-          <div class="script-line"><span class="script-tc">EP.5</span><span class="script-type st-vis">VIS</span><span class="script-content">Élection US → Washington D.C. POI passe en mode diplomatique, bonus intel ×2</span></div>
-          <div class="script-line"><span class="script-tc">EP.6-10</span><span class="script-type st-vis">VIS</span><span class="script-content">Crise Argentine / Séisme Japon / G7 / Coupe du Monde / Space Launch</span></div>
-        </div>
-        <div>
-          <div class="tips-block">
-            <div class="tip">Série = rétention compte. "Partie 2 demain" → follow obligatoire pour voir la suite.</div>
-            <div class="tip">Chaque épisode commence par le recap du précédent → nouveaux viewers toujours onboard</div>
-            <div class="tip">Timing : publier l'épisode correspondant le jour d'une vraie actualité geo. EP.1 = maintenant (Hormuz)</div>
-            <div class="tip">Commentaire épinglé : "Quelle crise veux-tu voir prochaine ?" → feedback + engagement</div>
-          </div>
-          <div class="hashtags">#geopolitique #monde #ormuz #ukraine #taiwan #crises #education</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- V6-V20 compact -->
-    <div style="background:var(--d2);border:1px solid var(--border);border-radius:8px;padding:24px;">
-      <div style="font-family:var(--fd);font-size:22px;letter-spacing:2px;color:#fff;margin-bottom:20px;">VIDÉOS 6 → 20 — FORMATS COMPACTS</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;">
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V06 · "POI Safari"</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">Explore les 8 POI les plus fous du monde en 60s. Chernobyl, Mont Everest, Times Square...</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V07 · Rank 1 mondial</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">"Comment je suis monté Rank 1 en 7 jours" — conseil strat + flex</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V08 · Bourj Khalifa clash</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">Player de Dubai défend le Burj Khalifa contre une alliance européenne</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V09 · Revenus passifs</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">"Combien tu peux gagner F2P en 30 jours" — calculateur live</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V10 · Control Tower War</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">Compte à rebours 1h d'un événement Tour de Contrôle. Tension réelle.</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V11 · "La Tour Eiffel en live"</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">Regarder en vrai depuis la Tour Eiffel + carte du jeu côte à côte</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V12 · Stitch "ma ville"</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">Répondre aux stitch "ma ville c'est quoi ?" avec map reveal par ville</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V13 · Alliance recrutement</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">"On recrute 25 joueurs pour attaquer l'Allemagne vendredi" — urgence</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V14 · TDC sur DEX</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">Montrer TDC sur QuickSwap. Prix en temps réel. "Vous pouviez acheter à 0.01€"</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V15 · Tutorial express</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">"0 à premier territoire en 60 secondes" — tutorial speed run</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V16 · Reply "arnaque ?"</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">Répondre au commentaire "c'est une arnaque ?" avec preuve chain on-chain</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V17 · Battle replay</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">Replay animé d'une grande bataille. Résultat surprise à la fin.</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V18 · Streak 30 jours</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">"Connecté 30 jours de suite — j'ai gagné 500 TDC bonus"</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V19 · Duet défi</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">"Je duet chaque vidéo qui montre une autre ville en jeu"</div>
-        </div>
-        <div style="padding:14px;border:1px solid var(--border);border-radius:6px;">
-          <div style="font-family:var(--fd);font-size:14px;letter-spacing:1px;color:#fff;margin-bottom:4px;">V20 · "J-7 avant l'attaque"</div>
-          <div style="font-size:11px;color:rgba(255,255,255,0.4);line-height:1.5;">Annoncer une alliance war planifiée dans 7 jours. Construire l'anticipation.</div>
-        </div>
-      </div>
-    </div>
-
-  </div>
+<!-- TARGET METRICS -->
+<div class="metrics">
+  <div class="metric"><div class="metric-n" style="color:var(--pk);">10/sem</div><div class="metric-l">Total posts/semaine</div></div>
+  <div class="metric"><div class="metric-n" style="color:var(--g);">2s</div><div class="metric-l">Hook max pour garder l'algo</div></div>
+  <div class="metric"><div class="metric-n" style="color:var(--gold);">$200</div><div class="metric-l">Budget boost/vidéo qui décolle</div></div>
+  <div class="metric"><div class="metric-n" style="color:#60A5FA;">3-5</div><div class="metric-l">Hashtags max en 2026</div></div>
+  <div class="metric"><div class="metric-n" style="color:var(--g);">15s</div><div class="metric-l">Durée cible (watch time maximum)</div></div>
 </div>
 
-<!-- CALENDRIER DE POSTING -->
-<div class="section">
-  <h2>CALENDRIER POSTING — MOIS 1</h2>
-  <div class="calendar-grid">
-    <div class="cal-week">
-      <div class="cal-header">SEMAINE 1 · LANCEMENT</div>
-      <div class="cal-body">
-        <div class="cal-item" style="background:rgba(255,59,48,0.12);border:1px solid rgba(255,59,48,0.2);">
-          <div class="day">J+1 · 12h</div>
-          <div class="content">V01 🔥 Hormuz. Notre première vidéo. Budget : 0€. Angle : actu mondiale.</div>
+<!-- VIDEO SCRIPTS -->
+<div class="scripts-section">
+
+  <!-- SEMAINE 1 — LAUNCH -->
+  <div class="week-header">
+    <div class="week-num">W1</div>
+    <div><div class="week-title">LANCEMENT — "Ce jeu existe vraiment"</div><div class="week-sub">Objectif : 50K vues organiques. Hook : choc de réalité. "Ce n'est pas une carte imaginaire."</div></div>
+  </div>
+
+  <div class="vid-grid">
+    <div class="vid-card" style="border-color:rgba(239,68,68,0.3);">
+      <div class="vid-header">
+        <div class="vid-num">#1</div>
+        <div class="vid-title">@tdgeopolitics — LE HOOK HORMUZ</div>
+      </div>
+      <div class="vid-hook-label">🎣 Hook (2 secondes)</div>
+      <div class="vid-hook">"Ce jeu a un détroit d'Ormuz en temps réel."</div>
+      <div class="vid-body">
+        <div class="vid-script">
+          [0s] Carte réelle du détroit d'Ormuz en jeu, avec le marqueur 🔥 BLOCKADE ACTIF<br>
+          [2s] Split screen : BBC news "Iran ferme Ormuz" / carte du jeu avec énergie -60%<br>
+          [5s] Zoom sur le panel territoire : "ENERGY PRODUCTION ↓60% · INTEL ×3"<br>
+          [8s] Voix off : "Quand l'Iran bloque le détroit IRL... vos territoires du Golfe perdent leur énergie dans le jeu."<br>
+          [12s] Montrer 3 joueurs qui activent des unités navales dans la zone<br>
+          [15s] Texte final : "terradomini.io — GRATUIT"
         </div>
-        <div class="cal-item" style="background:rgba(0,255,135,0.08);border:1px solid rgba(0,255,135,0.15);">
-          <div class="day">J+2 · 19h</div>
-          <div class="content">V03 📍 "Mon quartier dans ce jeu". Filmer Paris 18e. Commentaires géo-localisés.</div>
-        </div>
-        <div class="cal-item" style="background:rgba(255,184,0,0.08);border:1px solid rgba(255,184,0,0.15);">
-          <div class="day">J+4 · 18h</div>
-          <div class="content">V02 💰 Tour Eiffel + TDC earn. Withdrawal MetaMask en live.</div>
-        </div>
-        <div class="cal-item" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);">
-          <div class="day">J+5 · 20h</div>
-          <div class="content">V15 ⚡ Tutorial 60 secondes. Lowkey le meilleur convertisseur.</div>
-        </div>
-        <div class="cal-item" style="background:rgba(255,255,255,0.04);border:1px solid var(--border);">
-          <div class="day">J+7 · 19h</div>
-          <div class="content">V04 ⚔️ Alliance war time-lapse. Caption : "l'Espagne vient de tomber 🇪🇸"</div>
+        <div class="vid-meta">
+          <span class="meta-tag hot">HORMUZ IRL</span>
+          <span class="meta-tag viral">Viral potential ++</span>
+          <span class="meta-tag">Hashtags : #geopolitics #strategy #irangame</span>
         </div>
       </div>
     </div>
-    <div class="cal-week">
-      <div class="cal-header">SEMAINE 2 · SÉRIE</div>
-      <div class="cal-body">
-        <div class="cal-item" style="background:rgba(123,47,255,0.1);border:1px solid rgba(123,47,255,0.2);">
-          <div class="day">J+8 · 12h</div>
-          <div class="content">V05 Ep.1 🧵 Série crises mondiales. Ormuz d'abord. "Partie 1/10"</div>
+
+    <div class="vid-card">
+      <div class="vid-header">
+        <div class="vid-num">#2</div>
+        <div class="vid-title">@tdcities — I OWN THE EIFFEL TOWER</div>
+      </div>
+      <div class="vid-hook-label">🎣 Hook</div>
+      <div class="vid-hook">"J'ai acheté la Tour Eiffel pour 0€."</div>
+      <div class="vid-body">
+        <div class="vid-script">
+          [0s] Map zoomée sur Paris, territoire "Tour Eiffel" avec icône 🗼 et couleur verte<br>
+          [3s] Ouvrir le territory panel : "+312 TDC aujourd'hui · 47 842 vues"<br>
+          [6s] Voix : "Cette zone m'a rapporté €3.12 en pubs aujourd'hui. C'est ma tour."<br>
+          [10s] Cut rapide : 5 autres landmarks mondiales avec leur owner<br>
+          [14s] "Quelle ville tu veux dominer ? 👇"
         </div>
-        <div class="cal-item" style="background:rgba(123,47,255,0.06);">
-          <div class="day">J+10 · 12h</div>
-          <div class="content">V05 Ep.2 🌾 Ukraine blé. Stitcher avec news réelle du jour si dispo.</div>
-        </div>
-        <div class="cal-item" style="background:rgba(236,72,153,0.08);border:1px solid rgba(236,72,153,0.15);">
-          <div class="day">J+11 · 18h</div>
-          <div class="content">V12 📍 Répondre aux stitch "ma ville". Montrer Lyon, Marseille, Bordeaux.</div>
-        </div>
-        <div class="cal-item" style="background:rgba(123,47,255,0.06);">
-          <div class="day">J+12 · 12h</div>
-          <div class="content">V05 Ep.3 ⚡ Taiwan Strait. Timing si news APAC disponible.</div>
-        </div>
-        <div class="cal-item" style="background:rgba(255,184,0,0.08);">
-          <div class="day">J+14 · 20h</div>
-          <div class="content">V09 💸 Calculateur revenus F2P. "Combien tu peux gagner sans payer ?"</div>
+        <div class="vid-meta">
+          <span class="meta-tag viral">Comment bait ++</span>
+          <span class="meta-tag">Hashtags : #paris #gaming #tdc</span>
         </div>
       </div>
     </div>
-    <div class="cal-week">
-      <div class="cal-header">SEMAINE 3 · SOCIAL PROOF</div>
-      <div class="cal-body">
-        <div class="cal-item" style="background:rgba(255,59,48,0.08);">
-          <div class="day">J+15</div>
-          <div class="content">Product Hunt launch. Post TikTok V10 "Control Tower War en direct" le même jour.</div>
-        </div>
-        <div class="cal-item" style="background:rgba(0,255,135,0.06);">
-          <div class="day">J+17</div>
-          <div class="content">V07 🏆 Rank 1 "comment j'ai fait". Screenshots leaderboard réels.</div>
-        </div>
-        <div class="cal-item" style="background:rgba(255,59,48,0.06);">
-          <div class="day">J+19</div>
-          <div class="content">V13 ⚔️ Recrutement alliance. "On attaque l'Allemagne vendredi. 15 places dispo."</div>
-        </div>
-        <div class="cal-item" style="background:rgba(255,184,0,0.08);">
-          <div class="day">J+21</div>
-          <div class="content">V14 🪙 TDC sur QuickSwap. Prix live. "Première personne qui avait acheté..."</div>
-        </div>
+
+    <div class="vid-card">
+      <div class="vid-header">
+        <div class="vid-num">#3</div>
+        <div class="vid-title">@terradomini — TA RUE EST DANS LE JEU</div>
       </div>
-    </div>
-    <div class="cal-week">
-      <div class="cal-header">SEMAINE 4 · MOMENTUM</div>
-      <div class="cal-body">
-        <div class="cal-item" style="background:rgba(0,255,135,0.08);">
-          <div class="day">J+22</div>
-          <div class="content">V11 🗼 Filmer depuis la Tour Eiffel IRL + carte jeu. Authentique.</div>
+      <div class="vid-hook-label">🎣 Hook</div>
+      <div class="vid-hook">"Clique sur ta propre rue."</div>
+      <div class="vid-body">
+        <div class="vid-script">
+          [0s] Zoom depuis vue globale → Paris → 9ème arrond → une rue spécifique<br>
+          [4s] Hexagone gris "Non revendiqué" clignotant<br>
+          [7s] Clic → animation claim → zone devient verte → "+20 crédits/tick"<br>
+          [11s] "C'est VRAIMENT ta rue. Sur OpenStreetMap. En temps réel."<br>
+          [14s] CTA : "Revendique la tienne → terradomini.io"
         </div>
-        <div class="cal-item" style="background:rgba(236,72,153,0.08);">
-          <div class="day">J+24</div>
-          <div class="content">V19 🤝 Duet challenge "montre ta ville". Réagir à 10 duets de la communauté.</div>
-        </div>
-        <div class="cal-item" style="background:rgba(255,59,48,0.12);border:1px solid rgba(255,59,48,0.2);">
-          <div class="day">J+26</div>
-          <div class="content">V20 📢 "Dans 7 jours on attaque toute la péninsule ibérique". Hype building.</div>
-        </div>
-        <div class="cal-item" style="background:rgba(123,47,255,0.1);">
-          <div class="day">J+28</div>
-          <div class="content">Bilan 25k MAU. V SPÉCIAL "en 1 mois on a dépassé 25 000 joueurs 🤯"</div>
-        </div>
-        <div class="cal-item" style="background:rgba(255,184,0,0.1);border:1px solid rgba(255,184,0,0.25);">
-          <div class="day">J+30</div>
-          <div class="content">🏆 Grande alliance war annoncée J+20. Streaming en live sur TikTok.</div>
+        <div class="vid-meta">
+          <span class="meta-tag viral">GPS FOMO</span>
+          <span class="meta-tag">Hashtags : #iogame #map #free</span>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- SEMAINE 2 — SOCIAL PROOF -->
+  <div class="week-header">
+    <div class="week-num">W2</div>
+    <div><div class="week-title">PREUVE SOCIALE — "D'autres jouent déjà"</div><div class="week-sub">Objectif : 200K vues cumulées. Hook : FOMO social. "Pendant que tu regardes cette vidéo..."</div></div>
+  </div>
+
+  <div class="vid-grid">
+    <div class="vid-card" style="border-color:rgba(255,184,0,0.3);">
+      <div class="vid-header">
+        <div class="vid-num">#4</div>
+        <div class="vid-title">@tdcrypto — LE CHÈQUE DU MOIS</div>
+      </div>
+      <div class="vid-hook-label">🎣 Hook</div>
+      <div class="vid-hook">"Ce joueur a gagné €47 ce mois. En jouant."</div>
+      <div class="vid-body">
+        <div class="vid-script">
+          [0s] Screenshot wallet TDC : "1 847 TDC = €18.47 ce mois" (revenus pub)<br>
+          [3s] "Son secret : il possède 3 landmarks à Londres + 1 à Tokyo"<br>
+          [7s] Montrer le dashboard ad revenue : Big Ben £24.10 · Shibuya Crossing £12.80<br>
+          [11s] "Les marques paient pour s'afficher sur ses territoires. Il reçoit 70%."<br>
+          [14s] "C'est pas Axie Infinity. C'est pas du P2E miroir. C'est de l'immobilier virtuel réel."
+        </div>
+        <div class="vid-meta">
+          <span class="meta-tag viral">P2E angle</span>
+          <span class="meta-tag hot">Preuve chiffres réels</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="vid-card">
+      <div class="vid-header">
+        <div class="vid-num">#5</div>
+        <div class="vid-title">@tdwarclips — LA BATAILLE ÉPIQUE</div>
+      </div>
+      <div class="vid-hook-label">🎣 Hook</div>
+      <div class="vid-hook">"500 joueurs pour 1 tour de contrôle."</div>
+      <div class="vid-body">
+        <div class="vid-script">
+          [0s] Compte à rebours : "TOWER WAR IN 0:47:22" — pulsation rouge<br>
+          [4s] Carte Europe : alliances colorées qui se massent aux frontières<br>
+          [8s] Timer → 0:00 → EXPLOSION de couleurs sur la carte<br>
+          [11s] Résultat : "[IRON] capture Notre Dame · +2 800 membres notifiés"<br>
+          [14s] "Ça se passe 3 fois par jour. Le prochain : dans 4h."
+        </div>
+        <div class="vid-meta">
+          <span class="meta-tag viral">Drama tension</span>
+          <span class="meta-tag">Hashtags : #battle #alliance #strategy</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="vid-card">
+      <div class="vid-header">
+        <div class="vid-num">#6</div>
+        <div class="vid-title">@tdcities — DUBAÏ 🇦🇪 LOCAL PRIDE</div>
+      </div>
+      <div class="vid-hook-label">🎣 Hook</div>
+      <div class="vid-hook">"Le Burj Khalifa appartient à un Iranien. Fix that."</div>
+      <div class="vid-body">
+        <div class="vid-script">
+          [0s] Map Dubai — Burj Khalifa marqué rouge "Owned by [Persian_Eagle]"<br>
+          [3s] "Un joueur iranien a capturé votre monument. Pendant la crise Hormuz."<br>
+          [7s] Commentaires type : "UNACCEPTABLE 🇦🇪" / "We're coming"<br>
+          [11s] Clip screen-record : [GULF_PRIDE] lance une attaque sur Burj Khalifa<br>
+          [15s] "Les batailles de territoires locaux se déclenchent VRAIMENT à cause de l'actu."
+        </div>
+        <div class="vid-meta">
+          <span class="meta-tag hot">Géopolitique locale</span>
+          <span class="meta-tag viral">Identité nationale = viral</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEMAINE 3 — VIRAL MECHANICS -->
+  <div class="week-header">
+    <div class="week-num">W3</div>
+    <div><div class="week-title">MÉCANIQUE VIRALE — "Comment je deviens riche"</div><div class="week-sub">Objectif : 1M vues cumulées. Hook : tutoriel secret. Conversion joueur actif.</div></div>
+  </div>
+
+  <div class="vid-grid">
+    <div class="vid-card" style="border-color:rgba(123,47,255,0.3);">
+      <div class="vid-header">
+        <div class="vid-num">#7</div>
+        <div class="vid-title">@terradomini — LES 3 TERRITOIRES À PRENDRE EN PREMIER</div>
+      </div>
+      <div class="vid-hook-label">🎣 Hook</div>
+      <div class="vid-hook">"Ces 3 types de zones rapportent 10x plus."</div>
+      <div class="vid-body">
+        <div class="vid-script">
+          [0s] Text on screen : "Si tu joues à Terra Domini, arrête de capturer ça →"<br>
+          [2s] Zone rurale highlighted en rouge : "+5 food/tick. Inutile."<br>
+          [5s] "Capture ÇA à la place :" → Zone LANDMARK 🏛️ → "+60 culture + AD REVENUE"<br>
+          [9s] "Et ÇA :" → Zone COASTAL ⚓ → "+ Intelligence + Trade routes"<br>
+          [12s] "La combo Landmark + Coastal + Industrial = empire auto-finançant"<br>
+          [15s] "Sauvegarde ça 🔖"
+        </div>
+        <div class="vid-meta">
+          <span class="meta-tag viral">Tutorial save</span>
+          <span class="meta-tag">Save rate target : 8%+</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="vid-card">
+      <div class="vid-header">
+        <div class="vid-num">#8</div>
+        <div class="vid-title">@tdcrypto — COMBIEN TU PEUX GAGNER EN 30 JOURS</div>
+      </div>
+      <div class="vid-hook-label">🎣 Hook</div>
+      <div class="vid-hook">"Calculateur honnête. Sans bullshit."</div>
+      <div class="vid-body">
+        <div class="vid-script">
+          [0s] "Voici EXACTEMENT combien tu peux gagner sur Terra Domini."<br>
+          [2s] Tableau : 10 territoires → ~50 TDC/jour = €0.50/jour<br>
+          [5s] 50 territoires → ~300 TDC/jour = €3/jour → €90/mois<br>
+          [8s] "Si t'as 1 landmark populaire : + €5-20/jour en revenus pubs"<br>
+          [11s] "C'est pas un salaire. Mais c'est réel, vérifiable on-chain, et c'est GRATUIT pour commencer."<br>
+          [15s] "Lien dans la bio → calculateur interactif"
+        </div>
+        <div class="vid-meta">
+          <span class="meta-tag viral">Transparence = confiance</span>
+          <span class="meta-tag niche">P2E community</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="vid-card">
+      <div class="vid-header">
+        <div class="vid-num">#9</div>
+        <div class="vid-title">@tdwarclips — TRAHISON EN ALLIANCE</div>
+      </div>
+      <div class="vid-hook-label">🎣 Hook</div>
+      <div class="vid-hook">"Mon meilleur général m'a trahi à 23h59."</div>
+      <div class="vid-body">
+        <div class="vid-script">
+          [0s] Alliance chat : "[BobMarshal] quitte l'alliance [TERRA]"<br>
+          [2s] "[BobMarshal] rejoint [IRON]" — ennemi direct<br>
+          [4s] "[BobMarshal] attaque — votre capitale → ETA : 6h"<br>
+          [7s] Joueur panique, achète bouclier, réveille les membres de l'alliance<br>
+          [11s] 6h plus tard : "[TERRA] défend avec succès. [BobMarshal] expulsé."<br>
+          [14s] "La diplomatie de Terra Domini frappe différemment."
+        </div>
+        <div class="vid-meta">
+          <span class="meta-tag viral">Drama social</span>
+          <span class="meta-tag hot">Storytelling</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEMAINE 4 — WORLD EVENTS VIRAL -->
+  <div class="week-header">
+    <div class="week-num">W4</div>
+    <div><div class="week-title">ÉVÉNEMENTS MONDIAUX — "Le vrai monde change le jeu"</div><div class="week-sub">Objectif : 2M vues cumulées. Post Hormuz sur 3 comptes simultanément. Angle média unique.</div></div>
+  </div>
+
+  <div class="vid-grid">
+    <div class="vid-card" style="border-color:rgba(239,68,68,0.4);">
+      <div class="vid-header">
+        <div class="vid-num">#10</div>
+        <div class="vid-title">@tdgeopolitics — HORMUZ UPDATE LIVE</div>
+      </div>
+      <div class="vid-hook-label">🎣 Hook — MUST POST when Hormuz news drops</div>
+      <div class="vid-hook">"Breaking : l'Iran vient d'autoriser l'Inde à passer. Dans le jeu, les territoires indiens récupèrent +40% d'énergie."</div>
+      <div class="vid-body">
+        <div class="vid-script">
+          [0s] Split screen : Reuters "India tankers cleared Hormuz" / carte du jeu<br>
+          [3s] Zoom sur Golfe Persique : zones indiennes passent de rouge (energy -60%) à orange (-20%)<br>
+          [7s] "Notre système POI se met à jour automatiquement avec les dépêches Reuters."<br>
+          [11s] "Seul jeu au monde où l'actualité internationale change vos ressources en temps réel."<br>
+          [14s] Hashtag push : #hormuz #geopolitics #iran #iogame
+        </div>
+        <div class="vid-meta">
+          <span class="meta-tag hot">News jacking 🔥</span>
+          <span class="meta-tag viral">Unique au monde</span>
+          <span class="meta-tag">Poster dans les 2h après la news</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="vid-card">
+      <div class="vid-header">
+        <div class="vid-num">#11</div>
+        <div class="vid-title">@tdgeopolitics — QUI CONTRÔLE LE PÉTROLE ?</div>
+      </div>
+      <div class="vid-hook-label">🎣 Hook</div>
+      <div class="vid-hook">"Dans ce jeu, 3 alliances contrôlent 80% du pétrole mondial virtuel."</div>
+      <div class="vid-body">
+        <div class="vid-script">
+          [0s] Carte monde : zones énergétiques colorées par alliance<br>
+          [3s] "[GULF_PRIDE] contrôle : Arabie Saoudite, UAE, Koweït → 8 400 TDC/jour"<br>
+          [6s] "[RED_DRAGON] : Golfe Persique côté Iran + Irak"<br>
+          [9s] "[NORDIC_OIL] : North Sea, Norvège, Texan Gulf"<br>
+          [12s] "Les guerres pour les ressources dans Terra Domini reflètent exactement les vraies tensions."<br>
+          [15s] "Quelle alliance rejoins-tu ? 👇"
+        </div>
+        <div class="vid-meta">
+          <span class="meta-tag viral">Geopolitique angle</span>
+          <span class="meta-tag niche">r/geopolitics cross-post</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="vid-card">
+      <div class="vid-header">
+        <div class="vid-num">#12</div>
+        <div class="vid-title">@terradomini — LE JEU PRÉDIT L'ACTU ?</div>
+      </div>
+      <div class="vid-hook-label">🎣 Hook</div>
+      <div class="vid-hook">"On avait prévu la crise Hormuz en jeu 3 semaines avant."</div>
+      <div class="vid-body">
+        <div class="vid-script">
+          [0s] Screenshot GitHub commit du 15 février : "feat: Hormuz POI — energy -60% Gulf"<br>
+          [2s] "On a créé ce POI 2 semaines avant que l'Iran ferme vraiment le détroit."<br>
+          [5s] "Coïncidence ? Non. On suit les tensions géopolitiques en temps réel."<br>
+          [8s] "Prochains POI en préparation : Taiwan Strait tension (haut risque) · Nord Stream 3 sabotage alert"<br>
+          [12s] "Si ces POI s'activent IRL, vos territoires en seront impactés en jeu."<br>
+          [15s] "Abonnez-vous pour les alerts 🔔"
+        </div>
+        <div class="vid-meta">
+          <span class="meta-tag viral">Mystery + credibility</span>
+          <span class="meta-tag">Follow bait</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SEMAINES 5-8 : résumé rapide -->
+  <div class="week-header">
+    <div class="week-num">W5-8</div>
+    <div><div class="week-title">CROISSANCE — Engagement community + challenges</div><div class="week-sub">Objectif : 5M vues cumulées · 15K joueurs. Series "Qui contrôle X ?" + duets + reply videos.</div></div>
+  </div>
+
+  <div class="vid-grid">
+    <div class="vid-card">
+      <div class="vid-header"><div class="vid-num">#13-15</div><div class="vid-title">SÉRIE "Mon empire en 30 jours"</div></div>
+      <div class="vid-hook">"Day 1 → Day 30 de mon empire Terra Domini."</div>
+      <div class="vid-body"><div class="vid-script">Timelapse quotidien de progression. D1 : 3 zones. D7 : 40 zones. D14 : Alliance formée. D21 : Premier Control Tower. D30 : 142 zones, €23 TDC gagnés. Series format = returnees chaque jour.</div>
+      <div class="vid-meta"><span class="meta-tag viral">Daily series</span><span class="meta-tag">Return rate +++</span></div></div>
+    </div>
+    <div class="vid-card">
+      <div class="vid-header"><div class="vid-num">#16-18</div><div class="vid-title">CHALLENGE "Qui est le vrai owner ?"</div></div>
+      <div class="vid-hook">"POV : tu habites rue de Rivoli et un Américain owns ta rue."</div>
+      <div class="vid-body"><div class="vid-script">POV des locaux qui découvrent que des étrangers possèdent leurs rues. Fort taux de commentaires agressifs = boost algorithme. "Comment reprendre sa rue" tutorial dans la foulée.</div>
+      <div class="vid-meta"><span class="meta-tag hot">Rage bait (safe)</span><span class="meta-tag viral">Comment boost</span></div></div>
+    </div>
+    <div class="vid-card">
+      <div class="vid-header"><div class="vid-num">#19-21</div><div class="vid-title">DUET/REPLY avec créateurs actu</div></div>
+      <div class="vid-hook">Répondre aux vidéos TikTok de journalistes qui couvrent Hormuz.</div>
+      <div class="vid-body"><div class="vid-script">Quand @BBCNews / @LeMonde poste sur Hormuz → Reply video : "Dans notre jeu, voici exactement ce que ça donne en temps réel". Cross-audience journalism + gaming = reach unique.</div>
+      <div class="vid-meta"><span class="meta-tag viral">News jacking reply</span><span class="meta-tag niche">Journaliste audience</span></div></div>
+    </div>
+  </div>
+
 </div>
 
-<!-- RÈGLES ALGO -->
-<div class="section">
-  <h2>RÈGLES ALGO TIKTOK</h2>
-  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;">
-    <div style="padding:20px;background:var(--d2);border-radius:8px;border:1px solid var(--border);">
-      <div style="font-family:var(--fd);font-size:18px;letter-spacing:1px;color:var(--g);margin-bottom:14px;">À FAIRE</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--g);">✓</span> Poster à 12h, 18h ou 20h heure Paris (pic engagement FR)</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--g);">✓</span> Hook dans les 2 premières secondes — sinon skip</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--g);">✓</span> Répondre aux 20 premiers commentaires dans les 30 min</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--g);">✓</span> Épingler un commentaire qui pose une question ("comment ça marche ?")</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--g);">✓</span> 3-5 hashtags pertinents max (pas 30)</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--g);">✓</span> Son tendance FR pour la semaine (TikTok Creative Center)</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--g);">✓</span> Montrer le link en bio avec sticker "lien bio" à la fin</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--g);">✓</span> Caption qui pose une question pour forcer les commentaires</div>
+<!-- HASHTAG STRATEGY -->
+<div class="hashtags-section">
+  <div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.15em;margin-bottom:16px;">HASHTAG STRATEGY — Max 5 par post en 2026</div>
+  <div class="ht-grid">
+    <div class="ht-card">
+      <div class="ht-type">BRAND (toujours)</div>
+      <div class="ht-tags">
+        <span class="ht-tag">#terradomini</span>
+        <span class="ht-tag">#claimtheearth</span>
       </div>
     </div>
-    <div style="padding:20px;background:var(--d2);border-radius:8px;border:1px solid var(--border);">
-      <div style="font-family:var(--fd);font-size:18px;letter-spacing:1px;color:var(--r);margin-bottom:14px;">À ÉVITER</div>
-      <div style="display:flex;flex-direction:column;gap:8px;">
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--r);">✗</span> Intro de 3+ secondes sans action — algo punit le bounce immédiat</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--r);">✗</span> "Joue à ce jeu" — trop direct, pénalisé par algo</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--r);">✗</span> Filigrane YouTube ou Instagram (pénalité -30% reach)</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--r);">✗</span> Vidéo de +2 minutes pour commencer (tester avec 30-45s d'abord)</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--r);">✗</span> 30+ hashtags génériques (shadow-ban possible)</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--r);">✗</span> Poster moins d'1x par jour les 2 premières semaines</div>
-        <div style="font-size:12px;color:rgba(255,255,255,0.6);display:flex;gap:8px;"><span style="color:var(--r);">✗</span> Ignorer les commentaires négatifs (répondre = engagement = reach)</div>
+    <div class="ht-card">
+      <div class="ht-type">GAMING LARGE</div>
+      <div class="ht-tags">
+        <span class="ht-tag">#iogame</span>
+        <span class="ht-tag">#indiegame</span>
+        <span class="ht-tag">#freegame</span>
+        <span class="ht-tag">#strategygame</span>
       </div>
     </div>
+    <div class="ht-card">
+      <div class="ht-type">GÉOPOLITIQUE (unique)</div>
+      <div class="ht-tags">
+        <span class="ht-tag">#geopolitics</span>
+        <span class="ht-tag">#hormuz</span>
+        <span class="ht-tag">#worldnews</span>
+        <span class="ht-tag">#iran</span>
+      </div>
+    </div>
+    <div class="ht-card">
+      <div class="ht-type">CRYPTO P2E</div>
+      <div class="ht-tags">
+        <span class="ht-tag">#gamefi</span>
+        <span class="ht-tag">#polygon</span>
+        <span class="ht-tag">#p2e</span>
+        <span class="ht-tag">#crypto</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GROWTH TIMELINE -->
+<div class="timeline-section">
+  <div style="font-family:var(--fd);font-size:28px;letter-spacing:2px;color:#fff;margin-bottom:24px;">PROJECTION JOUEURS — 6 MOIS</div>
+  <div>
+    <div class="tl-row"><div class="tl-week">J+0</div><div class="tl-num" style="color:var(--g);">400</div><div><div class="tl-title">Lancement — jeu enfin en prod</div><div class="tl-detail">manage.py + vite.config existe. Docker up. Seed Paris. Premier vrai serveur. Priya streame en direct.</div></div></div>
+    <div class="tl-row"><div class="tl-week">J+7</div><div class="tl-num" style="color:var(--g);">2 500</div><div><div class="tl-title">Product Hunt + 3 TikToks Hormuz</div><div class="tl-detail">Post Product Hunt "Geopolitics meets .io game". 3 vidéos TikTok sur Hormuz postées en 48h. Reddit r/io_games. GitHub star spike.</div></div></div>
+    <div class="tl-row"><div class="tl-week">J+14</div><div class="tl-num" style="color:var(--g);">8 000</div><div><div class="tl-title">TikTok viral — 1 vidéo dépasse 500K vues</div><div class="tl-detail">La vidéo Hormuz split-screen atteint 500K vues organiques. $200 Spark Ads dessus. Conversion 1.6% = 8K downloads. Geo pipeline Paris + Londres + Lagos en ligne.</div></div></div>
+    <div class="tl-row"><div class="tl-week">J+21</div><div class="tl-num" style="color:var(--gold);">18 000</div><div><div class="tl-title">Priya (Bangalore) stream 2h + viral moment</div><div class="tl-detail">Priya streame une Tower War de 2h sur ses 50K abonnés YouTube. Clip "trahison alliance à 23h59" → 200K vues TikTok en 24h. Referral code Priya rapporte 400 joueurs.</div></div></div>
+    <div class="tl-row"><div class="tl-week">J+30</div><div class="tl-num" style="color:var(--gold);">35 000</div><div><div class="tl-title">Mois 1 — seuil communauté vivante</div><div class="tl-detail">35K MAU. Discord 5K membres. 3 alliances fédération. TDC sur Polygon Amoy. r/terradomini créé spontanément par la communauté. 2ème streamer onboardé.</div></div></div>
+    <div class="tl-row"><div class="tl-week">J+60</div><div class="tl-num" style="color:var(--r);">62 000</div><div><div class="tl-title">Mois 2 — Geo pipeline APAC + Zhang Wei arrive</div><div class="tl-detail">Tokyo, Seoul, Shanghai en jeu. Zhang Wei recrute 50 coworkers. Compte @tdcities japonais → 30K followers TikTok en 3 semaines (local pride extrêmement fort en JP). Battle Season 1 annoncée.</div></div></div>
+    <div class="tl-row"><div class="tl-week">J+90</div><div class="tl-num" style="color:var(--r);">87 000</div><div><div class="tl-title">Mois 3 — Season 1 + Battle Pass live</div><div class="tl-detail">Season 1 débute : 13 semaines, leaderboard mondial, 50K TDC prize pool. Battle Pass €4.99. Tariq (Dubai) dépense €500 sur whale bundle. Priya crée le format "TD Weekly Recap" sur YouTube (20K vues/épisode).</div></div></div>
+    <div class="tl-row"><div class="tl-week">J+120</div><div class="tl-num" style="color:var(--pk);">107 000</div><div><div class="tl-title">✅ 100K MAU ATTEINT — Mois 4</div><div class="tl-detail">TikTok total : ~15M vues cumulées. 5 comptes actifs. Ad marketplace live : 3 premiers clients marques (€8K/mois). CertiK audit publié → Magnus valide publiquement. Product hunt Rank #3 Gaming. Conversation Series A ouverte.</div></div></div>
+  </div>
+</div>
+
+<!-- OPEX PLAYBOOK -->
+<div class="playbook-section">
+  <div style="font-family:var(--fd);font-size:28px;letter-spacing:2px;color:#fff;margin-bottom:20px;">RÈGLES D'OR DU PLAYBOOK</div>
+  <div>
+    <div class="pb-row"><div class="pb-icon">⚡</div><div><div class="pb-title">Réagis à l'actu en 2h max</div><div class="pb-detail">Quand une news géopolitique tombe (Hormuz, Taiwan, élections), le compte @tdgeopolitics poste dans les 2h. C'est le seul jeu au monde à pouvoir faire ça. C'est votre plus grand avantage concurrentiel sur TikTok.</div></div></div>
+    <div class="pb-row"><div class="pb-icon">💥</div><div><div class="pb-title">Boost Paid Organic uniquement les posts qui font +1K vues organiques en 6h</div><div class="pb-detail">Ne jamais booster un post plat. Attendre le signal organique, PUIS mettre $200. Règle issue de la recherche TikTok 2026 : 100x plus efficace que la pub standard.</div></div></div>
+    <div class="pb-row"><div class="pb-icon">💬</div><div><div class="pb-title">Répondre à TOUS les commentaires dans les 30 premières minutes</div><div class="pb-detail">L'algorithme TikTok 2026 booste massivement les posts avec engagement précoce dans les commentaires. Engager chaque commentaire les 30 premières minutes = 3x plus de reach selon les données.</div></div></div>
+    <div class="pb-row"><div class="pb-icon">🔁</div><div><div class="pb-title">Chaque TikTok → YouTube Shorts → Instagram Reels → Reddit</div><div class="pb-detail">Même contenu, 4 plateformes. TikTok est le moteur. YouTube Shorts est le filet de rattrapage (moins de déclin algorithmique). Reddit r/io_games pour le SEO long terme.</div></div></div>
+    <div class="pb-row"><div class="pb-icon">🎯</div><div><div class="pb-title">KPI unique : "Quelle ville tu veux dominer ?" → Taux de réponse dans les commentaires</div><div class="pb-detail">Chaque video se termine par une question géographique. Si 5%+ des viewers répondent une ville → la vidéo va viral. En dessous de 2% → couper le budget Spark Ads.</div></div></div>
   </div>
 </div>
 
