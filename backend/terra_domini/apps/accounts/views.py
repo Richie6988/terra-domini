@@ -262,9 +262,18 @@ from terra_domini.apps.accounts.models import Player
 class PlayerViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
 
-    @action(detail=False, methods=['GET'], url_path='me')
+    @action(detail=False, methods=['GET', 'PATCH'], url_path='me')
     def me(self, request):
         p = request.user
+        if request.method == 'PATCH':
+            for field in ('display_name', 'avatar_emoji', 'bio'):
+                if field in request.data:
+                    setattr(p, field, request.data[field])
+            save_fields = [f for f in ('display_name', 'avatar_emoji', 'bio') if f in request.data]
+            if save_fields:
+                p.save(update_fields=save_fields)
+            return Response({'success': True})
+        # GET
         return Response({
             'id': str(p.id), 'username': p.username,
             'display_name': getattr(p, 'display_name', p.username),
@@ -272,19 +281,11 @@ class PlayerViewSet(viewsets.GenericViewSet):
             'bio': getattr(p, 'bio', ''),
             'commander_rank': getattr(p, 'commander_rank', 1),
             'tdc_in_game': float(getattr(p, 'tdc_in_game', 0)),
-            'territories_owned': getattr(p, 'stats', {}).get('territories_owned', 0) if hasattr(p, 'stats') else 0,
+            'territories_owned': 0,
             'tutorial_completed': getattr(p, 'tutorial_completed', False),
             'is_bot': getattr(p, 'is_bot', False),
         })
 
-    @action(detail=False, methods=['PATCH'], url_path='me')
-    def update_me(self, request):
-        p = request.user
-        for field in ('display_name', 'avatar_emoji', 'bio'):
-            if field in request.data:
-                setattr(p, field, request.data[field])
-        p.save(update_fields=[f for f in ('display_name', 'avatar_emoji', 'bio') if f in request.data])
-        return Response({'success': True})
 
     @action(detail=False, methods=['GET'], url_path='search')
     def search(self, request):

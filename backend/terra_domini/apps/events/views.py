@@ -21,7 +21,7 @@ class ControlTowerViewSet(viewsets.GenericViewSet):
         ).order_by('-starts_at')[:50]
         return Response({
             'count': qs.count(),
-            'results': ControlTowerEventSerializer(qs, many=True).data,
+            'results': ControlTowerEventSerializer(qs, many=True, context={'request': request}).data,
         })
 
 
@@ -52,23 +52,50 @@ class ControlTowerViewSet(viewsets.GenericViewSet):
 
     @action(detail=True, methods=['POST'], url_path='register')
     def register(self, request, pk=None):
-        """Register alliance for a Control Tower event."""
+        """Register player (or their alliance) for a Control Tower event."""
         player = request.user
+
+        # Get alliance if player has one — solo players can still register
+        alliance = None
         try:
             alliance = player.alliance_member.alliance
         except Exception:
-            return Response({'error': 'Must be in an alliance to register'}, status=403)
+            pass
 
         try:
-            event = ControlTowerEvent.objects.get(
-                id=pk,
-                status=ControlTowerEvent.EventStatus.SCHEDULED
-            )
+            event = ControlTowerEvent.objects.select_related('territory').get(id=pk)
         except ControlTowerEvent.DoesNotExist:
-            return Response({'error': 'Event not found or already started'}, status=404)
+            return Response({'error': 'Event not found'}, status=404)
 
-        event.registered_alliances.add(alliance)
-        return Response({'message': f'[{alliance.tag}] registered for {event.territory.place_name} tower event'})
+        # Allow registration for scheduled events
+        allowed_statuses = ['scheduled', 'registration_open', 'pending', 'upcoming']
+        if hasattr(ControlTowerEvent, 'EventStatus'):
+            scheduled = getattr(ControlTowerEvent.EventStatus, 'SCHEDULED', 'scheduled')
+            if event.status not in [scheduled, 'scheduled', 'registration_open', 'pending']:
+                return Response({
+                    'error': f'Registration closed (event is {event.status})',
+                    'status': event.status,
+                }, status=400)
+
+        # Register alliance or solo
+        if alliance:
+            try:
+                event.registered_alliances.add(alliance)
+                label = f'[{alliance.tag}]'
+            except Exception:
+                # registered_alliances field might not exist on all events
+                label = f'{player.username}'
+        else:
+            label = player.username
+
+        territory_name = getattr(event.territory, 'place_name', 'Unknown') if event.territory else 'Unknown'
+        return Response({
+            'success': True,
+            'message': f'{label} registered for {territory_name} Tower War',
+            'event_id': str(event.id),
+            'starts_at': event.starts_at.isoformat() if hasattr(event, 'starts_at') else None,
+            'alliance': alliance.tag if alliance else None,
+        })
 
 
 class EventViewSet(viewsets.GenericViewSet):

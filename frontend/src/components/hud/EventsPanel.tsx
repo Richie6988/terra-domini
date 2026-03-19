@@ -36,7 +36,7 @@ function TowerCard({ tower, onRegister }: { tower: any; onRegister: (id: string)
           {tower.winner && (
             <div style={{ fontSize: 12, color: '#F59E0B' }}>🏆 Won by [{tower.winner.tag}]</div>
           )}
-          {tower.status === 'scheduled' && !tower.my_alliance_registered && (
+          {(tower.status === 'scheduled' || tower.status === 'registration_open' || tower.status === 'pending') && !tower.my_alliance_registered && (
             <button onClick={() => onRegister(tower.id)} style={{
               marginTop: 6, padding: '6px 14px', background: 'rgba(0,255,135,0.1)', border: '1px solid rgba(0,255,135,0.25)',
               borderRadius: 8, color: '#00FF87', fontSize: 12, cursor: 'pointer', fontWeight: 500,
@@ -107,8 +107,15 @@ export function EventsPanel({ onClose }: { onClose: () => void }) {
 
   const registerMut = useMutation({
     mutationFn: (id: string) => api.post(`/control-towers/${id}/register/`),
-    onSuccess: () => { toast.success('Alliance registered! ⚔️'); qc.invalidateQueries({ queryKey: ['control-towers'] }) },
-    onError: () => toast.error('Could not register — join an alliance first'),
+    onSuccess: () => { toast.success(data?.data?.message || 'Registered for Tower War! ⚔️'); qc.invalidateQueries({ queryKey: ['control-towers'] }) },
+    onError: (e: any) => {
+      const msg = e.response?.data?.error || 'Registration failed'
+      if (msg.includes('alliance')) {
+        toast.error('⚔️ ' + msg + ' — or register solo below')
+      } else {
+        toast.error(msg)
+      }
+    },
   })
 
   const towers = Array.isArray(towersData) ? towersData : []
