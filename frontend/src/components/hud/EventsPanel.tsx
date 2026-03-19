@@ -200,11 +200,3 @@ export function EventsPanel({ onClose }: { onClose: () => void }) {
     </motion.div>
   )
 }
-) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, marginTop: 4 }}>
-      <span style={{ fontSize: 12 }}>{emoji}</span>
-      <span style={{ fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.1em', color, fontWeight: 500, textTransform: 'uppercase' }}>{label}</span>
-    </div>
-  )
-}
