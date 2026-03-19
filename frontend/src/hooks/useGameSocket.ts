@@ -7,7 +7,11 @@ import toast from 'react-hot-toast'
 import { useStore } from '../store'
 import type { WSMessage, Viewport } from '../types'
 
-const WS_URL = import.meta.env.VITE_WS_URL || 'ws://localhost:8000'
+// Derive WS URL from current page location — works in Codespace, prod, local
+const WS_URL = import.meta.env.VITE_WS_URL || 
+  (typeof window !== 'undefined' 
+    ? `${window.location.protocol === 'https:' ? 'wss' : 'ws'}://${window.location.host}`
+    : 'ws://localhost:8000')
 const RECONNECT_DELAY_MS = 3000
 const MAX_RECONNECT_ATTEMPTS = 10
 const PING_INTERVAL_MS = 30000
