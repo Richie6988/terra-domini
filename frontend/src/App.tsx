@@ -1,6 +1,5 @@
 /**
- * App.tsx — root component with routing.
- * GameScreen — the main game UI (map + HUD + panels).
+ * App.tsx — root component with routing and panel system.
  */
 import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
@@ -12,8 +11,12 @@ import { useGameSocket } from './hooks/useGameSocket'
 import { GameMap } from './components/map/GameMap'
 import { GameHUD } from './components/hud/GameHUD'
 import { TerritoryPanel } from './components/hud/TerritoryPanel'
+import { CombatPanel } from './components/hud/CombatPanel'
+import { EventsPanel } from './components/hud/EventsPanel'
+import { ProfilePanel } from './components/hud/ProfilePanel'
+import { AlliancePanel } from './components/alliance/AlliancePanel'
 
-const LoginPage = lazy(() => import('./pages/LoginPage'))
+const LoginPage    = lazy(() => import('./pages/LoginPage'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 
 const queryClient = new QueryClient({
@@ -34,30 +37,32 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 function GameScreen() {
   const { sendViewport, subscribeTerritory } = useGameSocket()
   const setSelectedTerritory = useStore((s) => s.setSelectedTerritory)
-  const selectedTerritory = useStore((s) => s.selectedTerritory)
-
-  const handleViewportChange = (lat: number, lon: number, radius_km: number) => {
-    sendViewport({ lat, lon, radius_km })
-  }
-
-  const handleTerritoryClick = (h3: string) => {
-    subscribeTerritory(h3)
-  }
+  const selectedTerritory    = useStore((s) => s.selectedTerritory)
+  const activePanel          = useStore((s) => s.activePanel)
+  const setActivePanel       = useStore((s) => s.setActivePanel)
 
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', background: '#0a0a14' }}>
-      {/* Base map layer */}
+      {/* Base map */}
       <GameMap
-        onViewportChange={handleViewportChange}
-        onTerritoryClick={handleTerritoryClick}
+        onViewportChange={(lat, lon, radius_km) => sendViewport({ lat, lon, radius_km })}
+        onTerritoryClick={(h3) => subscribeTerritory(h3)}
       />
 
-      {/* HUD overlay */}
+      {/* HUD */}
       <GameHUD />
 
-      {/* Territory detail panel */}
+      {/* Territory detail panel (bottom sheet) */}
       <AnimatePresence>
         {selectedTerritory && <TerritoryPanel />}
+      </AnimatePresence>
+
+      {/* Side panels — triggered by bottom nav */}
+      <AnimatePresence>
+        {activePanel === 'combat'   && <CombatPanel    onClose={() => setActivePanel(null)} />}
+        {activePanel === 'alliance' && <AlliancePanel  onClose={() => setActivePanel(null)} />}
+        {activePanel === 'events'   && <EventsPanel    onClose={() => setActivePanel(null)} />}
+        {activePanel === 'profile'  && <ProfilePanel   onClose={() => setActivePanel(null)} />}
       </AnimatePresence>
     </div>
   )
@@ -73,7 +78,7 @@ export default function App() {
           </div>
         }>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
+            <Route path="/login"    element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/" element={
               <PrivateRoute>
@@ -96,7 +101,7 @@ export default function App() {
             fontSize: 13,
           },
           success: { iconTheme: { primary: '#10B981', secondary: '#fff' } },
-          error: { iconTheme: { primary: '#EF4444', secondary: '#fff' } },
+          error:   { iconTheme: { primary: '#EF4444', secondary: '#fff' } },
         }}
       />
     </QueryClientProvider>
