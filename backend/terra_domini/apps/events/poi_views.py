@@ -14,12 +14,81 @@ from terra_domini.apps.events.poi_models import WorldPOI, POIPlayerInteraction, 
 logger = logging.getLogger('terra_domini.pois')
 
 
+from rest_framework import serializers as drf_serializers
+
+
+class WorldPOISerializer(drf_serializers.ModelSerializer):
+    effects_summary   = drf_serializers.SerializerMethodField()
+    is_live           = drf_serializers.SerializerMethodField()
+    game_briefing     = drf_serializers.SerializerMethodField()
+
+    class Meta:
+        model  = WorldPOI
+        fields = [
+            'id', 'name', 'slug', 'category', 'status', 'threat_level',
+            'latitude', 'longitude', 'radius_km', 'icon_emoji', 'icon_color',
+            'pulse', 'is_featured', 'news_headline', 'effects_summary',
+            'is_live', 'game_briefing',
+        ]
+
+    def get_effects_summary(self, obj):
+        return _summarize_effects(getattr(obj, 'effects', {}))
+
+    def get_is_live(self, obj):
+        return getattr(obj, 'is_live', False)
+
+    def get_game_briefing(self, obj):
+        try:
+            return obj.get_game_briefing()
+        except Exception:
+            return {}
+
+
 class WorldPOIViewSet(viewsets.ReadOnlyModelViewSet):
     """Public POI endpoints — all POIs visible to all players."""
-    permission_classes = [IsAuthenticated]
+    permission_classes = [AllowAny]
+    serializer_class   = WorldPOISerializer
 
     def get_queryset(self):
-        return WorldPOI.objects.filter(status=WorldPOI.POIStatus.ACTIVE)
+        qs = WorldPOI.objects.all()
+        status_filter = self.request.query_params.get('status')
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        else:
+            qs = qs.filter(status=WorldPOI.POIStatus.ACTIVE)
+        return qs.order_by('-is_featured', '-threat_level')
+
+    def list(self, request, *args, **kwargs):
+        """Override list to guarantee safe serialization."""
+        try:
+            qs = self.get_queryset()
+            data = []
+            for poi in qs:
+                try:
+                    data.append({
+                        'id': str(poi.id),
+                        'name': poi.name,
+                        'slug': poi.slug,
+                        'category': poi.category,
+                        'status': poi.status,
+                        'threat_level': poi.threat_level,
+                        'latitude': poi.latitude,
+                        'longitude': poi.longitude,
+                        'radius_km': poi.radius_km,
+                        'icon_emoji': poi.icon_emoji,
+                        'icon_color': poi.icon_color,
+                        'pulse': poi.pulse,
+                        'is_featured': poi.is_featured,
+                        'news_headline': poi.news_headline,
+                        'effects_summary': _summarize_effects(getattr(poi, 'effects', {})),
+                        'is_live': bool(getattr(poi, 'is_live', False)),
+                    })
+                except Exception:
+                    pass
+            return Response(data)
+        except Exception as e:
+            logger.error(f'POI list error: {e}')
+            return Response([])
 
     @action(detail=False, methods=['GET'], url_path='map')
     def map_data(self, request):

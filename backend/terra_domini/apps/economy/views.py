@@ -23,6 +23,8 @@ from terra_domini.apps.territories.models import Territory, Building
 from terra_domini.apps.territories.engine import TerritoryEngine
 from terra_domini.apps.combat.engine import CombatEngine, Battle, MilitaryUnit
 from terra_domini.apps.economy.models import ShopItem, PlayerInventory, ActiveBoost, AdCampaign
+from terra_domini.apps.economy.serializers import ShopItemSerializer
+from terra_domini.apps.territories.serializers import TerritoryDetailSerializer, TerritoryLightSerializer
 from terra_domini.apps.blockchain.service import TDCTransaction, PurchaseOrder
 from terra_domini.apps.alliances.models import Alliance, AllianceMember
 
