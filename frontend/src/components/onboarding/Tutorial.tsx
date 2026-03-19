@@ -643,3 +643,5 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
     </motion.div>
   )
 }
+
+export default OnboardingTutorial

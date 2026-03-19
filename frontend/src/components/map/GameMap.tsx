@@ -109,7 +109,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     handleMove()
 
     // IP-based geolocation on first load (no permission needed)
-    fetch('https://ipapi.co/json/')
+    fetch('https://ipwho.is/')
       .then(r => r.json())
       .then(data => {
         if (data.latitude && data.longitude) {
