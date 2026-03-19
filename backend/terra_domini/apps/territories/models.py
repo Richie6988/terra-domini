@@ -121,6 +121,23 @@ class Territory(models.Model):
         return self.owner is not None
 
     @property
+
+
+    def is_available(self) -> bool:
+        """Territory can be claimed (not owned, not under attack)."""
+        return self.owner is None and not self.is_under_attack
+
+    def get_production_rates(self) -> dict:
+        """Returns per-tick resource production for this territory."""
+        return {
+            'energy':    float(self.resource_energy or 0),
+            'food':      float(self.resource_food or 0),
+            'credits':   float(self.resource_credits or 0),
+            'culture':   float(self.resource_culture or 0),
+            'materials': float(self.resource_materials or 0),
+            'intel':     float(self.resource_intel or 0),
+        }
+
     def is_shielded(self):
         return self.shield_expires_at and self.shield_expires_at > timezone.now()
 

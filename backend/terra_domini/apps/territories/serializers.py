@@ -162,7 +162,10 @@ class TerritoryDetailSerializer(serializers.ModelSerializer):
         return obj.alliance.tag if obj.alliance else None
 
     def get_production_rates(self, obj):
-        return obj.get_production_rates()
+        try:
+            return obj.get_production_rates()
+        except Exception:
+            return {}
 
     def get_can_be_attacked(self, obj):
         request = self.context.get('request')
