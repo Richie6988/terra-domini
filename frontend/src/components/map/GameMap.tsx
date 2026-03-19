@@ -65,7 +65,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const [showGrid, setShowGrid]     = useState(false)
   const [zoom, setZoom]             = useState(13)
 
-  const territories = useStore(s => s.territories)
+  const territoriesMap = useStore(s => s.territories)
+  const territories = Object.values(territoriesMap)
   const player      = useStore(s => s.player)
   const setMapCenter = useStore(s => s.setMapCenter)
 
@@ -107,13 +108,23 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     map.on('moveend zoomend', handleMove)
     handleMove()
 
-    // Try geolocation on first load
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        pos => map.setView([pos.coords.latitude, pos.coords.longitude], 14),
-        () => {} // Ignore error, stay on Paris
-      )
-    }
+    // IP-based geolocation on first load (no permission needed)
+    fetch('https://ipapi.co/json/')
+      .then(r => r.json())
+      .then(data => {
+        if (data.latitude && data.longitude) {
+          map.setView([data.latitude, data.longitude], 13)
+        }
+      })
+      .catch(() => {
+        // Fallback: try GPS
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            pos => map.setView([pos.coords.latitude, pos.coords.longitude], 14),
+            () => {} // Stay on Paris default
+          )
+        }
+      })
 
     return () => {
       clearTimeout(viewportTimer.current)

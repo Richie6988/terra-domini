@@ -129,8 +129,15 @@ export function useGameSocket() {
       intentionalClose.current = true
       clearTimeout(reconnectTimer.current)
       clearInterval(pingTimer.current)
-      if (wsRef.current) {
-        wsRef.current.close()
+      const ws = wsRef.current
+      if (ws) {
+        // If still connecting, wait for open then close — prevents "closed before established"
+        if (ws.readyState === WebSocket.CONNECTING) {
+          ws.addEventListener('open', () => ws.close(1000, 'component unmounted'), { once: true })
+          ws.addEventListener('error', () => {}, { once: true })
+        } else {
+          ws.close(1000, 'component unmounted')
+        }
         wsRef.current = null
       }
       useStore.getState().setWsConnected(false)
