@@ -23,8 +23,8 @@ export function WarTicker() {
   const [current, setCurrent] = useState(0)
   const timerRef = useRef<ReturnType<typeof setInterval>>()
 
-  const activeBattles = useStore(s => s.activeBattles)
-  const notifications = useStore(s => s.notifications)
+  const activeBattles = useStore(s => s.activeBattles ?? [])
+  const notifications = useStore(s => s.notifications ?? [])
 
   // Load tower wars
 
@@ -54,7 +54,7 @@ export function WarTicker() {
     const all: TickerEvent[] = []
 
     // Active battles
-    activeBattles.forEach(b => {
+    ;(activeBattles ?? []).forEach(b => {
       all.push({
         id: b.id,
         icon: '⚔️',
@@ -123,7 +123,7 @@ export function WarTicker() {
     }
 
     setEvents(all.sort((a, b) => b.ts - a.ts))
-  }, [activeBattles.length, towersData, worldEvents, notifications.length])
+  }, [(activeBattles ?? []).length, towersData, worldEvents, (notifications ?? []).length])
 
   // Auto-advance ticker
   useEffect(() => {

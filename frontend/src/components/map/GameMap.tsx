@@ -61,13 +61,17 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     const onMove = () => {
       clearTimeout(vpTimer.current)
       vpTimer.current = setTimeout(() => {
-        const c = map.getCenter()
-        const b = map.getBounds()
-        const r = Math.min(map.distance(c, b.getNorthEast()) / 1000, 25)
-        const z = map.getZoom()
-        setZoom(z); setCenter([c.lat, c.lng])
-        storeSetCenter([c.lat, c.lng], z)
-        onViewportChange(c.lat, c.lng, r)
+        try {
+          const c = map.getCenter()
+          const b = map.getBounds()
+          const r = Math.min(map.distance(c, b.getNorthEast()) / 1000, 25)
+          const z = map.getZoom()
+          setZoom(z); setCenter([c.lat, c.lng])
+          storeSetCenter([c.lat, c.lng], z)
+          onViewportChange(c.lat, c.lng, r)
+        } catch (_) {
+          // Map not ready yet — will retry on next move event
+        }
       }, 300)
     }
     map.on('moveend zoomend', onMove)

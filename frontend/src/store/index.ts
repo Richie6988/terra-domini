@@ -200,6 +200,15 @@ export const useStore = create<Store>()(
     {
       name: 'terra-domini-store',
       storage: createJSONStorage(() => localStorage),
+      merge: (persisted: any, current: any) => ({
+        ...current,
+        ...persisted,
+        // Always ensure these are arrays, never undefined
+        activeBattles:        Array.isArray(persisted?.activeBattles) ? persisted.activeBattles : [],
+        notifications:        Array.isArray(persisted?.notifications) ? persisted.notifications : [],
+        recentBattleResults:  Array.isArray(persisted?.recentBattleResults) ? persisted.recentBattleResults : [],
+        territories:          persisted?.territories && typeof persisted.territories === 'object' ? persisted.territories : {},
+      }),
       partialize: (state) => ({
         // Only persist auth + preferences
         player: state.player,
