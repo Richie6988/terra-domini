@@ -29,6 +29,7 @@ INSTALLED_APPS = [
     # Third party
     'rest_framework',
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
     'corsheaders',
     'django_filters',
     'channels',
@@ -47,6 +48,7 @@ INSTALLED_APPS = [
     'terra_domini.apps.websocket',
     'terra_domini.apps.progression',
     'terra_domini.apps.social',
+    'terra_domini.apps.admin_gm',
 ]
 
 MIDDLEWARE = [
@@ -169,6 +171,29 @@ BLOCKCHAIN = {
     'TREASURY_ADDRESS': env('TDC_TREASURY_ADDRESS', default=''),
     'TREASURY_PRIVATE_KEY': env('TDC_TREASURY_PRIVATE_KEY', default=''),
     'TDC_EUR_RATE': int(env('TDC_EUR_RATE', default='100')),
+}
+
+
+# ── Game Mechanics Config (required by combat engine + territory engine) ──────
+GAME = {
+    'H3_DEFAULT_RESOLUTION': 10,
+    'TERRITORY_TICK_SECONDS': 300,
+    'OFFLINE_INCOME_RATE': 0.40,
+    'BEGINNER_PROTECTION_DAYS': 7,
+    'BATTLE_TIMER': {
+        'HEX': 4 * 3600,
+        'DISTRICT': 12 * 3600,
+        'CITY': 24 * 3600,
+        'CAPITAL': 72 * 3600,
+    },
+    'MAX_ALLIANCE_SQUAD': 5,
+    'MAX_ALLIANCE_GUILD': 25,
+    'MAX_ALLIANCE_FEDERATION': 500,
+    'CONTROL_TOWER_EVENTS_PER_DAY': 3,
+    'CONTROL_TOWER_EVENT_DURATION_SECONDS': 7200,
+    'SHIELD_MAX_HOURS_PER_DAY': 12,
+    'MAX_MILITARY_BOOST_PCT': 25,
+    'MAX_BUILD_SPEED_BOOST_PCT': 50,
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
