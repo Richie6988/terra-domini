@@ -12,7 +12,12 @@ from django.core.cache import caches
 
 logger = logging.getLogger('terra_domini.territories')
 
-GAME_CFG = settings.GAME
+GAME_CFG = getattr(settings, 'GAME', {
+    'H3_DEFAULT_RESOLUTION': 10,
+    'TERRITORY_TICK_SECONDS': 300,
+    'OFFLINE_INCOME_RATE': 0.40,
+    'MAX_ALLIANCE_SQUAD': 5, 'MAX_ALLIANCE_GUILD': 25, 'MAX_ALLIANCE_FEDERATION': 500,
+})
 GAME_CACHE = caches['game_state']
 
 # Resource production base rates by territory type (per 5-min tick)

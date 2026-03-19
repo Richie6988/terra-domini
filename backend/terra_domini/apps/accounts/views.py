@@ -56,7 +56,7 @@ class RegisterView(generics.CreateAPIView):
         from django.conf import settings
         from datetime import timedelta
         player.beginner_protection_until = timezone.now() + timedelta(
-            days=settings.GAME['BEGINNER_PROTECTION_DAYS']
+            days=getattr(settings, 'GAME', {}).get('BEGINNER_PROTECTION_DAYS', 7)
         )
         player.save(update_fields=['beginner_protection_until'])
 

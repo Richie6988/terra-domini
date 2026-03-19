@@ -11,7 +11,18 @@ from django.utils import timezone
 
 logger = logging.getLogger('terra_domini.combat')
 
-GAME_CFG = settings.GAME
+# Safe fallback — works even without GAME in settings (Codespace dev)
+GAME_CFG = getattr(settings, 'GAME', {
+    'BATTLE_TIMER': {'HEX': 14400, 'DISTRICT': 43200, 'CITY': 86400, 'CAPITAL': 259200},
+    'MAX_MILITARY_BOOST_PCT': 25,
+    'SHIELD_MAX_HOURS_PER_DAY': 12,
+    'BEGINNER_PROTECTION_DAYS': 7,
+    'TERRITORY_TICK_SECONDS': 300,
+    'OFFLINE_INCOME_RATE': 0.40,
+    'MAX_ALLIANCE_SQUAD': 5,
+    'MAX_ALLIANCE_GUILD': 25,
+    'MAX_ALLIANCE_FEDERATION': 500,
+})
 
 
 # ─── Models ──────────────────────────────────────────────────────────────────

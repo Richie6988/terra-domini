@@ -4,6 +4,12 @@ All endpoints require JWT authentication unless noted.
 """
 import logging
 from django.conf import settings
+
+# Safe game config — works without GAME in settings
+def _game(key, default=None):
+    cfg = getattr(settings, 'GAME', {})
+    return cfg.get(key, default)
+
 from django.core.cache import cache
 from django.utils import timezone
 from rest_framework import viewsets, status, generics
@@ -490,7 +496,7 @@ def _apply_item_effect(player, item, quantity, territory_h3=None):
             player.shield_reset_date = today
             player.save(update_fields=['daily_shield_hours_used', 'shield_reset_date'])
 
-        available_hours = settings.GAME['SHIELD_MAX_HOURS_PER_DAY'] - player.daily_shield_hours_used
+        available_hours = _game('SHIELD_MAX_HOURS_PER_DAY', 12) - player.daily_shield_hours_used
         actual_hours = min(duration_hours, available_hours)
 
         if actual_hours > 0:
@@ -506,7 +512,7 @@ def _apply_item_effect(player, item, quantity, territory_h3=None):
             player=player,
             item=item,
             boost_type='military',
-            boost_value=min(item.effect_value, settings.GAME['MAX_MILITARY_BOOST_PCT']),
+            boost_value=min(item.effect_value, _game('MAX_MILITARY_BOOST_PCT', 25)),
             expires_at=timezone.now() + duration,
         )
 
@@ -516,6 +522,6 @@ def _apply_item_effect(player, item, quantity, territory_h3=None):
             player=player,
             item=item,
             boost_type='construction',
-            boost_value=min(item.effect_value, settings.GAME['MAX_BUILD_SPEED_BOOST_PCT']),
+            boost_value=min(item.effect_value, _game('MAX_BUILD_SPEED_BOOST_PCT', 50)),
             expires_at=timezone.now() + duration,
         )
