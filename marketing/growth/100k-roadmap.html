@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terra Domini — 100K Roadmap</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+:root{--g:#00FF87;--r:#FF3B30;--gold:#FFB800;--pu:#7B2FFF;--dark:#050508;--d2:#0A0A12;--border:rgba(255,255,255,0.08);--fd:'Bebas Neue',sans-serif;--fb:'Space Grotesk',sans-serif;--fm:'IBM Plex Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--dark);color:#E8E8F0;font-family:var(--fb);}
+.hdr{padding:48px 60px 28px;border-bottom:1px solid var(--border);}
+.hdr h1{font-family:var(--fd);font-size:52px;letter-spacing:3px;color:#fff;}
+.hdr h1 span{color:var(--g);}
+.hdr p{font-size:14px;color:rgba(255,255,255,0.4);max-width:700px;margin-top:8px;line-height:1.7;}
+
+/* CHART */
+.chart-section{padding:40px 60px;border-bottom:1px solid var(--border);}
+.chart-wrap{position:relative;height:260px;margin-top:20px;}
+canvas{width:100% !important;}
+
+/* EVENTS CALENDAR */
+.events-section{padding:40px 60px;}
+.events-section h2{font-family:var(--fd);font-size:32px;letter-spacing:2px;color:#fff;margin-bottom:24px;}
+.month-block{margin-bottom:32px;}
+.month-label{font-family:var(--fm);font-size:10px;color:var(--g);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid rgba(0,255,135,0.15);}
+.event-row{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);align-items:flex-start;}
+.event-row:last-child{border-bottom:none;}
+.ev-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;margin-top:5px;}
+.ev-week{font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.2);flex-shrink:0;min-width:36px;margin-top:3px;}
+.ev-tag{font-family:var(--fm);font-size:9px;padding:2px 7px;border-radius:2px;align-self:flex-start;flex-shrink:0;margin-top:2px;}
+.tiktok-tag{background:rgba(236,72,153,0.15);color:#EC4899;}
+.ingame-tag{background:rgba(0,255,135,0.1);color:var(--g);}
+.media-tag{background:rgba(59,130,246,0.12);color:#60A5FA;}
+.deploy-tag{background:rgba(255,184,0,0.12);color:var(--gold);}
+.poi-tag{background:rgba(255,59,48,0.12);color:var(--r);}
+.ev-content{flex:1;}
+.ev-title{font-weight:500;font-size:13px;color:#fff;margin-bottom:3px;line-height:1.3;}
+.ev-desc{font-size:12px;color:rgba(255,255,255,0.4);line-height:1.5;}
+.ev-kpi{font-family:var(--fm);font-size:11px;color:var(--g);margin-top:4px;}
+
+/* KPI ROW */
+.kpi-row{display:flex;gap:0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);background:var(--d2);}
+.kpi{padding:18px 24px;border-right:1px solid var(--border);flex:1;text-align:center;}
+.kpi-n{font-family:var(--fd);font-size:32px;letter-spacing:1px;}
+.kpi-l{font-family:var(--fm);font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-top:2px;}
+
+@media(max-width:768px){.hdr,.chart-section,.events-section{padding:32px 20px;}.kpi{padding:14px 12px;}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <h1>100K MAU — <span>6 MOIS</span></h1>
+  <p>Plan de route précis semaine par semaine. 5 leviers : déploiement prod, TikTok multi-comptes, POI actualité (Hormuz), geo pipeline, créateurs. Tout est buildé. Tout est pushé. Il reste à exécuter.</p>
+</div>
+
+<!-- GROWTH CHART -->
+<div class="chart-section">
+  <div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.15em;margin-bottom:4px;">PROJECTION MAU — AVEC 5 FICHIERS MANQUANTS FIXÉS</div>
+  <div class="chart-wrap">
+    <canvas id="growthChart"></canvas>
+  </div>
+  <div style="display:flex;gap:20px;margin-top:12px;flex-wrap:wrap;">
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--fm);">
+      <div style="width:12px;height:3px;background:var(--g);border-radius:2px;"></div>Prod + TikTok + Hormuz POI
+    </div>
+    <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:rgba(255,255,255,0.4);font-family:var(--fm);">
+      <div style="width:12px;height:3px;background:rgba(255,255,255,0.15);border-radius:2px;border-top:2px dashed rgba(255,255,255,0.2);"></div>Ancien scénario (0 prod)
+    </div>
+  </div>
+</div>
+
+<!-- KPI TARGETS -->
+<div class="kpi-row">
+  <div class="kpi"><div class="kpi-n" style="color:var(--g);">107K</div><div class="kpi-l">MAU cible Mois 4</div></div>
+  <div class="kpi"><div class="kpi-n" style="color:var(--gold);">15M</div><div class="kpi-l">Vues TikTok 6 mois</div></div>
+  <div class="kpi"><div class="kpi-n" style="color:#60A5FA;">€8K</div><div class="kpi-l">MRR Mois 3 (Stripe + TDC)</div></div>
+  <div class="kpi"><div class="kpi-n" style="color:var(--pu);">3</div><div class="kpi-l">Créateurs actifs avec referral</div></div>
+  <div class="kpi"><div class="kpi-n" style="color:var(--r);">J+7</div><div class="kpi-l">Premier TikTok Hormuz</div></div>
+</div>
+
+<!-- EVENTS CALENDAR -->
+<div class="events-section">
+  <h2>CALENDRIER EXÉCUTION</h2>
+
+  <!-- MOIS 1 -->
+  <div class="month-block">
+    <div class="month-label">MOIS 1 — LANCEMENT (Semaines 1-4)</div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--r);box-shadow:0 0 6px rgba(255,59,48,0.5);"></div>
+      <div class="ev-week">J+0</div>
+      <span class="ev-tag deploy-tag">DEPLOY</span>
+      <div class="ev-content">
+        <div class="ev-title">Prod live sur Railway — terradomini.io accessible</div>
+        <div class="ev-desc">railway up depuis GitHub. SSL auto. Seed Paris (91 hexes). Health check vert. Premier joueur hors Codespace.</div>
+        <div class="ev-kpi">→ 400 MAU · Objectif : API &lt;200ms response time</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--r);"></div>
+      <div class="ev-week">J+1</div>
+      <span class="ev-tag poi-tag">POI</span>
+      <div class="ev-content">
+        <div class="ev-title">Hormuz POI activé + 3 TikToks postés en 48h</div>
+        <div class="ev-desc">python manage.py create_world_events --event hormuz_2026. Carte live avec le 🔥 sur le détroit. @tdgeopolitics poste vid #1 "split screen BBC/jeu". @terradomini poste vid "Ta rue est dans le jeu". @tdcrypto poste "combien tu peux gagner".</div>
+        <div class="ev-kpi">→ 1 500 MAU · KPI TikTok : 50K vues vid #1</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--gold);"></div>
+      <div class="ev-week">J+5</div>
+      <span class="ev-tag media-tag">MEDIA</span>
+      <div class="ev-content">
+        <div class="ev-title">Product Hunt launch — "Geopolitics meets io game"</div>
+        <div class="ev-desc">Soumission avec teaser 30s, screenshots App Store, description "real Hormuz POI". Demander à la communauté GitHub (40 watchers) de voter. Viser Top 5 Gaming du jour.</div>
+        <div class="ev-kpi">→ 2 500 MAU · Product Hunt : 300 upvotes minimum pour Top 5</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--gold);"></div>
+      <div class="ev-week">J+7</div>
+      <span class="ev-tag tiktok-tag">TIKTOK</span>
+      <div class="ev-content">
+        <div class="ev-title">Paid Organic boost — booster les vidéos qui dépassent 10K vues</div>
+        <div class="ev-desc">Sur chaque vidéo qui atteint 10K vues organiques en 6h → activer TikTok Spark Ads $200. Modèle Paid Organic : 100x plus efficace que la pub standard selon les données 2026.</div>
+        <div class="ev-kpi">→ Budget Semaine 1 : max $600 total sur 3 vidéos</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--g);"></div>
+      <div class="ev-week">J+10</div>
+      <span class="ev-tag deploy-tag">DEPLOY</span>
+      <div class="ev-content">
+        <div class="ev-title">TDC déployé sur Polygon Amoy testnet + Polygonscan vérifié</div>
+        <div class="ev-desc">npx hardhat deploy --network amoy. Vérifier sur polygonscan.com. Publier l'adresse du contrat dans le footer du jeu et README. Magnus (persona) cherche cette info — la mettre en évidence.</div>
+        <div class="ev-kpi">→ Web3 credibility ON. Magnus peut valider publiquement.</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--g);"></div>
+      <div class="ev-week">J+14</div>
+      <span class="ev-tag ingame-tag">IN-GAME</span>
+      <div class="ev-content">
+        <div class="ev-title">Geo pipeline — Paris dense + Londres + Lagos</div>
+        <div class="ev-desc">python scripts/geo_pipeline.py --cities paris,london,lagos. ~200K hexagones réels. Yasmine voit Paris dense. Amara voit Lagos. Rétention J1 passe de 3% à 25% estimé.</div>
+        <div class="ev-kpi">→ 8 000 MAU · Retention Day 1 target : 25%</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--pu);"></div>
+      <div class="ev-week">J+16</div>
+      <span class="ev-tag tiktok-tag">TIKTOK</span>
+      <div class="ev-content">
+        <div class="ev-title">Priya (50K subs) — session stream 2h Tower War</div>
+        <div class="ev-desc">Contacter Priya avec référral code. Lui donner: 50 TDC gratuit, accès au compte AliceGeneral déjà built (8 territoires, alliance), accès spectateur mode Control Tower. Elle crée le clip "trahison alliance à 23h59".</div>
+        <div class="ev-kpi">→ +1 500 joueurs via referral Priya · KPI : son clip &gt;100K vues</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--g);"></div>
+      <div class="ev-week">J+21</div>
+      <span class="ev-tag ingame-tag">IN-GAME</span>
+      <div class="ev-content">
+        <div class="ev-title">Control Tower Season 0 — premier event mondial organisé</div>
+        <div class="ev-desc">Annoncer via in-game ticker + Twitter : "Premier Control Tower War mondial — Notre Dame de Paris — Dimanche 15h00 UTC". Priya streame. Clip post-event compilé automatiquement.</div>
+        <div class="ev-kpi">→ 18 000 MAU · Discord spike attendu</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--g);"></div>
+      <div class="ev-week">J+30</div>
+      <span class="ev-tag ingame-tag">IN-GAME</span>
+      <div class="ev-content">
+        <div class="ev-title">FIN MOIS 1 — Bilan + Discord 3K membres</div>
+        <div class="ev-desc">Publier les stats Mois 1 sur tous les comptes TikTok : MAU, batailles jouées, TDC en circulation. Le "transparency report" de jeu est lui-même viral sur les communautés GameFi.</div>
+        <div class="ev-kpi">→ 35 000 MAU · Discord 3K · 1ère brand ad deal en discussion</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOIS 2 -->
+  <div class="month-block">
+    <div class="month-label">MOIS 2 — EXPANSION (Semaines 5-8)</div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:#6366F1;"></div>
+      <div class="ev-week">J+32</div>
+      <span class="ev-tag deploy-tag">DEPLOY</span>
+      <div class="ev-content">
+        <div class="ev-title">Tokyo + Seoul + Shanghai geo pipeline</div>
+        <div class="ev-desc">@tdcities ouvre un compte TikTok japonais avec device physiquement au JP (ou VPN JP). "I own Shibuya Crossing" → local pride japonais est un moteur viral extrêmement fort.</div>
+        <div class="ev-kpi">→ @tdcities_jp : objectif 30K followers en 3 semaines</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--gold);"></div>
+      <div class="ev-week">J+35</div>
+      <span class="ev-tag tiktok-tag">TIKTOK</span>
+      <div class="ev-content">
+        <div class="ev-title">Série "My Empire Day 1 → Day 30" — Zhang Wei style</div>
+        <div class="ev-desc">Recruter un créateur asiatique avec 10K+ followers. Format timelapse quotidien de son empire. Day 1 : 3 zones · Day 30 : 142 zones + alliance + €23 TDC. Format série = return viewers chaque jour.</div>
+        <div class="ev-kpi">→ +3K joueurs Asie · Série : 14 épisodes × 30K vues minimum</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--r);"></div>
+      <div class="ev-week">J+42</div>
+      <span class="ev-tag poi-tag">POI</span>
+      <div class="ev-content">
+        <div class="ev-title">POI Taiwan Strait activé — tensions PLA en jeu</div>
+        <div class="ev-desc">python manage.py create_world_events --event taiwan_strait_tension. Materials -40% en APAC, unités navales débloquées. TikTok : split screen SCMP article / carte Taiwan. Cross-post sur r/geopolitics (500K members).</div>
+        <div class="ev-kpi">→ Reddit post cible : 2K upvotes · +2K joueurs APAC</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--g);"></div>
+      <div class="ev-week">J+50</div>
+      <span class="ev-tag media-tag">MEDIA</span>
+      <div class="ev-content">
+        <div class="ev-title">Pitch Reuters/BBC Technologie — "le jeu qui simule les crises géopolitiques"</div>
+        <div class="ev-desc">Contact journalists qui ont couvert Hormuz. Angle : "Un jeu gratuit sur navigateur simule en temps réel les effets économiques du blocus d'Ormuz sur vos territoires virtuels." Un article dans un média tech = 10K joueurs potentiels.</div>
+        <div class="ev-kpi">→ 62 000 MAU · 1 article tech media visé</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOIS 3-4 -->
+  <div class="month-block">
+    <div class="month-label">MOIS 3–4 — SEASON 1 + 100K</div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--gold);box-shadow:0 0 8px rgba(255,184,0,0.5);"></div>
+      <div class="ev-week">J+60</div>
+      <span class="ev-tag ingame-tag">IN-GAME</span>
+      <div class="ev-content">
+        <div class="ev-title">🏆 SEASON 1 LAUNCH — 13 semaines · 50K TDC prize pool</div>
+        <div class="ev-desc">Premier leaderboard mondial officiel. Battle Pass €4.99 activé. Tariq (Dubai) achète whale bundle €999. Weekly rankings postés sur TikTok par @tdwarclips. Chaque semaine : "qui est N°1 mondial cette semaine ?" = viral automatique.</div>
+        <div class="ev-kpi">→ 80 000 MAU · Battle Pass ARPU : €4.99 sur ~8% des joueurs = €3 200 MRR</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--g);box-shadow:0 0 8px rgba(0,255,135,0.6);"></div>
+      <div class="ev-week">J+90</div>
+      <span class="ev-tag ingame-tag">IN-GAME</span>
+      <div class="ev-content">
+        <div class="ev-title">✅ AD MARKETPLACE LIVE — première campagne brand</div>
+        <div class="ev-desc">Premier brand deal : une marque de crypto/fintech paie €2K/mois pour afficher leur banner sur les territoires à fort trafic. TDC redistribué aux owners. Angle TikTok : "Cette marque paie mon empire virtuel."</div>
+        <div class="ev-kpi">→ 87 000 MAU · Ad revenue €2K/mois · Proof of concept économie réelle</div>
+      </div>
+    </div>
+
+    <div class="event-row">
+      <div class="ev-dot" style="background:var(--g);box-shadow:0 0 12px rgba(0,255,135,0.8);"></div>
+      <div class="ev-week">J+120</div>
+      <span class="ev-tag ingame-tag">IN-GAME</span>
+      <div class="ev-content">
+        <div class="ev-title">🎯 100K MAU ATTEINT — MOIS 4</div>
+        <div class="ev-desc">TikTok total : ~15M vues · 5 comptes · 3 créateurs actifs · CertiK audit publié · Magnus valide on Twitter · Discord 10K · iOS App Store soumis · 2 conversations Series A ouvertes. La croissance devient organique : chaque joueur invite en moyenne 0.8 autres (viral coefficient).</div>
+        <div class="ev-kpi">→ 107 000 MAU · MRR €8K · Viral coeff : 0.8 (seuil self-sustaining = 1.0, objectif Mois 6)</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const labels = ['J+0','J+7','J+14','J+21','J+30','J+45','J+60','J+75','J+90','J+105','J+120','J+150','J+180']
+const real = [400, 2500, 8000, 18000, 35000, 48000, 62000, 72000, 87000, 95000, 107000, 130000, 160000]
+const old  = [400, 600, 1200, 2000, 3500, 5000, 7000, 9000, 11000, 13000, 14200, 15000, 16000]
+
+const ctx = document.getElementById('growthChart')
+new Chart(ctx, {
+  type: 'line',
+  data: {
+    labels,
+    datasets: [
+      {
+        label: 'Avec deploy + TikTok + Hormuz',
+        data: real,
+        borderColor: '#00FF87',
+        backgroundColor: 'rgba(0,255,135,0.06)',
+        borderWidth: 2.5,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 4,
+        pointBackgroundColor: '#00FF87',
+        pointBorderColor: '#050508',
+        pointBorderWidth: 2,
+      },
+      {
+        label: 'Scénario sans deploy (réalité passée)',
+        data: old,
+        borderColor: 'rgba(255,255,255,0.2)',
+        backgroundColor: 'transparent',
+        borderWidth: 1.5,
+        borderDash: [5,4],
+        fill: false,
+        tension: 0.4,
+        pointRadius: 0,
+      }
+    ]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: 'rgba(10,10,18,0.95)',
+        borderColor: 'rgba(0,255,135,0.3)',
+        borderWidth: 1,
+        titleColor: '#00FF87',
+        bodyColor: '#E8E8F0',
+        callbacks: {
+          label: ctx => `${ctx.dataset.label}: ${ctx.parsed.y.toLocaleString()} MAU`
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        ticks: { color: 'rgba(255,255,255,0.35)', font: { family: 'IBM Plex Mono', size: 10 } }
+      },
+      y: {
+        grid: { color: 'rgba(255,255,255,0.04)' },
+        ticks: {
+          color: 'rgba(255,255,255,0.35)',
+          font: { family: 'IBM Plex Mono', size: 10 },
+          callback: v => v >= 1000 ? `${Math.round(v/1000)}K` : v
+        },
+        max: 170000,
+      }
+    }
+  }
+})
+</script>
+</body>
+</html>
