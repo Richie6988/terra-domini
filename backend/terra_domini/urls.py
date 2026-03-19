@@ -18,6 +18,7 @@ from terra_domini.apps.accounts.views import (
 from terra_domini.apps.alliances.views import AllianceViewSet, DiplomacyViewSet
 from terra_domini.apps.events.views import ControlTowerViewSet, EventViewSet
 from terra_domini.apps.events.poi_views import WorldPOIViewSet
+from terra_domini.apps.social.models_and_views import FriendViewSet, PublicProfileView, JoinViaReferralView
 
 router = DefaultRouter()
 router.register(r'territories', TerritoryViewSet, basename='territory')
@@ -30,6 +31,7 @@ router.register(r'events', EventViewSet, basename='event')
 router.register(r'control-towers', ControlTowerViewSet, basename='control-tower')
 router.register(r'ads', AdCampaignViewSet, basename='ad')
 router.register(r'pois', WorldPOIViewSet, basename='poi')
+router.register(r'social', FriendViewSet, basename='social')
 
 urlpatterns = [
     # Admin
@@ -48,6 +50,8 @@ urlpatterns = [
     path('api/players/search/', PlayerSearchView.as_view(), name='player_search'),
     path('api/players/wallet/', WalletLinkView.as_view(), name='wallet_link'),
     path('api/leaderboard/', LeaderboardView.as_view(), name='leaderboard'),
+    path('api/players/<str:username>/profile/', PublicProfileView.as_view(), name='public_profile'),
+    path('api/social/join-referral/', JoinViaReferralView.as_view(), name='join_referral'),
 
     # Game API (all require JWT)
     path('api/', include(router.urls)),

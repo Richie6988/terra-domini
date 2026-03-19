@@ -49,6 +49,7 @@ LOCAL_APPS = [
     'terra_domini.apps.blockchain',
     'terra_domini.apps.events',
     'terra_domini.apps.progression',
+    'terra_domini.apps.social',
     'terra_domini.apps.websocket',
 ]
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
