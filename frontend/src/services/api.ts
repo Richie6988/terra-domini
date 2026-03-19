@@ -87,7 +87,7 @@ export const playerApi = {
     api.post('/players/wallet/', { wallet_address, signature }).then(r => r.data),
   leaderboard: (type: 'territory' | 'season' = 'territory') =>
     api.get(`/leaderboard/?type=${type}`).then(r => r.data),
-  search: (q: string) => api.get(`/players/search/?q=${encodeURIComponent(q)}`).then(r => r.data),
+  search: (q: string) => api.get(`/players/search/?q=${encodeURIComponent(q)}`).then(r => r.data?.results ?? r.data ?? []),
 }
 
 export const territoryApi = {
@@ -123,11 +123,6 @@ export const allianceApi = {
     api.post('/alliances/propose/', { target_alliance_id, proposal_type }).then(r => r.data),
 }
 
-export const playerApi = {
-  search: (q: string) => api.get(`/players/search/?q=${encodeURIComponent(q)}`).then(r => r.data?.results ?? r.data ?? []),
-  me: () => api.get('/players/me/').then(r => r.data),
-  update: (data: Record<string, unknown>) => api.patch('/players/me/', data).then(r => r.data),
-}
 
 export const eventsApi = {
   controlTowers: () => api.get('/control-towers/upcoming/').then(r => r.data),
