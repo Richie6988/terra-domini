@@ -13,20 +13,42 @@ import type { UnitType } from '../../types'
 const RESOURCE_ICONS: Record<string, string> = {
   energy: '⚡', food: '🌾', credits: '💰', culture: '🎭', materials: '⚙️', intel: '🔍'
 }
-
 const DEFENSE_TIER_NAMES: Record<number, string> = {
   1: 'Outpost', 2: 'Fort', 3: 'Citadel', 4: 'Fortress', 5: 'Stronghold'
 }
-
 const BUILDING_ICONS: Record<string, string> = {
   farm: '🌾', mine: '⛏️', power_plant: '⚡', factory: '🏭', market: '🏪',
   barracks: '🏛️', radar: '📡', ad_billboard: '📢', culture_center: '🎭',
 }
-
 const UNIT_TYPES: UnitType[] = ['infantry', 'cavalry', 'artillery', 'air', 'naval']
 const UNIT_ICONS: Record<UnitType, string> = {
   infantry: '⚔️', cavalry: '🐴', artillery: '💣', air: '✈️', naval: '⚓'
 }
+const closeBtn: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: 6, color: '#9CA3AF', cursor: 'pointer',
+  width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+  flexShrink: 0,
+}
+const primaryBtn: React.CSSProperties = {
+  width: '100%', padding: '12px', marginTop: 4,
+  background: '#059669', border: 'none', borderRadius: 8,
+  color: '#fff', fontSize: 14, fontWeight: 500, cursor: 'pointer',
+}
+const tagBtn: React.CSSProperties = {
+  padding: '6px 12px', borderRadius: 6, border: '1px solid',
+  fontSize: 12, cursor: 'pointer', fontWeight: 500,
+}
+const numInput: React.CSSProperties = {
+  width: 72, padding: '5px 8px',
+  background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
+  borderRadius: 6, color: '#fff', fontSize: 13, textAlign: 'center',
+}
+
+
+
+
+
 
 export function TerritoryPanel() {
   const territory = useSelectedTerritory()
@@ -376,26 +398,6 @@ function getTerritoryTypeColor(type: string): string {
 
 // ─── Styles ──────────────────────────────────────────────────────────────────
 
-const closeBtn: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 6, color: '#9CA3AF', cursor: 'pointer',
-  width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
-  flexShrink: 0,
-}
-const primaryBtn: React.CSSProperties = {
-  width: '100%', padding: '12px', marginTop: 4,
-  background: '#059669', border: 'none', borderRadius: 8,
-  color: '#fff', fontSize: 14, fontWeight: 500, cursor: 'pointer',
-}
-const tagBtn: React.CSSProperties = {
-  padding: '6px 12px', borderRadius: 6, border: '1px solid',
-  fontSize: 12, cursor: 'pointer', fontWeight: 500,
-}
-const numInput: React.CSSProperties = {
-  width: 72, padding: '5px 8px',
-  background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
-  borderRadius: 6, color: '#fff', fontSize: 13, textAlign: 'center',
-}
 
 
 

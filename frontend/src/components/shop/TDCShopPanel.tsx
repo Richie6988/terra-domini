@@ -12,8 +12,6 @@ import { useStore, useTDCBalance } from '../../store'
 import type { ShopItem } from '../../types'
 
 const toNum = (v: unknown): number => parseFloat(String(v ?? 0)) || 0
-
-
 const EUR_PACKAGES = [
   { eur: 1.99, tdc: 200,  bonus: 0,    label: 'Starter' },
   { eur: 4.99, tdc: 550,  bonus: 50,   label: 'Scout' },
@@ -21,8 +19,6 @@ const EUR_PACKAGES = [
   { eur: 19.99,tdc: 2600, bonus: 600,  label: 'General', popular: true },
   { eur: 49.99,tdc: 7000, bonus: 2000, label: 'Marshal' },
   { eur: 99.99,tdc: 15000,bonus: 5000, label: 'Emperor' },
-]
-
 const CATEGORY_LABELS: Record<string, string> = {
   shield: '🛡️ Shields',
   military: '⚔️ Military',
@@ -31,6 +27,21 @@ const CATEGORY_LABELS: Record<string, string> = {
   battle_pass: '🎖️ Battle Pass',
   alliance: '🏰 Alliance',
 }
+const primaryBtn: React.CSSProperties = {
+  width: '100%', padding: '12px', background: '#059669',
+  border: 'none', borderRadius: 8, color: '#fff',
+  fontSize: 14, fontWeight: 500, cursor: 'pointer',
+}
+const catBtn: React.CSSProperties = {
+  padding: '5px 12px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.08)',
+  color: '#E5E7EB', fontSize: 12, cursor: 'pointer',
+}
+
+
+
+
+]
+
 
 export function TDCShopPanel({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<'balance' | 'buy' | 'shop' | 'history'>('balance')
@@ -402,13 +413,4 @@ function formatTxType(type: string): string {
   return labels[type] || type
 }
 
-const primaryBtn: React.CSSProperties = {
-  width: '100%', padding: '12px', background: '#059669',
-  border: 'none', borderRadius: 8, color: '#fff',
-  fontSize: 14, fontWeight: 500, cursor: 'pointer',
-}
 
-const catBtn: React.CSSProperties = {
-  padding: '5px 12px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.08)',
-  color: '#E5E7EB', fontSize: 12, cursor: 'pointer',
-}

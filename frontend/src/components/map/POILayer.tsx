@@ -9,6 +9,33 @@ import { useQuery } from '@tanstack/react-query'
 import { api } from '../../services/api'
 import type L from 'leaflet'
 
+const THREAT_CONFIG = {
+  critical: { color: '#FF3B30', bg: 'rgba(255,59,48,0.12)',  border: 'rgba(255,59,48,0.4)',  label: '🔴 CRITICAL' },
+  high:     { color: '#FF6B35', bg: 'rgba(255,107,53,0.10)', border: 'rgba(255,107,53,0.35)', label: '🟠 HIGH' },
+  medium:   { color: '#FFB800', bg: 'rgba(255,184,0,0.10)',  border: 'rgba(255,184,0,0.35)',  label: '🟡 MEDIUM' },
+  low:      { color: '#3B82F6', bg: 'rgba(59,130,246,0.08)', border: 'rgba(59,130,246,0.25)', label: '🔵 LOW' },
+  none:     { color: '#6B7280', bg: 'rgba(107,114,128,0.06)', border: 'rgba(107,114,128,0.2)', label: '⚪ STABLE' },
+}
+const CATEGORY_LABELS: Record<string, string> = {
+  chokepoint: '🚢 Chokepoint', capital: '🏛️ Capital', landmark: '🏛️ Landmark',
+  port: '⚓ Port', military_base: '🪖 Military', energy: '⚡ Energy',
+  conflict_zone: '⚔️ Conflict Zone', diplomatic: '🕊️ Diplomatic',
+  disaster: '🌪️ Disaster', election: '🗳️ Election', economic: '📉 Economic',
+  cultural: '🎭 Cultural', space: '🚀 Space', control_tower: '🗼 Tower',
+  trade_route: '💱 Trade Route',
+}
+const panelStyle: React.CSSProperties = {
+  position: 'absolute', right: 0, top: 0, bottom: 0, width: 360,
+  background: 'rgba(10,10,20,0.97)', backdropFilter: 'blur(12px)',
+  borderLeft: '1px solid rgba(255,255,255,0.08)',
+  display: 'flex', flexDirection: 'column', overflow: 'hidden',
+}
+const tagStyle: React.CSSProperties = {
+  fontSize: 10, padding: '3px 8px', borderRadius: 4, fontWeight: 600,
+  letterSpacing: '0.05em',
+}
+
+
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface POI {
@@ -60,22 +87,7 @@ interface NewsItem {
 
 // ─── Threat colors ────────────────────────────────────────────────────────────
 
-const THREAT_CONFIG = {
-  critical: { color: '#FF3B30', bg: 'rgba(255,59,48,0.12)',  border: 'rgba(255,59,48,0.4)',  label: '🔴 CRITICAL' },
-  high:     { color: '#FF6B35', bg: 'rgba(255,107,53,0.10)', border: 'rgba(255,107,53,0.35)', label: '🟠 HIGH' },
-  medium:   { color: '#FFB800', bg: 'rgba(255,184,0,0.10)',  border: 'rgba(255,184,0,0.35)',  label: '🟡 MEDIUM' },
-  low:      { color: '#3B82F6', bg: 'rgba(59,130,246,0.08)', border: 'rgba(59,130,246,0.25)', label: '🔵 LOW' },
-  none:     { color: '#6B7280', bg: 'rgba(107,114,128,0.06)', border: 'rgba(107,114,128,0.2)', label: '⚪ STABLE' },
-}
 
-const CATEGORY_LABELS: Record<string, string> = {
-  chokepoint: '🚢 Chokepoint', capital: '🏛️ Capital', landmark: '🏛️ Landmark',
-  port: '⚓ Port', military_base: '🪖 Military', energy: '⚡ Energy',
-  conflict_zone: '⚔️ Conflict Zone', diplomatic: '🕊️ Diplomatic',
-  disaster: '🌪️ Disaster', election: '🗳️ Election', economic: '📉 Economic',
-  cultural: '🎭 Cultural', space: '🚀 Space', control_tower: '🗼 Tower',
-  trade_route: '💱 Trade Route',
-}
 
 // ─── News Ticker ──────────────────────────────────────────────────────────────
 
@@ -495,16 +507,6 @@ export function POIManager({ leafletMap }: { leafletMap: L.Map | null }) {
 
 // ─── Styles ───────────────────────────────────────────────────────────────────
 
-const panelStyle: React.CSSProperties = {
-  position: 'absolute', right: 0, top: 0, bottom: 0, width: 360,
-  background: 'rgba(10,10,20,0.97)', backdropFilter: 'blur(12px)',
-  borderLeft: '1px solid rgba(255,255,255,0.08)',
-  display: 'flex', flexDirection: 'column', overflow: 'hidden',
-}
-const tagStyle: React.CSSProperties = {
-  fontSize: 10, padding: '3px 8px', borderRadius: 4, fontWeight: 600,
-  letterSpacing: '0.05em',
-}
 
 
 
