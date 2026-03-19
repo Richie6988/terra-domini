@@ -291,4 +291,3 @@ export function DailyClicker({ onClose }: { onClose: () => void }) {
   )
 }
 
-const TIER_COLORS: Record<string, string> = { common: '#9CA3AF', rare: '#3B82F6', epic: '#8B5CF6', legendary: '#FFB800' }
