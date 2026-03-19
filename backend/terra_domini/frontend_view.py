@@ -43,7 +43,12 @@ class FrontendAppView(View):
                 content_type='text/html',
             )
 
-        return HttpResponse(
+        resp = HttpResponse(
             index_path.read_bytes(),
             content_type='text/html; charset=utf-8',
         )
+        # Never cache index.html — assets have hash-based names for cache busting
+        resp['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+        resp['Pragma'] = 'no-cache'
+        resp['Expires'] = '0'
+        return resp
