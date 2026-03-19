@@ -183,3 +183,70 @@ class PlayerSearchView(generics.ListAPIView):
         return Player.objects.filter(
             username__icontains=q, is_active=True
         ).select_related('stats')[:20]
+
+
+# ─── Password Reset (uses configured EMAIL_BACKEND) ───────────────────────────
+
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.core.mail import send_mail
+from django.conf import settings as django_settings
+
+
+class PasswordResetRequestView(APIView):
+    permission_classes = []  # Public
+
+    def post(self, request):
+        email = request.data.get('email', '').lower().strip()
+        try:
+            player = Player.objects.get(email=email, is_active=True)
+        except Player.DoesNotExist:
+            # Don't reveal whether email exists
+            return Response({'message': 'If this email is registered, a reset link has been sent.'})
+
+        token = default_token_generator.make_token(player)
+        uid   = urlsafe_base64_encode(force_bytes(player.pk))
+
+        # In prod, this URL points to the React reset page
+        reset_url = f"{request.scheme}://{request.get_host()}/reset-password/{uid}/{token}/"
+
+        try:
+            send_mail(
+                subject='Reset your Terra Domini password',
+                message=f'Click to reset your password:\n\n{reset_url}\n\nExpires in 24 hours.',
+                from_email=getattr(django_settings, 'DEFAULT_FROM_EMAIL', 'noreply@terradomini.io'),
+                recipient_list=[player.email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            logger.error(f"Password reset email failed: {e}")
+
+        return Response({'message': 'If this email is registered, a reset link has been sent.'})
+
+
+class PasswordResetConfirmView(APIView):
+    permission_classes = []  # Public
+
+    def post(self, request):
+        uid      = request.data.get('uid', '')
+        token    = request.data.get('token', '')
+        password = request.data.get('password', '')
+
+        if len(password) < 8:
+            return Response({'error': 'Password must be at least 8 characters.'}, status=400)
+
+        try:
+            pk     = force_str(urlsafe_base64_decode(uid))
+            player = Player.objects.get(pk=pk, is_active=True)
+        except (Player.DoesNotExist, ValueError, TypeError):
+            return Response({'error': 'Invalid reset link.'}, status=400)
+
+        if not default_token_generator.check_token(player, token):
+            return Response({'error': 'Reset link expired or already used.'}, status=400)
+
+        player.set_password(password)
+        player.save(update_fields=['password'])
+        logger.info(f"Password reset successful for {player.email}")
+
+        return Response({'message': 'Password reset successful. You can now log in.'})

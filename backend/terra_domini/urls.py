@@ -14,6 +14,7 @@ from terra_domini.frontend_view import FrontendAppView
 from terra_domini.apps.accounts.views import (
     RegisterView, LoginView, RefreshView,
     PlayerProfileView, LeaderboardView, PlayerSearchView, WalletLinkView,
+    PasswordResetRequestView, PasswordResetConfirmView,
 )
 from terra_domini.apps.territories.views import TerritoryViewSet
 from terra_domini.apps.combat.views import BattleViewSet
@@ -55,6 +56,8 @@ urlpatterns = [
     path('api/auth/register/', RegisterView.as_view(),    name='register'),
     path('api/auth/login/',    LoginView.as_view(),       name='login'),
     path('api/auth/refresh/',  RefreshView.as_view(),     name='token_refresh'),
+    path('api/auth/password-reset/', PasswordResetRequestView.as_view(), name='password_reset'),
+    path('api/auth/password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
 
     # ── Player ───────────────────────────────────────────────────────────────
     path('api/players/me/',           PlayerProfileView.as_view(), name='player_me'),

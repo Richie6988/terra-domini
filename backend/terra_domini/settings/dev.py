@@ -206,7 +206,20 @@ GAME = {
     'MAX_BUILD_SPEED_BOOST_PCT': 50,
 }
 
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# ── Email ────────────────────────────────────────────────────────────────────
+# Dev: emails printed to console (no SMTP needed)
+# Prod: set RESEND_API_KEY env var → emails sent via Resend (3000/month free)
+_resend_key = env('RESEND_API_KEY', default='')
+if _resend_key:
+    EMAIL_BACKEND = 'anymail.backends.resend.EmailBackend'
+    ANYMAIL = {
+        'RESEND_API_KEY': _resend_key,
+    }
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Terra Domini <noreply@terradomini.io>')
+EMAIL_SUBJECT_PREFIX = '[Terra Domini] '
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 DEFAULT_FROM_EMAIL = 'noreply@terradomini.local'
 LANGUAGE_CODE = 'en-us'

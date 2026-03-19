@@ -34,9 +34,22 @@ class TerritoryMapConsumer(AsyncWebsocketConsumer):
     TERRITORY_GROUP_PREFIX = 'territory'
     PLAYER_GROUP_PREFIX = 'player'
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Initialize all instance attrs so disconnect() never gets AttributeError
+        self.player = None
+        self.player_id = None
+        self.player_group = None
+        self.subscribed_territories = set()
+
     async def connect(self):
         self.player = self.scope.get('user')
         if not self.player or not self.player.is_authenticated:
+            logger.warning(
+                f"[WS] Rejected unauthenticated connection from {self.scope.get('client', '?')}"
+                f" — query: {self.scope.get('query_string', b'').decode()[:50]}"
+            )
+            await self.accept()   # Must accept before closing, else WSREJECT loop
             await self.close(code=4001)
             return
 
@@ -60,7 +73,7 @@ class TerritoryMapConsumer(AsyncWebsocketConsumer):
         logger.debug(f"Player {self.player.username} connected via WebSocket")
 
     async def disconnect(self, close_code):
-        if not hasattr(self, 'player'):
+        if not self.player_group:  # connect() was rejected before groups were set
             return
 
         # Leave all groups
