@@ -43,8 +43,13 @@ class FrontendAppView(View):
                 content_type='text/html',
             )
 
+        html = index_path.read_bytes().decode('utf-8', errors='replace')
+        # Inject safety patch before </head>
+        patch = """\n<script>\n// Terra Domini safety patch — prevents slice/forEach on undefined\n(function(){\n  var _orig_forEach = Array.prototype.forEach;\n  // Patch Zustand store state access\n  var patchStore = function() {\n    try {\n      var store = window.__TERRA_STORE__;\n      if (store) {\n        var state = store.getState();\n        if (!Array.isArray(state.activeBattles)) store.setState({activeBattles: []});\n        if (!Array.isArray(state.notifications)) store.setState({notifications: []});\n        if (!Array.isArray(state.recentBattleResults)) store.setState({recentBattleResults: []});\n      }\n    } catch(e) {}\n  };\n  setTimeout(patchStore, 100);\n  setTimeout(patchStore, 500);\n  setTimeout(patchStore, 2000);\n})();\n</script>\n"""
+        if '</head>' in html:
+            html = html.replace('</head>', patch + '</head>', 1)
         resp = HttpResponse(
-            index_path.read_bytes(),
+            html.encode('utf-8'),
             content_type='text/html; charset=utf-8',
         )
         # Never cache index.html — assets have hash-based names for cache busting
