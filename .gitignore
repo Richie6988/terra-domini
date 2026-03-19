@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+*.sqlite3
+staticfiles/
+media/
+
+# Node
+node_modules/
+dist/
+.env.local
+
+# Secrets — never commit
+.env
+!.env.example
+!.env.dev
+
+# Docker volumes
+postgres_data/
+redis_data/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Hardhat
+artifacts/
+cache/
+deployments/

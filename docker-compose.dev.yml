@@ -1,0 +1,174 @@
+version: '3.9'
+
+# Dev overrides — use with: docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# Or just: docker compose -f docker-compose.dev.yml up
+
+services:
+  postgres:
+    image: postgis/postgis:16-3.4
+    restart: unless-stopped
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init_db.sql:/docker-entrypoint-initdb.d/init.sql
+    environment:
+      POSTGRES_DB: terradomini
+      POSTGRES_USER: td_user
+      POSTGRES_PASSWORD: devpassword123
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U td_user"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    command: redis-server --requirepass devredis123 --maxmemory 512mb
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "devredis123", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Minimal Kafka for dev (KRaft mode — no Zookeeper)
+  kafka:
+    image: confluentinc/cp-kafka:7.6.0
+    restart: unless-stopped
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
+      KAFKA_LISTENERS: PLAINTEXT://kafka:29092,CONTROLLER://kafka:9093,PLAINTEXT_HOST://0.0.0.0:9092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: 'true'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      CLUSTER_ID: "MkU3OEVBNTcwNTJENDM2Qk"
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+
+  web:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    # Dev: uvicorn with --reload for hot reload
+    command: >
+      sh -c "python manage.py migrate --noinput &&
+             python manage.py shell -c 'from django.contrib.auth import get_user_model; U=get_user_model(); U.objects.filter(email=\"admin@td.local\").exists() or U.objects.create_superuser(\"admin@td.local\", \"admin\", \"adminpassword123\")' &&
+             uvicorn terra_domini.asgi:application --host 0.0.0.0 --port 8000 --reload --reload-dir /app/terra_domini"
+    volumes:
+      - ./backend:/app
+      - static_files:/app/staticfiles
+    environment:
+      DJANGO_SETTINGS_MODULE: terra_domini.settings.dev
+      POSTGRES_DB: terradomini
+      POSTGRES_USER: td_user
+      POSTGRES_PASSWORD: devpassword123
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: devredis123
+      REDIS_DB_CACHE: 0
+      REDIS_DB_CHANNELS: 1
+      REDIS_DB_CELERY: 2
+      REDIS_DB_GAME: 3
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DJANGO_SECRET_KEY: dev-secret-key-change-in-production-at-least-50-chars-long
+      DEBUG: "True"
+      ALLOWED_HOSTS: "*"
+      CELERY_BROKER_URL: "redis://:devredis123@redis:6379/2"
+      CELERY_RESULT_BACKEND: "redis://:devredis123@redis:6379/2"
+      BLOCKCHAIN_CHAIN_ID: "31337"
+      BLOCKCHAIN_RPC_URL: "http://host.docker.internal:8545"
+      TDC_CONTRACT_ADDRESS: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      TDC_TREASURY_ADDRESS: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      TDC_TREASURY_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+      TDC_EUR_RATE: "100"
+      TDC_MIN_WITHDRAWAL: "50"
+      H3_DEFAULT_RESOLUTION: "10"
+      STRIPE_SECRET_KEY: "sk_test_placeholder"
+      STRIPE_WEBHOOK_SECRET: "whsec_placeholder"
+      JWT_ACCESS_TOKEN_LIFETIME_MINUTES: "1440"
+      JWT_REFRESH_TOKEN_LIFETIME_DAYS: "30"
+      DEFAULT_FROM_EMAIL: "noreply@terradomini.local"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  celery_worker:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: celery -A terra_domini worker --loglevel=info --concurrency=2 -Q default,combat,territory,blockchain
+    volumes:
+      - ./backend:/app
+    environment:
+      DJANGO_SETTINGS_MODULE: terra_domini.settings.dev
+      POSTGRES_DB: terradomini
+      POSTGRES_USER: td_user
+      POSTGRES_PASSWORD: devpassword123
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PASSWORD: devredis123
+      CELERY_BROKER_URL: "redis://:devredis123@redis:6379/2"
+      CELERY_RESULT_BACKEND: "redis://:devredis123@redis:6379/2"
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      DJANGO_SECRET_KEY: dev-secret-key-change-in-production-at-least-50-chars-long
+      BLOCKCHAIN_CHAIN_ID: "31337"
+      BLOCKCHAIN_RPC_URL: "http://host.docker.internal:8545"
+      TDC_CONTRACT_ADDRESS: "0x5FbDB2315678afecb367f032d93F642f64180aa3"
+      TDC_TREASURY_ADDRESS: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+      TDC_TREASURY_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+      TDC_EUR_RATE: "100"
+      H3_DEFAULT_RESOLUTION: "10"
+    depends_on:
+      - web
+      - redis
+
+  celery_beat:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: celery -A terra_domini beat --loglevel=info --scheduler django_celery_beat.schedulers:DatabaseScheduler
+    volumes:
+      - ./backend:/app
+    environment:
+      DJANGO_SETTINGS_MODULE: terra_domini.settings.dev
+      POSTGRES_DB: terradomini
+      POSTGRES_USER: td_user
+      POSTGRES_PASSWORD: devpassword123
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PASSWORD: devredis123
+      CELERY_BROKER_URL: "redis://:devredis123@redis:6379/2"
+      CELERY_RESULT_BACKEND: "redis://:devredis123@redis:6379/2"
+      DJANGO_SECRET_KEY: dev-secret-key-change-in-production-at-least-50-chars-long
+    depends_on:
+      - web
+      - redis
+
+volumes:
+  postgres_data:
+  redis_data:
+  kafka_data:
+  static_files:
