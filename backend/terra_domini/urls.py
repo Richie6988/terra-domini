@@ -5,7 +5,7 @@ Clean version: no duplicate registrations, no duplicate health path.
 from django.contrib import admin
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerUIView
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView as SpectacularSwaggerUIView
 
 from terra_domini.health import health_check, robots_txt
 
