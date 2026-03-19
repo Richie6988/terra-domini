@@ -197,6 +197,16 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             from terra_domini.apps.accounts.models import Player as P
             P.objects.filter(id=request.user.id).update(tdc_in_game=FF('tdc_in_game') + 100)
 
+        # Initialize resources based on territory type
+        try:
+            from terra_domini.apps.territories.resource_engine import initialize_territory_resources
+            # Only init if resources are zero (first claim)
+            if not territory.resource_food and not territory.resource_energy:
+                initialize_territory_resources(territory, save=True)
+                territory.refresh_from_db()
+        except Exception as e:
+            logger.warning(f'Resource init failed: {e}')
+
         logger.info(f"Territory claimed: {h3_index} by {request.user.username} (method={method})")
         # Create map overlay event
         try:

@@ -107,7 +107,7 @@ class TerritoryLightSerializer(serializers.ModelSerializer):
             'alliance_tag', 'defense_tier', 'is_control_tower',
             'ad_slot_enabled', 'is_landmark', 'landmark_name', 'place_name',
             'center_lat', 'center_lon', 'defense_points',
-            'resource_food', 'resource_energy', 'resource_credits',
+            'resource_food', 'resource_water', 'resource_energy', 'resource_credits',
             'resource_materials', 'resource_intel',
         ]
 
@@ -147,12 +147,12 @@ class TerritoryDetailSerializer(serializers.ModelSerializer):
             'owner', 'alliance_tag', 'captured_at',
             'defense_tier', 'defense_points', 'max_defense_points', 'fortification_level',
             'stockpile_energy', 'stockpile_food', 'stockpile_credits',
-            'stockpile_culture', 'stockpile_materials', 'stockpile_intel',
+            'stockpile_culture', 'stockpile_materials', 'stockpile_water', 'stockpile_intel',
             'stockpile_capacity', 'production_rates',
             'is_control_tower', 'control_tower_type', 'is_capital',
             'is_landmark', 'landmark_name', 'landmark_bonus',
             'terrain_attack_modifier', 'terrain_defense_modifier',
-            'is_under_attack', 'current_battle',
+            'is_under_attack', 'current_battle', 'hidden_resource_type', 'hidden_resource_rarity', 'hidden_resource_found', 'hidden_resource_amount',
             'ad_slot_enabled', 'ad_slot_tier', 'daily_viewer_count',
             'buildings', 'can_be_attacked', 'recent_history',
         ]

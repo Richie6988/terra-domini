@@ -100,6 +100,15 @@ class Territory(models.Model):
     updated_at    = models.DateTimeField(auto_now=True)
     last_tick_at  = models.DateTimeField(null=True, blank=True)
 
+
+    # ── Hidden Resource Discovery ──────────────────────────────────────────
+    # Each territory may hide a sub-surface resource (oil, minerals, etc.)
+    # Revealed when player scouts with intel units or clicker bonus
+    hidden_resource_type   = models.CharField(max_length=30, blank=True)  # category from ResourceCategory
+    hidden_resource_amount = models.FloatField(default=0)   # bonus_pct if mined
+    hidden_resource_found  = models.BooleanField(default=False)
+    hidden_resource_rarity = models.CharField(max_length=12, default='common')
+
     # Combat state — set by CombatEngine
     is_under_attack = models.BooleanField(default=False)
     current_battle  = models.UUIDField(null=True, blank=True)
@@ -281,3 +290,103 @@ class TerritoryCluster(models.Model):
     class Meta:
         db_table = 'territory_cluster'
         unique_together = [('player', 'cluster_id')]
+
+
+# ─── Resource Trade System ─────────────────────────────────────────────────
+class ResourceTrade(models.Model):
+    """
+    Player-to-player resource trade or market listing.
+    Two modes:
+    - DIRECT: specific player offer (requires acceptance)
+    - MARKET: listed on open market, first taker wins
+    """
+    TRADE_STATUS = [
+        ('pending',   'Pending'),
+        ('accepted',  'Accepted'),
+        ('rejected',  'Rejected'),
+        ('cancelled', 'Cancelled'),
+        ('expired',   'Expired'),
+        ('completed', 'Completed'),
+    ]
+    TRADE_MODES = [
+        ('direct', 'Direct Trade'),
+        ('market', 'Open Market'),
+    ]
+    RESOURCE_TYPES = [
+        ('water',     '💧 Water'),
+        ('food',      '🌾 Food'),
+        ('energy',    '⚡ Energy'),
+        ('credits',   '💰 Credits'),
+        ('materials', '⚙️ Materials'),
+        ('culture',   '🎭 Culture'),
+        ('intel',     '🕵️ Intel'),
+        ('tdc',       '🪙 TDC Coins'),
+    ]
+
+    id              = models.UUIDField(primary_key=True, default=__import__('uuid').uuid4, editable=False)
+    mode            = models.CharField(max_length=10, choices=TRADE_MODES, default='market')
+    status          = models.CharField(max_length=12, choices=TRADE_STATUS, default='pending')
+
+    # Parties
+    seller          = models.ForeignKey(
+        'accounts.Player', on_delete=models.CASCADE, related_name='trades_selling')
+    buyer           = models.ForeignKey(
+        'accounts.Player', null=True, blank=True,
+        on_delete=models.SET_NULL, related_name='trades_buying')
+
+    # What's being traded
+    offer_resource  = models.CharField(max_length=12, choices=RESOURCE_TYPES)
+    offer_amount    = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # What seller wants in return
+    request_resource = models.CharField(max_length=12, choices=RESOURCE_TYPES)
+    request_amount   = models.DecimalField(max_digits=12, decimal_places=2)
+
+    # Market price in TDC (auto-computed or manual)
+    market_price_tdc = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+    allow_tdc_purchase = models.BooleanField(default=True)  # can buy with TDC instead of resource
+
+    # Metadata
+    message         = models.CharField(max_length=200, blank=True)
+    expires_at      = models.DateTimeField(null=True)
+    created_at      = models.DateTimeField(auto_now_add=True)
+    completed_at    = models.DateTimeField(null=True)
+
+    class Meta:
+        db_table = 'resource_trade'
+        ordering = ['-created_at']
+        indexes  = [
+            models.Index(fields=['status', 'mode']),
+            models.Index(fields=['offer_resource', 'status']),
+        ]
+
+    def __str__(self):
+        return f"{self.seller.username}: {self.offer_amount} {self.offer_resource} → {self.request_amount} {self.request_resource}"
+
+    @classmethod
+    def market_rates(cls) -> dict:
+        """TDC value per unit of each resource (based on supply/demand + world events)."""
+        base = {
+            'water':     8.0,    # Increasingly scarce
+            'food':      5.0,
+            'energy':    10.0,
+            'credits':   1.0,    # Credits = near-money
+            'materials': 7.0,
+            'culture':   12.0,   # Rare to produce
+            'intel':     20.0,   # High strategic value
+            'tdc':       1.0,
+        }
+        # Apply world event modifiers
+        try:
+            from terra_domini.apps.events.poi_models import WorldEvent
+            from django.utils import timezone
+            active = WorldEvent.objects.filter(is_active=True).values_list('effects', flat=True)
+            for effects in active:
+                if isinstance(effects, dict):
+                    mults = effects.get('resource_multipliers', {})
+                    for res, mult in mults.items():
+                        if res in base:
+                            base[res] *= mult
+        except Exception:
+            pass
+        return {k: round(v, 2) for k, v in base.items()}
