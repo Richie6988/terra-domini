@@ -9,6 +9,7 @@ import { AnimatePresence } from 'framer-motion'
 import { useStore } from '../../store'
 import { FavoritePinsPanel } from './FavoritePins'
 import { ClaimModal } from './ClaimModal'
+import { AttackPanel } from '../hud/AttackPanel'
 import type { TerritoryLight } from '../../types'
 
 interface GameMapProps {
@@ -42,6 +43,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const [zoom,     setZoom]       = useState(13)
   const [center,   setCenter]     = useState<[number, number]>([48.8566, 2.3522])
   const [claimTarget, setClaimTarget] = useState<TerritoryLight | null>(null)
+  const [attackTarget, setAttackTarget] = useState<TerritoryLight | null>(null)
 
   const territories  = Object.values(useStore(s => s.territories))
   const player       = useStore(s => s.player)
@@ -140,6 +142,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         onTerritoryClick(t.h3_index)
         if (!t.owner_id) {
           setClaimTarget(t)
+        } else if (t.owner_id !== player?.id) {
+          setAttackTarget(t)
         }
       })
 
@@ -214,6 +218,16 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         currentLon={center[1]}
         currentZoom={zoom}
       />
+
+      {/* Attack panel */}
+      <AnimatePresence>
+        {attackTarget && (
+          <AttackPanel
+            target={attackTarget}
+            onClose={() => setAttackTarget(null)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Claim modal */}
       <AnimatePresence>

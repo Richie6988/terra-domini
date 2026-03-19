@@ -15,6 +15,7 @@ import { CombatPanel } from './components/hud/CombatPanel'
 import { EventsPanel } from './components/hud/EventsPanel'
 import { ProfilePanel } from './components/hud/ProfilePanel'
 import { AlliancePanel } from './components/alliance/AlliancePanel'
+import { WarTicker } from './components/hud/WarTicker'
 
 const LoginPage    = lazy(() => import('./pages/LoginPage'))
 const Tutorial     = lazy(() => import('./components/onboarding/Tutorial'))
@@ -53,6 +54,9 @@ function GameScreen() {
 
       {/* HUD */}
       <GameHUD />
+
+      {/* Live war ticker */}
+      <WarTicker />
 
       {/* Territory detail panel (bottom sheet) */}
       <AnimatePresence>
