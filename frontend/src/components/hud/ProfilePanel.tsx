@@ -4,10 +4,11 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { X, LogOut, Copy } from 'lucide-react'
+import { X, LogOut, Copy, Edit2 } from 'lucide-react'
 import { api } from '../../services/api'
 import { useStore, usePlayer } from '../../store'
 import toast from 'react-hot-toast'
+import { ProfileEditor } from './ProfileEditor'
 
 const toNum = (v: unknown) => parseFloat(String(v ?? 0)) || 0
 
@@ -126,6 +127,7 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<'stats' | 'missions'>('stats')
   const player = usePlayer()
   const logout = useStore(s => s.logout)
+  const [showEditor, setShowEditor] = useState(false)
 
   if (!player) return null
 
@@ -149,7 +151,10 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
             {player.username.slice(0, 2).toUpperCase()}
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>{player.display_name || player.username}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <div style={{ fontSize: 16, fontWeight: 600, color: '#fff' }}>{player.display_name || player.username}</div>
+              <button onClick={() => setShowEditor(true)} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', padding: 2 }}><Edit2 size={13} /></button>
+            </div>
             <div style={{ fontSize: 12, color: '#10B981' }}>Rank {player.commander_rank} · {player.spec_path || 'Commander'}</div>
             <div style={{ fontSize: 11, color: '#4B5563' }}>{player.email}</div>
           </div>
@@ -170,6 +175,7 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
         </div>
       </div>
 
+      {showEditor && <ProfileEditor onClose={() => setShowEditor(false)} />}
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
         {tab === 'stats' && <StatsTab player={player} />}
         {tab === 'missions' && <MissionsTab />}

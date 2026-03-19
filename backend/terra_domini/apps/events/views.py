@@ -11,6 +11,19 @@ from rest_framework.permissions import IsAuthenticated
 from terra_domini.apps.events.models import ControlTowerEvent, WorldEvent
 
 class ControlTowerViewSet(viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request):
+        """GET /api/control-towers/ — all tower events."""
+        from terra_domini.apps.events.serializers import ControlTowerEventSerializer
+        qs = ControlTowerEvent.objects.select_related(
+            'territory', 'winning_alliance'
+        ).order_by('-starts_at')[:50]
+        return Response({
+            'count': qs.count(),
+            'results': ControlTowerEventSerializer(qs, many=True).data,
+        })
+
 
     @action(detail=False, methods=['GET'], url_path='upcoming')
     def upcoming(self, request):

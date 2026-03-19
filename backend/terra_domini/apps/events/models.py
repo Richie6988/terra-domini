@@ -58,3 +58,8 @@ class WorldEvent(models.Model):
     class Meta:
         db_table = 'world_events'
         ordering = ['-starts_at']
+
+# Import POI models so Django discovers them for migrations
+from terra_domini.apps.events.poi_models import WorldPOI, POINewsUpdate
+
+__all__ = ["ControlTowerEvent", "WorldEvent", "WorldPOI", "POINewsUpdate"]
