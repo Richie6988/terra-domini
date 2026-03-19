@@ -17,6 +17,7 @@ import { ProfilePanel } from './components/hud/ProfilePanel'
 import { AlliancePanel } from './components/alliance/AlliancePanel'
 
 const LoginPage    = lazy(() => import('./pages/LoginPage'))
+const Tutorial     = lazy(() => import('./components/onboarding/Tutorial'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 
 const queryClient = new QueryClient({
@@ -38,6 +39,7 @@ function GameScreen() {
   const { sendViewport, subscribeTerritory } = useGameSocket()
   const setSelectedTerritory = useStore((s) => s.setSelectedTerritory)
   const selectedTerritory    = useStore((s) => s.selectedTerritory)
+  const player               = useStore((s) => s.player)
   const activePanel          = useStore((s) => s.activePanel)
   const setActivePanel       = useStore((s) => s.setActivePanel)
 
@@ -64,6 +66,20 @@ function GameScreen() {
         {activePanel === 'events'   && <EventsPanel    onClose={() => setActivePanel(null)} />}
         {activePanel === 'profile'  && <ProfilePanel   onClose={() => setActivePanel(null)} />}
       </AnimatePresence>
+
+      {/* Auto-tutorial for new players */}
+      <Suspense fallback={null}>
+        {player && !player.tutorial_completed && (
+          <Tutorial onComplete={() => {
+            // Mark complete in API
+            import('./services/api').then(({ api }) =>
+              api.post('/progression/tutorial-complete/').catch(() => {})
+            )
+            // Update local store
+            useStore.getState().updatePlayer({ tutorial_completed: true } as any)
+          }} />
+        )}
+      </Suspense>
     </div>
   )
 }

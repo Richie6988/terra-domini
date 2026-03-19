@@ -126,7 +126,7 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
 
   const { data: history } = useQuery({
     queryKey: ['battle-history'],
-    queryFn: () => api.get('/battles/?status=completed&limit=10').then(r => r.data?.results ?? []),
+    queryFn: () => api.get('/battles/?ordering=-started_at&limit=10').then(r => r.data?.results ?? r.data ?? []),
     staleTime: 60000,
   })
 

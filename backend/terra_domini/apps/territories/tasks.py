@@ -407,3 +407,20 @@ def calculate_offline_income():
     # This is already handled by the territory tick (checks is_player_online)
     # This task exists as a stub for future offline-specific logic
     pass
+
+
+# ─── Bot Tasks ────────────────────────────────────────────────────────────────
+
+@shared_task(name='territories.run_bot_ticks', queue='default')
+def run_bot_ticks():
+    """Run all 8 regional bots. Called every 5 minutes by Celery beat."""
+    from terra_domini.apps.territories.bots import BOT_REGIONS, run_bot_tick
+    results = []
+    for bot_key in BOT_REGIONS:
+        try:
+            result = run_bot_tick(bot_key)
+            results.append(result)
+        except Exception as e:
+            import logging
+            logging.getLogger('terra_domini.bots').error(f"Bot {bot_key} tick failed: {e}")
+    return {'ticks': len(results), 'results': results}

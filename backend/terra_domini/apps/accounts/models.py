@@ -95,6 +95,7 @@ class Player(AbstractBaseUser, PermissionsMixin):
     notifications_enabled = models.BooleanField(default=True)
     push_token = models.CharField(max_length=512, blank=True)
     tutorial_completed = models.BooleanField(default=False)
+    is_bot = models.BooleanField(default=False, db_index=True)
 
     objects = PlayerManager()
 
