@@ -47,7 +47,7 @@ class ControlTowerViewSet(viewsets.GenericViewSet):
                         'min_participants': event.min_participants,
                         'winner_score':   event.winner_score,
                         'total_participants': event.total_participants,
-                        'reward_bonus':   float(event.reward_bonus) if event.reward_bonus else 0,
+                        'reward_bonus':   event.reward_bonus if isinstance(event.reward_bonus, (int, float)) else (float(event.reward_bonus) if isinstance(event.reward_bonus, str) else 0),
                         'winning_alliance': {'tag': wa.tag, 'name': wa.name} if wa else None,
                         'time_until_start_s': max(0, int(delta)),
                         'registered_count': event.registered_alliances.count(),
