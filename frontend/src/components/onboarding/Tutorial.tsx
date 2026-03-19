@@ -372,7 +372,9 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
         exit={{ opacity: 0 }}
         style={{
           position: 'fixed', inset: 0, zIndex: 10000,
-          background: 'rgba(5,5,8,0.92)', backdropFilter: 'blur(8px)',
+          pointerEvents: claimWaiting ? 'none' : 'auto',
+          background: claimWaiting ? 'transparent' : 'rgba(5,5,8,0.92)',
+          backdropFilter: claimWaiting ? 'none' : 'blur(8px)',
           display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
           padding: '0 16px 32px',
         }}
@@ -393,6 +395,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
           style={{
             width: '100%', maxWidth: 480,
             background: 'rgba(10,10,20,0.99)',
+              pointerEvents: 'auto',
             border: '1px solid rgba(0,255,135,0.25)',
             borderRadius: 16, overflow: 'hidden',
             boxShadow: '0 -4px 40px rgba(0,255,135,0.1), 0 0 0 1px rgba(0,255,135,0.1)',

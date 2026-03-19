@@ -8,6 +8,7 @@ from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView as SpectacularSwaggerUIView
 
 from terra_domini.health import health_check, robots_txt
+from terra_domini.apps.accounts.geoip_view import GeoIPView
 from terra_domini.frontend_view import FrontendAppView
 
 # ─── Views imports ────────────────────────────────────────────────────────────
@@ -45,6 +46,7 @@ router.register(r'progression', ProgressionViewSet, basename='progression')
 urlpatterns = [
     # ── System ──────────────────────────────────────────────────────────────
     path('health/',     health_check, name='health'),
+    path('api/geoip/',   GeoIPView.as_view(), name='geoip'),
     path('robots.txt',  robots_txt),
     path('admin/',      admin.site.urls),
 
