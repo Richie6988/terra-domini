@@ -41,9 +41,23 @@ class JWTAuthMiddleware(BaseMiddleware):
 
         try:
             token = AccessToken(token_list[0])
-            player_id = token['user_id']
-            return Player.objects.get(id=player_id, is_active=True)
-        except (TokenError, Player.DoesNotExist, KeyError):
+            player_id = token.get('user_id') or token.get('sub')
+            if not player_id:
+                logger.warning(f"[WS] JWT has no user_id claim. Claims: {list(token.keys())}")
+                return AnonymousUser()
+            # UUID field: ensure string is properly converted
+            import uuid as _uuid
+            try:
+                player_uuid = _uuid.UUID(str(player_id))
+            except (ValueError, AttributeError):
+                logger.warning(f"[WS] Invalid UUID: {player_id}")
+                return AnonymousUser()
+            return Player.objects.get(id=player_uuid, is_active=True)
+        except Player.DoesNotExist:
+            logger.warning(f"[WS] Player {player_id} not found or inactive")
+            return AnonymousUser()
+        except Exception as e:
+            logger.warning(f"[WS] JWT auth failed: {type(e).__name__}: {e}")
             return AnonymousUser()
 
 

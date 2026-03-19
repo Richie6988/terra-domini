@@ -139,6 +139,10 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
     'AUTH_HEADER_TYPES': ('Bearer',),
+    'USER_ID_FIELD': 'id',           # Player.id (UUID)
+    'USER_ID_CLAIM': 'user_id',      # claim name in JWT payload
+    'TOKEN_TYPE_CLAIM': 'token_type',
+    'JTI_CLAIM': 'jti',
 }
 
 # ── REST Framework ────────────────────────────────────────────────────────────
