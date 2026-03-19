@@ -3,7 +3,7 @@ Terra Domini — URL routing.
 Clean version: no duplicate registrations, no duplicate health path.
 """
 from django.contrib import admin
-from django.urls import path, include
+from django.urls import path, include, re_path
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView as SpectacularSwaggerUIView
 
