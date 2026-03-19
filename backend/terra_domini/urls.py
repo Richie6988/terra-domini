@@ -78,4 +78,5 @@ urlpatterns = [
 
     # ── Router (all ViewSets) ─────────────────────────────────────────────────
     path('api/', include(router.urls)),
+    path('api/gm/', include('terra_domini.apps.admin_gm.urls')),
 ]
