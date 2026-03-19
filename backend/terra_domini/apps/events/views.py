@@ -15,14 +15,53 @@ class ControlTowerViewSet(viewsets.GenericViewSet):
 
     def list(self, request):
         """GET /api/control-towers/ — all tower events."""
-        from terra_domini.apps.events.serializers import ControlTowerEventSerializer
-        qs = ControlTowerEvent.objects.select_related(
-            'territory', 'winning_alliance'
-        ).order_by('-starts_at')[:50]
-        return Response({
-            'count': qs.count(),
-            'results': ControlTowerEventSerializer(qs, many=True, context={'request': request}).data,
-        })
+        try:
+            qs = ControlTowerEvent.objects.select_related(
+                'territory', 'winning_alliance'
+            ).prefetch_related('registered_alliances').order_by('-starts_at')[:50]
+            results = []
+            for event in qs:
+                try:
+                    t = event.territory
+                    wa = event.winning_alliance
+                    from django.utils import timezone as tz
+                    delta = (event.starts_at - tz.now()).total_seconds() if event.starts_at else 0
+                    # alliance registration check
+                    my_registered = False
+                    if request.user and request.user.is_authenticated:
+                        try:
+                            a = request.user.alliance_member.alliance
+                            my_registered = event.registered_alliances.filter(id=a.id).exists()
+                        except Exception:
+                            pass
+                    results.append({
+                        'id': str(event.id),
+                        'territory_name': t.place_name if t else '',
+                        'territory_lat':  float(t.center_lat) if t and t.center_lat else 0,
+                        'territory_lon':  float(t.center_lon) if t and t.center_lon else 0,
+                        'status':         event.status,
+                        'status_display': event.get_status_display(),
+                        'announced_at':   event.announced_at.isoformat() if event.announced_at else None,
+                        'starts_at':      event.starts_at.isoformat() if event.starts_at else None,
+                        'ends_at':        event.ends_at.isoformat() if event.ends_at else None,
+                        'min_participants': event.min_participants,
+                        'winner_score':   event.winner_score,
+                        'total_participants': event.total_participants,
+                        'reward_bonus':   float(event.reward_bonus) if event.reward_bonus else 0,
+                        'winning_alliance': {'tag': wa.tag, 'name': wa.name} if wa else None,
+                        'time_until_start_s': max(0, int(delta)),
+                        'registered_count': event.registered_alliances.count(),
+                        'my_alliance_registered': my_registered,
+                        'my_player_registered': False,
+                    })
+                except Exception as e:
+                    import logging
+                    logging.getLogger('terra_domini').warning(f'Tower event serialize error: {e}')
+            return Response({'count': len(results), 'results': results})
+        except Exception as e:
+            import logging
+            logging.getLogger('terra_domini').error(f'ControlTower list error: {e}')
+            return Response({'count': 0, 'results': []})
 
 
     @action(detail=False, methods=['GET'], url_path='upcoming')
