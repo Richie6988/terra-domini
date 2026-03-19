@@ -145,9 +145,22 @@ export function useGameSocket() {
   }, [isAuthenticated, accessToken, connect])
 
   const sendViewport = useCallback((viewport: Viewport) => {
+    // Send via WebSocket if connected
     if (wsRef.current?.readyState === WebSocket.OPEN) {
       wsRef.current.send(JSON.stringify({ type: 'viewport', ...viewport }))
     }
+    // Always also fetch via REST API (reliable fallback for initial load)
+    const { lat, lon, radius_km } = viewport
+    fetch(`/api/territories/map-view/?lat=${lat}&lon=${lon}&radius_km=${radius_km}`, {
+      headers: { Authorization: `Bearer ${useStore.getState().accessToken}` },
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.results?.length) {
+          useStore.getState().setTerritories(data.results)
+        }
+      })
+      .catch(() => {})
   }, [])
 
   const subscribeTerritory = useCallback((h3: string) => {

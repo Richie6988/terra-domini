@@ -16,6 +16,24 @@ logger = logging.getLogger('terra_domini.combat')
 class BattleViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
 
+    def list(self, request):
+        """GET /api/battles/ — player's battle history."""
+        from terra_domini.apps.combat.engine import Battle
+        from terra_domini.apps.combat.serializers import BattleSerializer
+        ordering = request.query_params.get('ordering', '-started_at')
+        limit = min(int(request.query_params.get('limit', 20)), 50)
+
+        qs = Battle.objects.filter(
+            attacker=request.user
+        ).select_related('territory', 'attacker').order_by(ordering)[:limit]
+
+        return Response({
+            'count': qs.count(),
+            'results': BattleSerializer(qs, many=True).data,
+        })
+
+    permission_classes = [IsAuthenticated]
+
     @action(detail=False, methods=['POST'], url_path='attack')
     def launch_attack(self, request):
         """

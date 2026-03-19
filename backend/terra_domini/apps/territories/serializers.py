@@ -84,18 +84,25 @@ class PlayerProfileSerializer(serializers.ModelSerializer):
 class TerritoryLightSerializer(serializers.ModelSerializer):
     """Minimal — used for map viewport rendering (performance critical)."""
     owner_username = serializers.CharField(source='owner.username', default=None)
+    owner_id = serializers.UUIDField(source='owner.id', default=None)
+    place_name = serializers.SerializerMethodField()
     alliance_tag = serializers.SerializerMethodField()
 
     class Meta:
         model = Territory
         fields = [
-            'h3_index', 'territory_type', 'owner_username', 'alliance_tag',
-            'defense_tier', 'is_under_attack', 'is_control_tower',
-            'ad_slot_enabled', 'is_landmark', 'landmark_name',
+            'h3_index', 'territory_type', 'owner_username', 'owner_id',
+            'alliance_tag', 'defense_tier', 'is_under_attack', 'is_control_tower',
+            'ad_slot_enabled', 'is_landmark', 'landmark_name', 'place_name',
+            'center_lat', 'center_lon', 'defense_points',
         ]
 
     def get_alliance_tag(self, obj):
-        return obj.alliance.tag if obj.alliance else None
+        try: return obj.alliance.tag if obj.alliance else None
+        except: return None
+
+    def get_place_name(self, obj):
+        return obj.landmark_name or obj.place_name or None
 
 
 class BuildingSerializer(serializers.ModelSerializer):

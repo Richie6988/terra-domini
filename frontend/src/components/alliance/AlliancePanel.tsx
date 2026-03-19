@@ -17,6 +17,23 @@ const ROLE_ICONS: Record<string, string> = {
   leader: '👑', officer: '⭐', veteran: '🎖️', member: '⚔️', recruit: '🌱'
 }
 
+
+function TabBar({ tabs, active, onChange }: { tabs: string[]; active: string; onChange: (t: string) => void }) {
+  return (
+    <div style={{ display: 'flex', gap: 4, padding: '10px 20px 0', background: 'rgba(255,255,255,0.02)', flexShrink: 0 }}>
+      {tabs.map(t => (
+        <button key={t} onClick={() => onChange(t)} style={{
+          flex: 1, padding: '8px 6px', borderRadius: '8px 8px 0 0', border: 'none', cursor: 'pointer',
+          background: active === t ? 'rgba(139,92,246,0.15)' : 'transparent',
+          borderBottom: active === t ? '2px solid #8B5CF6' : '2px solid transparent',
+          color: active === t ? '#C084FC' : '#6B7280', fontSize: 12, fontWeight: active === t ? 600 : 400,
+          textTransform: 'capitalize',
+        }}>{t}</button>
+      ))}
+    </div>
+  )
+}
+
 export function AlliancePanel({ onClose }: { onClose: () => void }) {
   const player = usePlayer()
   const qc = useQueryClient()
