@@ -214,6 +214,16 @@ TIME_ZONE = 'UTC'
 USE_I18N = True
 USE_TZ = True
 
+
+# ── WebSocket / Codespace ─────────────────────────────────────────────────────
+# Allow github.dev Codespace URLs for WebSocket connections
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.app.github.dev',
+    'https://*.github.dev',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
+
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
 
