@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 import { useStore } from '../store'
 import type { WSMessage, Viewport } from '../types'
 
-const RECONNECT_BASE_MS = 2000
+const RECONNECT_BASE_MS = 3000
 const MAX_RECONNECT_ATTEMPTS = 5
 const PING_INTERVAL_MS = 25000
 
@@ -20,59 +20,62 @@ function getWsBase(): string {
 }
 
 export function useGameSocket() {
-  const wsRef = useRef<WebSocket | null>(null)
-  const attemptsRef = useRef(0)
-  const reconnectTimer = useRef<ReturnType<typeof setTimeout>>()
-  const pingTimer = useRef<ReturnType<typeof setInterval>>()
-  const intentionalClose = useRef(false)
+  const wsRef               = useRef<WebSocket | null>(null)
+  const attemptsRef         = useRef(0)
+  const reconnectTimer      = useRef<ReturnType<typeof setTimeout>>()
+  const pingTimer           = useRef<ReturnType<typeof setInterval>>()
+  const intentionalClose    = useRef(false)
+  const connectRef          = useRef<() => void>()  // stable ref to latest connect fn
 
-  const {
-    accessToken, isAuthenticated,
-    setTerritories, upsertTerritory,
-    addBattle, resolveBattle,
-    setBalance, updateInGameBalance,
-    addNotification, setWsConnected,
-  } = useStore()
+  const store = useStore()
+
+  // Extract only what we need — use getState() in callbacks to avoid stale closures
+  const { isAuthenticated, accessToken } = store
 
   const handleMessage = useCallback((event: MessageEvent) => {
-    try {
-      const msg: WSMessage = JSON.parse(event.data)
-      switch (msg.type) {
-        case 'territory_state':
-          if (msg.territories) setTerritories(msg.territories)
-          break
-        case 'territory_update':
-          if (msg.territory) upsertTerritory(msg.territory)
-          break
-        case 'battle_event':
-          if (msg.battle) addBattle(msg.battle)
-          break
-        case 'battle_resolved':
-          if (msg.battle_id) resolveBattle(msg.battle_id, msg.result)
-          break
-        case 'balance_update':
-          if (msg.tdc_delta) updateInGameBalance(msg.tdc_delta)
-          if (msg.balance) setBalance(msg.balance)
-          break
-        case 'notification':
-          addNotification(msg)
-          break
-        case 'pong':
-          break
-        default:
-          break
-      }
-    } catch (e) {
-      console.warn('[WS] Failed to parse message', e)
+    let msg: WSMessage
+    try { msg = JSON.parse(event.data) }
+    catch { return }
+
+    // Always use getState() to avoid stale closure issues
+    const s = useStore.getState()
+
+    switch (msg.type) {
+      case 'territory_state':
+        if (Array.isArray(msg.territories)) s.setTerritories(msg.territories)
+        break
+      case 'territory_update':
+        if (msg.territory) s.upsertTerritory(msg.territory)
+        break
+      case 'battle_event':
+        if (msg.battle) s.addBattle(msg.battle)
+        break
+      case 'battle_resolved':
+        if (msg.battle_id) s.resolveBattle(msg.battle_id, msg.result)
+        break
+      case 'balance_update':
+        if (typeof msg.tdc_delta === 'number') s.updateInGameBalance(msg.tdc_delta)
+        if (msg.balance) s.setBalance(msg.balance)
+        break
+      case 'notification':
+        s.addNotification(msg)
+        break
+      case 'pong':
+      case 'connected':
+        break
+      default:
+        break
     }
-  }, [setTerritories, upsertTerritory, addBattle, resolveBattle, setBalance, updateInGameBalance, addNotification])
+  }, []) // No deps — uses getState() directly
 
   const connect = useCallback(() => {
-    if (!isAuthenticated || !accessToken) return
+    const { isAuthenticated: auth, accessToken: token } = useStore.getState()
+    if (!auth || !token) return
     if (wsRef.current?.readyState === WebSocket.OPEN) return
+    if (wsRef.current?.readyState === WebSocket.CONNECTING) return
 
-    const url = `${getWsBase()}/ws/map/?token=${accessToken}`
-    
+    const url = `${getWsBase()}/ws/map/?token=${token}`
+
     try {
       const ws = new WebSocket(url)
       wsRef.current = ws
@@ -80,8 +83,8 @@ export function useGameSocket() {
       ws.onopen = () => {
         attemptsRef.current = 0
         intentionalClose.current = false
-        setWsConnected(true)
-        // Start ping
+        useStore.getState().setWsConnected(true)
+        clearInterval(pingTimer.current)
         pingTimer.current = setInterval(() => {
           if (ws.readyState === WebSocket.OPEN) {
             ws.send(JSON.stringify({ type: 'ping' }))
@@ -92,41 +95,47 @@ export function useGameSocket() {
       ws.onmessage = handleMessage
 
       ws.onclose = (event) => {
-        setWsConnected(false)
+        useStore.getState().setWsConnected(false)
         clearInterval(pingTimer.current)
-        
         if (intentionalClose.current) return
-        if (event.code === 4001) return // Auth failed — don't retry
-        
+        if (event.code === 4001) return // Auth failed — do not retry
+
         if (attemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
           const delay = RECONNECT_BASE_MS * Math.pow(2, attemptsRef.current)
           attemptsRef.current++
-          reconnectTimer.current = setTimeout(connect, delay)
+          // Use connectRef.current so we always call the latest version
+          reconnectTimer.current = setTimeout(() => connectRef.current?.(), delay)
         } else {
-          toast.error('Connection lost. Refresh the page to reconnect.', { id: 'ws-error' })
+          toast.error('Connection lost. Refresh to reconnect.', { id: 'ws-lost', duration: Infinity })
         }
       }
 
-      ws.onerror = () => {
-        // onclose will handle retry — just suppress the console error
-      }
+      ws.onerror = () => {} // onclose handles everything
     } catch (e) {
-      console.warn('[WS] Connection failed', e)
+      console.warn('[WS] Failed to create WebSocket:', e)
     }
-  }, [isAuthenticated, accessToken, handleMessage, setWsConnected])
+  }, [handleMessage])
+
+  // Keep connectRef always pointing to latest connect function
+  useEffect(() => { connectRef.current = connect }, [connect])
 
   useEffect(() => {
     if (isAuthenticated && accessToken) {
+      intentionalClose.current = false
+      attemptsRef.current = 0
       connect()
     }
     return () => {
       intentionalClose.current = true
       clearTimeout(reconnectTimer.current)
       clearInterval(pingTimer.current)
-      wsRef.current?.close()
-      setWsConnected(false)
+      if (wsRef.current) {
+        wsRef.current.close()
+        wsRef.current = null
+      }
+      useStore.getState().setWsConnected(false)
     }
-  }, [isAuthenticated, accessToken]) // eslint-disable-line
+  }, [isAuthenticated, accessToken, connect])
 
   const sendViewport = useCallback((viewport: Viewport) => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {
