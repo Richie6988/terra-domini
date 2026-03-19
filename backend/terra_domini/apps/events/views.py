@@ -1,100 +1,14 @@
 """
-Events — Control Tower Wars + World Events system.
+Events views — Control Tower Wars + World Events viewsets.
 """
-import uuid
-from django.db import models
-from django.conf import settings
 from django.utils import timezone
+from datetime import timedelta
 from rest_framework import viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 
-
-class ControlTowerEvent(models.Model):
-    """Timed capture window for a Control Tower territory."""
-
-    class EventStatus(models.TextChoices):
-        SCHEDULED = 'scheduled', 'Scheduled'
-        ACTIVE = 'active', 'Active'
-        COMPLETED = 'completed', 'Completed'
-        CANCELLED = 'cancelled', 'Cancelled'
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    territory = models.ForeignKey(
-        'territories.Territory',
-        on_delete=models.CASCADE,
-        related_name='tower_events',
-        limit_choices_to={'is_control_tower': True}
-    )
-    status = models.CharField(max_length=12, choices=EventStatus.choices, default=EventStatus.SCHEDULED)
-    announced_at = models.DateTimeField()
-    starts_at = models.DateTimeField()
-    ends_at = models.DateTimeField()
-
-    # Participants
-    min_participants = models.IntegerField(default=5)
-    registered_alliances = models.ManyToManyField('alliances.Alliance', blank=True, related_name='registered_events')
-
-    # Outcome
-    winning_alliance = models.ForeignKey(
-        'alliances.Alliance', null=True, blank=True,
-        on_delete=models.SET_NULL, related_name='tower_victories'
-    )
-    winner_score = models.IntegerField(default=0)
-    total_participants = models.IntegerField(default=0)
-
-    # Rewards (applied to winning alliance territories in region)
-    reward_bonus = models.JSONField(default=dict)  # e.g. {"credits": 2.0, "duration_hours": 168}
-
-    class Meta:
-        db_table = 'control_tower_events'
-        ordering = ['starts_at']
-
-    def is_active(self) -> bool:
-        now = timezone.now()
-        return self.status == self.EventStatus.ACTIVE and self.starts_at <= now <= self.ends_at
-
-    def time_until_start(self) -> int:
-        delta = self.starts_at - timezone.now()
-        return max(0, int(delta.total_seconds()))
-
-
-class WorldEvent(models.Model):
-    """Dynamic world event affecting gameplay globally or regionally."""
-
-    class EventType(models.TextChoices):
-        TRADE_DISRUPTION = 'trade_disruption', 'Trade Disruption'
-        RESOURCE_SURGE = 'resource_surge', 'Resource Surge'
-        MILITARY_MOBILIZATION = 'military_mobilization', 'Military Mobilization'
-        DIPLOMATIC_SUMMIT = 'diplomatic_summit', 'Diplomatic Summit'
-        NATURAL_DISASTER = 'natural_disaster', 'Natural Disaster'
-        TECH_BREAKTHROUGH = 'tech_breakthrough', 'Tech Breakthrough'
-
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=200)
-    description = models.TextField()
-    event_type = models.CharField(max_length=30, choices=EventType.choices)
-
-    # Geographic scope
-    is_global = models.BooleanField(default=False)
-    affected_countries = models.JSONField(default=list)
-    affected_h3_cells = models.JSONField(default=list)
-
-    # Effect
-    effects = models.JSONField(default=dict)  # {resource_type: multiplier, duration_hours: N}
-
-    starts_at = models.DateTimeField()
-    ends_at = models.DateTimeField()
-    is_active = models.BooleanField(default=False)
-
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    class Meta:
-        db_table = 'world_events'
-        ordering = ['-starts_at']
-
-
-# ─── Views ───────────────────────────────────────────────────────────────────
+from terra_domini.apps.events.models import ControlTowerEvent, WorldEvent
 
 class ControlTowerViewSet(viewsets.GenericViewSet):
 
