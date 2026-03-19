@@ -46,8 +46,7 @@ class PlayerProfileSerializer(serializers.ModelSerializer):
             'stats', 'alliance', 'active_boosts', 'last_active', 'is_online',
             'preferred_language', 'date_joined',
             'action_slots_max', 'action_slots_used', 'next_slot_ready_in_seconds',
-            'regen_progress_pct', 'regen_bonus_pct', 'regen_seconds_per_slot',
-        ]
+            'regen_progress_pct', 'regen_bonus_pct', 'regen_seconds_per_slot']
         read_only_fields = ['id', 'email', 'commander_rank', 'commander_xp',
                             'tdc_in_game', 'total_tdc_purchased', 'total_tdc_earned_ads']
 
@@ -107,9 +106,8 @@ class TerritoryLightSerializer(serializers.ModelSerializer):
             'alliance_tag', 'defense_tier', 'is_control_tower',
             'ad_slot_enabled', 'is_landmark', 'landmark_name', 'place_name',
             'center_lat', 'center_lon', 'defense_points',
-            'resource_food', 'resource_water', 'resource_energy', 'resource_credits',
-            'resource_materials', 'resource_intel',
-        ]
+            'resource_food', 'resource_energy', 'resource_credits',
+            'resource_materials', 'resource_intel']
 
     def get_food_per_tick(self, obj):
         return obj.resource_food
@@ -143,19 +141,18 @@ class TerritoryDetailSerializer(serializers.ModelSerializer):
         model = Territory
         fields = [
             'h3_index', 'h3_resolution', 'territory_type', 'country_code',
-            'region_name', 'place_name', 'elevation_meters', 'population_density',
+            'region_name', 'place_name',
             'owner', 'alliance_tag', 'captured_at',
             'defense_tier', 'defense_points', 'max_defense_points', 'fortification_level',
             'stockpile_energy', 'stockpile_food', 'stockpile_credits',
-            'stockpile_culture', 'stockpile_materials', 'stockpile_water', 'stockpile_intel',
-            'stockpile_capacity', 'production_rates',
-            'is_control_tower', 'control_tower_type', 'is_capital',
-            'is_landmark', 'landmark_name', 'landmark_bonus',
+            'stockpile_culture', 'stockpile_materials', 'stockpile_intel',
+            'stockpile_capacity',
+            'is_control_tower', 'control_tower_type',
+            'is_landmark', 'landmark_name',
             'terrain_attack_modifier', 'terrain_defense_modifier',
             'is_under_attack', 'current_battle',
-            'ad_slot_enabled', 'ad_slot_tier', 'daily_viewer_count',
-            'buildings', 'can_be_attacked', 'recent_history',
-        ]
+            'ad_slot_enabled', 'daily_viewer_count',
+            'buildings', 'can_be_attacked', 'recent_history']
 
     def get_food_per_tick(self, obj):
         return obj.resource_food
@@ -216,8 +213,7 @@ class BattleSerializer(serializers.ModelSerializer):
             'id', 'territory_h3', 'territory_name', 'defender_username',
             'battle_type', 'status', 'started_at', 'resolves_at', 'completed_at',
             'winner', 'territory_captured', 'attacker_casualties', 'defender_casualties',
-            'resources_looted', 'combat_log', 'participants', 'time_remaining_seconds',
-        ]
+            'resources_looted', 'combat_log', 'participants', 'time_remaining_seconds']
 
     def get_time_remaining_seconds(self, obj):
         from django.utils import timezone
@@ -240,8 +236,7 @@ class ShopItemSerializer(serializers.ModelSerializer):
             'price_tdc', 'price_eur', 'price_eur_display',
             'effect_type', 'effect_value', 'effect_duration_seconds',
             'max_per_day', 'hard_cap_pct', 'is_active', 'is_limited',
-            'available_until', 'icon_url', 'rarity', 'is_available',
-        ]
+            'available_until', 'icon_url', 'rarity', 'is_available']
 
     def get_is_available(self, obj):
         return obj.is_available()
@@ -272,8 +267,7 @@ class AllianceSerializer(serializers.ModelSerializer):
             'banner_color', 'banner_symbol',
             'leader_username', 'member_count', 'territory_count',
             'war_score', 'season_score', 'is_recruiting',
-            'min_rank_to_join', 'require_approval', 'created_at',
-        ]
+            'min_rank_to_join', 'require_approval', 'created_at']
 
 
 class AllianceMemberSerializer(serializers.ModelSerializer):
@@ -305,8 +299,7 @@ class AdCampaignPublicSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'brand_name', 'campaign_name', 'banner_url',
             'click_url', 'logo_url', 'targeting_type',
-            'total_impressions', 'status',
-        ]
+            'total_impressions', 'status']
 
 
 class AdCampaignAdminSerializer(serializers.ModelSerializer):
