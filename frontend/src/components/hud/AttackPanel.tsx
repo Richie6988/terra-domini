@@ -1,214 +1,258 @@
 /**
- * AttackPanel — RISK-style dice attack interface.
- * Shows dice rolls, army counts, win probability, territory preview.
- * Appears when player clicks an enemy territory.
+ * AttackPanel — Combat RISK avancé.
+ * Simulation Monte Carlo des probabilités.
+ * Sélection tactique : type d'attaque + unités.
+ * Dés animés avec résolution réaliste.
  */
-import { useState, useCallback } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState, useCallback, useEffect } from 'react'
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
 import toast from 'react-hot-toast'
+import type { TerritoryLight } from '../../types'
 
-const UNIT_TYPES = [
-  { key: 'infantry',  emoji: '⚔️', atk: 10, cost: 1 },
-  { key: 'cavalry',   emoji: '🐎', atk: 20, cost: 2 },
-  { key: 'artillery', emoji: '💣', atk: 35, cost: 4 },
-]
+// ─── Monte Carlo combat simulation ────────────────────────────────────────
+function rollDie(): number { return Math.floor(Math.random() * 6) + 1 }
 
-// Dice animation
-function Dice({ value, rolling }: { value: number; rolling: boolean }) {
-  const faces = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅']
+function simulateBattle(atkUnits: number, defUnits: number, nSims = 500): number {
+  let atkWins = 0
+  for (let i = 0; i < nSims; i++) {
+    let atk = atkUnits, def = defUnits
+    while (atk > 0 && def > 0) {
+      const atkDice = Array.from({ length: Math.min(3, atk) }, rollDie).sort((a,b) => b-a)
+      const defDice = Array.from({ length: Math.min(2, def) }, rollDie).sort((a,b) => b-a)
+      for (let j = 0; j < Math.min(atkDice.length, defDice.length); j++) {
+        if (atkDice[j] > defDice[j]) def--; else atk--
+      }
+    }
+    if (atk > 0) atkWins++
+  }
+  return atkWins / nSims
+}
+
+// ─── Die component ─────────────────────────────────────────────────────────
+function Die({ value, color, delay = 0 }: { value: number; color: string; delay?: number }) {
+  const DOTS: Record<number, [number,number][]> = {
+    1: [[50,50]],
+    2: [[25,25],[75,75]],
+    3: [[25,25],[50,50],[75,75]],
+    4: [[25,25],[75,25],[25,75],[75,75]],
+    5: [[25,25],[75,25],[50,50],[25,75],[75,75]],
+    6: [[25,25],[75,25],[25,50],[75,50],[25,75],[75,75]],
+  }
   return (
-    <motion.div
-      animate={rolling ? { rotate: [0, 180, 360], scale: [1, 1.2, 1] } : {}}
-      transition={{ duration: 0.4, repeat: rolling ? Infinity : 0 }}
-      style={{ fontSize: 36, lineHeight: 1, userSelect: 'none' }}
-    >
-      {faces[value] || '🎲'}
+    <motion.div initial={{ rotateX: 180, opacity: 0 }} animate={{ rotateX: 0, opacity: 1 }}
+      transition={{ delay, type: 'spring', stiffness: 200 }}
+      style={{ width: 44, height: 44, background: color === 'red' ? 'rgba(239,68,68,0.2)' : 'rgba(59,130,246,0.2)', border: `2px solid ${color === 'red' ? '#EF4444' : '#3B82F6'}`, borderRadius: 8, position: 'relative', boxShadow: `0 0 12px ${color === 'red' ? '#EF444440' : '#3B82F640'}` }}>
+      {(DOTS[value] || []).map(([x,y], i) => (
+        <div key={i} style={{ position: 'absolute', width: 8, height: 8, borderRadius: '50%', background: color === 'red' ? '#EF4444' : '#3B82F6', left: `${x}%`, top: `${y}%`, transform: 'translate(-50%,-50%)' }} />
+      ))}
     </motion.div>
   )
 }
 
-interface AttackPanelProps {
-  target: { h3_index: string; place_name?: string; owner_username?: string; defense_points?: number }
+// ─── Attack type definitions ───────────────────────────────────────────────
+const ATTACK_TYPES = [
+  { id: 'conquest',  label: 'Conquest',  emoji: '⚔️',  color: '#EF4444', desc: 'Full invasion — captures territory on win. Slow but decisive.',   timer: '4h',  riskMult: 1.0 },
+  { id: 'raid',      label: 'Raid',      emoji: '💨',  color: '#F59E0B', desc: 'Steals resources without capturing. Fast, lower losses.',          timer: '1h',  riskMult: 0.7 },
+  { id: 'surprise',  label: 'Surprise',  emoji: '🌙',  color: '#8B5CF6', desc: 'Night strike — ignores some defenses. Higher risk, higher reward.', timer: '30m', riskMult: 1.3 },
+  { id: 'siege',     label: 'Siege',     emoji: '🏰',  color: '#6382FF', desc: 'Reduces fortifications without capturing. Weakens for next attack.', timer: '8h', riskMult: 0.5 },
+]
+
+interface Props {
+  target: TerritoryLight
   onClose: () => void
 }
 
-export function AttackPanel({ target, onClose }: AttackPanelProps) {
-  const player = usePlayer()
-  const qc = useQueryClient()
+export function AttackPanel({ target, onClose }: Props) {
+  const player   = usePlayer()
+  const qc       = useQueryClient()
 
-  const [units, setUnits] = useState<Record<string, number>>({ infantry: 3 })
-  const [phase, setPhase] = useState<'setup' | 'rolling' | 'result'>('setup')
-  const [dice, setDice] = useState<{ atk: number[]; def: number[] }>({ atk: [], def: [] })
-  const [rollResult, setRollResult] = useState<'win' | 'loss' | 'draw' | null>(null)
+  const [atkType, setAtkType]   = useState('conquest')
+  const [units, setUnits]       = useState({ infantry: 50, cavalry: 0, artillery: 0, naval: 0 })
+  const [phase, setPhase]       = useState<'setup' | 'rolling' | 'result'>('setup')
+  const [atkDice, setAtkDice]   = useState<number[]>([])
+  const [defDice, setDefDice]   = useState<number[]>([])
+  const [outcome, setOutcome]   = useState<'win' | 'loss' | 'draw' | null>(null)
+  const [winProb, setWinProb]   = useState(0.5)
 
-  const totalAtk = Object.entries(units).reduce((sum, [k, n]) => {
-    const u = UNIT_TYPES.find(u => u.key === k)!
-    return sum + n * u.atk
-  }, 0)
+  const typeConf  = ATTACK_TYPES.find(t => t.id === atkType)!
+  const totalUnits = Object.values(units).reduce((a,b) => a+b, 0)
 
-  const defPoints = target.defense_points ?? 100
-  const winProb = Math.min(95, Math.max(5, Math.round((totalAtk / (totalAtk + defPoints)) * 100)))
-
-  const rollDice = useCallback(() => {
-    setPhase('rolling')
-    // Animate dice for 1.5s
-    setTimeout(() => {
-      const atkDice = Array.from({ length: Math.min(3, Object.values(units).reduce((a,b) => a+b, 0)) }, () => Math.ceil(Math.random() * 6))
-      const defDice = Array.from({ length: 2 }, () => Math.ceil(Math.random() * 6))
-      const atkMax = Math.max(...atkDice)
-      const defMax = Math.max(...defDice)
-      setDice({ atk: atkDice.sort((a,b) => b-a), def: defDice.sort((a,b) => b-a) })
-      const result = atkMax > defMax ? 'win' : atkMax === defMax ? 'draw' : 'loss'
-      setRollResult(result)
-      setPhase('result')
-    }, 1500)
-  }, [units])
+  // Recalculate win probability when units change
+  useEffect(() => {
+    const defUnits = Math.max(10, (target.defense_tier ?? 0) * 25 + 20)
+    const prob = simulateBattle(totalUnits, defUnits) * typeConf.riskMult
+    setWinProb(Math.min(0.95, Math.max(0.05, prob)))
+  }, [units, atkType, target.defense_tier])
 
   const attackMut = useMutation({
-    mutationFn: () => api.post('/territories/claim/', {
-      h3_index: target.h3_index,
-      method: 'attack',
+    mutationFn: () => api.post('/battles/attack/', {
+      target_h3: target.h3_index,
+      attack_type: atkType,
       units,
     }),
-    onSuccess: () => {
-      toast.success(`⚔️ ${target.place_name || 'Territory'} captured!`)
-      qc.invalidateQueries({ queryKey: ['player'] })
-      onClose()
+    onSuccess: (res) => {
+      // Animate dice roll
+      setPhase('rolling')
+      const aD = Array.from({ length: 3 }, rollDie)
+      const dD = Array.from({ length: 2 }, rollDie)
+      setAtkDice(aD); setDefDice(dD)
+      setTimeout(() => {
+        const result = res.data?.result ?? (winProb >= 0.5 ? 'attacker' : 'defender')
+        setOutcome(result === 'attacker' ? 'win' : result === 'draw' ? 'draw' : 'loss')
+        setPhase('result')
+        qc.invalidateQueries({ queryKey: ['battles-active'] })
+        qc.invalidateQueries({ queryKey: ['territories'] })
+      }, 2000)
     },
-    onError: (err: any) => toast.error(err.response?.data?.error || 'Attack failed'),
+    onError: (e: any) => toast.error(e.response?.data?.error || 'Attack failed'),
   })
 
+  const probColor = winProb >= 0.65 ? '#00FF87' : winProb >= 0.4 ? '#F59E0B' : '#EF4444'
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 3000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)' }}
-      onClick={e => e.target === e.currentTarget && onClose()}
-    >
-      <motion.div
-        initial={{ y: '100%' }}
-        animate={{ y: 0 }}
-        exit={{ y: '100%' }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        style={{ width: '100%', maxWidth: 480, background: '#0A0A14', borderRadius: '20px 20px 0 0', border: '1px solid rgba(239,68,68,0.2)', padding: '20px 20px 36px' }}
-      >
-        <div style={{ width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.1)', margin: '0 auto 20px' }} />
+    <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+      transition={{ type: 'spring', stiffness: 320, damping: 32 }}
+      style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 390, zIndex: 1000,
+        display: 'flex', flexDirection: 'column', background: '#0A0A14',
+        borderLeft: '1px solid rgba(239,68,68,0.2)' }}>
 
-        {/* Target info */}
-        <div style={{ textAlign: 'center', marginBottom: 20 }}>
-          <div style={{ fontSize: 13, color: '#EF4444', fontFamily: 'monospace', letterSpacing: '0.1em', marginBottom: 4 }}>⚔️ ATTACK</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{target.place_name || target.h3_index.slice(0,10)}</div>
-          <div style={{ fontSize: 12, color: '#9CA3AF' }}>Defended by {target.owner_username || 'unknown'} · {defPoints.toFixed(0)} defense</div>
+      {/* Header */}
+      <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', background: 'linear-gradient(180deg, rgba(239,68,68,0.08) 0%, transparent 100%)', flexShrink: 0 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#EF4444' }}>⚔️ ATTACK</div>
+            <div style={{ fontSize: 14, color: '#fff', fontWeight: 600, marginTop: 2 }}>{target.place_name || 'Enemy Zone'}</div>
+            <div style={{ fontSize: 11, color: '#4B5563', marginTop: 1 }}>
+              Owned by: <span style={{ color: '#E5E7EB' }}>{target.owner_username ?? 'Unknown'}</span>
+              {target.defense_tier > 0 && <span style={{ color: '#6B7280', marginLeft: 8 }}>🛡️ Tier {target.defense_tier}</span>}
+            </div>
+          </div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 22 }}>×</button>
         </div>
+      </div>
 
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
         <AnimatePresence mode="wait">
-          {/* SETUP PHASE */}
+
+          {/* SETUP */}
           {phase === 'setup' && (
             <motion.div key="setup" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-              {/* Unit selector */}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 11, color: '#6B7280', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>Choose your forces</div>
-                {UNIT_TYPES.map(u => (
-                  <div key={u.key} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
-                    <span style={{ fontSize: 20, width: 28 }}>{u.emoji}</span>
-                    <div style={{ flex: 1 }}>
-                      <span style={{ fontSize: 13, color: '#fff' }}>{u.key.charAt(0).toUpperCase() + u.key.slice(1)}</span>
-                      <span style={{ fontSize: 10, color: '#6B7280', marginLeft: 6 }}>ATK {u.atk}</span>
-                    </div>
-                    <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-                      <button onClick={() => setUnits(p => ({ ...p, [u.key]: Math.max(0, (p[u.key]??0)-1) }))}
-                        style={{ width: 26, height: 26, borderRadius: 6, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', color: '#fff', cursor: 'pointer', fontSize: 14 }}>−</button>
-                      <span style={{ fontSize: 14, color: '#fff', minWidth: 20, textAlign: 'center' }}>{units[u.key]??0}</span>
-                      <button onClick={() => setUnits(p => ({ ...p, [u.key]: (p[u.key]??0)+1 }))}
-                        style={{ width: 26, height: 26, borderRadius: 6, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', cursor: 'pointer', fontSize: 14 }}>+</button>
-                    </div>
-                  </div>
+
+              {/* Attack type */}
+              <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Attack Type</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 20 }}>
+                {ATTACK_TYPES.map(t => (
+                  <button key={t.id} onClick={() => setAtkType(t.id)}
+                    style={{ padding: '10px', borderRadius: 10, border: `1px solid ${atkType === t.id ? t.color : 'rgba(255,255,255,0.07)'}`, background: atkType === t.id ? `${t.color}12` : 'transparent', cursor: 'pointer', textAlign: 'left' }}>
+                    <div style={{ fontSize: 18, marginBottom: 4 }}>{t.emoji}</div>
+                    <div style={{ fontSize: 12, fontWeight: 700, color: atkType === t.id ? t.color : '#E5E7EB' }}>{t.label}</div>
+                    <div style={{ fontSize: 9, color: '#4B5563', marginTop: 2, lineHeight: 1.4 }}>{t.desc}</div>
+                    <div style={{ fontSize: 9, color: t.color, marginTop: 4 }}>⏱ {t.timer}</div>
+                  </button>
                 ))}
               </div>
 
-              {/* Win probability bar */}
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 11, color: '#6B7280' }}>Win probability</span>
-                  <span style={{ fontSize: 13, color: winProb > 60 ? '#10B981' : winProb > 40 ? '#F59E0B' : '#EF4444', fontWeight: 600 }}>{winProb}%</span>
+              {/* Units */}
+              <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Deploy Forces</div>
+              {[
+                { key: 'infantry', emoji: '⚔️', name: 'Infantry', max: 999 },
+                { key: 'cavalry',  emoji: '🐎', name: 'Cavalry',  max: 999 },
+                { key: 'artillery',emoji: '💣', name: 'Artillery',max: 999 },
+              ].map(u => (
+                <div key={u.key} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, background: 'rgba(255,255,255,0.02)', borderRadius: 10, padding: '8px 12px' }}>
+                  <span style={{ fontSize: 20, width: 28 }}>{u.emoji}</span>
+                  <span style={{ fontSize: 12, color: '#9CA3AF', flex: 1 }}>{u.name}</span>
+                  <button onClick={() => setUnits(p => ({ ...p, [u.key]: Math.max(0, (p[u.key as keyof typeof p] ?? 0) - 10) }))}
+                    style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.08)', border: 'none', color: '#fff', cursor: 'pointer' }}>−</button>
+                  <span style={{ minWidth: 36, textAlign: 'center', fontFamily: 'monospace', color: '#fff', fontSize: 14, fontWeight: 600 }}>
+                    {units[u.key as keyof typeof units]}
+                  </span>
+                  <button onClick={() => setUnits(p => ({ ...p, [u.key]: (p[u.key as keyof typeof p] ?? 0) + 10 }))}
+                    style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', cursor: 'pointer' }}>+</button>
                 </div>
-                <div style={{ height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 3 }}>
-                  <motion.div animate={{ width: `${winProb}%` }} style={{ height: '100%', borderRadius: 3, background: winProb > 60 ? '#10B981' : winProb > 40 ? '#F59E0B' : '#EF4444' }} />
+              ))}
+
+              {/* Win probability */}
+              <div style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 12, padding: '14px', marginTop: 16, marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                  <span style={{ fontSize: 12, color: '#6B7280' }}>Monte Carlo Probability ({totalUnits} units)</span>
+                  <span style={{ fontSize: 18, fontWeight: 800, color: probColor, fontFamily: 'monospace' }}>{(winProb * 100).toFixed(0)}%</span>
+                </div>
+                <div style={{ height: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
+                  <motion.div animate={{ width: `${winProb * 100}%` }} transition={{ type: 'spring' }}
+                    style={{ height: '100%', background: `linear-gradient(90deg, ${probColor}, ${probColor}88)`, borderRadius: 4 }} />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 10, color: probColor }}>⚔️ Attack {(winProb * 100).toFixed(0)}%</span>
+                  <span style={{ fontSize: 10, color: '#4B5563' }}>🛡️ Defense {((1 - winProb) * 100).toFixed(0)}%</span>
                 </div>
               </div>
 
-              {/* Attack button */}
-              <button onClick={rollDice}
-                disabled={Object.values(units).every(n => n === 0)}
-                style={{ width: '100%', padding: '14px', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.4)', borderRadius: 12, color: '#EF4444', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
-                ⚔️ Roll the Dice! (ATK: {totalAtk})
+              <button onClick={() => attackMut.mutate()} disabled={attackMut.isPending || totalUnits === 0}
+                style={{ width: '100%', padding: '14px', background: totalUnits > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${totalUnits > 0 ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 12, color: totalUnits > 0 ? '#EF4444' : '#4B5563', fontSize: 15, fontWeight: 800, cursor: totalUnits > 0 ? 'pointer' : 'not-allowed', letterSpacing: '0.05em' }}>
+                {attackMut.isPending ? '⏳ Launching…' : `⚔️ LAUNCH ${typeConf.label.toUpperCase()}`}
               </button>
             </motion.div>
           )}
 
-          {/* ROLLING PHASE */}
+          {/* ROLLING DICE */}
           {phase === 'rolling' && (
-            <motion.div key="rolling" initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '20px 0' }}>
-              <div style={{ fontSize: 13, color: '#9CA3AF', marginBottom: 20 }}>Rolling dice…</div>
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
-                {[1,2,3].map(i => <Dice key={i} value={Math.ceil(Math.random()*6)} rolling={true} />)}
+            <motion.div key="rolling" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 300, gap: 24 }}>
+              <div style={{ fontSize: 14, color: '#6B7280', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Rolling dice…</div>
+              <div>
+                <div style={{ fontSize: 11, color: '#EF4444', textAlign: 'center', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>⚔️ Attacker</div>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                  {atkDice.map((v, i) => <Die key={i} value={v} color="red" delay={i * 0.1} />)}
+                </div>
+              </div>
+              <div style={{ fontSize: 20, color: '#4B5563' }}>vs</div>
+              <div>
+                <div style={{ fontSize: 11, color: '#3B82F6', textAlign: 'center', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>🛡️ Defender</div>
+                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
+                  {defDice.map((v, i) => <Die key={i} value={v} color="blue" delay={0.3 + i * 0.1} />)}
+                </div>
               </div>
             </motion.div>
           )}
 
-          {/* RESULT PHASE */}
-          {phase === 'result' && (
-            <motion.div key="result" initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} style={{ textAlign: 'center' }}>
-              <div style={{ marginBottom: 16 }}>
-                <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 8 }}>ATTACKER</div>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 12 }}>
-                  {dice.atk.map((d, i) => <Dice key={i} value={d} rolling={false} />)}
-                </div>
-                <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 8 }}>DEFENDER</div>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-                  {dice.def.map((d, i) => <Dice key={i} value={d} rolling={false} />)}
-                </div>
+          {/* RESULT */}
+          {phase === 'result' && outcome && (
+            <motion.div key="result" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+              style={{ textAlign: 'center', paddingTop: 30 }}>
+              <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.6 }}
+                style={{ fontSize: 64, marginBottom: 12 }}>
+                {outcome === 'win' ? '🏆' : outcome === 'loss' ? '💀' : '🤝'}
+              </motion.div>
+              <div style={{ fontSize: 24, fontWeight: 800, color: outcome === 'win' ? '#00FF87' : outcome === 'loss' ? '#EF4444' : '#F59E0B', marginBottom: 8 }}>
+                {outcome === 'win' ? 'VICTORY!' : outcome === 'loss' ? 'DEFEATED' : 'STANDOFF'}
               </div>
-
-              {rollResult === 'win' && (
-                <div>
-                  <div style={{ fontSize: 20, color: '#00FF87', fontWeight: 700, marginBottom: 12 }}>🎉 Victory! You win the roll!</div>
-                  <button onClick={() => attackMut.mutate()} disabled={attackMut.isPending}
-                    style={{ width: '100%', padding: '14px', background: '#00FF87', border: 'none', borderRadius: 12, color: '#000', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
-                    {attackMut.isPending ? 'Capturing…' : '⚔️ Claim Territory!'}
-                  </button>
-                </div>
-              )}
-              {rollResult === 'loss' && (
-                <div>
-                  <div style={{ fontSize: 18, color: '#EF4444', fontWeight: 700, marginBottom: 12 }}>💀 Defeated! Defender holds.</div>
-                  <button onClick={() => { setPhase('setup'); setRollResult(null) }}
-                    style={{ width: '100%', padding: '14px', background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 12, color: '#EF4444', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
-                    Try Again
-                  </button>
-                </div>
-              )}
-              {rollResult === 'draw' && (
-                <div>
-                  <div style={{ fontSize: 18, color: '#F59E0B', fontWeight: 700, marginBottom: 12 }}>⚖️ Draw! Both sides take losses.</div>
-                  <button onClick={() => { setPhase('setup'); setRollResult(null) }}
-                    style={{ width: '100%', padding: '14px', background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)', borderRadius: 12, color: '#F59E0B', fontSize: 15, fontWeight: 700, cursor: 'pointer' }}>
-                    Roll Again
-                  </button>
-                </div>
-              )}
+              <div style={{ fontSize: 13, color: '#6B7280', marginBottom: 24, lineHeight: 1.6 }}>
+                {outcome === 'win'
+                  ? atkType === 'conquest'
+                    ? `${target.place_name || 'Territory'} is now under your control!`
+                    : 'Raid successful — resources plundered!'
+                  : outcome === 'loss'
+                    ? 'Your forces were repelled. Reinforce and try again.'
+                    : 'Both sides withdrew. The territory remains contested.'}
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={() => { setPhase('setup'); setOutcome(null) }}
+                  style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#9CA3AF', cursor: 'pointer', fontSize: 13 }}>
+                  🔄 Attack Again
+                </button>
+                <button onClick={onClose}
+                  style={{ flex: 1, padding: '12px', background: 'rgba(0,255,135,0.1)', border: '1px solid rgba(0,255,135,0.3)', borderRadius: 10, color: '#00FF87', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>
+                  Map →
+                </button>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
-
-        <button onClick={onClose} style={{ width: '100%', marginTop: 10, padding: 8, background: 'transparent', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 12 }}>
-          Retreat
-        </button>
-      </motion.div>
+      </div>
     </motion.div>
   )
 }

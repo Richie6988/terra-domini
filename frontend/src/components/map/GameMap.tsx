@@ -157,7 +157,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       </div>
 
       {/* Favorite pins — bottom left */}
-      <MapOverlayLayer map={mapRef.current} />
+      {showOverlay && <MapOverlayLayer map={mapRef.current} />}
       <FavoritePinsPanel onNavigate={navigateTo} currentLat={center[0]} currentLon={center[1]} currentZoom={zoom} />
 
       {/* Modals */}

@@ -141,6 +141,33 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 territory_type='urban',  # default, geo pipeline refines later
             )
 
+        # ── Method validation ─────────────────────────────────────────────
+        method = request.data.get('method', 'free')
+        answer = request.data.get('answer', '')
+
+        from terra_domini.apps.accounts.models import PlayerStats, Player as P
+        stats, _ = PlayerStats.objects.get_or_create(player=request.user)
+        is_first = stats.territories_owned == 0
+
+        if method == 'free':
+            if not is_first:
+                return Response({'error': 'Free claim is only for your first territory.'}, status=403)
+
+        elif method == 'puzzle':
+            # Answer validated client-side (math puzzle) — trust but log
+            if not answer:
+                return Response({'error': 'Puzzle answer required'}, status=400)
+
+        elif method == 'buy':
+            CLAIM_COST = 50  # TDC
+            player_obj = P.objects.get(id=request.user.id)
+            if float(player_obj.tdc_in_game) < CLAIM_COST:
+                return Response({'error': f'Need {CLAIM_COST} TDC. You have {float(player_obj.tdc_in_game):.0f}.'}, status=402)
+            P.objects.filter(id=request.user.id).update(
+                tdc_in_game=player_obj.tdc_in_game - CLAIM_COST
+            )
+
+        # ── Claim ─────────────────────────────────────────────────────────
         territory.owner = request.user
         territory.captured_at = timezone.now()
         territory.save(update_fields=['owner', 'captured_at'])
@@ -157,12 +184,38 @@ class TerritoryViewSet(viewsets.ModelViewSet):
 
         # Update player stats
         from terra_domini.apps.accounts.models import PlayerStats
+        owned_count = Territory.objects.filter(owner=request.user).count()
         PlayerStats.objects.filter(player=request.user).update(
-            territories_owned=Territory.objects.filter(owner=request.user).count(),
-            territories_captured=request.user.stats.territories_captured + 1 if hasattr(request.user, 'stats') else 1,
+            territories_owned=owned_count,
+            territories_captured=stats.territories_captured + 1,
         )
+        stats.refresh_from_db()
 
-        logger.info(f"Territory claimed: {h3_index} by {request.user.username}")
+        # First-claim bonus
+        if method == 'free' and is_first:
+            from django.db.models import F as FF
+            from terra_domini.apps.accounts.models import Player as P
+            P.objects.filter(id=request.user.id).update(tdc_in_game=FF('tdc_in_game') + 100)
+
+        logger.info(f"Territory claimed: {h3_index} by {request.user.username} (method={method})")
+        # Create map overlay event
+        try:
+            from terra_domini.apps.territories.models import MapOverlayEvent
+            from django.utils import timezone as tz2
+            MapOverlayEvent.objects.create(
+                event_type='resource_drop' if method == 'free' else 'troop_move',
+                player=request.user,
+                territory=territory,
+                from_lat=territory.center_lat,
+                from_lon=territory.center_lon,
+                title=f'{request.user.username} claimed {territory.place_name or h3_index[:8]}',
+                body=f'Method: {method}',
+                icon_emoji='🎉' if method == 'free' else '⚑',
+                is_active=True,
+                expires_at=tz2.now() + __import__('datetime').timedelta(minutes=10),
+            )
+        except Exception:
+            pass
 
         return Response({
             'success': True,

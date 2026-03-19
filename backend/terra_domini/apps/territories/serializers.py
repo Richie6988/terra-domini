@@ -48,7 +48,11 @@ class PlayerProfileSerializer(serializers.ModelSerializer):
 
     def get_stats(self, obj):
         try:
-            s = obj.stats
+            try:
+                s = obj.stats
+            except Exception:
+                from terra_domini.apps.accounts.models import PlayerStats
+                s, _ = PlayerStats.objects.get_or_create(player=obj)
             return {
                 'territories_owned': s.territories_owned,
                 'territories_captured': s.territories_captured,

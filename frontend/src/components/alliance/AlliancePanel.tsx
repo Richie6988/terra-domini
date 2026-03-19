@@ -11,6 +11,19 @@ import { usePlayer, useStore } from '../../store'
 import type { Alliance, AllianceMember } from '../../types'
 import { TradePanel } from './TradePanel'
 
+const textInput: React.CSSProperties = {
+  background: 'rgba(255,255,255,0.06)',
+  border: '1px solid rgba(255,255,255,0.1)',
+  borderRadius: 8,
+  padding: '9px 12px',
+  color: '#fff',
+  fontSize: 13,
+  outline: 'none',
+  width: '100%',
+  boxSizing: 'border-box' as const,
+}
+
+
 const TIER_COLORS: Record<string, string> = {
   squad: '#3B82F6', guild: '#8B5CF6', federation: '#F59E0B'
 }

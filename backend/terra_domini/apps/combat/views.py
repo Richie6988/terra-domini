@@ -17,15 +17,23 @@ class BattleViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
 
     def list(self, request):
-        """GET /api/battles/ — player's battle history."""
+        """GET /api/battles/ — player's battle history (as attacker or defender)."""
         from terra_domini.apps.combat.engine import Battle
         from terra_domini.apps.combat.serializers import BattleSerializer
-        ordering = request.query_params.get('ordering', '-started_at')
         limit = min(int(request.query_params.get('limit', 20)), 50)
 
+        # Player is attacker via BattleParticipant, or defender via Battle.defender
+        from terra_domini.apps.combat.engine import BattleParticipant
+        attack_ids = BattleParticipant.objects.filter(
+            player=request.user, is_commander=True
+        ).values_list('battle_id', flat=True)
+
+        from django.db.models import Q
         qs = Battle.objects.filter(
-            attacker=request.user
-        ).select_related('territory', 'attacker').order_by(ordering)[:limit]
+            Q(id__in=attack_ids) | Q(defender=request.user)
+        ).select_related('target_territory', 'defender').prefetch_related(
+            'participants__player'
+        ).order_by('-started_at')[:limit]
 
         return Response({
             'count': qs.count(),
@@ -80,6 +88,21 @@ class BattleViewSet(viewsets.GenericViewSet):
             attack_type=attack_type,
             attacker_units=units_data,
         )
+
+        # Map overlay event for attack
+        try:
+            from terra_domini.apps.territories.models import MapOverlayEvent
+            import datetime
+            MapOverlayEvent.objects.create(
+                event_type='attack_wave', player=request.user, territory=target,
+                to_lat=target.center_lat, to_lon=target.center_lon,
+                title=f'⚔️ {request.user.username} attacks {target.place_name or target.h3_index[:8]}',
+                body=f'{attack_type} · {sum(units_data.values())} units',
+                icon_emoji='⚔️', is_active=True,
+                expires_at=timezone.now() + datetime.timedelta(hours=1),
+            )
+        except Exception:
+            pass
 
         return Response({
             'battle_id': str(battle.id),
