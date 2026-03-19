@@ -94,6 +94,7 @@ class Player(AbstractBaseUser, PermissionsMixin):
     preferred_language = models.CharField(max_length=5, default='en')
     notifications_enabled = models.BooleanField(default=True)
     push_token = models.CharField(max_length=512, blank=True)
+    tutorial_completed = models.BooleanField(default=False)
 
     objects = PlayerManager()
 
