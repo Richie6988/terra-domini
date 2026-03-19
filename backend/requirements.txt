@@ -27,14 +27,13 @@ flower==2.0.1
 
 # ─── Geo / Map ───────────────────────────────────────────────────────────────
 h3==3.7.7
-# shapely: use 2.1+ wheel, NOT 2.0.4 (fails on Python 3.12 — pkg_resources bug)
-# pip install shapely already succeeded with 2.1.2 musllinux wheel
-shapely>=2.1.0
+# IMPORTANT: shapely 2.0.4 FAILS on Python 3.12 (pkg_resources missing).
+# Use 2.1.0+ which ships as pre-built musllinux wheel — no compilation needed.
+# If this still fails: pip install shapely --no-build-isolation
+shapely==2.1.2
 geojson==3.1.0
-# NO pyproj / django.contrib.gis — requires system GDAL not available in Codespaces
 
 # ─── Blockchain / Web3 ───────────────────────────────────────────────────────
-# Comment out if install fails (optional for Codespace testing)
 web3==6.19.0
 eth-account==0.12.3
 
@@ -43,7 +42,7 @@ pymongo==4.7.2
 motor==3.4.0
 
 # ─── Kafka ───────────────────────────────────────────────────────────────────
-# kafka-python 2.0.2 is BROKEN on Python 3.12 — use kafka-python-ng fork
+# kafka-python 2.0.2 is BROKEN on Python 3.12 — use this fork instead
 kafka-python-ng>=2.2.3
 
 # ─── Security ────────────────────────────────────────────────────────────────
@@ -59,7 +58,6 @@ pydantic==2.7.1
 orjson==3.10.3
 python-dateutil==2.9.0
 numpy>=1.26.4
-# setuptools needed for pkg_resources in older packages
 setuptools>=69.0.0
 pip>=24.0
 sentry-sdk[django]==2.3.1
