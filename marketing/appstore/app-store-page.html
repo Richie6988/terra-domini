@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terra Domini — App Store Page</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g:#00FF87;--gold:#FFB800;--r:#FF3B30;--pu:#7B2FFF;
+  --dark:#050508;--d2:#0A0A12;--border:rgba(255,255,255,0.08);
+  --fd:'Bebas Neue',sans-serif;--fb:'Space Grotesk',sans-serif;--fm:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--dark);color:#E8E8F0;font-family:var(--fb);}
+
+/* ── HERO ── */
+.app-hero{
+  padding:80px 60px 60px;text-align:center;
+  background:radial-gradient(ellipse 80% 50% at 50% 100%,rgba(0,255,135,0.07) 0%,transparent 70%);
+  border-bottom:1px solid var(--border);
+}
+.app-icon{
+  width:120px;height:120px;border-radius:27px;
+  background:var(--dark);border:1px solid rgba(0,255,135,0.3);
+  margin:0 auto 24px;display:flex;align-items:center;justify-content:center;
+  box-shadow:0 0 40px rgba(0,255,135,0.15);
+}
+.app-name{font-family:var(--fd);font-size:48px;letter-spacing:3px;color:#fff;}
+.app-sub{font-family:var(--fm);font-size:11px;color:rgba(0,255,135,0.6);letter-spacing:0.15em;margin:4px 0 20px;}
+.app-cat{font-size:13px;color:rgba(255,255,255,0.35);}
+.stars{color:#FFB800;font-size:18px;margin-bottom:4px;}
+.rating-info{font-size:12px;color:rgba(255,255,255,0.3);}
+
+.cta-row{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;margin-top:32px;}
+.btn-store{
+  display:flex;align-items:center;gap:10px;
+  padding:14px 28px;border-radius:12px;
+  background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.12);
+  text-decoration:none;color:#fff;transition:all 0.2s;
+}
+.btn-store:hover{background:rgba(255,255,255,0.1);border-color:rgba(0,255,135,0.3);}
+.btn-store-icon{font-size:24px;}
+.btn-store-text div:first-child{font-size:10px;color:rgba(255,255,255,0.4);text-transform:uppercase;letter-spacing:0.05em;}
+.btn-store-text div:last-child{font-size:15px;font-weight:600;}
+.btn-web{
+  padding:14px 32px;border-radius:12px;
+  background:var(--g);color:#000;font-weight:700;font-size:14px;
+  text-decoration:none;letter-spacing:0.05em;transition:all 0.2s;
+}
+.btn-web:hover{box-shadow:0 8px 24px rgba(0,255,135,0.3);transform:translateY(-1px);}
+
+/* ── META ROW ── */
+.meta-row{
+  display:flex;justify-content:center;gap:32px;padding:24px 60px;
+  border-bottom:1px solid var(--border);flex-wrap:wrap;
+}
+.meta-item{text-align:center;}
+.meta-val{font-family:var(--fd);font-size:24px;letter-spacing:1px;color:#fff;}
+.meta-lbl{font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;text-transform:uppercase;margin-top:2px;}
+
+/* ── SCREENSHOT CAROUSEL ── */
+.screenshots{padding:48px 60px;overflow-x:auto;border-bottom:1px solid var(--border);}
+.screenshots h2{font-family:var(--fd);font-size:28px;letter-spacing:2px;margin-bottom:24px;color:#fff;}
+.screen-scroll{display:flex;gap:16px;width:max-content;}
+
+.phone-frame{
+  width:200px;flex-shrink:0;border-radius:28px;
+  background:var(--d2);border:1px solid var(--border);
+  overflow:hidden;position:relative;
+  box-shadow:0 20px 60px rgba(0,0,0,0.5);
+}
+.phone-frame.featured{width:240px;}
+.phone-notch{height:24px;background:#000;display:flex;align-items:center;justify-content:center;}
+.phone-notch-pill{width:60px;height:6px;background:rgba(255,255,255,0.15);border-radius:3px;}
+.phone-screen{
+  aspect-ratio:9/17;position:relative;overflow:hidden;
+  background:var(--dark);display:flex;flex-direction:column;
+}
+.phone-caption{
+  padding:10px 12px;
+  font-family:var(--fm);font-size:9px;color:rgba(255,255,255,0.3);
+  letter-spacing:0.1em;text-align:center;
+  background:var(--d2);
+}
+
+/* Screen contents — simulated UI */
+.screen-map{
+  background:linear-gradient(180deg,#0a1219 0%,#0d1a1a 100%);
+  flex:1;position:relative;overflow:hidden;
+}
+/* Hex grid simulation */
+.hex-sim{position:absolute;inset:0;opacity:0.8;}
+.hex-r{display:flex;gap:2px;margin-bottom:2px;}
+.hex-c{width:22px;height:19px;clip-path:polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%);flex-shrink:0;}
+.hex-c.un{background:rgba(107,114,128,0.2);}
+.hex-c.me{background:rgba(0,255,135,0.35);}
+.hex-c.en{background:rgba(239,68,68,0.35);}
+.hex-c.al{background:rgba(99,102,241,0.3);}
+.hex-c.tw{background:rgba(245,158,11,0.4);}
+
+.screen-hud{
+  position:absolute;top:0;left:0;right:0;
+  padding:8px 10px;background:rgba(5,5,8,0.9);backdrop-filter:blur(4px);
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(0,255,135,0.15);
+}
+.hud-name{font-family:var(--fd);font-size:12px;letter-spacing:1px;color:var(--g);}
+.hud-tdc{font-family:var(--fm);font-size:10px;color:var(--gold);}
+
+.screen-panel{
+  position:absolute;right:0;top:40px;bottom:0;width:55%;
+  background:rgba(5,5,8,0.95);border-left:1px solid rgba(0,255,135,0.1);
+  padding:8px;
+}
+.panel-title{font-family:var(--fd);font-size:11px;letter-spacing:1px;color:#fff;margin-bottom:6px;}
+.panel-row{display:flex;justify-content:space-between;font-size:9px;padding:3px 0;border-bottom:1px solid rgba(255,255,255,0.04);}
+.panel-row .lbl{color:rgba(255,255,255,0.4);}
+.panel-row .val{color:var(--g);font-family:var(--fm);}
+.panel-btn{
+  width:100%;margin-top:6px;padding:5px;border-radius:3px;border:none;
+  background:var(--r);color:#fff;font-size:9px;font-weight:600;cursor:pointer;
+  font-family:var(--fd);letter-spacing:1px;
+}
+.panel-btn.green{background:var(--g);color:#000;}
+
+.screen-battle{
+  padding:10px;display:flex;flex-direction:column;gap:6px;
+}
+.battle-card{
+  padding:8px;background:rgba(239,68,68,0.1);
+  border:1px solid rgba(239,68,68,0.25);border-radius:4px;
+}
+.battle-title{font-family:var(--fd);font-size:11px;letter-spacing:1px;color:#fff;margin-bottom:3px;}
+.battle-timer{font-family:var(--fm);font-size:10px;color:var(--r);}
+.battle-bar{height:3px;background:rgba(239,68,68,0.2);border-radius:2px;margin-top:5px;}
+.battle-bar-fill{height:100%;background:var(--r);border-radius:2px;}
+
+.screen-shop{padding:10px;background:var(--dark);}
+.shop-item{
+  display:flex;align-items:center;gap:8px;padding:8px 0;
+  border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.shop-icon{font-size:16px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;
+  background:rgba(255,255,255,0.06);border-radius:6px;}
+.shop-name{font-size:9px;font-weight:500;color:#fff;display:block;}
+.shop-price{font-family:var(--fm);font-size:9px;color:var(--gold);display:block;margin-top:1px;}
+.shop-buy{
+  margin-left:auto;padding:4px 10px;background:var(--pu);border:none;border-radius:4px;
+  color:#fff;font-size:9px;font-weight:600;cursor:pointer;
+}
+
+.screen-wallet{padding:10px;background:var(--dark);}
+.wallet-bal{
+  padding:14px;margin-bottom:8px;border-radius:6px;
+  background:rgba(0,255,135,0.08);border:1px solid rgba(0,255,135,0.2);text-align:center;
+}
+.wallet-num{font-family:var(--fd);font-size:24px;letter-spacing:2px;color:var(--g);}
+.wallet-eur{font-family:var(--fm);font-size:9px;color:rgba(255,255,255,0.4);}
+.wallet-tx{display:flex;justify-content:space-between;font-size:9px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.wallet-tx .type{color:rgba(255,255,255,0.5);}
+.wallet-tx .amount{font-family:var(--fm);color:var(--g);}
+
+.screen-alliance{padding:10px;background:var(--dark);}
+.alliance-banner{
+  padding:12px;margin-bottom:8px;border-radius:6px;text-align:center;
+  background:linear-gradient(135deg,rgba(99,102,241,0.2),rgba(123,47,255,0.1));
+  border:1px solid rgba(99,102,241,0.3);
+}
+.al-tag{font-family:var(--fd);font-size:20px;letter-spacing:2px;color:#fff;}
+.al-tier{font-family:var(--fm);font-size:9px;color:rgba(99,102,241,0.7);letter-spacing:0.1em;}
+.member-row{display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,0.05);}
+.member-icon{font-size:10px;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;}
+.member-name{font-size:9px;color:#E5E7EB;}
+.member-rank{font-family:var(--fm);font-size:9px;color:rgba(255,255,255,0.35);margin-left:auto;}
+
+/* ── FEATURES ── */
+.features{padding:48px 60px;border-bottom:1px solid var(--border);}
+.features h2{font-family:var(--fd);font-size:28px;letter-spacing:2px;margin-bottom:32px;color:#fff;}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.feat-card{padding:20px;background:var(--d2);border:1px solid var(--border);border-radius:8px;}
+.feat-icon{font-size:24px;margin-bottom:12px;}
+.feat-title{font-weight:600;font-size:14px;color:#fff;margin-bottom:6px;}
+.feat-desc{font-size:12px;color:rgba(255,255,255,0.4);line-height:1.6;}
+
+/* ── REVIEWS ── */
+.reviews{padding:48px 60px;border-bottom:1px solid var(--border);}
+.reviews h2{font-family:var(--fd);font-size:28px;letter-spacing:2px;margin-bottom:32px;color:#fff;}
+.review-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.review-card{padding:20px;background:var(--d2);border:1px solid var(--border);border-radius:8px;}
+.review-stars{color:var(--gold);margin-bottom:8px;font-size:13px;}
+.review-title{font-weight:600;font-size:13px;color:#fff;margin-bottom:6px;}
+.review-body{font-size:12px;color:rgba(255,255,255,0.45);line-height:1.6;}
+.review-author{font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.2);margin-top:10px;}
+
+/* ── INFO ── */
+.app-info{padding:48px 60px;display:grid;grid-template-columns:2fr 1fr;gap:48px;}
+.info-section h3{font-family:var(--fd);font-size:20px;letter-spacing:1px;color:#fff;margin-bottom:12px;}
+.info-list{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.info-list li{font-size:12px;color:rgba(255,255,255,0.45);display:flex;gap:8px;}
+.info-list li::before{content:'›';color:var(--g);}
+.info-meta{display:flex;flex-direction:column;gap:12px;}
+.meta-line{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05);font-size:12px;}
+.meta-line .mk{color:rgba(255,255,255,0.3);}
+.meta-line .mv{color:#E5E7EB;font-family:var(--fm);}
+
+/* ── RATING BREAKDOWN ── */
+.rating-block{padding:32px 60px;display:flex;gap:40px;border-top:1px solid var(--border);align-items:center;flex-wrap:wrap;}
+.rating-big{text-align:center;}
+.rating-num-big{font-family:var(--fd);font-size:72px;letter-spacing:2px;color:#fff;line-height:1;}
+.rating-stars-big{color:var(--gold);font-size:20px;}
+.rating-count{font-family:var(--fm);font-size:11px;color:rgba(255,255,255,0.3);margin-top:4px;}
+.rating-bars{flex:1;min-width:200px;display:flex;flex-direction:column;gap:6px;}
+.rb-row{display:flex;align-items:center;gap:8px;font-size:11px;color:rgba(255,255,255,0.4);}
+.rb-bar{flex:1;height:4px;background:rgba(255,255,255,0.08);border-radius:2px;}
+.rb-fill{height:100%;background:var(--gold);border-radius:2px;}
+
+@media(max-width:768px){
+  .app-hero{padding:48px 24px 40px;}
+  .meta-row{padding:20px 24px;}
+  .screenshots,.features,.reviews,.app-info{padding:40px 24px;}
+  .feat-grid,.review-grid{grid-template-columns:1fr;}
+  .app-info{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<!-- ── APP HERO ── -->
+<div class="app-hero">
+  <div class="app-icon">
+    <svg viewBox="0 0 80 80" width="80" height="80">
+      <polygon points="40,5 70,22 70,58 40,75 10,58 10,22" fill="rgba(0,255,135,0.1)" stroke="#00FF87" stroke-width="1.5"/>
+      <polygon points="40,18 58,28 58,52 40,62 22,52 22,28" fill="none" stroke="#00FF87" stroke-width="0.7" opacity="0.5"/>
+      <text x="40" y="49" font-family="Impact,sans-serif" font-size="28" fill="#00FF87" text-anchor="middle">T</text>
+    </svg>
+  </div>
+
+  <div class="app-name">TERRA DOMINI</div>
+  <div class="app-sub">REAL-WORLD TERRITORY STRATEGY · EARN TDC</div>
+  <div class="app-cat">Strategy · Free to Play · 17+</div>
+
+  <div class="stars" style="margin-top:16px;">★★★★★</div>
+  <div class="rating-info">4.8 · 12.4K Ratings</div>
+
+  <div class="cta-row">
+    <a href="#" class="btn-store">
+      <div class="btn-store-icon">🍎</div>
+      <div class="btn-store-text">
+        <div>Download on the</div>
+        <div>App Store</div>
+      </div>
+    </a>
+    <a href="#" class="btn-store">
+      <div class="btn-store-icon">▶</div>
+      <div class="btn-store-text">
+        <div>Get it on</div>
+        <div>Google Play</div>
+      </div>
+    </a>
+    <a href="/app" class="btn-web">🌐 PLAY IN BROWSER — FREE</a>
+  </div>
+</div>
+
+<!-- ── META ROW ── -->
+<div class="meta-row">
+  <div class="meta-item"><div class="meta-val" style="color:var(--g);">4.2B</div><div class="meta-lbl">Playable Hexes</div></div>
+  <div class="meta-item"><div class="meta-val">FREE</div><div class="meta-lbl">To Download</div></div>
+  <div class="meta-item"><div class="meta-val" style="color:var(--gold);">TDC</div><div class="meta-lbl">Real Crypto Earn</div></div>
+  <div class="meta-item"><div class="meta-val">24/7</div><div class="meta-lbl">Persistent World</div></div>
+  <div class="meta-item"><div class="meta-val" style="color:var(--g);">70%</div><div class="meta-lbl">Ad Revenue Share</div></div>
+</div>
+
+<!-- ── SCREENSHOTS ── -->
+<div class="screenshots">
+  <h2>SCREENSHOTS</h2>
+  <div class="screen-scroll">
+
+    <!-- Screenshot 1: Map View -->
+    <div class="phone-frame featured">
+      <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+      <div class="phone-screen">
+        <div class="screen-hud">
+          <div class="hud-name">AliceGeneral</div>
+          <div class="hud-tdc">🪙 5,847 TDC</div>
+        </div>
+        <div class="screen-map" style="flex:1;">
+          <div class="hex-sim">
+            <div class="hex-r" style="margin-left:11px;margin-top:40px;"><div class="hex-c un"></div><div class="hex-c me"></div><div class="hex-c me"></div><div class="hex-c en"></div><div class="hex-c un"></div><div class="hex-c al"></div></div>
+            <div class="hex-r"><div class="hex-c me"></div><div class="hex-c me"></div><div class="hex-c tw"></div><div class="hex-c en"></div><div class="hex-c en"></div><div class="hex-c al"></div><div class="hex-c al"></div></div>
+            <div class="hex-r" style="margin-left:11px;"><div class="hex-c me"></div><div class="hex-c me"></div><div class="hex-c en"></div><div class="hex-c un"></div><div class="hex-c al"></div><div class="hex-c al"></div></div>
+            <div class="hex-r"><div class="hex-c un"></div><div class="hex-c me"></div><div class="hex-c un"></div><div class="hex-c un"></div><div class="hex-c un"></div><div class="hex-c al"></div><div class="hex-c al"></div></div>
+            <div class="hex-r" style="margin-left:11px;"><div class="hex-c un"></div><div class="hex-c un"></div><div class="hex-c un"></div><div class="hex-c un"></div><div class="hex-c un"></div><div class="hex-c un"></div></div>
+          </div>
+          <!-- POI marker simulation -->
+          <div style="position:absolute;top:65px;left:60px;font-size:18px;filter:drop-shadow(0 0 6px rgba(255,59,48,0.8));">🔥</div>
+          <div style="position:absolute;top:85px;right:30px;font-size:14px;filter:drop-shadow(0 0 4px rgba(0,255,135,0.8));">🗼</div>
+          <!-- Ticker -->
+          <div style="position:absolute;bottom:0;left:0;right:0;padding:5px 8px;background:rgba(255,59,48,0.9);font-family:var(--fm);font-size:8px;color:#fff;letter-spacing:0.08em;overflow:hidden;white-space:nowrap;">⚡ LIVE · 🔥 HORMUZ BLOCKADE — Energy -60% in Gulf · ⚔️ BobMarshal attacks your district!</div>
+        </div>
+      </div>
+      <div class="phone-caption">LIVE MAP · REAL EARTH TERRITORIES</div>
+    </div>
+
+    <!-- Screenshot 2: Territory Panel -->
+    <div class="phone-frame">
+      <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+      <div class="phone-screen">
+        <div class="screen-hud">
+          <div class="hud-name">Notre Dame</div>
+          <div style="font-size:8px;color:var(--r);font-family:var(--fm);">🔥 POI ACTIVE</div>
+        </div>
+        <div style="flex:1;padding:8px;background:var(--dark);">
+          <div style="display:flex;gap:6px;margin-bottom:8px;flex-wrap:wrap;">
+            <span style="font-size:8px;padding:2px 6px;background:rgba(168,85,247,0.2);color:#C084FC;border-radius:2px;font-family:var(--fm);">LANDMARK</span>
+            <span style="font-size:8px;padding:2px 6px;background:rgba(0,255,135,0.1);color:var(--g);border-radius:2px;font-family:var(--fm);">✓ YOUR TERRITORY</span>
+          </div>
+          <div style="margin-bottom:8px;">
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:4px;font-family:var(--fm);">DEFENSE</div>
+            <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:2px;"><div style="width:75%;height:100%;background:var(--g);border-radius:2px;"></div></div>
+          </div>
+          <div style="margin-bottom:8px;">
+            <div style="font-size:9px;color:rgba(255,255,255,0.3);margin-bottom:4px;font-family:var(--fm);">TODAY'S AD REVENUE</div>
+            <div style="font-family:var(--fd);font-size:22px;letter-spacing:1px;color:var(--gold);">+312 TDC</div>
+            <div style="font-family:var(--fm);font-size:8px;color:rgba(255,255,255,0.3);">47,842 views · €3.12</div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-bottom:8px;">
+            <div style="padding:6px;background:rgba(255,255,255,0.04);border-radius:4px;"><div style="font-size:8px;color:rgba(255,255,255,0.3);">⚡ Energy</div><div style="font-family:var(--fm);font-size:10px;color:var(--g);">+10/tick</div></div>
+            <div style="padding:6px;background:rgba(255,255,255,0.04);border-radius:4px;"><div style="font-size:8px;color:rgba(255,255,255,0.3);">💰 Credits</div><div style="font-family:var(--fm);font-size:10px;color:var(--g);">+50/tick</div></div>
+            <div style="padding:6px;background:rgba(255,255,255,0.04);border-radius:4px;"><div style="font-size:8px;color:rgba(255,255,255,0.3);">🎭 Culture</div><div style="font-family:var(--fm);font-size:10px;color:var(--g);">+60/tick</div></div>
+            <div style="padding:6px;background:rgba(255,255,255,0.04);border-radius:4px;"><div style="font-size:8px;color:rgba(255,255,255,0.3);">🔍 Intel</div><div style="font-family:var(--fm);font-size:10px;color:var(--g);">+8/tick</div></div>
+          </div>
+          <button style="width:100%;padding:6px;background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.3);border-radius:4px;color:#EF4444;font-size:9px;font-weight:700;cursor:pointer;font-family:var(--fd);letter-spacing:1px;">🛡️ ACTIVATE SHIELD · 50 TDC</button>
+        </div>
+      </div>
+      <div class="phone-caption">TERRITORY DETAIL + AD REVENUE</div>
+    </div>
+
+    <!-- Screenshot 3: Battle -->
+    <div class="phone-frame">
+      <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+      <div class="phone-screen">
+        <div class="screen-hud">
+          <div class="hud-name">Combat Ops</div>
+          <div style="font-size:9px;color:var(--r);font-family:var(--fm);">⚔️ 2 ACTIVE</div>
+        </div>
+        <div class="screen-battle" style="flex:1;">
+          <div style="font-family:var(--fm);font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-bottom:4px;">INCOMING ATTACKS</div>
+          <div class="battle-card">
+            <div class="battle-title">BobMarshal → Montmartre</div>
+            <div class="battle-timer">⏱ 3h 42m remaining</div>
+            <div style="display:flex;gap:4px;margin-top:4px;flex-wrap:wrap;">
+              <span style="font-size:8px;padding:2px 5px;background:rgba(255,255,255,0.06);border-radius:2px;color:rgba(255,255,255,0.5);">⚔️ 150 infantry</span>
+              <span style="font-size:8px;padding:2px 5px;background:rgba(255,255,255,0.06);border-radius:2px;color:rgba(255,255,255,0.5);">🐴 30 cavalry</span>
+            </div>
+            <div class="battle-bar"><div class="battle-bar-fill" style="width:45%;"></div></div>
+          </div>
+          <div style="font-family:var(--fm);font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin:8px 0 4px;">YOUR ATTACKS</div>
+          <div class="battle-card" style="background:rgba(0,255,135,0.06);border-color:rgba(0,255,135,0.2);">
+            <div class="battle-title">→ [IRON] Control Tower</div>
+            <div class="battle-timer" style="color:var(--g);">⏱ 1h 15m · Alliance assault</div>
+            <div style="display:flex;gap:4px;margin-top:4px;">
+              <span style="font-size:8px;padding:2px 5px;background:rgba(0,255,135,0.1);border-radius:2px;color:var(--g);">⚔️ 500 inf · 💣 100 arty</span>
+            </div>
+            <div class="battle-bar" style="background:rgba(0,255,135,0.1);"><div class="battle-bar-fill" style="width:72%;background:var(--g);"></div></div>
+          </div>
+          <button style="width:100%;padding:6px;margin-top:8px;background:var(--r);border:none;border-radius:4px;color:#fff;font-size:9px;font-weight:700;cursor:pointer;font-family:var(--fd);letter-spacing:1px;">⚔️ LAUNCH NEW ATTACK</button>
+        </div>
+      </div>
+      <div class="phone-caption">BATTLE MANAGEMENT</div>
+    </div>
+
+    <!-- Screenshot 4: TDC Shop -->
+    <div class="phone-frame">
+      <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+      <div class="phone-screen">
+        <div class="screen-hud">
+          <div class="hud-name">TDC Wallet</div>
+          <div class="hud-tdc">🪙 5,847</div>
+        </div>
+        <div class="screen-wallet" style="flex:1;">
+          <div class="wallet-bal">
+            <div class="wallet-num">5,847 TDC</div>
+            <div class="wallet-eur">≈ €58.47 · Polygon Mainnet</div>
+          </div>
+          <div style="margin-bottom:8px;">
+            <div style="font-family:var(--fm);font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-bottom:6px;">RECENT TRANSACTIONS</div>
+            <div class="wallet-tx"><span class="type">📢 Ad Revenue · Notre Dame</span><span class="amount">+312 TDC</span></div>
+            <div class="wallet-tx"><span class="type">🛡️ Shield 12h</span><span class="amount" style="color:var(--r);">-90 TDC</span></div>
+            <div class="wallet-tx"><span class="type">📢 Ad Revenue · Eiffel</span><span class="amount">+204 TDC</span></div>
+            <div class="wallet-tx"><span class="type">💳 Purchase</span><span class="amount">+1,000 TDC</span></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;">
+            <button style="padding:8px;background:var(--g);border:none;border-radius:4px;color:#000;font-size:9px;font-weight:700;cursor:pointer;font-family:var(--fd);letter-spacing:1px;">BUY TDC</button>
+            <button style="padding:8px;background:rgba(123,47,255,0.2);border:1px solid rgba(123,47,255,0.4);border-radius:4px;color:#C084FC;font-size:9px;font-weight:700;cursor:pointer;font-family:var(--fd);letter-spacing:1px;">WITHDRAW</button>
+          </div>
+        </div>
+      </div>
+      <div class="phone-caption">TDC WALLET + AD EARNINGS</div>
+    </div>
+
+    <!-- Screenshot 5: Alliance -->
+    <div class="phone-frame">
+      <div class="phone-notch"><div class="phone-notch-pill"></div></div>
+      <div class="phone-screen">
+        <div class="screen-hud">
+          <div class="hud-name">Alliance</div>
+          <div style="font-size:9px;color:#A855F7;font-family:var(--fm);">[TERRA] GUILD</div>
+        </div>
+        <div class="screen-alliance" style="flex:1;">
+          <div class="alliance-banner">
+            <div class="al-tag">[TERRA]</div>
+            <div class="al-tier">TERRA DOMINATORS · GUILD · 24 MEMBERS</div>
+            <div style="display:flex;justify-content:center;gap:16px;margin-top:8px;">
+              <div style="text-align:center;"><div style="font-family:var(--fd);font-size:14px;color:#fff;">312</div><div style="font-family:var(--fm);font-size:7px;color:rgba(255,255,255,0.3);">TERRITORIES</div></div>
+              <div style="text-align:center;"><div style="font-family:var(--fd);font-size:14px;color:var(--gold);">48,200</div><div style="font-family:var(--fm);font-size:7px;color:rgba(255,255,255,0.3);">WAR SCORE</div></div>
+            </div>
+          </div>
+          <div style="font-family:var(--fm);font-size:8px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-bottom:6px;">MEMBERS</div>
+          <div class="member-row"><div class="member-icon">👑</div><div class="member-name">AliceGeneral</div><div class="member-rank">Rank 15</div></div>
+          <div class="member-row"><div class="member-icon">⭐</div><div class="member-name">IronCommander</div><div class="member-rank">Rank 12</div></div>
+          <div class="member-row"><div class="member-icon">⚔️</div><div class="member-name">BattleHawk42</div><div class="member-rank">Rank 9</div></div>
+          <div class="member-row"><div class="member-icon">⚔️</div><div class="member-name">NovaMarshal</div><div class="member-rank">Rank 7</div></div>
+          <button style="width:100%;padding:6px;margin-top:8px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:4px;color:#818CF8;font-size:9px;font-weight:700;cursor:pointer;font-family:var(--fd);letter-spacing:1px;">🏰 ALLIANCE TREASURY</button>
+        </div>
+      </div>
+      <div class="phone-caption">ALLIANCE & DIPLOMACY</div>
+    </div>
+
+  </div><!-- /screen-scroll -->
+</div>
+
+<!-- ── FEATURES ── -->
+<div class="features">
+  <h2>WHAT IS TERRA DOMINI?</h2>
+  <div style="max-width:700px;margin-bottom:32px;">
+    <p style="font-size:15px;color:rgba(255,255,255,0.55);line-height:1.8;">
+      The first strategy game built on real Earth. Every hexagon is a real location — from your street corner to the Eiffel Tower. Conquer territories, form alliances, fight for Control Towers. And earn real TerraDominiCoin (TDC) from brand advertising on your territories.
+    </p>
+  </div>
+
+  <div class="feat-grid">
+    <div class="feat-card">
+      <div class="feat-icon">🗺️</div>
+      <div class="feat-title">Real Satellite Maps</div>
+      <div class="feat-desc">4.2 billion playable hexagons derived from OpenStreetMap. Real terrain affects combat — mountains defend, coasts unlock naval, urban zones earn credits.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">⚔️</div>
+      <div class="feat-title">Grand Strategy Combat</div>
+      <div class="feat-desc">Pure strategy, no twitch skills. 5 unit types, 5 defense tiers. Surprise attacks, sieges, alliance raids. Battle timers from 4h to 72h based on territory size.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🪙</div>
+      <div class="feat-title">Earn Real TDC</div>
+      <div class="feat-desc">TerraDominiCoin (ERC-20, Polygon). Earn from brand ads on your territories. Trade on QuickSwap. Withdraw to your wallet. 70% of ad revenue goes to players.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">📡</div>
+      <div class="feat-title">Live World Events</div>
+      <div class="feat-desc">Real geopolitical events trigger in-game effects. Strait of Hormuz blockade? Energy production drops in Gulf territories. The world is your game board.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🤝</div>
+      <div class="feat-title">Alliance Diplomacy</div>
+      <div class="feat-desc">Form Squads (5), Guilds (25), or Federations (500+). Shared treasury, diplomatic treaties, geographic peace lines. Real geopolitics in miniature.</div>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon">🗼</div>
+      <div class="feat-title">Control Tower Wars</div>
+      <div class="feat-desc">500 global strategic chokepoints — ports, mountain passes, capitals. 3 capture events daily. 2-hour windows. Your alliance vs the world.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── REVIEWS ── -->
+<div class="reviews">
+  <h2>PLAYER REVIEWS</h2>
+  <div class="review-grid">
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-title">"Finally a strategy game with stakes"</div>
+      <div class="review-body">I've been playing since beta. Holding the Arc de Triomphe hex earns me actual TDC from ads. When BobMarshal's alliance attacked it last week, I spent $15 on shields without even thinking. That's when I realized — this game has actual stakes because the land is worth real money.</div>
+      <div class="review-author">AliceGeneral · Rank 15 · Paris Region</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★★</div>
+      <div class="review-title">"My alliance is more organized than my job"</div>
+      <div class="review-body">We're 22 people in our guild. We have a war council, a diplomat, a treasurer. We coordinate Control Tower assaults via Discord 3x a day. This is the deepest alliance gameplay I've seen in a mobile game. And seeing the Hormuz POI trigger in real-time? Mindblowing.</div>
+      <div class="review-author">IronCommander · Guild Leader · Germany</div>
+    </div>
+    <div class="review-card">
+      <div class="review-stars">★★★★☆</div>
+      <div class="review-title">"P2W is real but fairly capped"</div>
+      <div class="review-body">As a F2P player I'm top 15% in my region. Shields are annoying but limited to 12h/day. The terrain and strategy knowledge genuinely matter more than spending. The TDC ad revenue from my landmark hex almost covers my Battle Pass subscription.</div>
+      <div class="review-author">FreeLancer_k · F2P · Japan</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── RATING BREAKDOWN ── -->
+<div class="rating-block">
+  <div class="rating-big">
+    <div class="rating-num-big">4.8</div>
+    <div class="rating-stars-big">★★★★★</div>
+    <div class="rating-count">12,400 RATINGS</div>
+  </div>
+  <div class="rating-bars">
+    <div class="rb-row">5 ★<div class="rb-bar"><div class="rb-fill" style="width:82%;"></div></div>82%</div>
+    <div class="rb-row">4 ★<div class="rb-bar"><div class="rb-fill" style="width:12%;"></div></div>12%</div>
+    <div class="rb-row">3 ★<div class="rb-bar"><div class="rb-fill" style="width:4%;"></div></div>4%</div>
+    <div class="rb-row">2 ★<div class="rb-bar"><div class="rb-fill" style="width:1%;"></div></div>1%</div>
+    <div class="rb-row">1 ★<div class="rb-bar"><div class="rb-fill" style="width:1%;"></div></div>1%</div>
+  </div>
+</div>
+
+<!-- ── APP INFO ── -->
+<div class="app-info">
+  <div>
+    <div class="info-section">
+      <h3>WHAT'S NEW IN 1.2.0</h3>
+      <ul class="info-list">
+        <li>World POI system — live geopolitical events on the map (Hormuz crisis live now)</li>
+        <li>News ticker with real-time event broadcasts</li>
+        <li>Intel missions on strategic chokepoints earn TDC</li>
+        <li>Control Tower event scheduling improved — 3× daily guaranteed</li>
+        <li>Combat replay system — watch battles play out after resolution</li>
+        <li>Alliance treasury audit log — complete transaction history</li>
+        <li>Performance improvements — 60fps on 3-year-old Android devices</li>
+        <li>Korean and Japanese localization added</li>
+      </ul>
+    </div>
+  </div>
+  <div class="info-meta">
+    <div class="meta-line"><span class="mk">Version</span><span class="mv">1.2.0</span></div>
+    <div class="meta-line"><span class="mk">Size</span><span class="mv">48 MB</span></div>
+    <div class="meta-line"><span class="mk">Category</span><span class="mv">Strategy</span></div>
+    <div class="meta-line"><span class="mk">Languages</span><span class="mv">EN FR DE JP KR PT ES</span></div>
+    <div class="meta-line"><span class="mk">Age Rating</span><span class="mv">17+</span></div>
+    <div class="meta-line"><span class="mk">In-App Purchases</span><span class="mv">TDC · €1.99–€99.99</span></div>
+    <div class="meta-line"><span class="mk">Developer</span><span class="mv">Terra Domini SAS</span></div>
+    <div class="meta-line"><span class="mk">Website</span><span class="mv" style="color:var(--g);">terradomini.io</span></div>
+    <div class="meta-line"><span class="mk">Privacy Policy</span><span class="mv" style="color:var(--g);">terradomini.io/privacy</span></div>
+  </div>
+</div>
+
+</body>
+</html>

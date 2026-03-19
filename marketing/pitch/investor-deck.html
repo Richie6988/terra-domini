@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terra Domini — Investor Deck 2024</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --g:#00FF87; --gd:#00C860; --r:#FF3B30; --gold:#FFB800; --pu:#7B2FFF;
+  --dark:#050508; --d2:#0A0A12; --d3:#0F0F1A; --border:rgba(255,255,255,0.07);
+  --fd:'Bebas Neue',sans-serif; --fb:'Space Grotesk',sans-serif; --fm:'IBM Plex Mono',monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{background:var(--dark);color:#E8E8F0;font-family:var(--fb);overflow-x:hidden;}
+
+/* SLIDE SYSTEM */
+.deck{width:100%;max-width:1200px;margin:0 auto;padding:40px 20px;}
+.slide{
+  min-height:100vh;padding:80px 80px;
+  display:flex;flex-direction:column;justify-content:center;
+  border-bottom:1px solid var(--border);
+  position:relative;overflow:hidden;
+}
+.slide::before{
+  content:'';position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 60% at var(--gx,20%) var(--gy,80%), var(--gc,rgba(0,255,135,0.04)) 0%, transparent 70%);
+}
+
+/* SLIDE NUMBER */
+.snum{
+  position:absolute;top:40px;right:80px;
+  font-family:var(--fm);font-size:11px;color:rgba(255,255,255,0.2);letter-spacing:0.15em;
+}
+
+/* SECTION TAG */
+.stag{
+  font-family:var(--fm);font-size:11px;letter-spacing:0.2em;text-transform:uppercase;
+  color:var(--g);margin-bottom:20px;display:flex;align-items:center;gap:10px;
+}
+.stag::before{content:'';width:24px;height:1px;background:var(--g);}
+
+/* HEADLINES */
+.h1{font-family:var(--fd);font-size:clamp(52px,7vw,96px);letter-spacing:2px;line-height:0.92;color:#fff;margin-bottom:24px;}
+.h2{font-family:var(--fd);font-size:clamp(36px,5vw,64px);letter-spacing:2px;line-height:1;color:#fff;margin-bottom:20px;}
+.h3{font-family:var(--fd);font-size:28px;letter-spacing:1px;color:#fff;margin-bottom:10px;}
+.sub{font-size:18px;color:rgba(255,255,255,0.5);line-height:1.7;max-width:640px;}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:32px;}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;}
+
+/* METRIC CARD */
+.mc{
+  padding:28px 24px;border-radius:4px;
+  background:var(--d2);border:1px solid var(--border);
+}
+.mc-n{font-family:var(--fd);font-size:52px;letter-spacing:2px;margin-bottom:4px;}
+.mc-l{font-family:var(--fm);font-size:11px;color:rgba(255,255,255,0.4);letter-spacing:0.12em;text-transform:uppercase;}
+.mc-s{font-size:13px;color:rgba(255,255,255,0.3);margin-top:6px;line-height:1.5;}
+
+/* TABLE */
+.table{width:100%;border-collapse:collapse;margin-top:32px;}
+.table th{
+  font-family:var(--fm);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;
+  color:rgba(255,255,255,0.3);padding:12px 16px;text-align:left;
+  border-bottom:1px solid var(--border);
+}
+.table td{padding:14px 16px;font-size:14px;border-bottom:1px solid rgba(255,255,255,0.04);}
+.table tr:last-child td{border-bottom:none;}
+.table tr:hover td{background:rgba(255,255,255,0.02);}
+
+/* PROGRESS BAR */
+.pbar-wrap{margin-bottom:12px;}
+.pbar-label{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;}
+.pbar-label .name{color:rgba(255,255,255,0.6);}
+.pbar-label .val{font-family:var(--fm);color:var(--g);}
+.pbar-bg{height:4px;background:rgba(255,255,255,0.07);border-radius:2px;}
+.pbar-fill{height:100%;border-radius:2px;background:var(--g);}
+
+/* TIMELINE */
+.tl{border-left:1px solid rgba(0,255,135,0.2);padding-left:32px;margin-top:40px;}
+.tl-item{margin-bottom:32px;position:relative;}
+.tl-item::before{
+  content:'';width:10px;height:10px;border-radius:50%;background:var(--g);
+  position:absolute;left:-37px;top:4px;
+  box-shadow:0 0 10px rgba(0,255,135,0.5);
+}
+.tl-item.future::before{background:rgba(255,255,255,0.2);box-shadow:none;}
+.tl-phase{font-family:var(--fm);font-size:10px;color:var(--g);letter-spacing:0.15em;text-transform:uppercase;margin-bottom:4px;}
+.tl-phase.future{color:rgba(255,255,255,0.2);}
+.tl-title{font-family:var(--fd);font-size:24px;letter-spacing:1px;color:#fff;margin-bottom:8px;}
+.tl-body{font-size:13px;color:rgba(255,255,255,0.4);line-height:1.7;}
+
+/* COMPETITOR MATRIX */
+.matrix-grid{display:grid;grid-template-columns:180px repeat(5,1fr);gap:1px;background:var(--border);border-radius:4px;overflow:hidden;margin-top:32px;}
+.mx-cell{
+  background:var(--d2);padding:12px;
+  font-size:12px;display:flex;align-items:center;justify-content:center;
+}
+.mx-cell.header{
+  font-family:var(--fm);font-size:10px;letter-spacing:0.1em;color:rgba(255,255,255,0.35);
+  text-transform:uppercase;background:var(--d3);
+}
+.mx-cell.row-label{
+  justify-content:flex-start;font-weight:500;color:#E5E7EB;background:var(--d3);
+}
+.mx-cell.ours{background:rgba(0,255,135,0.08);}
+.check{color:var(--g);font-size:16px;}
+.cross{color:rgba(255,255,255,0.2);font-size:14px;}
+.partial{color:var(--gold);font-size:13px;}
+
+/* TEAM */
+.team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:32px;}
+.team-card{
+  padding:24px 20px;background:var(--d2);border:1px solid var(--border);border-radius:4px;
+  text-align:center;
+}
+.team-avatar{
+  width:56px;height:56px;border-radius:50%;margin:0 auto 12px;
+  background:linear-gradient(135deg, rgba(0,255,135,0.2), rgba(123,47,255,0.2));
+  border:1px solid rgba(0,255,135,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--fd);font-size:20px;color:var(--g);
+}
+.team-name{font-weight:600;font-size:14px;color:#fff;margin-bottom:2px;}
+.team-role{font-family:var(--fm);font-size:10px;color:var(--g);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px;}
+.team-bio{font-size:11px;color:rgba(255,255,255,0.35);line-height:1.5;}
+
+/* RISK */
+.risk-item{
+  display:flex;gap:16px;padding:16px 20px;margin-bottom:8px;border-radius:4px;
+  border:1px solid var(--border);background:var(--d2);
+}
+.risk-level{
+  font-family:var(--fm);font-size:10px;letter-spacing:0.1em;font-weight:700;
+  padding:3px 8px;border-radius:2px;align-self:flex-start;white-space:nowrap;
+}
+.risk-level.h{background:rgba(255,59,48,0.15);color:#FF3B30;}
+.risk-level.m{background:rgba(255,184,0,0.15);color:var(--gold);}
+.risk-level.l{background:rgba(0,255,135,0.12);color:var(--g);}
+.risk-title{font-weight:600;font-size:13px;color:#E5E7EB;margin-bottom:4px;}
+.risk-mit{font-size:12px;color:rgba(255,255,255,0.35);line-height:1.5;}
+
+/* FINANCIAL CHART */
+.rev-bars{display:flex;gap:12px;align-items:flex-end;height:200px;margin-top:32px;}
+.rev-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;}
+.rev-bar{width:100%;background:rgba(0,255,135,0.15);border:1px solid rgba(0,255,135,0.3);border-radius:2px;
+  display:flex;align-items:flex-end;justify-content:center;padding-bottom:8px;
+  transition:background 0.3s;}
+.rev-bar:hover{background:rgba(0,255,135,0.25);}
+.rev-val{font-family:var(--fd);font-size:14px;letter-spacing:1px;color:var(--g);}
+.rev-year{font-family:var(--fm);font-size:11px;color:rgba(255,255,255,0.35);}
+
+/* COVER SLIDE */
+.cover-bg{
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 120%, rgba(0,255,135,0.07) 0%, transparent 60%),
+    radial-gradient(ellipse 40% 40% at 90% 10%, rgba(123,47,255,0.05) 0%, transparent 60%);
+}
+
+/* DISCLAIMER */
+.disc{
+  font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.15);
+  line-height:1.7;margin-top:40px;padding-top:20px;border-top:1px solid rgba(255,255,255,0.05);
+}
+
+/* NAV DOTS */
+.nav-dots{
+  position:fixed;right:20px;top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:8px;z-index:100;
+}
+.nav-dot{
+  width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,0.2);
+  cursor:pointer;transition:all 0.2s;border:none;padding:0;
+}
+.nav-dot.active{background:var(--g);box-shadow:0 0 8px rgba(0,255,135,0.5);}
+.nav-dot:hover{background:rgba(255,255,255,0.5);}
+
+/* PRINT / EXPORT */
+@media print{
+  .nav-dots{display:none;}
+  .slide{min-height:auto;page-break-after:always;}
+}
+@media(max-width:768px){
+  .slide{padding:40px 24px;}
+  .g2,.g3,.g4,.team-grid{grid-template-columns:1fr;}
+  .matrix-grid{grid-template-columns:120px repeat(3,1fr);}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV DOTS -->
+<div class="nav-dots" id="navDots"></div>
+
+<div class="deck">
+
+<!-- ── SLIDE 1: COVER ─────────────────────────────────────────────── -->
+<div class="slide cover-bg" id="s1">
+  <span class="snum">01 / 14</span>
+
+  <div style="display:flex;align-items:center;gap:20px;margin-bottom:48px;">
+    <svg viewBox="0 0 80 80" width="64" height="64">
+      <polygon points="40,5 70,22 70,58 40,75 10,58 10,22" fill="rgba(0,255,135,0.1)" stroke="#00FF87" stroke-width="1.5"/>
+      <polygon points="40,18 58,28 58,52 40,62 22,52 22,28" fill="none" stroke="#00FF87" stroke-width="0.7" opacity="0.5"/>
+      <text x="40" y="48" font-family="Impact" font-size="28" fill="#00FF87" text-anchor="middle">T</text>
+    </svg>
+    <div>
+      <div style="font-family:var(--fd);font-size:22px;letter-spacing:3px;color:#fff;">TERRA<span style="color:var(--g)">DOMINI</span></div>
+      <div style="font-family:var(--fm);font-size:10px;color:rgba(0,255,135,0.5);letter-spacing:0.2em;margin-top:2px;">INVESTOR PRESENTATION · CONFIDENTIAL</div>
+    </div>
+  </div>
+
+  <div class="h1">THE EARTH<br>IS THE<br><span style="color:var(--g)">GAME BOARD</span></div>
+
+  <p class="sub" style="margin-top:24px;">First real-world territory strategy game with a native blockchain economy. 4.2 billion playable hexagons. Real satellite maps. Real TDC earnings.</p>
+
+  <div style="display:flex;gap:48px;margin-top:48px;flex-wrap:wrap;">
+    <div>
+      <div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-bottom:4px;">RAISE</div>
+      <div style="font-family:var(--fd);font-size:32px;letter-spacing:2px;color:var(--gold);">€2.5M SEED</div>
+    </div>
+    <div>
+      <div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-bottom:4px;">USE OF FUNDS</div>
+      <div style="font-family:var(--fd);font-size:32px;letter-spacing:2px;color:#fff;">18 MONTHS</div>
+    </div>
+    <div>
+      <div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-bottom:4px;">TARGET ARR Y3</div>
+      <div style="font-family:var(--fd);font-size:32px;letter-spacing:2px;color:var(--g);">€52M</div>
+    </div>
+  </div>
+
+  <div class="disc">This presentation is for informational purposes only and does not constitute an offer to sell or solicitation to buy securities. TDC is a utility token; projected returns are estimates and not guaranteed.</div>
+</div>
+
+<!-- ── SLIDE 2: PROBLEM ───────────────────────────────────────────── -->
+<div class="slide" id="s2" style="--gx:80%;--gy:20%;--gc:rgba(255,59,48,0.04);">
+  <span class="snum">02 / 14</span>
+  <div class="stag">The Problem</div>
+  <div class="h2">STRATEGY GAMES<br>FORGOT THE REAL WORLD</div>
+
+  <div class="g3" style="margin-top:40px;">
+    <div class="mc">
+      <div class="mc-n" style="color:var(--r);">$0</div>
+      <div class="mc-l">Real economic value created</div>
+      <div class="mc-s">Clash of Clans, Rise of Kingdoms — billions played, zero real-world value captured by players.</div>
+    </div>
+    <div class="mc">
+      <div class="mc-n" style="color:var(--gold);">$245B</div>
+      <div class="mc-l">Mobile gaming market 2027</div>
+      <div class="mc-s">99% of revenue flows to publishers. Players get entertainment — nothing else of lasting value.</div>
+    </div>
+    <div class="mc">
+      <div class="mc-n" style="color:var(--r);">3%</div>
+      <div class="mc-l">Paying player rate (F2P average)</div>
+      <div class="mc-s">Because players feel no ownership. When you own real digital land, you have a reason to invest.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:40px;padding:24px 28px;background:rgba(255,59,48,0.06);border:1px solid rgba(255,59,48,0.2);border-radius:4px;">
+    <div style="font-family:var(--fd);font-size:20px;letter-spacing:1px;color:#fff;margin-bottom:8px;">The Core Insight</div>
+    <p style="font-size:15px;color:rgba(255,255,255,0.6);line-height:1.7;">
+      People fight over real territory because it has real value. Digital games fail to replicate this because virtual territories have zero extrinsic value. We fix this with a real advertising marketplace and a real blockchain token — making your in-game land worth actual money.
+    </p>
+  </div>
+</div>
+
+<!-- ── SLIDE 3: SOLUTION ──────────────────────────────────────────── -->
+<div class="slide" id="s3">
+  <span class="snum">03 / 14</span>
+  <div class="stag">The Solution</div>
+  <div class="h2">TERRA DOMINI —<br>EARTH IS THE MAP</div>
+
+  <div class="g2" style="margin-top:40px;align-items:start;">
+    <div>
+      <div style="margin-bottom:20px;">
+        <div class="h3" style="font-size:20px;">🗺️ Real satellite geography</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.7;margin-top:6px;">OpenStreetMap + H3 hexagonal grid. Every square meter of Earth is a capturable territory. Real terrain drives combat mechanics — mountains defend, coastal hexes unlock naval units.</p>
+      </div>
+      <div style="margin-bottom:20px;">
+        <div class="h3" style="font-size:20px;">🪙 Native blockchain economy</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.7;margin-top:6px;">TerraDominiCoin (TDC) on Polygon. Players earn real cryptocurrency by holding high-traffic territories that host brand advertising. First game to create a direct ad marketplace for virtual land.</p>
+      </div>
+      <div>
+        <div class="h3" style="font-size:20px;">📡 Live geopolitical events</div>
+        <p style="font-size:13px;color:rgba(255,255,255,0.45);line-height:1.7;margin-top:6px;">Real news triggers in-game world events. The Hormuz blockade (2026) immediately cuts energy production in Gulf territories by 60%. Players interact with current events in real time.</p>
+      </div>
+    </div>
+    <div>
+      <div style="background:var(--d2);border:1px solid var(--border);border-radius:8px;padding:24px;">
+        <div style="font-family:var(--fm);font-size:10px;color:rgba(0,255,135,0.5);letter-spacing:0.15em;margin-bottom:16px;">THE ECONOMIC LOOP — INDUSTRY FIRST</div>
+        <div style="display:flex;flex-direction:column;gap:0;">
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+            <span style="font-size:18px;flex-shrink:0;">🎮</span>
+            <div><div style="font-size:13px;font-weight:500;color:#fff;">Players fight for territory</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">Alliance warfare drives engagement</div></div>
+          </div>
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+            <span style="font-size:18px;flex-shrink:0;">👁️</span>
+            <div><div style="font-size:13px;font-weight:500;color:#fff;">Territories gain viewers</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">High-traffic hexes = valuable billboard space</div></div>
+          </div>
+          <div style="display:flex;gap:12px;padding:12px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
+            <span style="font-size:18px;flex-shrink:0;">📢</span>
+            <div><div style="font-size:13px;font-weight:500;color:#fff;">Brands pay CPM rates</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">Real advertising marketplace, AI-screened</div></div>
+          </div>
+          <div style="display:flex;gap:12px;padding:12px 0;">
+            <span style="font-size:18px;flex-shrink:0;">💰</span>
+            <div><div style="font-size:13px;font-weight:500;color:#fff;">Players earn TDC</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">70% ad revenue → player wallet. More fights → more value</div></div>
+          </div>
+        </div>
+        <div style="margin-top:12px;padding:10px;background:rgba(0,255,135,0.06);border-radius:4px;font-family:var(--fm);font-size:11px;color:var(--g);text-align:center;letter-spacing:0.08em;">
+          SELF-AMPLIFYING LOOP — MORE CONFLICT = MORE VALUE
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 4: MARKET ────────────────────────────────────────────── -->
+<div class="slide" id="s4" style="--gx:50%;--gy:50%;--gc:rgba(123,47,255,0.05);">
+  <span class="snum">04 / 14</span>
+  <div class="stag">Market Opportunity</div>
+  <div class="h2">THREE CONVERGING<br>MARKETS</div>
+
+  <div class="g3" style="margin-top:40px;">
+    <div class="mc" style="border-color:rgba(0,255,135,0.2);">
+      <div class="mc-n" style="color:var(--g);">$245B</div>
+      <div class="mc-l">Mobile Gaming 2027</div>
+      <div class="mc-s">Strategy segment growing 8% YoY. 2.8B mobile gamers globally. Real-money gaming driving premium ARPU.</div>
+      <div style="margin-top:12px;">
+        <div class="pbar-wrap">
+          <div class="pbar-label"><span class="name">Strategy games</span><span class="val">$38B</span></div>
+          <div class="pbar-bg"><div class="pbar-fill" style="width:62%;"></div></div>
+        </div>
+        <div class="pbar-wrap">
+          <div class="pbar-label"><span class="name">.io genre</span><span class="val">$4.2B</span></div>
+          <div class="pbar-bg"><div class="pbar-fill" style="width:18%;background:rgba(0,255,135,0.5);"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="mc" style="border-color:rgba(255,184,0,0.2);">
+      <div class="mc-n" style="color:var(--gold);">$42B</div>
+      <div class="mc-l">GameFi / Play-to-Earn 2026</div>
+      <div class="mc-s">Post-2022 correction stabilized. Utility-token models (vs speculation) showing 3× better retention. Polygon ecosystem growing fastest.</div>
+      <div style="margin-top:12px;">
+        <div class="pbar-wrap">
+          <div class="pbar-label"><span class="name">Polygon TVL</span><span class="val">$12B</span></div>
+          <div class="pbar-bg"><div class="pbar-fill" style="width:72%;background:rgba(255,184,0,0.6);"></div></div>
+        </div>
+        <div class="pbar-wrap">
+          <div class="pbar-label"><span class="name">Active wallets</span><span class="val">4.2M</span></div>
+          <div class="pbar-bg"><div class="pbar-fill" style="width:40%;background:rgba(255,184,0,0.4);"></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="mc" style="border-color:rgba(123,47,255,0.2);">
+      <div class="mc-n" style="color:var(--pu);">$680B</div>
+      <div class="mc-l">Digital Advertising 2027</div>
+      <div class="mc-s">In-game advertising the fastest growing segment (+22% YoY). Brands seeking contextual, high-engagement environments beyond banner ads.</div>
+      <div style="margin-top:12px;">
+        <div class="pbar-wrap">
+          <div class="pbar-label"><span class="name">In-game ads market</span><span class="val">$17B</span></div>
+          <div class="pbar-bg"><div class="pbar-fill" style="width:55%;background:rgba(123,47,255,0.6);"></div></div>
+        </div>
+        <div class="pbar-wrap">
+          <div class="pbar-label"><span class="name">Addressable (geo-games)</span><span class="val">$2.1B</span></div>
+          <div class="pbar-bg"><div class="pbar-fill" style="width:22%;background:rgba(123,47,255,0.4);"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:32px;padding:20px 24px;background:var(--d2);border:1px solid var(--border);border-radius:4px;display:flex;gap:32px;align-items:center;flex-wrap:wrap;">
+    <div><div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:4px;">SERVICEABLE ADDRESSABLE MARKET</div><div style="font-family:var(--fd);font-size:36px;letter-spacing:2px;color:var(--g);">€4.8B</div></div>
+    <div style="height:40px;width:1px;background:var(--border);"></div>
+    <div><div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:4px;">OBTAINABLE MARKET (3 years)</div><div style="font-family:var(--fd);font-size:36px;letter-spacing:2px;color:#fff;">€240M</div></div>
+    <div style="height:40px;width:1px;background:var(--border);"></div>
+    <div style="flex:1;min-width:200px;font-size:13px;color:rgba(255,255,255,0.4);line-height:1.6;">We capture €240M ARR at 5% of SAM — achievable with 500k paying MAU at €40/month ARPU (Y3 target).</div>
+  </div>
+</div>
+
+<!-- ── SLIDE 5: PRODUCT ───────────────────────────────────────────── -->
+<div class="slide" id="s5">
+  <span class="snum">05 / 14</span>
+  <div class="stag">Product Differentiation</div>
+  <div class="h2">WHY THIS WINS</div>
+
+  <div class="matrix-grid" style="margin-top:40px;">
+    <div class="mx-cell header"></div>
+    <div class="mx-cell header" style="background:rgba(0,255,135,0.08);color:var(--g);">TERRA<br>DOMINI</div>
+    <div class="mx-cell header">Clash of<br>Clans</div>
+    <div class="mx-cell header">Pokémon<br>GO</div>
+    <div class="mx-cell header">Axie<br>Infinity</div>
+    <div class="mx-cell header">Rise of<br>Kingdoms</div>
+
+    <div class="mx-cell row-label">Real-world geography</div>
+    <div class="mx-cell ours"><span class="check">✓</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="check">✓</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+
+    <div class="mx-cell row-label">Real crypto earnings</div>
+    <div class="mx-cell ours"><span class="check">✓</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="partial">~</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+
+    <div class="mx-cell row-label">Ad revenue sharing</div>
+    <div class="mx-cell ours"><span class="check">✓</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+
+    <div class="mx-cell row-label">Live geopolitical events</div>
+    <div class="mx-cell ours"><span class="check">✓</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+
+    <div class="mx-cell row-label">Alliance grand strategy</div>
+    <div class="mx-cell ours"><span class="check">✓</span></div>
+    <div class="mx-cell"><span class="partial">~</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="check">✓</span></div>
+
+    <div class="mx-cell row-label">P2W hard caps</div>
+    <div class="mx-cell ours"><span class="check">✓</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="check">✓</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+    <div class="mx-cell"><span class="cross">—</span></div>
+
+    <div class="mx-cell row-label">Browser + mobile</div>
+    <div class="mx-cell ours"><span class="check">✓</span></div>
+    <div class="mx-cell"><span class="check">✓</span></div>
+    <div class="mx-cell"><span class="check">✓</span></div>
+    <div class="mx-cell"><span class="check">✓</span></div>
+    <div class="mx-cell"><span class="check">✓</span></div>
+  </div>
+</div>
+
+<!-- ── SLIDE 6: BUSINESS MODEL ───────────────────────────────────── -->
+<div class="slide" id="s6" style="--gx:30%;--gy:70%;--gc:rgba(255,184,0,0.05);">
+  <span class="snum">06 / 14</span>
+  <div class="stag">Business Model</div>
+  <div class="h2">FIVE REVENUE STREAMS</div>
+
+  <table class="table" style="margin-top:40px;">
+    <tr>
+      <th>Stream</th><th>Mechanism</th><th>Year 1</th><th>Year 2</th><th>Year 3</th><th>Margin</th>
+    </tr>
+    <tr>
+      <td style="color:var(--g);font-weight:600;">TDC Purchases</td>
+      <td style="color:rgba(255,255,255,0.5);font-size:12px;">Stripe → TDC mint on Polygon</td>
+      <td style="font-family:var(--fm);">€1.8M</td>
+      <td style="font-family:var(--fm);">€7.2M</td>
+      <td style="font-family:var(--fm);">€22M</td>
+      <td style="color:var(--g);font-family:var(--fm);">~85%</td>
+    </tr>
+    <tr>
+      <td style="color:var(--gold);font-weight:600;">Ad Marketplace</td>
+      <td style="color:rgba(255,255,255,0.5);font-size:12px;">30% commission on brand CPM</td>
+      <td style="font-family:var(--fm);">€0.2M</td>
+      <td style="font-family:var(--fm);">€3.1M</td>
+      <td style="font-family:var(--fm);">€18M</td>
+      <td style="color:var(--g);font-family:var(--fm);">~92%</td>
+    </tr>
+    <tr>
+      <td style="color:#C084FC;font-weight:600;">Battle Pass</td>
+      <td style="color:rgba(255,255,255,0.5);font-size:12px;">€4.99/season, 60-day track</td>
+      <td style="font-family:var(--fm);">€0.3M</td>
+      <td style="font-family:var(--fm);">€2.4M</td>
+      <td style="font-family:var(--fm);">€8M</td>
+      <td style="color:var(--g);font-family:var(--fm);">~95%</td>
+    </tr>
+    <tr>
+      <td style="color:#60A5FA;font-weight:600;">Alliance Premium</td>
+      <td style="color:rgba(255,255,255,0.5);font-size:12px;">€9.99/mo per guild</td>
+      <td style="font-family:var(--fm);">€0.1M</td>
+      <td style="font-family:var(--fm);">€1.1M</td>
+      <td style="font-family:var(--fm);">€4M</td>
+      <td style="color:var(--g);font-family:var(--fm);">~90%</td>
+    </tr>
+    <tr>
+      <td style="color:#F472B6;font-weight:600;">Withdrawal Fees</td>
+      <td style="color:rgba(255,255,255,0.5);font-size:12px;">3% on TDC → wallet</td>
+      <td style="font-family:var(--fm);">—</td>
+      <td style="font-family:var(--fm);">€0.2M</td>
+      <td style="font-family:var(--fm);">€1.5M</td>
+      <td style="color:var(--g);font-family:var(--fm);">~100%</td>
+    </tr>
+    <tr style="border-top:1px solid rgba(0,255,135,0.2);">
+      <td style="font-weight:700;color:#fff;">TOTAL ARR</td>
+      <td></td>
+      <td style="font-family:var(--fd);font-size:18px;color:var(--g);">€2.4M</td>
+      <td style="font-family:var(--fd);font-size:18px;color:var(--g);">€14M</td>
+      <td style="font-family:var(--fd);font-size:18px;color:var(--g);">€52M+</td>
+      <td style="color:var(--g);font-family:var(--fm);">~88%</td>
+    </tr>
+  </table>
+
+  <div style="margin-top:32px;padding:16px 20px;background:rgba(0,255,135,0.05);border:1px solid rgba(0,255,135,0.15);border-radius:4px;display:flex;gap:40px;flex-wrap:wrap;">
+    <div><div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:4px;">TARGET ARPU/MONTH (Y3)</div><div style="font-family:var(--fd);font-size:28px;color:var(--gold);">€8.70</div></div>
+    <div><div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:4px;">LTV (24mo avg)</div><div style="font-family:var(--fd);font-size:28px;color:var(--g);">€209</div></div>
+    <div><div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:4px;">CAC TARGET</div><div style="font-family:var(--fd);font-size:28px;color:#fff;">€12</div></div>
+    <div><div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);margin-bottom:4px;">LTV:CAC RATIO</div><div style="font-family:var(--fd);font-size:28px;color:var(--g);">17×</div></div>
+  </div>
+</div>
+
+<!-- ── SLIDE 7: UNIT ECONOMICS ───────────────────────────────────── -->
+<div class="slide" id="s7">
+  <span class="snum">07 / 14</span>
+  <div class="stag">Unit Economics</div>
+  <div class="h2">WHY PLAYERS SPEND</div>
+
+  <div class="g2" style="margin-top:40px;align-items:start;">
+    <div>
+      <div class="h3">The TDC Flywheel</div>
+      <p style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:24px;line-height:1.7;">Players invest in TDC → own valuable territory → earn ad revenue → reinvest in game → territory becomes more valuable → more players join. Each new player increases everyone's TDC value.</p>
+
+      <div style="border-left:2px solid rgba(0,255,135,0.3);padding-left:20px;">
+        <div style="margin-bottom:16px;">
+          <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:4px;">1. Organic land pressure</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.4);">As player count grows, unclaimed land disappears. Early players capture prime real estate cheap. FOMO drives acquisition.</div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:4px;">2. Loss aversion spending</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.4);">Players who built valuable territories (earning ad revenue) spend to defend them. The more invested, the more they defend.</div>
+        </div>
+        <div style="margin-bottom:16px;">
+          <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:4px;">3. Alliance social pressure</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.4);">Guilds of 25 players where 3 are heavy spenders creates pressure on others to contribute. Social commitment drives spending.</div>
+        </div>
+        <div>
+          <div style="font-weight:600;font-size:14px;color:#fff;margin-bottom:4px;">4. Real yield on TDC</div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.4);">Ad revenue creates a genuine yield on holding land. This is not P2W — it's land ownership. Completely different psychological model.</div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="h3">Cohort Analysis (Projection)</div>
+      <table class="table">
+        <tr>
+          <th>Month</th><th>Active</th><th>Paying</th><th>ARPU</th><th>Revenue</th>
+        </tr>
+        <tr><td>M1</td><td style="font-family:var(--fm);">2,000</td><td style="font-family:var(--fm);">160</td><td style="font-family:var(--fm);">€8</td><td style="color:var(--g);font-family:var(--fm);">€1.3K</td></tr>
+        <tr><td>M3</td><td style="font-family:var(--fm);">8,000</td><td style="font-family:var(--fm);">800</td><td style="font-family:var(--fm);">€12</td><td style="color:var(--g);font-family:var(--fm);">€9.6K</td></tr>
+        <tr><td>M6</td><td style="font-family:var(--fm);">25,000</td><td style="font-family:var(--fm);">3,000</td><td style="font-family:var(--fm);">€18</td><td style="color:var(--g);font-family:var(--fm);">€54K</td></tr>
+        <tr><td>M12</td><td style="font-family:var(--fm);">80,000</td><td style="font-family:var(--fm);">12,000</td><td style="font-family:var(--fm);">€24</td><td style="color:var(--g);font-family:var(--fm);">€288K</td></tr>
+        <tr><td>M24</td><td style="font-family:var(--fm);">300,000</td><td style="font-family:var(--fm);">54,000</td><td style="font-family:var(--fm);">€30</td><td style="color:var(--g);font-family:var(--fm);">€1.62M</td></tr>
+        <tr><td>M36</td><td style="font-family:var(--fm);">800,000</td><td style="font-family:var(--fm);">160,000</td><td style="font-family:var(--fm);">€38</td><td style="color:var(--g);font-family:var(--fm);">€6.1M</td></tr>
+      </table>
+      <div style="margin-top:12px;font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.2);">Paying conversion: 8%→20% as social mechanics mature. ARPU growth driven by ad marketplace scaling.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 8: GO-TO-MARKET ─────────────────────────────────────── -->
+<div class="slide" id="s8" style="--gx:70%;--gy:30%;--gc:rgba(0,255,135,0.04);">
+  <span class="snum">08 / 14</span>
+  <div class="stag">Go-to-Market</div>
+  <div class="h2">LAUNCH STRATEGY</div>
+
+  <div class="g3" style="margin-top:40px;">
+    <div class="mc">
+      <div style="font-size:28px;margin-bottom:12px;">🌍</div>
+      <div class="h3" style="font-size:18px;">Phase 1: EU Beta</div>
+      <div class="mc-s">Launch in Paris, London, Berlin markets. Dense urban H3 coverage already seeded. Strong strategy game communities. European privacy laws align with our data model.</div>
+      <div style="margin-top:16px;font-family:var(--fm);font-size:10px;color:var(--g);">MONTHS 1-6 · TARGET 25K MAU</div>
+    </div>
+    <div class="mc">
+      <div style="font-size:28px;margin-bottom:12px;">🏆</div>
+      <div class="h3" style="font-size:18px;">Phase 2: Gaming Communities</div>
+      <div class="mc-s">Reddit r/gaming, r/altstrategy, YouTube strategy content creators. Product Hunt launch. App Store featuring pitch (geolocation category). Twitch Control Tower event streaming.</div>
+      <div style="margin-top:16px;font-family:var(--fm);font-size:10px;color:var(--g);">MONTHS 4-9 · TARGET 100K MAU</div>
+    </div>
+    <div class="mc">
+      <div style="font-size:28px;margin-bottom:12px;">🪙</div>
+      <div class="h3" style="font-size:18px;">Phase 3: Crypto Natives</div>
+      <div class="mc-s">Polygon ecosystem partnerships, CoinGecko/DeFiLlama TDC listing, Web3 gaming influencers, GameFi DAOs. TDC DEX liquidity pool drives organic discovery.</div>
+      <div style="margin-top:16px;font-family:var(--fm);font-size:10px;color:var(--g);">MONTHS 8-18 · TARGET 300K MAU</div>
+    </div>
+  </div>
+
+  <div style="margin-top:32px;">
+    <div class="h3" style="font-size:16px;margin-bottom:16px;">Key Distribution Channels</div>
+    <div style="display:flex;flex-wrap:wrap;gap:10px;">
+      <span style="padding:8px 14px;background:var(--d2);border:1px solid var(--border);border-radius:4px;font-size:12px;color:rgba(255,255,255,0.6);">🎮 Discord gaming servers</span>
+      <span style="padding:8px 14px;background:var(--d2);border:1px solid var(--border);border-radius:4px;font-size:12px;color:rgba(255,255,255,0.6);">📱 App Store / Play Store (Geo Games)</span>
+      <span style="padding:8px 14px;background:var(--d2);border:1px solid var(--border);border-radius:4px;font-size:12px;color:rgba(255,255,255,0.6);">🏙️ City tourism partnerships</span>
+      <span style="padding:8px 14px;background:var(--d2);border:1px solid var(--border);border-radius:4px;font-size:12px;color:rgba(255,255,255,0.6);">🔗 Polygon Ecosystem grants</span>
+      <span style="padding:8px 14px;background:var(--d2);border:1px solid var(--border);border-radius:4px;font-size:12px;color:rgba(255,255,255,0.6);">📺 Twitch / YouTube creators</span>
+      <span style="padding:8px 14px;background:var(--d2);border:1px solid var(--border);border-radius:4px;font-size:12px;color:rgba(255,255,255,0.6);">📰 Tech / GameFi press</span>
+      <span style="padding:8px 14px;background:var(--d2);border:1px solid var(--border);border-radius:4px;font-size:12px;color:rgba(255,255,255,0.6);">🤝 Brand partnership (ad marketplace)</span>
+      <span style="padding:8px 14px;background:var(--d2);border:1px solid var(--border);border-radius:4px;font-size:12px;color:rgba(255,255,255,0.6);">📊 Product Hunt viral loop</span>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 9: ROADMAP ───────────────────────────────────────────── -->
+<div class="slide" id="s9">
+  <span class="snum">09 / 14</span>
+  <div class="stag">Product Roadmap</div>
+  <div class="h2">36-MONTH PLAN</div>
+
+  <div class="tl">
+    <div class="tl-item">
+      <div class="tl-phase">Q1-Q2 2025 — Foundation (Funded)</div>
+      <div class="tl-title">Core Loop & Infrastructure</div>
+      <div class="tl-body">H3 hex engine ✓ · Combat resolution ✓ · TDC on Polygon ✓ · Django backend ✓ · React map frontend ✓ · WebSocket real-time ✓ · Anti-cheat Kafka pipeline ✓ · Paris test region 91 hexes ✓ · World POI system ✓</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-phase">Q3-Q4 2025 — Beta</div>
+      <div class="tl-title">Soft Launch — Europe</div>
+      <div class="tl-body">Geo pipeline for EU (France, UK, Germany, Spain) · Battle Pass Season 1 · Mobile PWA · Anti-cheat tuning · Stripe payment integration · 50k MAU target · Alliance wars live</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-phase">Q1-Q2 2026 — Growth</div>
+      <div class="tl-title">Ad Marketplace + Native Mobile</div>
+      <div class="tl-body">Brand portal live · iOS + Android native apps · Control Tower Wars daily events · 6 language localization · Season 2 · TDC DEX listing on QuickSwap · 200k MAU target</div>
+    </div>
+    <div class="tl-item future">
+      <div class="tl-phase future">Q3-Q4 2026 — Scale</div>
+      <div class="tl-title">Global Expansion</div>
+      <div class="tl-body">APAC hex coverage (Japan, Korea, Singapore) · Americas · Real-world news POI automation · Esports spectator mode · Partnership with city tourism boards · 500k MAU</div>
+    </div>
+    <div class="tl-item future">
+      <div class="tl-phase future">2027 — Domination</div>
+      <div class="tl-title">Series A / Licensing</div>
+      <div class="tl-body">AR mobile layer · AI NPC factions · Global esports league · Modding API · White-label regional operator model · Series A €15-20M · 1M+ MAU</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 10: TEAM ─────────────────────────────────────────────── -->
+<div class="slide" id="s10" style="--gx:50%;--gy:0%;--gc:rgba(123,47,255,0.04);">
+  <span class="snum">10 / 14</span>
+  <div class="stag">The Team</div>
+  <div class="h2">BUILDERS WITH<br>DEEP DOMAIN ROOTS</div>
+
+  <div class="team-grid">
+    <div class="team-card">
+      <div class="team-avatar">RG</div>
+      <div class="team-name">Richard Grondin</div>
+      <div class="team-role">CEO & Founder</div>
+      <div class="team-bio">French consulting background. AI development, enterprise systems, pharmaceutical data. Serial builder across ML, RL, 3D geometry, web platforms.</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:linear-gradient(135deg,rgba(59,130,246,0.2),rgba(139,92,246,0.2));border-color:rgba(59,130,246,0.3);">BE</div>
+      <div class="team-name">Backend Lead</div>
+      <div class="team-role">CTO · Hiring</div>
+      <div class="team-bio">Django + Go game server specialist. 5+ years distributed systems, real-time WebSocket architectures, PostGIS. Previous: AAA game backend.</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:linear-gradient(135deg,rgba(0,255,135,0.15),rgba(59,130,246,0.15));border-color:rgba(0,255,135,0.2);">GE</div>
+      <div class="team-name">Geo Engineer</div>
+      <div class="team-role">Data Lead · Hiring</div>
+      <div class="team-bio">H3 hex specialist, OSM pipeline, PostGIS. GDAL/QGIS expert. Previous: mapping startup, government GIS contracts.</div>
+    </div>
+    <div class="team-card">
+      <div class="team-avatar" style="background:linear-gradient(135deg,rgba(255,184,0,0.15),rgba(255,59,48,0.15));border-color:rgba(255,184,0,0.2);">BC</div>
+      <div class="team-name">Blockchain Dev</div>
+      <div class="team-role">Web3 Lead · Hiring</div>
+      <div class="team-bio">Solidity + Web3.py. 3 DeFi protocols shipped. Polygon ecosystem contributor. ERC-20 tokenomics design experience.</div>
+    </div>
+  </div>
+
+  <div style="margin-top:24px;padding:16px 20px;background:var(--d2);border:1px solid var(--border);border-radius:4px;display:flex;gap:32px;align-items:center;flex-wrap:wrap;">
+    <div style="font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;flex:1;">
+      <strong style="color:#fff;">Hiring Plan (seed round):</strong> 2× Backend engineers (Go/Django), 1× Frontend (React+WebGL), 1× Geo data specialist, 1× Blockchain developer, 1× Game designer, 1× Growth/marketing. Target 12-person team by Month 6.
+    </div>
+    <div style="text-align:center;flex-shrink:0;">
+      <div style="font-family:var(--fd);font-size:36px;letter-spacing:2px;color:var(--g);">7</div>
+      <div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;">PLANNED HIRES · 6MO</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 11: RISKS ────────────────────────────────────────────── -->
+<div class="slide" id="s11">
+  <span class="snum">11 / 14</span>
+  <div class="stag">Risk Assessment</div>
+  <div class="h2">RISKS & MITIGATIONS</div>
+
+  <div style="margin-top:40px;display:flex;flex-direction:column;gap:10px;">
+    <div class="risk-item">
+      <span class="risk-level h">HIGH</span>
+      <div>
+        <div class="risk-title">Blockchain regulation (TDC utility token)</div>
+        <div class="risk-mit"><strong>Mitigation:</strong> TDC structured as pure utility token (not security). Legal opinion secured pre-launch. MiCA compliance framework built-in. Withdrawal capped at €500/day per player. No investment solicitation language anywhere.</div>
+      </div>
+    </div>
+    <div class="risk-item">
+      <span class="risk-level h">HIGH</span>
+      <div>
+        <div class="risk-title">Real-time sync at 100k+ concurrent players</div>
+        <div class="risk-mit"><strong>Mitigation:</strong> Go game server (100k+ WS connections proven in load tests). Redis cluster as hot state, Postgres as recovery. Continental sharding — EU failure doesn't affect APAC. H3 spatial partitioning limits per-pod load.</div>
+      </div>
+    </div>
+    <div class="risk-item">
+      <span class="risk-level m">MEDIUM</span>
+      <div>
+        <div class="risk-title">Bot / anti-cheat in clicker economy</div>
+        <div class="risk-mit"><strong>Mitigation:</strong> Kafka event stream + ML behavioral analysis + device fingerprinting. Auto-ban pipeline tested before public launch. Click rate hard-capped. CAPTCHA-free (UX preserved) through fingerprinting + behavioral patterns.</div>
+      </div>
+    </div>
+    <div class="risk-item">
+      <span class="risk-level m">MEDIUM</span>
+      <div>
+        <div class="risk-title">Geographically sensitive territories (Kashmir, Taiwan, Palestine)</div>
+        <div class="risk-mit"><strong>Mitigation:</strong> Neutral OSM admin-level boundary data. Legal disclaimer layer at game launch. Content policy document by soft launch. In-game territories explicitly labeled "game fiction, not political statements."</div>
+      </div>
+    </div>
+    <div class="risk-item">
+      <span class="risk-level l">LOW</span>
+      <div>
+        <div class="risk-title">P2W balance complaints destroying community</div>
+        <div class="risk-mit"><strong>Mitigation:</strong> Hard-coded caps in smart contract (non-negotiable). Public transparency dashboard showing % F2P in top leaderboards. Quarterly balance patches with community voting. No pay-to-skip mechanics — only pay-to-enhance.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 12: FINANCIALS ───────────────────────────────────────── -->
+<div class="slide" id="s12" style="--gx:20%;--gy:40%;--gc:rgba(0,255,135,0.04);">
+  <span class="snum">12 / 14</span>
+  <div class="stag">Financial Projections</div>
+  <div class="h2">3-YEAR P&L MODEL</div>
+
+  <table class="table" style="margin-top:40px;">
+    <tr>
+      <th>Line Item</th><th>Year 1</th><th>Year 2</th><th>Year 3</th>
+    </tr>
+    <tr>
+      <td style="color:var(--g);font-weight:600;">Total Revenue</td>
+      <td style="font-family:var(--fd);font-size:18px;color:var(--g);">€2.4M</td>
+      <td style="font-family:var(--fd);font-size:18px;color:var(--g);">€14M</td>
+      <td style="font-family:var(--fd);font-size:18px;color:var(--g);">€52M</td>
+    </tr>
+    <tr>
+      <td style="color:rgba(255,255,255,0.6);">COGS (infra, blockchain gas, payment fees)</td>
+      <td style="font-family:var(--fm);">(€0.4M)</td>
+      <td style="font-family:var(--fm);">(€1.8M)</td>
+      <td style="font-family:var(--fm);">(€6M)</td>
+    </tr>
+    <tr>
+      <td style="color:rgba(255,255,255,0.6);">Gross Profit</td>
+      <td style="font-family:var(--fm);">€2.0M <span style="color:rgba(255,255,255,0.3);font-size:11px;">(83%)</span></td>
+      <td style="font-family:var(--fm);">€12.2M <span style="color:rgba(255,255,255,0.3);font-size:11px;">(87%)</span></td>
+      <td style="font-family:var(--fm);">€46M <span style="color:rgba(255,255,255,0.3);font-size:11px;">(88%)</span></td>
+    </tr>
+    <tr>
+      <td style="color:rgba(255,255,255,0.6);">Headcount (avg 12 → 35)</td>
+      <td style="font-family:var(--fm);">(€1.2M)</td>
+      <td style="font-family:var(--fm);">(€2.8M)</td>
+      <td style="font-family:var(--fm);">(€5.5M)</td>
+    </tr>
+    <tr>
+      <td style="color:rgba(255,255,255,0.6);">Marketing & UA</td>
+      <td style="font-family:var(--fm);">(€0.6M)</td>
+      <td style="font-family:var(--fm);">(€3.5M)</td>
+      <td style="font-family:var(--fm);">(€12M)</td>
+    </tr>
+    <tr>
+      <td style="color:rgba(255,255,255,0.6);">Infrastructure & DevOps</td>
+      <td style="font-family:var(--fm);">(€0.3M)</td>
+      <td style="font-family:var(--fm);">(€1.2M)</td>
+      <td style="font-family:var(--fm);">(€4M)</td>
+    </tr>
+    <tr style="border-top:1px solid rgba(0,255,135,0.2);">
+      <td style="font-weight:700;color:#fff;">EBITDA</td>
+      <td style="font-family:var(--fd);font-size:18px;color:var(--r);">(€0.1M)</td>
+      <td style="font-family:var(--fd);font-size:18px;color:var(--gold);">€4.7M</td>
+      <td style="font-family:var(--fd);font-size:18px;color:var(--g);">€24.5M</td>
+    </tr>
+    <tr>
+      <td style="color:rgba(255,255,255,0.5);font-size:12px;">EBITDA Margin</td>
+      <td style="font-family:var(--fm);font-size:12px;color:var(--r);">-4%</td>
+      <td style="font-family:var(--fm);font-size:12px;color:var(--gold);">34%</td>
+      <td style="font-family:var(--fm);font-size:12px;color:var(--g);">47%</td>
+    </tr>
+  </table>
+
+  <div style="margin-top:20px;padding:12px 16px;background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:4px;font-family:var(--fm);font-size:11px;color:rgba(255,255,255,0.25);line-height:1.7;">
+    Projections are forward-looking estimates based on comparable title benchmarks (Pokémon GO early cohorts, Axie Infinity pre-2022, mobile strategy genre ARPU data). Actual results may differ materially. Key assumptions: 15% monthly user growth Y1-Y2, conversion rate 8%→20%, ad marketplace €2 CPM Y2→€4 CPM Y3.
+  </div>
+</div>
+
+<!-- ── SLIDE 13: THE ASK ──────────────────────────────────────────── -->
+<div class="slide" id="s13" style="--gx:50%;--gy:50%;--gc:rgba(255,184,0,0.06);">
+  <span class="snum">13 / 14</span>
+  <div class="stag">The Ask</div>
+  <div class="h2">€2.5M SEED ROUND</div>
+
+  <div class="g2" style="margin-top:40px;align-items:start;">
+    <div>
+      <div class="h3" style="margin-bottom:20px;">Use of Funds</div>
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <div>
+          <div class="pbar-wrap">
+            <div class="pbar-label"><span class="name">Engineering & Product (7 hires)</span><span class="val" style="color:var(--g);">€1.2M · 48%</span></div>
+            <div class="pbar-bg"><div class="pbar-fill" style="width:48%;"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="pbar-wrap">
+            <div class="pbar-label"><span class="name">Marketing & User Acquisition</span><span class="val" style="color:var(--gold);">€0.6M · 24%</span></div>
+            <div class="pbar-bg"><div class="pbar-fill" style="width:24%;background:rgba(255,184,0,0.6);"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="pbar-wrap">
+            <div class="pbar-label"><span class="name">Infrastructure (K8s, CDN, AWS)</span><span class="val" style="color:#60A5FA;">€0.35M · 14%</span></div>
+            <div class="pbar-bg"><div class="pbar-fill" style="width:14%;background:rgba(59,130,246,0.6);"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="pbar-wrap">
+            <div class="pbar-label"><span class="name">Legal (token, IP, privacy)</span><span class="val" style="color:#C084FC;">€0.2M · 8%</span></div>
+            <div class="pbar-bg"><div class="pbar-fill" style="width:8%;background:rgba(123,47,255,0.6);"></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="pbar-wrap">
+            <div class="pbar-label"><span class="name">Runway buffer (18mo)</span><span class="val" style="color:rgba(255,255,255,0.4);">€0.15M · 6%</span></div>
+            <div class="pbar-bg"><div class="pbar-fill" style="width:6%;background:rgba(255,255,255,0.2);"></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="h3" style="margin-bottom:20px;">Milestones at 18 Months</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--d2);border:1px solid rgba(0,255,135,0.15);border-radius:4px;">
+          <span style="color:var(--g);font-size:16px;flex-shrink:0;">◆</span>
+          <div><div style="font-size:13px;font-weight:500;color:#fff;">100,000 MAU live</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">Retained player base, battle-tested infrastructure</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--d2);border:1px solid rgba(255,184,0,0.15);border-radius:4px;">
+          <span style="color:var(--gold);font-size:16px;flex-shrink:0;">◆</span>
+          <div><div style="font-size:13px;font-weight:500;color:#fff;">€500K MRR achieved</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">Path to profitability demonstrated</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--d2);border:1px solid rgba(123,47,255,0.15);border-radius:4px;">
+          <span style="color:var(--pu);font-size:16px;flex-shrink:0;">◆</span>
+          <div><div style="font-size:13px;font-weight:500;color:#fff;">5 brand ad campaigns live</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">Ad marketplace proven, revenue diversified</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--d2);border:1px solid rgba(59,130,246,0.15);border-radius:4px;">
+          <span style="color:#60A5FA;font-size:16px;flex-shrink:0;">◆</span>
+          <div><div style="font-size:13px;font-weight:500;color:#fff;">iOS + Android native shipped</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">Full mobile coverage unlocks 10× distribution</div></div>
+        </div>
+        <div style="display:flex;gap:12px;align-items:flex-start;padding:12px;background:var(--d2);border:1px solid rgba(0,255,135,0.15);border-radius:4px;">
+          <span style="color:var(--g);font-size:16px;flex-shrink:0;">◆</span>
+          <div><div style="font-size:13px;font-weight:500;color:#fff;">Series A metrics ready</div><div style="font-size:11px;color:rgba(255,255,255,0.35);">€6-8M ARR run rate for €15M Series A raise</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SLIDE 14: CLOSE ────────────────────────────────────────────── -->
+<div class="slide cover-bg" id="s14" style="text-align:center;align-items:center;">
+  <span class="snum">14 / 14</span>
+
+  <div class="h1" style="margin-bottom:20px;">THE EARTH<br>IS WAITING<br><span style="color:var(--g)">TO BE CLAIMED</span></div>
+
+  <p class="sub" style="margin:0 auto 48px;text-align:center;">4.2 billion hexagons. Real wars. Real money. Real geography.<br>This is the game no one built — until now.</p>
+
+  <div style="display:flex;gap:32px;justify-content:center;flex-wrap:wrap;">
+    <div style="text-align:center;">
+      <div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-bottom:4px;">CONTACT</div>
+      <div style="font-size:15px;color:var(--g);">hello@terradomini.io</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-bottom:4px;">GITHUB</div>
+      <div style="font-size:15px;color:var(--g);">github.com/Richie6988/terra-domini</div>
+    </div>
+    <div style="text-align:center;">
+      <div style="font-family:var(--fm);font-size:10px;color:rgba(255,255,255,0.3);letter-spacing:0.1em;margin-bottom:4px;">PLAY NOW</div>
+      <div style="font-size:15px;color:var(--g);">terradomini.io</div>
+    </div>
+  </div>
+
+  <div class="disc" style="max-width:800px;margin:60px auto 0;">This presentation is confidential. All financial projections are estimates. TDC token value is not guaranteed. This is not an offer of securities. Terra Domini © 2024. All rights reserved.</div>
+</div>
+
+</div><!-- /deck -->
+
+<script>
+const slides = document.querySelectorAll('.slide');
+const dotsEl = document.getElementById('navDots');
+
+// Create nav dots
+slides.forEach((s,i)=>{
+  const d = document.createElement('button');
+  d.className = 'nav-dot' + (i===0?' active':'');
+  d.onclick = ()=>s.scrollIntoView({behavior:'smooth'});
+  d.title = `Slide ${i+1}`;
+  dotsEl.appendChild(d);
+});
+
+// Update active dot on scroll
+const io = new IntersectionObserver(entries=>{
+  entries.forEach(e=>{
+    if(e.isIntersecting){
+      const i = [...slides].indexOf(e.target);
+      dotsEl.querySelectorAll('.nav-dot').forEach((d,j)=>{
+        d.classList.toggle('active',i===j);
+      });
+    }
+  });
+},{threshold:0.5});
+
+slides.forEach(s=>io.observe(s));
+
+// Keyboard navigation
+document.addEventListener('keydown',e=>{
+  const active = document.querySelector('.nav-dot.active');
+  const dots = [...dotsEl.querySelectorAll('.nav-dot')];
+  const i = dots.indexOf(active);
+  if(e.key==='ArrowDown'||e.key==='ArrowRight'){
+    dots[Math.min(i+1,dots.length-1)]?.click();
+  } else if(e.key==='ArrowUp'||e.key==='ArrowLeft'){
+    dots[Math.max(i-1,0)]?.click();
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 120" width="400" height="120">
+  <defs>
+    <!-- Hex clip mask -->
+    <clipPath id="hexClip">
+      <polygon points="48,8 80,26 80,62 48,80 16,62 16,26" />
+    </clipPath>
+
+    <!-- Green glow filter -->
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+
+    <!-- Scan line effect -->
+    <filter id="scan">
+      <feTurbulence baseFrequency="0 0.5" numOctaves="1" result="noise"/>
+      <feColorMatrix type="saturate" values="0" in="noise" result="grayNoise"/>
+      <feBlend in="SourceGraphic" in2="grayNoise" mode="overlay" result="blend"/>
+      <feComposite in="blend" in2="SourceGraphic" operator="in"/>
+    </filter>
+
+    <!-- Animated gradient for hex fill -->
+    <linearGradient id="hexGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00FF87" stop-opacity="0.15"/>
+      <stop offset="100%" stop-color="#00C860" stop-opacity="0.05"/>
+    </linearGradient>
+
+    <!-- Text gradient -->
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="60%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#00FF87"/>
+    </linearGradient>
+  </defs>
+
+  <!-- ── Background hex shape ── -->
+  <g transform="translate(0,0)">
+    <!-- Outer glow ring -->
+    <polygon points="48,4 84,24 84,64 48,84 12,64 12,24"
+      fill="none" stroke="#00FF87" stroke-width="0.5" opacity="0.3">
+      <animate attributeName="opacity" values="0.3;0.7;0.3" dur="3s" repeatCount="indefinite"/>
+    </polygon>
+
+    <!-- Main hex -->
+    <polygon points="48,10 78,28 78,62 48,80 18,62 18,28"
+      fill="url(#hexGrad)" stroke="#00FF87" stroke-width="1">
+      <animate attributeName="stroke-opacity" values="0.6;1;0.6" dur="2s" repeatCount="indefinite"/>
+    </polygon>
+
+    <!-- Inner hex wireframe -->
+    <polygon points="48,22 66,32 66,54 48,64 30,54 30,32"
+      fill="none" stroke="#00FF87" stroke-width="0.5" opacity="0.4"/>
+
+    <!-- Hex center cross -->
+    <line x1="48" y1="22" x2="48" y2="64" stroke="#00FF87" stroke-width="0.3" opacity="0.3"/>
+    <line x1="30" y1="32" x2="66" y2="54" stroke="#00FF87" stroke-width="0.3" opacity="0.3"/>
+    <line x1="66" y1="32" x2="30" y2="54" stroke="#00FF87" stroke-width="0.3" opacity="0.3"/>
+
+    <!-- T letter inside hex -->
+    <text x="48" y="57" font-family="'Bebas Neue', Impact, sans-serif" font-size="36"
+      fill="#00FF87" text-anchor="middle" dominant-baseline="auto"
+      filter="url(#glow)">T</text>
+  </g>
+
+  <!-- ── Animated scan line sweep across hex ── -->
+  <rect x="10" y="0" width="80" height="3" fill="#00FF87" opacity="0.15" rx="1">
+    <animateTransform attributeName="transform" type="translate" values="0,10;0,80;0,10" dur="4s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;0.2;0" dur="4s" repeatCount="indefinite"/>
+  </rect>
+
+  <!-- ── TERRA text ── -->
+  <text x="102" y="62" font-family="'Bebas Neue', Impact, sans-serif"
+    font-size="58" letter-spacing="4" fill="url(#textGrad)">TERRA</text>
+
+  <!-- ── DOMINI text — outlined ── -->
+  <text x="102" y="95" font-family="'Bebas Neue', Impact, sans-serif"
+    font-size="34" letter-spacing="6"
+    fill="none" stroke="#00FF87" stroke-width="0.8" opacity="0.7">DOMINI</text>
+
+  <!-- ── Tagline ── -->
+  <text x="103" y="108" font-family="'IBM Plex Mono', 'Courier New', monospace"
+    font-size="9" fill="#00FF87" opacity="0.5" letter-spacing="2">CLAIM THE EARTH</text>
+
+  <!-- ── Decorative scan line on right ── -->
+  <line x1="102" y1="66" x2="395" y2="66" stroke="#00FF87" stroke-width="0.3" opacity="0.2"
+    stroke-dasharray="4 8">
+    <animate attributeName="stroke-dashoffset" values="0;-120" dur="4s" repeatCount="indefinite"/>
+  </line>
+
+  <!-- ── Corner brackets decoration ── -->
+  <g stroke="#00FF87" stroke-width="0.8" fill="none" opacity="0.4">
+    <path d="M2,2 L2,12 M2,2 L12,2"/>
+    <path d="M398,2 L398,12 M398,2 L388,2"/>
+    <path d="M2,118 L2,108 M2,118 L12,118"/>
+    <path d="M398,118 L398,108 M398,118 L388,118"/>
+  </g>
+
+  <!-- ── Blinking cursor ── -->
+  <rect x="385" y="100" width="6" height="10" fill="#00FF87" rx="1">
+    <animate attributeName="opacity" values="1;0;1" dur="1s" repeatCount="indefinite"/>
+  </rect>
+</svg>

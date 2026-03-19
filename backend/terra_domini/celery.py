@@ -56,6 +56,22 @@ app.conf.beat_schedule = {
         'schedule': 300.0,
         'options': {'queue': 'default'},
     },
+    # Addiction mechanics
+    'offline-harvest-notify': {
+        'task': 'addiction.offline_harvest_notify',
+        'schedule': 21600.0,  # every 6h
+        'options': {'queue': 'default'},
+    },
+    'streak-risk-notify': {
+        'task': 'addiction.streak_risk_notify',
+        'schedule': crontab(hour=20, minute=0),
+        'options': {'queue': 'default'},
+    },
+    'generate-daily-missions': {
+        'task': 'addiction.generate_daily_missions',
+        'schedule': crontab(hour=0, minute=0),
+        'options': {'queue': 'default'},
+    },
     # Daily metrics snapshot
     'daily-metrics': {
         'task': 'terra_domini.apps.accounts.tasks.daily_metrics_snapshot',
