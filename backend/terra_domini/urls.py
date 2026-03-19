@@ -44,7 +44,7 @@ router.register(r'pois',        WorldPOIViewSet,  basename='poi')
 router.register(r'social',      FriendViewSet,    basename='social')
 router.register(r'progression', ProgressionViewSet, basename='progression')
 router.register(r'players', PlayerViewSet, basename='players')
-router.register(r'social', TradeViewSet, basename='social')
+router.register(r'trade', TradeViewSet, basename='trade')
 
 # ─── URL Patterns ─────────────────────────────────────────────────────────────
 urlpatterns = [

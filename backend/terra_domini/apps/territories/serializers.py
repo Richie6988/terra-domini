@@ -74,9 +74,12 @@ class PlayerProfileSerializer(serializers.ModelSerializer):
             return None
 
     def get_active_boosts(self, obj):
-        from django.utils import timezone
-        boosts = obj.active_boosts.filter(expires_at__gt=timezone.now())
-        return [{'type': b.boost_type, 'value': b.boost_value, 'expires_at': b.expires_at.isoformat()} for b in boosts]
+        try:
+            from django.utils import timezone
+            boosts = obj.active_boosts.filter(expires_at__gt=timezone.now())
+            return [{'type': b.boost_type, 'value': b.boost_value, 'expires_at': b.expires_at.isoformat()} for b in boosts]
+        except Exception:
+            return []
 
 
 # ─── Territory ────────────────────────────────────────────────────────────────
