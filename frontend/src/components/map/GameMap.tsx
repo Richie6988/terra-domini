@@ -36,6 +36,9 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
   const [tile,        setTile]        = useState<keyof typeof TILES>('dark')
   const [showHex,     setShowHex]     = useState(true)
+  const [showOverlay,  setShowOverlay]  = useState(true)
+  const [showResources,setShowResources] = useState(true)
+  const [showGrid,     setShowGrid]     = useState(false)
   const [zoom,        setZoom]        = useState(13)
   const [center,      setCenter]      = useState<[number,number]>([48.8566, 2.3522])
   const [claimTarget, setClaimTarget] = useState<TerritoryLight | null>(null)

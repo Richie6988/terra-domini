@@ -2,7 +2,7 @@
  * GameHUD — persistent top overlay with player stats, TDC, active battles.
  */
 import { useState, useEffect } from 'react'
-import { Sword, Shield, Users, Trophy, Wifi, WifiOff, Bell, Map } from 'lucide-react'
+import { Sword, Shield, Users, Trophy, Wifi, WifiOff, Bell, Map, ArrowRightLeft, Bitcoin, Star } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { usePlayer, useTDCBalance, useActiveBattles, useWsConnected, useNotifications, useStore } from '../../store'
 import { TDCShopPanel } from '../shop/TDCShopPanel'
