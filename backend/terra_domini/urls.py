@@ -17,6 +17,7 @@ from terra_domini.apps.accounts.views import (
 )
 from terra_domini.apps.alliances.views import AllianceViewSet, DiplomacyViewSet
 from terra_domini.apps.events.views import ControlTowerViewSet, EventViewSet
+from terra_domini.apps.events.poi_views import WorldPOIViewSet
 
 router = DefaultRouter()
 router.register(r'territories', TerritoryViewSet, basename='territory')
@@ -28,6 +29,7 @@ router.register(r'diplomacy', DiplomacyViewSet, basename='diplomacy')
 router.register(r'events', EventViewSet, basename='event')
 router.register(r'control-towers', ControlTowerViewSet, basename='control-tower')
 router.register(r'ads', AdCampaignViewSet, basename='ad')
+router.register(r'pois', WorldPOIViewSet, basename='poi')
 
 urlpatterns = [
     # Admin

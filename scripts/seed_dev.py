@@ -185,6 +185,11 @@ if tower and not ControlTowerEvent.objects.filter(territory=tower).exists():
     )
     print(f"  ✅ Control Tower event scheduled for: {tower.landmark_name}")
 
+# Run POI seed
+print("\n🌍 Seeding World POIs...")
+import subprocess, sys
+subprocess.run([sys.executable, 'scripts/seed_pois.py'], check=False)
+
 print("\n✅ Seed complete! Dev credentials:")
 print("   Alice:   alice@td.local   / testpassword123  (rank 15, 5000 TDC, 8 territories)")
 print("   Bob:     bob@td.local     / testpassword123  (rank 8,  1200 TDC, 7 territories)")
