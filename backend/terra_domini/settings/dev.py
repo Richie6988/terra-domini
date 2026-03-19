@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'whitenoise.runserver_nostatic',  # must be before staticfiles
+    # 'whitenoise.runserver_nostatic',  # disabled in dev — use Django static serving
     # Third party
     'rest_framework',
     'rest_framework_simplejwt',
@@ -177,7 +177,7 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 # Whitenoise: serve static files efficiently in production (no nginx needed)
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'  # dev: no compression/caching
 WHITENOISE_ROOT = BASE_DIR.parent / 'frontend' / 'dist'
 WHITENOISE_INDEX_FILE = True  # serve index.html for directory requests
 

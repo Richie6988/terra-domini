@@ -1,3 +1,4 @@
+// FORCE_REBUILD_TS: 1773933342
 /**
  * Zustand global store.
  * Slices: auth, game (territories, battles), ui, tdc
