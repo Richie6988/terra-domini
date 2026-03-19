@@ -27,22 +27,19 @@ flower==2.0.1
 
 # ─── Geo / Map ───────────────────────────────────────────────────────────────
 h3==3.7.7
-# IMPORTANT: shapely 2.0.4 FAILS on Python 3.12 (pkg_resources missing).
-# Use 2.1.0+ which ships as pre-built musllinux wheel — no compilation needed.
-# If this still fails: pip install shapely --no-build-isolation
 shapely==2.1.2
 geojson==3.1.0
 
 # ─── Blockchain / Web3 ───────────────────────────────────────────────────────
-web3==6.19.0
-eth-account==0.12.3
+# web3 7.x + eth-account 0.13.x share hexbytes>=1.2.0 — fully compatible
+web3==7.6.0
+eth-account==0.13.4
 
 # ─── MongoDB ─────────────────────────────────────────────────────────────────
 pymongo==4.7.2
 motor==3.4.0
 
 # ─── Kafka ───────────────────────────────────────────────────────────────────
-# kafka-python 2.0.2 is BROKEN on Python 3.12 — use this fork instead
 kafka-python-ng>=2.2.3
 
 # ─── Security ────────────────────────────────────────────────────────────────
