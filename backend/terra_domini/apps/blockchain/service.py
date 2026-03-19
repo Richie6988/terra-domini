@@ -13,7 +13,14 @@ from django.conf import settings
 from django.db import models, transaction
 from django.utils import timezone
 from web3 import Web3
-from web3.middleware import geth_poa_middleware
+# web3 v7 renamed geth_poa_middleware → ExtraDataToPOAMiddleware
+try:
+    from web3.middleware import ExtraDataToPOAMiddleware as geth_poa_middleware
+except ImportError:
+    try:
+        from web3.middleware import geth_poa_middleware  # web3 v6
+    except ImportError:
+        geth_poa_middleware = None
 from eth_account import Account
 
 logger = logging.getLogger('terra_domini.blockchain')
@@ -41,7 +48,7 @@ class BlockchainService:
 
     def __init__(self):
         self.w3 = Web3(Web3.HTTPProvider(BLOCKCHAIN_CFG['RPC_URL']))
-        self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)  # Polygon PoS
+        if geth_poa_middleware: self.w3.middleware_onion.inject(geth_poa_middleware, layer=0)  # Polygon PoS
 
         if not self.w3.is_connected():
             logger.error("Cannot connect to blockchain RPC")
