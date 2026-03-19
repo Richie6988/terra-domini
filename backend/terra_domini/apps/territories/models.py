@@ -155,3 +155,108 @@ class TradeRoute(models.Model):
 
     class Meta:
         db_table = 'trade_routes'
+
+
+# ─── Territory Customization ───────────────────────────────────────────────
+class TerritoryCustomization(models.Model):
+    """
+    Unlocked based on contiguous cluster size.
+    1 zone  → rename + emoji
+    3 zones → embed image / background color
+    6 zones → embed video URL
+    10 zones→ live stream RTMP slot
+    15 zones→ private chat room
+    25 zones→ 3D metaverse portal
+    50 zones→ premium ad placement
+    """
+    EMBED_TYPES = [
+        ('none', 'None'),
+        ('image', 'Image URL'),
+        ('video', 'Video URL (YouTube/MP4)'),
+        ('livestream', 'Live Stream'),
+        ('chat', 'Private Chat Room'),
+        ('metaverse', '3D Metaverse Portal'),
+        ('ad_slot', 'Premium Ad Slot'),
+    ]
+    territory        = models.OneToOneField(Territory, on_delete=models.CASCADE, related_name='customization')
+    display_name     = models.CharField(max_length=80, blank=True)
+    flag_emoji       = models.CharField(max_length=8, blank=True)
+    border_color     = models.CharField(max_length=7, default='#00FF87')  # hex
+    fill_color       = models.CharField(max_length=7, blank=True)
+    embed_type       = models.CharField(max_length=20, choices=EMBED_TYPES, default='none')
+    embed_url        = models.URLField(blank=True)
+    embed_title      = models.CharField(max_length=120, blank=True)
+    chat_room_id     = models.CharField(max_length=36, blank=True)  # UUID
+    ad_advertiser    = models.CharField(max_length=120, blank=True)
+    ad_cpm_rate      = models.DecimalField(max_digits=8, decimal_places=4, default=0)
+    ad_impressions   = models.BigIntegerField(default=0)
+    ad_revenue_total = models.DecimalField(max_digits=12, decimal_places=4, default=0)
+    unlocked_tier    = models.PositiveSmallIntegerField(default=0)  # cluster size when last updated
+    updated_at       = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'territory_customization'
+
+
+# ─── Map Overlay Events ─────────────────────────────────────────────────────
+class MapOverlayEvent(models.Model):
+    """
+    Live geo-mapped events displayed as animated sublayer on the map.
+    Troop movements, resource drops, war declarations, trade convoys,
+    live news pins, player messages.
+    """
+    EVENT_TYPES = [
+        ('troop_move', 'Troop Movement'),
+        ('attack_wave', 'Attack Wave'),
+        ('trade_convoy', 'Trade Convoy'),
+        ('resource_drop', 'Resource Drop'),
+        ('news_pin', 'Live News Pin'),
+        ('player_msg', 'Player Message'),
+        ('war_declaration', 'War Declaration'),
+        ('alliance_rally', 'Alliance Rally'),
+        ('tower_siege', 'Tower Siege'),
+        ('airdrop', 'TDC Airdrop'),
+    ]
+    event_type   = models.CharField(max_length=20, choices=EVENT_TYPES)
+    player       = models.ForeignKey('accounts.Player', null=True, blank=True, on_delete=models.SET_NULL)
+    territory    = models.ForeignKey(Territory, null=True, blank=True, on_delete=models.SET_NULL)
+    from_lat     = models.FloatField(null=True)
+    from_lon     = models.FloatField(null=True)
+    to_lat       = models.FloatField(null=True)
+    to_lon       = models.FloatField(null=True)
+    title        = models.CharField(max_length=160)
+    body         = models.TextField(blank=True)
+    icon_emoji   = models.CharField(max_length=8, default='📍')
+    icon_3d      = models.CharField(max_length=60, blank=True)  # glTF asset key
+    payload      = models.JSONField(default=dict)
+    is_active    = models.BooleanField(default=True)
+    starts_at    = models.DateTimeField(auto_now_add=True)
+    expires_at   = models.DateTimeField(null=True)
+
+    class Meta:
+        db_table = 'map_overlay_event'
+        ordering  = ['-starts_at']
+        indexes   = [models.Index(fields=['event_type', 'is_active', 'expires_at'])]
+
+
+# ─── Territory Cluster Cache ───────────────────────────────────────────────
+class TerritoryCluster(models.Model):
+    """
+    Denormalized cache of contiguous territory clusters per player.
+    Recomputed by Celery task on any territory capture/loss.
+    Determines customization unlock tier.
+    """
+    player       = models.ForeignKey('accounts.Player', on_delete=models.CASCADE, related_name='clusters')
+    cluster_id   = models.CharField(max_length=36)   # UUID, stable across recomputes
+    size         = models.PositiveIntegerField(default=1)
+    centroid_lat = models.FloatField(default=0)
+    centroid_lon = models.FloatField(default=0)
+    unlock_tier  = models.PositiveSmallIntegerField(default=0)
+    tdc_per_24h  = models.DecimalField(max_digits=10, decimal_places=4, default=0)
+    tdi_per_24h  = models.DecimalField(max_digits=14, decimal_places=8, default=0)
+    last_payout  = models.DateTimeField(null=True)
+    computed_at  = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'territory_cluster'
+        unique_together = [('player', 'cluster_id')]

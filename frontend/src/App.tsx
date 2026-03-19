@@ -1,7 +1,7 @@
 /**
  * App.tsx — root component with routing and panel system.
  */
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
@@ -16,6 +16,10 @@ import { EventsPanel } from './components/hud/EventsPanel'
 import { ProfilePanel } from './components/hud/ProfilePanel'
 import { AlliancePanel } from './components/alliance/AlliancePanel'
 import { TradePanel } from './components/hud/TradePanel'
+import { CryptoPanel } from './components/crypto/CryptoPanel'
+import { LeaderboardPanel } from './components/leaderboard/LeaderboardPanel'
+import { DailyClicker } from './components/clicker/DailyClicker'
+
 import { WarTicker } from './components/hud/WarTicker'
 
 const LoginPage    = lazy(() => import('./pages/LoginPage'))
@@ -43,6 +47,7 @@ function GameScreen() {
   const selectedTerritory    = useStore((s) => s.selectedTerritory)
   const player               = useStore((s) => s.player)
   const activePanel          = useStore((s) => s.activePanel)
+  const [showClicker, setShowClicker] = useState(false)
   const setActivePanel       = useStore((s) => s.setActivePanel)
 
   return (
@@ -54,7 +59,7 @@ function GameScreen() {
       />
 
       {/* HUD */}
-      <GameHUD />
+      <GameHUD onClickerOpen={() => setShowClicker(true)} />
 
       {/* Live war ticker */}
       <WarTicker />
@@ -70,7 +75,10 @@ function GameScreen() {
         {activePanel === 'alliance' && <AlliancePanel  onClose={() => setActivePanel(null)} />}
         {activePanel === 'events'   && <EventsPanel    onClose={() => setActivePanel(null)} />}
         {activePanel === 'profile'  && <ProfilePanel   onClose={() => setActivePanel(null)} />}
-        {activePanel === 'trade'    && <TradePanel     onClose={() => setActivePanel(null)} />}
+        {activePanel === 'trade'    && <TradePanel       onClose={() => setActivePanel(null)} />}
+        {activePanel === 'crypto'   && <CryptoPanel      onClose={() => setActivePanel(null)} />}
+        {activePanel === 'leaderboard' && <LeaderboardPanel onClose={() => setActivePanel(null)} />}
+        {showClicker && <DailyClicker onClose={() => setShowClicker(false)} />}
       </AnimatePresence>
 
       {/* Auto-tutorial for new players */}

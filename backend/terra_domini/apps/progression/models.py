@@ -537,3 +537,82 @@ def check_achievements_for_player(player_id: str):
             pass
 
     return {'unlocked': len(unlocked), 'achievements': unlocked}
+
+
+# ─── Daily Clicker ────────────────────────────────────────────────────────
+class DailyClickerSession(models.Model):
+    """
+    60-second daily mini-game. Player clicks targets that appear.
+    Reward = base_tdc + (clicks / max_clicks) * bonus_pool + random loot.
+    Streak multiplier applies from PlayerStreak.
+    """
+    LOOT_TIERS = [
+        ('common',    'Common'),
+        ('rare',      'Rare'),
+        ('epic',      'Epic'),
+        ('legendary', 'Legendary'),
+    ]
+    player         = models.ForeignKey('accounts.Player', on_delete=models.CASCADE, related_name='clicker_sessions')
+    date           = models.DateField()
+    clicks         = models.PositiveIntegerField(default=0)
+    max_clicks     = models.PositiveIntegerField(default=60)
+    score          = models.BigIntegerField(default=0)
+    duration_ms    = models.PositiveIntegerField(default=60000)
+    tdc_earned     = models.DecimalField(max_digits=10, decimal_places=4, default=0)
+    tdi_earned     = models.DecimalField(max_digits=14, decimal_places=8, default=0)
+    loot_tier      = models.CharField(max_length=12, choices=LOOT_TIERS, default='common')
+    loot_item      = models.CharField(max_length=60, blank=True)   # 'resource_food_100', 'boost_defense_24h'
+    loot_quantity  = models.PositiveIntegerField(default=0)
+    streak_mult    = models.FloatField(default=1.0)
+    completed      = models.BooleanField(default=False)
+    completed_at   = models.DateTimeField(null=True)
+
+    class Meta:
+        db_table = 'daily_clicker_session'
+        unique_together = [('player', 'date')]
+
+
+class ClickerTarget(models.Model):
+    """Pre-seeded target configs for the clicker mini-game."""
+    TARGET_TYPES = [
+        ('coin', '🪙 Coin'),
+        ('crate', '📦 Crate'),
+        ('bomb', '💣 Bomb - avoid'),
+        ('multiplier', '⚡ Multiplier'),
+        ('rare_gem', '💎 Rare Gem'),
+    ]
+    target_type  = models.CharField(max_length=20, choices=TARGET_TYPES)
+    base_points  = models.PositiveIntegerField(default=10)
+    spawn_weight = models.FloatField(default=1.0)  # relative probability
+    is_avoidance = models.BooleanField(default=False)  # clicking = penalty
+    icon_3d      = models.CharField(max_length=60, blank=True)
+    color_hex    = models.CharField(max_length=7, default='#FFB800')
+    is_active    = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'clicker_target'
+
+
+# ─── Leaderboard Snapshot ─────────────────────────────────────────────────
+class LeaderboardSnapshot(models.Model):
+    """
+    Materialized leaderboard, recomputed every 15 min by Celery.
+    Global + per-region (country_code).
+    """
+    SCOPES = [('global', 'Global'), ('regional', 'Regional'), ('alliance', 'Alliance')]
+    scope         = models.CharField(max_length=12, choices=SCOPES, default='global')
+    region_code   = models.CharField(max_length=8, blank=True)   # ISO country code
+    alliance_id   = models.UUIDField(null=True, blank=True)
+    player        = models.ForeignKey('accounts.Player', on_delete=models.CASCADE, related_name='leaderboard_entries')
+    rank          = models.PositiveIntegerField()
+    prev_rank     = models.PositiveIntegerField(null=True)
+    score         = models.BigIntegerField(default=0)
+    territories   = models.PositiveIntegerField(default=0)
+    battles_won   = models.PositiveIntegerField(default=0)
+    tdc_total     = models.DecimalField(max_digits=16, decimal_places=4, default=0)
+    computed_at   = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'leaderboard_snapshot'
+        unique_together = [('scope', 'region_code', 'player')]
+        ordering  = ['rank']

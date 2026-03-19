@@ -9,6 +9,7 @@ import 'leaflet/dist/leaflet.css'
 import { AnimatePresence } from 'framer-motion'
 import { useStore } from '../../store'
 import { FavoritePinsPanel } from './FavoritePins'
+import { MapOverlayLayer } from './MapOverlayLayer'
 import { ClaimModal } from './ClaimModal'
 import { AttackPanel } from '../hud/AttackPanel'
 import { injectGlowFilter, makeHexPolygon } from './HexLayer'
@@ -156,6 +157,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       </div>
 
       {/* Favorite pins — bottom left */}
+      <MapOverlayLayer map={mapRef.current} />
       <FavoritePinsPanel onNavigate={navigateTo} currentLat={center[0]} currentLon={center[1]} currentZoom={zoom} />
 
       {/* Modals */}

@@ -161,7 +161,9 @@ export function GameHUD() {
           { panel: 'alliance' as const, icon: <Users size={18} />, label: 'Alliance', badge: 0 },
           { panel: 'events' as const, icon: <Trophy size={18} />, label: 'Events', badge: 0 },
           { panel: 'profile' as const, icon: <Shield size={18} />, label: 'Profile', badge: 0 },
-          { panel: 'trade' as const, icon: <ArrowRightLeft size={18} />, label: 'Trade', badge: 0 },
+          { panel: 'trade' as const,        icon: <ArrowRightLeft size={18} />, label: 'Trade',     badge: 0 },
+          { panel: 'crypto' as const,       icon: <Bitcoin size={18} />,         label: 'Crypto',    badge: 0 },
+          { panel: 'leaderboard' as const,  icon: <Star size={18} />,            label: 'Ranks',     badge: 0 },
         ].map(({ panel, icon, label, badge }) => (
           <button
             key={panel}

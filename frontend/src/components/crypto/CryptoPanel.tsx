@@ -1,0 +1,236 @@
+/**
+ * CryptoPanel — Section crypto complète :
+ * Wallet TDI, prix live, newsfeed, convert TDI↔TDC, withdraw
+ */
+import { useState } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { motion } from 'framer-motion'
+import { api } from '../../services/api'
+import toast from 'react-hot-toast'
+
+const toF = (v: unknown, d = 2) => parseFloat(String(v ?? 0)).toFixed(d)
+
+function PriceTicker({ prices }: { prices: Record<string, any> }) {
+  return (
+    <div style={{ display: 'flex', gap: 8, overflowX: 'auto', padding: '10px 0', scrollbarWidth: 'none' }}>
+      {Object.entries(prices).map(([sym, p]) => {
+        const up = (p.change_24h ?? 0) > 0
+        return (
+          <div key={sym} style={{ flexShrink: 0, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '8px 14px', border: `1px solid ${sym === 'TDI' ? 'rgba(0,255,135,0.25)' : 'rgba(255,255,255,0.07)'}`, minWidth: 90 }}>
+            <div style={{ fontSize: 10, color: '#6B7280', letterSpacing: '0.1em' }}>{sym}</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: sym === 'TDI' ? '#00FF87' : '#fff', fontFamily: 'monospace', marginTop: 2 }}>
+              ${p.price_usd < 0.01 ? parseFloat(p.price_usd).toFixed(6) : parseFloat(p.price_usd).toFixed(2)}
+            </div>
+            <div style={{ fontSize: 10, color: up ? '#10B981' : '#EF4444', marginTop: 2 }}>
+              {up ? '▲' : '▼'} {Math.abs(p.change_24h ?? 0).toFixed(2)}%
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+function WalletCard({ wallet, onConvert, onWithdraw }: any) {
+  return (
+    <div style={{ background: 'linear-gradient(135deg, rgba(0,255,135,0.07) 0%, rgba(139,92,246,0.07) 100%)', border: '1px solid rgba(0,255,135,0.18)', borderRadius: 16, padding: 20, marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
+        <div>
+          <div style={{ fontSize: 10, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>TDI Balance</div>
+          <div style={{ fontSize: 28, fontWeight: 800, color: '#00FF87', fontFamily: 'monospace', marginTop: 2 }}>
+            {toF(wallet?.tdi_balance, 4)}
+            <span style={{ fontSize: 13, color: '#6B7280', marginLeft: 6 }}>TDI</span>
+          </div>
+          <div style={{ fontSize: 12, color: '#9CA3AF', marginTop: 3 }}>≈ ${toF(wallet?.tdi_usd_value, 2)} USD</div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: 10, color: '#6B7280' }}>In-Game TDC</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#FFB800', fontFamily: 'monospace', marginTop: 2 }}>🪙 {toF(wallet?.tdc_in_game, 0)}</div>
+          <div style={{ fontSize: 10, color: '#4B5563', marginTop: 3 }}>Staked: {toF(wallet?.tdi_staked, 4)}</div>
+        </div>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <button onClick={onConvert} style={{ padding: 10, background: 'rgba(0,255,135,0.12)', border: '1px solid rgba(0,255,135,0.3)', borderRadius: 10, color: '#00FF87', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>⇄ TDI → TDC</button>
+        <button onClick={onWithdraw} style={{ padding: 10, background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 10, color: '#A78BFA', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>↗ Withdraw</button>
+      </div>
+      {wallet?.tdi_pending > 0 && (
+        <div style={{ marginTop: 10, padding: '6px 10px', background: 'rgba(245,158,11,0.1)', border: '1px solid rgba(245,158,11,0.2)', borderRadius: 8, fontSize: 11, color: '#F59E0B' }}>
+          ⏳ {toF(wallet.tdi_pending, 4)} TDI pending withdrawal
+        </div>
+      )}
+      <div style={{ marginTop: 14, fontSize: 10, color: '#374151', lineHeight: 1.6, textAlign: 'center' }}>
+        TDI earned = crypto equivalent of your TDC purchases · Withdraw to Polygon wallet after KYC
+      </div>
+    </div>
+  )
+}
+
+function ConvertModal({ wallet, onClose }: { wallet: any; onClose: () => void }) {
+  const [amount, setAmount] = useState('10')
+  const qc = useQueryClient()
+  const mut = useMutation({
+    mutationFn: () => api.post('/wallet/convert/', { amount_tdi: parseFloat(amount) }),
+    onSuccess: (r) => { toast.success(`Converted → ${r.data.tdc_earned?.toFixed(1)} TDC`); qc.invalidateQueries({ queryKey: ['wallet'] }); onClose() },
+    onError: (e: any) => toast.error(e.response?.data?.error || 'Failed'),
+  })
+  const rate = wallet?.tdi_price_usd ? (wallet.tdi_price_usd / 0.001) : 4.2
+  const preview = (parseFloat(amount) || 0) * rate
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+      <motion.div initial={{ y: 300 }} animate={{ y: 0 }} style={{ background: '#0F0F1A', borderRadius: '20px 20px 0 0', padding: 28, width: '100%', maxWidth: 420, border: '1px solid rgba(255,255,255,0.08)' }}>
+        <div style={{ fontSize: 17, fontWeight: 700, color: '#fff', marginBottom: 6 }}>Convert TDI → TDC</div>
+        <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 14 }}>Rate: 1 TDI ≈ {rate.toFixed(1)} TDC · Available: {toF(wallet?.tdi_balance, 4)} TDI</div>
+        <input type="number" value={amount} onChange={e => setAmount(e.target.value)}
+          style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, padding: '12px 16px', color: '#fff', fontSize: 18, fontFamily: 'monospace', outline: 'none', boxSizing: 'border-box', marginBottom: 10 }} />
+        <div style={{ textAlign: 'center', color: '#00FF87', fontSize: 16, fontWeight: 700, marginBottom: 16 }}>→ 🪙 {preview.toFixed(1)} TDC</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <button onClick={onClose} style={{ padding: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#6B7280', cursor: 'pointer' }}>Cancel</button>
+          <button onClick={() => mut.mutate()} disabled={mut.isPending} style={{ padding: 12, background: 'rgba(0,255,135,0.15)', border: '1px solid rgba(0,255,135,0.4)', borderRadius: 10, color: '#00FF87', cursor: 'pointer', fontWeight: 700 }}>
+            {mut.isPending ? '…' : 'Convert'}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+function CryptoNewsfeed() {
+  const { data: news = [] } = useQuery({
+    queryKey: ['crypto-news'],
+    queryFn: () => api.get('/wallet/newsfeed/').then(r => r.data ?? []),
+    refetchInterval: 120000,
+  })
+  if (!news.length) return <div style={{ textAlign: 'center', color: '#4B5563', padding: '30px 0', fontSize: 13 }}>Loading crypto news…</div>
+  return (
+    <div>
+      {(news as any[]).map((a, i) => (
+        <a key={i} href={a.url} target="_blank" rel="noopener" style={{ display: 'block', textDecoration: 'none', padding: '12px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+            {a.thumb && <img src={a.thumb} alt="" style={{ width: 52, height: 52, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} />}
+            <div>
+              <div style={{ fontSize: 13, color: '#E5E7EB', fontWeight: 500, lineHeight: 1.4, marginBottom: 4 }}>{a.title}</div>
+              <div style={{ fontSize: 10, color: '#6B7280' }}>{a.source}</div>
+            </div>
+          </div>
+        </a>
+      ))}
+    </div>
+  )
+}
+
+const TABS = [{ id: 'wallet', label: '💎 Wallet' }, { id: 'markets', label: '📈 Markets' }, { id: 'news', label: '📰 News' }, { id: 'history', label: '📋 History' }]
+
+const TX_COLORS: Record<string, string> = {
+  purchase_bonus: '#00FF87', territory_yield: '#10B981', stake_reward: '#F59E0B',
+  withdraw: '#EF4444', convert_to_tdc: '#8B5CF6', referral_bonus: '#06B6D4',
+}
+
+export function CryptoPanel({ onClose }: { onClose: () => void }) {
+  const [tab, setTab] = useState('wallet')
+  const [showConvert, setShowConvert] = useState(false)
+  const [showWithdraw, setShowWithdraw] = useState(false)
+  const [wAddr, setWAddr] = useState('')
+  const [wAmt, setWAmt] = useState('10')
+  const qc = useQueryClient()
+
+  const { data: wallet } = useQuery({ queryKey: ['wallet'], queryFn: () => api.get('/wallet/me/').then(r => r.data), refetchInterval: 30000 })
+  const { data: prices = {} } = useQuery({ queryKey: ['prices'], queryFn: () => api.get('/wallet/prices/').then(r => r.data), refetchInterval: 60000 })
+  const { data: txHistory = [] } = useQuery({ queryKey: ['wallet-tx'], queryFn: () => api.get('/wallet/transactions/').then(r => r.data ?? []), enabled: tab === 'history' })
+
+  const withdrawMut = useMutation({
+    mutationFn: () => api.post('/wallet/withdraw/', { amount_tdi: parseFloat(wAmt), wallet_address: wAddr }),
+    onSuccess: () => { toast.success('Withdrawal submitted (24-48h)'); setShowWithdraw(false); qc.invalidateQueries({ queryKey: ['wallet'] }) },
+    onError: (e: any) => toast.error(e.response?.data?.error || 'Failed'),
+  })
+
+  return (
+    <>
+      <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 400, zIndex: 1000, display: 'flex', flexDirection: 'column', background: '#0A0A14', borderLeft: '1px solid rgba(255,255,255,0.07)' }}>
+
+        <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+          <span style={{ fontSize: 20, marginRight: 10 }}>💎</span>
+          <span style={{ fontSize: 17, fontWeight: 600, color: '#fff', flex: 1 }}>Crypto</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 22 }}>×</button>
+        </div>
+
+        <div style={{ padding: '0 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
+          <PriceTicker prices={prices} />
+        </div>
+
+        <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+          {TABS.map(t => (
+            <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: '10px 4px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 11, borderBottom: tab === t.id ? '2px solid #00FF87' : '2px solid transparent', color: tab === t.id ? '#00FF87' : '#6B7280' }}>{t.label}</button>
+          ))}
+        </div>
+
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
+          {tab === 'wallet' && <WalletCard wallet={wallet} onConvert={() => setShowConvert(true)} onWithdraw={() => setShowWithdraw(true)} />}
+
+          {tab === 'markets' && Object.entries(prices).map(([sym, p]: any) => (
+            <div key={sym} style={{ display: 'flex', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', background: sym === 'TDI' ? 'rgba(0,255,135,0.12)' : 'rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, marginRight: 14, flexShrink: 0 }}>
+                {sym === 'BTC' ? '₿' : sym === 'ETH' ? 'Ξ' : sym === 'MATIC' ? '⬡' : '💎'}
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: '#fff' }}>{sym}</div>
+                {p.market_cap && <div style={{ fontSize: 10, color: '#4B5563' }}>MCap ${(p.market_cap / 1e9).toFixed(1)}B</div>}
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 15, fontFamily: 'monospace', fontWeight: 700, color: sym === 'TDI' ? '#00FF87' : '#fff' }}>
+                  ${p.price_usd < 0.01 ? p.price_usd.toFixed(6) : p.price_usd.toFixed(2)}
+                </div>
+                <div style={{ fontSize: 11, color: (p.change_24h ?? 0) > 0 ? '#10B981' : '#EF4444' }}>
+                  {(p.change_24h ?? 0) > 0 ? '▲' : '▼'} {Math.abs(p.change_24h ?? 0).toFixed(2)}%
+                </div>
+              </div>
+            </div>
+          ))}
+
+          {tab === 'news' && <CryptoNewsfeed />}
+
+          {tab === 'history' && (
+            <div>
+              {!(txHistory as any[]).length && <div style={{ textAlign: 'center', color: '#4B5563', padding: '30px 0' }}>No transactions yet</div>}
+              {(txHistory as any[]).map((tx, i) => (
+                <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <div>
+                    <div style={{ fontSize: 12, color: '#9CA3AF', fontWeight: 500 }}>{tx.type.replace(/_/g, ' ')}</div>
+                    <div style={{ fontSize: 10, color: '#4B5563', marginTop: 2 }}>{tx.note}</div>
+                    <div style={{ fontSize: 10, color: '#374151', marginTop: 1 }}>{new Date(tx.date).toLocaleDateString()}</div>
+                  </div>
+                  <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'monospace', color: TX_COLORS[tx.type] ?? '#fff' }}>
+                    {tx.amount > 0 ? '+' : ''}{parseFloat(tx.amount).toFixed(6)} TDI
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </motion.div>
+
+      {showConvert && <ConvertModal wallet={wallet} onClose={() => setShowConvert(false)} />}
+
+      {showWithdraw && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <motion.div initial={{ y: 300 }} animate={{ y: 0 }} style={{ background: '#0F0F1A', borderRadius: '20px 20px 0 0', padding: 28, width: '100%', maxWidth: 420 }}>
+            <div style={{ fontSize: 17, fontWeight: 700, color: '#fff', marginBottom: 4 }}>Withdraw TDI</div>
+            <div style={{ fontSize: 11, color: '#EF4444', marginBottom: 16 }}>⚠️ KYC required · Min 10 TDI · 24-48h</div>
+            <input type="number" value={wAmt} onChange={e => setWAmt(e.target.value)} placeholder="Amount TDI"
+              style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: 12, color: '#fff', fontSize: 16, outline: 'none', boxSizing: 'border-box', marginBottom: 10 }} />
+            <input value={wAddr} onChange={e => setWAddr(e.target.value)} placeholder="0x... Polygon wallet"
+              style={{ width: '100%', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)', borderRadius: 10, padding: 12, color: '#fff', fontSize: 12, fontFamily: 'monospace', outline: 'none', boxSizing: 'border-box', marginBottom: 16 }} />
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              <button onClick={() => setShowWithdraw(false)} style={{ padding: 12, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: '#6B7280', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={() => withdrawMut.mutate()} disabled={withdrawMut.isPending} style={{ padding: 12, background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.4)', borderRadius: 10, color: '#A78BFA', cursor: 'pointer', fontWeight: 700 }}>
+                {withdrawMut.isPending ? '…' : 'Withdraw'}
+              </button>
+            </div>
+          </motion.div>
+        </div>
+      )}
+    </>
+  )
+}

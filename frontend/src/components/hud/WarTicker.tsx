@@ -27,6 +27,13 @@ export function WarTicker() {
   const notifications = useStore(s => s.notifications)
 
   // Load tower wars
+
+  // Territory income
+  const { data: income } = useQuery({
+    queryKey: ['territory-income'],
+    queryFn: () => api.get('/territories-geo/income/').then(r => r.data),
+    refetchInterval: 60000,
+  })
   const { data: towersData } = useQuery({
     queryKey: ['ticker-towers'],
     queryFn: () => api.get('/control-towers/').then(r => r.data?.results ?? []),

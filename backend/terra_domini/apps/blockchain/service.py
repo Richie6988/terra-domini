@@ -284,3 +284,62 @@ class AdCampaignRevenue(models.Model):
     class Meta:
         db_table = 'ad_campaign_revenue'
         unique_together = ['territory', 'campaign', 'date']
+
+
+# ─── Dual Currency Wallet ──────────────────────────────────────────────────
+class CryptoWallet(models.Model):
+    """
+    Each player has an internal TDI (Terra Domini Invest) balance.
+    When TDC is purchased with real money → TDI credited at current MATIC rate.
+    TDI can be: reinvested into TDC, held as crypto, or withdrawn to external wallet.
+    """
+    player          = models.OneToOneField('accounts.Player', on_delete=models.CASCADE, related_name='crypto_wallet')
+    tdi_balance     = models.DecimalField(max_digits=18, decimal_places=8, default=0)  # internal TDI
+    tdi_staked      = models.DecimalField(max_digits=18, decimal_places=8, default=0)  # staked in game
+    tdi_pending_withdraw = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    total_tdi_earned  = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    total_tdi_withdrawn = models.DecimalField(max_digits=18, decimal_places=8, default=0)
+    external_wallet   = models.CharField(max_length=42, blank=True)  # 0x... Polygon address
+    kyc_verified      = models.BooleanField(default=False)
+    created_at        = models.DateTimeField(auto_now_add=True)
+    updated_at        = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'crypto_wallet'
+
+
+class TDITransaction(models.Model):
+    """Ledger for all TDI movements."""
+    TX_TYPES = [
+        ('purchase_bonus', 'TDC Purchase Bonus'),
+        ('territory_yield', 'Territory Daily Yield'),
+        ('stake_reward', 'Staking Reward'),
+        ('withdraw', 'Withdrawal to External Wallet'),
+        ('convert_to_tdc', 'Convert TDI → TDC'),
+        ('referral_bonus', 'Referral Bonus'),
+    ]
+    player      = models.ForeignKey('accounts.Player', on_delete=models.CASCADE, related_name='tdi_transactions')
+    tx_type     = models.CharField(max_length=30, choices=TX_TYPES)
+    amount_tdi  = models.DecimalField(max_digits=18, decimal_places=8)
+    matic_rate  = models.DecimalField(max_digits=10, decimal_places=6, null=True)  # rate at time of tx
+    usd_value   = models.DecimalField(max_digits=12, decimal_places=4, null=True)
+    tx_hash     = models.CharField(max_length=66, blank=True)  # on-chain if withdrawn
+    note        = models.CharField(max_length=200, blank=True)
+    created_at  = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'tdi_transaction'
+        ordering = ['-created_at']
+
+
+class CryptoPriceCache(models.Model):
+    """Cached crypto prices from CoinGecko (updated every 5 min)."""
+    symbol       = models.CharField(max_length=10, primary_key=True)  # MATIC, ETH, BTC, TDI
+    price_usd    = models.DecimalField(max_digits=16, decimal_places=8)
+    change_24h   = models.FloatField(default=0)
+    volume_24h   = models.DecimalField(max_digits=20, decimal_places=2, null=True)
+    market_cap   = models.DecimalField(max_digits=20, decimal_places=2, null=True)
+    updated_at   = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'crypto_price_cache'
