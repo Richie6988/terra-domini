@@ -32,16 +32,15 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 }
 
 function GameScreen() {
-  const { updateViewport, clickTerritory, subscribeTerritory } = useGameSocket()
+  const { sendViewport, subscribeTerritory } = useGameSocket()
   const setSelectedTerritory = useStore((s) => s.setSelectedTerritory)
   const selectedTerritory = useStore((s) => s.selectedTerritory)
 
   const handleViewportChange = (lat: number, lon: number, radius_km: number) => {
-    updateViewport({ lat, lon, radius_km })
+    sendViewport({ lat, lon, radius_km })
   }
 
   const handleTerritoryClick = (h3: string) => {
-    clickTerritory(h3)
     subscribeTerritory(h3)
   }
 
