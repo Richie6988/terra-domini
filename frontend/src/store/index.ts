@@ -45,7 +45,7 @@ interface GameState {
   setHoveredH3: (h3: string | null) => void
   setMapCenter: (center: [number, number], zoom?: number) => void
   addBattle: (battle: Battle) => void
-  resolveBattle: (battleId: string) => void
+  resolveBattle: (battleId: string, result?: unknown) => void
 }
 
 // ─── TDC Slice ───────────────────────────────────────────────────────────────
@@ -156,7 +156,7 @@ export const useStore = create<Store>()(
         activeBattles: [battle, ...state.activeBattles.filter(b => b.id !== battle.id)],
       })),
 
-      resolveBattle: (battleId) => set((state) => {
+      resolveBattle: (battleId, _result?) => set((state) => {
         const battle = state.activeBattles.find(b => b.id === battleId)
         return {
           activeBattles: state.activeBattles.filter(b => b.id !== battleId),

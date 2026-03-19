@@ -17,6 +17,13 @@ if env_file.exists():
 SECRET_KEY = env('DJANGO_SECRET_KEY', default='dev-secret-key-not-for-production-change-me-please')
 DEBUG = True
 ALLOWED_HOSTS = ['*']
+# Codespace WebSocket: also needed for channels security
+CSRF_TRUSTED_ORIGINS = [
+    'https://*.app.github.dev',
+    'https://*.github.dev',
+    'http://localhost:8000',
+    'http://127.0.0.1:8000',
+]
 CORS_ALLOW_ALL_ORIGINS = True
 
 INSTALLED_APPS = [
@@ -230,12 +237,6 @@ USE_TZ = True
 
 # ── WebSocket / Codespace ─────────────────────────────────────────────────────
 # Allow github.dev Codespace URLs for WebSocket connections
-CSRF_TRUSTED_ORIGINS = [
-    'https://*.app.github.dev',
-    'https://*.github.dev',
-    'http://localhost:8000',
-    'http://127.0.0.1:8000',
-]
 
 SECURE_SSL_REDIRECT = False
 SESSION_COOKIE_SECURE = False
