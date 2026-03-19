@@ -9,7 +9,9 @@ import 'leaflet/dist/leaflet.css'
 import { AnimatePresence } from 'framer-motion'
 import { useStore } from '../../store'
 import { FavoritePinsPanel } from './FavoritePins'
-import { MapOverlayLayer } from './MapOverlayLayer'
+import { MapOverlayLayer }
+import { ResourceLayer } from './MapOverlayLayer'
+import { ResourceLayer } from './ResourceLayer'
 import { ClaimModal } from './ClaimModal'
 import { AttackPanel } from '../hud/AttackPanel'
 import { injectGlowFilter, makeHexPolygon } from './HexLayer'
@@ -163,6 +165,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       {/* Favorite pins — bottom left */}
       {showOverlay && <MapOverlayLayer map={mapRef.current} />}
+      <ResourceLayer map={mapRef.current} viewportLat={center[0]} viewportLon={center[1]} viewportRadius={zoom < 8 ? 200 : zoom < 11 ? 100 : 50} visible={showResources} />
       <FavoritePinsPanel onNavigate={navigateTo} currentLat={center[0]} currentLon={center[1]} currentZoom={zoom} />
 
       {/* Modals */}

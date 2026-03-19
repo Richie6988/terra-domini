@@ -24,6 +24,7 @@ from terra_domini.apps.blockchain.wallet_views import WalletViewSet
 from terra_domini.apps.territories.cluster_views import TerritoryClusterViewSet
 from terra_domini.apps.progression.clicker_views import ClickerViewSet
 from terra_domini.apps.progression.leaderboard_views import LeaderboardViewSet
+from terra_domini.apps.events.resource_views import ResourcePOIViewSet
 
 from terra_domini.apps.combat.views import BattleViewSet
 from terra_domini.apps.economy.views import ShopViewSet, TDCViewSet, StripeWebhookView, AdCampaignViewSet
@@ -54,6 +55,7 @@ router.register(r'wallet',      WalletViewSet,           basename='wallet')
 router.register(r'territories-geo', TerritoryClusterViewSet, basename='territories-geo')
 router.register(r'clicker',     ClickerViewSet,          basename='clicker')
 router.register(r'leaderboard', LeaderboardViewSet,      basename='leaderboard')
+router.register(r'resources',   ResourcePOIViewSet,      basename='resources')
 
 
 # ─── URL Patterns ─────────────────────────────────────────────────────────────
