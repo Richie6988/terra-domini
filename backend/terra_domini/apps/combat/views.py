@@ -75,6 +75,22 @@ class BattleViewSet(viewsets.GenericViewSet):
             }, status=409)
 
         # Check if player already attacking this target
+        # ── Stamina check ──────────────────────────────────────────────────
+        from terra_domini.apps.accounts.models import Player as P
+        player_obj = P.objects.get(id=request.user.id)
+        if not player_obj.consume_action_slot():
+            next_ready = player_obj.next_slot_ready_in_seconds
+            hours = int(next_ready // 3600)
+            mins  = int((next_ready % 3600) // 60)
+            return Response({
+                'error': 'No action slots available',
+                'slots_used': player_obj.action_slots_used,
+                'slots_max': player_obj.action_slots_max,
+                'next_slot_in_seconds': int(next_ready),
+                'next_slot_label': f'{hours}h {mins}m' if hours else f'{mins}m',
+                'regen_bonus_pct': player_obj.regen_bonus_pct,
+            }, status=429)
+
         if Battle.objects.filter(
             attacker=request.user,
             territory=target,

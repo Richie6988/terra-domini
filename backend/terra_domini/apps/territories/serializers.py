@@ -45,6 +45,8 @@ class PlayerProfileSerializer(serializers.ModelSerializer):
             'wallet_address', 'is_protected', 'shield_until', 'beginner_protection_until',
             'stats', 'alliance', 'active_boosts', 'last_active', 'is_online',
             'preferred_language', 'date_joined',
+            'action_slots_max', 'action_slots_used', 'next_slot_ready_in_seconds',
+            'regen_progress_pct', 'regen_bonus_pct', 'regen_seconds_per_slot',
         ]
         read_only_fields = ['id', 'email', 'commander_rank', 'commander_xp',
                             'tdc_in_game', 'total_tdc_purchased', 'total_tdc_earned_ads']

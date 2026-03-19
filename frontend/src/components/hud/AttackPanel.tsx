@@ -6,6 +6,7 @@
  */
 import { useState, useCallback, useEffect } from 'react'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
+import { StaminaBar } from './StaminaBar'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
@@ -107,7 +108,14 @@ export function AttackPanel({ target, onClose }: Props) {
         qc.invalidateQueries({ queryKey: ['territories'] })
       }, 2000)
     },
-    onError: (e: any) => toast.error(e.response?.data?.error || 'Attack failed'),
+    onError: (e: any) => {
+      const data = e.response?.data
+      if (e.response?.status === 429 && data?.next_slot_label) {
+        toast.error(`⚔️ No slots — next in ${data.next_slot_label}`, { duration: 5000 })
+      } else {
+        toast.error(data?.error || 'Attack failed')
+      }
+    },
   })
 
   const probColor = winProb >= 0.65 ? '#00FF87' : winProb >= 0.4 ? '#F59E0B' : '#EF4444'
@@ -195,6 +203,9 @@ export function AttackPanel({ target, onClose }: Props) {
                 style={{ width: '100%', padding: '14px', background: totalUnits > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${totalUnits > 0 ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 12, color: totalUnits > 0 ? '#EF4444' : '#4B5563', fontSize: 15, fontWeight: 800, cursor: totalUnits > 0 ? 'pointer' : 'not-allowed', letterSpacing: '0.05em' }}>
                 {attackMut.isPending ? '⏳ Launching…' : `⚔️ LAUNCH ${typeConf.label.toUpperCase()}`}
               </button>
+              <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center' }}>
+                <StaminaBar />
+              </div>
             </motion.div>
           )}
 

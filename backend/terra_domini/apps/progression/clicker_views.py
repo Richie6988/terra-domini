@@ -146,6 +146,14 @@ class ClickerViewSet(viewsets.GenericViewSet):
             tdc_earned=tdc_earned, tdi_earned=tdi_earned,
             loot_tier=tier, loot_item=item, loot_quantity=qty,
         )
+        # High score → temporary regen bonus (12h)
+        if session.score >= 3000:
+            from terra_domini.apps.accounts.models import Player
+            from django.db.models import F
+            bonus = 25.0 if session.score >= 5000 else 10.0
+            Player.objects.filter(id=request.user.id).update(
+                regen_bonus_pct=F('regen_bonus_pct') + bonus
+            )
 
         return Response({
             'success': True,

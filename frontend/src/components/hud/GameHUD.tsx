@@ -6,6 +6,7 @@ import { Sword, Shield, Users, Trophy, Wifi, WifiOff, Bell, Map } from 'lucide-r
 import { AnimatePresence, motion } from 'framer-motion'
 import { usePlayer, useTDCBalance, useActiveBattles, useWsConnected, useNotifications, useStore } from '../../store'
 import { TDCShopPanel } from '../shop/TDCShopPanel'
+import { StaminaBar } from './StaminaBar'
 
 // Django DecimalField serializes as string — always parse before arithmetic
 const toNum = (v: unknown): number => parseFloat(String(v ?? 0)) || 0
@@ -99,6 +100,7 @@ export function GameHUD() {
             <div style={{ fontSize: 13, fontWeight: 600, color: '#F59E0B' }}>
               {toNum(balance?.in_game ?? player.tdc_in_game).toFixed(0)} TDC
             </div>
+            <StaminaBar />
             <div style={{ fontSize: 10, color: '#6B7280' }}>≈ €{(toNum(balance?.in_game ?? player.tdc_in_game) / toNum(balance?.tdc_eur_rate ?? 100)).toFixed(2)}</div>
           </div>
           <span style={{ fontSize: 10, color: '#8B5CF6', borderLeft: '1px solid rgba(255,255,255,0.1)', paddingLeft: 8 }}>Buy +</span>

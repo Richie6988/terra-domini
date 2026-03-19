@@ -287,6 +287,22 @@ class PlayerViewSet(viewsets.GenericViewSet):
         })
 
 
+    @action(detail=False, methods=['GET'], url_path='stamina')
+    def stamina(self, request):
+        """GET /api/players/stamina/ — live stamina state for HUD."""
+        from terra_domini.apps.accounts.models import Player
+        p = Player.objects.get(id=request.user.id)
+        return Response({
+            'slots_max':              p.action_slots_max,
+            'slots_used':             p.action_slots_used,
+            'slots_available':        p.action_slots_available,
+            'next_slot_in_seconds':   int(p.next_slot_ready_in_seconds),
+            'regen_progress_pct':     round(p.regen_progress_pct, 1),
+            'regen_seconds_per_slot': int(p.regen_seconds_per_slot),
+            'regen_bonus_pct':        p.regen_bonus_pct,
+            'attack_power_bonus':     p.attack_power_bonus,
+        })
+
     @action(detail=False, methods=['GET'], url_path='search')
     def search(self, request):
         q = request.query_params.get('q', '').strip()

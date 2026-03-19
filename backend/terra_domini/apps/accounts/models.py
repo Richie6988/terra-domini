@@ -75,6 +75,15 @@ class Player(AbstractBaseUser, PermissionsMixin):
         SUSPENDED = 'suspended', 'Suspended (temp)'
         BANNED = 'banned', 'Banned'
 
+
+    # ── Action Stamina System ──────────────────────────────────────────────
+    # Each attack costs 1 action slot. Slots regenerate over 24h (or faster with bonuses).
+    # Base: 3 slots, max 10 with upgrades. Full regen = 24h / max_action_slots per slot.
+    action_slots_max     = models.PositiveSmallIntegerField(default=3)   # max concurrent attacks
+    action_slots_used    = models.PositiveSmallIntegerField(default=0)   # currently in use
+    last_slot_regen_at   = models.DateTimeField(null=True, blank=True)   # last regen tick
+    regen_bonus_pct      = models.FloatField(default=0.0)                # % faster regen (from boosts)
+    attack_power_bonus   = models.FloatField(default=0.0)                # % bonus to attack strength
     ban_status = models.CharField(max_length=12, choices=BanStatus.choices, default=BanStatus.CLEAN)
     ban_reason = models.TextField(blank=True)
     ban_until = models.DateTimeField(null=True, blank=True)
@@ -112,6 +121,94 @@ class Player(AbstractBaseUser, PermissionsMixin):
             models.Index(fields=['is_online', 'last_active']),
             models.Index(fields=['ban_status']),
         ]
+
+
+    # ── Stamina helpers ────────────────────────────────────────────────────
+    @property
+    def regen_seconds_per_slot(self) -> float:
+        """Time to regenerate 1 action slot. Base 24h, faster with bonuses."""
+        base = 86400.0 / max(1, self.action_slots_max)  # 24h / max_slots
+        return base / (1 + self.regen_bonus_pct / 100)
+
+    @property
+    def action_slots_available(self) -> int:
+        """Slots currently available (auto-regens on access)."""
+        self._apply_regen()
+        return max(0, self.action_slots_max - self.action_slots_used)
+
+    @property
+    def next_slot_ready_in_seconds(self) -> float:
+        """Seconds until next slot is available (0 if slots free)."""
+        if self.action_slots_available > 0:
+            return 0.0
+        if not self.last_slot_regen_at:
+            return 0.0
+        from django.utils import timezone
+        elapsed = (timezone.now() - self.last_slot_regen_at).total_seconds()
+        remaining = self.regen_seconds_per_slot - elapsed
+        return max(0.0, remaining)
+
+    @property
+    def regen_progress_pct(self) -> float:
+        """0-100 progress toward next slot regen."""
+        if not self.last_slot_regen_at or self.action_slots_used == 0:
+            return 100.0
+        from django.utils import timezone
+        elapsed = (timezone.now() - self.last_slot_regen_at).total_seconds()
+        return min(100.0, (elapsed / self.regen_seconds_per_slot) * 100)
+
+    def _apply_regen(self):
+        """Called on read — silently regens slots if enough time has passed."""
+        if self.action_slots_used == 0 or not self.last_slot_regen_at:
+            return
+        from django.utils import timezone
+        now = timezone.now()
+        elapsed = (now - self.last_slot_regen_at).total_seconds()
+        slots_to_regen = int(elapsed // self.regen_seconds_per_slot)
+        if slots_to_regen > 0:
+            from django.apps import apps
+            Player = apps.get_model('accounts', 'Player')
+            new_used = max(0, self.action_slots_used - slots_to_regen)
+            new_regen_at = self.last_slot_regen_at
+            if new_used < self.action_slots_used:
+                # Advance regen timer by consumed slots
+                import datetime
+                new_regen_at = self.last_slot_regen_at + datetime.timedelta(
+                    seconds=slots_to_regen * self.regen_seconds_per_slot
+                )
+            Player.objects.filter(pk=self.pk).update(
+                action_slots_used=new_used,
+                last_slot_regen_at=new_regen_at,
+            )
+            self.action_slots_used = new_used
+            self.last_slot_regen_at = new_regen_at
+
+    def consume_action_slot(self) -> bool:
+        """Try to use 1 slot. Returns True if successful, False if exhausted."""
+        from django.utils import timezone
+        from django.apps import apps
+        Player = apps.get_model('accounts', 'Player')
+        self._apply_regen()
+        if self.action_slots_used >= self.action_slots_max:
+            return False
+        now = timezone.now()
+        first_use = self.action_slots_used == 0
+        Player.objects.filter(pk=self.pk).update(
+            action_slots_used=self.action_slots_used + 1,
+            last_slot_regen_at=now if first_use else self.last_slot_regen_at,
+        )
+        self.action_slots_used += 1
+        if first_use:
+            self.last_slot_regen_at = now
+        return True
+
+    def release_action_slot(self):
+        """Called when a battle completes — frees 1 slot immediately."""
+        from django.apps import apps
+        Player = apps.get_model('accounts', 'Player')
+        new_used = max(0, self.action_slots_used - 1)
+        Player.objects.filter(pk=self.pk).update(action_slots_used=new_used)
+        self.action_slots_used = new_used
 
     def __str__(self):
         return f"{self.username} (rank {self.commander_rank})"
