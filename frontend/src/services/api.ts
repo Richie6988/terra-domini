@@ -25,7 +25,9 @@ export const api = axios.create({
 // ─── Request interceptor: attach JWT ─────────────────────────────────────────
 api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   const token = useStore.getState().accessToken
-  if (token) config.headers.Authorization = `Bearer ${token}`
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`
+  }
   return config
 })
 
@@ -50,7 +52,12 @@ api.interceptors.response.use(
             useStore.setState({ accessToken: newAccess })
             return newAccess
           })
-          .catch(() => { useStore.getState().logout(); return Promise.reject(new Error('Session expired')) })
+          .catch((err) => {
+            useStore.getState().logout()
+            // Clear stale localStorage tokens
+            try { localStorage.removeItem('terra-domini-store') } catch {}
+            return Promise.reject(new Error('Session expired — please log in again'))
+          })
           .finally(() => { refreshPromise = null })
       }
 

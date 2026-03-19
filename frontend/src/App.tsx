@@ -1,7 +1,7 @@
 /**
  * App.tsx — root component with routing and panel system.
  */
-import { Suspense, lazy, useState } from 'react'
+import { Suspense, lazy, useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
@@ -47,6 +47,17 @@ function GameScreen() {
   const selectedTerritory    = useStore((s) => s.selectedTerritory)
   const player               = useStore((s) => s.player)
   const activePanel          = useStore((s) => s.activePanel)
+  const accessToken          = useStore((s) => s.accessToken)
+
+  // Show session expired toast when token is cleared while on game screen
+  const [wasLoggedIn, setWasLoggedIn] = useState(false)
+  useEffect(() => {
+    if (accessToken) setWasLoggedIn(true)
+    else if (wasLoggedIn) {
+      toast.error('Session expired — please log in again', { duration: 5000 })
+      setWasLoggedIn(false)
+    }
+  }, [accessToken])
   const [showClicker, setShowClicker] = useState(false)
   const setActivePanel       = useStore((s) => s.setActivePanel)
 
