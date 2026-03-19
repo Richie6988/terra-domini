@@ -21,6 +21,9 @@ class PlayerPublicSerializer(serializers.ModelSerializer):
         fields = ['id', 'username', 'display_name', 'avatar_url', 'commander_rank',
                   'spec_path', 'territories_owned', 'season_score', 'alliance_tag', 'is_online']
 
+    def get_food_per_tick(self, obj):
+        return obj.resource_food
+
     def get_alliance_tag(self, obj):
         try:
             return obj.alliance_member.alliance.tag
@@ -99,10 +102,15 @@ class TerritoryLightSerializer(serializers.ModelSerializer):
         model = Territory
         fields = [
             'h3_index', 'territory_type', 'owner_username', 'owner_id',
-            'alliance_tag', 'defense_tier', 'is_under_attack', 'is_control_tower',
+            'alliance_tag', 'defense_tier', 'is_control_tower',
             'ad_slot_enabled', 'is_landmark', 'landmark_name', 'place_name',
             'center_lat', 'center_lon', 'defense_points',
+            'resource_food', 'resource_energy', 'resource_credits',
+            'resource_materials', 'resource_intel',
         ]
+
+    def get_food_per_tick(self, obj):
+        return obj.resource_food
 
     def get_alliance_tag(self, obj):
         try: return obj.alliance.tag if obj.alliance else None
@@ -146,6 +154,9 @@ class TerritoryDetailSerializer(serializers.ModelSerializer):
             'ad_slot_enabled', 'ad_slot_tier', 'daily_viewer_count',
             'buildings', 'can_be_attacked', 'recent_history',
         ]
+
+    def get_food_per_tick(self, obj):
+        return obj.resource_food
 
     def get_alliance_tag(self, obj):
         return obj.alliance.tag if obj.alliance else None

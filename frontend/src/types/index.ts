@@ -49,17 +49,30 @@ export type TerritoryType = 'urban' | 'rural' | 'industrial' | 'coastal' | 'land
 export type DefenseTier = 1 | 2 | 3 | 4 | 5
 
 export interface TerritoryLight {
-  h3: string
+  h3_index: string
+  h3?: string  // alias kept for backward compat
   owner_id: string | null
   owner_username: string | null
   alliance_id: string | null
-  type: TerritoryType
-  defense_tier: DefenseTier
+  alliance_tag: string | null
+  territory_type: string
+  type?: string  // alias
+  defense_tier: number
   defense_points: number
-  is_under_attack: boolean
   is_control_tower: boolean
+  is_landmark: boolean
+  landmark_name: string | null
+  place_name: string | null
   ad_slot_enabled: boolean
-  updated_at: string
+  center_lat: number
+  center_lon: number
+  boundary_points?: [number, number][]
+  resource_food: number
+  resource_energy: number
+  resource_credits: number
+  resource_materials: number
+  resource_intel: number
+  food_per_tick?: number  // alias
 }
 
 export interface TerritoryDetail extends TerritoryLight {

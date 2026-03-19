@@ -123,8 +123,8 @@ export const useStore = create<Store>()(
         const player = get().player
         const mySet = new Set<string>()
         for (const t of territories) {
-          map[t.h3] = t
-          if (player && t.owner_id === player.id) mySet.add(t.h3)
+          map[t.h3_index ?? t.h3] = t
+          if (player && t.owner_id === player.id) mySet.add(t.h3_index ?? t.h3)
         }
         set((state) => ({
           territories: { ...state.territories, ...map },
@@ -136,10 +136,10 @@ export const useStore = create<Store>()(
         const player = get().player
         set((state) => {
           const mySet = new Set(state.myTerritories)
-          if (player && territory.owner_id === player.id) mySet.add(territory.h3)
-          else if (player && territory.owner_id !== player.id) mySet.delete(territory.h3)
+          if (player && territory.owner_id === player.id) mySet.add(territory.h3_index ?? territory.h3)
+          else if (player && territory.owner_id !== player.id) mySet.delete(territory.h3_index ?? territory.h3)
           return {
-            territories: { ...state.territories, [territory.h3]: territory },
+            territories: { ...state.territories, [territory.h3_index ?? territory.h3]: territory },
             myTerritories: mySet,
           }
         })

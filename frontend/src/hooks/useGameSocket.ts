@@ -156,8 +156,10 @@ export function useGameSocket() {
     })
       .then(r => r.json())
       .then(data => {
-        if (data.results?.length) {
-          useStore.getState().setTerritories(data.results)
+        // Backend returns plain array OR {results: [...]}
+        const territories = Array.isArray(data) ? data : (data.results ?? [])
+        if (territories.length) {
+          useStore.getState().setTerritories(territories)
         }
       })
       .catch(() => {})

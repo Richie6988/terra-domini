@@ -150,7 +150,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
 
           {/* Resources */}
           <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 10, padding: '10px 14px', border: '1px solid rgba(255,255,255,0.06)' }}>
-            <ResourceRow emoji="🌾" label="Food"      value={t.food_per_tick ?? 0}      color="#10B981" />
+            <ResourceRow emoji="🌾" label="Food"      value={t.resource_food ?? 0}       color="#10B981" />
             <ResourceRow emoji="⚡" label="Energy"    value={t.resource_energy ?? 0}    color="#F59E0B" />
             <ResourceRow emoji="💰" label="Credits"   value={t.resource_credits ?? 0}   color="#FFB800" />
             <ResourceRow emoji="⚙️"  label="Materials" value={t.resource_materials ?? 0} color="#6B7280" />
