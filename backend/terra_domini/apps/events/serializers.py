@@ -20,6 +20,7 @@ class ControlTowerEventSerializer(serializers.ModelSerializer):
             'status', 'status_display', 'announced_at', 'starts_at', 'ends_at',
             'min_participants', 'winner_score', 'total_participants',
             'reward_bonus', 'winning_alliance', 'time_until_start_s',
+            'registered_count', 'my_alliance_registered', 'my_player_registered',
         ]
 
 

@@ -150,7 +150,7 @@ class TerritoryDetailSerializer(serializers.ModelSerializer):
             'is_control_tower', 'control_tower_type', 'is_capital',
             'is_landmark', 'landmark_name', 'landmark_bonus',
             'terrain_attack_modifier', 'terrain_defense_modifier',
-            'is_under_attack', 'current_battle_id',
+            'is_under_attack', 'current_battle',
             'ad_slot_enabled', 'ad_slot_tier', 'daily_viewer_count',
             'buildings', 'can_be_attacked', 'recent_history',
         ]
