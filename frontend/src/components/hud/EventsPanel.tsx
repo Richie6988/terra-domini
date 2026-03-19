@@ -129,7 +129,7 @@ export function EventsPanel({ onClose }: { onClose: () => void }) {
   const towers = Array.isArray(towersData) ? towersData : []
   const active = towers.filter((t: any) => t.status === 'active')
   const scheduled = towers.filter((t: any) => t.status === 'scheduled')
-  const completed = towers.filter((t: any) => t.status === 'completed').slice(0, 5)
+  const completed = (towers ?? []).filter((t: any) => t.status === 'completed').slice(0, 5)
 
   return (
     <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}

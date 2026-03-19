@@ -46,7 +46,7 @@ export function MobileTowerPanel({ onClose }: { onClose: () => void }) {
   const events: TowerEvent[] = data?.results ?? []
   const active   = events.filter(e => e.status === 'active')
   const upcoming = events.filter(e => e.status === 'scheduled')
-  const recent   = events.filter(e => e.status === 'completed').slice(0, 3)
+  const recent = (events ?? []).filter(e => e.status === 'completed').slice(0, 3)
 
   return (
     <MobileDrawer onClose={onClose} title="🗼 Control Towers">
@@ -346,7 +346,7 @@ function TowerDetailSheet({ tower, onClose }: { tower: TowerEvent; onClose: () =
                 VICTORY REWARDS
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                {Object.entries(rewards).slice(0, 4).map(([k, v]) => (
+                {Object.entries(rewards ?? {}).slice(0, 4).map(([k, v]) => (
                   <div key={k} style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: 10 }}>
                     <div style={{ fontSize: 18, fontWeight: 600, color: '#00FF87', fontFamily: "'Bebas Neue',sans-serif" }}>
                       {typeof v === 'number' ? (v > 10 ? `×${v}` : `+${Math.round(v * 100)}%`) : v}

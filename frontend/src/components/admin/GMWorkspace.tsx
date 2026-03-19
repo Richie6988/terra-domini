@@ -369,7 +369,7 @@ function TowersSection() {
             </tr>
           </thead>
           <tbody>
-            {towers.slice(0, 20).map((t: any) => {
+            {(towers ?? []).slice(0, 20).map((t: any) => {
               const color = (statusColor as any)[t.status] ?? '#6B7280'
               const starts = new Date(t.starts_at)
               const ends = new Date(t.ends_at)

@@ -100,7 +100,7 @@ export function POINewsTicker() {
   // Build ticker items from featured POIs
   const tickerItems = [
     ...featured.map(p => ({ text: `${p.icon} ${p.name.toUpperCase()} — ${p.effects_summary}`, color: p.color, threat: p.threat })),
-    ...news.slice(0, 5).map(n => ({ text: `${n.poi_icon} ${n.headline}`, color: n.poi_color, threat: n.poi_threat })),
+    ...(news ?? []).slice(0, 5).map(n => ({ text: `${n.poi_icon} ${n.headline}`, color: n.poi_color, threat: n.poi_threat })),
   ]
 
   if (tickerItems.length === 0) return null
@@ -337,7 +337,7 @@ export function POIDetailPanel({ poiId, onClose }: { poiId: string; onClose: () 
           <div style={{ marginBottom: 20 }}>
             <SectionLabel>📊 Real-World Data</SectionLabel>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-              {Object.entries(poi.real_world_data).slice(0, 6).map(([k, v]) => (
+              {Object.entries(poi.real_world_data ?? {}).slice(0, 6).map(([k, v]) => (
                 <div key={k} style={{ padding: '8px 10px', background: 'rgba(255,255,255,0.04)', borderRadius: 6, fontSize: 11 }}>
                   <div style={{ color: 'rgba(255,255,255,0.3)', marginBottom: 2, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
                     {k.replace(/_/g, ' ')}
@@ -384,7 +384,7 @@ export function POIDetailPanel({ poiId, onClose }: { poiId: string; onClose: () 
         {poi.news_updates.length > 0 && (
           <div style={{ marginBottom: 20 }}>
             <SectionLabel>📰 Intel Updates</SectionLabel>
-            {poi.news_updates.slice(0, 5).map((n, i) => (
+            {(poi.news_updates ?? []).slice(0, 5).map((n, i) => (
               <div key={i} style={{
                 padding: '10px 12px', marginBottom: 6,
                 background: 'rgba(255,255,255,0.03)',

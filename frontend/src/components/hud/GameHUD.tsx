@@ -115,7 +115,7 @@ export function GameHUD() {
         <div style={{ flex: 1 }} />
 
         {/* Active battles */}
-        {activeBattles.slice(0, 3).map(b => (
+        {(activeBattles ?? []).slice(0, 3).map(b => (
           <div key={b.id} style={{ pointerEvents: 'auto' }}>
             <BattleTimer battle={b} />
           </div>
@@ -221,7 +221,7 @@ export function GameHUD() {
                 No notifications
               </div>
             ) : (
-              notifications.slice(0, 20).map((n, i) => (
+              (notifications ?? []).slice(0, 20).map((n, i) => (
                 <div key={i} style={{
                   padding: '10px 16px', borderBottom: '1px solid rgba(255,255,255,0.04)',
                   display: 'flex', gap: 10, alignItems: 'flex-start',

@@ -208,7 +208,7 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
             ))}
 
             {/* Recent completed */}
-            {completed.slice(0, 3).map((b: any) => (
+            {(completed ?? []).slice(0, 3).map((b: any) => (
               <div key={b.id} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10, padding: '10px 14px', marginBottom: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div style={{ fontSize: 12, color: '#9CA3AF' }}>

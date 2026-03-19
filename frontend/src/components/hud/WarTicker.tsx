@@ -163,7 +163,7 @@ export function WarTicker() {
           </span>
           {/* Pagination dots */}
           <div style={{ display: 'flex', gap: 3, flexShrink: 0 }}>
-            {events.slice(0, 6).map((_, i) => (
+            {(events ?? []).slice(0, 6).map((_, i) => (
               <span key={i} onClick={() => setCurrent(i)} style={{
                 width: 5, height: 5, borderRadius: '50%', cursor: 'pointer',
                 background: i === current ? evt.color : 'rgba(255,255,255,0.2)',

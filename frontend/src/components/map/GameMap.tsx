@@ -71,7 +71,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       }, 300)
     }
     map.on('moveend zoomend', onMove)
-    onMove()
+    // Defer first call until map pane is initialized
+    setTimeout(onMove, 100)
 
     // Server-side IP geolocation
     fetch('/api/geoip/').then(r=>r.json())
