@@ -19,6 +19,8 @@ const EUR_PACKAGES = [
   { eur: 19.99,tdc: 2600, bonus: 600,  label: 'General', popular: true },
   { eur: 49.99,tdc: 7000, bonus: 2000, label: 'Marshal' },
   { eur: 99.99,tdc: 15000,bonus: 5000, label: 'Emperor' },
+]
+
 const CATEGORY_LABELS: Record<string, string> = {
   shield: '🛡️ Shields',
   military: '⚔️ Military',
