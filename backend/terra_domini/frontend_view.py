@@ -1,18 +1,14 @@
 """
 Serve the React SPA from Django.
 
-Architecture:
-  - All /api/* routes → Django REST API
-  - All /ws/* routes  → Django Channels (WebSocket)
-  - Everything else   → index.html (React Router takes over client-side)
+Lookup order for index.html:
+  1. STATIC_ROOT/frontend/index.html  (after collectstatic — production)
+  2. STATICFILES_DIRS[0]/index.html   (direct vite dist — dev without collectstatic)
 
-In development:  collectstatic is not needed, Django finds files via
-                 STATICFILES_DIRS pointing to staticfiles/frontend/
-
-In production:   whitenoise serves the hashed asset files from STATIC_ROOT
-                 with proper cache headers (1 year for hashed files)
+This means the app works:
+  - In dev: just run 'npm run build', no collectstatic needed
+  - In prod: run collectstatic, whitenoise serves assets with cache headers
 """
-import os
 from pathlib import Path
 from django.http import HttpResponse, Http404
 from django.conf import settings
@@ -20,48 +16,34 @@ from django.views import View
 
 
 class FrontendAppView(View):
-    """
-    Serves the compiled React index.html for any non-API route.
-    Django collectstatic must have been run first (or STATICFILES_DIRS configured).
-    """
 
     def get(self, request, *args, **kwargs):
-        index_path = Path(settings.STATIC_ROOT) / 'frontend' / 'index.html'
+        # 1. After collectstatic (prod)
+        candidates = [
+            Path(settings.STATIC_ROOT) / 'frontend' / 'index.html',
+        ]
+        # 2. Direct from vite dist (dev — no collectstatic needed)
+        for static_dir in getattr(settings, 'STATICFILES_DIRS', []):
+            candidates.append(Path(static_dir) / 'index.html')
 
-        # Fallback: check STATICFILES_DIRS during dev (before collectstatic)
-        if not index_path.exists():
-            for static_dir in getattr(settings, 'STATICFILES_DIRS', []):
-                candidate = Path(static_dir) / 'index.html'
-                if candidate.exists():
-                    index_path = candidate
-                    break
+        index_path = next((p for p in candidates if p.exists()), None)
 
-        if not index_path.exists():
+        if not index_path:
             return HttpResponse(
-                """
-                <html><body style="font-family:monospace;padding:40px;background:#050508;color:#fff">
+                """<!DOCTYPE html><html><body style="font-family:monospace;padding:40px;background:#050508;color:#fff">
                 <h2 style="color:#00FF87">Frontend not built yet</h2>
-                <p>Run this to build the React app:</p>
-                <pre style="background:#0A0A12;padding:16px;border-radius:8px;color:#00FF87">
-cd frontend
-npm install
-npm run build
-                </pre>
-                <p>Then restart Django. The game will appear at this URL.</p>
-                <p style="margin-top:24px">Meanwhile, you can use the API directly:</p>
+                <pre style="background:#0A0A12;padding:16px;border-radius:8px;color:#00FF87">cd frontend && npm install && npm run build</pre>
+                <p>Then restart Django.</p>
+                <p style="margin-top:24px">API available now:</p>
                 <ul>
-                  <li><a href="/api/docs/" style="color:#60A5FA">/api/docs/</a> — Swagger UI</li>
-                  <li><a href="/admin/" style="color:#60A5FA">/admin/</a> — Django Admin</li>
-                  <li><a href="/health/" style="color:#60A5FA">/health/</a> — Health Check</li>
-                </ul>
-                </body></html>
-                """,
-                status=200,
+                  <li><a href="/api/docs/" style="color:#60A5FA">/api/docs/</a></li>
+                  <li><a href="/admin/" style="color:#60A5FA">/admin/</a></li>
+                  <li><a href="/health/" style="color:#60A5FA">/health/</a></li>
+                </ul></body></html>""",
                 content_type='text/html',
             )
 
-        try:
-            content = index_path.read_bytes()
-            return HttpResponse(content, content_type='text/html; charset=utf-8')
-        except OSError:
-            raise Http404("Frontend index.html not found")
+        return HttpResponse(
+            index_path.read_bytes(),
+            content_type='text/html; charset=utf-8',
+        )

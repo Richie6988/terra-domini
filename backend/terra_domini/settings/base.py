@@ -225,7 +225,7 @@ TEMPLATES = [{
 # ─── Static / Media ──────────────────────────────────────────────────────────
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / 'staticfiles' / 'frontend',
+    BASE_DIR.parent / 'frontend' / 'dist',  # Vite build output
 ]
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 MEDIA_URL = '/media/'

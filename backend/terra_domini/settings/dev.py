@@ -156,14 +156,14 @@ STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 # Tell Django where to find the built React app (before collectstatic)
 STATICFILES_DIRS = [
-    BASE_DIR / 'staticfiles' / 'frontend',
+    BASE_DIR.parent / 'frontend' / 'dist',  # Vite build output
 ]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
 # Whitenoise: serve static files efficiently in production (no nginx needed)
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-WHITENOISE_ROOT = BASE_DIR / 'staticfiles' / 'frontend'
+WHITENOISE_ROOT = BASE_DIR.parent / 'frontend' / 'dist'
 WHITENOISE_INDEX_FILE = True  # serve index.html for directory requests
 
 # ── Game Config ───────────────────────────────────────────────────────────────

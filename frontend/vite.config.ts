@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => ({
 
   build: {
     // Build directement dans le dossier que Django sert
-    outDir: path.resolve(__dirname, '../backend/staticfiles/frontend'),
+    outDir: path.resolve(__dirname, 'dist'),  // Django collectstatic picks this up via STATICFILES_DIRS
     emptyOutDir: true,
     sourcemap: mode === 'development',
 
