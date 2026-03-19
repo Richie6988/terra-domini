@@ -86,7 +86,13 @@ function TrainTab() {
   }, 0)
 
   const trainMut = useMutation({
-    mutationFn: () => api.post('/shop/purchase/', { item_code: 'military_units', units }),
+    mutationFn: () => {
+      // Train each unit type as separate shop purchase
+      const promises = Object.entries(units)
+        .filter(([_, n]) => n > 0)
+        .map(([key, n]) => api.post('/shop/purchase/', { item_code: `unit_${key}`, quantity: n }))
+      return Promise.all(promises)
+    },
     onSuccess: () => { toast.success('Units trained!'); setUnits({}); qc.invalidateQueries({ queryKey: ['player'] }) },
     onError: () => toast.error('Not enough TDC'),
   })
@@ -126,7 +132,7 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
 
   const { data: history } = useQuery({
     queryKey: ['battle-history'],
-    queryFn: () => api.get('/battles/?ordering=-started_at&limit=10').then(r => r.data?.results ?? r.data ?? []),
+    queryFn: () => api.get('/battles/history/').then(r => r.data?.results ?? r.data ?? []).catch(() => []),
     staleTime: 60000,
   })
 

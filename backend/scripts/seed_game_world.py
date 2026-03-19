@@ -157,3 +157,28 @@ print(f"  🗼 Towers:         {Territory.objects.filter(is_control_tower=True).
 print(f"  ⚡ Active wars:    {ControlTowerEvent.objects.filter(status='active').count()}")
 print(f"  ⏰ Scheduled:      {ControlTowerEvent.objects.filter(status='scheduled').count()}")
 print(f"  🌍 World events:   {WorldEvent.objects.count()}")
+
+# ─── Shop Items for Military Units ────────────────────────────────────────────
+try:
+    from terra_domini.apps.economy.models import ShopItem
+    UNIT_ITEMS = [
+        {'code': 'unit_infantry',  'name': 'Infantry Unit',  'price_tdc': 50,  'category': 'military'},
+        {'code': 'unit_cavalry',   'name': 'Cavalry Unit',   'price_tdc': 120, 'category': 'military'},
+        {'code': 'unit_artillery', 'name': 'Artillery Unit', 'price_tdc': 200, 'category': 'military'},
+        {'code': 'unit_naval',     'name': 'Naval Unit',     'price_tdc': 300, 'category': 'military'},
+    ]
+    for u in UNIT_ITEMS:
+        ShopItem.objects.update_or_create(
+            code=u['code'],
+            defaults={
+                'name': u['name'],
+                'price_tdc': u['price_tdc'],
+                'category': u.get('category', 'military'),
+                'is_active': True,
+                'max_per_day': 100,
+                'description': f"Train {u['name']} for your territories",
+            }
+        )
+    print(f"  🛒 {len(UNIT_ITEMS)} unit shop items created")
+except Exception as e:
+    print(f"  ⚠️ Shop items: {e}")

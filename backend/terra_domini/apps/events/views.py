@@ -73,7 +73,24 @@ class ControlTowerViewSet(viewsets.GenericViewSet):
 
 class EventViewSet(viewsets.GenericViewSet):
 
-    @action(detail=False, methods=['GET'], url_path='active')
+    def list(self, request):
+        """GET /api/events/ — all world events."""
+        from terra_domini.apps.events.models import WorldEvent
+        from django.utils import timezone
+        now = timezone.now()
+        events = WorldEvent.objects.filter(
+            starts_at__lte=now, ends_at__gte=now
+        ).order_by('-starts_at')[:20]
+        return Response({'count': events.count(), 'results': [
+            {'id': str(e.id), 'name': e.name, 'description': e.description,
+             'event_type': e.event_type, 'is_global': e.is_global,
+             'effects': e.effects, 'starts_at': e.starts_at.isoformat(),
+             'ends_at': e.ends_at.isoformat(), 'is_active': e.is_active}
+            for e in events
+        ]})
+
+
+    @action(detail=False, methods=['GET'], url_path='active_events')
     def active_events(self, request):
         """All currently active world events."""
         now = timezone.now()

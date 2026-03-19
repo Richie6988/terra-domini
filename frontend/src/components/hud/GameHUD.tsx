@@ -161,6 +161,7 @@ export function GameHUD() {
           { panel: 'alliance' as const, icon: <Users size={18} />, label: 'Alliance', badge: 0 },
           { panel: 'events' as const, icon: <Trophy size={18} />, label: 'Events', badge: 0 },
           { panel: 'profile' as const, icon: <Shield size={18} />, label: 'Profile', badge: 0 },
+          { panel: 'trade' as const, icon: <ArrowRightLeft size={18} />, label: 'Trade', badge: 0 },
         ].map(({ panel, icon, label, badge }) => (
           <button
             key={panel}

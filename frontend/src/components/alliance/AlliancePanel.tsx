@@ -9,6 +9,7 @@ import toast from 'react-hot-toast'
 import { allianceApi } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
 import type { Alliance, AllianceMember } from '../../types'
+import { TradePanel } from './TradePanel'
 
 const TIER_COLORS: Record<string, string> = {
   squad: '#3B82F6', guild: '#8B5CF6', federation: '#F59E0B'
@@ -18,7 +19,7 @@ const ROLE_ICONS: Record<string, string> = {
 }
 
 
-function TabBar({ tabs, active, onChange }: { tabs: string[]; active: string; onChange: (t: string) => void }) {
+function AlliancePanelTabBar({ tabs, active, onChange }: { tabs: string[]; active: string; onChange: (t: string) => void }) {
   return (
     <div style={{ display: 'flex', gap: 4, padding: '10px 20px 0', background: 'rgba(255,255,255,0.02)', flexShrink: 0 }}>
       {tabs.map(t => (
@@ -30,6 +31,14 @@ function TabBar({ tabs, active, onChange }: { tabs: string[]; active: string; on
           textTransform: 'capitalize',
         }}>{t}</button>
       ))}
+    </div>
+  )
+}
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div style={{ fontSize: 11, color: '#6B7280', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '12px 0 6px', fontWeight: 500 }}>
+      {children}
     </div>
   )
 }
@@ -87,10 +96,10 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
   return (
     <PanelShell title="Alliance & Diplomacy" icon={<Users size={18} color="#8B5CF6" />} onClose={onClose}>
       {/* Tabs */}
-      <TabBar
+      <AlliancePanelTabBar
         tabs={alliance
-          ? ['overview', 'members', 'diplomacy']
-          : ['create', 'search']}
+          ? ['overview', 'members', 'diplomacy', 'trade']
+          : ['create', 'search', 'trade']}
         active={tab}
         onChange={setTab as any}
       />
@@ -248,6 +257,13 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* ── TRADE ─────────────────────────────────────────────────── */}
+        {tab === 'trade' && (
+          <div style={{ padding: '0 0 20px' }}>
+            <TradePanel />
           </div>
         )}
       </div>

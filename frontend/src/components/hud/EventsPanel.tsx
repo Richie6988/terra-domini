@@ -87,6 +87,8 @@ function POICard({ poi }: { poi: any }) {
   )
 }
 
+function SectionLabel({ emoji, label, color }: { emoji: string; label: string; color: string }
+
 export function EventsPanel({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<'towers' | 'world'>('towers')
   const qc = useQueryClient()
@@ -183,8 +185,7 @@ export function EventsPanel({ onClose }: { onClose: () => void }) {
     </motion.div>
   )
 }
-
-function SectionLabel({ emoji, label, color }: { emoji: string; label: string; color: string }) {
+) {
   return (
     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10, marginTop: 4 }}>
       <span style={{ fontSize: 12 }}>{emoji}</span>

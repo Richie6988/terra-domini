@@ -83,6 +83,8 @@ class Territory(models.Model):
     terrain_movement_cost     = models.FloatField(default=1.0)
 
     # ── Control Tower ─────────────────────────────────────────────────────────
+    token_id = models.BigIntegerField(null=True, blank=True, db_index=True, help_text="Polygon NFT token ID")
+    token_minted_at = models.DateTimeField(null=True, blank=True)
     is_control_tower   = models.BooleanField(default=False)
     control_tower_type = models.CharField(max_length=30, blank=True)
     is_landmark        = models.BooleanField(default=False)
@@ -104,7 +106,7 @@ class Territory(models.Model):
         indexes = [
             models.Index(fields=['owner']),
             models.Index(fields=['country_code']),
-            models.Index(fields=['is_control_tower']),
+            models.Index(fields=['token_id']),
         ]
 
     def __str__(self):

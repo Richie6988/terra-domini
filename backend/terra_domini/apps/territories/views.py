@@ -1,3 +1,6 @@
+from terra_domini.apps.blockchain.nft_service import mint_territory_nft
+from django.utils import timezone as tz
+import math
 """
 Territory views — CRUD + claim + attack + build.
 """
@@ -28,59 +31,43 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             return TerritoryDetailSerializer
         return TerritoryLightSerializer
 
-    # ── Map viewport query ────────────────────────────────────────────────────
+    # ── Map viewport query ─────────────────────────────────────────
     @action(detail=False, methods=['GET'], url_path='map-view')
     def map_view(self, request):
         """GET /api/territories/map-view/?lat=&lon=&radius_km= — territories in viewport."""
-        import h3 as h3lib
         try:
             lat = float(request.query_params.get('lat', 48.8566))
             lon = float(request.query_params.get('lon', 2.3522))
-            radius_km = min(float(request.query_params.get('radius_km', 5)), 25)
-        except (ValueError, TypeError):
-            return Response({'error': 'Invalid coordinates'}, status=400)
+            radius_km = float(request.query_params.get('radius_km', 5.0))
 
-        # Get H3 indexes in the viewport area
-        center_h3 = h3lib.geo_to_h3(lat, lon, 10)
-        k = max(1, min(20, int(radius_km * 1.5)))
-        h3_disk = h3lib.k_ring(center_h3, k)
+            # Approximate bounding box
+            deg_lat = radius_km / 111.0
+            deg_lon = radius_km / (111.0 * abs(math.cos(lat * math.pi / 180)) or 0.01)
 
-        # Return all matching territories + synthesize missing ones as unclaimed
-        existing = {
-            t.h3_index: t
-            for t in Territory.objects.filter(h3_index__in=h3_disk).select_related('owner', 'alliance')
-        }
+            territories = Territory.objects.filter(
+                center_lat__range=(lat - deg_lat, lat + deg_lat),
+                center_lon__range=(lon - deg_lon, lon + deg_lon),
+            ).select_related('owner', 'owner__alliance_member__alliance')[:200]
 
-        result = []
-        for h3_idx in list(h3_disk)[:300]:
-            if h3_idx in existing:
-                t = existing[h3_idx]
-                lat_c, lon_c = h3lib.h3_to_geo(h3_idx)
-                result.append({
-                    'h3_index': h3_idx,
-                    'owner_id': str(t.owner_id) if t.owner_id else None,
-                    'owner_username': t.owner.username if t.owner else None,
-                    'alliance_tag': t.alliance.tag if t.alliance else None,
-                    'is_control_tower': t.is_control_tower,
-                    'is_under_attack': t.is_under_attack,
-                    'place_name': t.landmark_name or t.place_name or None,
-                    'defense_points': t.defense_points,
-                    'territory_type': t.territory_type,
-                    'center_lat': lat_c,
-                    'center_lon': lon_c,
-                })
-            else:
-                lat_c, lon_c = h3lib.h3_to_geo(h3_idx)
-                result.append({
-                    'h3_index': h3_idx,
-                    'owner_id': None, 'owner_username': None,
-                    'alliance_tag': None, 'is_control_tower': False,
-                    'is_under_attack': False, 'place_name': None,
-                    'defense_points': 100.0, 'territory_type': 'hex',
-                    'center_lat': lat_c, 'center_lon': lon_c,
-                })
-
-        return Response({'count': len(result), 'results': result})
+            from terra_domini.apps.territories.serializers import TerritoryLightSerializer
+            # Add H3 boundary points for map rendering
+            result = []
+            for t in territories:
+                data = TerritoryLightSerializer(t).data
+                # Generate boundary points from h3_index
+                if t.h3_index and not data.get('boundary_points'):
+                    try:
+                        import h3
+                        boundary = h3.h3_to_geo_boundary(t.h3_index, geo_json=False)
+                        data['boundary_points'] = [[lat, lon] for lat, lon in boundary]
+                    except Exception:
+                        data['boundary_points'] = []
+                result.append(data)
+            return Response(result)
+        except Exception as e:
+            import logging
+            logging.getLogger('terra_domini').warning(f'map_view error: {e}')
+            return Response([])
 
 
     @action(detail=False, methods=['GET'], url_path='viewport')
@@ -157,6 +144,16 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         territory.owner = request.user
         territory.captured_at = timezone.now()
         territory.save(update_fields=['owner', 'captured_at'])
+
+        # Async NFT mint (non-blocking — doesn't fail the claim)
+        try:
+            nft_result = mint_territory_nft(territory, request.user)
+            if nft_result['success'] and nft_result.get('token_id'):
+                territory.token_id = nft_result['token_id']
+                territory.token_minted_at = tz.now()
+                territory.save(update_fields=['token_id', 'token_minted_at'])
+        except Exception:
+            pass  # NFT mint never blocks gameplay
 
         # Update player stats
         from terra_domini.apps.accounts.models import PlayerStats

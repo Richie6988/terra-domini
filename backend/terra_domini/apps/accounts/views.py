@@ -250,3 +250,53 @@ class PasswordResetConfirmView(APIView):
         logger.info(f"Password reset successful for {player.email}")
 
         return Response({'message': 'Password reset successful. You can now log in.'})
+
+
+from rest_framework import viewsets
+from rest_framework.decorators import action
+from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
+from terra_domini.apps.accounts.models import Player
+
+
+class PlayerViewSet(viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=['GET'], url_path='me')
+    def me(self, request):
+        p = request.user
+        return Response({
+            'id': str(p.id), 'username': p.username,
+            'display_name': getattr(p, 'display_name', p.username),
+            'avatar_emoji': getattr(p, 'avatar_emoji', '🎖️'),
+            'bio': getattr(p, 'bio', ''),
+            'commander_rank': getattr(p, 'commander_rank', 1),
+            'tdc_in_game': float(getattr(p, 'tdc_in_game', 0)),
+            'territories_owned': getattr(p, 'stats', {}).get('territories_owned', 0) if hasattr(p, 'stats') else 0,
+            'tutorial_completed': getattr(p, 'tutorial_completed', False),
+            'is_bot': getattr(p, 'is_bot', False),
+        })
+
+    @action(detail=False, methods=['PATCH'], url_path='me')
+    def update_me(self, request):
+        p = request.user
+        for field in ('display_name', 'avatar_emoji', 'bio'):
+            if field in request.data:
+                setattr(p, field, request.data[field])
+        p.save(update_fields=[f for f in ('display_name', 'avatar_emoji', 'bio') if f in request.data])
+        return Response({'success': True})
+
+    @action(detail=False, methods=['GET'], url_path='search')
+    def search(self, request):
+        q = request.query_params.get('q', '').strip()
+        if len(q) < 2:
+            return Response([])
+        players = Player.objects.filter(
+            username__icontains=q, is_bot=False
+        ).exclude(id=request.user.id)[:10]
+        return Response([{
+            'id': str(p.id), 'username': p.username,
+            'display_name': getattr(p, 'display_name', p.username),
+            'avatar_emoji': getattr(p, 'avatar_emoji', '🎖️'),
+            'commander_rank': getattr(p, 'commander_rank', 1),
+        } for p in players])

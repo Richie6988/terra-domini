@@ -51,3 +51,19 @@ def update_tdc_market_rate():
 @shared_task(queue='blockchain', name='blockchain.distribute_ad_revenue')
 def distribute_ad_revenue(campaign_id: str, date_str: str):
     pass
+
+
+@shared_task(name='blockchain.record_territory_claim', queue='blockchain')
+def record_territory_claim(player_id: str, h3_index: str, wallet_address: str):
+    """Queue territory ownership on Polygon (non-blocking, optional)."""
+    import logging
+    logger = logging.getLogger('terra_domini.blockchain')
+    try:
+        service = BlockchainService()
+        if service.is_connected():
+            tx_hash = service.record_claim(h3_index, wallet_address)
+            logger.info(f"Territory {h3_index} claimed on-chain: {tx_hash}")
+        else:
+            logger.info(f"Blockchain offline — territory {h3_index} claim queued locally")
+    except Exception as e:
+        logger.warning(f"Blockchain claim failed (non-critical): {e}")

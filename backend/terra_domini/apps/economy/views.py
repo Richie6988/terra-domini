@@ -249,6 +249,21 @@ class ShopViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['POST'], url_path='purchase')
     def purchase(self, request):
+        # Handle military unit purchases
+        item_code = request.data.get('item_code', '')
+        if item_code.startswith('unit_'):
+            unit_type = item_code.replace('unit_', '')
+            quantity = int(request.data.get('quantity', 1))
+            UNIT_COSTS = {'infantry': 50, 'cavalry': 120, 'artillery': 200, 'naval': 300}
+            cost = UNIT_COSTS.get(unit_type, 50) * quantity
+            player = request.user
+            if float(player.tdc_in_game) < float(cost):
+                return Response({'error': f'Need {cost} TDC. You have {float(player.tdc_in_game):.0f} TDC.'}, status=400)
+            from django.db.models import F
+            from terra_domini.apps.accounts.models import Player as P
+            P.objects.filter(id=player.id).update(tdc_in_game=F('tdc_in_game') - cost)
+            return Response({'success': True, 'unit_type': unit_type, 'quantity': quantity, 'tdc_spent': cost})
+
         """
         POST /api/shop/purchase/
         Body: {item_code: str, quantity: int, territory_h3?: str}
@@ -273,7 +288,7 @@ class ShopViewSet(viewsets.GenericViewSet):
         total_cost = item.price_tdc * quantity
 
         # Check balance
-        if player.tdc_in_game < total_cost:
+        if float(player.tdc_in_game) < float(total_cost):
             return Response({'error': 'Insufficient TDC balance'}, status=402)
 
         # Check daily limit
@@ -288,15 +303,9 @@ class ShopViewSet(viewsets.GenericViewSet):
         from django.db import transaction
         with transaction.atomic():
             # Deduct TDC
-            player.__class__.objects.filter(id=player.id).update(
-                tdc_in_game=player.__class__._meta.get_field('tdc_in_game').db_column and
-                            __import__('django.db.models', fromlist=['F']).F('tdc_in_game') - total_cost
-            )
-            # Refreshing with F() expression properly:
             from django.db.models import F
             player.__class__.objects.filter(id=player.id).update(
                 tdc_in_game=F('tdc_in_game') - total_cost,
-                total_tdc_spent=F('total_tdc_spent') + total_cost,
             )
             player.refresh_from_db()
 

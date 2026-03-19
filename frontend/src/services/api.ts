@@ -110,8 +110,16 @@ export const allianceApi = {
     api.post('/alliances/create/', data).then(r => r.data),
   join: (id: string) => api.post(`/alliances/${id}/join/`).then(r => r.data),
   leave: () => api.post('/alliances/leave/').then(r => r.data),
-  members: (id: string) => api.get(`/alliances/${id}/members/`).then(r => r.data),
-  search: (q: string) => api.get(`/alliances/search/?q=${encodeURIComponent(q)}`).then(r => r.data),
+  members: (_id?: string) => api.get('/alliances/members/').then(r => r.data?.results ?? r.data ?? []),
+  search: (q: string) => api.get(`/alliances/search/?q=${encodeURIComponent(q)}`).then(r => r.data?.results ?? r.data ?? []),
+  propose: (target_alliance_id: string, proposal_type: string) =>
+    api.post('/alliances/propose/', { target_alliance_id, proposal_type }).then(r => r.data),
+}
+
+export const playerApi = {
+  search: (q: string) => api.get(`/players/search/?q=${encodeURIComponent(q)}`).then(r => r.data?.results ?? r.data ?? []),
+  me: () => api.get('/players/me/').then(r => r.data),
+  update: (data: Record<string, unknown>) => api.patch('/players/me/', data).then(r => r.data),
 }
 
 export const eventsApi = {

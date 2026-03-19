@@ -15,6 +15,7 @@ import { CombatPanel } from './components/hud/CombatPanel'
 import { EventsPanel } from './components/hud/EventsPanel'
 import { ProfilePanel } from './components/hud/ProfilePanel'
 import { AlliancePanel } from './components/alliance/AlliancePanel'
+import { TradePanel } from './components/hud/TradePanel'
 import { WarTicker } from './components/hud/WarTicker'
 
 const LoginPage    = lazy(() => import('./pages/LoginPage'))
@@ -69,6 +70,7 @@ function GameScreen() {
         {activePanel === 'alliance' && <AlliancePanel  onClose={() => setActivePanel(null)} />}
         {activePanel === 'events'   && <EventsPanel    onClose={() => setActivePanel(null)} />}
         {activePanel === 'profile'  && <ProfilePanel   onClose={() => setActivePanel(null)} />}
+        {activePanel === 'trade'    && <TradePanel     onClose={() => setActivePanel(null)} />}
       </AnimatePresence>
 
       {/* Auto-tutorial for new players */}

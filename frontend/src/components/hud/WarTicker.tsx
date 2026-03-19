@@ -37,7 +37,7 @@ export function WarTicker() {
   // Load world events
   const { data: worldEvents } = useQuery({
     queryKey: ['ticker-world-events'],
-    queryFn: () => api.get('/events/active_events/').then(r => r.data?.results ?? r.data ?? []),
+    queryFn: () => api.get('/events/').then(r => r.data?.results ?? r.data ?? []),
     refetchInterval: 120000,
     staleTime: 60000,
   })

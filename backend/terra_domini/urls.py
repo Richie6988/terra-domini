@@ -18,6 +18,8 @@ from terra_domini.apps.accounts.views import (
     PasswordResetRequestView, PasswordResetConfirmView,
 )
 from terra_domini.apps.territories.views import TerritoryViewSet
+from terra_domini.apps.accounts.views import PlayerViewSet
+from terra_domini.apps.social.views import TradeViewSet
 from terra_domini.apps.combat.views import BattleViewSet
 from terra_domini.apps.economy.views import ShopViewSet, TDCViewSet, StripeWebhookView, AdCampaignViewSet
 from terra_domini.apps.alliances.views import AllianceViewSet, DiplomacyViewSet
@@ -41,6 +43,8 @@ router.register(r'ads',         AdCampaignViewSet, basename='ad')
 router.register(r'pois',        WorldPOIViewSet,  basename='poi')
 router.register(r'social',      FriendViewSet,    basename='social')
 router.register(r'progression', ProgressionViewSet, basename='progression')
+router.register(r'players', PlayerViewSet, basename='players')
+router.register(r'social', TradeViewSet, basename='social')
 
 # ─── URL Patterns ─────────────────────────────────────────────────────────────
 urlpatterns = [

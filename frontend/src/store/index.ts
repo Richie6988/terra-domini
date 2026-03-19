@@ -61,7 +61,7 @@ interface TDCState {
 
 interface UIState {
   sidebarOpen: boolean
-  activePanel: 'territory' | 'combat' | 'alliance' | 'shop' | 'profile' | 'events' | null
+  activePanel: 'territory' | 'combat' | 'alliance' | 'shop' | 'profile' | 'events' | 'trade' | null
   notifications: GameNotification[]
   wsConnected: boolean
   isMobile: boolean
