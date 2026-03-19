@@ -33,7 +33,11 @@ router.register(r'ads', AdCampaignViewSet, basename='ad')
 router.register(r'pois', WorldPOIViewSet, basename='poi')
 router.register(r'social', FriendViewSet, basename='social')
 
+from terra_domini.health import health_check, robots_txt
+
 urlpatterns = [
+    path('health/', health_check, name='health'),
+    path('robots.txt', robots_txt),
     # Admin
     path('admin/', admin.site.urls),
 
