@@ -18,6 +18,8 @@ from terra_domini.apps.accounts.views import (
 from terra_domini.apps.alliances.views import AllianceViewSet, DiplomacyViewSet
 from terra_domini.apps.events.views import ControlTowerViewSet, EventViewSet
 from terra_domini.apps.events.poi_views import WorldPOIViewSet
+from terra_domini.apps.territories.views import TerritoryViewSet
+from terra_domini.apps.combat.views import BattleViewSet
 from terra_domini.apps.social.models_and_views import FriendViewSet, PublicProfileView, JoinViaReferralView
 
 router = DefaultRouter()
@@ -31,6 +33,8 @@ router.register(r'events', EventViewSet, basename='event')
 router.register(r'control-towers', ControlTowerViewSet, basename='control-tower')
 router.register(r'ads', AdCampaignViewSet, basename='ad')
 router.register(r'pois', WorldPOIViewSet, basename='poi')
+router.register(r'territories', TerritoryViewSet, basename='territory')
+router.register(r'combat', BattleViewSet, basename='combat')
 router.register(r'social', FriendViewSet, basename='social')
 
 from terra_domini.health import health_check, robots_txt

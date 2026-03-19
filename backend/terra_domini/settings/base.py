@@ -27,7 +27,6 @@ DJANGO_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.gis',  # PostGIS
 ]
 THIRD_PARTY_APPS = [
     'rest_framework',
@@ -75,7 +74,7 @@ ASGI_APPLICATION = 'terra_domini.asgi.application'
 # ─── Database ────────────────────────────────────────────────────────────────
 DATABASES = {
     'default': {
-        'ENGINE': 'django.contrib.gis.db.backends.postgis',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': env('POSTGRES_DB', default='terradomini'),
         'USER': env('POSTGRES_USER', default='td_user'),
         'PASSWORD': env('POSTGRES_PASSWORD'),
