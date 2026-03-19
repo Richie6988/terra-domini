@@ -8,6 +8,7 @@ from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView as SpectacularSwaggerUIView
 
 from terra_domini.health import health_check, robots_txt
+from terra_domini.frontend_view import FrontendAppView
 
 # ─── Views imports ────────────────────────────────────────────────────────────
 from terra_domini.apps.accounts.views import (
@@ -79,4 +80,10 @@ urlpatterns = [
     # ── Router (all ViewSets) ─────────────────────────────────────────────────
     path('api/', include(router.urls)),
     path('api/gm/', include('terra_domini.apps.admin_gm.urls')),
+
+    # ── React SPA catch-all (must be LAST) ───────────────────────────────────
+    # Any URL that doesn't match /api/ /admin/ /health/ /static/ /ws/
+    # gets served the React app — React Router handles client-side routing
+    re_path(r'^(?!api/|admin/|health/|static/|media/|ws/|robots[.]txt).*$',
+            FrontendAppView.as_view(), name='frontend'),
 ]

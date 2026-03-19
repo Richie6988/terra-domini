@@ -54,3 +54,19 @@ setup: up
 smoke:
 	@echo "Testing API health..."
 	@curl -sf http://localhost:8000/health/ && echo "✅ Backend OK" || echo "❌ Backend DOWN"
+
+# Build React frontend and wire into Django (run this once before starting)
+build-frontend:
+	bash build.sh
+
+# Dev: start Django only (serves built React + API on :8000)
+dev:
+	cd backend && python manage.py runserver 0.0.0.0:8000
+
+# Dev with hot reload: start Django + Vite proxy simultaneously
+dev-full:
+	@echo "Starting backend on :8000 and frontend dev server on :5173"
+	@trap 'kill 0' INT; \
+	  (cd backend && python manage.py runserver 0.0.0.0:8000) & \
+	  (cd frontend && npm run dev) & \
+	  wait

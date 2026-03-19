@@ -26,6 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'whitenoise.runserver_nostatic',  # must be before staticfiles
     # Third party
     'rest_framework',
     'rest_framework_simplejwt',
@@ -53,6 +54,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -152,10 +154,17 @@ CELERY_TASK_EAGER_PROPAGATES = True
 # ── Static / Media ────────────────────────────────────────────────────────────
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+# Tell Django where to find the built React app (before collectstatic)
+STATICFILES_DIRS = [
+    BASE_DIR / 'staticfiles' / 'frontend',
+]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
-STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# Whitenoise: serve static files efficiently in production (no nginx needed)
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_ROOT = BASE_DIR / 'staticfiles' / 'frontend'
+WHITENOISE_INDEX_FILE = True  # serve index.html for directory requests
 
 # ── Game Config ───────────────────────────────────────────────────────────────
 H3_DEFAULT_RESOLUTION = 10
