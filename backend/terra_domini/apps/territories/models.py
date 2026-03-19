@@ -100,6 +100,10 @@ class Territory(models.Model):
     updated_at    = models.DateTimeField(auto_now=True)
     last_tick_at  = models.DateTimeField(null=True, blank=True)
 
+    # Combat state — set by CombatEngine
+    is_under_attack = models.BooleanField(default=False)
+    current_battle  = models.UUIDField(null=True, blank=True)
+
     class Meta:
         db_table = 'territories'
         verbose_name_plural = 'territories'

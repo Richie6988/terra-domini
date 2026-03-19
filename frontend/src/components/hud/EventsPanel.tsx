@@ -87,7 +87,15 @@ function POICard({ poi }: { poi: any }) {
   )
 }
 
-function SectionLabel({ emoji, label, color }: { emoji: string; label: string; color: string }
+function SectionLabel({ emoji, label, color }: { emoji: string; label: string; color: string }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 0 4px', marginTop: 4 }}>
+      <span style={{ fontSize: 14 }}>{emoji}</span>
+      <span style={{ fontSize: 11, fontWeight: 700, color, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{label}</span>
+    </div>
+  )
+}
+
 
 export function EventsPanel({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<'towers' | 'world'>('towers')
