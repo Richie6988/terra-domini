@@ -89,7 +89,7 @@ export function WarTicker() {
     })
 
     // World events
-    const wevts = Array.isArray(worldEvents) ? worldEvents : []
+    const wevts = Array.isArray(worldEvents) ? worldEvents : Array.isArray(worldEvents?.results) ? worldEvents.results : []
     ;(wevts ?? []).slice(0, 3).forEach((e: any) => {
       all.push({
         id: `world_${e.id}`,
