@@ -48,17 +48,17 @@ class TerritoryEngine:
     @staticmethod
     def get_neighbors(h3_index: str, k: int = 1) -> list[str]:
         """Get k-ring neighbors of a hex cell."""
-        return list(h3.k_ring(h3_index, k) - {h3_index})
+        return [c for c in h3.grid_disk(h3_index, k) if c != h3_index]
 
     @staticmethod
     def get_h3_from_latlon(lat: float, lon: float, resolution: int = 10) -> str:
         """Convert lat/lon to H3 index."""
-        return h3.geo_to_h3(lat, lon, resolution)
+        return h3.latlng_to_cell(lat, lon, resolution)
 
     @staticmethod
     def get_hex_boundary(h3_index: str) -> list[tuple]:
         """Get polygon boundary of hex cell as lat/lon pairs."""
-        return h3.h3_to_geo_boundary(h3_index)
+        return h3.cell_to_boundary(h3_index)
 
     @staticmethod
     def hex_distance(h3_a: str, h3_b: str) -> int:
@@ -68,7 +68,7 @@ class TerritoryEngine:
     @staticmethod
     def get_region_hexes(center_h3: str, radius_k: int) -> list[str]:
         """All hexes within radius_k from center."""
-        return list(h3.k_ring(center_h3, radius_k))
+        return list(h3.grid_disk(center_h3, radius_k))
 
     @staticmethod
     def get_path(h3_from: str, h3_to: str) -> list[str]:
@@ -199,10 +199,10 @@ class TerritoryEngine:
         """
         from terra_domini.apps.territories.models import Territory
 
-        center_h3 = h3.geo_to_h3(center_lat, center_lon, resolution)
+        center_h3 = h3.latlng_to_cell(center_lat, center_lon, resolution)
         # Approximate k-ring radius: each hex is ~0.5km at res 10
         k = max(1, int(radius_km / 0.5))
-        hex_ids = list(h3.k_ring(center_h3, k))
+        hex_ids = list(h3.grid_disk(center_h3, k))
 
         # Try cache first (hot path)
         territories = []

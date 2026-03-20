@@ -112,7 +112,7 @@ class ResourcePOI(models.Model):
         if not self.h3_index:
             try:
                 import h3
-                self.h3_index = h3.geo_to_h3(self.latitude, self.longitude, 7)
+                self.h3_index = h3.latlng_to_cell(self.latitude, self.longitude, 7)
             except Exception:
                 pass
         # Set display from config

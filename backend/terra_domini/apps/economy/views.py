@@ -64,9 +64,9 @@ class TerritoryViewSet(viewsets.ReadOnlyModelViewSet):
 
         try:
             import h3 as h3lib
-            center_h3 = h3lib.geo_to_h3(lat, lon, res)
+            center_h3 = h3lib.latlng_to_cell(lat, lon, res)
             k = max(3, min(int(radius_km / {6:10, 7:4, 8:1.2}.get(res, 4)), 12))
-            hex_ids = list(h3lib.k_ring(center_h3, k))
+            hex_ids = list(h3lib.grid_disk(center_h3, k))
         except Exception as e:
             return Response({'territories': [], 'count': 0, 'error': str(e)})
 
@@ -76,31 +76,29 @@ class TerritoryViewSet(viewsets.ReadOnlyModelViewSet):
 
         player = request.user
 
-        # Build POI spatial index for this viewport (lat/lon → closest POI per hex)
+        # Build POI index: exact h3_index match — each POI owns exactly one hex
         from terra_domini.apps.events.unified_poi import UnifiedPOI
-        import math
         poi_index = {}
         try:
             nearby_pois = UnifiedPOI.objects.filter(
-                latitude__range=(lat - 0.5, lat + 0.5),
-                longitude__range=(lon - 0.5, lon + 0.5),
+                h3_index__in=hex_ids,
                 is_active=True,
-            ).values('name','category','emoji','rarity','latitude','longitude',
+            ).values('name','category','emoji','rarity','h3_index',
                      'tdc_per_24h','token_id','is_shiny','wiki_url',
                      'description','fun_fact','floor_price_tdi',
                      'visitors_per_year','geopolitical_score')
             for poi in nearby_pois:
-                poi_h3 = h3lib.geo_to_h3(poi['latitude'], poi['longitude'], res)
-                if poi_h3 not in poi_index:
-                    poi_index[poi_h3] = dict(poi)
+                hx = poi['h3_index']
+                if hx and hx not in poi_index:
+                    poi_index[hx] = dict(poi)
         except Exception:
             pass
 
         result = []
         for hx in hex_ids:
             try:
-                geo      = h3lib.h3_to_geo(hx)
-                boundary = [[p[0], p[1]] for p in h3lib.h3_to_geo_boundary(hx)]
+                geo      = h3lib.cell_to_latlng(hx)
+                boundary = [[p[0], p[1]] for p in h3lib.cell_to_boundary(hx)]
             except Exception:
                 continue
             t = owned.get(hx)

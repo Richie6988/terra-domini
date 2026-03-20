@@ -80,7 +80,7 @@ def recompute_clusters(player):
             if current in owned_set:
                 cluster.append(current)
                 try:
-                    neighbors = h3.k_ring(current, 1) - {current}
+                    neighbors = [c for c in h3.grid_disk(current, 1) if c != current]
                     queue.extend(n for n in neighbors if n not in visited)
                 except Exception:
                     pass
@@ -105,8 +105,8 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
             # centroid
             try:
                 import h3
-                lats = [h3.h3_to_geo(h)[0] for h in cluster_list]
-                lons = [h3.h3_to_geo(h)[1] for h in cluster_list]
+                lats = [h3.cell_to_latlng(h)[0] for h in cluster_list]
+                lons = [h3.cell_to_latlng(h)[1] for h in cluster_list]
                 clat = sum(lats) / len(lats)
                 clon = sum(lons) / len(lons)
             except Exception:
