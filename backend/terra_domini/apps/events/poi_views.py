@@ -129,6 +129,43 @@ class UnifiedPOIViewSet(viewsets.GenericViewSet):
             'count': len(results),
         })
 
+    @action(detail=False, methods=['GET'], url_path='hex-map')
+    def hex_map(self, request):
+        """GET /api/pois/hex-map/?lat=&lon=&radius_km= — POI hexes for map display."""
+        try:
+            lat       = float(request.query_params.get('lat', 48.8566))
+            lon       = float(request.query_params.get('lon', 2.3522))
+            radius_km = min(float(request.query_params.get('radius_km', 50)), 600)
+        except (TypeError, ValueError):
+            return Response({'error': 'Invalid params'}, status=400)
+
+        deg_lat = radius_km / 111.0
+        deg_lon = radius_km / (111.0 * max(abs(math.cos(math.radians(lat))), 0.01))
+
+        pois = UnifiedPOI.objects.filter(
+            is_active=True,
+            latitude__range=(lat - deg_lat, lat + deg_lat),
+            longitude__range=(lon - deg_lon, lon + deg_lon),
+        ).values('name','emoji','rarity','latitude','longitude','is_shiny','category','h3_index')[:500]
+
+        result = []
+        for p in pois:
+            if not p['h3_index']:
+                continue
+            result.append({
+                'h3_index': p['h3_index'],
+                'name': p['name'],
+                'rarity': p['rarity'],
+                'emoji': p['emoji'] or '📍',
+                'lat': float(p['latitude']),
+                'lon': float(p['longitude']),
+                'category': p['category'],
+                'is_shiny': bool(p['is_shiny']),
+            })
+
+        return Response({'pois': result, 'count': len(result)})
+
+
     @action(detail=False, methods=['GET'], url_path='news')
     def news_events(self, request):
         """GET /api/pois/news/ — live events (GDELT + USGS)"""
