@@ -180,6 +180,60 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
             'cluster_count': len(clusters),
         })
 
+    @action(detail=False, methods=['GET'], url_path='mine')
+    def mine(self, request):
+        """GET /api/territories-geo/mine/ — player's owned territories with full data."""
+        from terra_domini.apps.territories.models import Territory
+        import h3 as h3lib
+        player = request.user
+        territories = Territory.objects.filter(owner=player).select_related('owner')[:200]
+
+        from terra_domini.apps.events.unified_poi import UnifiedPOI
+        hex_ids = [t.h3_index for t in territories if t.h3_index]
+        pois = {p['h3_index']: p for p in UnifiedPOI.objects.filter(
+            h3_index__in=hex_ids, is_active=True
+        ).values('name','emoji','rarity','is_shiny','wiki_url','floor_price_tdi','h3_index')}
+
+        result = []
+        for t in territories:
+            try:
+                geo = h3lib.cell_to_latlng(t.h3_index) if t.h3_index else (t.center_lat, t.center_lon)
+                boundary = [[p[0],p[1]] for p in h3lib.cell_to_boundary(t.h3_index)] if t.h3_index else []
+            except Exception:
+                geo = (t.center_lat or 0, t.center_lon or 0)
+                boundary = []
+            poi = pois.get(t.h3_index, {})
+            result.append({
+                'h3_index': t.h3_index,
+                'h3': t.h3_index,
+                'owner_id': str(player.id),
+                'owner_username': player.username,
+                'custom_name': getattr(t, 'custom_name', None),
+                'custom_emoji': getattr(t, 'custom_emoji', None),
+                'border_color': getattr(t, 'border_color', None),
+                'territory_type': t.territory_type,
+                'rarity': poi.get('rarity') or getattr(t, 'rarity', 'common'),
+                'is_shiny': poi.get('is_shiny') or getattr(t, 'is_shiny', False),
+                'nft_version': getattr(t, 'nft_version', 1),
+                'token_id': getattr(t, 'token_id', None),
+                'center_lat': geo[0], 'center_lon': geo[1],
+                'boundary_points': boundary,
+                'resource_credits': float(getattr(t, 'resource_credits', 10)),
+                'resource_food': float(getattr(t, 'resource_food', 5)),
+                'resource_energy': float(getattr(t, 'resource_energy', 5)),
+                'resource_materials': float(getattr(t, 'resource_materials', 3)),
+                'resource_intel': float(getattr(t, 'resource_intel', 2)),
+                'food_per_tick': float(getattr(t, 'resource_food', 10)),
+                'defense_tier': t.defense_tier,
+                'poi_name': poi.get('name'),
+                'poi_emoji': poi.get('emoji'),
+                'poi_wiki_url': poi.get('wiki_url'),
+                'poi_floor_price': poi.get('floor_price_tdi'),
+                'is_landmark': bool(poi),
+            })
+        return Response({'territories': result, 'count': len(result)})
+
+
     @action(detail=False, methods=['GET'], url_path='overlay')
     def overlay(self, request):
         """Active map overlay events — returned to frontend for animated sublayer."""

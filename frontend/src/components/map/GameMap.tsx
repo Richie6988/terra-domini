@@ -12,7 +12,7 @@ import { FavoritePinsPanel } from './FavoritePins'
 import { MapOverlayLayer } from './MapOverlayLayer'
 import { UnifiedPOILayer } from './UnifiedPOILayer'
 import { GeoNewsLayer } from './GeoNewsLayer'
-import { TerritoryPanel } from './TerritoryPanel'
+import { HexCard } from './HexCard'
 import { AttackPanel } from '../hud/AttackPanel'
 import { ClaimModal } from './ClaimModal'
 import { injectGlowFilter, makeHexPolygon } from './HexLayer'
@@ -346,10 +346,10 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       {/* Territory Panel */}
       <AnimatePresence>
-        {selectedHex && (
-          <TerritoryPanel
-            territory={selectedTerritory || { h3_index: selectedHex, h3: selectedHex, owner_id: null, owner_username: null, alliance_id: null, alliance_tag: null, territory_type: 'rural', type: 'rural', defense_tier: 1, defense_points: 100, is_control_tower: false, is_landmark: false, is_under_attack: false, ad_slot_enabled: false, landmark_name: null, place_name: null, center_lat: 0, center_lon: 0, resource_food: 10, resource_energy: 10, resource_credits: 10, resource_materials: 10, resource_intel: 5, food_per_tick: 10 }}
-            onClose={() => { setSelectedHex(null); setSelectedTerritoryState(null); selectedLayer?.clearLayers?.() }}
+        {selectedHex && selectedTerritory && (
+          <HexCard
+            territory={selectedTerritory}
+            onClose={() => { setSelectedHex(null); setSelectedTerritoryState(null); selectedLayer.clearLayers() }}
             onRequestClaim={() => setShowClaimModal(true)}
           />
         )}
@@ -365,8 +365,15 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
             onClaimed={() => {
               setShowClaimModal(false)
               localStorage.setItem('td_claimed_first', '1')
+              // Update store so hex shows as owned on map + in profile
+              if (selectedTerritory) {
+                const owned = { ...selectedTerritory, owner_id: player?.id, owner_username: player?.username }
+                useStore.getState().setTerritories([owned as any])
+                setSelectedTerritoryState(owned)
+              }
               setSelectedHex(null)
               setSelectedTerritoryState(null)
+              selectedLayer.clearLayers()
             }}
           />
         )}

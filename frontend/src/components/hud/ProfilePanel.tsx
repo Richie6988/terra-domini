@@ -134,7 +134,15 @@ function MissionsTab() {
 
 function TerritoriesTab({ onClose }: { onClose: () => void }) {
   const store = useStore()
-  const territories = Object.values(store.territories).filter((t: any) => t.owner_id === store.player?.id)
+  const player = usePlayer()
+  const { data: apiTerritories } = useQuery({
+    queryKey: ['my-territories'],
+    queryFn: () => api.get('/territories-geo/mine/').then(r => r.data).catch(() => null),
+    staleTime: 30000,
+  })
+  // Merge store (live) + API (persisted)
+  const storeOwned = Object.values(store.territories).filter((t: any) => t.owner_id === player?.id)
+  const territories = apiTerritories?.territories?.length ? apiTerritories.territories : storeOwned
 
   const teleport = (t: any) => {
     // Dispatch event to fly map to this territory
