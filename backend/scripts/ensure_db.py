@@ -10,11 +10,32 @@ from django.db import connection
 from django.core.management import call_command
 import io
 
+def _fix_token_tables(connection):
+    """Ensure token tables reference players not auth_user."""
+    with connection.cursor() as c:
+        c.execute("SELECT sql FROM sqlite_master WHERE name='token_blacklist_outstandingtoken'")
+        row = c.fetchone()
+        if row and 'auth_user' in (row[0] or ''):
+            c.execute("PRAGMA foreign_keys = OFF")
+            c.execute("DROP TABLE IF EXISTS token_blacklist_blacklistedtoken")
+            c.execute("DROP TABLE IF EXISTS token_blacklist_outstandingtoken")
+            c.execute("""CREATE TABLE token_blacklist_outstandingtoken (
+                id INTEGER PRIMARY KEY AUTOINCREMENT, token TEXT NOT NULL,
+                jti VARCHAR(255) NOT NULL UNIQUE, created_at DATETIME,
+                expires_at DATETIME NOT NULL,
+                user_id TEXT REFERENCES players(id) DEFERRABLE INITIALLY DEFERRED)""")
+            c.execute("""CREATE TABLE token_blacklist_blacklistedtoken (
+                id INTEGER PRIMARY KEY AUTOINCREMENT, blacklisted_at DATETIME NOT NULL,
+                token_id INTEGER NOT NULL UNIQUE
+                    REFERENCES token_blacklist_outstandingtoken(id))""")
+            c.execute("PRAGMA foreign_keys = ON")
+
 def get_tables():
     with connection.cursor() as c:
         c.execute("SELECT name FROM sqlite_master WHERE type='table'")
         return {r[0] for r in c.fetchall()}
 
+_fix_token_tables(connection)
 tables = get_tables()
 
 # 1. Run syncdb to get Django + third-party tables
@@ -79,6 +100,13 @@ GAME_SQL = [
         id TEXT PRIMARY KEY, name TEXT UNIQUE NOT NULL, tag TEXT UNIQUE NOT NULL,
         description TEXT DEFAULT \'\', leader_id INTEGER,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""),
+    ('token_blacklist_outstandingtoken_v2', """CREATE TABLE IF NOT EXISTS token_blacklist_outstandingtoken (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, token TEXT NOT NULL,
+    jti VARCHAR(255) NOT NULL UNIQUE, created_at DATETIME, expires_at DATETIME NOT NULL,
+    user_id TEXT REFERENCES players(id) DEFERRABLE INITIALLY DEFERRED)"""),
+    ('token_blacklist_blacklistedtoken_v2', """CREATE TABLE IF NOT EXISTS token_blacklist_blacklistedtoken (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, blacklisted_at DATETIME NOT NULL,
+    token_id INTEGER NOT NULL UNIQUE REFERENCES token_blacklist_outstandingtoken(id))"""),
     ('combat_battle', "CREATE TABLE IF NOT EXISTS combat_battle (id TEXT PRIMARY KEY, attacker_id INTEGER, defender_id INTEGER, territory_id TEXT, result TEXT DEFAULT \'pending\', created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"),
     ('progression_achievement', "CREATE TABLE IF NOT EXISTS progression_achievement (id TEXT PRIMARY KEY, player_id INTEGER NOT NULL, achievement_type TEXT NOT NULL, unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP)"),
     ('social_message', "CREATE TABLE IF NOT EXISTS social_message (id TEXT PRIMARY KEY, sender_id INTEGER, content TEXT DEFAULT \'\', created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"),
