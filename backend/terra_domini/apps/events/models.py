@@ -66,3 +66,6 @@ __all__ = ["ControlTowerEvent", "WorldEvent", "WorldPOI", "POINewsUpdate"]
 
 from terra_domini.apps.events.poi_models_resources import ResourcePOI
 __all_resources__ = ['ResourcePOI']
+
+from terra_domini.apps.events.unified_poi import UnifiedPOI
+__all_poi__ = ['UnifiedPOI']

@@ -25,6 +25,7 @@ from terra_domini.apps.territories.cluster_views import TerritoryClusterViewSet
 from terra_domini.apps.progression.clicker_views import ClickerViewSet
 from terra_domini.apps.progression.leaderboard_views import LeaderboardViewSet
 from terra_domini.apps.events.resource_views import ResourcePOIViewSet
+from terra_domini.apps.events.poi_views import UnifiedPOIViewSet
 from terra_domini.apps.territories.trade_views import ResourceTradeViewSet
 
 from terra_domini.apps.combat.views import BattleViewSet
@@ -57,6 +58,7 @@ router.register(r'territories-geo', TerritoryClusterViewSet, basename='territori
 router.register(r'clicker',     ClickerViewSet,          basename='clicker')
 router.register(r'leaderboard', LeaderboardViewSet,      basename='leaderboard')
 router.register(r'resources',   ResourcePOIViewSet,      basename='resources')
+router.register(r'pois',        UnifiedPOIViewSet,       basename='pois')
 router.register(r'resource-trade', ResourceTradeViewSet,   basename='resource-trade')
 
 

@@ -10,7 +10,7 @@ import { AnimatePresence } from 'framer-motion'
 import { useStore } from '../../store'
 import { FavoritePinsPanel } from './FavoritePins'
 import { MapOverlayLayer } from './MapOverlayLayer'
-import { ResourceLayer } from './ResourceLayer'
+import { UnifiedPOILayer } from './UnifiedPOILayer'
 import { ClaimModal } from './ClaimModal'
 import { AttackPanel } from '../hud/AttackPanel'
 import { injectGlowFilter, makeHexPolygon } from './HexLayer'
@@ -22,15 +22,35 @@ interface GameMapProps {
 }
 
 const TILES = {
-  dark:      { label: '🌑 Dark',      url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', maxZoom: 19 },
-  satellite: { label: '🛰️ Satellite', url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', maxZoom: 18 },
-  neon:      { label: '🟣 Neon',      url: 'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', maxZoom: 19 },
+  dark:      {
+    label: '🌑 Dark',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    maxZoom: 19,
+  },
+  satellite: {
+    label: '🛰️ Satellite',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    maxZoom: 18,
+    overlay: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+  },
+  topo: {
+    label: '🗺️ Topo',
+    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+    maxZoom: 17,
+  },
+  terrain: {
+    label: '🏔️ Terrain',
+    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}',
+    maxZoom: 13,
+    overlay: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+  },
 }
 
 export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const mapRef       = useRef<L.Map | null>(null)
   const tileRef      = useRef<L.TileLayer | null>(null)
   const hexRef       = useRef<L.LayerGroup | null>(null)
+  const overlayRef   = useRef<L.TileLayer | null>(null)
   const vpTimer      = useRef<ReturnType<typeof setTimeout>>()
   const containerRef = useRef<HTMLDivElement>(null)
 
@@ -58,7 +78,11 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       center: [48.8566, 2.3522], zoom: 13,
       zoomControl: false, attributionControl: false,
     })
-    tileRef.current = L.tileLayer(TILES[tile].url, { maxZoom: TILES[tile].maxZoom }).addTo(map)
+    const tileCfg = TILES[tile as keyof typeof TILES]
+    tileRef.current = L.tileLayer(tileCfg.url, { maxZoom: tileCfg.maxZoom ?? 19 }).addTo(map)
+    if ((tileCfg as any).overlay) {
+      overlayRef.current = L.tileLayer((tileCfg as any).overlay, { maxZoom: 19, opacity: 0.8 }).addTo(map)
+    }
     hexRef.current  = L.layerGroup().addTo(map)
     mapRef.current  = map
 
@@ -96,7 +120,13 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   useEffect(() => {
     const map = mapRef.current; if (!map || !tileRef.current) return
     map.removeLayer(tileRef.current)
-    tileRef.current = L.tileLayer(TILES[tile].url, { maxZoom: TILES[tile].maxZoom }).addTo(map)
+    const cfg = TILES[tile as keyof typeof TILES]
+    tileRef.current = L.tileLayer(cfg.url, { maxZoom: cfg.maxZoom ?? 19 }).addTo(map)
+    overlayRef.current?.remove()
+    overlayRef.current = null
+    if ((cfg as any).overlay) {
+      overlayRef.current = L.tileLayer((cfg as any).overlay, { maxZoom: 19, opacity: 0.8 }).addTo(map)
+    }
   }, [tile])
 
   // ── Draw hexes ────────────────────────────────────────────────────────────
@@ -167,7 +197,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       {/* Favorite pins — bottom left */}
       {showOverlay && <MapOverlayLayer map={mapRef.current} />}
-      <ResourceLayer map={mapRef.current} viewportLat={center[0]} viewportLon={center[1]} viewportRadius={zoom < 8 ? 200 : zoom < 11 ? 100 : 50} visible={showResources} />
+      <UnifiedPOILayer map={mapRef.current} viewportLat={center[0]} viewportLon={center[1]} zoom={zoom} visible={showResources} />
       <FavoritePinsPanel onNavigate={navigateTo} currentLat={center[0]} currentLon={center[1]} currentZoom={zoom} />
 
       {/* Modals */}
