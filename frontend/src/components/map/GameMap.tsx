@@ -67,6 +67,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const [center,      setCenter]      = useState<[number,number]>([48.8566, 2.3522])
   const [selectedHex, setSelectedHex] = useState<string | null>(null)
   const [selectedTerritory, setSelectedTerritoryState] = useState<any | null>(null)
+  const selectedHexRef = useRef<string | null>(null)
   const [selectedHexLatLon, setSelectedHexLatLon] = useState<[number,number]|null>(null)
   const [claimTarget, setClaimTarget] = useState<TerritoryLight | null>(null)
   const [attackTarget,setAttackTarget]= useState<TerritoryLight | null>(null)
@@ -173,7 +174,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       if (target?.closest('.territory-panel, .claim-modal, .attack-panel, .poi-panel')) return
 
       // If a panel is open → close it and stop
-      if (selectedHex) {
+      if (selectedHexRef.current) {
+        selectedHexRef.current = null
         setSelectedHex(null)
         setSelectedTerritoryState(null)
         setAttackTarget(null)
@@ -204,8 +206,28 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
           resource_credits: 10, resource_materials: 10,
           resource_intel: 5, food_per_tick: 10,
         }
-        setSelectedTerritoryState(terr)
+        // Show panel immediately, then enrich with POI data async
+        selectedHexRef.current = hx
         setSelectedHex(hx)
+        setSelectedTerritoryState({...terr})
+
+        const token = localStorage.getItem('td_access')
+        if (token && terr.center_lat) {
+          fetch(`/api/pois/?lat=${terr.center_lat}&lon=${terr.center_lon}&radius_km=0.5&limit=1`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+          }).then(r => r.ok ? r.json() : null).then(pdata => {
+            if (!pdata) return
+            const nearby = (pdata.results ?? pdata)[0]
+            if (nearby) setSelectedTerritoryState((prev: any) => prev ? {...prev,
+              poi_name: nearby.name, description: nearby.description,
+              fun_fact: nearby.fun_fact, wiki_url: nearby.wiki_url,
+              rarity: nearby.rarity, bonus_pct: nearby.bonus_pct,
+              tdc_per_24h: nearby.tdc_per_24h, is_shiny: nearby.is_shiny,
+              token_id: nearby.token_id, visitors_per_year: nearby.visitors_per_year,
+              is_landmark: true,
+            } : prev)
+          }).catch(() => {})
+        }
       } catch (_) {}
     })
     // Defer first call until map pane is initialized
