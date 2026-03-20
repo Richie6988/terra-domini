@@ -13,6 +13,7 @@ import { MapOverlayLayer } from './MapOverlayLayer'
 import { UnifiedPOILayer } from './UnifiedPOILayer'
 import { GeoNewsLayer } from './GeoNewsLayer'
 import { ClaimModal } from './ClaimModal'
+import { TerritoryPanel } from './TerritoryPanel'
 import { AttackPanel } from '../hud/AttackPanel'
 import { injectGlowFilter, makeHexPolygon } from './HexLayer'
 import type { TerritoryLight } from '../../types'
@@ -63,6 +64,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const [showNews,     setShowNews]     = useState(true)
   const [zoom,        setZoom]        = useState(13)
   const [center,      setCenter]      = useState<[number,number]>([48.8566, 2.3522])
+  const [selectedHex, setSelectedHex] = useState<string | null>(null)
+  const [selectedHexLatLon, setSelectedHexLatLon] = useState<[number,number]|null>(null)
   const [claimTarget, setClaimTarget] = useState<TerritoryLight | null>(null)
   const [attackTarget,setAttackTarget]= useState<TerritoryLight | null>(null)
 
@@ -105,6 +108,13 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       }, 300)
     }
     map.on('moveend zoomend', onMove)
+    map.on('click', (e: L.LeafletMouseEvent) => {
+      // Close all panels when clicking empty map area
+      const target = e.originalEvent?.target as HTMLElement
+      if (!target?.closest('.territory-panel, .claim-modal, .attack-panel, .poi-panel')) {
+        window.dispatchEvent(new CustomEvent('terra:closeAll'))
+      }
+    })
     // Defer first call until map pane is initialized
     setTimeout(onMove, 100)
 
@@ -142,6 +152,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         territory: t, playerId: player?.id,
         onClick: (ter) => {
           onTerritoryClick(ter.h3_index)
+          setSelectedHex(ter.h3_index)  // Show territory panel
           if (!ter.owner_id) setClaimTarget(ter)
           else if (ter.owner_id !== player?.id) setAttackTarget(ter)
         }
@@ -202,6 +213,16 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       <UnifiedPOILayer map={mapRef.current} viewportLat={center[0]} viewportLon={center[1]} zoom={zoom} visible={showResources} />
       <GeoNewsLayer map={mapRef.current} visible={showNews} />
       <FavoritePinsPanel onNavigate={navigateTo} currentLat={center[0]} currentLon={center[1]} currentZoom={zoom} />
+
+      {/* Territory Panel */}
+      <AnimatePresence>
+        {selectedHex && (
+          <TerritoryPanel 
+            h3Index={selectedHex}
+            onClose={() => setSelectedHex(null)}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Modals */}
       <AnimatePresence>

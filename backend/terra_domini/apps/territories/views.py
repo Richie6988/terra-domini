@@ -105,6 +105,210 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         return Response({'territories': data, 'count': len(data)})
 
     # ── Claim ─────────────────────────────────────────────────────────────────
+
+    @action(detail=False, methods=['GET'], url_path='hex/(?P<h3_index>[0-9a-f]+)')
+    def hex_detail(self, request, h3_index=None):
+        """GET /api/territories/hex/<h3>/ — full territory NFT card data"""
+        from terra_domini.apps.territories.resource_engine import get_territory_resource
+        from terra_domini.apps.events.unified_poi import UnifiedPOI
+        import math, hashlib, random
+
+        ter = Territory.objects.filter(h3_index=h3_index).first()
+
+        # Get POI for this hex
+        poi = None
+        try:
+            lat = float(request.query_params.get('lat', ter.center_lat if ter else 0) or 0)
+            lon = float(request.query_params.get('lon', ter.center_lon if ter else 0) or 0)
+            if lat and lon:
+                deg = 0.06  # ~7km radius
+                poi = UnifiedPOI.objects.filter(
+                    latitude__range=(lat-deg, lat+deg),
+                    longitude__range=(lon-deg, lon+deg),
+                    is_active=True,
+                ).order_by('-is_featured', '-bonus_pct').first()
+        except Exception:
+            pass
+
+        # Resource engine
+        res = get_territory_resource(
+            ter.center_lat if ter else 0,
+            ter.center_lon if ter else 0,
+            h3_index
+        ) if (ter and ter.center_lat) else {}
+
+        # Adjacent owned territories count
+        adjacent_owned = 0
+        dist_nearest = 999
+        if ter and request.user.is_authenticated:
+            try:
+                import h3 as h3lib
+                neighbors = h3lib.k_ring(h3_index, 1) - {h3_index}
+                owned = Territory.objects.filter(
+                    h3_index__in=list(neighbors),
+                    owner=request.user
+                ).count()
+                adjacent_owned = owned
+                # Also check distance to any owned territory
+                all_owned = Territory.objects.filter(owner=request.user).values_list('h3_index', flat=True)[:50]
+                for oh in all_owned:
+                    try:
+                        d = h3lib.h3_distance(h3_index, oh)
+                        dist_nearest = min(dist_nearest, d)
+                    except: pass
+            except ImportError:
+                pass
+
+        # Cost calculation
+        rarity_base = {'common':1,'uncommon':5,'rare':25,'epic':100,'legendary':500,'mythic':5000}
+        rarity = (poi.rarity if poi else res.get('rarity','common')) or 'common'
+        base = rarity_base.get(rarity, 10)
+        dist_mult = 1 + math.log2(max(1, dist_nearest)) if dist_nearest < 999 else 3.0
+        adj_discount = max(0.25, 1.0 - adjacent_owned * 0.25)
+        cost_tdi = round(base * dist_mult * adj_discount, 1)
+
+        # Mint seconds
+        mint_base = {'common':900,'uncommon':7200,'rare':43200,'epic':172800,'legendary':432000,'mythic':1209600}
+        mint_seconds = round(mint_base.get(rarity, 900) * adj_discount)
+
+        # Is currently minting?
+        is_minting = False
+        mint_end_at = None
+        if ter and ter.shield_until:  # reusing shield_until field as mint_end_at
+            from django.utils import timezone
+            if ter.shield_until > timezone.now():
+                is_minting = True
+                mint_end_at = ter.shield_until.isoformat()
+
+        data = {
+            'h3_index': h3_index,
+            'rarity': rarity,
+            'biome': res.get('biome', ter.biome if ter else 'grassland'),
+            'primary_resource': res.get('resource_type', ter.primary_resource if ter else 'credits'),
+            'tdc_per_day': ter.tdc_per_day if ter else res.get('tdc_per_day', 10),
+            'resource_richness': ter.resource_richness if ter else res.get('tdc_per_day', 1.0) / 10,
+            'owner_id': str(ter.owner_id) if (ter and ter.owner_id) else None,
+            'owner_username': ter.owner.username if (ter and ter.owner) else None,
+            'is_minting': is_minting,
+            'mint_end_at': mint_end_at,
+            'adjacent_owned': adjacent_owned,
+            'distance_to_nearest_owned': dist_nearest if dist_nearest < 999 else None,
+            'cost_tdi': cost_tdi,
+            'mint_seconds': mint_seconds,
+            'is_shiny': ter.is_shiny if ter else False,
+            'token_id': ter.token_id if ter else None,
+            'edition': ter.edition if ter else 'genesis',
+            'card_gradient': ter.get_card_gradient() if ter else None,
+        }
+        if poi:
+            data.update({
+                'poi_name': poi.name,
+                'poi_category': poi.category,
+                'poi_emoji': poi.emoji,
+                'poi_wiki_url': poi.wiki_url,
+                'poi_description': poi.description,
+                'poi_fun_fact': poi.fun_fact,
+                'visitors_per_year': poi.visitors_per_year if hasattr(poi, 'visitors_per_year') else 0,
+                'geopolitical_score': poi.geopolitical_score if hasattr(poi, 'geopolitical_score') else 0,
+                'floor_price_tdi': poi.floor_price_tdi if hasattr(poi, 'floor_price_tdi') else 0,
+                'mint_difficulty': poi.mint_difficulty if hasattr(poi, 'mint_difficulty') else 1,
+            })
+        return Response(data)
+
+    @action(detail=False, methods=['POST'], url_path='mint')
+    def mint(self, request):
+        """POST /api/territories/mint/ {h3_index} — start minting process"""
+        from django.utils import timezone
+        from datetime import timedelta
+        h3_index = request.data.get('h3_index', '')
+        if not h3_index:
+            return Response({'error': 'h3_index required'}, status=400)
+
+        ter, _ = Territory.objects.get_or_create(
+            h3_index=h3_index,
+            defaults={'center_lat': request.data.get('lat'), 'center_lon': request.data.get('lon')}
+        )
+        if ter.owner_id:
+            return Response({'error': 'Already claimed'}, status=400)
+        if ter.shield_until and ter.shield_until > timezone.now():
+            return Response({'error': 'Already minting'}, status=400)
+
+        # Calculate mint duration
+        mint_base = {'common':900,'uncommon':7200,'rare':43200,'epic':172800,'legendary':432000,'mythic':1209600}
+        rarity = ter.rarity or 'common'
+        adj_owned = Territory.objects.filter(owner=request.user).count()
+        discount = max(0.25, 1.0 - min(adj_owned, 3) * 0.25)
+        mint_secs = mint_base.get(rarity, 900) * discount
+
+        ter.shield_until = timezone.now() + timedelta(seconds=mint_secs)
+        ter.owner = request.user  # tentative claim
+        ter.save(update_fields=['shield_until', 'owner_id'])
+
+        return Response({'status': 'minting', 'ends_at': ter.shield_until.isoformat(), 'duration_seconds': int(mint_secs)})
+
+    @action(detail=False, methods=['POST'], url_path='buy')
+    def buy(self, request):
+        """POST /api/territories/buy/ {h3_index} — instant purchase"""
+        from django.utils import timezone
+        import math
+        h3_index = request.data.get('h3_index', '')
+        if not h3_index:
+            return Response({'error': 'h3_index required'}, status=400)
+
+        ter = Territory.objects.filter(h3_index=h3_index).first()
+        if ter and ter.owner_id and str(ter.owner_id) != str(request.user.id):
+            return Response({'error': 'Territory already owned'}, status=400)
+
+        rarity = (ter.rarity if ter else 'common') or 'common'
+        rarity_base = {'common':1,'uncommon':5,'rare':25,'epic':100,'legendary':500,'mythic':5000}
+        base = rarity_base.get(rarity, 10)
+
+        # Distance-based pricing
+        try:
+            import h3 as h3lib
+            owned = Territory.objects.filter(owner=request.user).values_list('h3_index', flat=True)[:50]
+            dist_nearest = min((h3lib.h3_distance(h3_index, oh) for oh in owned), default=999)
+        except: dist_nearest = 5
+
+        dist_mult = 1 + math.log2(max(1, dist_nearest)) if dist_nearest < 999 else 3.0
+        try:
+            import h3 as h3lib
+            neighbors = h3lib.k_ring(h3_index, 1) - {h3_index}
+            adj_owned = Territory.objects.filter(h3_index__in=list(neighbors), owner=request.user).count()
+        except: adj_owned = 0
+        adj_discount = max(0.25, 1.0 - adj_owned * 0.25)
+        cost = base * dist_mult * adj_discount
+
+        player = request.user
+        if float(player.tdc_in_game) < cost:
+            return Response({'error': f'Need {cost:.1f} TDI, have {float(player.tdc_in_game):.1f}'}, status=400)
+
+        # Deduct and claim
+        player.tdc_in_game = float(player.tdc_in_game) - cost
+        player.save(update_fields=['tdc_in_game'])
+
+        ter, _ = Territory.objects.get_or_create(h3_index=h3_index)
+        ter.owner = player
+        ter.shield_until = None
+        ter.rarity = rarity
+        ter.save(update_fields=['owner_id', 'shield_until', 'rarity'])
+
+        # Check for fusion (adjacent owned territories)
+        fusion_count = 0
+        try:
+            import h3 as h3lib
+            neighbors = h3lib.k_ring(h3_index, 1) - {h3_index}
+            fusion_count = Territory.objects.filter(h3_index__in=list(neighbors), owner=player).count()
+        except: pass
+
+        return Response({
+            'status': 'claimed',
+            'h3_index': h3_index,
+            'cost_paid': round(cost, 1),
+            'fusion_count': fusion_count,
+            'message': f'Territory claimed! {"Fusion unlocked!" if fusion_count > 0 else ""}',
+        })
+
     @action(detail=False, methods=['POST'], url_path='claim')
     def claim(self, request):
         """POST /api/territories/claim/ {h3_index: str}"""
