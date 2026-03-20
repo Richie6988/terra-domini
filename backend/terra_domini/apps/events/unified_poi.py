@@ -212,6 +212,16 @@ class UnifiedPOI(models.Model):
     created_at   = models.DateTimeField(auto_now_add=True)
     updated_at   = models.DateTimeField(auto_now=True)
 
+
+    # ── NFT Metadata ──────────────────────────────────────────────────────
+    mint_difficulty  = models.IntegerField(default=1)          # 1-10
+    card_number      = models.IntegerField(null=True, blank=True)
+    edition          = models.CharField(max_length=20, default='genesis')
+    is_shiny         = models.BooleanField(default=False)
+    floor_price_tdi  = models.FloatField(default=0.0)
+    token_id         = models.BigIntegerField(null=True, blank=True)
+    visitors_per_year= models.IntegerField(default=0)
+    geopolitical_score = models.IntegerField(default=0)
     class Meta:
         db_table = 'unified_poi'
         ordering = ['-is_featured', '-bonus_pct', 'name']
