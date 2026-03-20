@@ -16,6 +16,7 @@ import { ClaimModal } from './ClaimModal'
 import { TerritoryPanel } from './TerritoryPanel'
 import { AttackPanel } from '../hud/AttackPanel'
 import { injectGlowFilter, makeHexPolygon } from './HexLayer'
+import { latLngToCell, cellToBoundary, gridDisk } from 'h3-js'
 import type { TerritoryLight } from '../../types'
 
 interface GameMapProps {
@@ -171,7 +172,12 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       const target = e.originalEvent?.target as HTMLElement
       if (target?.closest('.territory-panel, .claim-modal, .attack-panel, .poi-panel')) return
 
-      // Click on empty hex = open claim modal for that hex
+      // Close any open panels first
+      setSelectedHex(null)
+      setSelectedTerritoryState(null)
+      setAttackTarget(null)
+
+      // Click on empty hex = open claim or show panel
       try {
         const zoom = map.getZoom()
         const res = zoom <= 11 ? 6 : zoom <= 14 ? 7 : 8
