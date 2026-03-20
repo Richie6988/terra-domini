@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => ({
     // Build directement dans le dossier que Django sert
     outDir: path.resolve(__dirname, 'dist'),  // Django collectstatic picks this up via STATICFILES_DIRS
     emptyOutDir: true,
-    sourcemap: true,  // temp: debug TDZ
+    sourcemap: mode === 'development',
 
     rollupOptions: {
       output: {
