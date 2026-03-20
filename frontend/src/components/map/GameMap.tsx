@@ -65,6 +65,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const [zoom,        setZoom]        = useState(13)
   const [center,      setCenter]      = useState<[number,number]>([48.8566, 2.3522])
   const [selectedHex, setSelectedHex] = useState<string | null>(null)
+  const [selectedTerritory, setSelectedTerritoryState] = useState<any | null>(null)
   const [selectedHexLatLon, setSelectedHexLatLon] = useState<[number,number]|null>(null)
   const [claimTarget, setClaimTarget] = useState<TerritoryLight | null>(null)
   const [attackTarget,setAttackTarget]= useState<TerritoryLight | null>(null)
@@ -111,33 +112,52 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       }, 300)
     }
     map.on('moveend zoomend', onMove)
+
+    // Teleport listener — fired from ProfilePanel territory click
+    const onFlyTo = (e: Event) => {
+      const { lat, lon, zoom } = (e as CustomEvent).detail
+      map.flyTo([lat, lon], zoom ?? 15, { duration: 1.2 })
+    }
+    window.addEventListener('terra:flyto', onFlyTo)
     // ── Hover ghost hex ─────────────────────────────────────────
     const hoverLayer = L.layerGroup().addTo(map)
     let hoverPoly: L.Polygon | null = null
 
+    let hoverTimer: ReturnType<typeof setTimeout> | null = null
+
     map.on('mousemove', (e: L.LeafletMouseEvent) => {
+      // Clear previous timer — hex disappears if mouse stops
+      if (hoverTimer) clearTimeout(hoverTimer)
       try {
         const zoom = map.getZoom()
         const res = zoom <= 11 ? 6 : zoom <= 14 ? 7 : 8
         const hx = latLngToCell(e.latlng.lat, e.latlng.lng, res)
         const owned = useStore.getState().territories[hx]
-        if (owned?.owner_id) {
-          hoverLayer.clearLayers(); hoverPoly = null; return
+        if (owned?.owner_id) { hoverLayer.clearLayers(); hoverPoly = null }
+        else {
+          if ((hoverPoly as any)?._hxId !== hx) {
+            hoverLayer.clearLayers()
+            const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
+            hoverPoly = L.polygon(boundary as L.LatLngTuple[], {
+              fillColor: '#00FF87', fillOpacity: 0.10,
+              color: '#00FF87', weight: 1.5, opacity: 0.5,
+              dashArray: '5,4', className: 'td-hex-hover',
+            })
+            ;(hoverPoly as any)._hxId = hx
+            hoverLayer.addLayer(hoverPoly)
+          }
         }
-        if ((hoverPoly as any)?._hxId === hx) return
-        hoverLayer.clearLayers()
-        const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
-        hoverPoly = L.polygon(boundary as L.LatLngTuple[], {
-          fillColor: '#00FF87', fillOpacity: 0.12,
-          color: '#00FF87', weight: 1.5, opacity: 0.6,
-          dashArray: '4,4', className: 'td-hex-hover',
-        })
-        ;(hoverPoly as any)._hxId = hx
-        hoverLayer.addLayer(hoverPoly)
       } catch (_) {}
+      // Auto-clear after 800ms if mouse stops
+      hoverTimer = setTimeout(() => {
+        hoverLayer.clearLayers()
+        hoverPoly = null
+        hoverTimer = null
+      }, 800)
     })
 
     map.on('mouseout', () => {
+      if (hoverTimer) clearTimeout(hoverTimer)
       hoverLayer.clearLayers()
       hoverPoly = null
     })
@@ -172,6 +192,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
             resource_credits: 10, resource_materials: 10,
             resource_intel: 5, food_per_tick: 10,
           }
+          setSelectedTerritoryState(fakeTerr)
+          setSelectedHex(hx)
           setClaimTarget(fakeTerr as any)
           return
         }
@@ -219,9 +241,9 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         territory: t, playerId: player?.id,
         onClick: (ter) => {
           onTerritoryClick(ter.h3_index)
-          setSelectedHex(ter.h3_index)  // Show territory panel
+          setSelectedHex(ter.h3_index)
+          setSelectedTerritoryState(ter)
           if (!ter.owner_id) setClaimTarget(ter)
-          else if (ter.owner_id !== player?.id) setAttackTarget(ter)
         }
       })
       if (poly) layer.addLayer(poly)
@@ -284,9 +306,9 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       {/* Territory Panel */}
       <AnimatePresence>
         {selectedHex && (
-          <TerritoryPanel 
-            h3Index={selectedHex}
-            onClose={() => setSelectedHex(null)}
+          <TerritoryPanel
+            territory={selectedTerritory || { h3_index: selectedHex, h3: selectedHex, owner_id: null, owner_username: null, alliance_id: null, alliance_tag: null, territory_type: 'rural', type: 'rural', defense_tier: 1, defense_points: 100, is_control_tower: false, is_landmark: false, is_under_attack: false, ad_slot_enabled: false, landmark_name: null, place_name: null, center_lat: 0, center_lon: 0, resource_food: 10, resource_energy: 10, resource_credits: 10, resource_materials: 10, resource_intel: 5, food_per_tick: 10 }}
+            onClose={() => { setSelectedHex(null); setSelectedTerritoryState(null) }}
           />
         )}
       </AnimatePresence>

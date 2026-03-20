@@ -131,8 +131,82 @@ function MissionsTab() {
   )
 }
 
+
+function TerritoriesTab({ onClose }: { onClose: () => void }) {
+  const store = useStore()
+  const territories = Object.values(store.territories).filter((t: any) => t.owner_id === store.player?.id)
+
+  const teleport = (t: any) => {
+    // Dispatch event to fly map to this territory
+    window.dispatchEvent(new CustomEvent('terra:flyto', {
+      detail: { lat: t.center_lat, lon: t.center_lon, zoom: 15 }
+    }))
+    onClose()
+  }
+
+  if (territories.length === 0) return (
+    <div style={{ textAlign: 'center', padding: '40px 20px', color: '#4B5563' }}>
+      <div style={{ fontSize: 32, marginBottom: 12 }}>🗺️</div>
+      <div style={{ fontSize: 14, color: '#6B7280' }}>No territories yet</div>
+      <div style={{ fontSize: 12, color: '#374151', marginTop: 4 }}>Claim your first hex on the map</div>
+    </div>
+  )
+
+  const totalTDC = territories.reduce((sum: number, t: any) => sum + (t.resource_credits || t.food_per_tick || 10), 0)
+  const RARITY_COLOR: Record<string, string> = {
+    common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
+    epic:'#8B5CF6', legendary:'#FFB800', mythic:'#FF006E',
+  }
+
+  return (
+    <div>
+      {/* Overview KPIs */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+        <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '12px 14px' }}>
+          <div style={{ fontSize: 10, color: '#4B5563', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Territories</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#3B82F6' }}>{territories.length}</div>
+        </div>
+        <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '12px 14px' }}>
+          <div style={{ fontSize: 10, color: '#4B5563', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Income / tick</div>
+          <div style={{ fontSize: 22, fontWeight: 700, color: '#10B981' }}>{totalTDC} <span style={{ fontSize: 12 }}>TDC</span></div>
+        </div>
+      </div>
+
+      {/* Territory list */}
+      <div style={{ fontSize: 10, color: '#4B5563', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>Your territories</div>
+      {territories.map((t: any) => {
+        const rarity = t.rarity || 'common'
+        const name = t.place_name || t.custom_name || t.h3_index?.slice(0, 10) + '…'
+        return (
+          <button key={t.h3_index} onClick={() => teleport(t)} style={{
+            width: '100%', textAlign: 'left', padding: '10px 12px', marginBottom: 6,
+            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',
+            borderRadius: 10, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
+          }}>
+            <span style={{ fontSize: 20 }}>{t.custom_emoji || '🏴'}</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 500, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
+              <div style={{ display: 'flex', gap: 6, marginTop: 3 }}>
+                <span style={{ fontSize: 10, color: RARITY_COLOR[rarity] }}>{rarity}</span>
+                <span style={{ fontSize: 10, color: '#4B5563' }}>•</span>
+                <span style={{ fontSize: 10, color: '#6B7280' }}>{t.territory_type || 'rural'}</span>
+                {t.nft_version > 1 && <><span style={{ fontSize: 10, color: '#4B5563' }}>•</span><span style={{ fontSize: 10, color: '#8B5CF6' }}>v{t.nft_version}</span></>}
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              <div style={{ fontSize: 12, color: '#10B981', fontFamily: 'monospace' }}>+{t.resource_credits || t.food_per_tick || 10}</div>
+              <div style={{ fontSize: 9, color: '#374151' }}>TDC/tick</div>
+            </div>
+            <span style={{ fontSize: 12, color: '#374151' }}>📍</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
 export function ProfilePanel({ onClose }: { onClose: () => void }) {
-  const [tab, setTab] = useState<'stats' | 'missions'>('stats')
+  const [tab, setTab] = useState<'stats' | 'territories' | 'missions'>('stats')
   const player = usePlayer()
   const logout = useStore(s => s.logout)
   const [showEditor, setShowEditor] = useState(false)
@@ -173,7 +247,7 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
 
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 4, padding: '10px 20px', background: 'rgba(255,255,255,0.02)' }}>
-          {[{ id: 'stats', label: 'Stats' }, { id: 'missions', label: 'Daily Missions' }].map(t => (
+          {[{ id: 'stats', label: 'Stats' }, { id: 'territories', label: '🗺️ Zones' }, { id: 'missions', label: 'Missions' }].map(t => (
             <button key={t.id} onClick={() => setTab(t.id as any)} style={{
               flex: 1, padding: '7px', borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 500,
               background: tab === t.id ? 'rgba(255,255,255,0.1)' : 'transparent',
@@ -186,6 +260,7 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
       {showEditor && <ProfileEditor onClose={() => setShowEditor(false)} />}
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
         {tab === 'stats' && <StatsTab player={player} />}
+        {tab === 'territories' && <TerritoriesTab onClose={onClose} />}
         {tab === 'missions' && <MissionsTab />}
       </div>
     </motion.div>
