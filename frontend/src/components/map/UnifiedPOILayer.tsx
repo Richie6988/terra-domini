@@ -16,7 +16,7 @@ type POI = {
   rarity: string; rarity_color: string; size: string
   game_resource: string; bonus_pct: number; tdc_per_24h: number
   description: string; fun_fact: string; country_code: string
-  is_featured: boolean; threat_level: string
+  is_featured: boolean; threat_level: string; wiki_url?: string
 }
 
 const RARITY_GLOW: Record<string, string> = {
@@ -96,6 +96,14 @@ function POIDetail({ poi, onClose }: { poi: POI; onClose: () => void }) {
       </div>
 
       <div style={{ padding: '16px 18px', flex: 1 }}>
+        {/* Image */}
+        {(poi as any).wiki_url && (
+          <div style={{ margin: '0 0 14px', borderRadius: 10, overflow: 'hidden', border: '1px solid rgba(255,255,255,0.07)' }}>
+            <img src={(poi as any).wiki_url} alt={poi.name}
+              style={{ width: '100%', height: 160, objectFit: 'cover', display: 'block' }}
+              onError={e => { (e.target as HTMLImageElement).style.display = 'none' }} />
+          </div>
+        )}
         {/* Description */}
         {poi.description && (
           <p style={{ fontSize: 13, color: '#9CA3AF', lineHeight: 1.7, margin: '0 0 14px' }}>{poi.description}</p>

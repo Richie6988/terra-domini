@@ -35,3 +35,8 @@ Thumbs.db
 artifacts/
 cache/
 deployments/
+
+# Internal agents — not for git
+backend/terra_domini/agents/poi_agent.py
+backend/terra_domini/management/
+backend/scripts/seed_pois_*.py

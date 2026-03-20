@@ -40,6 +40,7 @@ def serialize_poi(p: UnifiedPOI, dist=None) -> dict:
         'fun_fact':       p.fun_fact,
         'is_featured':    p.is_featured,
         'threat_level':   p.threat_level,
+        'wiki_url':       p.wiki_url,
         'distance_km':    round(dist, 1) if dist is not None else None,
     }
 
