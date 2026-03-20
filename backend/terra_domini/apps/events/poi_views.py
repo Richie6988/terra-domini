@@ -9,6 +9,34 @@ from rest_framework.response import Response
 
 from terra_domini.apps.events.unified_poi import UnifiedPOI, POI_VISUAL, RARITY_TDC
 
+
+import os, subprocess, sys
+
+def _ensure_table():
+    """Create unified_poi table and seed data if missing. Called on first request."""
+    try:
+        from django.db import connection
+        with connection.cursor() as cur:
+            cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='unified_poi'")
+            if cur.fetchone():
+                return  # Table exists, fast path
+        # Table missing — create it now
+        from django.core.management import call_command
+        import io
+        call_command('migrate', '--run-syncdb', stdout=io.StringIO(), verbosity=0)
+        # Seed if empty
+        from terra_domini.apps.events.unified_poi import UnifiedPOI
+        if UnifiedPOI.objects.count() == 0:
+            seed = os.path.join(os.path.dirname(__file__), '..', '..', '..', 
+                               'scripts', 'seed_all_pois_master.py')
+            seed = os.path.abspath(seed)
+            if os.path.exists(seed):
+                exec(open(seed).read(), {'__file__': seed})
+    except Exception as e:
+        logger.warning(f"ensure_table: {e}")
+
+_TABLE_READY = False
+
 logger = logging.getLogger('terra_domini.pois')
 
 RARITY_COLOR = {'common':'#9CA3AF','uncommon':'#10B981','rare':'#3B82F6','epic':'#8B5CF6','legendary':'#FFB800','mythic':'#FF006E'}
@@ -59,6 +87,10 @@ class UnifiedPOIViewSet(viewsets.GenericViewSet):
 
     def list(self, request):
         """GET /api/pois/?lat=&lon=&radius_km=&categories=&limit="""
+        global _TABLE_READY
+        if not _TABLE_READY:
+            _ensure_table()
+            _TABLE_READY = True
         try:
             lat       = float(request.query_params.get('lat', 0))
             lon       = float(request.query_params.get('lon', 0))
@@ -97,58 +129,27 @@ class UnifiedPOIViewSet(viewsets.GenericViewSet):
             'count': len(results),
         })
 
-    @action(detail=False, methods=['GET'], url_path='categories')
-    def categories(self, request):
-        from django.db.models import Count
-        counts = {r['category']: r['count'] for r in UnifiedPOI.objects.values('category').annotate(count=Count('id'))}
-        return Response([{
-            'id':    cat,
-            'label': label,
-            'count': counts.get(cat, 0),
-            **{k: POI_VISUAL.get(cat, {}).get(k) for k in ('emoji','color','rarity','game_resource','bonus')},
-        } for cat, label in UnifiedPOI._meta.get_field('category').choices])
-
-    @action(detail=False, methods=['GET'], url_path='featured')
-    def featured(self, request):
-        pois = UnifiedPOI.objects.filter(is_active=True, is_featured=True).order_by('-bonus_pct')[:50]
-        return Response({'pois': [serialize_poi(p) for p in pois]})
-
-
-    @action(detail=False, methods=['GET'], url_path='agent/status',
-            permission_classes=[__import__('rest_framework.permissions', fromlist=['IsAdminUser']).IsAdminUser])
-    def agent_status(self, request):
-        from terra_domini.agents.poi_agent import POIOrchestrator
-        try:
-            return Response(POIOrchestrator().get_status())
-        except Exception as e:
-            return Response({'error': str(e)}, status=500)
-
-    @action(detail=False, methods=['POST'], url_path='agent/run',
-            permission_classes=[__import__('rest_framework.permissions', fromlist=['IsAdminUser']).IsAdminUser])
-    def agent_run(self, request):
-        import threading
-        from terra_domini.agents.poi_agent import POIOrchestrator
-        phase = request.data.get('phase', '1')
-        cats  = request.data.get('categories', None)
-        def run():
-            agent = POIOrchestrator()
-            if phase == '1': agent.run_phase1(cats)
-            elif phase == '2': agent.run_phase2(cats)
-            elif phase == '3': agent.run_phase3_news()
-            else:
-                agent.run_phase1(cats)
-                agent.run_phase2(cats)
-        threading.Thread(target=run, daemon=True).start()
-        return Response({'status': 'started', 'phase': phase})
-
     @action(detail=False, methods=['GET'], url_path='news')
     def news_events(self, request):
-        """GET /api/pois/news/ — live geopolitical/earthquake events near viewport"""
-        from terra_domini.agents.poi_agent import GeoNewsAgent
+        """GET /api/pois/news/ — live events (GDELT + USGS)"""
+        import requests as req
+        events = []
         try:
-            agent = GeoNewsAgent()
-            quakes = agent.fetch_earthquakes()[:10]
-            conflicts = agent.fetch_gdelt_events()[:10]
-            return Response({'earthquakes': quakes, 'conflicts': conflicts, 'fetched_at': __import__('django.utils.timezone', fromlist=['now']).now().isoformat()})
-        except Exception as e:
-            return Response({'earthquakes': [], 'conflicts': [], 'error': str(e)})
+            # USGS earthquakes M4.5+
+            r = req.get(
+                'https://earthquake.usgs.gov/fdsnws/event/1/query'
+                '?format=geojson&minmagnitude=4.5&limit=15&orderby=time',
+                timeout=5)
+            if r.status_code == 200:
+                for f in r.json().get('features', []):
+                    p = f['properties']
+                    c = f['geometry']['coordinates']
+                    events.append({
+                        'type': 'earthquake', 'lat': c[1], 'lon': c[0],
+                        'title': p.get('place', 'Earthquake'),
+                        'magnitude': p.get('mag'), 'url': p.get('url', ''),
+                        'time': p.get('time'),
+                    })
+        except Exception:
+            pass
+        return Response({'events': events, 'count': len(events)})

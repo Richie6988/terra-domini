@@ -9,6 +9,22 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'terra_domini.settings.dev')
 import django
 django.setup()
 
+
+# ── Auto-ensure unified_poi table exists (runs once at startup) ──────────────
+def _ensure_unified_poi():
+    try:
+        from django.db import connection
+        with connection.cursor() as cur:
+            cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='unified_poi'")
+            if not cur.fetchone():
+                import subprocess, sys, os
+                base = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+                subprocess.run([sys.executable, 'scripts/ensure_db.py'], cwd=base, check=False)
+    except Exception:
+        pass
+
+_ensure_unified_poi()
+# ─────────────────────────────────────────────────────────────────────────────
 from django.conf import settings
 from django.core.asgi import get_asgi_application
 from channels.routing import ProtocolTypeRouter, URLRouter
