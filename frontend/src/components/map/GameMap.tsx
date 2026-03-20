@@ -234,7 +234,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         const zoom2 = map.getZoom()
         const token = localStorage.getItem('td_access')
         if (token) {
-          fetch(`/api/territories/viewport/?lat=${terr.center_lat||geo.lat}&lon=${terr.center_lon||geo.lng}&radius_km=0.1&zoom=${zoom2}`, {
+          fetch(`/api/territories/map-view/?lat=${terr.center_lat||geo.lat}&lon=${terr.center_lon||geo.lng}&radius_km=0.3&zoom=${zoom2}`, {
             headers: { 'Authorization': `Bearer ${token}` }
           }).then(r => r.ok ? r.json() : null).then(data => {
             const hexData = (data?.territories || data || []).find((h: any) => h.h3_index === hx)

@@ -60,6 +60,24 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                  Territory.objects.filter(h3_index__in=hex_ids).select_related('owner')}
 
         player = request.user
+
+        # POI index by exact h3_index
+        from terra_domini.apps.events.unified_poi import UnifiedPOI
+        RARITY_RANK = {'common':0,'uncommon':1,'rare':2,'epic':3,'legendary':4,'mythic':5}
+        poi_index = {}
+        try:
+            for poi in UnifiedPOI.objects.filter(h3_index__in=hex_ids, is_active=True).values(
+                    'name','category','emoji','rarity','h3_index','tdc_per_24h','token_id',
+                    'is_shiny','wiki_url','description','fun_fact','floor_price_tdi',
+                    'visitors_per_year','geopolitical_score'):
+                hx2 = poi['h3_index']
+                if not hx2: continue
+                cur_r = RARITY_RANK.get(poi_index.get(hx2,{}).get('rarity','common'), 0)
+                if hx2 not in poi_index or RARITY_RANK.get(poi.get('rarity','common'),0) > cur_r:
+                    poi_index[hx2] = dict(poi)
+        except Exception:
+            pass
+
         result = []
         for hx in hex_ids:
             try:
