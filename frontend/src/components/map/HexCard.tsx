@@ -1,33 +1,26 @@
 /**
- * HexCard — central animated card that appears when clicking a hex.
- * Collectible card style: rarity border glow, shiny shimmer, POI image.
- * Replaces TerritoryPanel slide-in for the primary interaction.
+ * HexCard — collectible card, hex-shaped face, opens with animation.
+ * Like a Magic/Pokemon card but hexagonal.
+ * Rarity drives: border color, glow, background texture, foil shimmer on shiny.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X } from 'lucide-react'
-import { usePlayer, useStore } from '../../store'
-import type { TerritoryLight } from '../../types'
+import { usePlayer } from '../../store'
 
-const RARITY_COLOR: Record<string, string> = {
-  common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
-  epic:'#8B5CF6', legendary:'#FFB800', mythic:'#FF006E',
+/* ─── Rarity config ─────────────────────────────────────────────────── */
+const R: Record<string, { border: string; glow: string; bg: string; accent: string; label: string }> = {
+  common:   { border:'#6B7280', glow:'none',                           bg:'linear-gradient(160deg,#1a1a2e,#16213e)', accent:'#9CA3AF', label:'Common'    },
+  uncommon: { border:'#10B981', glow:'0 0 18px #10B98155',             bg:'linear-gradient(160deg,#0d2b1e,#0a3325)', accent:'#10B981', label:'Uncommon'  },
+  rare:     { border:'#3B82F6', glow:'0 0 24px #3B82F666',             bg:'linear-gradient(160deg,#0d1b3e,#0a1628)', accent:'#60A5FA', label:'Rare'       },
+  epic:     { border:'#8B5CF6', glow:'0 0 28px #8B5CF677',             bg:'linear-gradient(160deg,#1a0d3e,#120a28)', accent:'#A78BFA', label:'Epic'       },
+  legendary:{ border:'#FFB800', glow:'0 0 36px #FFB80088',             bg:'linear-gradient(160deg,#2b1e00,#1a1200)', accent:'#FFB800', label:'Legendary'  },
+  mythic:   { border:'#FF006E', glow:'0 0 44px #FF006EAA,0 0 80px #FF006E44', bg:'linear-gradient(160deg,#2b0018,#1a000f)', accent:'#FF006E', label:'Mythic ✦'  },
 }
-const RARITY_BG: Record<string, string> = {
-  common:'rgba(156,163,175,0.08)', uncommon:'rgba(16,185,129,0.08)',
-  rare:'rgba(59,130,246,0.08)', epic:'rgba(139,92,246,0.1)',
-  legendary:'rgba(255,184,0,0.1)', mythic:'rgba(255,0,110,0.12)',
-}
-const RARITY_GLOW: Record<string, string> = {
-  common:'none', uncommon:'none',
-  rare:'0 0 20px rgba(59,130,246,0.3)',
-  epic:'0 0 24px rgba(139,92,246,0.4)',
-  legendary:'0 0 32px rgba(255,184,0,0.5)',
-  mythic:'0 0 40px rgba(255,0,110,0.6)',
-}
-const RARITY_LABEL: Record<string, string> = {
-  common:'Common', uncommon:'Uncommon', rare:'Rare',
-  epic:'Epic', legendary:'Legendary', mythic:'Mythic ✦',
+
+const BIOME_ART: Record<string, string> = {
+  urban:'🏙️', rural:'🌾', forest:'🌲', mountain:'⛰️',
+  coastal:'🌊', desert:'🏜️', tundra:'❄️', industrial:'🏭',
+  landmark:'🏛️', grassland:'🌿',
 }
 
 interface Props {
@@ -38,225 +31,257 @@ interface Props {
 
 export function HexCard({ territory: t, onClose, onRequestClaim }: Props) {
   const player  = usePlayer()
-  const store   = useStore()
-  const [shimmer, setShimmer] = useState(false)
-
-  const rarity  = t.rarity || 'common'
-  const isShiny = !!t.is_shiny
-  const hasPOI  = !!(t.poi_name || t.is_landmark)
   const isOwned = t.owner_id === player?.id
   const isEnemy = !!t.owner_id && !isOwned
   const isFree  = !t.owner_id
+  const hasPOI  = !!(t.poi_name || t.is_landmark)
 
-  const rc = RARITY_COLOR[rarity] || '#9CA3AF'
-  const bg = RARITY_BG[rarity]   || 'rgba(156,163,175,0.08)'
-  const glow = RARITY_GLOW[rarity] || 'none'
+  const rarity  = t.rarity || 'common'
+  const isShiny = !!t.is_shiny
+  const cfg     = R[rarity] || R.common
 
-  const name = t.custom_name || t.poi_name || t.landmark_name || t.place_name
-    || (t.h3_index || '').slice(0, 12) + '…'
+  const name = t.custom_name || t.poi_name || t.place_name || 'Zone ' + (t.h3_index || '').slice(0,6)
+  const biomeEmoji = BIOME_ART[t.territory_type || t.biome || 'rural'] || '🌾'
+  const cardEmoji  = t.custom_emoji || t.poi_emoji || biomeEmoji
 
-  // Shiny shimmer effect — cycles every 3s
+  /* shiny foil animation */
+  const [foil, setFoil] = useState(0)
   useEffect(() => {
     if (!isShiny) return
-    const id = setInterval(() => {
-      setShimmer(true)
-      setTimeout(() => setShimmer(false), 800)
-    }, 3000)
+    const id = setInterval(() => { setFoil(f => (f + 1) % 3) }, 2200)
     return () => clearInterval(id)
   }, [isShiny])
 
-  const cardVariants = {
-    hidden: { scale: 0.7, opacity: 0, rotateY: -15 },
-    visible: { scale: 1, opacity: 1, rotateY: 0,
-      transition: { type: 'spring', stiffness: 300, damping: 22 } },
-    exit: { scale: 0.8, opacity: 0, rotateY: 15,
-      transition: { duration: 0.2 } },
+  /* tilt on mouse */
+  const cardRef = useRef<HTMLDivElement>(null)
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+  const onMouseMove = (e: React.MouseEvent) => {
+    const r = cardRef.current?.getBoundingClientRect()
+    if (!r) return
+    const x = ((e.clientX - r.left) / r.width  - 0.5) * 16
+    const y = ((e.clientY - r.top ) / r.height - 0.5) * -12
+    setTilt({ x, y })
   }
+  const onMouseLeave = () => setTilt({ x: 0, y: 0 })
 
   return (
     <motion.div
       initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 1200,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(6px)',
-        padding: 20,
-      }}
+      style={{ position:'fixed', inset:0, zIndex:1200, display:'flex',
+        alignItems:'center', justifyContent:'center',
+        background:'rgba(0,0,0,0.75)', backdropFilter:'blur(8px)', padding:20 }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <motion.div
-        variants={cardVariants}
-        initial="hidden" animate="visible" exit="exit"
-        style={{
-          width: '100%', maxWidth: 340,
-          background: `linear-gradient(145deg, #0c0c18, #080810)`,
-          border: `2px solid ${rc}`,
+        ref={cardRef}
+        initial={{ scale:0.5, rotateY:-25, opacity:0 }}
+        animate={{ scale:1, rotateY:0, opacity:1 }}
+        exit={{ scale:0.6, rotateY:20, opacity:0 }}
+        transition={{ type:'spring', stiffness:280, damping:22 }}
+        style={{ rotateX: tilt.y, rotateY: tilt.x, transformStyle:'preserve-3d' }}
+        onMouseMove={onMouseMove}
+        onMouseLeave={onMouseLeave}
+      >
+        {/* ── Card shell ── */}
+        <div style={{
+          width: 280,
+          background: cfg.bg,
+          border: `2px solid ${cfg.border}`,
           borderRadius: 20,
-          boxShadow: glow,
+          boxShadow: cfg.glow !== 'none' ? cfg.glow : undefined,
           overflow: 'hidden',
           position: 'relative',
-        }}
-      >
-        {/* Shiny shimmer overlay */}
-        {isShiny && (
-          <motion.div
-            animate={shimmer ? { x: ['−100%', '200%'] } : { x: '-100%' }}
-            transition={{ duration: 0.8, ease: 'easeInOut' }}
-            style={{
-              position: 'absolute', inset: 0, zIndex: 10,
-              background: 'linear-gradient(105deg, transparent 40%, rgba(255,255,255,0.15) 50%, transparent 60%)',
-              pointerEvents: 'none',
-            }}
-          />
-        )}
-
-        {/* Rarity band top */}
-        <div style={{
-          background: `linear-gradient(90deg, ${rc}33, ${rc}11)`,
-          padding: '8px 16px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          userSelect: 'none',
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{
-              fontSize: 11, fontWeight: 700, color: rc,
-              letterSpacing: '0.1em', textTransform: 'uppercase',
-            }}>{RARITY_LABEL[rarity]}</span>
-            {isShiny && <span style={{ fontSize: 12, color: '#FFB800' }}>✨ Shiny</span>}
-            {t.nft_version > 1 && <span style={{ fontSize: 10, color: '#8B5CF6' }}>v{t.nft_version}</span>}
-          </div>
-          <button onClick={onClose} style={{
-            background: 'rgba(255,255,255,0.08)', border: 'none',
-            borderRadius: 6, color: '#9CA3AF', cursor: 'pointer',
-            width: 26, height: 26, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}><X size={14} /></button>
-        </div>
 
-        {/* POI Image */}
-        {(t.poi_wiki_url || t.wiki_url) && (
-          <div style={{ height: 140, overflow: 'hidden', position: 'relative' }}>
-            <img
-              src={t.poi_wiki_url || t.wiki_url}
-              alt={name}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-              onError={e => { (e.target as HTMLImageElement).parentElement!.style.display = 'none' }}
+          {/* Foil shimmer overlay for shiny */}
+          {isShiny && (
+            <motion.div
+              key={foil}
+              initial={{ x:'-120%', opacity:0.6 }}
+              animate={{ x:'160%', opacity:0 }}
+              transition={{ duration:0.9, ease:'easeInOut' }}
+              style={{
+                position:'absolute', inset:0, zIndex:20, pointerEvents:'none',
+                background:'linear-gradient(105deg,transparent 30%,rgba(255,255,255,0.25) 50%,transparent 70%)',
+              }}
             />
-            <div style={{
-              position: 'absolute', inset: 0,
-              background: 'linear-gradient(transparent 50%, rgba(8,8,16,0.9) 100%)',
-            }} />
-          </div>
-        )}
+          )}
 
-        {/* Card body */}
-        <div style={{ padding: '16px 18px' }}>
-          {/* Hex emoji + name */}
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>
-            <span style={{ fontSize: 28, flexShrink: 0 }}>
-              {t.custom_emoji || t.poi_emoji || (hasPOI ? '📍' : isOwned ? '🏴' : '⬡')}
+          {/* ── Top band: rarity + set ── */}
+          <div style={{
+            background:`${cfg.border}22`,
+            padding:'8px 14px 6px',
+            display:'flex', justifyContent:'space-between', alignItems:'center',
+            borderBottom:`1px solid ${cfg.border}44`,
+          }}>
+            <span style={{ fontSize:11, fontWeight:800, color:cfg.accent,
+              letterSpacing:'0.12em', textTransform:'uppercase' }}>
+              {cfg.label}
             </span>
-            <div>
-              <div style={{ fontSize: 17, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>{name}</div>
-              <div style={{ fontSize: 11, color: '#4B5563', fontFamily: 'monospace', marginTop: 2 }}>
-                {(t.h3_index || '').slice(0, 16)}
-              </div>
+            <div style={{ display:'flex', gap:6, alignItems:'center' }}>
+              {isShiny && <span style={{ fontSize:11, color:'#FFD700' }}>✨ Shiny</span>}
+              {t.nft_version > 1 && <span style={{ fontSize:10, color:'#8B5CF6',
+                background:'rgba(139,92,246,0.15)', padding:'1px 6px', borderRadius:4 }}>v{t.nft_version}</span>}
+              <button onClick={onClose} style={{ background:'none', border:'none',
+                color:'#6B7280', cursor:'pointer', fontSize:16, padding:0, lineHeight:1 }}>✕</button>
             </div>
           </div>
 
-          {/* POI description */}
-          {t.poi_description && (
-            <div style={{ fontSize: 12, color: '#9CA3AF', lineHeight: 1.5, marginBottom: 10,
-              padding: '8px 10px', background: 'rgba(255,255,255,0.04)', borderRadius: 8 }}>
-              {t.poi_description}
-            </div>
-          )}
-          {t.poi_fun_fact && (
-            <div style={{ fontSize: 11, color: '#6B7280', fontStyle: 'italic', marginBottom: 10 }}>
-              💡 {t.poi_fun_fact}
-            </div>
-          )}
+          {/* ── Hex art zone ── */}
+          <div style={{ position:'relative', height:150, display:'flex',
+            alignItems:'center', justifyContent:'center', overflow:'hidden' }}>
 
-          {/* Stats row */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 14 }}>
-            <StatBadge label="Income" value={`+${t.resource_credits || t.food_per_tick || 10}/tick`} color="#FFB800" />
-            {t.poi_floor_price && <StatBadge label="Floor" value={`${t.poi_floor_price} TDI`} color={rc} />}
-            {t.poi_visitors && <StatBadge label="Visitors" value={`${(t.poi_visitors/1e6).toFixed(1)}M`} color="#10B981" />}
-            {!t.poi_floor_price && <StatBadge label="Defense" value={`${t.defense_tier || 1}★`} color="#6B7280" />}
-            {!t.poi_visitors && <StatBadge label="Type" value={t.territory_type || 'rural'} color="#6B7280" />}
+            {/* Background: POI image or procedural */}
+            {t.poi_wiki_url ? (
+              <img src={t.poi_wiki_url} alt={name}
+                style={{ position:'absolute', inset:0, width:'100%', height:'100%',
+                  objectFit:'cover', opacity:0.55 }}
+                onError={e => { (e.target as HTMLImageElement).style.display='none' }}
+              />
+            ) : (
+              <div style={{ position:'absolute', inset:0,
+                background:`radial-gradient(ellipse at center, ${cfg.border}22 0%, transparent 70%)` }} />
+            )}
+
+            {/* Dark gradient over image */}
+            <div style={{ position:'absolute', inset:0,
+              background:'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.6) 100%)' }} />
+
+            {/* ── SVG Hex frame ── */}
+            <svg width="110" height="126" viewBox="0 0 110 126" style={{ position:'relative', zIndex:2, filter: cfg.glow !== 'none' ? `drop-shadow(0 0 8px ${cfg.border})` : undefined }}>
+              <defs>
+                <clipPath id={`hex-clip-${rarity}`}>
+                  <polygon points="55,2 107,29 107,97 55,124 3,97 3,29" />
+                </clipPath>
+              </defs>
+              {/* Hex border */}
+              <polygon points="55,2 107,29 107,97 55,124 3,97 3,29"
+                fill="none" stroke={cfg.border} strokeWidth="2.5" opacity="0.9" />
+              {/* Inner fill with image or gradient */}
+              {t.poi_wiki_url ? (
+                <image href={t.poi_wiki_url} x="3" y="2" width="104" height="122"
+                  clipPath={`url(#hex-clip-${rarity})`} preserveAspectRatio="xMidYMid slice" />
+              ) : (
+                <polygon points="55,2 107,29 107,97 55,124 3,97 3,29"
+                  fill={`${cfg.border}18`} />
+              )}
+              {/* Center emoji if no image */}
+              {!t.poi_wiki_url && (
+                <text x="55" y="72" textAnchor="middle" fontSize="38" dominantBaseline="central">{cardEmoji}</text>
+              )}
+            </svg>
           </div>
 
-          {/* Owner info */}
-          {isOwned && (
-            <div style={{
-              padding: '8px 12px', borderRadius: 8, marginBottom: 12,
-              background: `${t.border_color || '#00FF87'}15`,
-              border: `1px solid ${t.border_color || '#00FF87'}40`,
-              display: 'flex', alignItems: 'center', gap: 8,
-            }}>
-              <span style={{ fontSize: 18 }}>{t.custom_emoji || '🏴'}</span>
-              <div>
-                <div style={{ fontSize: 12, fontWeight: 600, color: t.border_color || '#00FF87' }}>Your territory</div>
-                {t.custom_name && <div style={{ fontSize: 10, color: '#6B7280' }}>{t.custom_name}</div>}
-              </div>
+          {/* ── Card name ── */}
+          <div style={{ padding:'10px 14px 6px', borderBottom:`1px solid ${cfg.border}33` }}>
+            <div style={{ fontSize:16, fontWeight:800, color:'#fff', lineHeight:1.2 }}>{name}</div>
+            <div style={{ display:'flex', gap:6, marginTop:4, alignItems:'center' }}>
+              <span style={{ fontSize:10, color:'#6B7280' }}>
+                {hasPOI ? (t.poi_category || 'poi') : (t.territory_type || 'rural')}
+              </span>
+              {t.h3_index && (
+                <span style={{ fontSize:9, color:'#374151', fontFamily:'monospace' }}>
+                  {t.h3_index.slice(0,10)}…
+                </span>
+              )}
             </div>
-          )}
-          {isEnemy && (
-            <div style={{
-              padding: '8px 12px', borderRadius: 8, marginBottom: 12,
-              background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.25)',
-              display: 'flex', alignItems: 'center', gap: 8,
-            }}>
-              <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#EF4444' }}>
-                {(t.owner_username || '?').slice(0,2).toUpperCase()}
-              </div>
-              <div style={{ fontSize: 12, color: '#F87171', fontWeight: 600 }}>{t.owner_username}</div>
+          </div>
+
+          {/* ── Stats box (like card power/toughness) ── */}
+          <div style={{ padding:'8px 14px', display:'grid',
+            gridTemplateColumns:'1fr 1fr 1fr', gap:6 }}>
+            <Stat icon="💰" val={`+${Math.round(t.resource_credits || t.food_per_tick || 10)}`} label="income" accent={cfg.accent} />
+            {hasPOI && t.poi_floor_price
+              ? <Stat icon="💎" val={`${t.poi_floor_price}`} label="TDI floor" accent={cfg.accent} />
+              : <Stat icon="🛡️" val={`${t.defense_tier || 1}★`} label="defense" accent={cfg.accent} />
+            }
+            {hasPOI && t.poi_visitors
+              ? <Stat icon="👥" val={`${(t.poi_visitors/1e6).toFixed(1)}M`} label="visitors" accent={cfg.accent} />
+              : <Stat icon="⚡" val={`+${Math.round(t.resource_energy || 5)}`} label="energy" accent={cfg.accent} />
+            }
+          </div>
+
+          {/* ── POI description (if any) ── */}
+          {hasPOI && t.poi_description && (
+            <div style={{ margin:'0 14px 8px', padding:'8px 10px',
+              background:`${cfg.border}12`, borderRadius:8, fontSize:11,
+              color:'#9CA3AF', lineHeight:1.5, fontStyle:'italic',
+              border:`1px solid ${cfg.border}22` }}>
+              {t.poi_description.slice(0,120)}{t.poi_description.length>120?'…':''}
             </div>
           )}
 
-          {/* Actions */}
-          {isFree && player && (
-            <button onClick={onRequestClaim} style={{
-              width: '100%', padding: '12px 0',
-              background: `linear-gradient(135deg, ${rc}cc, ${rc})`,
-              border: 'none', borderRadius: 10, color: '#000',
-              fontSize: 14, fontWeight: 800, cursor: 'pointer',
-            }}>
-              {hasPOI ? `🏴 Claim ${t.poi_name || name}` : '🏴 Claim territory'}
-            </button>
+          {/* ── Owner strip ── */}
+          {(isOwned || isEnemy) && (
+            <div style={{ margin:'0 14px 8px', padding:'6px 10px', borderRadius:8,
+              background: isOwned ? `${t.border_color || cfg.border}18` : 'rgba(239,68,68,0.1)',
+              border:`1px solid ${isOwned ? (t.border_color || cfg.border) : '#EF4444'}33`,
+              display:'flex', alignItems:'center', gap:8, fontSize:12 }}>
+              <span style={{ fontSize:16 }}>{isOwned ? (t.custom_emoji || '🏴') : '👤'}</span>
+              <span style={{ fontWeight:600, color: isOwned ? (t.border_color||'#00FF87') : '#F87171' }}>
+                {isOwned ? 'Your territory' : t.owner_username}
+              </span>
+            </div>
           )}
-          {isEnemy && (
-            <button onClick={onRequestClaim} style={{
-              width: '100%', padding: '12px 0',
-              background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.35)',
-              borderRadius: 10, color: '#EF4444', fontSize: 14, fontWeight: 700, cursor: 'pointer',
-            }}>
-              ⚔️ Attack / 💸 Buy
-            </button>
-          )}
-          {isOwned && (
-            <div style={{ display: 'flex', gap: 8 }}>
+
+          {/* ── Action button ── */}
+          <div style={{ padding:'0 14px 16px' }}>
+            {isFree && player && (
               <button onClick={onRequestClaim} style={{
-                flex: 1, padding: '10px 0',
-                background: 'rgba(16,185,129,0.12)', border: '1px solid rgba(16,185,129,0.3)',
-                borderRadius: 10, color: '#10B981', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              }}>💰 Revenue</button>
-              <button style={{
-                flex: 1, padding: '10px 0',
-                background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.3)',
-                borderRadius: 10, color: '#8B5CF6', fontSize: 13, fontWeight: 600, cursor: 'pointer',
-              }}>🎨 Style</button>
+                width:'100%', padding:'11px 0',
+                background:`linear-gradient(135deg, ${cfg.border}cc, ${cfg.border})`,
+                border:'none', borderRadius:10, color:'#000',
+                fontSize:13, fontWeight:800, cursor:'pointer',
+                boxShadow: cfg.glow !== 'none' ? cfg.glow : undefined,
+              }}>
+                🏴 {hasPOI ? `Claim ${t.poi_name || name}` : 'Claim territory'}
+              </button>
+            )}
+            {isEnemy && (
+              <button onClick={onRequestClaim} style={{
+                width:'100%', padding:'11px 0',
+                background:'rgba(239,68,68,0.12)', border:'1px solid rgba(239,68,68,0.35)',
+                borderRadius:10, color:'#EF4444', fontSize:13, fontWeight:700, cursor:'pointer',
+              }}>⚔️ Attack · 💸 Buy · 🧩 Puzzle</button>
+            )}
+            {isOwned && (
+              <div style={{ display:'flex', gap:8 }}>
+                <button onClick={onRequestClaim} style={{
+                  flex:1, padding:'10px 0',
+                  background:`${cfg.border}18`, border:`1px solid ${cfg.border}44`,
+                  borderRadius:10, color:cfg.accent, fontSize:12, fontWeight:600, cursor:'pointer',
+                }}>💰 Revenue</button>
+                <button style={{
+                  flex:1, padding:'10px 0',
+                  background:'rgba(139,92,246,0.12)', border:'1px solid rgba(139,92,246,0.3)',
+                  borderRadius:10, color:'#A78BFA', fontSize:12, fontWeight:600, cursor:'pointer',
+                }}>🎨 Customize</button>
+              </div>
+            )}
+          </div>
+
+          {/* ── Card footer: token ID ── */}
+          {t.token_id && (
+            <div style={{ padding:'4px 14px 10px', fontSize:9, color:'#374151',
+              fontFamily:'monospace', textAlign:'center' }}>
+              NFT #{t.token_id} · Genesis Edition
             </div>
           )}
+
         </div>
       </motion.div>
     </motion.div>
   )
 }
 
-function StatBadge({ label, value, color }: { label: string; value: string; color: string }) {
+function Stat({ icon, val, label, accent }: { icon:string; val:string; label:string; accent:string }) {
   return (
-    <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '6px 8px', textAlign: 'center' }}>
-      <div style={{ fontSize: 12, fontWeight: 700, color }}>{value}</div>
-      <div style={{ fontSize: 9, color: '#4B5563', marginTop: 2 }}>{label}</div>
+    <div style={{ background:'rgba(255,255,255,0.04)', borderRadius:8,
+      padding:'5px 6px', textAlign:'center' }}>
+      <div style={{ fontSize:10 }}>{icon}</div>
+      <div style={{ fontSize:12, fontWeight:700, color:accent, fontFamily:'monospace' }}>{val}</div>
+      <div style={{ fontSize:8, color:'#4B5563', marginTop:1 }}>{label}</div>
     </div>
   )
 }
