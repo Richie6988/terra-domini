@@ -18,6 +18,24 @@ from terra_domini.apps.territories.serializers import TerritoryLightSerializer, 
 logger = logging.getLogger('terra_domini.territories')
 
 
+
+# POI category → territory type / biome
+_POI_BIOME = {
+    'capital_city':'urban', 'financial_hub':'urban', 'stock_exchange':'urban',
+    'world_heritage':'landmark', 'ancient_ruins':'landmark', 'religious_site':'landmark',
+    'museum':'landmark', 'palace':'landmark', 'stadium':'landmark',
+    'mountain_peak':'mountain', 'volcano':'mountain',
+    'nature_sanctuary':'forest', 'ancient_forest':'forest', 'national_park':'forest',
+    'waterfall':'coastal', 'coral_reef':'coastal', 'mega_port':'coastal', 'island':'coastal',
+    'oil_field':'industrial', 'nuclear_plant':'industrial', 'military_base':'industrial',
+    'space_center':'industrial', 'mine':'industrial',
+    'desert':'desert', 'tundra':'tundra',
+}
+
+def _biome_from_poi(poi: dict) -> str:
+    return _POI_BIOME.get(poi.get('category',''), 'urban' if poi.get('name') else 'rural')
+
+
 class TerritoryViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated]
     serializer_class = TerritoryLightSerializer

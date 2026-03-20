@@ -31,6 +31,22 @@ from terra_domini.apps.alliances.models import Alliance, AllianceMember
 logger = logging.getLogger('terra_domini.api')
 
 
+
+_POI_BIOME = {
+    'capital_city':'urban','financial_hub':'urban','stock_exchange':'urban',
+    'world_heritage':'landmark','ancient_ruins':'landmark','religious_site':'landmark',
+    'museum':'landmark','palace':'landmark','stadium':'landmark',
+    'mountain_peak':'mountain','volcano':'mountain',
+    'nature_sanctuary':'forest','ancient_forest':'forest','national_park':'forest',
+    'waterfall':'coastal','coral_reef':'coastal','mega_port':'coastal','island':'coastal',
+    'oil_field':'industrial','nuclear_plant':'industrial','military_base':'industrial',
+    'space_center':'industrial',
+    'desert':'desert','tundra':'tundra',
+}
+def _biome_from_poi(poi):
+    return _POI_BIOME.get(poi.get('category',''), 'urban' if poi.get('name') else 'rural')
+
+
 class GameActionThrottle(UserRateThrottle):
     scope = 'game_actions'
 
@@ -122,8 +138,8 @@ class TerritoryViewSet(viewsets.ReadOnlyModelViewSet):
                 'owner_color': getattr(t.owner, 'border_color', '#00FF87') if t and t.owner_id else None,
                 'owner_emoji': getattr(t.owner, 'avatar_emoji', '🏴') if t and t.owner_id else None,
                 'alliance_id': None, 'alliance_tag': None,
-                'territory_type': t.territory_type if t else ('landmark' if poi_data else 'rural'),
-                'type': t.territory_type if t else ('landmark' if poi_data else 'rural'),
+                'territory_type': t.territory_type if t else _biome_from_poi(poi_data) if poi_data else 'rural',
+                'type': t.territory_type if t else _biome_from_poi(poi_data) if poi_data else 'rural',
                 'defense_tier': t.defense_tier if t else 1,
                 'defense_points': float(t.defense_points) if t else 100.0,
                 'is_control_tower': bool(t.is_control_tower) if t else False,
