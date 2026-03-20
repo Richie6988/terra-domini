@@ -25,7 +25,7 @@ if 'token_blacklist_blacklistedtoken' not in tables or 'unified_poi' not in tabl
 
 # 2. Create game app tables if missing (accounts, territories, etc.)
 GAME_SQL = [
-    ('accounts_player', """CREATE TABLE IF NOT EXISTS accounts_player (
+    ('players', """CREATE TABLE IF NOT EXISTS players (
         id INTEGER PRIMARY KEY AUTOINCREMENT, password TEXT NOT NULL,
         last_login DATETIME, is_superuser INTEGER DEFAULT 0,
         username TEXT UNIQUE NOT NULL, email TEXT UNIQUE NOT NULL DEFAULT \'\',
@@ -38,8 +38,8 @@ GAME_SQL = [
         stamina REAL DEFAULT 100.0, max_stamina INTEGER DEFAULT 100,
         stamina_updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         total_territories INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""),
-    ('accounts_player_groups', "CREATE TABLE IF NOT EXISTS accounts_player_groups (id INTEGER PRIMARY KEY, player_id INTEGER, group_id INTEGER)"),
-    ('accounts_player_user_permissions', "CREATE TABLE IF NOT EXISTS accounts_player_user_permissions (id INTEGER PRIMARY KEY, player_id INTEGER, permission_id INTEGER)"),
+    ('players_groups', "CREATE TABLE IF NOT EXISTS players_groups (id INTEGER PRIMARY KEY, player_id INTEGER, group_id INTEGER)"),
+    ('players_user_permissions', "CREATE TABLE IF NOT EXISTS players_user_permissions (id INTEGER PRIMARY KEY, player_id INTEGER, permission_id INTEGER)"),
     ('territories_territory', """CREATE TABLE IF NOT EXISTS territories_territory (
         id TEXT PRIMARY KEY, h3_index TEXT UNIQUE NOT NULL,
         h3_resolution INTEGER DEFAULT 7, center_lat REAL, center_lon REAL,
