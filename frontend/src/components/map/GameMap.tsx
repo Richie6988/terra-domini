@@ -123,37 +123,44 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     const hoverLayer = L.layerGroup().addTo(map)
     let hoverPoly: L.Polygon | null = null
 
-    let hoverTimer: ReturnType<typeof setTimeout> | null = null
-
+    
     map.on('mousemove', (e: L.LeafletMouseEvent) => {
-      // Clear previous timer — hex disappears if mouse stops
-      if (hoverTimer) clearTimeout(hoverTimer)
       try {
         const zoom = map.getZoom()
         const res = zoom <= 11 ? 6 : zoom <= 14 ? 7 : 8
         const hx = latLngToCell(e.latlng.lat, e.latlng.lng, res)
-        const owned = useStore.getState().territories[hx]
-        if (owned?.owner_id) { hoverLayer.clearLayers(); hoverPoly = null }
-        else {
-          if ((hoverPoly as any)?._hxId !== hx) {
-            hoverLayer.clearLayers()
-            const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
-            hoverPoly = L.polygon(boundary as L.LatLngTuple[], {
-              fillColor: '#00FF87', fillOpacity: 0.10,
-              color: '#00FF87', weight: 1.5, opacity: 0.5,
-              dashArray: '5,4', className: 'td-hex-hover',
-            })
-            ;(hoverPoly as any)._hxId = hx
-            hoverLayer.addLayer(hoverPoly)
-          }
-        }
-      } catch (_) {}
-      // Auto-clear after 800ms if mouse stops
-      hoverTimer = setTimeout(() => {
+        if ((hoverPoly as any)?._hxId === hx) return  // already showing this hex
+
         hoverLayer.clearLayers()
-        hoverPoly = null
-        hoverTimer = null
-      }, 800)
+
+        // 1. Show faint neighbors so user sees the hex grid shape
+        const neighbors = gridDisk(hx, 1)
+        neighbors.forEach((n: string) => {
+          if (n === hx) return
+          const nt = useStore.getState().territories[n]
+          if (nt?.owner_id) return  // skip owned
+          try {
+            const nb = cellToBoundary(n).map((p: number[]) => [p[0], p[1]])
+            hoverLayer.addLayer(L.polygon(nb as L.LatLngTuple[], {
+              fillColor: '#fff', fillOpacity: 0.03,
+              color: '#fff', weight: 0.6, opacity: 0.2,
+            }))
+          } catch (_) {}
+        })
+
+        // 2. Show the hovered hex brightly
+        const owned = useStore.getState().territories[hx]
+        const col = owned?.owner_id ? '#EF4444' : '#00FF87'
+        const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
+        hoverPoly = L.polygon(boundary as L.LatLngTuple[], {
+          fillColor: col, fillOpacity: 0.18,
+          color: col, weight: 2, opacity: 0.9,
+          dashArray: owned?.owner_id ? '' : '5,4',
+          className: 'td-hex-hover',
+        })
+        ;(hoverPoly as any)._hxId = hx
+        hoverLayer.addLayer(hoverPoly)
+      } catch (_) {}
     })
 
     map.on('mouseout', () => {

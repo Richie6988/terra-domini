@@ -393,51 +393,47 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
           exit={{ y: 60, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 400, damping: 35 }}
           style={{
-            width: '100%', maxWidth: 480,
-            background: 'rgba(10,10,20,0.99)',
-              pointerEvents: 'auto',
+            width: claimWaiting ? 'auto' : '100%',
+            maxWidth: claimWaiting ? 320 : 480,
+            background: claimWaiting ? 'rgba(0,0,0,0.75)' : 'rgba(10,10,20,0.99)',
+            pointerEvents: 'auto',
             border: '1px solid rgba(0,255,135,0.25)',
-            borderRadius: 16, overflow: 'hidden',
-            boxShadow: '0 -4px 40px rgba(0,255,135,0.1), 0 0 0 1px rgba(0,255,135,0.1)',
+            borderRadius: claimWaiting ? 40 : 16,
+            overflow: 'hidden',
+            boxShadow: '0 -4px 40px rgba(0,255,135,0.1)',
           }}
         >
-          {/* Progress bar */}
-          <div style={{ height: 3, background: 'rgba(255,255,255,0.06)' }}>
+          {!claimWaiting && <div style={{ height: 3, background: 'rgba(255,255,255,0.06)' }}>
             <motion.div
               initial={{ width: `${(state.currentStep / TUTORIAL_STEPS.length) * 100}%` }}
               animate={{ width: `${progress}%` }}
               style={{ height: '100%', background: 'var(--g, #00FF87)', borderRadius: 2 }}
             />
-          </div>
+          </div>}
 
-          {/* Step dots */}
-          <div style={{ display: 'flex', justifyContent: 'center', gap: 6, padding: '12px 0 0' }}>
+          {!claimWaiting && <div style={{ display: 'flex', justifyContent: 'center', gap: 6, padding: '12px 0 0' }}>
             {TUTORIAL_STEPS.map((s, i) => (
               <div key={i} style={{
                 width: i === state.currentStep ? 20 : 6,
                 height: 6, borderRadius: 3,
-                background: i < state.currentStep
-                  ? '#00FF87'
-                  : i === state.currentStep
-                  ? '#00FF87'
-                  : 'rgba(255,255,255,0.15)',
+                background: i < state.currentStep ? '#00FF87' : i === state.currentStep ? '#00FF87' : 'rgba(255,255,255,0.15)',
                 transition: 'all 0.3s',
               }} />
             ))}
-          </div>
+          </div>}
 
-          {/* Content */}
-          <div style={{ padding: '20px 28px 28px' }}>
-            <div style={{ fontSize: 48, marginBottom: 12, textAlign: 'center' }}>{currentStep.emoji}</div>
-            <div style={{
+          {/* Content — hidden when claimWaiting so map is fully visible */}
+          <div style={{ padding: claimWaiting ? '12px 20px' : '20px 28px 28px' }}>
+            {!claimWaiting && <div style={{ fontSize: 48, marginBottom: 12, textAlign: 'center' }}>{currentStep.emoji}</div>}
+            {!claimWaiting && <div style={{
               fontFamily: "'Bebas Neue', sans-serif",
               fontSize: 28, letterSpacing: '1px', color: '#fff',
               textAlign: 'center', marginBottom: 12,
-            }}>{currentStep.title}</div>
-            <div style={{
+            }}>{currentStep.title}</div>}
+            {!claimWaiting && <div style={{
               fontSize: 15, color: 'rgba(255,255,255,0.65)',
               lineHeight: 1.7, textAlign: 'center', marginBottom: 24,
-            }}>{currentStep.body}</div>
+            }}>{currentStep.body}</div>}
 
             {/* GPS error */}
             {gpsError && (
