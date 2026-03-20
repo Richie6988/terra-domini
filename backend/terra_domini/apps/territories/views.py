@@ -34,40 +34,67 @@ class TerritoryViewSet(viewsets.ModelViewSet):
     # ── Map viewport query ─────────────────────────────────────────
     @action(detail=False, methods=['GET'], url_path='map-view')
     def map_view(self, request):
-        """GET /api/territories/map-view/?lat=&lon=&radius_km= — territories in viewport."""
+        """GET /api/territories/map-view/?lat=&lon=&radius_km=&zoom="""
         try:
-            lat = float(request.query_params.get('lat', 48.8566))
-            lon = float(request.query_params.get('lon', 2.3522))
-            radius_km = float(request.query_params.get('radius_km', 5.0))
+            lat       = float(request.query_params.get('lat', 48.8566))
+            lon       = float(request.query_params.get('lon', 2.3522))
+            radius_km = min(float(request.query_params.get('radius_km', 10)), 100)
+            zoom      = int(request.query_params.get('zoom', 13))
+        except (TypeError, ValueError):
+            return Response({'error': 'Invalid params'}, status=400)
 
-            # Approximate bounding box
-            deg_lat = radius_km / 111.0
-            deg_lon = radius_km / (111.0 * abs(math.cos(lat * math.pi / 180)) or 0.01)
+        if zoom <= 11:   res = 6
+        elif zoom <= 14: res = 7
+        else:            res = 8
 
-            territories = Territory.objects.filter(
-                center_lat__range=(lat - deg_lat, lat + deg_lat),
-                center_lon__range=(lon - deg_lon, lon + deg_lon),
-            ).select_related('owner', 'owner__alliance_member__alliance')[:200]
-
-            from terra_domini.apps.territories.serializers import TerritoryLightSerializer
-            # Add H3 boundary points for map rendering
-            result = []
-            for t in territories:
-                data = TerritoryLightSerializer(t).data
-                # Generate boundary points from h3_index
-                if t.h3_index and not data.get('boundary_points'):
-                    try:
-                        import h3
-                        boundary = h3.h3_to_geo_boundary(t.h3_index, geo_json=False)
-                        data['boundary_points'] = [[lat, lon] for lat, lon in boundary]
-                    except Exception:
-                        data['boundary_points'] = []
-                result.append(data)
-            return Response(result)
+        try:
+            import h3 as h3lib
+            center_h3 = h3lib.geo_to_h3(lat, lon, res)
+            k = max(3, min(int(radius_km / {6:10, 7:4, 8:1.2}.get(res, 4)), 12))
+            hex_ids = list(h3lib.k_ring(center_h3, k))
         except Exception as e:
-            import logging
-            logging.getLogger('terra_domini').warning(f'map_view error: {e}')
-            return Response([])
+            return Response([], status=200)
+
+        from terra_domini.apps.territories.models import Territory
+        owned = {t.h3_index: t for t in
+                 Territory.objects.filter(h3_index__in=hex_ids).select_related('owner')}
+
+        player = request.user
+        result = []
+        for hx in hex_ids:
+            try:
+                geo      = h3lib.h3_to_geo(hx)
+                boundary = [[p[0], p[1]] for p in h3lib.h3_to_geo_boundary(hx)]
+            except Exception:
+                continue
+            t = owned.get(hx)
+            result.append({
+                'h3_index': hx, 'h3': hx, 'h3_resolution': res,
+                'owner_id': str(t.owner_id) if t and t.owner_id else None,
+                'owner_username': t.owner.username if t and t.owner_id else None,
+                'alliance_id': None, 'alliance_tag': None,
+                'territory_type': t.territory_type if t else 'rural',
+                'type': t.territory_type if t else 'rural',
+                'defense_tier': t.defense_tier if t else 1,
+                'defense_points': float(t.defense_points) if t else 100.0,
+                'is_control_tower': bool(t.is_control_tower) if t else False,
+                'is_landmark': False, 'is_under_attack': False,
+                'ad_slot_enabled': False, 'landmark_name': None,
+                'place_name': getattr(t, 'place_name', None),
+                'center_lat': geo[0], 'center_lon': geo[1],
+                'boundary_points': boundary,
+                'resource_food': float(getattr(t, 'resource_food', 10)),
+                'resource_energy': float(getattr(t, 'resource_energy', 10)),
+                'resource_credits': float(getattr(t, 'resource_credits', 10)),
+                'resource_materials': float(getattr(t, 'resource_materials', 10)),
+                'resource_intel': float(getattr(t, 'resource_intel', 5)),
+                'food_per_tick': float(getattr(t, 'resource_food', 10)),
+                'rarity': getattr(t, 'rarity', 'common'),
+                'nft_version': getattr(t, 'nft_version', 1),
+                'token_id': getattr(t, 'token_id', None),
+                'is_shiny': bool(getattr(t, 'is_shiny', False)),
+            })
+        return Response(result)
 
 
     @action(detail=False, methods=['GET'], url_path='viewport')

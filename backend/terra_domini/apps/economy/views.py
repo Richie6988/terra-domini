@@ -49,19 +49,69 @@ class TerritoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     @action(detail=False, methods=['GET'], url_path='viewport')
     def viewport(self, request):
-        """
-        GET /api/territories/viewport/?lat=48.85&lon=2.35&radius_km=5
-        Returns all territory states in a viewport. Hot path — reads from cache.
-        """
+        """GET /api/territories/viewport/?lat=&lon=&radius_km=&zoom="""
         try:
-            lat = float(request.query_params.get('lat', 0))
-            lon = float(request.query_params.get('lon', 0))
-            radius_km = min(float(request.query_params.get('radius_km', 5)), 50)
+            lat       = float(request.query_params.get('lat', 48.8566))
+            lon       = float(request.query_params.get('lon', 2.3522))
+            radius_km = min(float(request.query_params.get('radius_km', 10)), 100)
+            zoom      = int(request.query_params.get('zoom', 13))
         except (TypeError, ValueError):
-            return Response({'error': 'Invalid coordinates'}, status=400)
+            return Response({'error': 'Invalid params'}, status=400)
 
-        territories = TerritoryEngine.get_map_region(lat, lon, radius_km)
-        return Response({'territories': territories, 'count': len(territories)})
+        if zoom <= 11:   res = 6
+        elif zoom <= 14: res = 7
+        else:            res = 8
+
+        try:
+            import h3 as h3lib
+            center_h3 = h3lib.geo_to_h3(lat, lon, res)
+            k = max(3, min(int(radius_km / {6:10, 7:4, 8:1.2}.get(res, 4)), 12))
+            hex_ids = list(h3lib.k_ring(center_h3, k))
+        except Exception as e:
+            return Response({'territories': [], 'count': 0, 'error': str(e)})
+
+        from terra_domini.apps.territories.models import Territory
+        owned = {t.h3_index: t for t in
+                 Territory.objects.filter(h3_index__in=hex_ids).select_related('owner')}
+
+        player = request.user
+        result = []
+        for hx in hex_ids:
+            try:
+                geo      = h3lib.h3_to_geo(hx)
+                boundary = [[p[0], p[1]] for p in h3lib.h3_to_geo_boundary(hx)]
+            except Exception:
+                continue
+            t = owned.get(hx)
+            result.append({
+                'h3_index': hx, 'h3': hx, 'h3_resolution': res,
+                'owner_id': str(t.owner_id) if t and t.owner_id else None,
+                'owner_username': t.owner.username if t and t.owner_id else None,
+                'alliance_id': None, 'alliance_tag': None,
+                'territory_type': t.territory_type if t else 'rural',
+                'type': t.territory_type if t else 'rural',
+                'defense_tier': t.defense_tier if t else 1,
+                'defense_points': float(t.defense_points) if t else 100.0,
+                'is_control_tower': bool(t.is_control_tower) if t else False,
+                'is_landmark': False, 'is_under_attack': False,
+                'ad_slot_enabled': False, 'landmark_name': None,
+                'place_name': getattr(t, 'place_name', None),
+                'center_lat': geo[0], 'center_lon': geo[1],
+                'boundary_points': boundary,
+                'resource_food': float(getattr(t, 'resource_food', 10)),
+                'resource_energy': float(getattr(t, 'resource_energy', 10)),
+                'resource_credits': float(getattr(t, 'resource_credits', 10)),
+                'resource_materials': float(getattr(t, 'resource_materials', 10)),
+                'resource_intel': float(getattr(t, 'resource_intel', 5)),
+                'food_per_tick': float(getattr(t, 'resource_food', 10)),
+                'rarity': getattr(t, 'rarity', 'common'),
+                'biome': getattr(t, 'biome', 'grassland'),
+                'nft_version': getattr(t, 'nft_version', 1),
+                'token_id': getattr(t, 'token_id', None),
+                'is_shiny': bool(getattr(t, 'is_shiny', False)),
+            })
+        return Response({'territories': result, 'count': len(result)})
+
 
     @action(detail=True, methods=['POST'], url_path='claim')
     def claim(self, request, pk=None):
