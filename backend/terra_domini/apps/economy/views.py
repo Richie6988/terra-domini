@@ -256,15 +256,42 @@ class ShopViewSet(viewsets.GenericViewSet):
         if item_code.startswith('unit_'):
             unit_type = item_code.replace('unit_', '')
             quantity = int(request.data.get('quantity', 1))
-            UNIT_COSTS = {'infantry': 50, 'cavalry': 120, 'artillery': 200, 'naval': 300}
+            UNIT_COSTS = {
+                'infantry': 50, 'cavalry': 120, 'artillery': 200, 'naval': 300,
+                'spy': 150, 'engineer': 180, 'medic': 100, 'commander': 500,
+                'spy': 150, 'engineer': 180, 'medic': 100, 'commander': 500,
+            }
+            UNIT_TRAIN_SECONDS = {
+                'infantry': 300,    # 5 min
+                'cavalry': 600,     # 10 min
+                'artillery': 1200,  # 20 min
+                'naval': 900,       # 15 min
+                'spy': 450,         # 7.5 min
+                'engineer': 480,    # 8 min
+                'medic': 300,       # 5 min
+                'commander': 3600,  # 1 hour
+            }
             cost = UNIT_COSTS.get(unit_type, 50) * quantity
+            train_seconds = UNIT_TRAIN_SECONDS.get(unit_type, 300) * quantity
             player = request.user
             if float(player.tdc_in_game) < float(cost):
                 return Response({'error': f'Need {cost} TDC. You have {float(player.tdc_in_game):.0f} TDC.'}, status=400)
             from django.db.models import F
             from terra_domini.apps.accounts.models import Player as P
             P.objects.filter(id=player.id).update(tdc_in_game=F('tdc_in_game') - cost)
-            return Response({'success': True, 'unit_type': unit_type, 'quantity': quantity, 'tdc_spent': cost})
+            # Sync territories_owned stat
+            from terra_domini.apps.territories.models import Territory
+            from terra_domini.apps.accounts.models import PlayerStats
+            owned = Territory.objects.filter(owner=player).count()
+            PlayerStats.objects.filter(player=player).update(territories_owned=owned)
+            return Response({
+                'success': True,
+                'unit_type': unit_type,
+                'quantity': quantity,
+                'tdc_spent': cost,
+                'train_seconds': train_seconds,
+                'ready_at': (timezone.now() + __import__('datetime').timedelta(seconds=train_seconds)).isoformat(),
+            })
 
         """
         POST /api/shop/purchase/

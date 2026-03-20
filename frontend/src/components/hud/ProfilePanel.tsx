@@ -56,12 +56,20 @@ function MissionCard({ mission }: { mission: any }) {
 }
 
 function StatsTab({ player }: { player: any }) {
-  const stats = player.stats ?? {}
+  // Live refresh from API so KPIs update without re-login
+  const { data: livePlayer } = useQuery({
+    queryKey: ['player-live'],
+    queryFn: () => api.get('/players/me/').then(r => r.data),
+    refetchInterval: 15000,
+    staleTime: 10000,
+  })
+  const merged = livePlayer ? { ...player, ...livePlayer, stats: { ...(player.stats ?? {}), ...(livePlayer.stats ?? {}) } } : player
+  const stats = merged.stats ?? {}
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
-        <StatCard label="Commander Rank" value={player.commander_rank ?? 1} color="#F59E0B" />
-        <StatCard label="TDC Balance" value={`${toNum(player.tdc_in_game).toFixed(0)}`} color="#8B5CF6" />
+        <StatCard label="Commander Rank" value={merged.commander_rank ?? 1} color="#F59E0B" />
+        <StatCard label="TDC Balance" value={`${toNum(merged.tdc_in_game).toFixed(0)} 🪙`} color="#8B5CF6" />
         <StatCard label="Territories" value={stats.territories_owned ?? 0} color="#3B82F6" />
         <StatCard label="Battles Won" value={stats.battles_won ?? 0} color="#10B981" />
         <StatCard label="Season Score" value={stats.season_score ?? 0} color="#EC4899" />
