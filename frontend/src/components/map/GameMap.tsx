@@ -122,8 +122,10 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     }
     window.addEventListener('terra:flyto', onFlyTo)
     // ── Hover ghost hex ─────────────────────────────────────────
-    const hoverLayer = L.layerGroup().addTo(map)
+    const hoverLayer    = L.layerGroup().addTo(map)
+    const selectedLayer = L.layerGroup().addTo(map)  // locked selected hex
     let hoverPoly: L.Polygon | null = null
+    let selectedPoly: L.Polygon | null = null
 
     
     map.on('mousemove', (e: L.LeafletMouseEvent) => {
@@ -176,6 +178,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       // If a panel is open → close it and stop
       if (selectedHexRef.current) {
         selectedHexRef.current = null
+        selectedLayer.clearLayers()
+        selectedPoly = null
         setSelectedHex(null)
         setSelectedTerritoryState(null)
         setAttackTarget(null)
@@ -211,21 +215,29 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         setSelectedHex(hx)
         setSelectedTerritoryState({...terr})
 
+        // Lock/highlight the selected hex
+        selectedLayer.clearLayers()
+        hoverLayer.clearLayers()
+        hoverPoly = null
+        try {
+          const selBoundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
+          selectedPoly = L.polygon(selBoundary as L.LatLngTuple[], {
+            fillColor: '#fff', fillOpacity: 0.12,
+            color: '#fff', weight: 2.5, opacity: 1,
+            dashArray: '6,3',
+          })
+          selectedLayer.addLayer(selectedPoly)
+        } catch (_) {}
+
+        // Enrich with POI data via viewport endpoint (which has exact h3_index match)
+        const zoom2 = map.getZoom()
         const token = localStorage.getItem('td_access')
-        if (token && terr.center_lat) {
-          fetch(`/api/pois/?lat=${terr.center_lat}&lon=${terr.center_lon}&radius_km=0.5&limit=1`, {
+        if (token) {
+          fetch(`/api/territories/viewport/?lat=${terr.center_lat||geo.lat}&lon=${terr.center_lon||geo.lng}&radius_km=0.1&zoom=${zoom2}`, {
             headers: { 'Authorization': `Bearer ${token}` }
-          }).then(r => r.ok ? r.json() : null).then(pdata => {
-            if (!pdata) return
-            const nearby = (pdata.results ?? pdata)[0]
-            if (nearby) setSelectedTerritoryState((prev: any) => prev ? {...prev,
-              poi_name: nearby.name, description: nearby.description,
-              fun_fact: nearby.fun_fact, wiki_url: nearby.wiki_url,
-              rarity: nearby.rarity, bonus_pct: nearby.bonus_pct,
-              tdc_per_24h: nearby.tdc_per_24h, is_shiny: nearby.is_shiny,
-              token_id: nearby.token_id, visitors_per_year: nearby.visitors_per_year,
-              is_landmark: true,
-            } : prev)
+          }).then(r => r.ok ? r.json() : null).then(data => {
+            const hexData = (data?.territories || data || []).find((h: any) => h.h3_index === hx)
+            if (hexData) setSelectedTerritoryState((prev: any) => prev ? {...prev, ...hexData} : hexData)
           }).catch(() => {})
         }
       } catch (_) {}
@@ -240,7 +252,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         p => map.setView([p.coords.latitude, p.coords.longitude], 14), () => {}
       ))
 
-    return () => { clearTimeout(vpTimer.current); map.remove(); mapRef.current = null }
+    return () => { clearTimeout(vpTimer.current); map.remove(); mapRef.current = null; selectedLayer.clearLayers() }
   }, []) // eslint-disable-line
 
   // ── Tile switch ───────────────────────────────────────────────────────────

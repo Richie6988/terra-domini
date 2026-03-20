@@ -161,19 +161,8 @@ export function TerritoryPanel({ territory, onClose }: Props) {
 // ─── Info Tab ─────────────────────────────────────────────────────────────────
 function InfoTab({ t, isOwned, isUnclaimed, player, hasPOI, poiName, borderColor, onClose }: any) {
   const store = useStore()
-  const [loading, setLoading] = useState(false)
-
-  const handleClaim = async () => {
-    setLoading(true)
-    try {
-      await api.post('/territories/claim/', { h3_index: t.h3_index })
-      toast.success('Territory claimed! 🏴')
-      store.setSelectedTerritory({ ...t, owner_id: player?.id, owner_username: player?.username })
-      onClose()
-    } catch (e: any) {
-      toast.error(e?.response?.data?.error ?? 'Claim failed')
-    } finally { setLoading(false) }
-  }
+  const [showClaim, setShowClaim] = useState(false)
+  const hasClaimed = localStorage.getItem('td_claimed_first') === '1'
 
   return (
     <div>
@@ -224,13 +213,22 @@ function InfoTab({ t, isOwned, isUnclaimed, player, hasPOI, poiName, borderColor
         <KV label="H3 index" value={(t.h3_index||'').slice(0,14)+'…'} />
       </Section>
 
+      {showClaim && (
+        <ClaimModal
+          territory={t}
+          isFree={!hasClaimed}
+          onClose={() => setShowClaim(false)}
+          onClaimed={() => { setShowClaim(false); localStorage.setItem('td_claimed_first','1'); onClose() }}
+        />
+      )}
+
       {isUnclaimed && player && (
-        <button onClick={handleClaim} disabled={loading} style={{
+        <button onClick={() => setShowClaim(true)} style={{
           width:'100%', padding:14, marginTop:8,
-          background:`linear-gradient(135deg, #059669, #10B981)`,
+          background:'linear-gradient(135deg,#059669,#10B981)',
           border:'none', borderRadius:10, color:'#fff',
           fontSize:14, fontWeight:700, cursor:'pointer',
-        }}>{loading ? 'Claiming…' : '🏴 Claim this territory'}</button>
+        }}>{hasPOI ? `🏴 Claim ${poiName}` : '🏴 Claim this territory'}</button>
       )}
     </div>
   )
