@@ -236,7 +236,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     layer.clearLayers()
     if (!showHex) return
 
-    territories.forEach(t => {
+    // Only render owned/enemy territories permanently — not the full hex grid
+    territories.filter(t => t.owner_id).forEach(t => {
       const poly = makeHexPolygon({
         territory: t, playerId: player?.id,
         onClick: (ter) => {
@@ -244,6 +245,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
           setSelectedHex(ter.h3_index)
           setSelectedTerritoryState(ter)
           if (!ter.owner_id) setClaimTarget(ter)
+          else if (ter.owner_id !== player?.id) setAttackTarget(ter)
         }
       })
       if (poly) layer.addLayer(poly)

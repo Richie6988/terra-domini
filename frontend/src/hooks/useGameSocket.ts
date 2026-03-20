@@ -158,8 +158,10 @@ export function useGameSocket() {
       .then(data => {
         // Backend returns plain array OR {results: [...]}
         const territories = Array.isArray(data) ? data : (data.results ?? [])
-        if (territories.length) {
-          useStore.getState().setTerritories(territories)
+        // Only keep owned territories in store — empty hexes shown via hover ghost only
+        const ownedTerritories = territories.filter((t: any) => t.owner_id)
+        if (ownedTerritories.length) {
+          useStore.getState().setTerritories(ownedTerritories)
         }
       })
       .catch(() => {})
