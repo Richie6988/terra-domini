@@ -109,6 +109,35 @@ GAME_SQL = [
     token_id INTEGER NOT NULL UNIQUE REFERENCES token_blacklist_outstandingtoken(id))"""),
     ('combat_battle', "CREATE TABLE IF NOT EXISTS combat_battle (id TEXT PRIMARY KEY, attacker_id INTEGER, defender_id INTEGER, territory_id TEXT, result TEXT DEFAULT \'pending\', created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"),
     ('progression_achievement', "CREATE TABLE IF NOT EXISTS progression_achievement (id TEXT PRIMARY KEY, player_id INTEGER NOT NULL, achievement_type TEXT NOT NULL, unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP)"),
+    ('map_overlay_event', """CREATE TABLE IF NOT EXISTS map_overlay_event (
+    id INTEGER PRIMARY KEY AUTOINCREMENT, event_type VARCHAR(20) NOT NULL DEFAULT 'news_pin',
+    player_id TEXT REFERENCES players(id) ON DELETE SET NULL,
+    territory_id TEXT REFERENCES territories_territory(id) ON DELETE SET NULL,
+    from_lat REAL, from_lon REAL, to_lat REAL, to_lon REAL,
+    payload TEXT DEFAULT '{}', is_active INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP, expires_at DATETIME)"""),
+    ('combat_battle', """CREATE TABLE IF NOT EXISTS combat_battle (
+    id TEXT PRIMARY KEY, attacker_id TEXT REFERENCES players(id) ON DELETE SET NULL,
+    defender_id TEXT REFERENCES players(id) ON DELETE SET NULL,
+    territory_id TEXT REFERENCES territories_territory(id) ON DELETE SET NULL,
+    result TEXT DEFAULT 'pending', attacker_units INTEGER DEFAULT 0,
+    defender_units INTEGER DEFAULT 0, tdc_loot REAL DEFAULT 0,
+    started_at DATETIME DEFAULT CURRENT_TIMESTAMP, ended_at DATETIME)"""),
+    ('progression_player_stats', """CREATE TABLE IF NOT EXISTS progression_player_stats (
+    id TEXT PRIMARY KEY, player_id TEXT UNIQUE REFERENCES players(id) ON DELETE CASCADE,
+    total_logins INTEGER DEFAULT 0, longest_streak INTEGER DEFAULT 0,
+    current_streak INTEGER DEFAULT 0, last_login_date DATE,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""),
+    ('economy_shop_item', """CREATE TABLE IF NOT EXISTS economy_shop_item (
+    id TEXT PRIMARY KEY, name TEXT NOT NULL, description TEXT DEFAULT '',
+    price_tdc REAL DEFAULT 0, price_tdi REAL DEFAULT 0,
+    item_type TEXT DEFAULT 'boost', is_active INTEGER DEFAULT 1,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""),
+    ('blockchain_transaction', """CREATE TABLE IF NOT EXISTS blockchain_transaction (
+    id TEXT PRIMARY KEY, player_id TEXT REFERENCES players(id),
+    tx_hash TEXT DEFAULT '', amount REAL DEFAULT 0,
+    tx_type TEXT DEFAULT 'purchase', status TEXT DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""),
     ('social_message', "CREATE TABLE IF NOT EXISTS social_message (id TEXT PRIMARY KEY, sender_id INTEGER, content TEXT DEFAULT \'\', created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"),
 ]
 
@@ -128,5 +157,16 @@ if n == 0:
     if os.path.exists(seed):
         exec(open(seed).read())
     n = UnifiedPOI.objects.count()
+
+# Create default admin user if no players exist
+from terra_domini.apps.accounts.models import Player
+if not Player.objects.filter(email='admin@td.com').exists():
+    try:
+        Player.objects.create_superuser(
+            email='admin@td.com', username='admin', password='admin123'
+        )
+        print("   👤 Admin created: admin@td.com / admin123")
+    except Exception as e:
+        pass
 
 print(f"✅ DB OK — {n:,} POIs, {len(tables)} tables ready")
