@@ -164,7 +164,6 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     })
 
     map.on('mouseout', () => {
-      if (hoverTimer) clearTimeout(hoverTimer)
       hoverLayer.clearLayers()
       hoverPoly = null
     })
