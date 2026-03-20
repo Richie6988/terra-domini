@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 import { AnimatePresence } from 'framer-motion'
 import { useStore } from './store'
+import { api } from './services/api'
 import { useGameSocket } from './hooks/useGameSocket'
 import { GameMap } from './components/map/GameMap'
 import { GameHUD } from './components/hud/GameHUD'
@@ -97,7 +98,7 @@ function GameScreen() {
         {player && !player.tutorial_completed && (
           <Tutorial onComplete={() => {
             // Mark complete in API
-            import('./services/api').then(({ api }) =>
+            Promise.resolve().then(() =>
               api.post('/progression/tutorial-complete/').catch(() => {})
             )
             // Update local store
