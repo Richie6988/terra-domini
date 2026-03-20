@@ -172,47 +172,41 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       const target = e.originalEvent?.target as HTMLElement
       if (target?.closest('.territory-panel, .claim-modal, .attack-panel, .poi-panel')) return
 
-      // Close any open panels first
-      setSelectedHex(null)
-      setSelectedTerritoryState(null)
-      setAttackTarget(null)
+      // If a panel is open → close it and stop
+      if (selectedHex) {
+        setSelectedHex(null)
+        setSelectedTerritoryState(null)
+        setAttackTarget(null)
+        setClaimTarget(null)
+        return
+      }
 
-      // Click on empty hex = open claim or show panel
+      // Open territory panel for clicked hex
       try {
         const zoom = map.getZoom()
         const res = zoom <= 11 ? 6 : zoom <= 14 ? 7 : 8
         const hx = latLngToCell(e.latlng.lat, e.latlng.lng, res)
-        const owned = useStore.getState().territories[hx]
-        if (!owned) {
-          // Generate a minimal territory object for this hex
-          const geo = e.latlng
-          const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
-          const fakeTerr = {
-            h3_index: hx, h3: hx, h3_resolution: res,
-            owner_id: null, owner_username: null,
-            alliance_id: null, alliance_tag: null,
-            territory_type: 'rural', type: 'rural',
-            defense_tier: 1, defense_points: 100,
-            is_control_tower: false, is_landmark: false,
-            is_under_attack: false, ad_slot_enabled: false,
-            landmark_name: null, place_name: null,
-            center_lat: geo.lat, center_lon: geo.lng,
-            boundary_points: boundary as [number,number][],
-            resource_food: 10, resource_energy: 10,
-            resource_credits: 10, resource_materials: 10,
-            resource_intel: 5, food_per_tick: 10,
-          }
-          setSelectedTerritoryState(fakeTerr)
-          setSelectedHex(hx)
-          setClaimTarget(fakeTerr as any)
-          return
+        const geo = e.latlng
+        const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
+        const existing = useStore.getState().territories[hx]
+        const terr = existing || {
+          h3_index: hx, h3: hx, h3_resolution: res,
+          owner_id: null, owner_username: null,
+          alliance_id: null, alliance_tag: null,
+          territory_type: 'rural', type: 'rural',
+          defense_tier: 1, defense_points: 100,
+          is_control_tower: false, is_landmark: false,
+          is_under_attack: false, ad_slot_enabled: false,
+          landmark_name: null, place_name: null,
+          center_lat: geo.lat, center_lon: geo.lng,
+          boundary_points: boundary as [number,number][],
+          resource_food: 10, resource_energy: 10,
+          resource_credits: 10, resource_materials: 10,
+          resource_intel: 5, food_per_tick: 10,
         }
-        if (owned.owner_id) {
-          setAttackTarget(owned as any)
-        }
-      } catch (_) {
-        window.dispatchEvent(new CustomEvent('terra:closeAll'))
-      }
+        setSelectedTerritoryState(terr)
+        setSelectedHex(hx)
+      } catch (_) {}
     })
     // Defer first call until map pane is initialized
     setTimeout(onMove, 100)

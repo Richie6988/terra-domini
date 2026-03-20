@@ -75,6 +75,27 @@ class TerritoryViewSet(viewsets.ReadOnlyModelViewSet):
                  Territory.objects.filter(h3_index__in=hex_ids).select_related('owner')}
 
         player = request.user
+
+        # Build POI spatial index for this viewport (lat/lon → closest POI per hex)
+        from terra_domini.apps.events.unified_poi import UnifiedPOI
+        import math
+        poi_index = {}
+        try:
+            nearby_pois = UnifiedPOI.objects.filter(
+                latitude__range=(lat - 0.5, lat + 0.5),
+                longitude__range=(lon - 0.5, lon + 0.5),
+                is_active=True,
+            ).values('name','category','emoji','rarity','latitude','longitude',
+                     'tdc_per_24h','token_id','is_shiny','wiki_url',
+                     'description','fun_fact','floor_price_tdi',
+                     'visitors_per_year','geopolitical_score')
+            for poi in nearby_pois:
+                poi_h3 = h3lib.geo_to_h3(poi['latitude'], poi['longitude'], res)
+                if poi_h3 not in poi_index:
+                    poi_index[poi_h3] = dict(poi)
+        except Exception:
+            pass
+
         result = []
         for hx in hex_ids:
             try:
@@ -83,32 +104,53 @@ class TerritoryViewSet(viewsets.ReadOnlyModelViewSet):
             except Exception:
                 continue
             t = owned.get(hx)
+
+            # Find nearest POI for this hex (within ~1km)
+            poi_data = poi_index.get(hx)
+
             result.append({
                 'h3_index': hx, 'h3': hx, 'h3_resolution': res,
                 'owner_id': str(t.owner_id) if t and t.owner_id else None,
                 'owner_username': t.owner.username if t and t.owner_id else None,
+                'owner_color': getattr(t.owner, 'border_color', '#00FF87') if t and t.owner_id else None,
+                'owner_emoji': getattr(t.owner, 'avatar_emoji', '🏴') if t and t.owner_id else None,
                 'alliance_id': None, 'alliance_tag': None,
-                'territory_type': t.territory_type if t else 'rural',
-                'type': t.territory_type if t else 'rural',
+                'territory_type': t.territory_type if t else ('landmark' if poi_data else 'rural'),
+                'type': t.territory_type if t else ('landmark' if poi_data else 'rural'),
                 'defense_tier': t.defense_tier if t else 1,
                 'defense_points': float(t.defense_points) if t else 100.0,
                 'is_control_tower': bool(t.is_control_tower) if t else False,
-                'is_landmark': False, 'is_under_attack': False,
-                'ad_slot_enabled': False, 'landmark_name': None,
-                'place_name': getattr(t, 'place_name', None),
+                'is_landmark': bool(poi_data),
+                'is_under_attack': False,
+                'ad_slot_enabled': False,
+                'landmark_name': poi_data['name'] if poi_data else None,
+                'place_name': (poi_data['name'] if poi_data else None) or getattr(t, 'place_name', None),
                 'center_lat': geo[0], 'center_lon': geo[1],
                 'boundary_points': boundary,
                 'resource_food': float(getattr(t, 'resource_food', 10)),
                 'resource_energy': float(getattr(t, 'resource_energy', 10)),
-                'resource_credits': float(getattr(t, 'resource_credits', 10)),
+                'resource_credits': float(getattr(t, 'resource_credits', poi_data['tdc_per_24h'] if poi_data else 10)),
                 'resource_materials': float(getattr(t, 'resource_materials', 10)),
                 'resource_intel': float(getattr(t, 'resource_intel', 5)),
-                'food_per_tick': float(getattr(t, 'resource_food', 10)),
-                'rarity': getattr(t, 'rarity', 'common'),
+                'food_per_tick': float(getattr(t, 'resource_food', poi_data['tdc_per_24h'] if poi_data else 10)),
+                'rarity': (poi_data['rarity'] if poi_data else None) or getattr(t, 'rarity', 'common'),
                 'biome': getattr(t, 'biome', 'grassland'),
                 'nft_version': getattr(t, 'nft_version', 1),
-                'token_id': getattr(t, 'token_id', None),
-                'is_shiny': bool(getattr(t, 'is_shiny', False)),
+                'token_id': (poi_data['token_id'] if poi_data else None) or getattr(t, 'token_id', None),
+                'is_shiny': bool(getattr(t, 'is_shiny', poi_data['is_shiny'] if poi_data else False)),
+                # POI metadata
+                'poi_name': poi_data['name'] if poi_data else None,
+                'poi_category': poi_data['category'] if poi_data else None,
+                'poi_emoji': poi_data['emoji'] if poi_data else None,
+                'poi_wiki_url': poi_data['wiki_url'] if poi_data else None,
+                'poi_description': poi_data['description'] if poi_data else None,
+                'poi_fun_fact': poi_data['fun_fact'] if poi_data else None,
+                'poi_floor_price': poi_data['floor_price_tdi'] if poi_data else None,
+                'poi_visitors': poi_data['visitors_per_year'] if poi_data else None,
+                'poi_geo_score': poi_data['geopolitical_score'] if poi_data else None,
+                'custom_name': getattr(t, 'custom_name', None) if t else None,
+                'custom_emoji': getattr(t, 'custom_emoji', None) if t else None,
+                'border_color': getattr(t, 'border_color', None) if t else None,
             })
         return Response({'territories': result, 'count': len(result)})
 
