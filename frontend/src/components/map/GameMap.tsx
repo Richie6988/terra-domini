@@ -72,7 +72,10 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const territories   = Object.values(useStore(s => s.territories))
   const player        = useStore(s => s.player)
   const storeSetCenter= useStore(s => s.setMapCenter)
-  const isFirstClaim  = !(player?.stats?.territories_owned > 0)
+  const [hasClaimed, setHasClaimed] = useState(() => {
+    return localStorage.getItem('td_claimed_first') === '1'
+  })
+  const isFirstClaim = !hasClaimed && !(player?.territories_owned > 0)
 
   // ── Init ─────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -108,10 +111,74 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       }, 300)
     }
     map.on('moveend zoomend', onMove)
+    // ── Hover ghost hex ─────────────────────────────────────────
+    const hoverLayer = L.layerGroup().addTo(map)
+    let hoverPoly: L.Polygon | null = null
+
+    map.on('mousemove', (e: L.LeafletMouseEvent) => {
+      try {
+        const zoom = map.getZoom()
+        const res = zoom <= 11 ? 6 : zoom <= 14 ? 7 : 8
+        const hx = latLngToCell(e.latlng.lat, e.latlng.lng, res)
+        const owned = useStore.getState().territories[hx]
+        if (owned?.owner_id) {
+          hoverLayer.clearLayers(); hoverPoly = null; return
+        }
+        if ((hoverPoly as any)?._hxId === hx) return
+        hoverLayer.clearLayers()
+        const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
+        hoverPoly = L.polygon(boundary as L.LatLngTuple[], {
+          fillColor: '#00FF87', fillOpacity: 0.12,
+          color: '#00FF87', weight: 1.5, opacity: 0.6,
+          dashArray: '4,4', className: 'td-hex-hover',
+        })
+        ;(hoverPoly as any)._hxId = hx
+        hoverLayer.addLayer(hoverPoly)
+      } catch (_) {}
+    })
+
+    map.on('mouseout', () => {
+      hoverLayer.clearLayers()
+      hoverPoly = null
+    })
+    // ─────────────────────────────────────────────────────────────
+
     map.on('click', (e: L.LeafletMouseEvent) => {
-      // Close all panels when clicking empty map area
       const target = e.originalEvent?.target as HTMLElement
-      if (!target?.closest('.territory-panel, .claim-modal, .attack-panel, .poi-panel')) {
+      if (target?.closest('.territory-panel, .claim-modal, .attack-panel, .poi-panel')) return
+
+      // Click on empty hex = open claim modal for that hex
+      try {
+        const zoom = map.getZoom()
+        const res = zoom <= 11 ? 6 : zoom <= 14 ? 7 : 8
+        const hx = latLngToCell(e.latlng.lat, e.latlng.lng, res)
+        const owned = useStore.getState().territories[hx]
+        if (!owned) {
+          // Generate a minimal territory object for this hex
+          const geo = e.latlng
+          const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
+          const fakeTerr = {
+            h3_index: hx, h3: hx, h3_resolution: res,
+            owner_id: null, owner_username: null,
+            alliance_id: null, alliance_tag: null,
+            territory_type: 'rural', type: 'rural',
+            defense_tier: 1, defense_points: 100,
+            is_control_tower: false, is_landmark: false,
+            is_under_attack: false, ad_slot_enabled: false,
+            landmark_name: null, place_name: null,
+            center_lat: geo.lat, center_lon: geo.lng,
+            boundary_points: boundary as [number,number][],
+            resource_food: 10, resource_energy: 10,
+            resource_credits: 10, resource_materials: 10,
+            resource_intel: 5, food_per_tick: 10,
+          }
+          setClaimTarget(fakeTerr as any)
+          return
+        }
+        if (owned.owner_id) {
+          setAttackTarget(owned as any)
+        }
+      } catch (_) {
         window.dispatchEvent(new CustomEvent('terra:closeAll'))
       }
     })
@@ -229,7 +296,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         {attackTarget && <AttackPanel target={attackTarget} onClose={() => setAttackTarget(null)} />}
       </AnimatePresence>
       <AnimatePresence>
-        {claimTarget && <ClaimModal territory={claimTarget} isFree={isFirstClaim} onClose={() => setClaimTarget(null)} onClaimed={() => setClaimTarget(null)} />}
+        {claimTarget && <ClaimModal territory={claimTarget} isFree={isFirstClaim} onClose={() => setClaimTarget(null)} onClaimed={() => { setClaimTarget(null); setHasClaimed(true); localStorage.setItem('td_claimed_first','1') }} />}
       </AnimatePresence>
     </div>
   )
