@@ -10,8 +10,6 @@ import { AnimatePresence } from 'framer-motion'
 import { useStore } from '../../store'
 import { FavoritePinsPanel } from './FavoritePins'
 import { MapOverlayLayer } from './MapOverlayLayer'
-import { UnifiedPOILayer } from './UnifiedPOILayer'
-import { GeoNewsLayer } from './GeoNewsLayer'
 import { HexCard } from './HexCard'
 import { AttackPanel } from '../hud/AttackPanel'
 import { ClaimModal } from './ClaimModal'
@@ -340,8 +338,6 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       {/* Favorite pins — bottom left */}
       {showOverlay && <MapOverlayLayer map={mapRef.current} />}
-      <UnifiedPOILayer map={mapRef.current} viewportLat={center[0]} viewportLon={center[1]} zoom={zoom} visible={showResources} />
-      <GeoNewsLayer map={mapRef.current} visible={showNews} />
       <FavoritePinsPanel onNavigate={navigateTo} currentLat={center[0]} currentLon={center[1]} currentZoom={zoom} />
 
       {/* Territory Panel */}
