@@ -80,7 +80,7 @@ GAME_SQL = [
     fingerprint TEXT DEFAULT '', platform TEXT DEFAULT 'web', referred_by_id TEXT)"""),
     ('players_groups', "CREATE TABLE IF NOT EXISTS players_groups (id INTEGER PRIMARY KEY, player_id INTEGER, group_id INTEGER)"),
     ('players_user_permissions', "CREATE TABLE IF NOT EXISTS players_user_permissions (id INTEGER PRIMARY KEY, player_id INTEGER, permission_id INTEGER)"),
-    ('territories_territory', """CREATE TABLE IF NOT EXISTS territories_territory (
+    ('territories', """CREATE TABLE IF NOT EXISTS territories (
         id TEXT PRIMARY KEY, h3_index TEXT UNIQUE NOT NULL,
         h3_resolution INTEGER DEFAULT 7, center_lat REAL, center_lon REAL,
         country_code TEXT DEFAULT \'\', place_name TEXT DEFAULT \'\',
@@ -109,13 +109,16 @@ GAME_SQL = [
     token_id INTEGER NOT NULL UNIQUE REFERENCES token_blacklist_outstandingtoken(id))"""),
     ('combat_battle', "CREATE TABLE IF NOT EXISTS combat_battle (id TEXT PRIMARY KEY, attacker_id INTEGER, defender_id INTEGER, territory_id TEXT, result TEXT DEFAULT \'pending\', created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"),
     ('progression_achievement', "CREATE TABLE IF NOT EXISTS progression_achievement (id TEXT PRIMARY KEY, player_id INTEGER NOT NULL, achievement_type TEXT NOT NULL, unlocked_at DATETIME DEFAULT CURRENT_TIMESTAMP)"),
-    ('map_overlay_event', """CREATE TABLE IF NOT EXISTS map_overlay_event (
+        ('map_overlay_event', """CREATE TABLE IF NOT EXISTS map_overlay_event (
     id INTEGER PRIMARY KEY AUTOINCREMENT, event_type VARCHAR(20) NOT NULL DEFAULT 'news_pin',
     player_id TEXT REFERENCES players(id) ON DELETE SET NULL,
-    territory_id TEXT REFERENCES territories_territory(id) ON DELETE SET NULL,
+    territory_id TEXT REFERENCES territories(id) ON DELETE SET NULL,
     from_lat REAL, from_lon REAL, to_lat REAL, to_lon REAL,
+    title TEXT NOT NULL DEFAULT '', body TEXT DEFAULT '',
+    icon_emoji TEXT DEFAULT '📍', icon_3d TEXT DEFAULT '',
     payload TEXT DEFAULT '{}', is_active INTEGER DEFAULT 1,
-    created_at DATETIME DEFAULT CURRENT_TIMESTAMP, expires_at DATETIME)"""),
+    starts_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    expires_at DATETIME, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""),
     ('combat_battle', """CREATE TABLE IF NOT EXISTS combat_battle (
     id TEXT PRIMARY KEY, attacker_id TEXT REFERENCES players(id) ON DELETE SET NULL,
     defender_id TEXT REFERENCES players(id) ON DELETE SET NULL,
@@ -133,6 +136,16 @@ GAME_SQL = [
     price_tdc REAL DEFAULT 0, price_tdi REAL DEFAULT 0,
     item_type TEXT DEFAULT 'boost', is_active INTEGER DEFAULT 1,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""),
+    ('territory_customization', """CREATE TABLE IF NOT EXISTS territory_customization (
+    id TEXT PRIMARY KEY, territory_id TEXT UNIQUE REFERENCES territories(id) ON DELETE CASCADE,
+    custom_name TEXT DEFAULT '', emoji TEXT DEFAULT '', border_color TEXT DEFAULT '#6B7280',
+    image_url TEXT DEFAULT '', video_url TEXT DEFAULT '', stream_url TEXT DEFAULT '',
+    description TEXT DEFAULT '', updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""),
+    ('territory_cluster', """CREATE TABLE IF NOT EXISTS territory_cluster (
+    id TEXT PRIMARY KEY, owner_id TEXT REFERENCES players(id) ON DELETE CASCADE,
+    h3_indexes TEXT DEFAULT '[]', size INTEGER DEFAULT 1, tier INTEGER DEFAULT 0,
+    tdc_per_24h REAL DEFAULT 5.0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)"""),
     ('blockchain_transaction', """CREATE TABLE IF NOT EXISTS blockchain_transaction (
     id TEXT PRIMARY KEY, player_id TEXT REFERENCES players(id),
     tx_hash TEXT DEFAULT '', amount REAL DEFAULT 0,
