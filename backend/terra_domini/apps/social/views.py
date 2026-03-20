@@ -51,3 +51,18 @@ class TradeViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET'], url_path='proposals')
     def proposals(self, request):
         return Response({'incoming': [], 'outgoing': []})
+
+    @action(detail=False, methods=['GET', 'POST'], url_path='trades')
+    def trades(self, request):
+        if request.method == 'GET':
+            return Response({'results': [], 'count': 0})
+        # POST = create trade proposal
+        return self.propose_trade(request)
+
+    @action(detail=True, methods=['POST'], url_path='accept')
+    def accept_trade(self, request, pk=None):
+        return Response({'success': True, 'status': 'accepted'})
+
+    @action(detail=True, methods=['POST'], url_path='reject')
+    def reject_trade(self, request, pk=None):
+        return Response({'success': True, 'status': 'rejected'})

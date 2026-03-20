@@ -84,7 +84,8 @@ export function StaminaBar() {
   const { data: stamina, refetch } = useQuery<StaminaData>({
     queryKey: ['stamina'],
     queryFn: () => api.get('/players/stamina/').then(r => r.data),
-    refetchInterval: 30000,
+    refetchInterval: 60000,
+    staleTime: 55000,
     enabled: !!player,
   })
 
