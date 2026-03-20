@@ -12,7 +12,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { useStore, usePlayer } from '../../store'
 import { api } from '../../services/api'
-import { ClaimModal } from './ClaimModal'
 import type { TerritoryLight } from '../../types'
 
 const RARITY_COLOR: Record<string, string> = {
@@ -29,9 +28,9 @@ const BIOME_EMOJI: Record<string, string> = {
   desert:'🏜️',tundra:'❄️',urban:'🏙️',industrial:'🏭',rural:'🌾',
 }
 
-interface Props { territory: TerritoryLight; onClose: () => void }
+interface Props { territory: TerritoryLight; onClose: () => void; onRequestClaim: () => void }
 
-export function TerritoryPanel({ territory, onClose }: Props) {
+export function TerritoryPanel({ territory, onClose, onRequestClaim }: Props) {
   const player = usePlayer()
   const t = territory as any
 
@@ -148,7 +147,7 @@ export function TerritoryPanel({ territory, onClose }: Props) {
       )}
 
       <div style={{ flex:1, overflowY:'auto', padding:'16px 20px' }}>
-        {tab==='info'     && <InfoTab t={t} isOwned={isOwned} isUnclaimed={isUnclaimed} player={player} hasPOI={hasPOI} poiName={poiName} borderColor={borderColor} onClose={onClose} />}
+        {tab==='info'     && <InfoTab t={t} isOwned={isOwned} isUnclaimed={isUnclaimed} player={player} hasPOI={hasPOI} poiName={poiName} borderColor={borderColor} onClose={onClose} onRequestClaim={onRequestClaim} />}
         {tab==='revenue'  && isOwned && <RevenueTab t={t} />}
         {tab==='customize'&& isOwned && <CustomizeTab t={t} borderColor={borderColor} />}
         {tab==='attack'   && isEnemy && <AttackTab t={t} />}
@@ -159,10 +158,8 @@ export function TerritoryPanel({ territory, onClose }: Props) {
 }
 
 // ─── Info Tab ─────────────────────────────────────────────────────────────────
-function InfoTab({ t, isOwned, isUnclaimed, player, hasPOI, poiName, borderColor, onClose }: any) {
+function InfoTab({ t, isOwned, isUnclaimed, player, hasPOI, poiName, borderColor, onClose, onRequestClaim }: any) {
   const store = useStore()
-  const [showClaim, setShowClaim] = useState(false)
-  const hasClaimed = localStorage.getItem('td_claimed_first') === '1'
 
   return (
     <div>
@@ -213,17 +210,8 @@ function InfoTab({ t, isOwned, isUnclaimed, player, hasPOI, poiName, borderColor
         <KV label="H3 index" value={(t.h3_index||'').slice(0,14)+'…'} />
       </Section>
 
-      {showClaim && (
-        <ClaimModal
-          territory={t}
-          isFree={!hasClaimed}
-          onClose={() => setShowClaim(false)}
-          onClaimed={() => { setShowClaim(false); localStorage.setItem('td_claimed_first','1'); onClose() }}
-        />
-      )}
-
-      {isUnclaimed && player && (
-        <button onClick={() => setShowClaim(true)} style={{
+            {isUnclaimed && player && (
+        <button onClick={onRequestClaim} style={{
           width:'100%', padding:14, marginTop:8,
           background:'linear-gradient(135deg,#059669,#10B981)',
           border:'none', borderRadius:10, color:'#fff',

@@ -12,9 +12,9 @@ import { FavoritePinsPanel } from './FavoritePins'
 import { MapOverlayLayer } from './MapOverlayLayer'
 import { UnifiedPOILayer } from './UnifiedPOILayer'
 import { GeoNewsLayer } from './GeoNewsLayer'
-import { ClaimModal } from './ClaimModal'
 import { TerritoryPanel } from './TerritoryPanel'
 import { AttackPanel } from '../hud/AttackPanel'
+import { ClaimModal } from './ClaimModal'
 import { injectGlowFilter, makeHexPolygon } from './HexLayer'
 import { latLngToCell, cellToBoundary, gridDisk } from 'h3-js'
 import type { TerritoryLight } from '../../types'
@@ -69,6 +69,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const [selectedTerritory, setSelectedTerritoryState] = useState<any | null>(null)
   const selectedHexRef = useRef<string | null>(null)
   const [selectedHexLatLon, setSelectedHexLatLon] = useState<[number,number]|null>(null)
+  const [showClaimModal, setShowClaimModal] = useState(false)
   const [claimTarget, setClaimTarget] = useState<TerritoryLight | null>(null)
   const [attackTarget,setAttackTarget]= useState<TerritoryLight | null>(null)
 
@@ -348,7 +349,25 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         {selectedHex && (
           <TerritoryPanel
             territory={selectedTerritory || { h3_index: selectedHex, h3: selectedHex, owner_id: null, owner_username: null, alliance_id: null, alliance_tag: null, territory_type: 'rural', type: 'rural', defense_tier: 1, defense_points: 100, is_control_tower: false, is_landmark: false, is_under_attack: false, ad_slot_enabled: false, landmark_name: null, place_name: null, center_lat: 0, center_lon: 0, resource_food: 10, resource_energy: 10, resource_credits: 10, resource_materials: 10, resource_intel: 5, food_per_tick: 10 }}
-            onClose={() => { setSelectedHex(null); setSelectedTerritoryState(null) }}
+            onClose={() => { setSelectedHex(null); setSelectedTerritoryState(null); selectedLayer?.clearLayers?.() }}
+            onRequestClaim={() => setShowClaimModal(true)}
+          />
+        )}
+      </AnimatePresence>
+
+      {/* Claim Modal — at root level so position:fixed works */}
+      <AnimatePresence>
+        {showClaimModal && selectedTerritory && (
+          <ClaimModal
+            territory={selectedTerritory}
+            isFree={localStorage.getItem('td_claimed_first') !== '1'}
+            onClose={() => setShowClaimModal(false)}
+            onClaimed={() => {
+              setShowClaimModal(false)
+              localStorage.setItem('td_claimed_first', '1')
+              setSelectedHex(null)
+              setSelectedTerritoryState(null)
+            }}
           />
         )}
       </AnimatePresence>

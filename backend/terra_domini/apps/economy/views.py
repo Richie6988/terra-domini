@@ -87,10 +87,19 @@ class TerritoryViewSet(viewsets.ReadOnlyModelViewSet):
                      'tdc_per_24h','token_id','is_shiny','wiki_url',
                      'description','fun_fact','floor_price_tdi',
                      'visitors_per_year','geopolitical_score')
+            RARITY_RANK = {'common':0,'uncommon':1,'rare':2,'epic':3,'legendary':4,'mythic':5}
             for poi in nearby_pois:
                 hx = poi['h3_index']
-                if hx and hx not in poi_index:
+                if not hx:
+                    continue
+                if hx not in poi_index:
                     poi_index[hx] = dict(poi)
+                else:
+                    # Keep the highest rarity POI per hex
+                    cur = RARITY_RANK.get(poi_index[hx].get('rarity','common'), 0)
+                    new_r = RARITY_RANK.get(poi.get('rarity','common'), 0)
+                    if new_r > cur:
+                        poi_index[hx] = dict(poi)
         except Exception:
             pass
 
