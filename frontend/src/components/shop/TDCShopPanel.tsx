@@ -39,12 +39,6 @@ const catBtn: React.CSSProperties = {
   color: '#E5E7EB', fontSize: 12, cursor: 'pointer',
 }
 
-
-
-
-]
-
-
 export function TDCShopPanel({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState<'balance' | 'buy' | 'shop' | 'history'>('balance')
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
