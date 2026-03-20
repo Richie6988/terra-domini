@@ -129,34 +129,32 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         const zoom = map.getZoom()
         const res = zoom <= 11 ? 6 : zoom <= 14 ? 7 : 8
         const hx = latLngToCell(e.latlng.lat, e.latlng.lng, res)
-        if ((hoverPoly as any)?._hxId === hx) return  // already showing this hex
+        if ((hoverPoly as any)?._hxId === hx) return
 
         hoverLayer.clearLayers()
 
-        // 1. Show faint neighbors so user sees the hex grid shape
-        const neighbors = gridDisk(hx, 1)
-        neighbors.forEach((n: string) => {
+        // Faint neighbors — lets player see the hex grid
+        gridDisk(hx, 2).forEach((n: string) => {
           if (n === hx) return
+          const nb = cellToBoundary(n).map((p: number[]) => [p[0], p[1]])
           const nt = useStore.getState().territories[n]
-          if (nt?.owner_id) return  // skip owned
-          try {
-            const nb = cellToBoundary(n).map((p: number[]) => [p[0], p[1]])
-            hoverLayer.addLayer(L.polygon(nb as L.LatLngTuple[], {
-              fillColor: '#fff', fillOpacity: 0.03,
-              color: '#fff', weight: 0.6, opacity: 0.2,
-            }))
-          } catch (_) {}
+          const isOwned = !!nt?.owner_id
+          hoverLayer.addLayer(L.polygon(nb as L.LatLngTuple[], {
+            fillColor: isOwned ? '#00FF87' : '#ffffff',
+            fillOpacity: isOwned ? 0.08 : 0.02,
+            color: isOwned ? '#00FF87' : '#ffffff',
+            weight: 0.5, opacity: isOwned ? 0.4 : 0.15,
+          }))
         })
 
-        // 2. Show the hovered hex brightly
+        // Main hex under cursor
         const owned = useStore.getState().territories[hx]
         const col = owned?.owner_id ? '#EF4444' : '#00FF87'
         const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
         hoverPoly = L.polygon(boundary as L.LatLngTuple[], {
-          fillColor: col, fillOpacity: 0.18,
-          color: col, weight: 2, opacity: 0.9,
+          fillColor: col, fillOpacity: 0.20,
+          color: col, weight: 2, opacity: 1,
           dashArray: owned?.owner_id ? '' : '5,4',
-          className: 'td-hex-hover',
         })
         ;(hoverPoly as any)._hxId = hx
         hoverLayer.addLayer(hoverPoly)
