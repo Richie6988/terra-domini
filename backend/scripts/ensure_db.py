@@ -182,4 +182,42 @@ if not Player.objects.filter(email='admin@td.com').exists():
     except Exception as e:
         pass
 
+
+# ── Fix missing columns on existing tables ────────────────────────────────────
+def _fix_missing_columns():
+    from django.apps import apps as django_apps
+    from django.db import connection as conn
+    added = 0
+    for model in django_apps.get_models():
+        table = model._meta.db_table
+        try:
+            with conn.cursor() as c:
+                c.execute(f"PRAGMA table_info({table})")
+                existing = {r[1] for r in c.fetchall()}
+            if not existing:
+                continue
+        except:
+            continue
+        for f in model._meta.get_fields():
+            if not hasattr(f, 'column') or not f.column or f.column in existing:
+                continue
+            ftype = type(f).__name__
+            if 'Integer' in ftype or 'Auto' in ftype: t = 'INTEGER DEFAULT 0'
+            elif 'Float' in ftype or 'Decimal' in ftype: t = 'REAL DEFAULT 0'
+            elif 'Bool' in ftype: t = 'INTEGER DEFAULT 0'
+            elif 'DateTime' in ftype: t = 'DATETIME'
+            elif 'JSON' in ftype: t = "TEXT DEFAULT \'{}\'"
+            elif 'UUID' in ftype: t = 'TEXT'
+            else: t = "TEXT DEFAULT \'\'"
+            try:
+                with conn.cursor() as c:
+                    c.execute(f"ALTER TABLE {table} ADD COLUMN {f.column} {t}")
+                added += 1
+            except: pass
+    if added:
+        print(f"   🔧 Fixed {added} missing columns")
+
+_fix_missing_columns()
+# ─────────────────────────────────────────────────────────────────────────────
+
 print(f"✅ DB OK — {n:,} POIs, {len(tables)} tables ready")
