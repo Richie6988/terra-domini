@@ -11,6 +11,7 @@ import { useStore } from '../../store'
 import { FavoritePinsPanel } from './FavoritePins'
 import { MapOverlayLayer } from './MapOverlayLayer'
 import { UnifiedPOILayer } from './UnifiedPOILayer'
+import { GeoNewsLayer } from './GeoNewsLayer'
 import { ClaimModal } from './ClaimModal'
 import { AttackPanel } from '../hud/AttackPanel'
 import { injectGlowFilter, makeHexPolygon } from './HexLayer'
@@ -59,6 +60,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const [showOverlay,  setShowOverlay]  = useState(true)
   const [showResources,setShowResources] = useState(true)
   const [showGrid,     setShowGrid]     = useState(false)
+  const [showNews,     setShowNews]     = useState(true)
   const [zoom,        setZoom]        = useState(13)
   const [center,      setCenter]      = useState<[number,number]>([48.8566, 2.3522])
   const [claimTarget, setClaimTarget] = useState<TerritoryLight | null>(null)
@@ -198,6 +200,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       {/* Favorite pins — bottom left */}
       {showOverlay && <MapOverlayLayer map={mapRef.current} />}
       <UnifiedPOILayer map={mapRef.current} viewportLat={center[0]} viewportLon={center[1]} zoom={zoom} visible={showResources} />
+      <GeoNewsLayer map={mapRef.current} visible={showNews} />
       <FavoritePinsPanel onNavigate={navigateTo} currentLat={center[0]} currentLon={center[1]} currentZoom={zoom} />
 
       {/* Modals */}

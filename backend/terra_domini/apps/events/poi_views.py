@@ -102,3 +102,43 @@ class UnifiedPOIViewSet(viewsets.GenericViewSet):
     def featured(self, request):
         pois = UnifiedPOI.objects.filter(is_active=True, is_featured=True).order_by('-bonus_pct')[:50]
         return Response({'pois': [serialize_poi(p) for p in pois]})
+
+
+    @action(detail=False, methods=['GET'], url_path='agent/status',
+            permission_classes=[__import__('rest_framework.permissions', fromlist=['IsAdminUser']).IsAdminUser])
+    def agent_status(self, request):
+        from terra_domini.agents.poi_agent import POIOrchestrator
+        try:
+            return Response(POIOrchestrator().get_status())
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
+    @action(detail=False, methods=['POST'], url_path='agent/run',
+            permission_classes=[__import__('rest_framework.permissions', fromlist=['IsAdminUser']).IsAdminUser])
+    def agent_run(self, request):
+        import threading
+        from terra_domini.agents.poi_agent import POIOrchestrator
+        phase = request.data.get('phase', '1')
+        cats  = request.data.get('categories', None)
+        def run():
+            agent = POIOrchestrator()
+            if phase == '1': agent.run_phase1(cats)
+            elif phase == '2': agent.run_phase2(cats)
+            elif phase == '3': agent.run_phase3_news()
+            else:
+                agent.run_phase1(cats)
+                agent.run_phase2(cats)
+        threading.Thread(target=run, daemon=True).start()
+        return Response({'status': 'started', 'phase': phase})
+
+    @action(detail=False, methods=['GET'], url_path='news')
+    def news_events(self, request):
+        """GET /api/pois/news/ — live geopolitical/earthquake events near viewport"""
+        from terra_domini.agents.poi_agent import GeoNewsAgent
+        try:
+            agent = GeoNewsAgent()
+            quakes = agent.fetch_earthquakes()[:10]
+            conflicts = agent.fetch_gdelt_events()[:10]
+            return Response({'earthquakes': quakes, 'conflicts': conflicts, 'fetched_at': __import__('django.utils.timezone', fromlist=['now']).now().isoformat()})
+        except Exception as e:
+            return Response({'earthquakes': [], 'conflicts': [], 'error': str(e)})
