@@ -210,36 +210,39 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
           resource_credits: 10, resource_materials: 10,
           resource_intel: 5, food_per_tick: 10,
         }
-        // Show panel immediately, then enrich with POI data async
-        selectedHexRef.current = hx
-        setSelectedHex(hx)
-        setSelectedTerritoryState({...terr})
-
-        // Lock/highlight the selected hex
+        // Highlight hex immediately
         selectedLayer.clearLayers()
         hoverLayer.clearLayers()
         hoverPoly = null
         try {
           const selBoundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
           selectedPoly = L.polygon(selBoundary as L.LatLngTuple[], {
-            fillColor: '#fff', fillOpacity: 0.12,
-            color: '#fff', weight: 2.5, opacity: 1,
-            dashArray: '6,3',
+            fillColor: '#fff', fillOpacity: 0.15,
+            color: '#fff', weight: 2.5, opacity: 1, dashArray: '6,3',
           })
           selectedLayer.addLayer(selectedPoly)
         } catch (_) {}
 
-        // Enrich with POI data via viewport endpoint (which has exact h3_index match)
+        // Fetch full hex data (with POI) THEN open card
         const zoom2 = map.getZoom()
-        const token = localStorage.getItem('td_access')
-        if (token) {
-          fetch(`/api/territories/map-view/?lat=${terr.center_lat||geo.lat}&lon=${terr.center_lon||geo.lng}&radius_km=0.3&zoom=${zoom2}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-          }).then(r => r.ok ? r.json() : null).then(data => {
-            const hexData = (data?.territories || data || []).find((h: any) => h.h3_index === hx)
-            if (hexData) setSelectedTerritoryState((prev: any) => prev ? {...prev, ...hexData} : hexData)
-          }).catch(() => {})
-        }
+        const storeToken = useStore.getState().accessToken
+        const enrichFetch = storeToken
+          ? fetch(`/api/territories/map-view/?lat=${geo.lat}&lon=${geo.lng}&radius_km=0.3&zoom=${zoom2}`, {
+              headers: { 'Authorization': `Bearer ${storeToken}` }
+            })
+              .then(r => r.ok ? r.json() : null)
+              .then(data => {
+                const hexData = (data?.territories || data || []).find((h: any) => h.h3_index === hx)
+                return hexData ? { ...terr, ...hexData } : terr
+              })
+              .catch(() => terr)
+          : Promise.resolve(terr)
+
+        enrichFetch.then(enriched => {
+          selectedHexRef.current = hx
+          setSelectedHex(hx)
+          setSelectedTerritoryState(enriched)
+        })
       } catch (_) {}
     })
     // Defer first call until map pane is initialized
