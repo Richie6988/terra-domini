@@ -4,7 +4,7 @@ __pycache__/
 *.egg-info/
 .venv/
 venv/
-*.sqlite3
+# *.sqlite3  # pre-built DB committed for instant Codespace setup
 staticfiles/
 media/
 

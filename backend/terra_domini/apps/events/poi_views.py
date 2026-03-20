@@ -11,7 +11,7 @@ from terra_domini.apps.events.unified_poi import UnifiedPOI, POI_VISUAL, RARITY_
 
 logger = logging.getLogger('terra_domini.pois')
 
-RARITY_COLOR = {'common':'#9CA3AF','uncommon':'#10B981','rare':'#3B82F6','legendary':'#FFB800'}
+RARITY_COLOR = {'common':'#9CA3AF','uncommon':'#10B981','rare':'#3B82F6','epic':'#8B5CF6','legendary':'#FFB800','mythic':'#FF006E'}
 
 def haversine(lat1, lon1, lat2, lon2):
     R = 6371
@@ -40,8 +40,17 @@ def serialize_poi(p: UnifiedPOI, dist=None) -> dict:
         'fun_fact':       p.fun_fact,
         'is_featured':    p.is_featured,
         'threat_level':   p.threat_level,
-        'wiki_url':       p.wiki_url,
-        'distance_km':    round(dist, 1) if dist is not None else None,
+        'wiki_url':         p.wiki_url,
+        'distance_km':      round(dist, 1) if dist is not None else None,
+        # NFT metadata
+        'token_id':         p.token_id,
+        'floor_price_tdi':  p.floor_price_tdi,
+        'mint_difficulty':  p.mint_difficulty,
+        'is_shiny':         p.is_shiny,
+        'card_number':      p.card_number,
+        'edition':          p.edition,
+        'visitors_per_year':p.visitors_per_year,
+        'geopolitical_score':p.geopolitical_score,
     }
 
 

@@ -18,6 +18,8 @@ export DJANGO_SECRET_KEY="${DJANGO_SECRET_KEY:-dev-secret-key-change-in-prod}"
 echo "Starting Terra Domini..."
 echo "Settings: $DJANGO_SETTINGS_MODULE"
 
+echo "🗄️  Ensuring DB is ready..."
+python scripts/ensure_db.py
 # Try uvicorn first (better proxy header handling for Codespace)
 # Fall back to daphne
 if python -c "import uvicorn" 2>/dev/null; then
