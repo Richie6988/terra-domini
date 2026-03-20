@@ -4,7 +4,7 @@
  * Slices: auth, game (territories, battles), ui, tdc
  */
 import { create } from 'zustand'
-import { persist, createJSONStorage } from 'zustand/middleware'
+import { persist } from 'zustand/middleware'
 import type {
   Player, TerritoryLight, TerritoryDetail,
   Battle, TDCBalance, GameNotification
@@ -200,7 +200,17 @@ export const useStore = create<Store>()(
     }),
     {
       name: 'terra-domini-store',
-      storage: createJSONStorage(() => localStorage),
+      storage: {
+        getItem: (name) => {
+          try { return localStorage.getItem(name) } catch { return null }
+        },
+        setItem: (name, value) => {
+          try { localStorage.setItem(name, value) } catch {}
+        },
+        removeItem: (name) => {
+          try { localStorage.removeItem(name) } catch {}
+        },
+      },
       partialize: (state) => ({
         // Only persist auth + preferences
         player: state.player,
