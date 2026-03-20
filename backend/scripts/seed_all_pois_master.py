@@ -15,23 +15,7 @@ django.setup()
 from terra_domini.apps.events.unified_poi import UnifiedPOI
 from django.db import connection
 
-# Add NFT columns if they don't exist
-NFT_COLUMNS = [
-    ("mint_difficulty", "INTEGER DEFAULT 1"),
-    ("card_number", "INTEGER"),
-    ("edition", "TEXT DEFAULT 'genesis'"),
-    ("is_shiny", "INTEGER DEFAULT 0"),
-    ("floor_price_tdi", "REAL DEFAULT 0.0"),
-    ("token_id", "INTEGER"),
-    ("visitors_per_year", "INTEGER DEFAULT 0"),
-    ("geopolitical_score", "INTEGER DEFAULT 0"),
-]
-with connection.cursor() as cur:
-    cur.execute("PRAGMA table_info(unified_poi)")
-    existing = {r[1] for r in cur.fetchall()}
-    for col, coltype in NFT_COLUMNS:
-        if col not in existing:
-            cur.execute(f"ALTER TABLE unified_poi ADD COLUMN {col} {coltype}")
+# NFT columns now in migration 0001_initial — no manual ALTER needed
 
 created = updated = 0
 
@@ -90,18 +74,11 @@ for _p in [
   {'name': 'McArthur River Uranium', 'category': 'uranium_mine', 'latitude': 57.76, 'longitude': -105.29, 'country_code': 'CA', 'description': "World's highest-grade uranium ore.", 'fun_fact': '', 'wiki_url': '', 'is_featured': False, 'rarity': 'epic', 'tdc_per_24h': Decimal('10.00'), 'bonus_pct': 120, 'emoji': '☢️', 'color': '#16A34A', 'size': 'lg', 'game_resource': 'energy', 'source': 'seed', 'mint_difficulty': 6, 'card_number': 199, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 100.0, 'token_id': 100199, 'visitors_per_year': 200000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -159,18 +136,11 @@ for _p in [
   {'name': 'Great Wall Jinshanling', 'category': 'control_tower', 'latitude': 40.676, 'longitude': 117.231, 'country_code': 'CN', 'description': '13,170 miles long. Ming dynasty section. UNESCO.', 'fun_fact': '', 'wiki_url': '', 'is_featured': True, 'rarity': 'legendary', 'tdc_per_24h': Decimal('150.00'), 'bonus_pct': 200, 'emoji': '🗼', 'color': '#FFB800', 'size': 'xl', 'game_resource': 'credits', 'source': 'seed', 'mint_difficulty': 8, 'card_number': 142, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 500.0, 'token_id': 100142, 'visitors_per_year': 7500000, 'geopolitical_score': 45},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -228,18 +198,11 @@ for _p in [
   {'name': 'Angkor Wat Cambodia', 'category': 'control_tower', 'latitude': 13.413, 'longitude': 103.867, 'country_code': 'KH', 'description': "World's largest religious monument. Sunrise reflection.", 'fun_fact': '', 'wiki_url': 'https://upload.wikimedia.org/wikipedia/commons/thumb/6/60/Angkor_Wat_sunrise.jpg/640px-Angkor_Wat_sunrise.jpg', 'is_featured': False, 'rarity': 'legendary', 'tdc_per_24h': Decimal('150.00'), 'bonus_pct': 200, 'emoji': '🗼', 'color': '#FFB800', 'size': 'xl', 'game_resource': 'credits', 'source': 'seed', 'mint_difficulty': 8, 'card_number': 565, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 500.0, 'token_id': 100565, 'visitors_per_year': 5000000, 'geopolitical_score': 45},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -297,18 +260,11 @@ for _p in [
   {'name': 'Mount Weather Emergency Operations', 'category': 'secret_facility', 'latitude': 39.063, 'longitude': -77.888, 'country_code': 'US', 'description': "FEMA's classified emergency relocation center. Continuity of government.", 'fun_fact': '', 'wiki_url': '', 'is_featured': False, 'rarity': 'legendary', 'tdc_per_24h': Decimal('150.00'), 'bonus_pct': 180, 'emoji': '🔒', 'color': '#1F2937', 'size': 'xl', 'game_resource': 'intel', 'source': 'seed', 'mint_difficulty': 8, 'card_number': 105, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 500.0, 'token_id': 100105, 'visitors_per_year': 200000, 'geopolitical_score': 45},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -366,18 +322,11 @@ for _p in [
   {'name': 'Chichen Itza', 'category': 'ancient_ruins', 'latitude': 20.684, 'longitude': -88.568, 'country_code': 'MX', 'description': 'Maya pyramid. Shadow serpent. New 7 Wonder. 3M visitors/yr.', 'fun_fact': '', 'wiki_url': 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/51/El_Castillo_Chichen_Itza.jpg/640px-El_Castillo_Chichen_Itza.jpg', 'is_featured': True, 'rarity': 'mythic', 'tdc_per_24h': Decimal('10.00'), 'bonus_pct': 45, 'emoji': '🗿', 'color': '#92400E', 'size': 'md', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 10, 'card_number': 421, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5000.0, 'token_id': 100421, 'visitors_per_year': 2250000, 'geopolitical_score': 45},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -435,18 +384,11 @@ for _p in [
   {'name': 'TSMC Hsinchu HQ', 'category': 'semiconductor', 'latitude': 24.78, 'longitude': 121.002, 'country_code': 'TW', 'description': "World's most advanced chip foundry. 90%+ of cutting-edge chips globally.", 'fun_fact': "More valuable than most countries' GDP", 'wiki_url': '', 'is_featured': True, 'rarity': 'rare', 'tdc_per_24h': Decimal('60.00'), 'bonus_pct': 180, 'emoji': '💾', 'color': '#6366F1', 'size': 'xl', 'game_resource': 'intel', 'source': 'seed', 'mint_difficulty': 4, 'card_number': 32, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 25.0, 'token_id': 100032, 'visitors_per_year': 300000, 'geopolitical_score': 85},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -504,18 +446,11 @@ for _p in [
   {'name': 'Carlsbad Desalination California', 'category': 'desalination', 'latitude': 33.1, 'longitude': -117.32, 'country_code': 'US', 'description': 'Largest in Western hemisphere. 50M gallons/day. San Diego water.', 'fun_fact': '', 'wiki_url': '', 'is_featured': False, 'rarity': 'rare', 'tdc_per_24h': Decimal('60.00'), 'bonus_pct': 65, 'emoji': '🧊', 'color': '#BAE6FD', 'size': 'md', 'game_resource': 'food', 'source': 'seed', 'mint_difficulty': 4, 'card_number': 123, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 25.0, 'token_id': 100123, 'visitors_per_year': 200000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -573,18 +508,11 @@ for _p in [
   {'name': 'Havana', 'category': 'capital_city', 'latitude': 23.136, 'longitude': -82.358, 'country_code': 'CU', 'description': 'American cars frozen in 1962. Colonial architecture. Revolution museum.', 'fun_fact': 'Classic cars maintained for 60 years — mechanics are engineering geniuses', 'wiki_url': '', 'is_featured': False, 'rarity': 'rare', 'tdc_per_24h': Decimal('60.00'), 'bonus_pct': 50, 'emoji': '🏛️', 'color': '#3B82F6', 'size': 'lg', 'game_resource': 'credits', 'source': 'city_seed', 'mint_difficulty': 4, 'card_number': 1047, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 25.0, 'token_id': 101047, 'visitors_per_year': 10000000, 'geopolitical_score': 80},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -642,18 +570,11 @@ for _p in [
   {'name': 'Lijiang Old Town', 'category': 'world_heritage', 'latitude': 26.872, 'longitude': 100.233, 'country_code': 'CN', 'description': 'UNESCO. Naxi minority culture. Canal system. No cars.', 'fun_fact': 'Only ancient Chinese city built without city walls — relied on maze of canals', 'wiki_url': '', 'is_featured': False, 'rarity': 'rare', 'tdc_per_24h': Decimal('60.00'), 'bonus_pct': 50, 'emoji': '🏛️', 'color': '#D97706', 'size': 'md', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 4, 'card_number': 845, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 25.0, 'token_id': 100845, 'visitors_per_year': 2000000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -711,18 +632,11 @@ for _p in [
   {'name': 'Puerto Rico El Morro', 'category': 'world_heritage', 'latitude': 18.471, 'longitude': -66.118, 'country_code': 'PR', 'description': 'UNESCO. Spanish fortress 1539. Attacked by Drake, Cumberland, British.', 'fun_fact': 'Never captured despite being attacked 5 times — only surrendered to US 1898', 'wiki_url': '', 'is_featured': False, 'rarity': 'rare', 'tdc_per_24h': Decimal('60.00'), 'bonus_pct': 50, 'emoji': '🏛️', 'color': '#D97706', 'size': 'md', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 4, 'card_number': 905, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 25.0, 'token_id': 100905, 'visitors_per_year': 2000000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -780,18 +694,11 @@ for _p in [
   {'name': 'Tucuruí Dam', 'category': 'mega_dam', 'latitude': -3.831, 'longitude': -49.699, 'country_code': 'BR', 'description': 'First large dam in Amazon. 8,370 MW. Powers 13M homes.', 'fun_fact': '', 'wiki_url': '', 'is_featured': False, 'rarity': 'rare', 'tdc_per_24h': Decimal('60.00'), 'bonus_pct': 110, 'emoji': '🌊', 'color': '#0EA5E9', 'size': 'xl', 'game_resource': 'energy', 'source': 'seed', 'mint_difficulty': 4, 'card_number': 6, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 25.0, 'token_id': 100006, 'visitors_per_year': 200000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -849,18 +756,11 @@ for _p in [
   {'name': 'Jerusalem Temple Mount', 'category': 'religious_site', 'latitude': 31.778, 'longitude': 35.235, 'country_code': 'IL', 'description': 'Holy to 3 religions. Most contested land on Earth. Al-Aqsa + Western Wall.', 'fun_fact': '', 'wiki_url': '', 'is_featured': True, 'rarity': 'uncommon', 'tdc_per_24h': Decimal('25.00'), 'bonus_pct': 40, 'emoji': '🕌', 'color': '#D97706', 'size': 'md', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 2, 'card_number': 214, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5.0, 'token_id': 100214, 'visitors_per_year': 4500000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -918,18 +818,11 @@ for _p in [
   {'name': 'Altai Mountains Kazakhstan', 'category': 'mountain_peak', 'latitude': 49.8, 'longitude': 86.6, 'country_code': 'KZ', 'description': 'UNESCO. Altai mountains — cradle of Turkic civilization. Snow leopards.', 'fun_fact': '', 'wiki_url': '', 'is_featured': False, 'rarity': 'uncommon', 'tdc_per_24h': Decimal('25.00'), 'bonus_pct': 20, 'emoji': '🏔️', 'color': '#9CA3AF', 'size': 'sm', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 2, 'card_number': 378, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5.0, 'token_id': 100378, 'visitors_per_year': 100000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -987,18 +880,11 @@ for _p in [
   {'name': 'Bled Lake Slovenia', 'category': 'nature_sanctuary', 'latitude': 46.368, 'longitude': 14.094, 'country_code': 'SI', 'description': 'Alpine lake. Island church. Medieval castle cliff. Most photographed.', 'fun_fact': 'Wishing bell — ring three times, make a wish — legend works', 'wiki_url': '', 'is_featured': False, 'rarity': 'uncommon', 'tdc_per_24h': Decimal('25.00'), 'bonus_pct': 40, 'emoji': '🌿', 'color': '#10B981', 'size': 'md', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 2, 'card_number': 894, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5.0, 'token_id': 100894, 'visitors_per_year': 800000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -1056,18 +942,11 @@ for _p in [
   {'name': 'Dili', 'category': 'capital_city', 'latitude': -8.56, 'longitude': 125.579, 'country_code': 'TL', 'description': 'East Timor capital. Newest nation 2002. Indonesian occupation history.', 'fun_fact': 'Youngest country to join UN — independence 2002 after 24 year occupation', 'wiki_url': '', 'is_featured': False, 'rarity': 'uncommon', 'tdc_per_24h': Decimal('25.00'), 'bonus_pct': 75, 'emoji': '🏛️', 'color': '#10B981', 'size': 'xl', 'game_resource': 'credits', 'source': 'city_seed', 'mint_difficulty': 2, 'card_number': 1097, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5.0, 'token_id': 101097, 'visitors_per_year': 10000000, 'geopolitical_score': 80},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -1125,18 +1004,11 @@ for _p in [
   {'name': 'Hampi Vijayanagara', 'category': 'ancient_ruins', 'latitude': 15.335, 'longitude': 76.461, 'country_code': 'IN', 'description': 'UNESCO. Medieval empire capital. 1,600 monuments over 25 sq km.', 'fun_fact': '', 'wiki_url': '', 'is_featured': False, 'rarity': 'uncommon', 'tdc_per_24h': Decimal('25.00'), 'bonus_pct': 45, 'emoji': '🗿', 'color': '#92400E', 'size': 'md', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 2, 'card_number': 314, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5.0, 'token_id': 100314, 'visitors_per_year': 1500000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -1194,18 +1066,11 @@ for _p in [
   {'name': 'Kinabalu Park', 'category': 'mountain_peak', 'latitude': 6.076, 'longitude': 116.558, 'country_code': 'MY', 'description': 'UNESCO. 4,095m. Most species-rich spot in world. Pitcher plants.', 'fun_fact': '5,000 plant species — more than UK and Ireland combined', 'wiki_url': '', 'is_featured': False, 'rarity': 'uncommon', 'tdc_per_24h': Decimal('25.00'), 'bonus_pct': 20, 'emoji': '🏔️', 'color': '#9CA3AF', 'size': 'sm', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 2, 'card_number': 830, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5.0, 'token_id': 100830, 'visitors_per_year': 100000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -1263,18 +1128,11 @@ for _p in [
   {'name': 'Meteora Monasteries', 'category': 'religious_site', 'latitude': 39.721, 'longitude': 21.631, 'country_code': 'GR', 'description': '6 monasteries on rock pillars. UNESCO. James Bond filmed here.', 'fun_fact': 'Monks reached them only via rope nets until 1920s', 'wiki_url': 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8e/Meteora_Greece.jpg/640px-Meteora_Greece.jpg', 'is_featured': False, 'rarity': 'uncommon', 'tdc_per_24h': Decimal('25.00'), 'bonus_pct': 40, 'emoji': '🕌', 'color': '#D97706', 'size': 'md', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 2, 'card_number': 401, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5.0, 'token_id': 100401, 'visitors_per_year': 3000000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -1332,18 +1190,11 @@ for _p in [
   {'name': 'Palawan Underground River', 'category': 'cave_system', 'latitude': 10.175, 'longitude': 118.81, 'country_code': 'PH', 'description': "UNESCO. World's longest navigable underground river. 8.2km. New 7 Wonder Nature.", 'fun_fact': '', 'wiki_url': 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/98/Palawan_Underground_River.jpg/640px-Palawan_Underground_River.jpg', 'is_featured': False, 'rarity': 'uncommon', 'tdc_per_24h': Decimal('25.00'), 'bonus_pct': 25, 'emoji': '🕳️', 'color': '#6B7280', 'size': 'sm', 'game_resource': 'materials', 'source': 'seed', 'mint_difficulty': 2, 'card_number': 641, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5.0, 'token_id': 100641, 'visitors_per_year': 200000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -1401,18 +1252,11 @@ for _p in [
   {'name': 'Seoraksan Ulsan Rock', 'category': 'mountain_peak', 'latitude': 38.119, 'longitude': 128.464, 'country_code': 'KR', 'description': '900m granite monolith. Korea most scenic mountain.', 'fun_fact': 'Rock visible from 60km away — largest exposed granite in Korea', 'wiki_url': '', 'is_featured': False, 'rarity': 'uncommon', 'tdc_per_24h': Decimal('25.00'), 'bonus_pct': 20, 'emoji': '🏔️', 'color': '#9CA3AF', 'size': 'sm', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 2, 'card_number': 863, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5.0, 'token_id': 100863, 'visitors_per_year': 100000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -1470,18 +1314,11 @@ for _p in [
   {'name': 'Tierra del Fuego', 'category': 'nature_sanctuary', 'latitude': -54.8, 'longitude': -68.3, 'country_code': 'AR', 'description': 'World end. Beagle Channel. Darwin voyage. Yahgan people.', 'fun_fact': 'Darwin described Yahgan people — most isolated humans he ever saw', 'wiki_url': '', 'is_featured': False, 'rarity': 'uncommon', 'tdc_per_24h': Decimal('25.00'), 'bonus_pct': 40, 'emoji': '🌿', 'color': '#10B981', 'size': 'md', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 2, 'card_number': 923, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5.0, 'token_id': 100923, 'visitors_per_year': 800000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -1539,18 +1376,11 @@ for _p in [
   {'name': 'Yurt Camp Kyrgyzstan', 'category': 'nature_sanctuary', 'latitude': 42.2, 'longitude': 74.1, 'country_code': 'KG', 'description': 'Song Kul alpine lake. Nomadic Kyrgyz yurt camps. 3,016m altitude.', 'fun_fact': '', 'wiki_url': '', 'is_featured': False, 'rarity': 'uncommon', 'tdc_per_24h': Decimal('25.00'), 'bonus_pct': 40, 'emoji': '🌿', 'color': '#10B981', 'size': 'md', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 2, 'card_number': 614, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5.0, 'token_id': 100614, 'visitors_per_year': 800000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 
@@ -1560,18 +1390,11 @@ for _p in [
   {'name': 'iSimangaliso Wetland Park', 'category': 'nature_sanctuary', 'latitude': -28.1, 'longitude': 32.6, 'country_code': 'ZA', 'description': 'UNESCO. Whale sharks, hippos, crocodiles, leatherback turtles.', 'fun_fact': 'St Lucia estuary — ancient wetland system 25,000+ years', 'wiki_url': '', 'is_featured': False, 'rarity': 'uncommon', 'tdc_per_24h': Decimal('25.00'), 'bonus_pct': 40, 'emoji': '🌿', 'color': '#10B981', 'size': 'md', 'game_resource': 'culture', 'source': 'seed', 'mint_difficulty': 2, 'card_number': 707, 'edition': 'genesis', 'is_shiny': False, 'floor_price_tdi': 5.0, 'token_id': 100707, 'visitors_per_year': 800000, 'geopolitical_score': 25},
 ]:
     try:
-        _nft = {k: _p.pop(k, None) for k in ['mint_difficulty','card_number','edition','is_shiny','floor_price_tdi','token_id','visitors_per_year','geopolitical_score']}
         _name = _p.pop('name')
+        # Keep all fields including NFT metadata in defaults
         _, _new = UnifiedPOI.objects.get_or_create(name=_name, defaults=_p)
-        if _new:
-            created += 1
-            # Apply NFT metadata via raw SQL
-            from django.db import connection as _c
-            with _c.cursor() as _cur:
-                _cur.execute("UPDATE unified_poi SET mint_difficulty=%s,card_number=%s,edition=%s,is_shiny=%s,floor_price_tdi=%s,token_id=%s,visitors_per_year=%s,geopolitical_score=%s WHERE name=%s",
-                    [_nft.get('mint_difficulty',1),_nft.get('card_number'),_nft.get('edition','genesis'),1 if _nft.get('is_shiny') else 0,_nft.get('floor_price_tdi',0),_nft.get('token_id'),_nft.get('visitors_per_year',0),_nft.get('geopolitical_score',0),_name])
-        else:
-            updated += 1
+        if _new: created += 1
+        else: updated += 1
     except Exception as _e:
         pass
 

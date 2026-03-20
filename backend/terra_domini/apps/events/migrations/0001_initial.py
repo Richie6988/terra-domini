@@ -1,54 +1,29 @@
-# Generated migration for unified_poi and related models
+"""
+Terra Domini — Events App Initial Migration
+Creates all tables: unified_poi, world_pois, resource_poi,
+poi_player_interactions, poi_news_updates
+"""
 from django.db import migrations, models
 import django.db.models.deletion
+import django.utils.timezone
 import uuid
 
 
 class Migration(migrations.Migration):
 
     initial = True
-
-    dependencies = []
+    dependencies = [
+        ('auth', '0012_alter_user_first_name_max_length'),
+    ]
 
     operations = [
+        # ── UnifiedPOI ────────────────────────────────────────────────────
         migrations.CreateModel(
             name='UnifiedPOI',
             fields=[
-                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)),
                 ('name', models.CharField(db_index=True, max_length=300)),
-                ('category', models.CharField(choices=[
-                    ('mountain_peak','Mountain Peak'),('volcano','Volcano'),('canyon','Canyon'),
-                    ('waterfall','Waterfall'),('glacier','Glacier'),('cave_system','Cave System'),
-                    ('coral_reef','Coral Reef'),('ancient_forest','Ancient Forest'),
-                    ('nature_sanctuary','Nature Sanctuary'),('island','Strategic Island'),
-                    ('oil_field','Oil Field'),('gas_reserve','Gas Reserve'),('gold_mine','Gold Mine'),
-                    ('diamond_mine','Diamond Mine'),('rare_earth','Rare Earth Deposit'),
-                    ('lithium_deposit','Lithium Deposit'),('uranium_mine','Uranium Mine'),
-                    ('coal_mine','Coal Mine'),('iron_ore','Iron Ore'),('copper_mine','Copper Mine'),
-                    ('freshwater','Freshwater Reserve'),('fertile_land','Fertile Land'),
-                    ('capital_city','Capital City'),('mega_port','Mega Port'),
-                    ('chokepoint','Strategic Chokepoint'),('nuclear_plant','Nuclear Plant'),
-                    ('space_center','Space Center'),('data_center','Data Center Hub'),
-                    ('financial_hub','Financial Hub'),('stock_exchange','Stock Exchange'),
-                    ('military_base','Military Base'),('naval_base','Naval Base'),
-                    ('missile_site','Missile Site'),('intelligence_hq','Intelligence HQ'),
-                    ('world_heritage','UNESCO World Heritage'),('ancient_ruins','Ancient Ruins'),
-                    ('religious_site','Religious Site'),('royal_palace','Royal Palace'),
-                    ('museum','Major Museum'),('conspiracy','Conspiracy Site'),
-                    ('secret_facility','Secret Facility'),('oligarch_asset','Oligarch Asset'),
-                    ('offshore_haven','Offshore Haven'),('international_org','International Organization'),
-                    ('alliance_hq','Military Alliance HQ'),('tech_giant','Tech Giant Campus'),
-                    ('media_hq','Media Headquarters'),('control_tower','Control Tower'),
-                    ('trade_node','Trade Node'),('ancient_wonder','Ancient Wonder'),
-                    ('anomaly','Anomaly Zone'),('mega_dam','Mega Dam / Hydroelectric'),
-                    ('water_treatment','Water Treatment Plant'),('desalination','Desalination Plant'),
-                    ('agri_megafarm','Mega Farm / Agricultural Hub'),('seed_vault','Seed Vault'),
-                    ('steel_mill','Steel / Industrial Complex'),('semiconductor','Semiconductor Fab'),
-                    ('pharma_hq','Pharmaceutical HQ'),('internet_cable','Undersea Cable Landing'),
-                    ('ix_point','Internet Exchange Point'),('sports_arena','Mega Sports Arena'),
-                    ('casino_resort','Casino / Resort Complex'),('research_station','Research Station'),
-                    ('particle_collider','Particle Collider'),('observatory','Major Observatory'),
-                ], db_index=True, max_length=30)),
+                ('category', models.CharField(db_index=True, max_length=30, default='anomaly')),
                 ('latitude', models.FloatField()),
                 ('longitude', models.FloatField()),
                 ('country_code', models.CharField(blank=True, db_index=True, max_length=4)),
@@ -56,8 +31,8 @@ class Migration(migrations.Migration):
                 ('h3_index', models.CharField(blank=True, db_index=True, max_length=20)),
                 ('emoji', models.CharField(blank=True, max_length=8)),
                 ('color', models.CharField(default='#6B7280', max_length=7)),
-                ('size', models.CharField(choices=[('xs','XS'),('sm','SM'),('md','MD'),('lg','LG'),('xl','XL')], default='md', max_length=4)),
-                ('rarity', models.CharField(choices=[('common','Common'),('uncommon','Uncommon'),('rare','Rare'),('legendary','Legendary')], db_index=True, default='common', max_length=12)),
+                ('size', models.CharField(default='md', max_length=4)),
+                ('rarity', models.CharField(db_index=True, default='common', max_length=12)),
                 ('game_resource', models.CharField(default='credits', max_length=20)),
                 ('bonus_pct', models.IntegerField(default=25)),
                 ('tdc_per_24h', models.DecimalField(decimal_places=2, default=10, max_digits=10)),
@@ -67,16 +42,16 @@ class Migration(migrations.Migration):
                 ('fun_fact', models.TextField(blank=True)),
                 ('is_active', models.BooleanField(db_index=True, default=True)),
                 ('is_featured', models.BooleanField(default=False)),
-                ('threat_level', models.CharField(choices=[('none','None'),('low','Low'),('medium','Medium'),('high','High'),('critical','Critical')], default='none', max_length=10)),
+                ('threat_level', models.CharField(default='none', max_length=10)),
                 ('verified', models.BooleanField(default=True)),
                 ('source', models.CharField(blank=True, max_length=50)),
-
+                # NFT metadata
                 ('mint_difficulty', models.IntegerField(default=1)),
-                ('card_number', models.IntegerField(blank=True, null=True)),
-                ('edition', models.CharField(default='genesis', max_length=20)),
+                ('card_number', models.IntegerField(null=True, blank=True)),
+                ('edition', models.CharField(max_length=20, default='genesis')),
                 ('is_shiny', models.BooleanField(default=False)),
                 ('floor_price_tdi', models.FloatField(default=0.0)),
-                ('token_id', models.BigIntegerField(blank=True, null=True)),
+                ('token_id', models.BigIntegerField(null=True, blank=True)),
                 ('visitors_per_year', models.IntegerField(default=0)),
                 ('geopolitical_score', models.IntegerField(default=0)),
                 ('created_at', models.DateTimeField(auto_now_add=True)),
@@ -86,14 +61,112 @@ class Migration(migrations.Migration):
         ),
         migrations.AddIndex(
             model_name='unifiedpoi',
-            index=models.Index(fields=['category', 'is_active'], name='unified_poi_cat_idx'),
+            index=models.Index(fields=['category', 'is_active'], name='poi_cat_idx'),
         ),
         migrations.AddIndex(
             model_name='unifiedpoi',
-            index=models.Index(fields=['latitude', 'longitude'], name='unified_poi_geo_idx'),
+            index=models.Index(fields=['latitude', 'longitude'], name='poi_geo_idx'),
         ),
         migrations.AddIndex(
             model_name='unifiedpoi',
-            index=models.Index(fields=['rarity', 'is_active'], name='unified_poi_rar_idx'),
+            index=models.Index(fields=['rarity', 'is_active'], name='poi_rar_idx'),
+        ),
+        migrations.AddIndex(
+            model_name='unifiedpoi',
+            index=models.Index(fields=['country_code'], name='poi_cc_idx'),
+        ),
+
+        # ── WorldPOI ──────────────────────────────────────────────────────
+        migrations.CreateModel(
+            name='WorldPOI',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)),
+                ('name', models.CharField(db_index=True, max_length=300)),
+                ('poi_type', models.CharField(max_length=30, default='landmark')),
+                ('latitude', models.FloatField()),
+                ('longitude', models.FloatField()),
+                ('country_code', models.CharField(blank=True, max_length=4)),
+                ('emoji', models.CharField(blank=True, max_length=8)),
+                ('color', models.CharField(default='#6B7280', max_length=7)),
+                ('description', models.TextField(blank=True)),
+                ('wiki_url', models.URLField(blank=True)),
+                ('is_active', models.BooleanField(default=True)),
+                ('is_featured', models.BooleanField(default=False)),
+                ('threat_level', models.CharField(default='none', max_length=10)),
+                ('rarity', models.CharField(default='common', max_length=12)),
+                ('game_resource', models.CharField(default='credits', max_length=20)),
+                ('bonus_pct', models.IntegerField(default=25)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+            ],
+            options={'db_table': 'world_pois', 'ordering': ['-is_featured', '-threat_level', '-created_at']},
+        ),
+
+        # ── ResourcePOI ───────────────────────────────────────────────────
+        migrations.CreateModel(
+            name='ResourcePOI',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)),
+                ('name', models.CharField(db_index=True, max_length=300)),
+                ('resource_type', models.CharField(max_length=30, default='energy')),
+                ('latitude', models.FloatField()),
+                ('longitude', models.FloatField()),
+                ('country_code', models.CharField(blank=True, max_length=4)),
+                ('emoji', models.CharField(blank=True, max_length=8)),
+                ('color', models.CharField(default='#6B7280', max_length=7)),
+                ('description', models.TextField(blank=True)),
+                ('real_output', models.CharField(blank=True, max_length=200)),
+                ('wiki_url', models.URLField(blank=True)),
+                ('is_active', models.BooleanField(default=True)),
+                ('is_featured', models.BooleanField(default=False)),
+                ('rarity', models.CharField(default='common', max_length=12)),
+                ('bonus_pct', models.IntegerField(default=25)),
+                ('game_resource', models.CharField(default='energy', max_length=20)),
+                ('source', models.CharField(blank=True, max_length=50)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+                ('updated_at', models.DateTimeField(auto_now=True)),
+            ],
+            options={'db_table': 'resource_poi', 'ordering': ['-bonus_pct', 'name']},
+        ),
+        migrations.AddIndex(
+            model_name='resourcepoi',
+            index=models.Index(fields=['resource_type', 'is_active'], name='res_poi_type_idx'),
+        ),
+        migrations.AddIndex(
+            model_name='resourcepoi',
+            index=models.Index(fields=['latitude', 'longitude'], name='res_poi_geo_idx'),
+        ),
+
+        # ── POIPlayerInteraction ──────────────────────────────────────────
+        migrations.CreateModel(
+            name='POIPlayerInteraction',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)),
+                ('poi_id', models.UUIDField(db_index=True)),
+                ('player', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE,
+                    related_name='poi_interactions', to='auth.user')),
+                ('interaction_type', models.CharField(max_length=20, default='view')),
+                ('bonus_claimed', models.FloatField(default=0.0)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+            ],
+            options={'db_table': 'poi_player_interactions'},
+        ),
+
+        # ── POINewsUpdate ─────────────────────────────────────────────────
+        migrations.CreateModel(
+            name='POINewsUpdate',
+            fields=[
+                ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True)),
+                ('poi_id', models.UUIDField(db_index=True)),
+                ('title', models.CharField(max_length=300)),
+                ('source', models.CharField(max_length=100, blank=True)),
+                ('url', models.URLField(blank=True)),
+                ('summary', models.TextField(blank=True)),
+                ('event_type', models.CharField(max_length=30, default='news')),
+                ('threat_delta', models.IntegerField(default=0)),
+                ('published_at', models.DateTimeField(default=django.utils.timezone.now)),
+                ('created_at', models.DateTimeField(auto_now_add=True)),
+            ],
+            options={'db_table': 'poi_news_updates', 'ordering': ['-published_at']},
         ),
     ]
