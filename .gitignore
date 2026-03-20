@@ -10,7 +10,7 @@ media/
 
 # Node
 node_modules/
-dist/
+# dist/  # pre-built for Codespace
 .env.local
 
 # Secrets — never commit

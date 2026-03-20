@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <filter id="g">
+      <feGaussianBlur stdDeviation="1.5" result="b"/>
+      <feComposite in="SourceGraphic" in2="b" operator="over"/>
+    </filter>
+  </defs>
+  <!-- Dark background -->
+  <rect width="32" height="32" fill="#050508" rx="6"/>
+  <!-- Hex shape -->
+  <polygon points="16,3 27,9 27,23 16,29 5,23 5,9"
+    fill="#0A1A10" stroke="#00FF87" stroke-width="1.2"/>
+  <!-- Inner hex wireframe -->
+  <polygon points="16,8 23,12 23,20 16,24 9,20 9,12"
+    fill="none" stroke="#00FF87" stroke-width="0.5" opacity="0.5"/>
+  <!-- T letter -->
+  <text x="16" y="22" font-family="Impact,sans-serif" font-size="16"
+    fill="#00FF87" text-anchor="middle" filter="url(#g)">T</text>
+  <!-- Glow dot -->
+  <circle cx="16" cy="16" r="2" fill="#00FF87" opacity="0.15"/>
+</svg>

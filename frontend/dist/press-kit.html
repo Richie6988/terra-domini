@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Terra Domini — Press Kit & Media Assets</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@300;400;500;600&family=IBM+Plex+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #00FF87; --gold: #FFB800; --red: #FF3B30;
+    --dark: #050508; --dark2: #0A0A12; --border: rgba(255,255,255,0.07);
+    --font-d: 'Bebas Neue',sans-serif; --font-b: 'Space Grotesk',sans-serif; --font-m: 'IBM Plex Mono',monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--dark); color: #E8E8F0; font-family: var(--font-b); }
+
+  .kit-header {
+    padding: 80px 60px 60px;
+    border-bottom: 1px solid var(--border);
+    display: flex; justify-content: space-between; align-items: flex-end;
+  }
+  .kit-header h1 { font-family: var(--font-d); font-size: 64px; letter-spacing: 2px; color: #fff; line-height: 1; }
+  .kit-header h1 span { color: var(--green); }
+  .kit-header p { font-family: var(--font-m); font-size: 12px; color: rgba(255,255,255,0.3); max-width: 300px; text-align: right; line-height: 1.6; }
+
+  .kit-section { padding: 60px; border-bottom: 1px solid var(--border); }
+  .kit-section h2 { font-family: var(--font-d); font-size: 32px; letter-spacing: 2px; color: rgba(255,255,255,0.3); margin-bottom: 40px; }
+
+  /* ── BRAND COLORS ── */
+  .color-grid { display: flex; gap: 16px; flex-wrap: wrap; }
+  .color-swatch { width: 160px; border-radius: 4px; overflow: hidden; }
+  .swatch-color { height: 80px; }
+  .swatch-info { padding: 12px; background: var(--dark2); border: 1px solid var(--border); border-top: none; }
+  .swatch-name { font-family: var(--font-d); font-size: 16px; letter-spacing: 1px; color: #fff; }
+  .swatch-hex { font-family: var(--font-m); font-size: 11px; color: rgba(255,255,255,0.35); margin-top: 2px; }
+
+  /* ── LOGO VARIANTS ── */
+  .logo-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
+  .logo-box {
+    border: 1px solid var(--border); border-radius: 4px; padding: 40px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 160px;
+  }
+  .logo-box.dark { background: var(--dark2); }
+  .logo-box.light { background: #fff; }
+  .logo-box.green { background: var(--green); }
+  .logo-text { font-family: var(--font-d); font-size: 36px; letter-spacing: 3px; }
+  .logo-text.on-dark { color: #fff; }
+  .logo-text.on-dark span { color: var(--green); }
+  .logo-text.on-light { color: #050508; }
+  .logo-text.on-light span { color: #050508; opacity: 0.5; }
+  .logo-text.on-green { color: #000; }
+
+  .logo-label { font-family: var(--font-m); font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 12px; letter-spacing: 0.1em; }
+
+  /* ── SOCIAL BANNERS ── */
+  .banner-stack { display: flex; flex-direction: column; gap: 24px; }
+
+  /* Twitter/X banner — 1500×500 */
+  .twitter-banner {
+    width: 100%; aspect-ratio: 3/1; max-width: 750px;
+    background: var(--dark2); border: 1px solid var(--border); border-radius: 8px;
+    position: relative; overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .twitter-banner::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 80% at 30% 50%, rgba(0,255,135,0.08) 0%, transparent 70%),
+      radial-gradient(ellipse 40% 60% at 80% 30%, rgba(123,47,255,0.06) 0%, transparent 70%);
+  }
+  .twitter-banner .content { position: relative; z-index: 1; text-align: center; }
+  .twitter-banner .headline { font-family: var(--font-d); font-size: 48px; letter-spacing: 3px; color: #fff; line-height: 1; }
+  .twitter-banner .headline span { color: var(--green); }
+  .twitter-banner .sub { font-family: var(--font-m); font-size: 13px; color: rgba(255,255,255,0.4); margin-top: 8px; letter-spacing: 0.1em; }
+  .twitter-banner .tag { font-family: var(--font-d); font-size: 14px; letter-spacing: 2px; color: rgba(0,255,135,0.6); margin-top: 4px; }
+
+  /* OG card — 1200×630 */
+  .og-card {
+    width: 100%; aspect-ratio: 1.9/1; max-width: 760px;
+    background: var(--dark); border: 1px solid var(--border); border-radius: 8px;
+    position: relative; overflow: hidden;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center;
+  }
+  .og-card::before {
+    content: ''; position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% 110%, rgba(0,255,135,0.07) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 50% at 20% 20%, rgba(123,47,255,0.05) 0%, transparent 60%);
+  }
+  /* Hex pattern overlay */
+  .og-card::after {
+    content: ''; position: absolute; inset: 0; opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg width='60' height='52' viewBox='0 0 60 52' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolygon points='30 2 56 16 56 44 30 58 4 44 4 16' fill='none' stroke='%2300FF87' stroke-width='0.5'/%3E%3C/svg%3E");
+    background-size: 60px 52px;
+  }
+  .og-card .logo { font-family: var(--font-m); font-size: 12px; letter-spacing: 0.2em; color: rgba(0,255,135,0.6); margin-bottom: 16px; position: relative; z-index: 1; }
+  .og-card .title { font-family: var(--font-d); font-size: 72px; letter-spacing: 4px; color: #fff; line-height: 0.95; position: relative; z-index: 1; }
+  .og-card .title span { color: var(--green); }
+  .og-card .subtitle { font-size: 16px; color: rgba(255,255,255,0.4); margin-top: 16px; max-width: 460px; line-height: 1.6; position: relative; z-index: 1; }
+  .og-card .url { font-family: var(--font-m); font-size: 12px; color: rgba(0,255,135,0.4); margin-top: 24px; letter-spacing: 0.1em; position: relative; z-index: 1; }
+
+  /* ── POST TEMPLATES ── */
+  .post-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+
+  .post-card {
+    aspect-ratio: 1; border-radius: 8px; overflow: hidden;
+    position: relative; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center; padding: 32px;
+  }
+
+  .post-card.conquer {
+    background: radial-gradient(ellipse at 50% 100%, rgba(239,68,68,0.15) 0%, var(--dark) 70%);
+    border: 1px solid rgba(239,68,68,0.15);
+  }
+  .post-card.economy {
+    background: radial-gradient(ellipse at 50% 0%, rgba(255,184,0,0.12) 0%, var(--dark) 70%);
+    border: 1px solid rgba(255,184,0,0.12);
+  }
+  .post-card.alliance {
+    background: radial-gradient(ellipse at 100% 50%, rgba(123,47,255,0.12) 0%, var(--dark) 70%);
+    border: 1px solid rgba(123,47,255,0.12);
+  }
+  .post-card.tower {
+    background: radial-gradient(ellipse at 0% 50%, rgba(0,255,135,0.10) 0%, var(--dark) 70%);
+    border: 1px solid rgba(0,255,135,0.10);
+  }
+
+  .post-eyebrow { font-family: var(--font-m); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 12px; }
+  .post-headline { font-family: var(--font-d); font-size: 36px; letter-spacing: 2px; color: #fff; line-height: 1; margin-bottom: 12px; }
+  .post-body { font-size: 12px; color: rgba(255,255,255,0.4); line-height: 1.6; }
+  .post-tag { font-family: var(--font-m); font-size: 10px; margin-top: 16px; letter-spacing: 0.1em; }
+  .post-emoji { font-size: 40px; margin-bottom: 16px; display: block; }
+
+  .conquer .post-eyebrow { color: #EF4444; }
+  .conquer .post-tag { color: rgba(239,68,68,0.5); }
+  .economy .post-eyebrow { color: var(--gold); }
+  .economy .post-tag { color: rgba(255,184,0,0.5); }
+  .alliance .post-eyebrow { color: #A855F7; }
+  .alliance .post-tag { color: rgba(168,85,247,0.5); }
+  .tower .post-eyebrow { color: var(--green); }
+  .tower .post-tag { color: rgba(0,255,135,0.5); }
+
+  /* ── COPY LINES ── */
+  .copy-section { display: flex; flex-direction: column; gap: 16px; }
+  .copy-item {
+    padding: 20px 24px; border-left: 2px solid var(--green);
+    background: rgba(0,255,135,0.03);
+  }
+  .copy-label { font-family: var(--font-m); font-size: 10px; color: var(--green); letter-spacing: 0.15em; margin-bottom: 6px; }
+  .copy-text { font-size: 15px; color: rgba(255,255,255,0.75); line-height: 1.6; }
+  .copy-char { font-family: var(--font-m); font-size: 10px; color: rgba(255,255,255,0.2); margin-top: 4px; }
+
+  /* ── TYPOGRAPHY SPECIMEN ── */
+  .type-specimen { display: flex; flex-direction: column; gap: 32px; }
+  .type-sample { padding: 24px; border: 1px solid var(--border); border-radius: 4px; }
+  .type-name { font-family: var(--font-m); font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.15em; margin-bottom: 12px; }
+  .type-display { font-family: var(--font-d); font-size: 52px; letter-spacing: 2px; color: #fff; }
+  .type-body { font-family: var(--font-b); font-size: 16px; color: rgba(255,255,255,0.6); line-height: 1.7; }
+  .type-mono { font-family: var(--font-m); font-size: 13px; color: var(--green); }
+
+  @media(max-width:768px){
+    .kit-header { padding: 40px 24px; flex-direction: column; gap: 20px; }
+    .kit-section { padding: 40px 24px; }
+    .logo-grid, .post-grid { grid-template-columns: 1fr; }
+    .color-grid { gap: 10px; }
+    .color-swatch { width: 130px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="kit-header">
+  <div>
+    <h1>TERRA<span>DOMINI</span><br>PRESS KIT</h1>
+    <div style="font-family: var(--font-m); font-size: 11px; color: rgba(0,255,135,0.5); margin-top: 8px; letter-spacing: 0.1em;">VERSION 1.0 · CONFIDENTIAL UNTIL LAUNCH</div>
+  </div>
+  <p>Real-world territory strategy game. Built on OpenStreetMap + H3 hex grid. Powered by TerraDominiCoin (TDC) on Polygon. Every square meter of Earth is playable.</p>
+</div>
+
+<!-- ── BRAND COLORS ── -->
+<div class="kit-section">
+  <h2>BRAND COLORS</h2>
+  <div class="color-grid">
+    <div class="color-swatch">
+      <div class="swatch-color" style="background:#00FF87;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">CONQUEST GREEN</div>
+        <div class="swatch-hex">#00FF87 · Primary</div>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="swatch-color" style="background:#050508;border:1px solid #222;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">VOID BLACK</div>
+        <div class="swatch-hex">#050508 · Background</div>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="swatch-color" style="background:#FF3B30;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">WAR RED</div>
+        <div class="swatch-hex">#FF3B30 · Enemy/Danger</div>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="swatch-color" style="background:#FFB800;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">TDC GOLD</div>
+        <div class="swatch-hex">#FFB800 · Currency/Reward</div>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="swatch-color" style="background:#7B2FFF;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">ALLIANCE PURPLE</div>
+        <div class="swatch-hex">#7B2FFF · Alliance/Social</div>
+      </div>
+    </div>
+    <div class="color-swatch">
+      <div class="swatch-color" style="background:#0F0F1A; border:1px solid #222;"></div>
+      <div class="swatch-info">
+        <div class="swatch-name">TERRITORY DARK</div>
+        <div class="swatch-hex">#0F0F1A · Surface</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── LOGO VARIANTS ── -->
+<div class="kit-section">
+  <h2>LOGO VARIANTS</h2>
+  <div class="logo-grid">
+    <div>
+      <div class="logo-box dark">
+        <div class="logo-text on-dark">TERRA<span>DOMINI</span></div>
+      </div>
+      <div class="logo-label">PRIMARY · Dark backgrounds</div>
+    </div>
+    <div>
+      <div class="logo-box light">
+        <div class="logo-text on-light">TERRA<span>DOMINI</span></div>
+      </div>
+      <div class="logo-label">REVERSED · Light backgrounds</div>
+    </div>
+    <div>
+      <div class="logo-box green">
+        <div class="logo-text on-green">TERRADOMI</div>
+      </div>
+      <div class="logo-label">ACCENT · Green brand moments</div>
+    </div>
+  </div>
+  <div style="margin-top: 24px; padding: 16px 20px; background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 4px;">
+    <p style="font-family: var(--font-m); font-size: 11px; color: rgba(255,255,255,0.3); line-height: 1.7;">
+      USAGE RULES: Always maintain minimum 24px clear space around the logo. Never rotate, distort, or apply shadows.
+      Never use on backgrounds with insufficient contrast. The TERRA prefix is always white/dark; the DOMINI suffix toggles to green on dark, muted on light.
+      Minimum size: 120px wide for web, 10mm for print.
+    </p>
+  </div>
+</div>
+
+<!-- ── TYPOGRAPHY ── -->
+<div class="kit-section">
+  <h2>TYPOGRAPHY</h2>
+  <div class="type-specimen">
+    <div class="type-sample">
+      <div class="type-name">DISPLAY — BEBAS NEUE · Headlines, titles, UI numbers</div>
+      <div class="type-display">CLAIM THE EARTH</div>
+    </div>
+    <div class="type-sample">
+      <div class="type-name">BODY — SPACE GROTESK · Paragraphs, descriptions, UI text</div>
+      <div class="type-body">Every square meter of Earth is a territory to conquer, develop, and monetize. Real satellite maps. Real strategy. Real cryptocurrency. The game that turns geography into economy.</div>
+    </div>
+    <div class="type-sample">
+      <div class="type-name">MONO — IBM PLEX MONO · Labels, tags, technical data, H3 indexes</div>
+      <div class="type-mono">H3:8A3969A40C3FFFF · 47,842 VIEWS · +312 TDC · POLYGON:137</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── SOCIAL ASSETS ── -->
+<div class="kit-section">
+  <h2>SOCIAL MEDIA ASSETS</h2>
+  <div class="banner-stack">
+
+    <!-- Twitter Header -->
+    <div>
+      <div style="font-family: var(--font-m); font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.15em; margin-bottom: 12px;">TWITTER/X HEADER · 1500×500</div>
+      <div class="twitter-banner">
+        <div class="content">
+          <div class="headline">CONQUER <span>REAL</span> LAND</div>
+          <div class="sub">REAL-WORLD TERRITORY STRATEGY · POLYGON BLOCKCHAIN</div>
+          <div class="tag">TERRADOMINI.IO</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- OG Image -->
+    <div>
+      <div style="font-family: var(--font-m); font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.15em; margin-bottom: 12px;">OPEN GRAPH IMAGE · 1200×630</div>
+      <div class="og-card">
+        <div class="logo">TERRA DOMINI · REAL-WORLD STRATEGY</div>
+        <div class="title">CLAIM<br><span>THE EARTH</span></div>
+        <div class="subtitle">Every square meter of Earth is playable. Powered by OpenStreetMap, H3 hex grid, and TerraDominiCoin on Polygon.</div>
+        <div class="url">terradomini.io · play now — free</div>
+      </div>
+    </div>
+
+    <!-- Square posts -->
+    <div>
+      <div style="font-family: var(--font-m); font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.15em; margin-bottom: 12px;">INSTAGRAM/TWITTER POSTS · 1080×1080</div>
+      <div class="post-grid">
+        <div class="post-card conquer">
+          <span class="post-eyebrow">Core Mechanic</span>
+          <span class="post-emoji">⚔️</span>
+          <div class="post-headline">CONQUER<br>REAL LAND</div>
+          <div class="post-body">Not a fictional map. Real Earth. Your street. Their district. Attack. Defend. Dominate.</div>
+          <div class="post-tag">#TerraDomini #ConquerTheEarth</div>
+        </div>
+        <div class="post-card economy">
+          <span class="post-eyebrow">TDC Economy</span>
+          <span class="post-emoji">🪙</span>
+          <div class="post-headline">YOUR LAND<br>EARNS MONEY</div>
+          <div class="post-body">Hold the Eiffel Tower hex → Brands pay CPM rates → You earn TDC → Trade on Polygon DEX.</div>
+          <div class="post-tag">#TDC #Polygon #GameFi</div>
+        </div>
+        <div class="post-card alliance">
+          <span class="post-eyebrow">Diplomacy</span>
+          <span class="post-emoji">🏰</span>
+          <div class="post-headline">BUILD AN<br>EMPIRE</div>
+          <div class="post-body">Squad → Guild → Federation. 500-player alliances. Democratic governance. Geographic peace lines.</div>
+          <div class="post-tag">#Alliance #Strategy #TerraDomini</div>
+        </div>
+        <div class="post-card tower">
+          <span class="post-eyebrow">Live Events</span>
+          <span class="post-emoji">🗼</span>
+          <div class="post-headline">CONTROL<br>TOWER WARS</div>
+          <div class="post-body">3× daily. 2-hour capture windows. 500 global chokepoints. Your alliance vs the world.</div>
+          <div class="post-tag">#ControlTower #LiveEvent</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── AD COPY ── -->
+<div class="kit-section">
+  <h2>MARKETING COPY</h2>
+  <div class="copy-section">
+    <div class="copy-item">
+      <div class="copy-label">TAGLINE · PRIMARY</div>
+      <div class="copy-text">Claim the Earth.</div>
+      <div class="copy-char">16 chars</div>
+    </div>
+    <div class="copy-item">
+      <div class="copy-label">TAGLINE · EXTENDED</div>
+      <div class="copy-text">Every square meter of Earth is yours to conquer.</div>
+      <div class="copy-char">48 chars</div>
+    </div>
+    <div class="copy-item">
+      <div class="copy-label">TWITTER · LAUNCH</div>
+      <div class="copy-text">We built a game on top of real satellite maps.<br><br>Every hexagon = a real location on Earth. Conquer it. Build on it. Let brands advertise on it. Earn TDC.<br><br>The first game where holding land = real economic value.<br><br>Play free → terradomini.io<br><br>#TerraDomini #GameFi #Strategy</div>
+      <div class="copy-char">~280 chars</div>
+    </div>
+    <div class="copy-item">
+      <div class="copy-label">TWITTER · ECONOMY</div>
+      <div class="copy-text">If you owned the Eiffel Tower hex in Terra Domini, you'd earn ~312 TDC today from brand advertising.<br><br>That's because 47,842 players viewed that territory.<br><br>Real satellite map. Real CPM rates. Real Polygon token.<br><br>#TDC #Polygon #GameFi</div>
+      <div class="copy-char">~260 chars</div>
+    </div>
+    <div class="copy-item">
+      <div class="copy-label">TWITTER · P2W TRANSPARENCY</div>
+      <div class="copy-text">We capped Pay-to-Win at +25% military boost.<br><br>A free player who understands terrain will beat a whale with bad positioning every time.<br><br>Terra Domini is a strategy game. Not a credit card simulator.<br><br>#FairPlay #Strategy</div>
+      <div class="copy-char">~240 chars</div>
+    </div>
+    <div class="copy-item">
+      <div class="copy-label">PRODUCT HUNT · TAGLINE</div>
+      <div class="copy-text">Terra Domini — The real-world territory strategy game where your land earns real cryptocurrency</div>
+      <div class="copy-char">95 chars</div>
+    </div>
+    <div class="copy-item">
+      <div class="copy-label">APP STORE · DESCRIPTION (SHORT)</div>
+      <div class="copy-text">Conquer real territories on a live satellite map of Earth. Build, fortify, form alliances, and earn TerraDominiCoin (TDC) from brand advertising on your hexes. The first .io game with a real blockchain economy.</div>
+      <div class="copy-char">210 chars</div>
+    </div>
+    <div class="copy-item">
+      <div class="copy-label">PRESS · ONE-LINER</div>
+      <div class="copy-text">Terra Domini is a persistent real-world territory strategy game built on OpenStreetMap data, where players claim and develop H3 hexagonal territories, wage alliance warfare, and earn TerraDominiCoin (ERC-20, Polygon) through an integrated brand advertising marketplace.</div>
+      <div class="copy-char">270 chars</div>
+    </div>
+  </div>
+</div>
+
+<div style="padding: 40px 60px; border-top: 1px solid var(--border); text-align: center;">
+  <span style="font-family: var(--font-m); font-size: 11px; color: rgba(255,255,255,0.2); letter-spacing: 0.1em;">
+    TERRA DOMINI PRESS KIT · github.com/Richie6988/terra-domini · press@terradomini.io
+  </span>
+</div>
+
+</body>
+</html>
