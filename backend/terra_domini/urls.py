@@ -32,7 +32,6 @@ from terra_domini.apps.combat.views import BattleViewSet
 from terra_domini.apps.economy.views import ShopViewSet, TDCViewSet, StripeWebhookView, AdCampaignViewSet
 from terra_domini.apps.alliances.views import AllianceViewSet, DiplomacyViewSet
 from terra_domini.apps.events.views import ControlTowerViewSet, EventViewSet
-from terra_domini.apps.events.poi_views import WorldPOIViewSet
 from terra_domini.apps.blockchain.views import TDCBalanceView, TDCPurchaseView, TDCWithdrawView
 from terra_domini.apps.progression.views import ProgressionViewSet, TutorialCompleteView
 from terra_domini.apps.social.views import FriendViewSet, PublicProfileView, JoinViaReferralView
@@ -48,7 +47,6 @@ router.register(r'diplomacy',   DiplomacyViewSet, basename='diplomacy')
 router.register(r'events',      EventViewSet,     basename='event')
 router.register(r'control-towers', ControlTowerViewSet, basename='control-tower')
 router.register(r'ads',         AdCampaignViewSet, basename='ad')
-router.register(r'pois',        WorldPOIViewSet,  basename='poi')
 router.register(r'social',      FriendViewSet,    basename='social')
 router.register(r'progression', ProgressionViewSet, basename='progression')
 router.register(r'players', PlayerViewSet, basename='players')

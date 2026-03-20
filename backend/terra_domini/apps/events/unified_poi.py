@@ -69,6 +69,27 @@ class POICategory(models.TextChoices):
     TRADE_NODE       = 'trade_node',       'Trade Node'
     ANCIENT_WONDER   = 'ancient_wonder',   'Ancient Wonder'
     ANOMALY          = 'anomaly',          'Anomaly Zone'
+    # 💧 Water Infrastructure
+    MEGA_DAM         = 'mega_dam',         'Mega Dam / Hydroelectric'
+    WATER_TREATMENT  = 'water_treatment',  'Water Treatment Plant'
+    DESALINATION     = 'desalination',     'Desalination Plant'
+    # 🌾 Agriculture
+    AGRI_MEGAFARM    = 'agri_megafarm',    'Mega Farm / Agricultural Hub'
+    SEED_VAULT       = 'seed_vault',       'Seed Vault'
+    # 🏭 Industry
+    STEEL_MILL       = 'steel_mill',       'Steel / Industrial Complex'
+    SEMICONDUCTOR    = 'semiconductor',    'Semiconductor Fab'
+    PHARMA_HQ        = 'pharma_hq',        'Pharmaceutical HQ'
+    # 🌐 Internet
+    INTERNET_CABLE   = 'internet_cable',   'Undersea Cable Landing'
+    IX_POINT         = 'ix_point',         'Internet Exchange Point'
+    # 🎮 Sports & Events
+    SPORTS_ARENA     = 'sports_arena',     'Mega Sports Arena'
+    CASINO_RESORT    = 'casino_resort',    'Casino / Resort Complex'
+    # 🧬 Science
+    RESEARCH_STATION = 'research_station', 'Research Station'
+    PARTICLE_COLLIDER= 'particle_collider','Particle Collider'
+    OBSERVATORY      = 'observatory',      'Major Observatory'
 
 
 # Visual config per category
@@ -124,6 +145,21 @@ POI_VISUAL = {
     'trade_node':       {'emoji': '🔄', 'color': '#10B981', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'credits',   'bonus': 80},
     'ancient_wonder':   {'emoji': '✨', 'color': '#F59E0B', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'culture',   'bonus': 250},
     'anomaly':          {'emoji': '🌀', 'color': '#8B5CF6', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'intel',     'bonus': 300},
+    'mega_dam':         {'emoji': '🌊', 'color': '#0EA5E9', 'size': 'xl', 'rarity': 'rare',      'game_resource': 'energy',    'bonus': 110},
+    'water_treatment':  {'emoji': '💧', 'color': '#0284C7', 'size': 'md', 'rarity': 'uncommon',  'game_resource': 'food',      'bonus': 40},
+    'desalination':     {'emoji': '🧊', 'color': '#BAE6FD', 'size': 'md', 'rarity': 'rare',      'game_resource': 'food',      'bonus': 65},
+    'agri_megafarm':    {'emoji': '🌾', 'color': '#A16207', 'size': 'lg', 'rarity': 'uncommon',  'game_resource': 'food',      'bonus': 50},
+    'seed_vault':       {'emoji': '🌱', 'color': '#15803D', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'food',      'bonus': 200},
+    'steel_mill':       {'emoji': '🏭', 'color': '#4B5563', 'size': 'lg', 'rarity': 'uncommon',  'game_resource': 'materials', 'bonus': 55},
+    'semiconductor':    {'emoji': '💾', 'color': '#6366F1', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'intel',     'bonus': 180},
+    'pharma_hq':        {'emoji': '💊', 'color': '#EC4899', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'credits',   'bonus': 90},
+    'internet_cable':   {'emoji': '🔌', 'color': '#0EA5E9', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'intel',     'bonus': 85},
+    'ix_point':         {'emoji': '📡', 'color': '#6366F1', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'intel',     'bonus': 95},
+    'sports_arena':     {'emoji': '🏟️', 'color': '#10B981', 'size': 'md', 'rarity': 'uncommon',  'game_resource': 'culture',   'bonus': 45},
+    'casino_resort':    {'emoji': '🎰', 'color': '#F59E0B', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'credits',   'bonus': 100},
+    'research_station': {'emoji': '🔬', 'color': '#8B5CF6', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'intel',     'bonus': 85},
+    'particle_collider':{'emoji': '⚛️', 'color': '#1D4ED8', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'intel',     'bonus': 250},
+    'observatory':      {'emoji': '🔭', 'color': '#1E3A5F', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'intel',     'bonus': 70},
 }
 
 RARITY_TDC = {'common': 10, 'uncommon': 25, 'rare': 60, 'legendary': 150}
