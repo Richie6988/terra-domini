@@ -317,3 +317,25 @@ class PlayerViewSet(viewsets.GenericViewSet):
             'avatar_emoji': getattr(p, 'avatar_emoji', '🎖️'),
             'commander_rank': getattr(p, 'commander_rank', 1),
         } for p in players])
+
+
+class UpdateProfileView(APIView):
+    """PATCH /api/players/update-profile/"""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request):
+        player = request.user
+        data = request.data
+
+        if 'display_name' in data:
+            player.display_name = str(data['display_name'])[:50]
+        if 'avatar_emoji' in data:
+            player.avatar_emoji = str(data['avatar_emoji'])[:8]
+        if 'spec_path' in data and data['spec_path'] in ['military','economic','diplomatic','scientific']:
+            player.spec_path = data['spec_path']
+        if 'bio' in data:
+            player.bio = str(data['bio'])[:300]
+
+        player.save(update_fields=['display_name','avatar_emoji','spec_path','bio'])
+        return Response({'ok': True, 'display_name': player.display_name,
+                        'avatar_emoji': player.avatar_emoji, 'spec_path': player.spec_path})

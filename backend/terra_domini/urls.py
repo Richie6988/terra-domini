@@ -8,16 +8,19 @@ from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView as SpectacularSwaggerUIView
 
 from terra_domini.health import health_check, robots_txt
+from terra_domini.apps.accounts.views import UpdateProfileView
 from terra_domini.apps.accounts.geoip_view import GeoIPView
 from terra_domini.frontend_view import FrontendAppView
 
 # ─── Views imports ────────────────────────────────────────────────────────────
+from terra_domini.apps.accounts.views import UpdateProfileView
 from terra_domini.apps.accounts.views import (
     RegisterView, LoginView, RefreshView,
     PlayerProfileView, LeaderboardView, PlayerSearchView, WalletLinkView,
     PasswordResetRequestView, PasswordResetConfirmView,
 )
 from terra_domini.apps.territories.views import TerritoryViewSet
+from terra_domini.apps.accounts.views import UpdateProfileView
 from terra_domini.apps.accounts.views import PlayerViewSet
 from terra_domini.apps.social.views import TradeViewSet
 from terra_domini.apps.blockchain.wallet_views import WalletViewSet
@@ -98,6 +101,7 @@ urlpatterns = [
     path('api/webhooks/stripe/', StripeWebhookView.as_view(), name='stripe_webhook'),
 
     # ── Progression ──────────────────────────────────────────────────────────
+    path('api/players/update-profile/', UpdateProfileView.as_view(), name='update-profile'),
     path('api/progression/skills/', SkillTreeView.as_view(), name='skill-tree'),
     path('api/progression/skills/<int:pk>/unlock/', SkillUnlockView.as_view(), name='skill-unlock'),
     path('api/progression/tutorial-complete/', TutorialCompleteView.as_view(), name='tutorial_complete'),
