@@ -8,7 +8,9 @@ import { Suspense, useRef, useState, useEffect, useMemo } from 'react'
 import { Canvas, useFrame, useThree, extend } from '@react-three/fiber'
 import { useTexture, Environment } from '@react-three/drei'
 import * as THREE from 'three'
-import { motion } from 'framer-motion'
+import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { KingdomSkillTree } from './KingdomSkillTree'
 import { usePlayer } from '../../store'
 
 /* ── rarity ─────────────────────────────────────────────────── */
@@ -478,17 +480,28 @@ export function HexCard({ territory: t, onClose, onRequestClaim }: {
             }}>⚔️ Attack · 💸 Buy · 🧩 Puzzle</button>
           )}
           {isOwned && (
-            <div style={{ display: 'flex', gap: 7 }}>
-              <button onClick={onRequestClaim} style={{
-                flex:1, padding:'10px', borderRadius:9, cursor:'pointer',
-                background:`${cfg.hex}14`, border:`1px solid ${cfg.hex}44`,
-                color:cfg.hex, fontSize:12, fontWeight:700,
-              }}>💰 Revenue</button>
-              <button style={{
-                flex:1, padding:'10px', borderRadius:9, cursor:'pointer',
-                background:'rgba(139,92,246,0.1)', border:'1px solid rgba(139,92,246,0.3)',
-                color:'#A78BFA', fontSize:12, fontWeight:700,
-              }}>🎨 Customize</button>
+            <div style={{ display: 'flex', flexDirection:'column', gap: 6 }}>
+              <div style={{ display:'flex', gap:6 }}>
+                <button onClick={onRequestClaim} style={{
+                  flex:1, padding:'9px', borderRadius:9, cursor:'pointer',
+                  background:`${cfg.hex}14`, border:`1px solid ${cfg.hex}44`,
+                  color:cfg.hex, fontSize:11, fontWeight:700,
+                }}>💰 Revenus</button>
+                <button style={{
+                  flex:1, padding:'9px', borderRadius:9, cursor:'pointer',
+                  background:'rgba(139,92,246,0.1)', border:'1px solid rgba(139,92,246,0.3)',
+                  color:'#A78BFA', fontSize:11, fontWeight:700,
+                }}>🎨 Style</button>
+              </div>
+              <button onClick={() => setShowSkillTree(true)} style={{
+                width:'100%', padding:'10px', border:'none', borderRadius:9, cursor:'pointer',
+                background:`linear-gradient(135deg, ${cfg.hex}cc, ${cfg.hex})`,
+                color: ['legendary','mythic','epic'].includes(rarity) ? '#000':'#fff',
+                fontSize:12, fontWeight:900,
+                display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+              }}>
+                🔬 Arbre des compétences du royaume
+              </button>
             </div>
           )}
           <button onClick={onClose} style={{
@@ -502,6 +515,21 @@ export function HexCard({ territory: t, onClose, onRequestClaim }: {
       <div style={{ fontSize: 9, color: '#1F2937', zIndex: 1 }}>
         Drag to rotate · Spin to flip
       </div>
+
+      <AnimatePresence>
+        {showSkillTree && t.owner_kingdom_id && (
+          <KingdomSkillTree
+            clusterId={t.owner_kingdom_id}
+            onClose={() => setShowSkillTree(false)}
+          />
+        )}
+        {showSkillTree && !t.owner_kingdom_id && (
+          <KingdomSkillTree
+            clusterId={'main'}
+            onClose={() => setShowSkillTree(false)}
+          />
+        )}
+      </AnimatePresence>
     </motion.div>
   )
 }

@@ -79,6 +79,22 @@ class TerritoryViewSet(viewsets.ModelViewSet):
 
         player = request.user
 
+        # Kingdom lookup: find which cluster each owned hex belongs to
+        kingdom_map = {}  # h3_index -> cluster_id
+        try:
+            from terra_domini.apps.territories.kingdom_engine import recompute_kingdoms
+            kingdoms = recompute_kingdoms(player)
+            for k in kingdoms:
+                for h3_idx in k.get('h3_indexes', []):
+                    kingdom_map[h3_idx] = {
+                        'cluster_id': k['cluster_id'],
+                        'is_main': k['is_main'],
+                        'size': k['size'],
+                        'kingdom_tier': k['tier'],
+                    }
+        except Exception:
+            pass
+
         # POI index by exact h3_index
         from terra_domini.apps.events.unified_poi import UnifiedPOI
         RARITY_RANK = {'common':0,'uncommon':1,'rare':2,'epic':3,'legendary':4,'mythic':5}
@@ -109,6 +125,10 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 'h3_index': hx, 'h3': hx, 'h3_resolution': res,
                 'owner_id': str(t.owner_id) if t and t.owner_id else None,
                 'owner_username': t.owner.username if t and t.owner_id else None,
+                'owner_kingdom_id': kingdom_map.get(hx, {}).get('cluster_id') if t and t.owner_id and hx in kingdom_map else None,
+                'owner_kingdom_is_main': kingdom_map.get(hx, {}).get('is_main', False),
+                'owner_kingdom_size': kingdom_map.get(hx, {}).get('size', 1),
+                'owner_kingdom_tier': kingdom_map.get(hx, {}).get('kingdom_tier', 0),
                 'owner_emoji': getattr(t.owner, 'avatar_emoji', '🏴') if t and t.owner_id else None,
                 'alliance_id': None, 'alliance_tag': None,
                 'territory_type': t.territory_type if t else _biome_from_poi(poi) if poi else 'rural',

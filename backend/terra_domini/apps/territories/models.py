@@ -310,6 +310,21 @@ class TerritoryCluster(models.Model):
     unlock_tier  = models.PositiveSmallIntegerField(default=0)
     tdc_per_24h  = models.DecimalField(max_digits=10, decimal_places=4, default=0)
     tdi_per_24h  = models.DecimalField(max_digits=14, decimal_places=8, default=0)
+    # Aggregate resources for this kingdom (sum of all member territories)
+    agg_fer           = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    agg_petrole       = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    agg_silicium      = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    agg_donnees       = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    agg_uranium       = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    agg_hex_cristaux  = models.DecimalField(max_digits=12, decimal_places=4, default=0)
+    agg_influence     = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    agg_stabilite     = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    agg_acier         = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    agg_terres_rares  = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    agg_composants    = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    is_main_kingdom   = models.BooleanField(default=False)   # True for the largest cluster
+    poi_count         = models.IntegerField(default=0)        # number of POI territories
+    hex_h3_index      = models.CharField(max_length=20, blank=True, default='')  # centroid hex
     last_payout  = models.DateTimeField(null=True)
     computed_at  = models.DateTimeField(auto_now=True)
 
@@ -416,3 +431,26 @@ class ResourceTrade(models.Model):
         except Exception:
             pass
         return {k: round(v, 2) for k, v in base.items()}
+
+
+# ── Kingdom ─────────────────────────────────────────────────────────────────
+# A Kingdom = a contiguous cluster of territories. Skills are per-kingdom.
+class KingdomSkill(models.Model):
+    """
+    Skill unlocked for a specific kingdom (cluster).
+    Skills are lost if the kingdom is fragmented.
+    The main kingdom (largest cluster) gets full tree access.
+    Isolated territories start with empty tree.
+    """
+    player      = models.ForeignKey('accounts.Player', on_delete=models.CASCADE, related_name='kingdom_skills')
+    cluster_id  = models.CharField(max_length=36)   # UUID of the kingdom
+    skill       = models.ForeignKey('progression.SkillNode', on_delete=models.CASCADE)
+    unlocked_at = models.DateTimeField(auto_now_add=True)
+    level       = models.IntegerField(default=1)
+
+    class Meta:
+        unique_together = ('player', 'cluster_id', 'skill')
+        indexes = [models.Index(fields=['player','cluster_id'])]
+
+    def __str__(self):
+        return f"{self.player.username}@{self.cluster_id[:8]}: {self.skill.name}"

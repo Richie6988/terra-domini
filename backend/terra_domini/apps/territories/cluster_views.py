@@ -234,6 +234,58 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
         return Response({'territories': result, 'count': len(result)})
 
 
+    @action(detail=False, methods=['GET'], url_path='kingdoms')
+    def kingdoms(self, request):
+        """GET /api/territories-geo/kingdoms/ — all kingdoms for current player."""
+        from terra_domini.apps.territories.kingdom_engine import recompute_kingdoms
+        kingdoms = recompute_kingdoms(request.user)
+        return Response({'kingdoms': kingdoms, 'count': len(kingdoms)})
+
+    @action(detail=False, methods=['GET'], url_path='kingdom-skill-tree')
+    def kingdom_skill_tree(self, request):
+        """GET /api/territories-geo/kingdom-skill-tree/?cluster_id=xxx"""
+        cluster_id = request.query_params.get('cluster_id', '')
+        if not cluster_id:
+            # Auto: return main kingdom tree
+            from terra_domini.apps.territories.models import TerritoryCluster
+            cluster = TerritoryCluster.objects.filter(
+                player=request.user, is_main_kingdom=True).first()
+            if not cluster:
+                from terra_domini.apps.territories.kingdom_engine import recompute_kingdoms
+                kingdoms = recompute_kingdoms(request.user)
+                if kingdoms:
+                    cluster_id = kingdoms[0]['cluster_id']
+                else:
+                    return Response({'tree': {}, 'unlocked_count': 0, 'kingdom': None})
+            else:
+                cluster_id = cluster.cluster_id
+
+        from terra_domini.apps.territories.kingdom_engine import get_kingdom_skill_tree
+        return Response(get_kingdom_skill_tree(request.user, cluster_id))
+
+    @action(detail=False, methods=['POST'], url_path='kingdom-unlock-skill')
+    def kingdom_unlock_skill(self, request):
+        """POST /api/territories-geo/kingdom-unlock-skill/ {cluster_id, skill_id}"""
+        cluster_id = request.data.get('cluster_id', '')
+        skill_id   = request.data.get('skill_id')
+        if not cluster_id or not skill_id:
+            return Response({'error': 'cluster_id and skill_id required'}, status=400)
+        from terra_domini.apps.territories.kingdom_engine import unlock_kingdom_skill
+        result = unlock_kingdom_skill(request.user, cluster_id, int(skill_id))
+        if 'error' in result:
+            return Response(result, status=400)
+        return Response(result)
+
+    @action(detail=False, methods=['GET'], url_path='territory-kingdom')
+    def territory_kingdom(self, request):
+        """GET /api/territories-geo/territory-kingdom/?h3=xxx — get kingdom for a territory."""
+        h3_index = request.query_params.get('h3', '')
+        if not h3_index:
+            return Response({'error': 'h3 required'}, status=400)
+        from terra_domini.apps.territories.kingdom_engine import get_kingdom_for_territory
+        kingdom = get_kingdom_for_territory(request.user, h3_index)
+        return Response({'kingdom': kingdom})
+
     @action(detail=False, methods=['GET'], url_path='overlay')
     def overlay(self, request):
         """Active map overlay events — returned to frontend for animated sublayer."""
