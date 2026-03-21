@@ -22,7 +22,9 @@ from terra_domini.apps.accounts.views import PlayerViewSet
 from terra_domini.apps.social.views import TradeViewSet
 from terra_domini.apps.blockchain.wallet_views import WalletViewSet
 from terra_domini.apps.territories.cluster_views import TerritoryClusterViewSet
+from terra_domini.apps.progression.views import SkillTreeView, SkillUnlockView
 from terra_domini.apps.progression.clicker_views import ClickerViewSet
+from terra_domini.apps.progression.views import SkillTreeView, SkillUnlockView
 from terra_domini.apps.progression.leaderboard_views import LeaderboardViewSet
 from terra_domini.apps.events.resource_views import ResourcePOIViewSet
 from terra_domini.apps.events.poi_views import UnifiedPOIViewSet
@@ -33,6 +35,7 @@ from terra_domini.apps.economy.views import ShopViewSet, TDCViewSet, StripeWebho
 from terra_domini.apps.alliances.views import AllianceViewSet, DiplomacyViewSet
 from terra_domini.apps.events.views import ControlTowerViewSet, EventViewSet
 from terra_domini.apps.blockchain.views import TDCBalanceView, TDCPurchaseView, TDCWithdrawView
+from terra_domini.apps.progression.views import SkillTreeView, SkillUnlockView
 from terra_domini.apps.progression.views import ProgressionViewSet, TutorialCompleteView
 from terra_domini.apps.social.views import FriendViewSet, PublicProfileView, JoinViaReferralView
 
@@ -95,6 +98,8 @@ urlpatterns = [
     path('api/webhooks/stripe/', StripeWebhookView.as_view(), name='stripe_webhook'),
 
     # ── Progression ──────────────────────────────────────────────────────────
+    path('api/progression/skills/', SkillTreeView.as_view(), name='skill-tree'),
+    path('api/progression/skills/<int:pk>/unlock/', SkillUnlockView.as_view(), name='skill-unlock'),
     path('api/progression/tutorial-complete/', TutorialCompleteView.as_view(), name='tutorial_complete'),
 
     # ── Social ────────────────────────────────────────────────────────────────

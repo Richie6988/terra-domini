@@ -113,6 +113,32 @@ class Territory(models.Model):
     is_under_attack = models.BooleanField(default=False)
     current_battle  = models.UUIDField(null=True, blank=True)
 
+    # Hexod GDD Resources (Section 5)
+    res_fer           = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_cuivre        = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_aluminium     = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_acier         = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_titanium      = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_petrole       = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_gaz           = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_charbon       = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_uranium       = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_silicium      = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_terres_rares  = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_composants    = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_donnees       = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_main_oeuvre   = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_nourriture    = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_eau           = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_influence     = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_stabilite     = models.DecimalField(max_digits=12, decimal_places=2, default=0)
+    res_hex_cristaux  = models.DecimalField(max_digits=12, decimal_places=4, default=0)
+    # Hex type classification (GDD 2.2)
+    hex_type          = models.CharField(max_length=20, default='standard',
+        choices=[('standard','Standard'),('resource','Ressource'),('poi','POI'),('strategic','Stratégique')])
+    is_connected      = models.BooleanField(default=False)  # part of connected cluster
+    cluster_bonus_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+
     class Meta:
         db_table = 'territories'
         verbose_name_plural = 'territories'

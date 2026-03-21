@@ -616,3 +616,35 @@ class LeaderboardSnapshot(models.Model):
         db_table = 'leaderboard_snapshot'
         unique_together = [('scope', 'region_code', 'player')]
         ordering  = ['rank']
+
+
+class SkillNode(models.Model):
+    """GDD Section 6 — Arbre de compétences Hexod"""
+    BRANCHES = [
+        ('attack','Attaque'), ('defense','Défense'), ('economy','Économie'),
+        ('influence','Rayonnement'), ('tech','Technologie'),
+    ]
+    branch      = models.CharField(max_length=20, choices=BRANCHES)
+    name        = models.CharField(max_length=80)
+    effect      = models.TextField()
+    cost_json   = models.JSONField(default=list)   # list of resource names
+    position    = models.IntegerField(default=0)   # order in branch
+    icon        = models.CharField(max_length=8, default='⚔️')
+
+    class Meta:
+        unique_together = ('branch', 'position')
+        ordering = ['branch', 'position']
+
+    def __str__(self):
+        return f"[{self.branch}] {self.name}"
+
+
+class PlayerSkill(models.Model):
+    """Player's unlocked skills"""
+    player      = models.ForeignKey('accounts.Player', on_delete=models.CASCADE, related_name='skills')
+    skill       = models.ForeignKey(SkillNode, on_delete=models.CASCADE)
+    unlocked_at = models.DateTimeField(auto_now_add=True)
+    level       = models.IntegerField(default=1)
+
+    class Meta:
+        unique_together = ('player', 'skill')

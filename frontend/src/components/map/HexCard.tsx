@@ -56,35 +56,119 @@ function makeEmojiTexture(emoji: string, bg: string): THREE.CanvasTexture {
   return new THREE.CanvasTexture(c)
 }
 
-/* ── text → canvas texture (for rarity label) ───────────────── */
-function makeTextTexture(text: string, name: string, color: string): THREE.CanvasTexture {
+/* ── Back face texture — rich card back ──────────────────────── */
+function makeBackTexture(rarityLabel: string, h3index: string, income: number,
+  floorPrice: number|null, color: string, bgHex: string): THREE.CanvasTexture {
+  const W = 512
   const c = document.createElement('canvas')
-  c.width = 512; c.height = 512
+  c.width = W; c.height = W
   const ctx = c.getContext('2d')!
-  ctx.clearRect(0, 0, 512, 512)
 
-  // Name
-  ctx.font = 'bold 52px system-ui, sans-serif'
-  ctx.fillStyle = '#ffffff'
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  // Word-wrap name
-  const words = name.split(' ')
-  let lines: string[] = []
-  let current = ''
-  words.forEach(w => {
-    const test = current ? `${current} ${w}` : w
-    if (ctx.measureText(test).width > 440) { lines.push(current); current = w }
-    else current = test
-  })
-  lines.push(current)
-  const startY = 256 - (lines.length - 1) * 30
-  lines.forEach((l, i) => ctx.fillText(l, 256, startY + i * 60, 440))
+  // Dark background
+  ctx.fillStyle = bgHex
+  ctx.fillRect(0, 0, W, W)
 
-  // Rarity
-  ctx.font = 'bold 32px system-ui'
+  // Subtle hex grid watermark
+  ctx.globalAlpha = 0.06
+  ctx.font = '48px monospace'
   ctx.fillStyle = color
-  ctx.fillText(text.toUpperCase(), 256, 440)
+  for (let y = 40; y < W; y += 80) {
+    for (let x = y % 2 === 0 ? 20 : 60; x < W; x += 100) {
+      ctx.fillText('⬡', x, y)
+    }
+  }
+  ctx.globalAlpha = 1
+
+  // Hex icon
+  ctx.font = 'bold 72px monospace'
+  ctx.fillStyle = color
+  ctx.textAlign = 'center'
+  ctx.fillText('⬡', W/2, 140)
+
+  // H3 index
+  ctx.font = '20px monospace'
+  ctx.fillStyle = 'rgba(255,255,255,0.4)'
+  ctx.fillText(h3index.slice(0,18), W/2, 185)
+
+  // Separator
+  ctx.strokeStyle = color + '44'
+  ctx.lineWidth = 1
+  ctx.beginPath(); ctx.moveTo(60, 210); ctx.lineTo(W-60, 210); ctx.stroke()
+
+  // Income
+  ctx.font = 'bold 36px system-ui'
+  ctx.fillStyle = color
+  ctx.fillText(`+${income} cristaux/tick`, W/2, 260)
+
+  // Floor price
+  if (floorPrice) {
+    ctx.font = '28px system-ui'
+    ctx.fillStyle = 'rgba(255,255,255,0.7)'
+    ctx.fillText(`💎 Floor ${floorPrice} TDI`, W/2, 310)
+  }
+
+  // Separator
+  ctx.beginPath(); ctx.moveTo(60, 345); ctx.lineTo(W-60, 345); ctx.stroke()
+
+  // Rarity badge
+  ctx.font = 'bold 22px system-ui'
+  ctx.fillStyle = color
+  ctx.fillText(rarityLabel.toUpperCase(), W/2, 382)
+
+  // Footer
+  ctx.font = '18px system-ui'
+  ctx.fillStyle = 'rgba(255,255,255,0.2)'
+  ctx.fillText('Hexod · Season 1', W/2, 460)
+
+  return new THREE.CanvasTexture(c)
+}
+
+/* ── Front face overlay texture (name + type painted on image) ─ */
+function makeFrontOverlay(name: string, type: string, rarityLabel: string, color: string): THREE.CanvasTexture {
+  const W = 512
+  const c = document.createElement('canvas')
+  c.width = W; c.height = W
+  const ctx = c.getContext('2d')!
+  ctx.clearRect(0, 0, W, W)
+
+  // Rarity label at top
+  ctx.font = 'bold 22px system-ui'
+  ctx.textAlign = 'center'
+  // Badge bg
+  const bw = ctx.measureText(rarityLabel.toUpperCase()).width + 24
+  ctx.fillStyle = color + '44'
+  ctx.beginPath()
+  ctx.roundRect(W/2 - bw/2, 28, bw, 32, 8)
+  ctx.fill()
+  ctx.strokeStyle = color + '88'; ctx.lineWidth = 1
+  ctx.stroke()
+  ctx.fillStyle = color
+  ctx.fillText(rarityLabel.toUpperCase(), W/2, 50)
+
+  // Name at bottom (semi-transparent bg)
+  const nameLines: string[] = []
+  const words = name.split(' ')
+  let cur = ''
+  ctx.font = 'bold 44px system-ui'
+  words.forEach(w => {
+    const t = cur ? `${cur} ${w}` : w
+    if (ctx.measureText(t).width > 420) { nameLines.push(cur); cur = w }
+    else cur = t
+  })
+  nameLines.push(cur)
+
+  const nameH = nameLines.length * 52 + 30
+  ctx.fillStyle = 'rgba(0,0,0,0.72)'
+  ctx.fillRect(0, W - nameH - 40, W, nameH + 40)
+
+  ctx.fillStyle = '#ffffff'
+  const startY = W - nameH - 10
+  nameLines.forEach((l, i) => ctx.fillText(l, W/2, startY + i * 52, 460))
+
+  // Type badge
+  ctx.font = '22px system-ui'
+  ctx.fillStyle = color
+  ctx.fillText(type.toUpperCase(), W/2, W - 8)
 
   return new THREE.CanvasTexture(c)
 }
@@ -156,10 +240,26 @@ function HexMesh({ t, cfg, imgUrl }: { t: any; cfg: typeof R[Rarity]; imgUrl: st
     [t.custom_emoji, t.poi_emoji, t.territory_type, emojiBg]
   )
 
-  // Label texture (back face / bottom)
+  // Back face texture
+  const income = Math.round(t.resource_credits || t.food_per_tick || 10)
   const labelTex = useMemo(() =>
-    makeTextTexture(cfg.label, t.custom_name || t.poi_name || t.place_name || 'Zone', cfg.hex),
-    [cfg.label, t.custom_name, t.poi_name, t.place_name, cfg.hex]
+    makeBackTexture(
+      cfg.label,
+      t.h3_index || '',
+      income,
+      t.poi_floor_price || null,
+      cfg.hex,
+      cfg.emissive || '#050510'
+    ),
+    [cfg.label, cfg.hex, t.h3_index, income, t.poi_floor_price]
+  )
+
+  // Front overlay (name + rarity painted on top of image/emoji)
+  const cardName = t.custom_name || t.poi_name || t.place_name || 'Zone'
+  const cardType = t.poi_category || t.territory_type || 'standard'
+  const overlayTex = useMemo(() =>
+    makeFrontOverlay(cardName, cardType, cfg.label, cfg.hex),
+    [cardName, cardType, cfg.label, cfg.hex]
   )
 
   const [imgTex, setImgTex] = useState<THREE.Texture | null>(null)
@@ -189,19 +289,21 @@ function HexMesh({ t, cfg, imgUrl }: { t: any; cfg: typeof R[Rarity]; imgUrl: st
     // (unused groups)
     new THREE.MeshStandardMaterial({ color: '#111' }),
     new THREE.MeshStandardMaterial({ color: '#111' }),
-    // Front face
+    // Front face — image + overlay composited
     new THREE.MeshStandardMaterial({
-      map: faceTex, metalness: cfg.metal * 0.3, roughness: cfg.rough * 0.8,
-      envMapIntensity: cfg.envInt * 0.5,
+      map: faceTex,
+      alphaMap: overlayTex,
+      metalness: cfg.metal * 0.3, roughness: cfg.rough * 0.7,
+      envMapIntensity: cfg.envInt * 0.6,
       emissive: new THREE.Color(cfg.emissive),
-      emissiveIntensity: 0.3,
+      emissiveIntensity: 0.25,
     }),
     // Back face
     new THREE.MeshStandardMaterial({
       map: labelTex, metalness: 0.2, roughness: 0.7,
       color: '#111',
     }),
-  ], [faceTex, labelTex, cfg])
+  ], [faceTex, labelTex, overlayTex, cfg])
 
   const edgeMat = useMemo(() => new THREE.MeshStandardMaterial({
     color: cfg.hex, metalness: cfg.metal + 0.2,

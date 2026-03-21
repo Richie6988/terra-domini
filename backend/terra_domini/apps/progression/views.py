@@ -181,3 +181,46 @@ class TutorialCompleteView(APIView):
             tutorial_completed=True,
         )
         return Response({'tdc_granted': 100, 'message': 'Tutorial complete! +100 TDC 🎉'})
+
+
+class SkillTreeView(generics.ListAPIView):
+    """GET /api/progression/skills/ — full skill tree + player unlocks"""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from terra_domini.apps.progression.models import SkillNode, PlayerSkill
+        import json
+
+        nodes = list(SkillNode.objects.all().values(
+            'id','branch','name','effect','cost_json','position','icon'))
+        unlocked = set(PlayerSkill.objects.filter(
+            player=request.user).values_list('skill_id', flat=True))
+
+        for n in nodes:
+            n['unlocked'] = n['id'] in unlocked
+
+        # Group by branch
+        tree = {}
+        for n in nodes:
+            tree.setdefault(n['branch'], []).append(n)
+
+        return Response({'tree': tree, 'unlocked_count': len(unlocked)})
+
+
+class SkillUnlockView(generics.GenericAPIView):
+    """POST /api/progression/skills/<id>/unlock/"""
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, pk):
+        from terra_domini.apps.progression.models import SkillNode, PlayerSkill
+        try:
+            skill = SkillNode.objects.get(pk=pk)
+        except SkillNode.DoesNotExist:
+            return Response({'error': 'Skill not found'}, status=404)
+
+        if PlayerSkill.objects.filter(player=request.user, skill=skill).exists():
+            return Response({'error': 'Already unlocked'}, status=400)
+
+        # TODO: deduct resources (cost_json)
+        PlayerSkill.objects.create(player=request.user, skill=skill)
+        return Response({'ok': True, 'skill': skill.name})
