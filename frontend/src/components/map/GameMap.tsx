@@ -14,7 +14,7 @@ import { HexCard } from './HexCard'
 import { AttackPanel } from '../hud/AttackPanel'
 import { ClaimModal } from './ClaimModal'
 import { HexodBottomBar } from '../hud/HexodBottomBar'
-import { injectGlowFilter, makeHexPolygon } from './HexLayer'
+import { injectGlowFilter, makeHexPolygon, injectHexAnimations } from './HexLayer'
 import { POIHexLayer } from './POIHexLayer'
 import { latLngToCell, cellToBoundary, gridDisk } from 'h3-js'
 import type { TerritoryLight } from '../../types'
@@ -60,9 +60,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const [tile,        setTile]        = useState<keyof typeof TILES>('dark')
   const [showHex,     setShowHex]     = useState(true)
   const [showOverlay,  setShowOverlay]  = useState(true)
-  const [showResources,setShowResources] = useState(true)
   const [showGrid,     setShowGrid]     = useState(false)
-  const [showNews,     setShowNews]     = useState(true)
   const [zoom,        setZoom]        = useState(13)
   const [center,      setCenter]      = useState<[number,number]>([48.8566, 2.3522])
   const [selectedHex, setSelectedHex] = useState<string | null>(null)
@@ -85,6 +83,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return
     injectGlowFilter()
+    injectHexAnimations()
 
     const map = L.map(containerRef.current, {
       center: [48.8566, 2.3522], zoom: 13,
@@ -278,8 +277,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     layer.clearLayers()
     if (!showHex) return
 
-    // Only render owned/enemy territories permanently — not the full hex grid
-    territories.filter(t => t.owner_id).forEach(t => {
+    // Draw owned territories + all free POI hexes (POI identity is the territory)
+    territories.filter(t => t.owner_id || (t as any).is_landmark).forEach(t => {
       const poly = makeHexPolygon({
         territory: t, playerId: player?.id,
         onClick: (ter) => {
