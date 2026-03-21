@@ -149,19 +149,34 @@ class UnifiedPOIViewSet(viewsets.GenericViewSet):
         ).values('name','emoji','rarity','latitude','longitude','is_shiny','category','h3_index')[:500]
 
         result = []
+        # Deduplicate by h3_index — highest rarity wins per hex
+        RARITY_RANK = {'common':0,'uncommon':1,'rare':2,'epic':3,'legendary':4,'mythic':5}
+        hex_map_dict = {}
         for p in pois:
-            if not p['h3_index']:
-                continue
-            result.append({
-                'h3_index': p['h3_index'],
-                'name': p['name'],
-                'rarity': p['rarity'],
-                'emoji': p['emoji'] or '📍',
-                'lat': float(p['latitude']),
-                'lon': float(p['longitude']),
-                'category': p['category'],
-                'is_shiny': bool(p['is_shiny']),
-            })
+            hx = p['h3_index']
+            if not hx: continue
+            cur_r = RARITY_RANK.get(hex_map_dict.get(hx, {}).get('rarity','common'), 0)
+            if hx not in hex_map_dict or RARITY_RANK.get(p.get('rarity','common'),0) > cur_r:
+                hex_map_dict[hx] = p
+
+        import h3 as h3lib
+        for hx, p in hex_map_dict.items():
+            try:
+                # Use hex CENTROID — not raw POI lat/lon
+                # This ensures the pin sits on the hex territory, not beside it
+                geo = h3lib.h3_to_geo(hx)
+                result.append({
+                    'h3_index': hx,
+                    'name': p['name'],
+                    'rarity': p['rarity'],
+                    'emoji': p['emoji'] or '📍',
+                    'lat': geo[0],          # hex centroid lat
+                    'lon': geo[1],          # hex centroid lon
+                    'category': p['category'],
+                    'is_shiny': bool(p['is_shiny']),
+                })
+            except Exception:
+                pass
 
         return Response({'pois': result, 'count': len(result)})
 

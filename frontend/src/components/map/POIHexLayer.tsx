@@ -63,8 +63,9 @@ export function POIHexLayer({ map, zoom, lat, lon, catFilter = ['all'], rarFilte
     }
 
     if (zoom >= 13) {
-      // Individual discovery pins — hex-shaped, rarity glow
-      pois.forEach(poi => {
+      // At close zoom, the HexLayer already draws POI hexes with rarity glow.
+      // We only add a small floating label above epic/legendary/mythic hexes.
+      pois.filter(p => ['epic','legendary','mythic'].includes(p.rarity) || p.is_shiny).forEach(poi => {
         const color  = RC[poi.rarity] || '#9CA3AF'
         const isPulse = poi.rarity === 'legendary' || poi.rarity === 'mythic' || poi.is_shiny
         const size   = poi.rarity === 'mythic' ? 36 : poi.rarity === 'legendary' ? 32 : poi.is_shiny ? 28 : 22
