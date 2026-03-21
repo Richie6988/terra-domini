@@ -15,6 +15,8 @@ import { AttackPanel } from '../hud/AttackPanel'
 import { ClaimModal } from './ClaimModal'
 import { HexodBottomBar } from '../hud/HexodBottomBar'
 import { injectGlowFilter, makeHexPolygon, injectHexAnimations } from './HexLayer'
+import { POIHexLayer } from './POIHexLayer'
+import { POIFilterPanel } from './POIFilterPanel'
 import { latLngToCell, cellToBoundary, gridDisk } from 'h3-js'
 import type { TerritoryLight } from '../../types'
 
@@ -58,6 +60,9 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
   const [tile,        setTile]        = useState<keyof typeof TILES>('dark')
   const [showHex,     setShowHex]     = useState(true)
+  const [showPOIPanel, setShowPOIPanel] = useState(false)
+  const [poiCatFilter, setPoiCatFilter] = useState<string[]>(['all'])
+  const [poiRarFilter, setPoiRarFilter] = useState<string[]>(['all'])
   const [showOverlay,  setShowOverlay]  = useState(true)
   const [showGrid,     setShowGrid]     = useState(false)
   const [zoom,        setZoom]        = useState(13)

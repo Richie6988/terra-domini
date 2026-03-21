@@ -26,15 +26,16 @@ interface POIPin {
 
 interface Props {
   map: L.Map | null; zoom: number; lat: number; lon: number
+  catFilter?: string[]; rarFilter?: string[]
 }
 
-export function POIHexLayer({ map, zoom, lat, lon }: Props) {
+export function POIHexLayer({ map, zoom, lat, lon, catFilter = ['all'], rarFilter = ['all'] }: Props) {
   const layerRef = useRef<L.LayerGroup | null>(null)
 
   const radius = zoom <= 7 ? 600 : zoom <= 9 ? 300 : zoom <= 11 ? 120 : zoom <= 13 ? 50 : 20
 
   const { data } = useQuery<{ pois: POIPin[] }>({
-    queryKey: ['poi-discovery', Math.round(lat * 8) / 8, Math.round(lon * 8) / 8, Math.floor(zoom / 2)],
+    queryKey: ['poi-discovery', Math.round(lat * 8) / 8, Math.round(lon * 8) / 8, Math.floor(zoom / 2), catFilter.join(','), rarFilter.join(',')],
     queryFn: () => api.get(`/pois/hex-map/?lat=${lat}&lon=${lon}&radius_km=${radius}`).then(r => r.data),
     staleTime: 90000,
     enabled: !!map,
@@ -45,7 +46,16 @@ export function POIHexLayer({ map, zoom, lat, lon }: Props) {
     if (!layerRef.current) layerRef.current = L.layerGroup().addTo(map)
     const layer = layerRef.current
     layer.clearLayers()
-    const pois: POIPin[] = data?.pois ?? []
+    let pois: POIPin[] = data?.pois ?? []
+    if (!pois.length) return
+
+    // Apply filters
+    if (!catFilter.includes('all')) {
+      pois = pois.filter(p => catFilter.includes(p.category))
+    }
+    if (!rarFilter.includes('all')) {
+      pois = pois.filter(p => rarFilter.includes(p.rarity))
+    }
     if (!pois.length) return
 
     const flyTo = (poi: POIPin) => {
@@ -177,7 +187,7 @@ export function POIHexLayer({ map, zoom, lat, lon }: Props) {
     }
 
     return () => { layer.clearLayers() }
-  }, [map, data, zoom])
+  }, [map, data, zoom, catFilter.join(','), rarFilter.join(',')])
 
   useEffect(() => () => { layerRef.current?.remove() }, [])
 
