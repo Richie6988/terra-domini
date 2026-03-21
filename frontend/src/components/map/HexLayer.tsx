@@ -98,14 +98,16 @@ export function makeHexPolygon({ territory: t, playerId, onClick }: HexConfig): 
   } else {
     // Free territory
     if (hasPOI) {
-      // POI hex: rarity drives color even when unclaimed
-      fill   = rarityColor; fillOp = RARITY_FILL_OPACITY[rarity]
-      stroke = rarityColor; weight = 2
-      dash   = rarity === 'legendary' || rarity === 'mythic' ? '' : '4,3'
+      // POI hex = always visible, highlighted like "selected" — the hex IS the POI
+      // No logo, no icon — the hex polygon itself is the visual identity
+      fill   = rarityColor
+      fillOp = rarity === 'mythic' ? 0.45 : rarity === 'legendary' ? 0.38 : rarity === 'epic' ? 0.30 : rarity === 'rare' ? 0.22 : 0.16
+      stroke = rarityColor; weight = 3; dash = ''
       cssClass = `td-hex-poi td-hex-poi-${rarity}`
       glowFilter = rarity === 'mythic'    ? 'url(#glow-mythic)'
                  : rarity === 'legendary' ? 'url(#glow-gold)'
                  : rarity === 'epic'      ? 'url(#glow-mythic)'
+                 : rarity === 'rare'      ? 'url(#glow-blue)'
                  : 'none'
     } else {
       fill = '#fff'; fillOp = 0.0; stroke = '#fff'; weight = 0
