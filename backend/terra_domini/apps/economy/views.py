@@ -80,9 +80,9 @@ class TerritoryViewSet(viewsets.ReadOnlyModelViewSet):
 
         try:
             import h3 as h3lib
-            center_h3 = h3lib.latlng_to_cell(lat, lon, res)
+            center_h3 = h3lib.geo_to_h3(lat, lon, res)
             k = max(3, min(int(radius_km / {6:10, 7:4, 8:1.2}.get(res, 4)), 12))
-            hex_ids = list(h3lib.grid_disk(center_h3, k))
+            hex_ids = list(h3lib.k_ring(center_h3, k))
         except Exception as e:
             return Response({'territories': [], 'count': 0, 'error': str(e)})
 
@@ -122,8 +122,8 @@ class TerritoryViewSet(viewsets.ReadOnlyModelViewSet):
         result = []
         for hx in hex_ids:
             try:
-                geo      = h3lib.cell_to_latlng(hx)
-                boundary = [[p[0], p[1]] for p in h3lib.cell_to_boundary(hx)]
+                geo      = h3lib.h3_to_geo(hx)
+                boundary = [[p[0], p[1]] for p in h3lib.h3_to_geo_boundary(hx)]
             except Exception:
                 continue
             t = owned.get(hx)

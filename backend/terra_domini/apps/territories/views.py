@@ -67,9 +67,9 @@ class TerritoryViewSet(viewsets.ModelViewSet):
 
         try:
             import h3 as h3lib
-            center_h3 = h3lib.latlng_to_cell(lat, lon, res)
+            center_h3 = h3lib.geo_to_h3(lat, lon, res)
             k = max(3, min(int(radius_km / {6:10, 7:4, 8:1.2}.get(res, 4)), 12))
-            hex_ids = list(h3lib.grid_disk(center_h3, k))
+            hex_ids = list(h3lib.k_ring(center_h3, k))
         except Exception as e:
             return Response([], status=200)
 
@@ -115,8 +115,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         result = []
         for hx in hex_ids:
             try:
-                geo      = h3lib.cell_to_latlng(hx)
-                boundary = [[p[0], p[1]] for p in h3lib.cell_to_boundary(hx)]
+                geo      = h3lib.h3_to_geo(hx)
+                boundary = [[p[0], p[1]] for p in h3lib.h3_to_geo_boundary(hx)]
             except Exception:
                 continue
             t = owned.get(hx)
@@ -243,7 +243,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         if ter and request.user.is_authenticated:
             try:
                 import h3 as h3lib
-                neighbors = h3lib.grid_disk(h3_index, 1) - {h3_index}
+                neighbors = h3lib.k_ring(h3_index, 1) - {h3_index}
                 owned = Territory.objects.filter(
                     h3_index__in=list(neighbors),
                     owner=request.user
@@ -373,7 +373,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         dist_mult = 1 + math.log2(max(1, dist_nearest)) if dist_nearest < 999 else 3.0
         try:
             import h3 as h3lib
-            neighbors = h3lib.grid_disk(h3_index, 1) - {h3_index}
+            neighbors = h3lib.k_ring(h3_index, 1) - {h3_index}
             adj_owned = Territory.objects.filter(h3_index__in=list(neighbors), owner=request.user).count()
         except: adj_owned = 0
         adj_discount = max(0.25, 1.0 - adj_owned * 0.25)
@@ -397,7 +397,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         fusion_count = 0
         try:
             import h3 as h3lib
-            neighbors = h3lib.grid_disk(h3_index, 1) - {h3_index}
+            neighbors = h3lib.k_ring(h3_index, 1) - {h3_index}
             fusion_count = Territory.objects.filter(h3_index__in=list(neighbors), owner=player).count()
         except: pass
 
@@ -433,7 +433,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             # Create from scratch (new territory)
             try:
                 import h3
-                lat, lon = h3.cell_to_latlng(h3_index)
+                lat, lon = h3.h3_to_geo(h3_index)
             except Exception:
                 lat, lon = 0.0, 0.0
 

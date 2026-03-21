@@ -35,7 +35,7 @@ def _flood_fill(owned_set: set) -> list[list[str]]:
             visited.add(current)
             if current in owned_set:
                 cluster.append(current)
-                neighbors = [c for c in h3.grid_disk(current, 1) if c != current]
+                neighbors = [c for c in h3.k_ring(current, 1) if c != current]
                 queue.extend(n for n in neighbors if n not in visited)
         if cluster:
             clusters.append(cluster)
@@ -117,8 +117,8 @@ def recompute_kingdoms(player) -> list[dict]:
             agg = _aggregate_resources(component)
 
             # Centroid
-            lats = [h3.cell_to_latlng(h)[0] for h in component]
-            lons = [h3.cell_to_latlng(h)[1] for h in component]
+            lats = [h3.h3_to_geo(h)[0] for h in component]
+            lons = [h3.h3_to_geo(h)[1] for h in component]
             centroid_lat = sum(lats) / len(lats)
             centroid_lon = sum(lons) / len(lons)
 
