@@ -15,7 +15,6 @@ import { AttackPanel } from '../hud/AttackPanel'
 import { ClaimModal } from './ClaimModal'
 import { HexodBottomBar } from '../hud/HexodBottomBar'
 import { injectGlowFilter, makeHexPolygon, injectHexAnimations } from './HexLayer'
-import { POIHexLayer } from './POIHexLayer'
 import { latLngToCell, cellToBoundary, gridDisk } from 'h3-js'
 import type { TerritoryLight } from '../../types'
 
@@ -355,7 +354,6 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         )}
       </AnimatePresence>
 
-      <POIHexLayer map={mapRef.current} zoom={zoom} lat={center[0]} lon={center[1]} />
 
       {/* Claim Modal — at root level so position:fixed works */}
       <AnimatePresence>

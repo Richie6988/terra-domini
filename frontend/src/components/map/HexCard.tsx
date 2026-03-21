@@ -8,7 +8,6 @@ import { Suspense, useRef, useState, useEffect, useMemo } from 'react'
 import { Canvas, useFrame, useThree, extend } from '@react-three/fiber'
 import { useTexture, Environment } from '@react-three/drei'
 import * as THREE from 'three'
-import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { KingdomSkillTree } from './KingdomSkillTree'
 import { usePlayer } from '../../store'
@@ -354,6 +353,7 @@ export function HexCard({ territory: t, onClose, onRequestClaim }: {
 
   const rarity = (t.rarity || 'common') as Rarity
   const cfg    = R[rarity] ?? R.common
+  const [showSkillTree, setShowSkillTree] = useState(false)
 
   const cardName = t.custom_name || t.poi_name || t.place_name || 'Zone'
   const cardDesc = t.poi_description || null
