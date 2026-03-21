@@ -128,6 +128,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     // ── Hover ghost hex ─────────────────────────────────────────
     const hoverLayer    = L.layerGroup().addTo(map)
     const selectedLayer = L.layerGroup().addTo(map)  // locked selected hex
+    selectedLayerRef.current = selectedLayer
     let hoverPoly: L.Polygon | null = null
     let selectedPoly: L.Polygon | null = null
 
@@ -316,6 +317,13 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         .td-hex-free path{opacity:0.7;}
         @keyframes td-pulse{0%,100%{filter:drop-shadow(0 0 8px rgba(255,184,0,0.9));}50%{filter:drop-shadow(0 0 16px rgba(255,184,0,1.0));}}
         .leaflet-attribution-flag{display:none!important;}
+        .td-hex-poi-rare path{filter:drop-shadow(0 0 6px #3B82F6aa);}
+        .td-hex-poi-epic path{animation:hexPulseEpic 3s ease-in-out infinite;}
+        .td-hex-poi-legendary path{animation:hexPulseLegendary 2.5s ease-in-out infinite;}
+        .td-hex-poi-mythic path{animation:hexPulseMythic 2s ease-in-out infinite;}
+        @keyframes hexPulseLegendary{0%,100%{filter:drop-shadow(0 0 6px #F59E0Baa);}50%{filter:drop-shadow(0 0 14px #F59E0Bff) drop-shadow(0 0 28px #F59E0B55);}}
+        @keyframes hexPulseMythic{0%,100%{filter:drop-shadow(0 0 8px #EC4899cc);}50%{filter:drop-shadow(0 0 20px #EC4899ff) drop-shadow(0 0 40px #EC489966);}}
+        @keyframes hexPulseEpic{0%,100%{filter:drop-shadow(0 0 5px #8B5CF6aa);}50%{filter:drop-shadow(0 0 12px #8B5CF6ff);}}
       `}</style>
 
       {/* Layer controls — top right */}
@@ -353,7 +361,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         {selectedHex && selectedTerritory && (
           <HexCard
             territory={selectedTerritory}
-            onClose={() => { setSelectedHex(null); setSelectedTerritoryState(null); selectedLayer.clearLayers() }}
+            onClose={() => { setSelectedHex(null); setSelectedTerritoryState(null); selectedLayerRef.current?.clearLayers() }}
             onRequestClaim={() => setShowClaimModal(true)}
           />
         )}
@@ -378,7 +386,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
               }
               setSelectedHex(null)
               setSelectedTerritoryState(null)
-              selectedLayer.clearLayers()
+              selectedLayerRef.current?.clearLayers()
             }}
           />
         )}
@@ -391,6 +399,35 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       <AnimatePresence>
         {claimTarget && <ClaimModal territory={claimTarget} isFree={isFirstClaim} onClose={() => setClaimTarget(null)} onClaimed={() => { setClaimTarget(null); setHasClaimed(true); localStorage.setItem('td_claimed_first','1') }} />}
       </AnimatePresence>
+
+      {/* POI filter button — left side */}
+      <button
+        onClick={() => setShowPOIPanel(v => !v)}
+        style={{
+          position:'fixed', left:8, top:60, zIndex:920,
+          background: showPOIPanel ? 'rgba(139,92,246,0.3)' : 'rgba(4,4,12,0.92)',
+          border:`1px solid ${showPOIPanel ? 'rgba(139,92,246,0.6)' : 'rgba(255,255,255,0.1)'}`,
+          borderRadius:10, padding:'8px 10px', cursor:'pointer',
+          display:'flex', flexDirection:'column', alignItems:'center', gap:2,
+          backdropFilter:'blur(8px)',
+        }}
+      >
+        <span style={{ fontSize:16 }}>📍</span>
+        <span style={{ fontSize:8, color: showPOIPanel ? '#C4B5FD' : '#6B7280', fontWeight:700 }}>POI</span>
+      </button>
+
+      <POIFilterPanel
+        visible={showPOIPanel}
+        onClose={() => setShowPOIPanel(false)}
+        onFilterChange={(cats, rars) => { setPoiCatFilter(cats); setPoiRarFilter(rars) }}
+      />
+
+      <POIHexLayer
+        map={mapRef.current} zoom={zoom} lat={center[0]} lon={center[1]}
+        catFilter={poiCatFilter} rarFilter={poiRarFilter}
+      />
+
+      <HexodBottomBar />
     </div>
   )
 }

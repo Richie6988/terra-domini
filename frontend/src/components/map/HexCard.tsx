@@ -8,6 +8,8 @@ import { Suspense, useRef, useState, useEffect, useMemo } from 'react'
 import { Canvas, useFrame, useThree, extend } from '@react-three/fiber'
 import { useTexture, Environment } from '@react-three/drei'
 import * as THREE from 'three'
+// Suppress deprecated Clock warning
+if (typeof window !== 'undefined') { const _warn = console.warn; console.warn = (...a: any[]) => { if (String(a[0]).includes('THREE.Clock')) return; _warn(...a) } }
 import { motion, AnimatePresence } from 'framer-motion'
 import { KingdomSkillTree } from './KingdomSkillTree'
 import { usePlayer } from '../../store'
