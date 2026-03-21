@@ -70,6 +70,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const [selectedHex, setSelectedHex] = useState<string | null>(null)
   const [selectedTerritory, setSelectedTerritoryState] = useState<any | null>(null)
   const selectedHexRef = useRef<string | null>(null)
+  const selectedLayerRef = useRef<L.LayerGroup | null>(null)
   const [selectedHexLatLon, setSelectedHexLatLon] = useState<[number,number]|null>(null)
   const [showClaimModal, setShowClaimModal] = useState(false)
   const [claimTarget, setClaimTarget] = useState<TerritoryLight | null>(null)
