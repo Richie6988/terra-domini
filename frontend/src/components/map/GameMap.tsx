@@ -17,6 +17,9 @@ import { HexodBottomBar } from '../hud/HexodBottomBar'
 import { injectGlowFilter, makeHexPolygon, injectHexAnimations } from './HexLayer'
 import { POIFilterPanel } from './POIFilterPanel'
 import { KingdomBorderLayer } from './KingdomBorderLayer'
+import { MyTerritoriesOverlay } from './MyTerritoriesOverlay'
+import { AttackAnimationLayer } from './AttackAnimationLayer'
+import { BuildingsOverlayLayer } from './BuildingsOverlayLayer'
 import { latLngToCell, cellToBoundary, gridDisk } from 'h3-js'
 import type { TerritoryLight } from '../../types'
 
@@ -439,6 +442,9 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       />
 
       <KingdomBorderLayer map={mapRef.current} zoom={zoom} />
+      <AttackAnimationLayer map={mapRef.current} />
+      <BuildingsOverlayLayer map={mapRef.current} zoom={zoom} playerId={player?.id} />
+      <MyTerritoriesOverlay onFlyTo={(lat, lon, z) => mapRef.current?.flyTo([lat, lon], z ?? 15, { duration: 1.2 })} />
       <HexodBottomBar />
     </div>
   )

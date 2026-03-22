@@ -213,65 +213,70 @@ def seed_poi_territories():
     return created, updated
 
 
-def generate_territory(h3_index: str, lat: float, lon: float) -> dict:
+def generate_territory(h3_index: str, lat: float, lon: float, poi_category: str = '') -> dict:
     """
     Generate or retrieve a standard territory on first click.
-    Returns the territory data dict.
+    Biome assigned by biome_engine (Köppen + geo), not random.
+    Resources computed from biome × rarity.
     """
     from terra_domini.apps.territories.models import Territory
 
-    # Already exists?
+    # Already exists? Return existing (biome + resources already set)
     existing = Territory.objects.filter(h3_index=h3_index).first()
     if existing:
         return _territory_to_dict(existing)
 
-    # Find neighboring POI hexes (ring 1-2)
+    # Neighbor POI rarities for rarity roll
     try:
         ring1 = [c for c in h3.k_ring(h3_index, 1) if c != h3_index]
         ring2 = [c for c in h3.k_ring(h3_index, 2) if c not in ring1 and c != h3_index]
-        near_hexes = ring1 + ring2
         near_pois = Territory.objects.filter(
-            h3_index__in=near_hexes, is_landmark=True
+            h3_index__in=ring1 + ring2, is_landmark=True
         ).values_list('rarity', flat=True)
         near_rarities = list(near_pois)
     except Exception:
         near_rarities = []
 
-    # Determine biome from lat/lon (simple heuristic)
-    biome = _guess_biome(lat, lon)
+    # Biome from biome_engine (precise, deterministic, Köppen-based)
+    from terra_domini.apps.territories.biome_engine import assign_biome, BIOME_PRODUCTION
+    biome = assign_biome(lat, lon, poi_category, '')
 
-    # Roll rarity + shiny
-    rarity  = _roll_standard_rarity(biome, near_rarities)
-    is_shiny = random.random() < 0.10  # 10% chance
+    # Roll rarity (influenced by biome + neighbor POIs)
+    rarity   = _roll_standard_rarity(biome, near_rarities)
+    is_shiny = random.random() < 0.10
 
-    # Compute resources
-    resources = _compute_resources(biome, rarity, False)
+    # Resources from biome_engine table (not legacy BIOME_RESOURCES)
+    rarity_mult = RARITY_MULT.get(rarity, 1.0) * (1.5 if is_shiny else 1.0)
+    base_res = BIOME_PRODUCTION.get(biome, BIOME_PRODUCTION['rural'])
+    resources = {field: round(val * rarity_mult, 2) for field, val in base_res.items()}
+    tdc_per_day = RARITY_INCOME.get(rarity, 10)
 
     try:
         geo = h3.h3_to_geo(h3_index)
         with transaction.atomic():
             t = Territory.objects.create(
-                h3_index        = h3_index,
-                h3_resolution   = 7,
-                center_lat      = geo[0],
-                center_lon      = geo[1],
-                territory_type  = biome,
-                rarity          = rarity,
-                is_shiny        = is_shiny,
-                is_landmark     = False,
-                hex_type        = 'standard',
-                tdc_per_day     = resources['resource_credits'],
-                nft_version     = 1,
-                resource_credits = resources['resource_credits'],
-                **{k: v for k,v in resources.items() if k != 'resource_credits'},
+                h3_index       = h3_index,
+                h3_resolution  = 7,
+                center_lat     = geo[0],
+                center_lon     = geo[1],
+                territory_type = biome,
+                biome          = biome,
+                rarity         = rarity,
+                is_shiny       = is_shiny,
+                is_landmark    = False,
+                hex_type       = 'standard',
+                tdc_per_day    = tdc_per_day,
+                nft_version    = 1,
+                resource_credits = tdc_per_day,
+                **{k: v for k, v in resources.items()
+                   if k in {f.name for f in Territory._meta.get_fields() if hasattr(f,'name')}},
             )
         return _territory_to_dict(t)
-    except Exception as e:
-        # Return ephemeral data without DB write
+    except Exception:
         return {
             'h3_index': h3_index, 'rarity': rarity, 'is_shiny': is_shiny,
-            'territory_type': biome, 'is_landmark': False,
-            'resource_credits': resources['resource_credits'],
+            'territory_type': biome, 'biome': biome, 'is_landmark': False,
+            'resource_credits': tdc_per_day, 'tdc_per_day': tdc_per_day,
             **resources,
         }
 
