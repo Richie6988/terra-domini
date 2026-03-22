@@ -36,11 +36,33 @@ class ProgressionViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['GET'], url_path='daily-missions')
     def daily_missions(self, request):
-        """Get today's 3 daily missions."""
+        """Get today's 3 daily missions. Auto-generates if none exist for today."""
         today = timezone.now().date()
         missions = PlayerDailyMission.objects.filter(
             player=request.user, date=today
         ).select_related('template').order_by('is_completed')
+
+        # Auto-generate 3 missions if none exist for today
+        if not missions.exists():
+            from terra_domini.apps.progression.models import MissionTemplate
+            import random as _r
+            templates = list(MissionTemplate.objects.filter(is_active=True))
+            _r.shuffle(templates)
+            for tmpl in templates[:3]:
+                target = _r.randint(tmpl.target_min, tmpl.target_max)
+                reward = _r.randint(tmpl.reward_tdc_min, tmpl.reward_tdc_max)
+                title  = tmpl.title_template.replace('{target}', str(target))
+                try:
+                    PlayerDailyMission.objects.create(
+                        player=request.user, template=tmpl, date=today,
+                        title=title, target_count=target,
+                        reward_tdc=reward, reward_xp=tmpl.reward_xp,
+                    )
+                except Exception:
+                    pass  # unique_together conflict — skip
+            missions = PlayerDailyMission.objects.filter(
+                player=request.user, date=today
+            ).select_related('template').order_by('is_completed')
 
         return Response({
             'missions': [

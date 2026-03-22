@@ -37,10 +37,14 @@ from terra_domini.apps.combat.views import BattleViewSet
 from terra_domini.apps.economy.views import ShopViewSet, TDCViewSet, StripeWebhookView, AdCampaignViewSet
 from terra_domini.apps.alliances.views import AllianceViewSet, DiplomacyViewSet
 from terra_domini.apps.events.views import ControlTowerViewSet, EventViewSet
-from terra_domini.apps.blockchain.views import TDCBalanceView, TDCPurchaseView, TDCWithdrawView
+from terra_domini.apps.blockchain.marketplace_views import (
+    MarketplaceListingsView, MarketplaceMyListingsView, MarketplaceListView,
+    MarketplaceBuyView, MarketplaceDelistView, MarketplaceStatsView,
+)
 from terra_domini.apps.progression.views import SkillTreeView, SkillUnlockView
 from terra_domini.apps.progression.views import ProgressionViewSet, TutorialCompleteView
 from terra_domini.apps.social.views import FriendViewSet, PublicProfileView, JoinViaReferralView
+from terra_domini.apps.social.models_and_views import MyReferralView
 
 # ─── Router ───────────────────────────────────────────────────────────────────
 router = DefaultRouter()
@@ -97,6 +101,14 @@ urlpatterns = [
     path('api/tdc/purchase/',  TDCPurchaseView.as_view(),  name='tdc_purchase'),
     path('api/tdc/withdraw/',  TDCWithdrawView.as_view(),  name='tdc_withdraw'),
 
+    # ── Marketplace NFT ──────────────────────────────────────────────────────
+    path('api/marketplace/listings/',       MarketplaceListingsView.as_view(),   name='marketplace_listings'),
+    path('api/marketplace/listings/mine/',  MarketplaceMyListingsView.as_view(), name='marketplace_mine'),
+    path('api/marketplace/list/',           MarketplaceListView.as_view(),       name='marketplace_list'),
+    path('api/marketplace/buy/',            MarketplaceBuyView.as_view(),        name='marketplace_buy'),
+    path('api/marketplace/delist/',         MarketplaceDelistView.as_view(),     name='marketplace_delist'),
+    path('api/marketplace/stats/',          MarketplaceStatsView.as_view(),      name='marketplace_stats'),
+
     # ── Stripe webhook (no JWT) ───────────────────────────────────────────────
     path('api/webhooks/stripe/', StripeWebhookView.as_view(), name='stripe_webhook'),
 
@@ -108,6 +120,7 @@ urlpatterns = [
 
     # ── Social ────────────────────────────────────────────────────────────────
     path('api/social/join-referral/', JoinViaReferralView.as_view(), name='join_referral'),
+    path('api/social/my-referral/',   MyReferralView.as_view(),      name='my_referral'),
 
     # ── Router (all ViewSets) ─────────────────────────────────────────────────
     path('api/', include(router.urls)),

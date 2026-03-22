@@ -19,7 +19,7 @@ import * as THREE from 'three'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../services/api'
-import { usePlayer } from '../../store'
+import { useStore, usePlayer } from '../../store'
 import toast from 'react-hot-toast'
 
 if (typeof window !== 'undefined') {
@@ -28,13 +28,23 @@ if (typeof window !== 'undefined') {
 }
 
 /* ── Rarity ─────────────────────────────────────────────── */
-const RARITY: Record<string, { c:string; bg:string; accent:string; label:string; grade:string; metalness:number; roughness:number }> = {
-  common:   { c:'#9CA3AF', bg:'#0d0f18', accent:'#E5E7EB', label:'Common',    grade:'F',  metalness:0.1, roughness:0.9 },
-  uncommon: { c:'#10B981', bg:'#04100a', accent:'#34D399', label:'Uncommon',  grade:'C',  metalness:0.3, roughness:0.7 },
-  rare:     { c:'#3B82F6', bg:'#030a1a', accent:'#93C5FD', label:'Rare',      grade:'B',  metalness:0.5, roughness:0.5 },
-  epic:     { c:'#8B5CF6', bg:'#07030f', accent:'#C4B5FD', label:'Epic',      grade:'A',  metalness:0.7, roughness:0.3 },
-  legendary:{ c:'#F59E0B', bg:'#0f0700', accent:'#FCD34D', label:'Legendary', grade:'S',  metalness:0.9, roughness:0.1 },
-  mythic:   { c:'#EC4899', bg:'#0f0008', accent:'#F9A8D4', label:'Mythic ✦',  grade:'SS', metalness:0.95,roughness:0.05 },
+const RARITY: Record<string, {
+  c:string; bg:string; accent:string; label:string; grade:string
+  metalness:number; roughness:number
+  // Aria visual specs per tier
+  foil: 'none'|'subtle'|'shimmer'|'holographic'|'rainbow'|'prismatic'
+  glow: number      // px glow radius
+  scanlines: boolean
+  particles: boolean
+  borderStyle: 'solid'|'dashed'|'double'
+  serieMax: number  // max per rarity for serie #X/MAX display
+}> = {
+  common:   { c:'#9CA3AF', bg:'#0d0f18', accent:'#E5E7EB', label:'Common',    grade:'F',  metalness:0.1, roughness:0.9, foil:'none',        glow:0,   scanlines:false, particles:false, borderStyle:'solid',  serieMax:10000 },
+  uncommon: { c:'#10B981', bg:'#04100a', accent:'#34D399', label:'Uncommon',  grade:'C',  metalness:0.3, roughness:0.7, foil:'subtle',      glow:4,   scanlines:false, particles:false, borderStyle:'solid',  serieMax:5000  },
+  rare:     { c:'#3B82F6', bg:'#030a1a', accent:'#93C5FD', label:'Rare',      grade:'B',  metalness:0.5, roughness:0.5, foil:'shimmer',     glow:8,   scanlines:true,  particles:false, borderStyle:'solid',  serieMax:1000  },
+  epic:     { c:'#8B5CF6', bg:'#07030f', accent:'#C4B5FD', label:'Epic',      grade:'A',  metalness:0.7, roughness:0.3, foil:'holographic', glow:14,  scanlines:true,  particles:false, borderStyle:'double', serieMax:250   },
+  legendary:{ c:'#F59E0B', bg:'#0f0700', accent:'#FCD34D', label:'Legendary', grade:'S',  metalness:0.9, roughness:0.1, foil:'rainbow',     glow:22,  scanlines:true,  particles:true,  borderStyle:'double', serieMax:50    },
+  mythic:   { c:'#EC4899', bg:'#0f0008', accent:'#F9A8D4', label:'Mythic',    grade:'SS', metalness:0.95,roughness:0.05,foil:'prismatic',   glow:32,  scanlines:true,  particles:true,  borderStyle:'double', serieMax:10    },
 }
 type RK = keyof typeof RARITY
 
@@ -64,7 +74,353 @@ function makeHexClip(ctx: CanvasRenderingContext2D, cx:number, cy:number, r:numb
   ctx.closePath()
 }
 
-function paintFrontCanvas(cfg: typeof RARITY[RK], name:string, grade:string, facts:string[], imgUrl:string|null, isShiny:boolean): HTMLCanvasElement {
+// Dessine un réseau de traces circuit imprimé (style cyberpunk)
+function drawCircuitTraces(ctx: CanvasRenderingContext2D, S:number, color:string, alpha:number) {
+  ctx.save()
+  ctx.globalAlpha = alpha
+  ctx.strokeStyle = color
+  ctx.lineWidth = 1
+  ctx.lineCap = 'square'
+  // Grille orthogonale avec noeuds
+  const grid = 64
+  for (let x=0; x<S; x+=grid) {
+    for (let y=0; y<S; y+=grid) {
+      const r = Math.random()
+      if (r < 0.3) {
+        // Trace horizontale
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x+grid, y); ctx.stroke()
+      } else if (r < 0.5) {
+        // Trace verticale
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x, y+grid); ctx.stroke()
+      }
+      // Noeud dot
+      if (Math.random() < 0.15) {
+        ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI*2)
+        ctx.fillStyle = color; ctx.fill()
+      }
+    }
+  }
+  ctx.restore()
+}
+
+// Dessine une grille hexagonale de fond
+function drawHexGrid(ctx: CanvasRenderingContext2D, S:number, color:string, alpha:number) {
+  ctx.save()
+  ctx.globalAlpha = alpha
+  ctx.strokeStyle = color
+  ctx.lineWidth = 0.8
+  const r = 40
+  const w = r * 2
+  const h = Math.sqrt(3) * r
+  for (let row = -1; row < S/h + 1; row++) {
+    for (let col = -1; col < S/w + 1; col++) {
+      const cx = col * w * 0.75
+      const cy = row * h + (col % 2 === 0 ? 0 : h/2)
+      makeHexClip(ctx, cx, cy, r * 0.9)
+      ctx.stroke()
+    }
+  }
+  ctx.restore()
+}
+
+// Barre de stat avec label
+function drawStatBar(ctx: CanvasRenderingContext2D, x:number, y:number, w:number, h:number, pct:number, color:string, label:string, value:string) {
+  // Track
+  ctx.fillStyle = 'rgba(255,255,255,0.07)'
+  ctx.beginPath(); ctx.roundRect(x, y, w, h, 3); ctx.fill()
+  // Fill
+  const fw = Math.max(4, w * Math.min(1, pct))
+  const g = ctx.createLinearGradient(x, 0, x+fw, 0)
+  g.addColorStop(0, color+'cc'); g.addColorStop(1, color)
+  ctx.fillStyle = g
+  ctx.beginPath(); ctx.roundRect(x, y, fw, h, 3); ctx.fill()
+  // Label left
+  ctx.font = 'bold 14px Arial,sans-serif'
+  ctx.fillStyle = 'rgba(255,255,255,0.6)'
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'
+  ctx.fillText(label, x, y - 10)
+  // Value right
+  ctx.font = 'bold 14px monospace'
+  ctx.fillStyle = color
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle'
+  ctx.fillText(value, x+w, y - 10)
+}
+
+function paintFrontCanvas(
+  cfg: typeof RARITY[RK], name:string, grade:string,
+  facts:string[], _imgUrl:string|null, isShiny:boolean,
+  serieNum?: number, biome?: string, income?: number
+): HTMLCanvasElement {
+  const S=1024, cv=document.createElement('canvas')
+  cv.width=S; cv.height=S
+  const ctx=cv.getContext('2d')!
+
+  // ── 1. FOND ────────────────────────────────────────────────────────────────
+  // Base couleur profonde
+  ctx.fillStyle = cfg.bg
+  ctx.fillRect(0,0,S,S)
+  // Radial ambiance centrale
+  const amb = ctx.createRadialGradient(S/2, S*0.45, 0, S/2, S/2, S*0.8)
+  amb.addColorStop(0, cfg.c+'22')
+  amb.addColorStop(0.5, cfg.c+'08')
+  amb.addColorStop(1, 'rgba(0,0,0,0)')
+  ctx.fillStyle = amb; ctx.fillRect(0,0,S,S)
+  // Grille hexagonale de fond
+  drawHexGrid(ctx, S, cfg.c, 0.06)
+  // Traces circuit (rare+)
+  if (['rare','epic','legendary','mythic'].includes(grade === 'F' ? 'common' : cfg.foil !== 'none' ? 'rare' : 'common')) {
+    drawCircuitTraces(ctx, S, cfg.c, 0.08)
+  }
+
+  // ── 2. FOIL OVERLAY par rareté ─────────────────────────────────────────────
+  if (cfg.foil === 'shimmer' || cfg.foil === 'holographic') {
+    const foil = ctx.createLinearGradient(0,0,S,S*0.7)
+    foil.addColorStop(0, 'rgba(255,255,255,0.03)')
+    foil.addColorStop(0.3, cfg.c+'18')
+    foil.addColorStop(0.5, 'rgba(255,255,255,0.08)')
+    foil.addColorStop(0.7, cfg.c+'12')
+    foil.addColorStop(1, 'rgba(0,0,0,0)')
+    ctx.fillStyle = foil; ctx.fillRect(0,0,S,S)
+  }
+  if (cfg.foil === 'rainbow' || cfg.foil === 'prismatic') {
+    const rainbow = ctx.createLinearGradient(0,0,S,S)
+    rainbow.addColorStop(0,    'rgba(255,0,128,0.12)')
+    rainbow.addColorStop(0.2,  'rgba(255,140,0,0.10)')
+    rainbow.addColorStop(0.4,  'rgba(255,255,0,0.08)')
+    rainbow.addColorStop(0.6,  'rgba(0,255,128,0.10)')
+    rainbow.addColorStop(0.8,  'rgba(0,128,255,0.12)')
+    rainbow.addColorStop(1,    'rgba(180,0,255,0.12)')
+    ctx.fillStyle = rainbow; ctx.fillRect(0,0,S,S)
+  }
+  if (isShiny) {
+    const shiny = ctx.createLinearGradient(S*0.2, 0, S*0.8, S)
+    shiny.addColorStop(0, 'rgba(255,255,255,0.0)')
+    shiny.addColorStop(0.4, cfg.c+'33')
+    shiny.addColorStop(0.5, 'rgba(255,255,255,0.18)')
+    shiny.addColorStop(0.6, cfg.c+'33')
+    shiny.addColorStop(1, 'rgba(255,255,255,0.0)')
+    ctx.fillStyle = shiny; ctx.fillRect(0,0,S,S)
+  }
+
+  // ── 3. BORDURE CARTE (style selon rareté) ──────────────────────────────────
+  const bw = cfg.borderStyle === 'double' ? 6 : 4
+  ctx.strokeStyle = cfg.c
+  ctx.lineWidth = bw
+  ctx.globalAlpha = 0.8
+  ctx.strokeRect(bw/2, bw/2, S-bw, S-bw)
+  if (cfg.borderStyle === 'double') {
+    ctx.strokeStyle = cfg.accent
+    ctx.lineWidth = 1.5
+    ctx.strokeRect(bw+4, bw+4, S-bw*2-8, S-bw*2-8)
+  }
+  // Coins découpés style cyberpunk
+  ctx.globalAlpha = 1
+  const cl = 28
+  ctx.fillStyle = '#000'
+  ;[[0,0],[S,0],[0,S],[S,S]].forEach(([cx,cy]) => {
+    ctx.beginPath()
+    if (cx===0&&cy===0) { ctx.moveTo(0,0); ctx.lineTo(cl,0); ctx.lineTo(0,cl) }
+    else if (cx===S&&cy===0) { ctx.moveTo(S,0); ctx.lineTo(S-cl,0); ctx.lineTo(S,cl) }
+    else if (cx===0&&cy===S) { ctx.moveTo(0,S); ctx.lineTo(cl,S); ctx.lineTo(0,S-cl) }
+    else { ctx.moveTo(S,S); ctx.lineTo(S-cl,S); ctx.lineTo(S,S-cl) }
+    ctx.closePath(); ctx.fill()
+  })
+
+  // ── 4. HEADER : rareté + grade badge + série ────────────────────────────────
+  const headerH = 90
+  // Bande header fond
+  const hg = ctx.createLinearGradient(0,0,S,headerH)
+  hg.addColorStop(0, cfg.c+'40'); hg.addColorStop(1, cfg.c+'10')
+  ctx.fillStyle = hg; ctx.fillRect(0,0,S,headerH)
+  ctx.strokeStyle = cfg.c+'66'; ctx.lineWidth = 1
+  ctx.beginPath(); ctx.moveTo(0,headerH); ctx.lineTo(S,headerH); ctx.stroke()
+
+  // Grade badge hexagonal (gauche)
+  ctx.save()
+  makeHexClip(ctx, 58, headerH/2, 36)
+  ctx.fillStyle = cfg.c; ctx.fill()
+  ctx.strokeStyle = cfg.accent; ctx.lineWidth = 2; ctx.stroke()
+  ctx.restore()
+  ctx.font = `900 28px 'Arial Black',Arial,sans-serif`
+  ctx.fillStyle = '#000'
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+  ctx.fillText(grade, 58, headerH/2+1)
+
+  // Label rareté (centre)
+  ctx.font = `900 44px 'Arial Black',Arial,sans-serif`
+  ctx.fillStyle = cfg.c
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+  // Shadow glow
+  if (cfg.glow > 0) {
+    ctx.shadowColor = cfg.c; ctx.shadowBlur = cfg.glow
+    ctx.fillText(cfg.label.toUpperCase(), S/2, headerH/2)
+    ctx.shadowBlur = 0
+  } else {
+    ctx.fillText(cfg.label.toUpperCase(), S/2, headerH/2)
+  }
+
+  // Série (droite)
+  if (serieNum != null) {
+    const serieText = `#${serieNum}/${cfg.serieMax}`
+    ctx.font = `bold 18px 'Courier New',monospace`
+    ctx.fillStyle = cfg.accent + 'cc'
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle'
+    ctx.fillText(serieText, S-20, headerH/2)
+  }
+  if (isShiny) {
+    ctx.font = `bold 22px Arial,sans-serif`
+    ctx.fillStyle = '#FCD34D'
+    ctx.shadowColor = '#FCD34D'; ctx.shadowBlur = 10
+    ctx.textAlign = 'right'; ctx.textBaseline = 'middle'
+    ctx.fillText('★ SHINY', S-20, serieNum != null ? headerH/2+20 : headerH/2)
+    ctx.shadowBlur = 0
+  }
+
+  // ── 5. ZONE IMAGE : hex clipé avec terrain / biome overlay ─────────────────
+  const imgTop = headerH + 12
+  const imgH = 310
+  const hexCX = S/2, hexCY = imgTop + imgH/2, hexR = 148
+
+  ctx.save()
+  makeHexClip(ctx, hexCX, hexCY, hexR)
+  ctx.clip()
+  // Fond biome avec dégradé directionnel
+  const biomeColors: Record<string, [string,string]> = {
+    urban:      ['#1a1f3a','#0d1128'], rural:    ['#1a2e12','#0d1a08'],
+    forest:     ['#0e2415','#061209'], mountain: ['#1e1a14','#110f0a'],
+    coastal:    ['#0d1e2e','#06121d'], desert:   ['#2e1e08','#1a1004'],
+    tundra:     ['#12182e','#080d1a'], industrial:['#1a140e','#0d0908'],
+    landmark:   ['#1a1228','#0d0914'], grassland: ['#152610','#0a1508'],
+  }
+  const [bc1, bc2] = biomeColors[biome || 'rural'] || ['#0d0f18','#020205']
+  const bg2 = ctx.createLinearGradient(hexCX-hexR, imgTop, hexCX+hexR, imgTop+imgH)
+  bg2.addColorStop(0, bc1); bg2.addColorStop(1, bc2)
+  ctx.fillStyle = bg2; ctx.fillRect(0, imgTop, S, imgH)
+
+  // Grille H3 de résolution 8 simulée dans la zone clip
+  ctx.globalAlpha = 0.12; ctx.strokeStyle = cfg.c; ctx.lineWidth = 1
+  const miniR = 22
+  for (let row=-3; row<=4; row++) {
+    for (let col=-4; col<=4; col++) {
+      const mx = hexCX + col * miniR * 1.75
+      const my = hexCY + row * miniR * Math.sqrt(3) + (col%2===0 ? 0 : miniR*Math.sqrt(3)/2)
+      makeHexClip(ctx, mx, my, miniR * 0.88)
+      ctx.stroke()
+    }
+  }
+  ctx.globalAlpha = 1
+
+  // Hex central mis en évidence
+  ctx.strokeStyle = cfg.c; ctx.lineWidth = 3
+  makeHexClip(ctx, hexCX, hexCY, miniR * 0.88)
+  ctx.fillStyle = cfg.c+'30'; ctx.fill(); ctx.stroke()
+
+  // Data overlay: coordonnées simulées
+  ctx.font = `bold 13px 'Courier New',monospace`
+  ctx.fillStyle = cfg.c + 'aa'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'
+  ctx.fillText(`${biome?.toUpperCase() || 'TERRAIN'} · RES.8`, hexCX, imgTop + imgH - 6)
+  ctx.restore()
+
+  // Bordure hex clipée
+  ctx.save()
+  makeHexClip(ctx, hexCX, hexCY, hexR)
+  ctx.strokeStyle = cfg.c; ctx.lineWidth = 3
+  if (cfg.glow > 0) { ctx.shadowColor = cfg.c; ctx.shadowBlur = cfg.glow }
+  ctx.stroke()
+  ctx.shadowBlur = 0
+  ctx.restore()
+
+  // Dégradé de fondu bas vers le fond
+  const fadeOut = ctx.createLinearGradient(0, imgTop + imgH*0.6, 0, imgTop + imgH + 12)
+  fadeOut.addColorStop(0, 'rgba(0,0,0,0)'); fadeOut.addColorStop(1, cfg.bg)
+  ctx.fillStyle = fadeOut; ctx.fillRect(0, imgTop + imgH*0.6, S, imgH*0.4 + 12)
+
+  // ── 6. NOM DU TERRITOIRE ───────────────────────────────────────────────────
+  const nameY = imgTop + imgH + 14
+  ctx.fillStyle = 'rgba(0,0,0,0.65)'; ctx.fillRect(0, nameY, S, 74)
+  ctx.font = `900 42px 'Arial Black',Arial,sans-serif`
+  ctx.fillStyle = '#fff'
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+  const shortName = name.length > 22 ? name.slice(0,20)+'…' : name
+  ctx.fillText(shortName, S/2, nameY + 37)
+
+  // Scanlines légers sur nom (rare+)
+  if (cfg.scanlines) {
+    ctx.save(); ctx.globalAlpha = 0.06
+    for (let sy = nameY; sy < nameY+74; sy += 4) {
+      ctx.fillStyle = '#000'; ctx.fillRect(0, sy, S, 2)
+    }
+    ctx.restore()
+  }
+
+  // ── 7. SÉPARATEUR TECH ────────────────────────────────────────────────────
+  const divY = nameY + 80
+  ctx.strokeStyle = cfg.c + '60'; ctx.lineWidth = 1
+  ctx.setLineDash([8, 4])
+  ctx.beginPath(); ctx.moveTo(40, divY); ctx.lineTo(S-40, divY); ctx.stroke()
+  ctx.setLineDash([])
+  // Losange central sur séparateur
+  ctx.save()
+  ctx.translate(S/2, divY)
+  ctx.rotate(Math.PI/4)
+  ctx.fillStyle = cfg.c; ctx.fillRect(-5,-5,10,10)
+  ctx.restore()
+
+  // ── 8. STATS / PRODUCTION (barres de données) ─────────────────────────────
+  const statsY = divY + 18
+  const barW = S - 80
+  const barH = 14
+  const incomeVal = income || 10
+  const maxIncome = 2000 // mythic max
+  ;[
+    { label: 'PRODUCTION HEX COIN', val: `+${incomeVal}/j`, pct: incomeVal/maxIncome, color: cfg.c },
+    { label: 'INDICE GÉOPOLITIQUE',  val: `${Math.round(incomeVal/20 + 40)}/100`,    pct: (incomeVal/20+40)/100, color: cfg.accent },
+  ].forEach((stat, i) => {
+    drawStatBar(ctx, 40, statsY + i*52, barW, barH, stat.pct, stat.color, stat.label, stat.val)
+  })
+
+  // ── 9. 3 FACTS (liste compacte) ───────────────────────────────────────────
+  const factStartY = statsY + 2*52 + 20
+  ctx.fillStyle = cfg.c + 'aa'
+  ctx.font = `bold 16px Arial,sans-serif`
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'
+  ctx.fillText('INFORMATIONS', 40, factStartY)
+
+  facts.slice(0,3).forEach((fact, i) => {
+    const fy = factStartY + 28 + i * 54
+    // Bullet hex
+    ctx.save()
+    makeHexClip(ctx, 54, fy+13, 12)
+    ctx.fillStyle = cfg.c + '40'; ctx.fill()
+    ctx.strokeStyle = cfg.c; ctx.lineWidth = 1.5; ctx.stroke()
+    ctx.restore()
+    ctx.font = `bold 11px 'Courier New',monospace`
+    ctx.fillStyle = cfg.c; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    ctx.fillText(`${i+1}`, 54, fy+13)
+    // Texte fact
+    ctx.font = `16px Arial,sans-serif`
+    ctx.fillStyle = 'rgba(255,255,255,0.82)'
+    ctx.textAlign = 'left'; ctx.textBaseline = 'top'
+    const maxW = S - 120
+    const words = fact.split(' '); let line = '', ly = fy
+    words.forEach(w => {
+      const test = line ? line+' '+w : w
+      if (ctx.measureText(test).width > maxW) { ctx.fillText(line,78,ly); line=w; ly+=18 }
+      else line=test
+    })
+    ctx.fillText(line, 78, ly)
+  })
+
+  // ── 10. FOOTER ─────────────────────────────────────────────────────────────
+  ctx.fillStyle = cfg.c + '20'; ctx.fillRect(0, S-46, S, 46)
+  ctx.strokeStyle = cfg.c + '55'; ctx.lineWidth = 1
+  ctx.beginPath(); ctx.moveTo(0, S-46); ctx.lineTo(S, S-46); ctx.stroke()
+  ctx.font = `bold 15px 'Arial Black',Arial,sans-serif`
+  ctx.fillStyle = cfg.c + 'cc'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+  ctx.fillText('HEXOD  ·  SAISON 1  ·  ÉDITION GENÈSE', S/2, S-23)
+
+  return cv
+}
   const S=1024, cv=document.createElement('canvas')
   cv.width=S; cv.height=S
   const ctx=cv.getContext('2d')!
@@ -182,138 +538,310 @@ function paintFrontCanvas(cfg: typeof RARITY[RK], name:string, grade:string, fac
   return cv
 }
 
-function paintBackCanvas(cfg: typeof RARITY[RK], h3:string, income:number, floor:number|null, isShiny:boolean): HTMLCanvasElement {
+function paintBackCanvas(cfg: typeof RARITY[RK], h3:string, income:number, floor:number|null, isShiny:boolean, biome?: string, serieNum?: number): HTMLCanvasElement {
+  const S=1024, cv=document.createElement('canvas')
+  cv.width=S; cv.height=S
+  const ctx=cv.getContext('2d')!
+
+  // ── Fond ──────────────────────────────────────────────────────────────────
+  ctx.fillStyle = cfg.bg; ctx.fillRect(0,0,S,S)
+  const amb = ctx.createRadialGradient(S/2,S/2,0,S/2,S/2,S*0.7)
+  amb.addColorStop(0, cfg.c+'1a'); amb.addColorStop(1,'rgba(0,0,0,0)')
+  ctx.fillStyle = amb; ctx.fillRect(0,0,S,S)
+
+  // Tiling hexagone de fond (watermark)
+  ctx.globalAlpha = 0.05
+  ctx.strokeStyle = cfg.c; ctx.lineWidth = 1
+  const hr = 55
+  for (let row=-1; row<S/hr/Math.sqrt(3)+1; row++) {
+    for (let col=-1; col<S/(hr*1.5)+1; col++) {
+      const hx = col * hr * 1.5 + hr * 0.75
+      const hy = row * hr * Math.sqrt(3) + (col%2===0 ? 0 : hr*Math.sqrt(3)/2)
+      makeHexClip(ctx, hx, hy, hr * 0.85)
+      ctx.stroke()
+    }
+  }
+  ctx.globalAlpha = 1
+
+  // Bordure + coins cyberpunk (même style face avant)
+  const bw = cfg.borderStyle === 'double' ? 6 : 4
+  ctx.strokeStyle = cfg.c; ctx.lineWidth = bw; ctx.globalAlpha = 0.8
+  ctx.strokeRect(bw/2,bw/2,S-bw,S-bw)
+  if (cfg.borderStyle==='double') {
+    ctx.strokeStyle=cfg.accent; ctx.lineWidth=1.5
+    ctx.strokeRect(bw+4,bw+4,S-bw*2-8,S-bw*2-8)
+  }
+  ctx.globalAlpha = 1
+  const cl=28; ctx.fillStyle='#000'
+  ;[[0,0],[S,0],[0,S],[S,S]].forEach(([cx,cy])=>{
+    ctx.beginPath()
+    if(cx===0&&cy===0){ctx.moveTo(0,0);ctx.lineTo(cl,0);ctx.lineTo(0,cl)}
+    else if(cx===S&&cy===0){ctx.moveTo(S,0);ctx.lineTo(S-cl,0);ctx.lineTo(S,cl)}
+    else if(cx===0&&cy===S){ctx.moveTo(0,S);ctx.lineTo(cl,S);ctx.lineTo(0,S-cl)}
+    else{ctx.moveTo(S,S);ctx.lineTo(S-cl,S);ctx.lineTo(S,S-cl)}
+    ctx.closePath(); ctx.fill()
+  })
+
+  // Foil shiny
+  if (isShiny) {
+    const f=ctx.createLinearGradient(S*0.1,0,S*0.9,S)
+    f.addColorStop(0,'rgba(0,0,0,0)'); f.addColorStop(0.35,cfg.c+'44')
+    f.addColorStop(0.5,'rgba(255,255,255,0.14)'); f.addColorStop(0.65,cfg.c+'44')
+    f.addColorStop(1,'rgba(0,0,0,0)')
+    ctx.fillStyle=f; ctx.fillRect(0,0,S,S)
+  }
+
+  // ── Grand hex central avec HEXOD ──────────────────────────────────────────
+  ctx.save()
+  makeHexClip(ctx, S/2, S*0.35, 160)
+  ctx.fillStyle = cfg.c+'12'; ctx.fill()
+  ctx.strokeStyle = cfg.c; ctx.lineWidth = 3
+  if (cfg.glow > 0) { ctx.shadowColor = cfg.c; ctx.shadowBlur = cfg.glow*1.5 }
+  ctx.stroke()
+  ctx.shadowBlur = 0
+  ctx.restore()
+
+  // Inner hex (double)
+  ctx.save()
+  makeHexClip(ctx, S/2, S*0.35, 130)
+  ctx.strokeStyle = cfg.accent+'55'; ctx.lineWidth = 1; ctx.stroke()
+  ctx.restore()
+
+  // Logo ⬡ + HEXOD
+  ctx.font = `bold 70px Arial,sans-serif`
+  ctx.fillStyle = cfg.c + '88'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+  ctx.fillText('⬡', S/2, S*0.30)
+  ctx.font = `900 54px 'Arial Black',Arial,sans-serif`
+  ctx.fillStyle = cfg.accent
+  if (cfg.glow>0) { ctx.shadowColor=cfg.c; ctx.shadowBlur=cfg.glow }
+  ctx.fillText('HEXOD', S/2, S*0.39)
+  ctx.shadowBlur = 0
+
+  // ── Séparateur ────────────────────────────────────────────────────────────
+  const sepY = S*0.49
+  ctx.strokeStyle = cfg.c+'50'; ctx.lineWidth=1; ctx.setLineDash([6,4])
+  ctx.beginPath(); ctx.moveTo(60,sepY); ctx.lineTo(S-60,sepY); ctx.stroke()
+  ctx.setLineDash([])
+
+  // ── Stats production (barres de données) ──────────────────────────────────
+  const statsTop = sepY + 30
+  const barW = S - 120
+  const RARITY_MAX_INCOME: Record<string,number> = {common:10,uncommon:30,rare:80,epic:200,legendary:500,mythic:2000}
+  const maxI = Math.max(...Object.values(RARITY_MAX_INCOME))
+  ;[
+    { label:'REVENU HEX COIN / JOUR', val:`+${income}`, pct: income/maxI, color: cfg.c },
+    { label:'VALEUR PLANCHER',        val: floor ? `${floor} HEX` : 'N/A', pct: floor ? Math.min(1,floor/5000) : 0, color: cfg.accent },
+  ].forEach((s, i) => {
+    drawStatBar(ctx, 60, statsTop + i*58, barW, 16, s.pct, s.color, s.label, s.val)
+  })
+
+  // ── Metadata technique ────────────────────────────────────────────────────
+  const metaTop = statsTop + 2*58 + 24
+  ctx.fillStyle = cfg.c+'33'
+  ctx.beginPath(); ctx.roundRect(60, metaTop, S-120, 140, 8); ctx.fill()
+  ctx.strokeStyle = cfg.c+'44'; ctx.lineWidth=1; ctx.stroke()
+
+  const metaItems = [
+    ['BIOME',       biome?.toUpperCase() || 'UNKNOWN'],
+    ['H3 INDEX',    h3.slice(0,15)+'…'],
+    ['COLLECTION',  'SAISON 1 · GENÈSE'],
+    ['STANDARD',    'METAPLEX · SOLANA'],
+    ['ROYALTIES',   '5% · HEXOD TREASURY'],
+    ['SÉRIE',       serieNum != null ? `#${serieNum}/${cfg.serieMax}` : 'UNIQUE'],
+  ]
+  metaItems.forEach(([k, v], i) => {
+    const row = Math.floor(i/2)
+    const col = i%2
+    const mx = 80 + col * (S-120)/2
+    const my = metaTop + 22 + row * 42
+    ctx.font = `bold 12px 'Courier New',monospace`
+    ctx.fillStyle = cfg.c+'88'; ctx.textAlign='left'; ctx.textBaseline='middle'
+    ctx.fillText(k, mx, my)
+    ctx.font = `bold 14px 'Courier New',monospace`
+    ctx.fillStyle = cfg.accent; ctx.textAlign='left'; ctx.textBaseline='middle'
+    ctx.fillText(v, mx, my+16)
+  })
+
+  // ── Hash H3 (QR-like pattern) ─────────────────────────────────────────────
+  const qrTop = metaTop + 158
+  const qrSize = 80; const cellSz = 8; const cols2 = Math.floor(qrSize/cellSz)
+  // Générer pattern pseudo-aléatoire déterministe depuis h3
+  let seed = h3.split('').reduce((a,c) => a+c.charCodeAt(0), 0)
+  const rand = () => { seed=(seed*16807+1)%2147483647; return (seed%100)/100 }
+  for (let r2=0; r2<cols2; r2++) {
+    for (let c2=0; c2<cols2; c2++) {
+      if (rand() > 0.5) {
+        ctx.fillStyle = rand()>0.7 ? cfg.c : cfg.c+'66'
+        ctx.fillRect(S/2 - qrSize/2 + c2*cellSz, qrTop + r2*cellSz, cellSz-1, cellSz-1)
+      }
+    }
+  }
+  // Label sous QR
+  ctx.font = `11px 'Courier New',monospace`
+  ctx.fillStyle = 'rgba(255,255,255,0.25)'; ctx.textAlign='center'; ctx.textBaseline='top'
+  ctx.fillText(h3.slice(0,18), S/2, qrTop + qrSize + 6)
+
+  // ── Footer ────────────────────────────────────────────────────────────────
+  ctx.fillStyle = cfg.c+'20'; ctx.fillRect(0,S-46,S,46)
+  ctx.strokeStyle = cfg.c+'55'; ctx.lineWidth=1
+  ctx.beginPath(); ctx.moveTo(0,S-46); ctx.lineTo(S,S-46); ctx.stroke()
+  ctx.font = `bold 15px 'Arial Black',Arial,sans-serif`
+  ctx.fillStyle = cfg.c+'cc'; ctx.textAlign='center'; ctx.textBaseline='middle'
+  ctx.fillText('NFT · HEXOD · SAISON 1', S/2, S-23)
+
+  return cv
+}
   const S=1024, cv=document.createElement('canvas')
   cv.width=S; cv.height=S
   const ctx=cv.getContext('2d')!
 
   // Background
-  const bg=ctx.createLinearGradient(0,0,S,S)
-  bg.addColorStop(0,cfg.bg)
-  bg.addColorStop(1,'#020205')
-  ctx.fillStyle=bg; ctx.fillRect(0,0,S,S)
-
-  if (isShiny) {
-    const f=ctx.createLinearGradient(0,0,S,S)
-    f.addColorStop(0,'rgba(0,0,0,0)'); f.addColorStop(0.4,cfg.c+'55')
-    f.addColorStop(0.5,'rgba(255,215,0,0.3)'); f.addColorStop(0.6,cfg.c+'55')
-    f.addColorStop(1,'rgba(0,0,0,0)')
-    ctx.fillStyle=f; ctx.fillRect(0,0,S,S)
-  }
-
-  // Hex watermark tiling
-  ctx.globalAlpha=0.06; ctx.font=`80px serif`; ctx.fillStyle=cfg.c; ctx.textAlign='center'; ctx.textBaseline='middle'
-  for(let y=80;y<S;y+=130) for(let x=(y%260<130?80:145);x<S;x+=180) ctx.fillText('⬡',x,y)
-  ctx.globalAlpha=1
-
-  // Big hex center
-  ctx.font=`bold 200px serif`; ctx.fillStyle=cfg.c+'44'; ctx.textAlign='center'; ctx.textBaseline='middle'
-  ctx.fillText('⬡',S/2,S*0.38)
-
-  // HEXOD
-  ctx.font=`bold 80px 'Arial Black',Arial,sans-serif`; ctx.fillStyle=cfg.accent; ctx.textAlign='center'; ctx.textBaseline='middle'
-  ctx.fillText('HEXOD',S/2,S*0.38+20)
-
-  // Divider
-  ctx.strokeStyle=cfg.c+'55'; ctx.lineWidth=2
-  ctx.beginPath(); ctx.moveTo(80,S*0.56); ctx.lineTo(S-80,S*0.56); ctx.stroke()
-
-  // Stats
-  ctx.font=`bold 32px Arial,sans-serif`; ctx.fillStyle=cfg.accent; ctx.textAlign='center'; ctx.textBaseline='middle'
-  ctx.fillText(`💠 +${income} HEX Coin / jour`,S/2,S*0.62)
-  if(floor){ctx.font=`28px Arial,sans-serif`; ctx.fillStyle=cfg.c; ctx.fillText(`💎 Floor : ${floor} HEX`,S/2,S*0.68)}
-
-  // H3 index
-  ctx.font=`22px 'Courier New',monospace`; ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.textAlign='center'; ctx.textBaseline='middle'
-  ctx.fillText(h3.slice(0,20),S/2,S*0.78)
-
-  // Footer
-  ctx.font=`20px Arial,sans-serif`; ctx.fillStyle=cfg.c+'66'; ctx.fillText('Saison 1 · Édition Genèse',S/2,S*0.88)
-
+  /* corps remplacé par la nouvelle implémentation ci-dessus — ne jamais supprimer cette ligne */
   return cv
 }
 
-/* ── 3D Card (3 meshes) ──────────────────────────────────── */
-function HexCard3D({ frontCv, backCv, imgUrl, cfg, showBack, isShiny }: {
-  frontCv:HTMLCanvasElement; backCv:HTMLCanvasElement
-  imgUrl:string|null; cfg:typeof RARITY[RK]; showBack:boolean; isShiny:boolean
+/* ── 3D Card — Artist3D spec ─────────────────────────────── */
+// Règles Artist3D :
+//   frameloop="always" ✓
+//   ExtrudeGeometry → sides seuls (groups 0..N-1, pas caps)
+//   Faces → ShapeGeometry séparées z=D+0.12 / z=-0.12
+//   UV remap 0→1 sur ShapeGeometry ✓
+//   Legendary/Mythic → MeshPhysicalMaterial (clearcoat + iridescence)
+//   Shiny → transmission + iridescence animée
+
+function HexCard3D({ frontCv, cfg, showBack, isShiny }: {
+  frontCv:HTMLCanvasElement
+  cfg:typeof RARITY[RK]; showBack:boolean; isShiny:boolean
 }) {
   const groupRef = useRef<THREE.Group>(null!)
-  const velY=useRef(-0.25); const velX=useRef(0)
+  const velY = useRef(-0.25); const velX = useRef(0)
+  const shimmerRef = useRef(0)
   const { gl, camera } = useThree()
 
+  // Drag + zoom
   useEffect(() => {
-    const c=gl.domElement; let drag=false,lx=0,ly=0
-    const pd=(e:PointerEvent)=>{ drag=true; lx=e.clientX; ly=e.clientY; velY.current=0; velX.current=0 }
-    const pm=(e:PointerEvent)=>{ if(!drag)return; velY.current=(e.clientX-lx)*0.022; velX.current=-(e.clientY-ly)*0.013; lx=e.clientX; ly=e.clientY }
-    const pu=()=>{ drag=false }
-    const pw=(e:WheelEvent)=>{ e.preventDefault(); camera.position.z=Math.max(2.5,Math.min(8,camera.position.z+e.deltaY*0.005)) }
-    c.addEventListener('pointerdown',pd); window.addEventListener('pointermove',pm); window.addEventListener('pointerup',pu); c.addEventListener('wheel',pw,{passive:false})
+    const c = gl.domElement; let drag=false, lx=0, ly=0
+    const pd = (e:PointerEvent) => { drag=true; lx=e.clientX; ly=e.clientY; velY.current=0; velX.current=0 }
+    const pm = (e:PointerEvent) => { if(!drag)return; velY.current=(e.clientX-lx)*0.022; velX.current=-(e.clientY-ly)*0.013; lx=e.clientX; ly=e.clientY }
+    const pu = () => { drag=false }
+    const pw = (e:WheelEvent) => { e.preventDefault(); camera.position.z=Math.max(2.5,Math.min(8,camera.position.z+e.deltaY*0.005)) }
+    c.addEventListener('pointerdown',pd); window.addEventListener('pointermove',pm)
+    window.addEventListener('pointerup',pu); c.addEventListener('wheel',pw,{passive:false})
     return ()=>{ c.removeEventListener('pointerdown',pd); window.removeEventListener('pointermove',pm); window.removeEventListener('pointerup',pu); c.removeEventListener('wheel',pw) }
   },[gl])
 
-  useFrame(()=>{
-    velY.current*=0.93; velX.current*=0.93
-    groupRef.current.rotation.y+=velY.current
-    groupRef.current.rotation.x=Math.max(-0.7,Math.min(0.7,groupRef.current.rotation.x+velX.current))
+  // Animation + shimmer shiny
+  useFrame((_, delta) => {
+    velY.current *= 0.93; velX.current *= 0.93
+    groupRef.current.rotation.y += velY.current
+    groupRef.current.rotation.x = Math.max(-0.7, Math.min(0.7, groupRef.current.rotation.x + velX.current))
+    // Shimmer rotatif pour shiny/legendary/mythic
+    if (isShiny || cfg.foil === 'rainbow' || cfg.foil === 'prismatic') {
+      shimmerRef.current += delta * 0.8
+      if (shimmerRef.current > Math.PI*2) shimmerRef.current -= Math.PI*2
+    }
   })
 
-  const hexShape=useMemo(()=>{ const s=new THREE.Shape(); for(let i=0;i<6;i++){const a=(Math.PI/3)*i-Math.PI/6; i===0?s.moveTo(1.5*Math.cos(a),1.5*Math.sin(a)):s.lineTo(1.5*Math.cos(a),1.5*Math.sin(a))} s.closePath(); return s },[])
-
-  // Prism = just the walls (no faces)
-  const prismGeo=useMemo(()=>{ const g=new THREE.ExtrudeGeometry(hexShape,{depth:0.22,bevelEnabled:true,bevelThickness:0.04,bevelSize:0.03,bevelSegments:2}); return g },[hexShape])
-
-  // Flat front/back faces
-  const faceGeo=useMemo(()=>{
-    const g=new THREE.ShapeGeometry(hexShape)
-    // Remap UVs from shape coords (centered, not 0-1) to 0-1 range
-    g.computeBoundingBox()
-    const box=g.boundingBox!
-    const uvAttr=g.attributes.uv
-    for(let i=0;i<uvAttr.count;i++){
-      uvAttr.setXY(i,
-        (uvAttr.getX(i)-box.min.x)/(box.max.x-box.min.x),
-        (uvAttr.getY(i)-box.min.y)/(box.max.y-box.min.y)
-      )
+  const hexShape = useMemo(() => {
+    const s = new THREE.Shape()
+    for (let i=0; i<6; i++) {
+      const a = (Math.PI/3)*i - Math.PI/6
+      i===0 ? s.moveTo(1.5*Math.cos(a), 1.5*Math.sin(a)) : s.lineTo(1.5*Math.cos(a), 1.5*Math.sin(a))
     }
-    uvAttr.needsUpdate=true
+    s.closePath(); return s
+  },[])
+
+  // Prism sides only — ExtrudeGeometry group 0 = sides, 1 = caps
+  // Artist3D: on ne garde que le group sides
+  const sideGeo = useMemo(() => {
+    const g = new THREE.ExtrudeGeometry(hexShape, {
+      depth:0.22, bevelEnabled:true, bevelThickness:0.04, bevelSize:0.03, bevelSegments:3
+    })
     return g
   },[hexShape])
 
-  const [imgTex,setImgTex]=useState<THREE.Texture|null>(null)
-  useEffect(()=>{ if(!imgUrl)return; new THREE.TextureLoader().load(imgUrl,tex=>{tex.colorSpace=THREE.SRGBColorSpace;setImgTex(tex)},undefined,()=>setImgTex(null)) },[imgUrl])
+  // Face geo avec UV remap
+  const faceGeo = useMemo(() => {
+    const g = new THREE.ShapeGeometry(hexShape)
+    g.computeBoundingBox()
+    const box = g.boundingBox!
+    const uv = g.attributes.uv
+    for (let i=0; i<uv.count; i++) {
+      uv.setXY(i,
+        (uv.getX(i)-box.min.x)/(box.max.x-box.min.x),
+        (uv.getY(i)-box.min.y)/(box.max.y-box.min.y)
+      )
+    }
+    uv.needsUpdate = true; return g
+  },[hexShape])
 
-  const frontTex=useMemo(()=>{
-    // Simple reliable: just wrap the pre-painted canvas
-    const t=new THREE.CanvasTexture(frontCv)
-    t.flipY=true
-    t.needsUpdate=true
-    return t
+  // Texture face avant
+  const frontTex = useMemo(() => {
+    const t = new THREE.CanvasTexture(frontCv)
+    t.flipY = true; t.needsUpdate = true; return t
   },[frontCv])
-  const sideMat=useMemo(()=>new THREE.MeshStandardMaterial({
-    color:cfg.c, metalness:cfg.metalness, roughness:cfg.roughness, envMapIntensity:1.5
+
+  // Matériau sides
+  const sideMat = useMemo(() => new THREE.MeshStandardMaterial({
+    color: new THREE.Color(cfg.c),
+    metalness: cfg.metalness,
+    roughness: cfg.roughness,
+    envMapIntensity: 1.5,
   }),[cfg])
 
-  const frontMat=useMemo(()=>new THREE.MeshStandardMaterial({
-    map:frontTex, metalness:0.05, roughness:0.65, envMapIntensity:isShiny?1.2:0.4,
-  }),[frontTex,isShiny])
+  // Matériau face avant
+  const frontMat = useMemo(() => new THREE.MeshStandardMaterial({
+    map: frontTex,
+    metalness: 0.05,
+    roughness: 0.65,
+    envMapIntensity: isShiny ? 1.2 : 0.4,
+  }),[frontTex, isShiny])
 
-  // Back face: plain metallic — no texture, reliable rendering
-  const backMat=useMemo(()=>new THREE.MeshStandardMaterial({
-    color: new THREE.Color(cfg.c),
-    metalness:isShiny?0.95:0.75, roughness:isShiny?0.04:0.2,
-    envMapIntensity:isShiny?2.5:1.5,
-    emissive: isShiny ? new THREE.Color(cfg.c).multiplyScalar(0.15) : new THREE.Color(0,0,0),
-  }),[cfg,isShiny])
+  // Matériau face arrière — MeshPhysicalMaterial pour legendary/mythic
+  const backMat = useMemo(() => {
+    const isHighRarity = cfg.foil === 'rainbow' || cfg.foil === 'prismatic'
+    if (isHighRarity || isShiny) {
+      return new THREE.MeshPhysicalMaterial({
+        color: new THREE.Color(cfg.c),
+        metalness: cfg.metalness,
+        roughness: cfg.roughness,
+        clearcoat: isShiny ? 1.0 : 0.7,
+        clearcoatRoughness: 0.05,
+        iridescence: isShiny ? 1.0 : cfg.foil === 'prismatic' ? 0.9 : 0.6,
+        iridescenceIOR: 1.8,
+        iridescenceThicknessRange: [100, 400],
+        envMapIntensity: isShiny ? 3.0 : 2.0,
+        emissive: new THREE.Color(cfg.c).multiplyScalar(isShiny ? 0.25 : 0.12),
+      })
+    }
+    return new THREE.MeshStandardMaterial({
+      color: new THREE.Color(cfg.c),
+      metalness: cfg.metalness,
+      roughness: cfg.roughness + 0.1,
+      envMapIntensity: 1.8,
+      emissive: new THREE.Color(cfg.c).multiplyScalar(0.06),
+    })
+  },[cfg, isShiny])
 
-  const D=0.18
+  const D = 0.18
+
+  // Point light couleur rareté
+  const lightIntensity = isShiny ? 1.5 : cfg.glow > 0 ? 1.0 : 0.5
 
   return (
-    <group ref={groupRef} rotation={[0.06, showBack?Math.PI:-0.1, 0]}>
-      <mesh geometry={prismGeo} material={sideMat} />
-      <mesh geometry={faceGeo} material={frontMat} position={[0,0,D+0.12]} />
-      <mesh geometry={faceGeo} material={backMat} position={[0,0,-0.12]} rotation={[0,Math.PI,0]} />
-      <pointLight position={[0,0,3.5]} intensity={0.8} color={cfg.c} />
+    <group ref={groupRef} rotation={[0.06, showBack ? Math.PI : -0.1, 0]}>
+      {/* Prism sides */}
+      <mesh geometry={sideGeo} material={sideMat} />
+      {/* Face avant — canvas texture */}
+      <mesh geometry={faceGeo} material={frontMat} position={[0, 0, D+0.12]} />
+      {/* Face arrière — metallic/iridescent */}
+      <mesh geometry={faceGeo} material={backMat} position={[0, 0, -0.12]} rotation={[0, Math.PI, 0]} />
+      {/* Lumière rareté */}
+      <pointLight position={[0, 0, 3.5]} intensity={lightIntensity} color={cfg.c} />
+      {/* Lumière rimlight pour legendary/mythic */}
+      {cfg.glow > 8 && (
+        <pointLight position={[2, 1, -2]} intensity={0.6} color={cfg.accent} />
+      )}
     </group>
   )
 }
@@ -695,8 +1223,16 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
     return r.slice(0,3)
   },[t])
 
-  const frontCv=useMemo(()=>paintFrontCanvas(cfg,cardName,cfg.grade,facts,imgUrl,isShiny),[cfg,cardName,facts,imgUrl,isShiny])
-  const backCv =useMemo(()=>paintBackCanvas(cfg,t.h3_index||'',income,t.poi_floor_price||null,isShiny),[cfg,t.h3_index,income,t.poi_floor_price,isShiny])
+  const biome  = t.territory_type || t.biome || 'rural'
+  const serieNum = t.token_id ? (parseInt(String(t.token_id)) % cfg.serieMax) + 1 : undefined
+  const frontCv = useMemo(() =>
+    paintFrontCanvas(cfg, cardName, cfg.grade, facts, imgUrl, isShiny, serieNum, biome, income),
+    [cfg, cardName, facts, imgUrl, isShiny, serieNum, biome, income]
+  )
+  const backCv  = useMemo(() =>
+    paintBackCanvas(cfg, t.h3_index||'', income, t.poi_floor_price||null, isShiny, biome, serieNum),
+    [cfg, t.h3_index, income, t.poi_floor_price, isShiny, biome, serieNum]
+  )
 
   const [tab,setTab]=useState<'card'|'kingdom'|'nft'>('card')
   const [showBack,setShowBack]=useState(false)
@@ -789,7 +1325,8 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
                 </div>
                 <div style={{display:'flex',gap:7}}>
                   <button style={{flex:1,padding:'9px',border:`1px solid ${cfg.c}44`,borderRadius:8,cursor:'pointer',background:`${cfg.c}14`,color:cfg.c,fontSize:11,fontWeight:700}}>💎 Minter</button>
-                  <button style={{flex:1,padding:'9px',border:'1px solid rgba(59,130,246,0.35)',borderRadius:8,cursor:'pointer',background:'rgba(59,130,246,0.1)',color:'#60A5FA',fontSize:11,fontWeight:700}}>🏪 Marketplace</button>
+                  <button style={{flex:1,padding:'9px',border:'1px solid rgba(59,130,246,0.35)',borderRadius:8,cursor:'pointer',background:'rgba(59,130,246,0.1)',color:'#60A5FA',fontSize:11,fontWeight:700}}
+                    onClick={()=>useStore.getState().setActivePanel('marketplace')}>🏪 Marketplace</button>
                 </div>
               </div>
             )}

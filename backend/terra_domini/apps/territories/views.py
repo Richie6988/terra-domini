@@ -648,3 +648,107 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             'shield_expires_at': territory.shield_expires_at.isoformat(),
             'tdc_spent': tdc_cost,
         })
+
+    # ── Buy offer (send HEX Coin offer to owner) ──────────────────────────────
+    @action(detail=False, methods=['POST'], url_path='buy-offer')
+    def buy_offer(self, request):
+        """POST /api/territories/buy-offer/ {h3_index, offer_tdc}"""
+        h3_index   = request.data.get('h3_index', '')
+        offer_tdc  = float(request.data.get('offer_tdc', 0))
+
+        if not h3_index:
+            return Response({'error': 'h3_index required'}, status=400)
+        if offer_tdc <= 0:
+            return Response({'error': 'offer_tdc must be > 0'}, status=400)
+
+        try:
+            territory = Territory.objects.select_related('owner').get(h3_index=h3_index)
+        except Territory.DoesNotExist:
+            return Response({'error': 'Territory not found'}, status=404)
+
+        if not territory.owner:
+            return Response({'error': 'Territory is free — claim it directly'}, status=400)
+        if territory.owner == request.user:
+            return Response({'error': 'You already own this territory'}, status=400)
+
+        # Check buyer balance
+        from terra_domini.apps.accounts.models import Player as P
+        buyer = P.objects.get(id=request.user.id)
+        if float(buyer.tdc_in_game) < offer_tdc:
+            return Response({'error': f'Insufficient HEX Coin: need {offer_tdc}, have {float(buyer.tdc_in_game):.0f}'}, status=402)
+
+        # For V0: auto-accept if offer >= floor_price or rarity base
+        RARITY_FLOOR = {'common':1,'uncommon':5,'rare':25,'epic':100,'legendary':500,'mythic':5000}
+        floor = RARITY_FLOOR.get(territory.rarity or 'common', 10)
+        auto_accept = offer_tdc >= floor * 1.5
+
+        if auto_accept:
+            # Transfer: deduct from buyer, add to seller
+            seller = territory.owner
+            P.objects.filter(id=buyer.id).update(tdc_in_game=float(buyer.tdc_in_game) - offer_tdc)
+            P.objects.filter(id=seller.id).update(tdc_in_game=float(P.objects.get(id=seller.id).tdc_in_game) + offer_tdc)
+            territory.owner    = buyer
+            territory.captured_at = timezone.now()
+            territory.save(update_fields=['owner', 'captured_at'])
+            return Response({'success': True, 'auto_accepted': True,
+                             'message': f'Offer accepted! {offer_tdc} HEX Coin transferred.'})
+        else:
+            # V0: queue offer (notify owner via future WebSocket) — return pending
+            return Response({'success': True, 'auto_accepted': False,
+                             'message': f'Offer of {offer_tdc} HEX Coin sent to {territory.owner.username}. Waiting for response.'})
+
+    # ── Attack (CDC §2.3 — ATK vs DEF, cost by rarity) ───────────────────────
+    @action(detail=False, methods=['POST'], url_path='attack')
+    def attack(self, request):
+        """POST /api/territories/attack/ {h3_index}
+        Resolves attack based on ATK vs DEF stats.
+        Cost: time already passed client-side. Backend validates and resolves.
+        """
+        h3_index = request.data.get('h3_index', '').strip()
+        if not h3_index:
+            return Response({'error': 'h3_index required'}, status=400)
+
+        territory = Territory.objects.filter(h3_index=h3_index).select_related('owner').first()
+        if not territory:
+            return Response({'error': 'Territory not found'}, status=404)
+        if territory.owner == request.user:
+            return Response({'error': 'Already yours'}, status=400)
+
+        # ATK vs DEF — from player stats
+        from terra_domini.apps.accounts.models import Player as P
+        attacker = P.objects.get(id=request.user.id)
+        atk = float(getattr(attacker, 'attack_power_bonus', 0)) + float(getattr(attacker, 'commander_rank', 1)) * 10
+        def_val = float(territory.defense_points or 100.0)
+
+        import random as _r
+        # ATK > DEF → 70% win base + rank advantage
+        atk_ratio = atk / max(def_val, 1)
+        win_chance = min(0.95, max(0.15, 0.4 + atk_ratio * 0.3))
+        victory = _r.random() < win_chance
+
+        if victory:
+            prev_owner = territory.owner
+            territory.owner       = attacker
+            territory.captured_at = timezone.now()
+            territory.defense_points = territory.max_defense_points * 0.3  # weakened after attack
+            territory.save(update_fields=['owner', 'captured_at', 'defense_points'])
+
+            # Update player stats
+            P.objects.filter(id=attacker.id).update(
+                territories_captured=getattr(attacker,'territories_captured',0)+1,
+                battles_won=getattr(attacker,'battles_won',0)+1,
+            )
+            return Response({
+                'victory': True,
+                'atk': round(atk,1), 'def': round(def_val,1),
+                'win_chance': round(win_chance*100,1),
+                'message': f'Victory! {h3_index[:8]} captured.',
+            })
+        else:
+            P.objects.filter(id=attacker.id).update(battles_lost=getattr(attacker,'battles_lost',0)+1)
+            return Response({
+                'victory': False,
+                'atk': round(atk,1), 'def': round(def_val,1),
+                'win_chance': round(win_chance*100,1),
+                'message': 'Defeat. Defenses held.',
+            }, status=200)

@@ -2,11 +2,16 @@
  * GameHUD — persistent top overlay with player stats, HEX Coin, active battles.
  */
 import { useState, useEffect } from 'react'
-import { Sword, Shield, Users, Trophy, Wifi, WifiOff, Bell, Map, ArrowRightLeft, Bitcoin, Star } from 'lucide-react'
 import { AnimatePresence, motion } from 'framer-motion'
 import { usePlayer, useTDCBalance, useActiveBattles, useWsConnected, useNotifications, useStore } from '../../store'
 import { TDCShopPanel } from '../shop/TDCShopPanel'
 import { StaminaBar } from './StaminaBar'
+import { MissionsDailyWidget } from './MissionsDailyWidget'
+import {
+  IconCombat, IconCrystal, IconBell, IconWifi, IconWifiOff,
+  IconAlliance, IconTrophy, IconProfile, IconTrade, IconCrypto,
+  IconStrategy, IconClose, IconMap,
+} from '../ui/HexodIcons'
 
 // Django DecimalField serializes as string — always parse before arithmetic
 
@@ -49,7 +54,7 @@ function BattleTimer({ battle }: { battle: { id: string; territory_h3: string; r
       background: 'rgba(239,68,68,0.15)', borderRadius: 8,
       border: '1px solid rgba(239,68,68,0.3)',
     }}>
-      <Sword size={13} color="#EF4444" />
+      <IconCombat size={13} color="#EF4444" />
       <span style={{ fontSize: 12, color: '#FCA5A5' }}>
         {(battle.territory_name || battle.territory_h3 || 'Zone').slice(0, 12)}
       </span>
@@ -118,7 +123,7 @@ export function GameHUD() {
 
         {/* Territory count */}
         <div style={{ ...glassPill, gap: 6 }}>
-          <Map size={14} color="#3B82F6" />
+          <IconMap size={14} color="#3B82F6" />
           <span style={{ fontSize: 13, color: '#93C5FD' }}>
             {player.stats?.territories_owned ?? 0}
           </span>
@@ -138,7 +143,7 @@ export function GameHUD() {
           onClick={() => setShowNotifs(!showNotifs)}
           style={{ ...glassPill, pointerEvents: 'auto', cursor: 'pointer', position: 'relative', padding: '8px' }}
         >
-          <Bell size={16} color={unreadNotifs > 0 ? '#F59E0B' : '#6B7280'} />
+          <IconBell size={16} color={unreadNotifs > 0 ? '#F59E0B' : '#6B7280'} />
           {unreadNotifs > 0 && (
             <span style={{
               position: 'absolute', top: 0, right: 0,
@@ -155,8 +160,8 @@ export function GameHUD() {
         {/* WS status */}
         <div style={{ ...glassPill, padding: '6px 8px', gap: 5 }}>
           {wsConnected
-            ? <><Wifi size={13} color="#10B981" /><span style={{ fontSize: 10, color: '#10B981' }}>Live</span></>
-            : <><WifiOff size={13} color="#EF4444" /><span style={{ fontSize: 10, color: '#EF4444' }}>Offline</span></>
+            ? <><IconWifi size={13} color="#10B981" /><span style={{ fontSize: 10, color: '#10B981' }}>Live</span></>
+            : <><IconWifiOff size={13} color="#EF4444" /><span style={{ fontSize: 10, color: '#EF4444' }}>Offline</span></>
           }
         </div>
       </div>
@@ -169,13 +174,13 @@ export function GameHUD() {
         padding: '8px 12px', border: '1px solid rgba(255,255,255,0.08)',
       }}>
         {[
-          { panel: 'combat' as const, icon: <Sword size={18} />, label: 'Combat', badge: activeBattles.length },
-          { panel: 'alliance' as const, icon: <Users size={18} />, label: 'Alliance', badge: 0 },
-          { panel: 'events' as const, icon: <Trophy size={18} />, label: 'Events', badge: 0 },
-          { panel: 'profile' as const, icon: <Shield size={18} />, label: 'Profile', badge: 0 },
-          { panel: 'trade' as const,        icon: <ArrowRightLeft size={18} />, label: 'Trade',     badge: 0 },
-          { panel: 'crypto' as const,       icon: <Bitcoin size={18} />,         label: 'Crypto',    badge: 0 },
-          { panel: 'leaderboard' as const,  icon: <Star size={18} />,            label: 'Ranks',     badge: 0 },
+          { panel: 'combat' as const, icon: <IconCombat size={18} />, label: 'Combat', badge: activeBattles.length },
+          { panel: 'alliance' as const, icon: <IconAlliance size={18} />, label: 'Alliance', badge: 0 },
+          { panel: 'events' as const, icon: <IconTrophy size={18} />, label: 'Events', badge: 0 },
+          { panel: 'profile' as const, icon: <IconProfile size={18} />, label: 'Profile', badge: 0 },
+          { panel: 'trade' as const,        icon: <IconTrade size={18} />, label: 'Trade',     badge: 0 },
+          { panel: 'crypto' as const,       icon: <IconCrypto size={18} />,         label: 'Crypto',    badge: 0 },
+          { panel: 'leaderboard' as const,  icon: <IconTrophy size={18} />,            label: 'Ranks',     badge: 0 },
         ].map(({ panel, icon, label, badge }) => (
           <button
             key={panel}
@@ -257,6 +262,9 @@ export function GameHUD() {
       <AnimatePresence>
         {showShop && <TDCShopPanel onClose={() => setShowShop(false)} />}
       </AnimatePresence>
+
+      {/* Missions + Referral widget — bouton fixe bas-gauche */}
+      <MissionsDailyWidget />
     </>
   )
 }

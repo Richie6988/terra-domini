@@ -208,14 +208,34 @@ class PasswordResetRequestView(APIView):
         token = default_token_generator.make_token(player)
         uid   = urlsafe_base64_encode(force_bytes(player.pk))
 
-        # In prod, this URL points to the React reset page
-        reset_url = f"{request.scheme}://{request.get_host()}/reset-password/{uid}/{token}/"
+        frontend_url = getattr(django_settings, 'FRONTEND_URL', f"{request.scheme}://{request.get_host()}")
+        reset_url    = f"{frontend_url}/reset-password/{uid}/{token}/"
 
         try:
             send_mail(
-                subject='Reset your Terra Domini password',
-                message=f'Click to reset your password:\n\n{reset_url}\n\nExpires in 24 hours.',
-                from_email=getattr(django_settings, 'DEFAULT_FROM_EMAIL', 'noreply@terradomini.io'),
+                subject='Réinitialisation de votre mot de passe Hexod',
+                message=(
+                    f"Bonjour {player.username},\n\n"
+                    f"Cliquez sur ce lien pour réinitialiser votre mot de passe :\n\n"
+                    f"{reset_url}\n\n"
+                    f"Ce lien expire dans 24 heures.\n\n"
+                    f"Si vous n'avez pas demandé cette réinitialisation, ignorez cet email.\n\n"
+                    f"— L'équipe Hexod"
+                ),
+                html_message=(
+                    f"<div style='font-family:system-ui;max-width:480px;margin:auto;padding:32px;background:#07070f;color:#E5E7EB;border-radius:16px'>"
+                    f"<div style='font-size:28px;margin-bottom:8px'>⬡ Hexod</div>"
+                    f"<h2 style='color:#fff;margin-bottom:16px'>Réinitialisation du mot de passe</h2>"
+                    f"<p>Bonjour <strong>{player.username}</strong>,</p>"
+                    f"<p>Cliquez sur le bouton ci-dessous pour créer un nouveau mot de passe.</p>"
+                    f"<a href='{reset_url}' style='display:inline-block;margin:20px 0;padding:14px 28px;"
+                    f"background:#00FF87;color:#000;font-weight:800;border-radius:10px;text-decoration:none;font-size:15px'>"
+                    f"🔑 Réinitialiser mon mot de passe</a>"
+                    f"<p style='color:#6B7280;font-size:12px'>Ce lien expire dans 24 heures.<br>"
+                    f"Si vous n'avez pas fait cette demande, ignorez cet email.</p>"
+                    f"</div>"
+                ),
+                from_email=getattr(django_settings, 'DEFAULT_FROM_EMAIL', 'Hexod <noreply@hexod.io>'),
                 recipient_list=[player.email],
                 fail_silently=False,
             )

@@ -4,20 +4,23 @@
  */
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Sword, Building2, FlaskConical, ArrowLeftRight, Users, Map, ScrollText } from 'lucide-react'
 import { useStore, usePlayer } from '../../store'
 import { SkillTreePanel } from './SkillTreePanel'
 import { ResourcesPanel } from './ResourcesPanel'
+import {
+  IconCombat, IconBuild, IconResearch, IconTrade,
+  IconAlliance, IconStrategy, IconLogs,
+} from '../ui/HexodIcons'
 
 const ACTIONS = [
-  { id:'attack',    icon:'⚔️',  label:'Attaquer',   color:'#EF4444' },
-  { id:'build',     icon:'🏗️',  label:'Construire',  color:'#F59E0B' },
-  { id:'research',  icon:'🔬',  label:'Recherche',   color:'#8B5CF6' },
-  { id:'trade',     icon:'💱',  label:'Commerce',    color:'#10B981' },
-  { id:'alliances', icon:'🤝',  label:'Alliances',   color:'#3B82F6' },
-  { id:'strategy',  icon:'🗺️',  label:'Stratégie',   color:'#6B7280' },
-  { id:'logs',      icon:'📋',  label:'Logs',        color:'#4B5563' },
-]
+  { id:'attack',    icon:<IconCombat size={20} />,   label:'Attaquer',   color:'#EF4444' },
+  { id:'build',     icon:<IconBuild size={20} />,    label:'Construire',  color:'#F59E0B' },
+  { id:'research',  icon:<IconResearch size={20} />, label:'Recherche',   color:'#8B5CF6' },
+  { id:'trade',     icon:<IconTrade size={20} />,    label:'Commerce',    color:'#10B981' },
+  { id:'alliances', icon:<IconAlliance size={20} />, label:'Alliances',   color:'#3B82F6' },
+  { id:'strategy',  icon:<IconStrategy size={20} />, label:'Stratégie',   color:'#6B7280' },
+  { id:'logs',      icon:<IconLogs size={20} />,     label:'Logs',        color:'#4B5563' },
+] as const
 
 export function HexodBottomBar() {
   const player = usePlayer()
@@ -65,7 +68,7 @@ export function HexodBottomBar() {
               flex: 1, maxWidth: 64,
               transition: 'all 0.15s',
             }}>
-              <span style={{ fontSize: 18 }}>{a.icon}</span>
+              <span style={{ display:'flex', alignItems:'center', justifyContent:'center', color: active===a.id ? a.color : '#6B7280' }}>{a.icon}</span>
               <span style={{ fontSize: 9, fontWeight: active === a.id ? 700 : 400, lineHeight: 1 }}>
                 {a.label}
               </span>

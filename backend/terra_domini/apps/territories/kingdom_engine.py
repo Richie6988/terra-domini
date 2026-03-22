@@ -18,6 +18,44 @@ from django.utils import timezone
 from terra_domini.apps.territories.models import Territory, TerritoryCluster, KingdomSkill
 from terra_domini.apps.events.unified_poi import UnifiedPOI
 
+# Mapping SkillNode.cost_json labels → DB field names + default cost
+RESOURCE_LABEL_MAP: dict[str, tuple[str, float]] = {
+    'pétrole':                   ('res_petrole',      50),
+    'acier':                     ('res_acier',         40),
+    "main d'œuvre":              ('res_main_oeuvre',   60),
+    'données':                   ('res_donnees',       50),
+    'composants électroniques':  ('res_composants',    30),
+    'hex (cristaux)':            ('res_hex_cristaux',  20),
+    'terres rares':              ('res_terres_rares',  15),
+    'silicium':                  ('res_silicium',      30),
+    'titanium':                  ('res_titanium',      20),
+    'influence politique':       ('res_influence',     40),
+    'uranium':                   ('res_uranium',       10),
+    'fer':                       ('res_fer',           50),
+    'charbon':                   ('res_charbon',       40),
+    'gaz':                       ('res_gaz',           30),
+    'eau':                       ('res_eau',           60),
+    'nourriture':                ('res_nourriture',    60),
+    'stabilité':                 ('res_stabilite',     40),
+    'aluminium':                 ('res_aluminium',     30),
+    'cuivre':                    ('res_cuivre',        30),
+}
+
+def _parse_skill_costs(cost_json: list) -> dict[str, float]:
+    """Convert cost_json labels to {db_field: amount} dict."""
+    result: dict[str, float] = {}
+    for item in (cost_json or []):
+        if isinstance(item, dict):
+            # Already {field: amount} format
+            result.update({k: float(v) for k, v in item.items()})
+        elif isinstance(item, str):
+            key = item.lower().strip()
+            if key in RESOURCE_LABEL_MAP:
+                field, default_cost = RESOURCE_LABEL_MAP[key]
+                result[field] = result.get(field, 0) + default_cost
+            # else: unknown resource label — skip
+    return result
+
 
 def _flood_fill(owned_set: set) -> list[list[str]]:
     """BFS flood fill — returns list of connected components."""
@@ -181,7 +219,11 @@ def get_kingdom_for_territory(player, h3_index: str) -> dict | None:
 def unlock_kingdom_skill(player, cluster_id: str, skill_id: int) -> dict:
     """
     Unlock a skill for a specific kingdom.
-    Checks resources are available in that kingdom.
+    Deducts resources from territories in that kingdom.
+
+    cost_json format accepted:
+      - list of strings: ['res_fer', 'res_petrole']  → 10 each (legacy)
+      - list of dicts:   [{'res_fer': 50}, {'res_petrole': 30}]
     """
     from terra_domini.apps.progression.models import SkillNode
 
@@ -190,18 +232,74 @@ def unlock_kingdom_skill(player, cluster_id: str, skill_id: int) -> dict:
     except SkillNode.DoesNotExist:
         return {'error': 'Skill not found'}
 
-    # Check this is the player's kingdom
     cluster = TerritoryCluster.objects.filter(player=player, cluster_id=cluster_id).first()
     if not cluster:
         return {'error': 'Kingdom not found'}
 
-    # Check not already unlocked
-    if KingdomSkill.objects.filter(player=player, cluster_id=cluster_id, skill=skill).exists():
-        return {'error': 'Already unlocked in this kingdom'}
+    if not cluster.is_main_kingdom:
+        return {'error': 'Seul le Royaume Principal peut débloquer des compétences'}
 
-    # TODO: deduct resources from kingdom stockpile
+    if KingdomSkill.objects.filter(player=player, cluster_id=cluster_id, skill=skill).exists():
+        return {'error': 'Déjà débloquée dans ce royaume'}
+
+    # Parse cost_json → {field: amount}
+    costs: dict[str, float] = _parse_skill_costs(skill.cost_json or [])
+
+    if costs:
+        # Check aggregate resources across kingdom territories
+        kingdom_terrs = list(Territory.objects.filter(
+            owner=player, h3_index__in=cluster.hex_h3_index or []
+        ))
+
+        # Recalculate from DB to be safe
+        h3_set = []
+        try:
+            from terra_domini.apps.territories.kingdom_engine import _flood_fill
+            owned_all = list(Territory.objects.filter(owner=player).values_list('h3_index', flat=True))
+            components = _flood_fill(set(owned_all))
+            for comp in components:
+                if cluster.hex_h3_index in comp:
+                    h3_set = comp
+                    break
+        except Exception:
+            pass
+
+        kingdom_terrs = list(Territory.objects.filter(owner=player, h3_index__in=h3_set))
+        totals: dict[str, float] = {}
+        for t in kingdom_terrs:
+            for field in costs:
+                totals[field] = totals.get(field, 0.0) + float(getattr(t, field, 0) or 0)
+
+        # Check sufficiency
+        for field, needed in costs.items():
+            if totals.get(field, 0) < needed:
+                res_label = field.replace('res_', '').replace('_', ' ')
+                return {
+                    'error': f'Ressources insuffisantes : besoin {needed} {res_label}, '
+                             f'vous avez {totals.get(field,0):.1f}'
+                }
+
+        # Deduct proportionally from all kingdom territories
+        with transaction.atomic():
+            if kingdom_terrs:
+                per_terr = {f: v / len(kingdom_terrs) for f, v in costs.items()}
+                for t in kingdom_terrs:
+                    updates = {}
+                    for field, amt in per_terr.items():
+                        cur = float(getattr(t, field, 0) or 0)
+                        new_val = max(0.0, cur - amt)
+                        setattr(t, field, new_val)
+                        updates[field] = new_val
+                    if updates:
+                        Territory.objects.filter(pk=t.pk).update(**updates)
+
     KingdomSkill.objects.create(player=player, cluster_id=cluster_id, skill=skill)
-    return {'ok': True, 'skill': skill.name, 'kingdom_size': cluster.size}
+    return {
+        'ok': True,
+        'skill': skill.name,
+        'kingdom_size': cluster.size,
+        'costs_deducted': costs,
+    }
 
 
 def get_kingdom_skill_tree(player, cluster_id: str) -> dict:

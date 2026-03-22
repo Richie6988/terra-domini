@@ -82,9 +82,11 @@ export interface HexConfig {
   territory: TerritoryLight
   playerId?: string
   onClick: (t: TerritoryLight) => void
+  catFilter?: string[]
+  rarFilter?: string[]
 }
 
-export function makeHexPolygon({ territory: t, playerId, onClick }: HexConfig): L.Polygon | null {
+export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rarFilter }: HexConfig): L.Polygon | null {
   if (!t.boundary_points?.length) return null
   const pts = (t.boundary_points as [number,number][]).map(p => [p[0],p[1]] as L.LatLngTuple)
   const ta = t as any
@@ -96,55 +98,53 @@ export function makeHexPolygon({ territory: t, playerId, onClick }: HexConfig): 
   const rc      = RARITY_COLOR[rarity] || '#9CA3AF'
   const customBorder = ta.border_color
 
+  // Apply POI filters — only affects FREE POI hexes highlight visibility
+  // Owned / enemy hexes always shown regardless of filter
+  const activeCats = catFilter && catFilter.length ? catFilter : ['all']
+  const activeRars = rarFilter && rarFilter.length ? rarFilter : ['all']
+  const catMatch = activeCats.includes('all') || activeCats.includes(ta.poi_category || '')
+  const rarMatch = activeRars.includes('all') || activeRars.includes(rarity)
+  // If POI doesn't match filter: treat as invisible standard hex (but keep interaction)
+  const poiVisible = hasPOI && catMatch && rarMatch
+
   let fill: string, fillOp: number, stroke: string, weight: number, dash: string, cls: string
 
   if (ta.is_control_tower) {
-    // Tower — golden pulsing
     fill='#FFB800'; fillOp=0.45; stroke='#FFD700'; weight=2.5; dash=''; cls='td-hex-tower'
 
   } else if (isOwn) {
-    // OWNED = always green fill
-    // Border = custom color OR rarity color (shows territory quality)
-    const borderCol = customBorder || (hasPOI ? rc : '#00FF87')
+    const borderCol = customBorder || (poiVisible ? rc : '#00FF87')
     fill = '#00FF87'
     stroke = borderCol
     dash = ''
 
-    if (hasPOI) {
-      // Owned POI: stronger green fill, rarity border, pulse
-      fillOp = 0.38
-      weight = 4
+    if (poiVisible) {
+      fillOp = 0.38; weight = 4
       cls = rarity === 'mythic'    ? 'td-own-mythic'
           : rarity === 'legendary' ? 'td-own-legendary'
           : rarity === 'epic'      ? 'td-own-epic'
           : rarity === 'rare'      ? 'td-own-rare'
           : 'td-hex-own-std'
     } else {
-      // Owned standard: simple green
-      fillOp = 0.32
-      weight = 2.5
-      cls = 'td-hex-own-std'
+      fillOp = 0.32; weight = 2.5; cls = 'td-hex-own-std'
     }
 
   } else if (isEnemy) {
-    // Enemy — blue fill, rarity border hints
-    fill = hasPOI ? rc : '#4B8BF5'
-    fillOp = hasPOI ? 0.28 : 0.22
-    stroke = hasPOI ? rc : '#60A5FA'
-    weight = hasPOI ? 2.5 : 1.5
-    dash = ''
-    cls = 'td-hex-enemy'
+    fill = poiVisible ? rc : '#4B8BF5'
+    fillOp = poiVisible ? 0.28 : 0.22
+    stroke = poiVisible ? rc : '#60A5FA'
+    weight = poiVisible ? 2.5 : 1.5
+    dash = ''; cls = 'td-hex-enemy'
 
-  } else if (hasPOI) {
-    // FREE POI — rarity pulse (the look user loves on owned hex)
-    // Strongly highlighted so user WANTS to claim it
+  } else if (poiVisible) {
+    // FREE POI visible — rarity pulse
     fill = rc
     fillOp = rarity==='mythic' ? 0.60 : rarity==='legendary' ? 0.52 : rarity==='epic' ? 0.42 : rarity==='rare' ? 0.32 : rarity==='uncommon' ? 0.22 : 0.14
     stroke = rc; weight = 4; dash = ''
     cls = `td-poi-free-${rarity}`
 
   } else {
-    // Free standard — invisible
+    // Free standard OR filtered-out POI — invisible
     fill='#fff'; fillOp=0.0; stroke='#fff'; weight=0; dash=''; cls=''
   }
 

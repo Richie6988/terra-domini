@@ -20,6 +20,8 @@ import { TradePanel } from './components/hud/TradePanel'
 import { CryptoPanel } from './components/crypto/CryptoPanel'
 import { LeaderboardPanel } from './components/leaderboard/LeaderboardPanel'
 import { DailyClicker } from './components/clicker/DailyClicker'
+import { WalletProvider } from './components/crypto/WalletProvider'
+import { MarketplacePanel } from './components/crypto/MarketplacePanel'
 
 import { WarTicker } from './components/hud/WarTicker'
 
@@ -88,7 +90,8 @@ function GameScreen() {
         {activePanel === 'events'   && <EventsPanel    onClose={() => setActivePanel(null)} />}
         {activePanel === 'profile'  && <ProfilePanel   onClose={() => setActivePanel(null)} />}
         {activePanel === 'trade'    && <TradePanel       onClose={() => setActivePanel(null)} />}
-        {activePanel === 'crypto'   && <CryptoPanel      onClose={() => setActivePanel(null)} />}
+        {activePanel === 'crypto'      && <CryptoPanel      onClose={() => setActivePanel(null)} />}
+        {activePanel === 'marketplace' && <MarketplacePanel  onClose={() => setActivePanel(null)} />}
         {activePanel === 'leaderboard' && <LeaderboardPanel onClose={() => setActivePanel(null)} />}
         {showClicker && <DailyClicker onClose={() => setShowClicker(false)} />}
       </AnimatePresence>
@@ -113,6 +116,7 @@ function GameScreen() {
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
+      <WalletProvider>
       <BrowserRouter>
         <Suspense fallback={
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0a0a14', color: '#10B981', fontSize: 18 }}>

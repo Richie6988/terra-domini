@@ -221,21 +221,37 @@ GAME = {
 }
 
 # ── Email ────────────────────────────────────────────────────────────────────
-# Dev: emails printed to console (no SMTP needed)
-# Prod: set RESEND_API_KEY env var → emails sent via Resend (3000/month free)
-_resend_key = env('RESEND_API_KEY', default='')
-if _resend_key:
+# Priority: SMTP_HOST > RESEND_API_KEY > console (dev)
+#
+# SMTP (n'importe quel fournisseur — OVH, Gmail, Mailgun, Brevo...):
+#   SMTP_HOST=smtp.mondomaine.com
+#   SMTP_PORT=587
+#   SMTP_USER=noreply@hexod.io
+#   SMTP_PASSWORD=motdepasse
+#   SMTP_USE_TLS=True
+#
+# Resend (3000/mois gratuit) :
+#   RESEND_API_KEY=re_xxxx
+#
+_smtp_host    = env('SMTP_HOST', default='')
+_resend_key   = env('RESEND_API_KEY', default='')
+
+if _smtp_host:
+    EMAIL_BACKEND   = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST      = _smtp_host
+    EMAIL_PORT      = env.int('SMTP_PORT', default=587)
+    EMAIL_HOST_USER = env('SMTP_USER', default='')
+    EMAIL_HOST_PASSWORD = env('SMTP_PASSWORD', default='')
+    EMAIL_USE_TLS   = env.bool('SMTP_USE_TLS', default=True)
+    EMAIL_USE_SSL   = env.bool('SMTP_USE_SSL', default=False)
+elif _resend_key:
     EMAIL_BACKEND = 'anymail.backends.resend.EmailBackend'
-    ANYMAIL = {
-        'RESEND_API_KEY': _resend_key,
-    }
+    ANYMAIL = {'RESEND_API_KEY': _resend_key}
 else:
     EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
-DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL', default='Terra Domini <noreply@terradomini.io>')
-EMAIL_SUBJECT_PREFIX = '[Terra Domini] '
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-DEFAULT_FROM_EMAIL = 'noreply@terradomini.local'
+DEFAULT_FROM_EMAIL   = env('DEFAULT_FROM_EMAIL', default='Hexod <noreply@hexod.io>')
+EMAIL_SUBJECT_PREFIX = '[Hexod] '
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'UTC'
 USE_I18N = True

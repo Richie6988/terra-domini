@@ -14,6 +14,12 @@ app.autodiscover_tasks()
 
 # ─── Periodic Tasks ──────────────────────────────────────────────────────────
 app.conf.beat_schedule = {
+    # Hexod daily production — HEX Coin + ressources biome (toutes les 24h à 00:30 UTC)
+    'hexod-daily-production': {
+        'task': 'territories.daily_production',
+        'schedule': crontab(hour=0, minute=30),
+        'options': {'queue': 'territory'},
+    },
     # Territory resource tick — every 5 minutes
     'territory-resource-tick': {
         'task': 'terra_domini.apps.territories.tasks.process_territory_tick',

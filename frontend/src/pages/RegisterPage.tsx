@@ -2,7 +2,7 @@
  * RegisterPage.tsx
  */
 import { useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
+import { useNavigate, Link, useSearchParams } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { authApi } from '../services/api'
@@ -41,6 +41,8 @@ const btnStyle: React.CSSProperties = {
 
 export default function RegisterPage() {
   const navigate = useNavigate()
+  const [searchParams] = useSearchParams()
+  const refCode = searchParams.get('ref') || ''
   const setAuth = useStore((s) => s.setAuth)
   const [form, setForm] = useState({ email: '', username: '', display_name: '', password: '', confirm: '' })
   const [loading, setLoading] = useState(false)
@@ -50,8 +52,8 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (form.password !== form.confirm) { toast.error('Passwords do not match'); return }
-    if (form.password.length < 10) { toast.error('Password must be at least 10 characters'); return }
+    if (form.password !== form.confirm) { toast.error('Les mots de passe ne correspondent pas'); return }
+    if (form.password.length < 10) { toast.error('Mot de passe : 10 caractères minimum'); return }
 
     setLoading(true)
     try {
@@ -60,10 +62,18 @@ export default function RegisterPage() {
         password: form.password, display_name: form.display_name || form.username,
       })
       setAuth(data.player, data.access, data.refresh)
-      toast.success(`Welcome to Hexod, ${data.player.username}! 🌍`)
+      // Auto-apply referral code if present in URL
+      if (refCode) {
+        try {
+          await authApi.post?.('/social/join-referral/', { ref_code: refCode })
+        } catch (_) {}
+        toast.success(`Bienvenue sur Hexod, ${data.player.username} ! +50 💎 offerts par votre parrain 🎁`)
+      } else {
+        toast.success(`Bienvenue sur Hexod, ${data.player.username} ! 🌍`)
+      }
       navigate('/')
     } catch (e: any) {
-      toast.error(e?.response?.data?.error ?? 'Registration failed')
+      toast.error(e?.response?.data?.error ?? 'Inscription échouée')
     } finally { setLoading(false) }
   }
 
@@ -72,8 +82,15 @@ export default function RegisterPage() {
       <div style={bgStyle} />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={cardStyle}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{ fontSize: 28, fontWeight: 700, color: '#10B981', letterSpacing: -1, marginBottom: 4 }}>JOIN TERRA DOMINI</div>
-          <div style={{ fontSize: 13, color: '#6B7280' }}>Claim your first territory. Build your empire.</div>
+          <div style={{ fontSize: 32, marginBottom: 4 }}>⬡</div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: '#10B981', letterSpacing: -1, marginBottom: 4 }}>HEXOD</div>
+          <div style={{ fontSize: 13, color: '#6B7280' }}>Réclamez votre premier territoire. Construisez votre empire.</div>
+          {refCode && (
+            <div style={{ marginTop: 12, padding: '8px 14px', background: 'rgba(16,185,129,0.1)',
+              border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, fontSize: 12, color: '#10B981' }}>
+              🎁 Invitation acceptée — <strong>+50 💎 HEX Coin</strong> offerts à l'inscription !
+            </div>
+          )}
         </div>
 
         <form onSubmit={handleSubmit}>

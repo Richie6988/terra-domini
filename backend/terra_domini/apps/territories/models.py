@@ -101,6 +101,28 @@ class Territory(models.Model):
     last_tick_at  = models.DateTimeField(null=True, blank=True)
 
 
+    # ── Hexod GDD core fields (exist in DB, were missing from ORM) ───────────
+    rarity            = models.CharField(max_length=12, default='common',
+        choices=[('common','Common'),('uncommon','Uncommon'),('rare','Rare'),
+                 ('epic','Epic'),('legendary','Legendary'),('mythic','Mythic')])
+    biome             = models.CharField(max_length=20, default='grassland')
+    tdc_per_day       = models.FloatField(default=10.0)
+    poi_name          = models.CharField(max_length=200, blank=True, default='')
+    poi_wiki_url      = models.CharField(max_length=500, blank=True, default='')
+    is_shiny          = models.BooleanField(default=False)
+    nft_version       = models.IntegerField(default=1)
+    mint_cooldown_until = models.DateTimeField(null=True, blank=True)
+    shield_until      = models.DateTimeField(null=True, blank=True)
+    # Customisation
+    custom_name       = models.CharField(max_length=80, null=True, blank=True)
+    custom_emoji      = models.CharField(max_length=8, null=True, blank=True)
+    border_color      = models.CharField(max_length=7, null=True, blank=True)
+    fill_color        = models.CharField(max_length=7, null=True, blank=True)
+    hex_type          = models.CharField(max_length=20, default='standard',
+        choices=[('standard','Standard'),('resource','Ressource'),('poi','POI'),('strategic','Stratégique')])
+    is_connected      = models.BooleanField(default=False)
+    cluster_bonus_pct = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+
     # ── Hidden Resource Discovery ──────────────────────────────────────────
     # Each territory may hide a sub-surface resource (oil, minerals, etc.)
     # Revealed when player scouts with intel units or clicker bonus
@@ -174,7 +196,32 @@ class Territory(models.Model):
         }
 
     def is_shielded(self):
+        if self.shield_until and self.shield_until > timezone.now():
+            return True
         return self.shield_expires_at and self.shield_expires_at > timezone.now()
+
+    @property
+    def edition(self):
+        return 'genesis'
+
+    @property
+    def resource_richness(self):
+        return (self.tdc_per_day or 10) / 10.0
+
+    @property
+    def primary_resource(self):
+        return self.biome or 'credits'
+
+    def get_card_gradient(self):
+        RARITY_GRAD = {
+            'common':    ['#9CA3AF', '#4B5563'],
+            'uncommon':  ['#10B981', '#065F46'],
+            'rare':      ['#3B82F6', '#1E3A8A'],
+            'epic':      ['#8B5CF6', '#4C1D95'],
+            'legendary': ['#F59E0B', '#78350F'],
+            'mythic':    ['#EC4899', '#831843'],
+        }
+        return RARITY_GRAD.get(self.rarity or 'common', RARITY_GRAD['common'])
 
 
 class Building(models.Model):

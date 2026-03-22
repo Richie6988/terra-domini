@@ -16,7 +16,7 @@ import { ClaimModal } from './ClaimModal'
 import { HexodBottomBar } from '../hud/HexodBottomBar'
 import { injectGlowFilter, makeHexPolygon, injectHexAnimations } from './HexLayer'
 import { POIFilterPanel } from './POIFilterPanel'
-import { POIHexLayer } from './POIHexLayer'
+import { KingdomBorderLayer } from './KingdomBorderLayer'
 import { latLngToCell, cellToBoundary, gridDisk } from 'h3-js'
 import type { TerritoryLight } from '../../types'
 
@@ -287,6 +287,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     territories.filter(t => t.owner_id || (t as any).is_landmark || (t as any).poi_name).forEach(t => {
       const poly = makeHexPolygon({
         territory: t, playerId: player?.id,
+        catFilter: poiCatFilter, rarFilter: poiRarFilter,
         onClick: async (ter) => {
           onTerritoryClick(ter.h3_index)
           setSelectedHex(ter.h3_index)
@@ -413,9 +414,11 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         {claimTarget && <ClaimModal territory={claimTarget} isFree={isFirstClaim} onClose={() => setClaimTarget(null)} onClaimed={() => { setClaimTarget(null); setHasClaimed(true); localStorage.setItem('td_claimed_first','1') }} />}
       </AnimatePresence>
 
-      {/* POI filter button — left side */}
+
+      {/* POI filter — contrôle quels territoires sont en surbrillance */}
       <button
         onClick={() => setShowPOIPanel(v => !v)}
+        title="Filtrer les POI en surbrillance"
         style={{
           position:'fixed', left:8, top:60, zIndex:920,
           background: showPOIPanel ? 'rgba(139,92,246,0.3)' : 'rgba(4,4,12,0.92)',
@@ -426,7 +429,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         }}
       >
         <span style={{ fontSize:16 }}>📍</span>
-        <span style={{ fontSize:8, color: showPOIPanel ? '#C4B5FD' : '#6B7280', fontWeight:700 }}>POI</span>
+        <span style={{ fontSize:8, color: showPOIPanel ? '#C4B5FD' : '#6B7280', fontWeight:700 }}>Filtres</span>
       </button>
 
       <POIFilterPanel
@@ -435,12 +438,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         onFilterChange={(cats, rars) => { setPoiCatFilter(cats); setPoiRarFilter(rars) }}
       />
 
-
-
-      <POIHexLayer
-        map={mapRef.current} zoom={zoom} lat={center[0]} lon={center[1]}
-        catFilter={poiCatFilter} rarFilter={poiRarFilter}
-      />
+      <KingdomBorderLayer map={mapRef.current} zoom={zoom} />
       <HexodBottomBar />
     </div>
   )

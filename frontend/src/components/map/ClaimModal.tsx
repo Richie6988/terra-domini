@@ -15,6 +15,16 @@ import type { TerritoryLight } from '../../types'
 
 const CLAIM_COST = 50
 
+// CDC §2.3 — coûts d'attaque par rareté cible
+const ATTACK_COST: Record<string, { time_h: number; recaptcha: number; min_hex: number }> = {
+  common:    { time_h: 1,   recaptcha: 10,  min_hex: 0   },
+  uncommon:  { time_h: 4,   recaptcha: 20,  min_hex: 0   },
+  rare:      { time_h: 24,  recaptcha: 50,  min_hex: 5   },
+  epic:      { time_h: 72,  recaptcha: 75,  min_hex: 10  },
+  legendary: { time_h: 240, recaptcha: 100, min_hex: 20  },
+  mythic:    { time_h: 720, recaptcha: 500, min_hex: 100 },
+}
+
 type Method = 'free' | 'buy' | 'puzzle' | 'attack'
 type Puzzle = { q: string; a: number }
 
@@ -86,18 +96,43 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
     if (method === 'puzzle') setTimeout(() => inputRef.current?.focus(), 100)
   }, [method])
 
-  // Attack: animated progress bar based on rank, then auto-claim
+  const [attackResult, setAttackResult] = useState<{ victory: boolean; atk: number; def: number; win_chance: number; message: string } | null>(null)
+
+  const attackMut = useMutation({
+    mutationFn: () => api.post('/territories/attack/', { h3_index: t.h3_index }),
+    onSuccess: (res) => {
+      setAttackResult(res.data)
+      if (res.data.victory) {
+        setClaimed(true)
+        qc.invalidateQueries({ queryKey: ['player'] })
+        toast.success(`⚔️ ${name} conquered!`)
+        setTimeout(() => { onClaimed(); onClose() }, 2500)
+      } else {
+        toast.error('Defeat — defenses held.')
+        setAttacking(false)
+        setProgress(0)
+      }
+    },
+    onError: (e: any) => {
+      toast.error(e.response?.data?.error || 'Attack failed')
+      setAttacking(false)
+      setProgress(0)
+    },
+  })
+
+  // Attack: animated progress bar, then fire backend
   const startAttack = () => {
     setAttacking(true)
     setProgress(0)
-    const duration = Math.max(2000, 8000 - rank * 60) // rank 1=8s, rank 100=2s
+    setAttackResult(null)
+    const duration = Math.max(2000, 8000 - rank * 60)
     const interval = 50
     const step = (interval / duration) * 100
     const timer = setInterval(() => {
       setProgress(p => {
         if (p + step >= 100) {
           clearInterval(timer)
-          claimMut.mutate({ method: 'attack' })
+          attackMut.mutate()
           return 100
         }
         return p + step
@@ -282,13 +317,38 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                     Deploy your forces. Higher rank = faster conquest.
                     {isEnemy && <><br/><span style={{ color:'#F87171' }}>⚠️ Owned by {t.owner_username} — harder to take</span></>}
                   </div>
-                  <div style={{ display:'flex', justifyContent:'center', gap:6, marginTop:10, fontSize:11, color:'#9CA3AF' }}>
-                    <span>🎖️ Rank {rank}</span>
-                    <span>·</span>
-                    <span>⏱ ~{Math.max(2, Math.round((8000 - rank*60)/1000))}s</span>
-                    {isEnemy && <><span>·</span><span style={{ color:'#F87171' }}>+50% time (enemy)</span></>}
-                  </div>
+
+                  {/* CDC coûts par rareté */}
+                  {(() => {
+                    const cost = ATTACK_COST[rarity] || ATTACK_COST.common
+                    return (
+                      <div style={{ display:'flex', gap:8, justifyContent:'center', marginTop:12, flexWrap:'wrap' }}>
+                        <span style={{ fontSize:10, padding:'3px 8px', borderRadius:4, background:'rgba(239,68,68,0.1)', color:'#F87171', border:'1px solid rgba(239,68,68,0.2)' }}>
+                          ⏱ {cost.time_h}h mobilisation
+                        </span>
+                        {cost.min_hex > 0 && (
+                          <span style={{ fontSize:10, padding:'3px 8px', borderRadius:4, background:'rgba(245,158,11,0.1)', color:'#FCD34D', border:'1px solid rgba(245,158,11,0.2)' }}>
+                            💎 min {cost.min_hex} HEX
+                          </span>
+                        )}
+                        <span style={{ fontSize:10, padding:'3px 8px', borderRadius:4, background:'rgba(139,92,246,0.1)', color:'#C4B5FD', border:'1px solid rgba(139,92,246,0.2)' }}>
+                          🎖️ Rank {rank} · ~{Math.max(2, Math.round((8000 - rank*60)/1000))}s
+                        </span>
+                      </div>
+                    )
+                  })()}
                 </div>
+
+                {/* Résultat attaque */}
+                {attackResult && !attackResult.victory && (
+                  <div style={{ padding:'12px', borderRadius:10, background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', marginBottom:12, textAlign:'center' }}>
+                    <div style={{ fontSize:13, color:'#F87171', fontWeight:700 }}>💀 Défaite</div>
+                    <div style={{ fontSize:11, color:'#6B7280', marginTop:4 }}>
+                      ATK {attackResult.atk} vs DEF {attackResult.def} · Chance {attackResult.win_chance}%
+                    </div>
+                    <div style={{ fontSize:11, color:'#6B7280' }}>{attackResult.message}</div>
+                  </div>
+                )}
 
                 {!attacking ? (
                   <button onClick={startAttack}
@@ -309,7 +369,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                       />
                     </div>
                     <div style={{ fontSize:11, color:'#6B7280', textAlign:'center' }}>
-                      {attackProgress < 30 ? '🏃 Troops mobilizing…' : attackProgress < 60 ? '💥 Engaging defenses…' : attackProgress < 90 ? '🔥 Breaking through…' : '🏴 Planting your flag…'}
+                      {attackProgress < 30 ? '🏃 Troops mobilizing…' : attackProgress < 60 ? '💥 Engaging defenses…' : attackProgress < 90 ? '🔥 Breaking through…' : attackMut.isPending ? '📡 Resolving battle…' : '🏴 Planting your flag…'}
                     </div>
                   </div>
                 )}

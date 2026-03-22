@@ -362,6 +362,22 @@ def distribute_ad_revenue(campaign_id: str, date_str: str):
 
 # ─── Anti-Cheat Tasks ─────────────────────────────────────────────────────────
 
+@shared_task(bind=True, queue='territory', name='territories.daily_production')
+def daily_hexod_production(self):
+    """
+    Hexod 24h production tick — ressources biome × rareté → HEX Coin.
+    Scheduled: every 24h via Celery beat.
+    """
+    from terra_domini.apps.territories.production_cron import run_production_tick
+    try:
+        result = run_production_tick()
+        logger.info(f"daily_hexod_production: {result}")
+        return result
+    except Exception as e:
+        logger.error(f"daily_hexod_production failed: {e}", exc_info=True)
+        raise self.retry(exc=e, countdown=300, max_retries=3)
+
+
 @shared_task(queue='default', name='accounts.anticheat_analysis')
 def run_anticheat_analysis():
     """

@@ -255,6 +255,51 @@ class PublicProfileView(generics.RetrieveAPIView):
         })
 
 
+class MyReferralView(APIView):
+    """GET /api/social/my-referral/ — get or create le lien referral du joueur."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from django.conf import settings as _s
+        player = request.user
+
+        # get_or_create lien avec code basé sur username+id
+        link, created = ReferralLink.objects.get_or_create(
+            referrer=player,
+            defaults={'code': f"{player.username[:8].lower()}{str(player.id)[:6]}"}
+        )
+
+        # Si le code existe déjà mais a une collision, ajouter suffix
+        if created is False and not link.code:
+            link.code = f"{player.username[:8].lower()}{str(player.id)[:6]}"
+            link.save(update_fields=['code'])
+
+        frontend_url = getattr(_s, 'FRONTEND_URL', 'https://hexod.io')
+        invite_url   = f"{frontend_url}/register?ref={link.code}"
+
+        # Liste des filleuls
+        referrals = Referral.objects.filter(referrer=player).select_related('referred').order_by('-joined_at')[:20]
+
+        return Response({
+            'code': link.code,
+            'invite_url': invite_url,
+            'total_referrals': link.total_referrals,
+            'total_commission_tdc': float(link.total_commission_tdc),
+            'this_month_tdc': float(link.this_month_tdc),
+            'referrals': [
+                {
+                    'username': r.referred.username,
+                    'joined_at': r.joined_at.isoformat(),
+                    'is_active': r.is_active,
+                    'tdc_earned': float(r.total_tdc_earned),
+                }
+                for r in referrals
+            ],
+            'reward_per_referral': 50,   # HEX Coin offerts au filleul
+            'commission_pct': 5.0,       # 5% des achats du filleul pendant 90j
+        })
+
+
 class JoinViaReferralView(APIView):
     """Called after registration when ?ref= param present in URL."""
     permission_classes = [IsAuthenticated]
