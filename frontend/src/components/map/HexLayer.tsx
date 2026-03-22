@@ -74,6 +74,13 @@ export function injectHexAnimations() {
     .td-hex-own-std  { filter: drop-shadow(0 0 5px rgba(0,255,135,0.8)); }
     .td-hex-enemy    { filter: drop-shadow(0 0 4px rgba(99,145,255,0.6)); }
     .td-hex-tower    { animation: poiLegend 2s ease-in-out infinite; }
+
+    /* Vulnérabilité DEF — rouge clignotant (Alex spec) */
+    @keyframes vulnPulse {
+      0%,100% { filter: drop-shadow(0 0 4px #EF444488); opacity: 0.85; }
+      50%     { filter: drop-shadow(0 0 12px #EF4444cc) drop-shadow(0 0 6px #FF000088); opacity: 1; }
+    }
+    .td-hex-vulnerable { animation: vulnPulse 1.2s ease-in-out infinite !important; }
   `
   document.body.appendChild(s)
 }
@@ -97,6 +104,11 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
   const rarity  = ta.rarity || 'common'
   const rc      = RARITY_COLOR[rarity] || '#9CA3AF'
   const customBorder = ta.border_color
+
+  // Fenêtre de vulnérabilité DEF (Alex spec) — visible pour tout le monde
+  const isVulnerable = !!(ta.infiltration_window_until &&
+    new Date(ta.infiltration_window_until) > new Date())
+  const infiltrationCount = ta.infiltration_count || 0
 
   // Apply POI filters — only affects FREE POI hexes highlight visibility
   // Owned / enemy hexes always shown regardless of filter
@@ -148,6 +160,14 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
     fill='#fff'; fillOp=0.0; stroke='#fff'; weight=0; dash=''; cls=''
   }
 
+  // Override stroke/fill si territoire vulnérable (fenêtre post-infiltration)
+  if (isVulnerable && isEnemy) {
+    stroke = '#EF4444'
+    weight = Math.max(weight, 3)
+    dash   = '6 3'
+    cls    = cls + ' td-hex-vulnerable'
+  }
+
   const poly = L.polygon(pts, {
     fillColor:fill, fillOpacity:fillOp,
     color:stroke, weight:weight,
@@ -163,12 +183,20 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
     : hasPOI ? `⬡ ${rarity.toUpperCase()} — Libre`
     : '⬜ Libre'
 
+  const vulnHtml = isVulnerable
+    ? `<div style="color:#EF4444;font-size:10px;font-weight:800;margin-top:3px">
+         🔓 DÉFENSES AFFAIBLIES${infiltrationCount >= 3 ? ' (DEF 15%)' : ' (DEF 50%)'}
+         <br/><span style="color:#6B7280;font-weight:400">Infiltration${infiltrationCount >= 3 ? ' ×3' : ''} — Opportunité d'assaut !</span>
+       </div>`
+    : ''
+
   poly.bindTooltip(`
     <div style="font-size:11px;line-height:1.7;font-family:system-ui;min-width:160px">
       <div style="font-weight:900;color:#fff;font-size:13px">${ta.custom_name || ta.poi_name || ta.place_name || 'Zone ' + t.h3_index.slice(0,6)}</div>
       <div style="color:${isOwn ? '#00FF87' : hasPOI ? rc : '#9CA3AF'}">${stateLabel}</div>
       ${hasPOI ? `<div style="color:${rc};font-size:10px;font-weight:700">${ta.poi_category||''}</div>` : ''}
       <div style="color:#10B981;font-size:10px">+${income} HEX Coin/jour</div>
+      ${vulnHtml}
     </div>
   `, { className:'td-tooltip', direction:'top', sticky:true })
 

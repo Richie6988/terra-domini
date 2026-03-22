@@ -352,6 +352,29 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                     {isEnemy && <><br/><span style={{ color:'#F87171' }}>⚠️ Owned by {t.owner_username} — harder to take</span></>}
                   </div>
 
+                  {/* Indicateur vulnérabilité DEF */}
+                  {isEnemy && t.infiltration_window_until && new Date(t.infiltration_window_until) > new Date() && (
+                    <div style={{
+                      margin:'10px 0', padding:'8px 12px', borderRadius:9,
+                      background:'rgba(239,68,68,0.1)', border:'1px solid rgba(239,68,68,0.3)',
+                      display:'flex', alignItems:'center', gap:8,
+                    }}>
+                      <span style={{ fontSize:18 }}>🔓</span>
+                      <div>
+                        <div style={{ fontSize:11, fontWeight:800, color:'#EF4444' }}>
+                          {(t.infiltration_count || 0) >= 3 ? 'DEF réduite à 15% !' : 'DEF réduite à 50% !'}
+                        </div>
+                        <div style={{ fontSize:9, color:'#6B7280' }}>
+                          Infiltration réussie — fenêtre d'assaut ouverte !
+                          Lancez un assaut maintenant.
+                        </div>
+                      </div>
+                      <span style={{ marginLeft:'auto', fontSize:10, color:'#EF4444', fontWeight:800 }}>
+                        ×{(t.infiltration_count || 0) >= 3 ? '6.6' : '2'} ATK
+                      </span>
+                    </div>
+                  )}
+
                   {/* CDC coûts par rareté */}
                   {(() => {
                     const cost = ATTACK_COST[rarity] || ATTACK_COST.common

@@ -488,6 +488,69 @@ class ShopViewSet(viewsets.GenericViewSet):
             resp['booster'] = booster_result
         return Response(resp)
 
+    @action(detail=False, methods=['GET'], url_path='active-boosts')
+    def active_boosts_endpoint(self, request):
+        """GET /api/shop/active-boosts/ — boosts actifs du joueur."""
+        boosts = ActiveBoost.objects.filter(
+            player=request.user
+        ).filter(
+            Q(expires_at__isnull=True) | Q(expires_at__gt=timezone.now())
+        ).select_related('item').order_by('expires_at')
+
+        return Response([{
+            'id':          str(b.id),
+            'boost_type':  b.boost_type,
+            'boost_value': b.boost_value,
+            'item_name':   b.item.name if b.item else b.boost_type,
+            'expires_at':  b.expires_at.isoformat() if b.expires_at else None,
+            'is_permanent': b.expires_at is None,
+        } for b in boosts])
+
+    @action(detail=False, methods=['GET'], url_path='inventory')
+    def inventory(self, request):
+        """GET /api/shop/inventory/ — inventaire du joueur."""
+        from terra_domini.apps.economy.models import PlayerInventory
+        items = PlayerInventory.objects.filter(
+            player=request.user, quantity__gt=0
+        ).select_related('item').order_by('-acquired_at')
+
+        return Response([{
+            'id':          str(i.id),
+            'code':        i.item.code,
+            'name':        i.item.name,
+            'quantity':    i.quantity,
+            'effect_type': i.item.effect_type,
+            'icon':        i.item.icon_url or '🎁',
+            'rarity':      i.item.rarity,
+            'acquired_at': i.acquired_at.isoformat(),
+        } for i in items])
+
+    @action(detail=False, methods=['POST'], url_path='use-item')
+    def use_item(self, request):
+        """POST /api/shop/use-item/ {item_code, territory_h3?} — utiliser un item de l'inventaire."""
+        from terra_domini.apps.economy.models import PlayerInventory
+        item_code    = request.data.get('item_code')
+        territory_h3 = request.data.get('territory_h3')
+
+        if not item_code:
+            return Response({'error': 'item_code required'}, status=400)
+
+        inv = PlayerInventory.objects.filter(
+            player=request.user, item__code=item_code, quantity__gt=0
+        ).select_related('item').first()
+
+        if not inv:
+            return Response({'error': 'Item non trouvé dans l\'inventaire'}, status=404)
+
+        _apply_item_effect(request.user, inv.item, 1, territory_h3)
+        inv.quantity -= 1
+        if inv.quantity == 0:
+            inv.delete()
+        else:
+            inv.save(update_fields=['quantity'])
+
+        return Response({'success': True, 'item': item_code, 'remaining': inv.quantity if inv.pk else 0})
+
 
 class TDCViewSet(viewsets.GenericViewSet):
     """TDC balance management and transaction history."""
