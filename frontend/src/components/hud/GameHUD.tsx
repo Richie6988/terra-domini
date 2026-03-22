@@ -79,8 +79,29 @@ export function GameHUD() {
 
   const unreadNotifs = notifications.length
 
+  // Dominance check (Board spec: alerte si >8% de la carte)
+  const myTerritories = useStore(s => s.myTerritories)
+  const totalTerritories = useStore(s => s.territories?.length || 0)
+  const dominancePct = totalTerritories > 0 ? (myTerritories?.size || 0) / totalTerritories : 0
+  const isDominant = dominancePct > 0.08
+
   return (
     <>
+      {/* Alerte coalition anti-dominant */}
+      {isDominant && (
+        <div style={{
+          position:'absolute', top:0, left:0, right:0, zIndex:901,
+          background:'rgba(239,68,68,0.12)', borderBottom:'1px solid rgba(239,68,68,0.3)',
+          padding:'6px 16px', display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+          backdropFilter:'blur(4px)',
+        }}>
+          <span style={{ fontSize:12 }}>⚠️</span>
+          <span style={{ fontSize:11, color:'#FCA5A5', fontWeight:700 }}>
+            Coalition active — vous contrôlez {(dominancePct*100).toFixed(1)}% de la carte.
+            Tous vos adversaires reçoivent DEF +25% contre vous.
+          </span>
+        </div>
+      )}
       {/* Top bar */}
       <div style={{
         position: 'absolute', top: 0, left: 0, right: 0, zIndex: 900,

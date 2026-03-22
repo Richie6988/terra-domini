@@ -20,6 +20,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../services/api'
 import { useStore, usePlayer } from '../../store'
+import { ResourceBadge } from '../ui/ResourceTooltip'
 import toast from 'react-hot-toast'
 
 if (typeof window !== 'undefined') {
@@ -1144,21 +1145,18 @@ function KingdomTab({ t, cfg }: { t:any; cfg:typeof RARITY[RK] }) {
         </div>
       </div>
 
-      {/* Available resources for skill tree */}
+      {/* Available resources for skill tree — avec tooltips (Marie spec) */}
       <div style={{fontSize:9,color:'#4B5563',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:5}}>
         Ressources du royaume — allouer aux compétences
       </div>
-      <div style={{display:'flex',gap:4,flexWrap:'wrap',marginBottom:12}}>
-        {Object.entries(RES_LABELS).filter(([k])=>resources[k]>0).map(([k,icon])=>(
-          <div key={k} style={{display:'flex',alignItems:'center',gap:3,padding:'3px 8px',
-            borderRadius:5,background:`${cfg.c}14`,border:`1px solid ${cfg.c}33`}}>
-            <span style={{fontSize:12}}>{icon}</span>
-            <span style={{fontSize:10,color:cfg.accent,fontFamily:'monospace',fontWeight:700}}>
-              {Math.round(resources[k])}
-            </span>
-          </div>
-        ))}
-        {Object.keys(resources).filter(k=>RES_LABELS[k]&&resources[k]>0).length===0&&(
+      <div style={{display:'flex',gap:6,flexWrap:'wrap',marginBottom:12}}>
+        {Object.entries(resources)
+          .filter(([k,v]) => k.startsWith('res_') && (v as number) > 0)
+          .sort(([,a],[,b]) => (b as number)-(a as number))
+          .map(([k,v]) => (
+            <ResourceBadge key={k} resource={k} value={v as number} />
+          ))}
+        {Object.keys(resources).filter(k=>k.startsWith('res_')&&(resources[k] as number)>0).length===0&&(
           <span style={{fontSize:10,color:'#374151'}}>Aucune ressource — agrandissez votre royaume</span>
         )}
       </div>
@@ -1531,7 +1529,9 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 <div style={{display:'flex',gap:7}}>
                   <button style={{flex:1,padding:'9px',border:`1px solid ${cfg.c}44`,borderRadius:8,cursor:'pointer',background:`${cfg.c}14`,color:cfg.c,fontSize:11,fontWeight:700}}>💎 Minter</button>
                   <button style={{flex:1,padding:'9px',border:'1px solid rgba(59,130,246,0.35)',borderRadius:8,cursor:'pointer',background:'rgba(59,130,246,0.1)',color:'#60A5FA',fontSize:11,fontWeight:700}}
-                    onClick={()=>useStore.getState().setActivePanel('marketplace')}>🏪 Marketplace</button>
+                    onClick={()=>useStore.getState().setActivePanel('marketplace')}>🏪 Marché</button>
+                  <button style={{flex:1,padding:'9px',border:'1px solid rgba(0,255,135,0.3)',borderRadius:8,cursor:'pointer',background:'rgba(0,255,135,0.1)',color:'#00FF87',fontSize:11,fontWeight:700}}
+                    onClick={()=>useStore.getState().setActivePanel('shop')}>🏪 Boutique</button>
                 </div>
               </div>
             )}

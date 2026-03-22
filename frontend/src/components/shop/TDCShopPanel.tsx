@@ -22,10 +22,11 @@ const EUR_PACKAGES = [
 ]
 
 const CATEGORY_LABELS: Record<string, string> = {
-  shield: '🛡️ Shields',
-  military: '⚔️ Military',
+  shield: '🛡️ Boucliers',
+  military: '⚔️ Militaire',
   construction: '🔨 Construction',
-  cosmetic: '🎨 Cosmetics',
+  resource_pack: '⚡ Ressources',
+  cosmetic: '🎨 Cosmétiques',
   battle_pass: '🎖️ Battle Pass',
   alliance: '🏰 Alliance',
 }

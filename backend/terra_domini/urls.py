@@ -44,7 +44,7 @@ from terra_domini.apps.blockchain.marketplace_views import (
     MarketplaceBuyView, MarketplaceDelistView, MarketplaceStatsView,
 )
 from terra_domini.apps.progression.views import SkillTreeView, SkillUnlockView
-from terra_domini.apps.progression.views import ProgressionViewSet, TutorialCompleteView
+from terra_domini.apps.progression.views import ProgressionViewSet, TutorialCompleteView, offline_summary
 from terra_domini.apps.social.views import FriendViewSet, PublicProfileView, JoinViaReferralView
 from terra_domini.apps.social.models_and_views import MyReferralView
 
@@ -119,6 +119,7 @@ urlpatterns = [
     path('api/progression/skills/', SkillTreeView.as_view(), name='skill-tree'),
     path('api/progression/skills/<int:pk>/unlock/', SkillUnlockView.as_view(), name='skill-unlock'),
     path('api/progression/tutorial-complete/', TutorialCompleteView.as_view(), name='tutorial_complete'),
+    path('api/progression/offline-summary/',   offline_summary,                name='offline_summary'),
 
     # ── Social ────────────────────────────────────────────────────────────────
     path('api/social/join-referral/', JoinViaReferralView.as_view(), name='join_referral'),

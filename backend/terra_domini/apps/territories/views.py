@@ -543,6 +543,11 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             logger.warning(f'Resource init failed: {e}')
 
         logger.info(f"Territory claimed: {h3_index} by {request.user.username} (method={method})")
+        # Vérifier progression campagnes après claim
+        try:
+            from terra_domini.apps.progression.campaigns import check_campaign_progress
+            check_campaign_progress(request.user)
+        except Exception: pass
         # Create map overlay event
         try:
             from terra_domini.apps.territories.models import MapOverlayEvent
@@ -812,6 +817,11 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                     territories_captured=F('territories_captured') + 1,
                     battles_won=F('battles_won') + 1,
                 )
+                # Check campaign progress après victoire
+                try:
+                    from terra_domini.apps.progression.campaigns import check_campaign_progress
+                    check_campaign_progress(attacker)
+                except Exception: pass
                 return Response({
                     'victory': True, 'attack_type': 'assault',
                     'atk': round(atk, 1), 'def': round(def_val, 1),
