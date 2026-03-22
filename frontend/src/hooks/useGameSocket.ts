@@ -159,7 +159,7 @@ export function useGameSocket() {
         // Backend returns plain array OR {results: [...]}
         const territories = Array.isArray(data) ? data : (data.results ?? [])
         // Keep owned territories AND free POI hexes (they are visible on map)
-        const relevantTerritories = territories.filter((t: any) => t.owner_id || t.is_landmark || t.poi_name)
+        const relevantTerritories = territories.filter((t: any) => t.owner_id || t.is_landmark || t.poi_name || (t.rarity && t.rarity !== 'common'))
         if (relevantTerritories.length) {
           useStore.getState().setTerritories(relevantTerritories)
         }

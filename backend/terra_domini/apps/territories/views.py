@@ -74,8 +74,10 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             return Response([], status=200)
 
         from terra_domini.apps.territories.models import Territory
-        owned = {t.h3_index: t for t in
-                 Territory.objects.filter(h3_index__in=hex_ids).select_related('owner')}
+        # Load ALL territories in viewport: owned + landmark/seeded
+        all_terrs = {t.h3_index: t for t in
+                     Territory.objects.filter(h3_index__in=hex_ids).select_related('owner')}
+        owned = all_terrs  # alias for backward compat
 
         player = request.user
 
@@ -145,14 +147,14 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 'boundary_points': boundary,
                 'resource_food': float(getattr(t, 'resource_food', 5)),
                 'resource_energy': float(getattr(t, 'resource_energy', 5)),
-                'resource_credits': float(getattr(t, 'resource_credits', poi.get('tdc_per_24h', 10))),
+                'resource_credits': float(getattr(t,'tdc_per_day',None) or getattr(t,'resource_credits',None) or poi.get('tdc_per_24h',10) or 10),
                 'resource_materials': float(getattr(t, 'resource_materials', 3)),
                 'resource_intel': float(getattr(t, 'resource_intel', 2)),
                 'food_per_tick': float(getattr(t, 'resource_food', poi.get('tdc_per_24h', 10))),
-                'rarity': poi.get('rarity') or getattr(t, 'rarity', 'common'),
+                'rarity': getattr(t,'rarity',None) or poi.get('rarity') or 'common',
                 'nft_version': getattr(t, 'nft_version', 1),
                 'token_id': poi.get('token_id') or getattr(t, 'token_id', None),
-                'is_shiny': bool(poi.get('is_shiny')) or bool(getattr(t, 'is_shiny', False)),
+                'is_shiny': bool(getattr(t,'is_shiny',False)) or bool(poi.get('is_shiny',False)),
                 'custom_name': getattr(t, 'custom_name', None) if t else None,
                 'custom_emoji': getattr(t, 'custom_emoji', None) if t else None,
                 'border_color': getattr(t, 'border_color', None) if t else None,
@@ -568,6 +570,23 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         return Response(TerritoryDetailSerializer(territory).data)
 
     # ── Shield ────────────────────────────────────────────────────────────────
+    @action(detail=False, methods=['POST'], url_path='generate')
+    def generate(self, request):
+        """POST /api/territories/generate/ {h3_index, lat, lon}
+        Generate or retrieve a standard territory on first click.
+        """
+        h3_index = request.data.get('h3_index', '').strip()
+        lat = float(request.data.get('lat', 0))
+        lon = float(request.data.get('lon', 0))
+        if not h3_index:
+            return Response({'error': 'h3_index required'}, status=400)
+        try:
+            from terra_domini.apps.territories.territory_engine import generate_territory
+            data = generate_territory(h3_index, lat, lon)
+            return Response({'territory': data})
+        except Exception as e:
+            return Response({'error': str(e)}, status=500)
+
     @action(detail=False, methods=['POST'], url_path='shield')
     def activate_shield(self, request):
         """POST /api/territories/shield/ {h3_index, hours: 6|12}"""

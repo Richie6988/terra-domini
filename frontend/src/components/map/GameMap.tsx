@@ -287,12 +287,24 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     territories.filter(t => t.owner_id || (t as any).is_landmark || (t as any).poi_name).forEach(t => {
       const poly = makeHexPolygon({
         territory: t, playerId: player?.id,
-        onClick: (ter) => {
+        onClick: async (ter) => {
           onTerritoryClick(ter.h3_index)
           setSelectedHex(ter.h3_index)
-          setSelectedTerritoryState(ter)
-          if (!ter.owner_id) setClaimTarget(ter)
-          else if (ter.owner_id !== player?.id) setAttackTarget(ter)
+          // Generate territory on first click if not already in DB (standard hex)
+          let enriched: any = ter
+          if (!(ter as any).rarity && !(ter as any).is_landmark) {
+            try {
+              const r = await fetch(`/api/territories/generate/`, {
+                method: 'POST',
+                headers: { 'Content-Type':'application/json', Authorization:`Bearer ${useStore.getState().accessToken}` },
+                body: JSON.stringify({ h3_index: ter.h3_index, lat: (ter as any).center_lat, lon: (ter as any).center_lon }),
+              })
+              if (r.ok) { const d = await r.json(); enriched = { ...ter, ...d.territory } }
+            } catch(_) {}
+          }
+          setSelectedTerritoryState(enriched)
+          if (!(enriched as any).owner_id) setClaimTarget(enriched)
+          else if ((enriched as any).owner_id !== player?.id) setAttackTarget(enriched)
         }
       })
       if (poly) layer.addLayer(poly)
