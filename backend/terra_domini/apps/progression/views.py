@@ -185,6 +185,44 @@ class ProgressionViewSet(viewsets.GenericViewSet):
         })
 
 
+    @action(detail=False, methods=['GET'], url_path='campaigns')
+    def campaigns(self, request):
+        """GET /api/progression/campaigns/ — état des campagnes du joueur."""
+        from terra_domini.apps.progression.campaigns import get_or_start_campaign, CAMPAIGN_DATA
+        from terra_domini.apps.progression.campaigns import PlayerCampaign
+
+        # Créer campagne 1 si inexistante
+        prog, _ = PlayerCampaign.objects.get_or_create(
+            player=request.user, campaign_id=1
+        )
+
+        result = []
+        for camp in CAMPAIGN_DATA:
+            data = get_or_start_campaign(request.user, camp['id'])
+            # Vérifier si débloquée
+            is_unlocked = camp['id'] == 1 or PlayerCampaign.objects.filter(
+                player=request.user, campaign_id=camp['id']-1, completed=True
+            ).exists()
+            data['is_unlocked'] = is_unlocked
+            result.append(data)
+
+        return Response({'campaigns': result})
+
+    @action(detail=False, methods=['POST'], url_path='campaigns/check')
+    def campaigns_check(self, request):
+        """POST /api/progression/campaigns/check — vérifie progression après action."""
+        from terra_domini.apps.progression.campaigns import check_campaign_progress
+        result = check_campaign_progress(request.user)
+        if result and result.get('advanced'):
+            return Response({
+                'advanced': True,
+                'reward': result.get('reward_label'),
+                'new_step': result.get('new_step'),
+                'campaign_completed': result.get('campaign_completed', False),
+            })
+        return Response({'advanced': False, 'progress': result})
+
+
 class TutorialCompleteView(APIView):
     """POST /api/progression/tutorial-complete/ — grant 100 TDC for tutorial."""
     permission_classes = [IsAuthenticated]

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { LogOut, Copy, Camera, ChevronRight, TrendingUp, Shield, Zap, Globe, FlaskConical } from 'lucide-react'
 import { api } from '../../services/api'
 import { SkeletonList } from '../ui/Utils'
+import { CampaignWidget } from './CampaignWidget'
 import { useStore, usePlayer } from '../../store'
 import toast from 'react-hot-toast'
 
@@ -28,12 +29,13 @@ const RARITY_C: Record<string,string> = {
 }
 
 const TABS = [
-  { id:'overview', label:'Vue d\'ensemble', icon:'📊' },
-  { id:'territories', label:'Territoires',  icon:'🗺️' },
-  { id:'resources',  label:'Ressources',    icon:'📦' },
-  { id:'skills',     label:'Compétences',   icon:'🔬' },
-  { id:'missions',   label:'Missions',      icon:'🎯' },
-  { id:'settings',   label:'Paramètres',    icon:'⚙️' },
+  { id:'overview',    label:'Vue d\'ensemble', icon:'📊' },
+  { id:'territories', label:'Territoires',     icon:'🗺️' },
+  { id:'resources',   label:'Ressources',      icon:'📦' },
+  { id:'skills',      label:'Compétences',     icon:'🔬' },
+  { id:'missions',    label:'Missions',        icon:'🎯' },
+  { id:'campaigns',   label:'Campagnes',       icon:'🗺️' },
+  { id:'settings',    label:'Paramètres',      icon:'⚙️' },
 ]
 
 /* ── ProfilePanel ──────────────────────────────────────────── */
@@ -173,6 +175,7 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
             {tab === 'resources'   && <ResourcesTab />}
             {tab === 'skills'      && <SkillsTab spec={spec} />}
             {tab === 'missions'    && <MissionsTab />}
+            {tab === 'campaigns'   && <CampaignWidget />}
             {tab === 'settings'    && <SettingsTab player={player} spec={spec} />}
           </motion.div>
         </AnimatePresence>
