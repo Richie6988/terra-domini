@@ -24,8 +24,11 @@ from terra_domini.apps.accounts.views import UpdateProfileView
 from terra_domini.apps.accounts.views import PlayerViewSet
 from terra_domini.apps.social.views import TradeViewSet
 from terra_domini.apps.blockchain.wallet_views import WalletViewSet
-from terra_domini.apps.blockchain.solana_views import (TokenomicsView, VerifyNFTOwnershipView, SPLTokenInfoView,
-    TokenomicsWhitepaperView, OnChainRevenueView), StakingInfoView, StakeView, ClaimStakingRewardsView
+from terra_domini.apps.blockchain.solana_views import (
+    TokenomicsView, VerifyNFTOwnershipView, SPLTokenInfoView,
+    TokenomicsWhitepaperView, OnChainRevenueView,
+    StakingInfoView, StakeView, ClaimStakingRewardsView,
+)
 from terra_domini.apps.territories.cluster_views import TerritoryClusterViewSet
 from terra_domini.apps.progression.views import SkillTreeView, SkillUnlockView
 from terra_domini.apps.progression.clicker_views import ClickerViewSet
