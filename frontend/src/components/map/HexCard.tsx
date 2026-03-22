@@ -304,13 +304,13 @@ function HexCard3D({ frontCv, backCv, imgUrl, cfg, showBack, isShiny }: {
     emissive: isShiny ? new THREE.Color(cfg.c).multiplyScalar(0.15) : new THREE.Color(0,0,0),
   }),[cfg,isShiny])
 
-  const D=0.22
+  const D=0.18
 
   return (
     <group ref={groupRef} rotation={[0.06, showBack?Math.PI:-0.1, 0]}>
       <mesh geometry={prismGeo} material={sideMat} />
-      <mesh geometry={faceGeo} material={frontMat} position={[0,0,D+0.001]} />
-      <mesh geometry={faceGeo} material={backMat} position={[0,0,-0.001]} rotation={[0,Math.PI,0]} />
+      <mesh geometry={faceGeo} material={frontMat} position={[0,0,D+0.12]} />
+      <mesh geometry={faceGeo} material={backMat} position={[0,0,-0.12]} rotation={[0,Math.PI,0]} />
       <pointLight position={[0,0,3.5]} intensity={0.8} color={cfg.c} />
     </group>
   )
@@ -452,7 +452,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
 
       {/* 3D canvas */}
       <div style={{width:240,height:270,cursor:'grab',zIndex:1,flexShrink:0}}>
-        <Canvas camera={{position:[0,0,4.0],fov:42}} gl={{antialias:true,alpha:true}} style={{background:'transparent'}}>
+        <Canvas camera={{position:[0,0,4.0],fov:42}} gl={{antialias:true,alpha:true,powerPreference:"high-performance"}} frameloop="demand" style={{background:'transparent'}}>
           <Suspense fallback={null}>
             <ambientLight intensity={0.3} />
             <pointLight position={[3,4,3]} intensity={1.8} />

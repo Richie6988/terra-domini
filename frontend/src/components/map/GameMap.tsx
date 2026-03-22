@@ -283,8 +283,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     layer.clearLayers()
     if (!showHex) return
 
-    // Draw owned territories + all free POI hexes (POI identity is the territory)
-    territories.filter(t => t.owner_id || (t as any).is_landmark).forEach(t => {
+    // Draw owned + POI hexes (is_landmark OR poi_name)
+    territories.filter(t => t.owner_id || (t as any).is_landmark || (t as any).poi_name).forEach(t => {
       const poly = makeHexPolygon({
         territory: t, playerId: player?.id,
         onClick: (ter) => {
