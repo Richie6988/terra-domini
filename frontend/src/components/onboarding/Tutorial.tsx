@@ -222,42 +222,42 @@ interface TutorialStep {
 const TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 0,
-    emoji: '🌍',
-    title: 'Welcome to Hexod',
-    body: 'The real world is your game board. Claim zones near you. Build an empire. Earn real Coins from brand ads on your land.',
-    action: 'Start Playing →',
+    emoji: '⬡',
+    title: 'Bienvenue sur Hexod !',
+    body: 'La carte du monde réel est ton plateau de jeu. Revendique des zones, construis ton empire, gagne des HEX Coin.',
+    action: "C'est parti →",
     requiresGPS: true,
   },
   {
     id: 1,
     emoji: '🔲',
-    title: 'Zones are your currency',
-    body: 'The map is divided into hexagonal zones. Each zone earns resources every 5 minutes. Unclaimed zones (grey) are free — tap one to make it yours!',
-    action: 'Got it →',
+    title: 'Les zones qui brillent sont spéciales',
+    body: 'Les hexagones colorés sont des POI (Points d\'Intérêt). Plus ils brillent, plus ils rapportent. Les zones grises sont libres à revendiquer.',
+    action: 'Compris →',
     hint: 'hex-unclaimed',
   },
   {
     id: 2,
     emoji: '🏴',
-    title: 'Claim your first zone!',
+    title: 'Revendique ta première zone !',
     body: 'Tap any grey zone on the map, then press "Claim Zone". It\'s yours immediately. Go ahead!',
-    action: 'I claimed my first zone! ✓',
+    action: 'J\'ai revendiqué ma zone ✓',
     requiresClaim: true,
   },
   {
     id: 3,
     emoji: '⚡',
-    title: 'You\'re already earning!',
-    body: 'Your zone earns resources every 5 minutes — even when you\'re asleep. The more zones you own, the more you earn.',
-    action: 'What are Coins? →',
+    title: 'Tu gagnes déjà des HEX Coin !',
+    body: 'Ta zone produit des ressources et des HEX Coin toutes les 24h — même quand tu dors. Plus tu as de zones, plus tu gagnes.',
+    action: 'Et après ? →',
     hint: 'production-rates',
   },
   {
     id: 4,
     emoji: '🪙',
-    title: 'Coins = Real Crypto',
-    body: 'HEX Coin Coins are your reward. Brands pay to show ads on popular zones. You receive 70% of that revenue as Coins — which are tradeable on the Polygon blockchain.',
-    action: '🚀 Start Exploring!',
+    title: 'Tes missions du jour t\'attendent',
+    body: 'Chaque jour, 3 missions te guident et te récompensent. Le bouton 🎯 en bas à gauche les affiche. C\'est ta feuille de route quotidienne !',
+    action: '🚀 Explorer la carte !',
     hint: 'tdc-balance',
   },
 ]
@@ -340,19 +340,26 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
     }
     if (currentStep.requiresClaim) {
       setClaimWaiting(true)
+      // Fetch nearest unclaimed POI and dispatch event so map can show arrow
+      fetch('/api/geoip/').then(r => r.json()).then(loc => {
+        window.dispatchEvent(new CustomEvent('hexod:tutorial:show-arrow', {
+          detail: { lat: loc.lat, lon: loc.lon }
+        }))
+      }).catch(() => {})
       // Check if player has claimed any territory
       const checkClaimed = setInterval(() => {
         const myTerritories = useStore.getState().myTerritories
-        if (myTerritories.size > 0) {
+        if (myTerritories && myTerritories.size > 0) {
           clearInterval(checkClaimed)
           setClaimWaiting(false)
+          window.dispatchEvent(new CustomEvent('hexod:tutorial:hide-arrow'))
           advanceStep()
         }
       }, 2000)
-      // Timeout fallback after 60s
       setTimeout(() => {
         clearInterval(checkClaimed)
         setClaimWaiting(false)
+        window.dispatchEvent(new CustomEvent('hexod:tutorial:hide-arrow'))
         advanceStep()
       }, 60000)
       return
