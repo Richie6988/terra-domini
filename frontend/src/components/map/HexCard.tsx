@@ -282,24 +282,12 @@ function HexCard3D({ frontCv, backCv, imgUrl, cfg, showBack, isShiny }: {
   useEffect(()=>{ if(!imgUrl)return; new THREE.TextureLoader().load(imgUrl,tex=>{tex.colorSpace=THREE.SRGBColorSpace;setImgTex(tex)},undefined,()=>setImgTex(null)) },[imgUrl])
 
   const frontTex=useMemo(()=>{
-    const cv=frontCv
-    if(imgTex){
-      // Paint image into front canvas
-      const ctx=cv.getContext('2d')!; const S=cv.width
-      const imgTop=120, imgH=320
-      ctx.save()
-      makeHexClip(ctx,S/2,imgTop+imgH/2,155); ctx.clip()
-      ctx.drawImage(imgTex.image,0,imgTop,S,imgH)
-      const ov=ctx.createLinearGradient(0,imgTop+imgH*0.55,0,imgTop+imgH)
-      ov.addColorStop(0,'rgba(0,0,0,0)'); ov.addColorStop(1,cfg.bg+'ff')
-      ctx.fillStyle=ov; ctx.fillRect(0,imgTop,S,imgH)
-      ctx.restore()
-    }
-    const t=new THREE.CanvasTexture(cv); t.flipY=true; return t
-  },[frontCv,imgTex,cfg])
-
-  const backTex=useMemo(()=>{ const t=new THREE.CanvasTexture(backCv); t.flipY=false; return t },[backCv])
-
+    // Simple reliable: just wrap the pre-painted canvas
+    const t=new THREE.CanvasTexture(frontCv)
+    t.flipY=true
+    t.needsUpdate=true
+    return t
+  },[frontCv])
   const sideMat=useMemo(()=>new THREE.MeshStandardMaterial({
     color:cfg.c, metalness:cfg.metalness, roughness:cfg.roughness, envMapIntensity:1.5
   }),[cfg])
@@ -308,166 +296,23 @@ function HexCard3D({ frontCv, backCv, imgUrl, cfg, showBack, isShiny }: {
     map:frontTex, metalness:0.05, roughness:0.65, envMapIntensity:isShiny?1.2:0.4,
   }),[frontTex,isShiny])
 
+  // Back face: plain metallic — no texture, reliable rendering
   const backMat=useMemo(()=>new THREE.MeshStandardMaterial({
-    map:backTex, metalness:isShiny?0.95:0.2, roughness:isShiny?0.04:0.7, envMapIntensity:isShiny?2.5:0.5,
-  }),[backTex,isShiny])
+    color: new THREE.Color(cfg.c),
+    metalness:isShiny?0.95:0.75, roughness:isShiny?0.04:0.2,
+    envMapIntensity:isShiny?2.5:1.5,
+    emissive: isShiny ? new THREE.Color(cfg.c).multiplyScalar(0.15) : new THREE.Color(0,0,0),
+  }),[cfg,isShiny])
 
-  const D=0.22 // depth
+  const D=0.22
 
   return (
     <group ref={groupRef} rotation={[0.06, showBack?Math.PI:-0.1, 0]}>
-      {/* Side walls only */}
       <mesh geometry={prismGeo} material={sideMat} />
-      {/* Front face at z=D+0.001 */}
-      <mesh geometry={faceGeo} material={frontMat} position={[0,0,D+0.001]} rotation={[0,0,0]} />
-      {/* Back face at z=-0.001, flipped */}
+      <mesh geometry={faceGeo} material={frontMat} position={[0,0,D+0.001]} />
       <mesh geometry={faceGeo} material={backMat} position={[0,0,-0.001]} rotation={[0,Math.PI,0]} />
-      {/* Rarity point light */}
       <pointLight position={[0,0,3.5]} intensity={0.8} color={cfg.c} />
     </group>
-  )
-}
-
-/* ── Skill Tree SVG (radial, fully deployed) ─────────────── */
-const BRANCHES = [
-  { id:'attack',    ang:-90,  color:'#EF4444', icon:'⚔️', label:'Attaque'     },
-  { id:'defense',   ang:-26,  color:'#3B82F6', icon:'🛡️', label:'Défense'     },
-  { id:'economy',   ang: 38,  color:'#F59E0B', icon:'💰', label:'Économie'    },
-  { id:'influence', ang:102,  color:'#10B981', icon:'🌐', label:'Influence'   },
-  { id:'tech',      ang:166,  color:'#8B5CF6', icon:'🔬', label:'Technologie' },
-] as const
-
-function SkillTreeSVG({ tree, kingdom, cfg, onUnlock }: {
-  tree:Record<string,any[]>; kingdom:any; cfg:typeof RARITY[RK]; onUnlock:(id:number)=>void
-}) {
-  const [hover,setHover]=useState<number|null>(null)
-  const [selectedBranch,setSelectedBranch]=useState<string|null>(null)
-  const W=520,H=480,cx=W/2,cy=H/2-10
-  const BR=125, NR=20, SR=14, GAP=50
-
-  return (
-    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{display:'block',margin:'0 auto',overflow:'visible'}}>
-      <defs>
-        {BRANCHES.map(b=>(
-          <filter key={b.id} id={`gsf-${b.id}`} x="-80%" y="-80%" width="260%" height="260%">
-            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="bl"/>
-            <feMerge><feMergeNode in="bl"/><feMergeNode in="SourceGraphic"/></feMerge>
-          </filter>
-        ))}
-        <filter id="gsf-center" x="-80%" y="-80%" width="260%" height="260%">
-          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="bl"/>
-          <feMerge><feMergeNode in="bl"/><feMergeNode in="SourceGraphic"/></feMerge>
-        </filter>
-      </defs>
-
-      {BRANCHES.map(b=>{
-        const rad=(b.ang*Math.PI)/180
-        const bx=cx+Math.cos(rad)*BR, by=cy+Math.sin(rad)*BR
-        const skills=tree[b.id]||[]
-        const isHigh=selectedBranch===b.id
-
-        return (
-          <g key={b.id}>
-            {/* Center → branch */}
-            <line x1={cx} y1={cy} x2={bx} y2={by}
-              stroke={b.color} strokeWidth={isHigh?2.5:1.5}
-              strokeOpacity={isHigh?0.95:0.35}
-              strokeDasharray={isHigh?undefined:'5,4'} />
-
-            {/* Branch root */}
-            <g style={{cursor:'pointer'}} onClick={()=>setSelectedBranch(s=>s===b.id?null:b.id)}>
-              <circle cx={bx} cy={by} r={NR+4} fill={b.color+'15'}
-                stroke={b.color} strokeWidth={isHigh?2.5:1.5} strokeOpacity={isHigh?1:0.5}
-                filter={isHigh?`url(#gsf-${b.id})`:undefined} />
-              <text x={bx} y={by} textAnchor="middle" dominantBaseline="central"
-                fontSize={16} style={{pointerEvents:'none'}}>{b.icon}</text>
-              <text x={bx} y={by+NR+14} textAnchor="middle"
-                fontSize={9} fill={b.color} fontWeight={700} style={{pointerEvents:'none'}}>
-                {b.label}
-              </text>
-              {/* Unlocked count */}
-              <text x={bx} y={by+NR+25} textAnchor="middle"
-                fontSize={8} fill={b.color+'99'} style={{pointerEvents:'none'}}>
-                {skills.filter((s:any)=>s.unlocked).length}/{skills.length}
-              </text>
-            </g>
-
-            {/* ALL skills along branch — always visible */}
-            {skills.map((s:any,i:number)=>{
-              const dist=BR+NR+8+i*GAP
-              const sx=cx+Math.cos(rad)*dist, sy=cy+Math.sin(rad)*dist
-              const prevDist=i===0?BR:BR+NR+8+(i-1)*GAP
-              const px=cx+Math.cos(rad)*prevDist, py=cy+Math.sin(rad)*prevDist
-              const isHov=hover===s.id
-
-              return (
-                <g key={s.id}>
-                  {/* Connector */}
-                  <line x1={px} y1={py} x2={sx} y2={sy}
-                    stroke={b.color} strokeWidth={1.5}
-                    strokeOpacity={s.unlocked?0.85:0.2}
-                    strokeDasharray={s.unlocked?undefined:'3,4'} />
-
-                  {/* Skill node */}
-                  <g style={{cursor:'pointer'}}
-                    onMouseEnter={()=>setHover(s.id)} onMouseLeave={()=>setHover(null)}>
-                    <circle cx={sx} cy={sy} r={SR+3} fill={s.unlocked?b.color+'22':'rgba(10,10,20,0.9)'}
-                      stroke={b.color} strokeWidth={s.unlocked?2:1}
-                      strokeOpacity={s.unlocked?1:0.35}
-                      filter={s.unlocked?`url(#gsf-${b.id})`:undefined} />
-                    <text x={sx} y={sy} textAnchor="middle" dominantBaseline="central"
-                      fontSize={11} style={{pointerEvents:'none'}} opacity={s.unlocked?1:0.5}>
-                      {s.icon}
-                    </text>
-                    {/* Unlocked checkmark */}
-                    {s.unlocked&&(
-                      <circle cx={sx+SR+1} cy={sy-SR+1} r={7} fill="#00FF87">
-                        <title>Débloquée</title>
-                      </circle>
-                    )}
-                    {s.unlocked&&(
-                      <text x={sx+SR+1} y={sy-SR+2} textAnchor="middle" dominantBaseline="central"
-                        fontSize={8} fill="#000" fontWeight={900} style={{pointerEvents:'none'}}>✓</text>
-                    )}
-
-                    {/* Hover tooltip */}
-                    {isHov&&(
-                      <g>
-                        <rect x={sx-90} y={sy-72} width={180} height={68} rx={7}
-                          fill="rgba(4,4,20,0.98)" stroke={b.color} strokeWidth={1.5} />
-                        <text x={sx} y={sy-57} textAnchor="middle" fontSize={11} fontWeight={800} fill="#fff">
-                          {s.name.slice(0,22)}
-                        </text>
-                        <text x={sx} y={sy-40} textAnchor="middle" fontSize={9} fill={b.color}>
-                          {s.effect.slice(0,28)}
-                        </text>
-                        <text x={sx} y={sy-24} textAnchor="middle" fontSize={8} fill="#6B7280">
-                          {s.cost_json.slice(0,2).join(' · ')}
-                        </text>
-                        {!s.unlocked&&kingdom?.is_main&&(
-                          <text x={sx} y={sy-10} textAnchor="middle" fontSize={9} fill="#10B981"
-                            style={{cursor:'pointer'}} onClick={()=>onUnlock(s.id)}>
-                            ▶ Débloquer
-                          </text>
-                        )}
-                      </g>
-                    )}
-                  </g>
-                </g>
-              )
-            })}
-          </g>
-        )
-      })}
-
-      {/* Center node */}
-      <circle cx={cx} cy={cy} r={34} fill="rgba(245,158,11,0.15)" stroke="#F59E0B" strokeWidth={2.5}
-        filter="url(#gsf-center)" />
-      <text x={cx} y={cy-5} textAnchor="middle" dominantBaseline="central" fontSize={24} fill="#F59E0B">⬡</text>
-      <text x={cx} y={cy+18} textAnchor="middle" fontSize={9} fill="#F59E0B" fontWeight={800} letterSpacing="2">
-        HEXOD
-      </text>
-    </svg>
   )
 }
 
