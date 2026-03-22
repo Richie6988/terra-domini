@@ -315,3 +315,190 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
             'expires_at': e.expires_at.isoformat() if e.expires_at else None,
         } for e in events])
 
+
+    @action(detail=False, methods=['GET'], url_path='ladder')
+    def ladder(self, request):
+        """
+        GET /api/territories-geo/ladder/
+        Params: ?scope=global|nearby&lat=&lon=&radius_km=500
+
+        Classement global ou joueurs proches (distance géo du joueur).
+        Métriques : territoires, HEX Coin total, batailles gagnées, rareté max.
+        """
+        scope    = request.query_params.get('scope', 'global')
+        lat      = request.query_params.get('lat')
+        lon      = request.query_params.get('lon')
+        radius   = float(request.query_params.get('radius_km', 500))
+
+        import sqlite3 as _sq
+        from django.conf import settings as _s
+        import math
+
+        db = str(_s.DATABASES['default'].get('NAME', 'db.sqlite3'))
+        conn = _sq.connect(db)
+        c    = conn.cursor()
+
+        RARITY_RANK = {'common':1,'uncommon':2,'rare':3,'epic':4,'legendary':5,'mythic':6}
+
+        if scope == 'nearby' and lat and lon:
+            # Joueurs qui ont des territoires dans le rayon
+            lat_f, lon_f = float(lat), float(lon)
+            # Approximation: 1° lat ≈ 111km, 1° lon ≈ 111km×cos(lat)
+            dlat = radius / 111.0
+            dlon = radius / (111.0 * max(0.01, abs(math.cos(math.radians(lat_f)))))
+
+            c.execute("""
+                SELECT u.id, u.username, u.commander_rank,
+                       COUNT(t.h3_index) as terr_count,
+                       SUM(t.tdc_per_day) as daily_income,
+                       MAX(CASE t.rarity
+                           WHEN 'mythic' THEN 6 WHEN 'legendary' THEN 5
+                           WHEN 'epic' THEN 4 WHEN 'rare' THEN 3
+                           WHEN 'uncommon' THEN 2 ELSE 1 END) as max_rarity_rank,
+                       u.battles_won, u.tdc_in_game,
+                       AVG(t.center_lat) as avg_lat,
+                       AVG(t.center_lon) as avg_lon
+                FROM accounts_player u
+                JOIN territories t ON t.owner_id = CAST(u.id AS TEXT)
+                WHERE t.center_lat BETWEEN ? AND ?
+                  AND t.center_lon BETWEEN ? AND ?
+                GROUP BY u.id, u.username, u.commander_rank, u.battles_won, u.tdc_in_game
+                ORDER BY terr_count DESC, daily_income DESC
+                LIMIT 50
+            """, [lat_f - dlat, lat_f + dlat, lon_f - dlon, lon_f + dlon])
+        else:
+            # Classement global
+            c.execute("""
+                SELECT u.id, u.username, u.commander_rank,
+                       COUNT(t.h3_index) as terr_count,
+                       SUM(t.tdc_per_day) as daily_income,
+                       MAX(CASE t.rarity
+                           WHEN 'mythic' THEN 6 WHEN 'legendary' THEN 5
+                           WHEN 'epic' THEN 4 WHEN 'rare' THEN 3
+                           WHEN 'uncommon' THEN 2 ELSE 1 END) as max_rarity_rank,
+                       u.battles_won, u.tdc_in_game,
+                       NULL as avg_lat, NULL as avg_lon
+                FROM accounts_player u
+                JOIN territories t ON t.owner_id = CAST(u.id AS TEXT)
+                GROUP BY u.id, u.username, u.commander_rank, u.battles_won, u.tdc_in_game
+                ORDER BY terr_count DESC, daily_income DESC
+                LIMIT 100
+            """)
+
+        rows = c.fetchall()
+        conn.close()
+
+        RARITY_LABELS = {1:'Common',2:'Uncommon',3:'Rare',4:'Epic',5:'Legendary',6:'Mythic'}
+        RARITY_COLORS = {1:'#9CA3AF',2:'#10B981',3:'#3B82F6',4:'#8B5CF6',5:'#F59E0B',6:'#EC4899'}
+
+        result = []
+        for i, row in enumerate(rows):
+            uid, username, rank, terr_count, daily_income, max_rar_rank, battles_won, tdc_total, avg_lat, avg_lon = row
+            # Calculer distance si nearby
+            dist_km = None
+            if lat and lon and avg_lat and avg_lon:
+                dlat_r = math.radians(float(avg_lat) - float(lat))
+                dlon_r = math.radians(float(avg_lon) - float(lon))
+                a = math.sin(dlat_r/2)**2 + math.cos(math.radians(float(lat))) * math.cos(math.radians(float(avg_lat))) * math.sin(dlon_r/2)**2
+                dist_km = round(6371 * 2 * math.asin(math.sqrt(a)), 0)
+
+            is_me = str(uid) == str(request.user.id) if request.user.is_authenticated else False
+            max_rar_rank = max_rar_rank or 1
+
+            result.append({
+                'rank':          i + 1,
+                'player_id':     str(uid),
+                'username':      username,
+                'commander_rank': rank or 1,
+                'territories':   terr_count or 0,
+                'daily_income':  round(float(daily_income or 0), 0),
+                'battles_won':   battles_won or 0,
+                'tdc_total':     round(float(tdc_total or 0), 0),
+                'max_rarity':    RARITY_LABELS.get(max_rar_rank, 'Common'),
+                'max_rarity_color': RARITY_COLORS.get(max_rar_rank, '#9CA3AF'),
+                'distance_km':   dist_km,
+                'is_me':         is_me,
+            })
+
+        # Position du joueur courant dans le classement global
+        my_rank = None
+        if request.user.is_authenticated:
+            for entry in result:
+                if entry['is_me']:
+                    my_rank = entry['rank']; break
+
+        return Response({
+            'scope':   scope,
+            'entries': result,
+            'my_rank': my_rank,
+            'total':   len(result),
+        })
+
+    @action(detail=False, methods=['GET'], url_path='meta')
+    def meta(self, request):
+        """
+        GET /api/territories-geo/meta/
+        Stats mondiales pour MetaDashboard (Alex spec).
+        """
+        import sqlite3 as _sq
+        from django.conf import settings as _s
+        db = str(_s.DATABASES['default'].get('NAME','db.sqlite3'))
+        conn = _sq.connect(db); c = conn.cursor()
+
+        # Distribution raretés
+        c.execute("SELECT rarity, COUNT(*) FROM territories WHERE owner_id IS NOT NULL GROUP BY rarity")
+        rarity_dist = dict(c.fetchall())
+
+        # Distribution biomes
+        c.execute("SELECT COALESCE(biome,territory_type,'unknown'), COUNT(*) FROM territories WHERE owner_id IS NOT NULL GROUP BY biome")
+        biome_dist = dict(c.fetchall())
+
+        # Stats globales
+        c.execute("SELECT COUNT(DISTINCT owner_id) FROM territories WHERE owner_id IS NOT NULL")
+        active_players = (c.fetchone() or [0])[0]
+        c.execute("SELECT COUNT(*) FROM territories WHERE owner_id IS NOT NULL")
+        owned_count = (c.fetchone() or [0])[0]
+
+        # Zones contestées (batailles 24h) — approx via battle_log si existe
+        contested = []
+        try:
+            c.execute("""
+                SELECT t.h3_index, t.poi_name, t.rarity, COUNT(b.id) as battle_count
+                FROM territories t
+                JOIN battle_log b ON b.territory_h3 = t.h3_index
+                WHERE b.resolved_at > datetime('now','-24 hours')
+                GROUP BY t.h3_index
+                ORDER BY battle_count DESC
+                LIMIT 10
+            """)
+            for row in c.fetchall():
+                contested.append({'h3_index':row[0],'poi_name':row[1],'rarity':row[2],
+                                   'battle_count':row[3],'owner_changes':0})
+        except: pass
+
+        # Balance ressources (offre vs demande estimée)
+        resource_fields = ['res_petrole','res_fer','res_donnees','res_influence',
+                           'res_uranium','res_terres_rares','res_or','res_silicium']
+        resource_balance = []
+        for rf in resource_fields:
+            try:
+                c.execute(f"SELECT SUM({rf}) FROM territories WHERE owner_id IS NOT NULL")
+                supply = (c.fetchone() or [0])[0] or 0
+                # Demande estimée = supply * 0.8 (équilibre cible)
+                resource_balance.append({'resource': rf.replace('res_',''), 'supply':round(supply,0), 'demand': round(supply*0.75,0)})
+            except: pass
+
+        conn.close()
+
+        return Response({
+            'rarity_distribution': rarity_dist,
+            'biome_distribution':  biome_dist,
+            'global_stats': {
+                'active_players': active_players,
+                'owned_count':    owned_count,
+                'battles_24h':    0,
+                'hex_emitted_24h': owned_count * 10,
+            },
+            'contested_zones':  contested,
+            'resource_balance': resource_balance,
+        })

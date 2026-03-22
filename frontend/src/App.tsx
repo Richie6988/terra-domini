@@ -58,6 +58,9 @@ import { AlliancePanel } from './components/alliance/AlliancePanel'
 import { TradePanel } from './components/hud/TradePanel'
 import { CryptoPanel } from './components/crypto/CryptoPanel'
 import { LeaderboardPanel } from './components/leaderboard/LeaderboardPanel'
+import { ShopPanel }        from './components/shop/ShopPanel'
+import { LadderPanel }      from './components/hud/LadderPanel'
+import { MetaDashboard }    from './components/hud/MetaDashboard'
 import { DailyClicker } from './components/clicker/DailyClicker'
 import { WalletProvider } from './components/crypto/WalletProvider'
 import { MarketplacePanel } from './components/crypto/MarketplacePanel'
@@ -130,14 +133,17 @@ function GameScreen() {
 
       {/* Side panels — triggered by bottom nav */}
       <AnimatePresence>
-        {activePanel === 'combat'   && <CombatPanel    onClose={() => setActivePanel(null)} />}
-        {activePanel === 'alliance' && <AlliancePanel  onClose={() => setActivePanel(null)} />}
-        {activePanel === 'events'   && <EventsPanel    onClose={() => setActivePanel(null)} />}
-        {activePanel === 'profile'  && <ProfilePanel   onClose={() => setActivePanel(null)} />}
-        {activePanel === 'trade'    && <TradePanel       onClose={() => setActivePanel(null)} />}
-        {activePanel === 'crypto'      && <CryptoPanel      onClose={() => setActivePanel(null)} />}
-        {activePanel === 'marketplace' && <MarketplacePanel  onClose={() => setActivePanel(null)} />}
+        {activePanel === 'combat'      && <CombatPanel     onClose={() => setActivePanel(null)} />}
+        {activePanel === 'alliance'    && <AlliancePanel   onClose={() => setActivePanel(null)} />}
+        {activePanel === 'events'      && <EventsPanel     onClose={() => setActivePanel(null)} />}
+        {activePanel === 'profile'     && <ProfilePanel    onClose={() => setActivePanel(null)} />}
+        {activePanel === 'trade'       && <TradePanel      onClose={() => setActivePanel(null)} />}
+        {activePanel === 'crypto'      && <CryptoPanel     onClose={() => setActivePanel(null)} />}
+        {activePanel === 'marketplace' && <MarketplacePanel onClose={() => setActivePanel(null)} />}
         {activePanel === 'leaderboard' && <LeaderboardPanel onClose={() => setActivePanel(null)} />}
+        {activePanel === 'shop'        && <ShopPanel        onClose={() => setActivePanel(null)} />}
+        {activePanel === 'ladder'      && <LadderPanel      onClose={() => setActivePanel(null)} />}
+        {activePanel === 'meta'        && <MetaDashboard    onClose={() => setActivePanel(null)} />}
         {showClicker && <DailyClicker onClose={() => setShowClicker(false)} />}
       </AnimatePresence>
 

@@ -10,7 +10,7 @@ import { MissionsDailyWidget } from './MissionsDailyWidget'
 import {
   IconCombat, IconCrystal, IconBell, IconWifi, IconWifiOff,
   IconAlliance, IconTrophy, IconProfile, IconTrade, IconCrypto,
-  IconStrategy, IconClose, IconMap,
+  IconStrategy, IconClose, IconMap, IconCoin,
 } from '../ui/HexodIcons'
 
 // Django DecimalField serializes as string — always parse before arithmetic
@@ -174,13 +174,15 @@ export function GameHUD() {
         padding: '8px 12px', border: '1px solid rgba(255,255,255,0.08)',
       }}>
         {[
-          { panel: 'combat' as const, icon: <IconCombat size={18} />, label: 'Combat', badge: activeBattles.length },
-          { panel: 'alliance' as const, icon: <IconAlliance size={18} />, label: 'Alliance', badge: 0 },
-          { panel: 'events' as const, icon: <IconTrophy size={18} />, label: 'Events', badge: 0 },
-          { panel: 'profile' as const, icon: <IconProfile size={18} />, label: 'Profile', badge: 0 },
-          { panel: 'trade' as const,        icon: <IconTrade size={18} />, label: 'Trade',     badge: 0 },
-          { panel: 'crypto' as const,       icon: <IconCrypto size={18} />,         label: 'Crypto',    badge: 0 },
-          { panel: 'leaderboard' as const,  icon: <IconTrophy size={18} />,            label: 'Ranks',     badge: 0 },
+          { panel: 'combat' as const,     icon: <IconCombat size={18} />,   label: 'Combat',   badge: activeBattles.length },
+          { panel: 'alliance' as const,   icon: <IconAlliance size={18} />, label: 'Alliance', badge: 0 },
+          { panel: 'events' as const,     icon: <IconTrophy size={18} />,   label: 'Events',   badge: 0 },
+          { panel: 'profile' as const,    icon: <IconProfile size={18} />,  label: 'Profil',   badge: 0 },
+          { panel: 'trade' as const,      icon: <IconTrade size={18} />,    label: 'Trade',    badge: 0 },
+          { panel: 'shop' as const,       icon: <IconCoin size={18} />,     label: 'Boutique', badge: 0 },
+          { panel: 'ladder' as const,     icon: <IconTrophy size={18} />,   label: 'Ladder',   badge: 0 },
+          { panel: 'meta' as const,       icon: <IconStrategy size={18} />, label: 'Méta',     badge: 0 },
+          { panel: 'crypto' as const,     icon: <IconCrypto size={18} />,   label: 'Crypto',   badge: 0 },
         ].map(({ panel, icon, label, badge }) => (
           <button
             key={panel}
