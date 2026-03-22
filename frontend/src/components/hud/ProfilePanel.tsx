@@ -10,6 +10,7 @@ import { LogOut, Copy, Camera, ChevronRight, TrendingUp, Shield, Zap, Globe, Fla
 import { api } from '../../services/api'
 import { SkeletonList } from '../ui/Utils'
 import { CampaignWidget } from './CampaignWidget'
+import { ResourceBadge } from '../ui/ResourceTooltip'
 import { useStore, usePlayer } from '../../store'
 import toast from 'react-hot-toast'
 
@@ -450,7 +451,7 @@ function ResourcesTab() {
                     border: `1px solid ${val > 0 ? res.color + '22' : 'rgba(255,255,255,0.04)'}`,
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
-                      <span style={{ fontSize: 14 }}>{res.icon}</span>
+                      <ResourceBadge resource={res.key} showValue={false} />
                       <span style={{ fontSize: 10, color: val > 0 ? '#E5E7EB' : '#4B5563', fontWeight: 600 }}>
                         {res.label}
                       </span>

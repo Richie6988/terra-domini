@@ -11,6 +11,7 @@ def _game(key, default=None):
     return cfg.get(key, default)
 
 from django.core.cache import cache
+from django.db.models import Q, F, Sum
 from django.utils import timezone
 from rest_framework import viewsets, status, generics
 from rest_framework.decorators import action

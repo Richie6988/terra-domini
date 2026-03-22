@@ -1510,8 +1510,30 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                     </div>
                   ))}
                 </div>
+
+                {/* Ressources produites par ce territoire (Marie: tooltip expliquant l'utilité) */}
+                {(() => {
+                  const resEntries = Object.entries(t as Record<string,any>)
+                    .filter(([k,v]) => k.startsWith('res_') && typeof v === 'number' && v > 0)
+                    .sort(([,a],[,b]) => (b as number)-(a as number))
+                  if (!resEntries.length) return null
+                  return (
+                    <div style={{marginBottom:8}}>
+                      <div style={{fontSize:9,color:'#4B5563',textTransform:'uppercase',letterSpacing:'0.08em',marginBottom:6}}>
+                        Production journalière
+                      </div>
+                      <div style={{display:'flex',flexWrap:'wrap',gap:6}}>
+                        {resEntries.slice(0,6).map(([k,v])=>(
+                          <ResourceBadge key={k} resource={k} value={v as number} />
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })()}
+
                 <KV label="H3 Index" val={(t.h3_index||'').slice(0,16)+'…'} mono />
                 <KV label="Grade" val={cfg.grade} color={cfg.c} />
+                <KV label="Biome" val={(t.territory_type || t.biome || 'rural').toUpperCase()} />
               </div>
             )}
             {tab==='kingdom'&&<KingdomTab t={t} cfg={cfg} />}
