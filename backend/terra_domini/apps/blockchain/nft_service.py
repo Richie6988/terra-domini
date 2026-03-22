@@ -73,12 +73,17 @@ def mint_territory_nft(territory, player) -> dict:
         payer_key = getattr(settings, 'HEXOD_PAYER_KEYPAIR', None)
         if not payer_key:
             raise ValueError("HEXOD_PAYER_KEYPAIR not configured")
-        # TODO V1: full Metaplex CPI via solders
-        tid  = _mock_token_id(territory.h3_index)
-        tx   = f"sol_{territory.h3_index[:16]}"
-        mint = player.wallet_address[:44]
-        logger.info(f"Solana NFT minted (stub): {territory.h3_index}")
-        return {'success': True, 'token_id': tid, 'tx_hash': tx, 'mint_address': mint, 'metadata': metadata, 'mock': False, 'error': None}
+        # Déléguer à solana_devnet (Metaplex Core + mock dev)
+        from terra_domini.apps.blockchain.solana_devnet import mint_nft as _sol_mint
+        tid = _mock_token_id(territory.h3_index)
+        result = _sol_mint(
+            h3_index=territory.h3_index,
+            rarity=territory.rarity or 'common',
+            biome=getattr(territory,'biome',None) or territory.territory_type or 'rural',
+            is_shiny=bool(territory.is_shiny),
+            wallet=player.wallet_address or '',
+        )
+        return {**result, 'token_id': tid, 'error': None}
     except Exception as e:
         logger.error(f"Solana NFT mint failed: {e}")
         return {'success': False, 'token_id': None, 'tx_hash': None, 'mint_address': None, 'mock': False, 'error': str(e)}

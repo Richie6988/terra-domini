@@ -700,13 +700,36 @@ class TerritoryViewSet(viewsets.ModelViewSet):
     # ── Attack (CDC §2.3 — ATK vs DEF, cost by rarity) ───────────────────────
     @action(detail=False, methods=['POST'], url_path='attack')
     def attack(self, request):
-        """POST /api/territories/attack/ {h3_index}
-        Resolves attack based on ATK vs DEF stats.
-        Cost: time already passed client-side. Backend validates and resolves.
         """
-        h3_index = request.data.get('h3_index', '').strip()
+        POST /api/territories/attack/ {h3_index, attack_type}
+
+        3 types d'attaque (BOARD spec — rock-paper-scissors stratégique) :
+
+        'assault'      → ATK brute vs DEF physique
+                         Ressource consommée: res_petrole + res_acier
+                         Counter: Fortification build
+                         Bonus si attacker a skill "Guerre mécanisée"
+
+        'infiltration' → Données vs Stabilité du défenseur
+                         Ressource consommée: res_donnees + res_composants
+                         Counter: Tour de contrôle build
+                         Bonus si attacker a skill "Frappe à distance"
+                         Succès → neutralise DEF sans conquête (prépare assault)
+
+        'blockade'     → Influence attaquant vs Influence défenseur
+                         Ressource consommée: res_influence + res_or
+                         Counter: skill "Résistance prolongée"
+                         Succès → réduit production défenseur de 50% pendant 24h
+                         Ne conquiert pas mais ruine économiquement
+        """
+        import random as _r
+        h3_index    = request.data.get('h3_index', '').strip()
+        attack_type = request.data.get('attack_type', 'assault')
+
         if not h3_index:
             return Response({'error': 'h3_index required'}, status=400)
+        if attack_type not in ('assault', 'infiltration', 'blockade'):
+            return Response({'error': 'attack_type must be assault|infiltration|blockade'}, status=400)
 
         territory = Territory.objects.filter(h3_index=h3_index).select_related('owner').first()
         if not territory:
@@ -714,41 +737,162 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         if territory.owner == request.user:
             return Response({'error': 'Already yours'}, status=400)
 
-        # ATK vs DEF — from player stats
         from terra_domini.apps.accounts.models import Player as P
+        from django.db.models import F
         attacker = P.objects.get(id=request.user.id)
-        atk = float(getattr(attacker, 'attack_power_bonus', 0)) + float(getattr(attacker, 'commander_rank', 1)) * 10
-        def_val = float(territory.defense_points or 100.0)
+        rank = float(getattr(attacker, 'commander_rank', 1))
 
-        import random as _r
-        # ATK > DEF → 70% win base + rank advantage
-        atk_ratio = atk / max(def_val, 1)
-        win_chance = min(0.95, max(0.15, 0.4 + atk_ratio * 0.3))
-        victory = _r.random() < win_chance
+        # ── Coûts en ressources (Board: consommation sans maintenance) ──────
+        import sqlite3 as _sq3
+        from django.conf import settings as _s
+        db = str(_s.DATABASES['default'].get('NAME', 'db.sqlite3'))
+        conn = _sq3.connect(db)
+        c = conn.cursor()
 
-        if victory:
-            prev_owner = territory.owner
-            territory.owner       = attacker
-            territory.captured_at = timezone.now()
-            territory.defense_points = territory.max_defense_points * 0.3  # weakened after attack
-            territory.save(update_fields=['owner', 'captured_at', 'defense_points'])
+        ATTACK_COSTS = {
+            'assault':      {'res_petrole': 20, 'res_acier': 15},
+            'infiltration': {'res_donnees': 25, 'res_composants': 10},
+            'blockade':     {'res_influence': 30},
+        }
+        costs = ATTACK_COSTS[attack_type]
 
-            # Update player stats
-            P.objects.filter(id=attacker.id).update(
-                territories_captured=getattr(attacker,'territories_captured',0)+1,
-                battles_won=getattr(attacker,'battles_won',0)+1,
-            )
-            return Response({
-                'victory': True,
-                'atk': round(atk,1), 'def': round(def_val,1),
-                'win_chance': round(win_chance*100,1),
-                'message': f'Victory! {h3_index[:8]} captured.',
-            })
-        else:
-            P.objects.filter(id=attacker.id).update(battles_lost=getattr(attacker,'battles_lost',0)+1)
-            return Response({
-                'victory': False,
-                'atk': round(atk,1), 'def': round(def_val,1),
-                'win_chance': round(win_chance*100,1),
-                'message': 'Defeat. Defenses held.',
-            }, status=200)
+        # Vérifier ressources attaquant (depuis ses territoires)
+        c.execute('SELECT ' + ', '.join(costs.keys()) +
+                  ' FROM territories WHERE owner_id=? LIMIT 1', [str(attacker.id)])
+        row = c.fetchone()
+        if not row:
+            conn.close()
+            return Response({'error': 'Aucun territoire — impossible d\'attaquer'}, status=400)
+        for i, (res, needed) in enumerate(costs.items()):
+            if (row[i] or 0) < needed:
+                conn.close()
+                return Response({'error': f'Ressources insuffisantes : {needed} {res} requis'}, status=402)
+
+        # Déduire ressources du premier territoire de l'attaquant
+        sets = ', '.join(f"{k}=MAX(0,{k}-?)" for k in costs)
+        c.execute(f"UPDATE territories SET {sets} WHERE owner_id=? AND ROWID=(SELECT MIN(ROWID) FROM territories WHERE owner_id=?)",
+                  [*costs.values(), str(attacker.id), str(attacker.id)])
+        conn.commit()
+        conn.close()
+
+        # ── Résolution selon le type ─────────────────────────────────────────
+        if attack_type == 'assault':
+            # ATK brute — rank + skill "Guerre mécanisée" + build fortification counter
+            atk = rank * 12 + float(getattr(attacker, 'attack_power_bonus', 0))
+            def_val = float(territory.defense_points or 100.0)
+            # Check si défenseur a Fortification → DEF ×1.25
+            if getattr(territory, 'fortification_level', 0) > 0:
+                def_val *= 1.25
+            atk_ratio  = atk / max(def_val, 1)
+            win_chance = min(0.90, max(0.10, 0.35 + atk_ratio * 0.35))
+            victory    = _r.random() < win_chance
+
+            if victory:
+                prev_owner = territory.owner
+                territory.owner = attacker
+                territory.captured_at = timezone.now()
+                territory.defense_points = float(territory.max_defense_points or 100) * 0.25
+                territory.save(update_fields=['owner', 'captured_at', 'defense_points'])
+                P.objects.filter(id=attacker.id).update(
+                    territories_captured=F('territories_captured') + 1,
+                    battles_won=F('battles_won') + 1,
+                )
+                return Response({
+                    'victory': True, 'attack_type': 'assault',
+                    'atk': round(atk, 1), 'def': round(def_val, 1),
+                    'win_chance': round(win_chance * 100, 1),
+                    'territory_captured': True,
+                    'report': {
+                        'title': '⚔️ Assaut victorieux',
+                        'detail': f'ATK {atk:.0f} vs DEF {def_val:.0f}',
+                        'loot': f'Territoire conquis · Défenses réduites à 25%',
+                        'tip': 'Construisez vite avant que l\'ennemi riposte !',
+                    }
+                })
+            else:
+                P.objects.filter(id=attacker.id).update(battles_lost=F('battles_lost') + 1)
+                return Response({
+                    'victory': False, 'attack_type': 'assault',
+                    'atk': round(atk, 1), 'def': round(def_val, 1),
+                    'win_chance': round(win_chance * 100, 1),
+                    'territory_captured': False,
+                    'report': {
+                        'title': '💀 Assaut repoussé',
+                        'detail': f'ATK {atk:.0f} insuffisant vs DEF {def_val:.0f}',
+                        'loot': 'Aucun territoire pris',
+                        'tip': 'Débloquez "Guerre mécanisée" ou augmentez votre rang.',
+                    }
+                })
+
+        elif attack_type == 'infiltration':
+            # Données attaquant vs Stabilité défenseur
+            # Succès : neutralise les défenses (DEF ÷2) sans conquérir
+            atk_data  = float(getattr(attacker, 'commander_rank', 1)) * 8
+            def_stab  = float(territory.res_stabilite or 50) + float(territory.defense_points or 100) * 0.3
+            # Tour de contrôle counter
+            if territory.is_control_tower:
+                def_stab *= 1.5
+            win_chance = min(0.85, max(0.15, 0.4 + (atk_data / max(def_stab, 1)) * 0.3))
+            victory    = _r.random() < win_chance
+
+            if victory:
+                # Neutralise défenses pendant 6h (shield_expires_at utilisé comme timer)
+                from datetime import timedelta
+                territory.defense_points = max(10, float(territory.defense_points or 100) * 0.5)
+                territory.save(update_fields=['defense_points'])
+                return Response({
+                    'victory': True, 'attack_type': 'infiltration',
+                    'territory_captured': False,
+                    'report': {
+                        'title': '🔓 Infiltration réussie',
+                        'detail': f'Stabilité percée — DEF divisée par 2',
+                        'loot': 'Défenses du territoire affaiblies pendant 6h',
+                        'tip': 'Lancez un assaut maintenant pendant que les défenses sont basses !',
+                    }
+                })
+            else:
+                return Response({
+                    'victory': False, 'attack_type': 'infiltration',
+                    'territory_captured': False,
+                    'report': {
+                        'title': '🚫 Infiltration déjouée',
+                        'detail': 'Contre-espionnage actif',
+                        'loot': 'Aucun effet',
+                        'tip': 'Augmentez vos Données ou débloquez "Cyberguerre".',
+                    }
+                })
+
+        else:  # blockade
+            # Influence attaquant vs Influence défenseur
+            # Succès : réduit production de 50% pendant 24h
+            atk_inf  = float(getattr(attacker, 'commander_rank', 1)) * 6 + float(territory.res_influence or 0) * 0.1
+            def_inf  = float(territory.res_influence or 30) + float(territory.res_stabilite or 30) * 0.5
+            win_chance = min(0.80, max(0.10, 0.35 + (atk_inf / max(def_inf, 1)) * 0.3))
+            victory    = _r.random() < win_chance
+
+            if victory:
+                # Réduire production HEX Coin du territoire pour 24h
+                orig = float(territory.tdc_per_day or 10)
+                territory.tdc_per_day = orig * 0.5
+                territory.save(update_fields=['tdc_per_day'])
+                return Response({
+                    'victory': True, 'attack_type': 'blockade',
+                    'territory_captured': False,
+                    'report': {
+                        'title': '🚢 Blocus économique réussi',
+                        'detail': f'Production réduite de 50% ({orig:.0f}→{orig*0.5:.0f} HEX Coin/j)',
+                        'loot': f'Adversaire perd {orig*0.5:.0f} HEX Coin/j pendant 24h',
+                        'tip': 'Répétez le blocus pour ruiner économiquement avant l\'assaut final.',
+                    }
+                })
+            else:
+                return Response({
+                    'victory': False, 'attack_type': 'blockade',
+                    'territory_captured': False,
+                    'report': {
+                        'title': '📡 Blocus brisé',
+                        'detail': 'Influence défenseur trop forte',
+                        'loot': 'Aucun effet',
+                        'tip': 'Débloquez "Soft power" pour forcer la capitulation diplomatique.',
+                    }
+                })

@@ -20,6 +20,7 @@ import { KingdomBorderLayer } from './KingdomBorderLayer'
 import { MyTerritoriesOverlay } from './MyTerritoriesOverlay'
 import { AttackAnimationLayer } from './AttackAnimationLayer'
 import { BuildingsOverlayLayer } from './BuildingsOverlayLayer'
+import { TutorialArrow } from './TutorialArrow'
 import { latLngToCell, cellToBoundary, gridDisk } from 'h3-js'
 import type { TerritoryLight } from '../../types'
 
@@ -68,7 +69,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const [poiRarFilter, setPoiRarFilter] = useState<string[]>(['all'])
   const [showOverlay,  setShowOverlay]  = useState(true)
   const [showGrid,     setShowGrid]     = useState(false)
-  const [zoom,        setZoom]        = useState(13)
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 480
+  const [zoom, setZoom] = useState(isMobile ? 14 : 13)
   const [center,      setCenter]      = useState<[number,number]>([48.8566, 2.3522])
   const [selectedHex, setSelectedHex] = useState<string | null>(null)
   const [selectedTerritory, setSelectedTerritoryState] = useState<any | null>(null)
@@ -94,7 +96,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     injectHexAnimations()
 
     const map = L.map(containerRef.current, {
-      center: [48.8566, 2.3522], zoom: 13,
+      center: [48.8566, 2.3522], zoom: (typeof window !== 'undefined' && window.innerWidth < 480) ? 14 : 13,
       zoomControl: false, attributionControl: false,
     })
     const tileCfg = TILES[tile as keyof typeof TILES]
@@ -259,7 +261,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
     // Server-side IP geolocation
     fetch('/api/geoip/').then(r=>r.json())
-      .then(d => { if (d.lat && d.lon) map.setView([d.lat, d.lon], 13) })
+      .then(d => { if (d.lat && d.lon) map.setView([d.lat, d.lon], (window.innerWidth < 480) ? 15 : 13) })
       .catch(() => navigator.geolocation?.getCurrentPosition(
         p => map.setView([p.coords.latitude, p.coords.longitude], 14), () => {}
       ))
@@ -444,6 +446,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       <KingdomBorderLayer map={mapRef.current} zoom={zoom} />
       <AttackAnimationLayer map={mapRef.current} />
       <BuildingsOverlayLayer map={mapRef.current} zoom={zoom} playerId={player?.id} />
+      <TutorialArrow map={mapRef.current} />
       <MyTerritoriesOverlay onFlyTo={(lat, lon, z) => mapRef.current?.flyTo([lat, lon], z ?? 15, { duration: 1.2 })} />
       <HexodBottomBar />
     </div>

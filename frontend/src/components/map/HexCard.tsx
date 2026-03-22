@@ -1081,6 +1081,124 @@ function KingdomTab({ t, cfg }: { t:any; cfg:typeof RARITY[RK] }) {
 }
 
 
+/* ── WebGL Card with Context Lost + LOD + GPU fallback (Artist3D spec) ─── */
+function detectGPUTier(): 'high' | 'mid' | 'low' {
+  try {
+    const canvas = document.createElement('canvas')
+    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl')
+    if (!gl) return 'low'
+    const ext = (gl as WebGLRenderingContext).getExtension('WEBGL_debug_renderer_info')
+    if (ext) {
+      const renderer = (gl as any).getParameter(ext.UNMASKED_RENDERER_WEBGL) as string
+      if (/Mali-4|Adreno 3|PowerVR|Intel HD/i.test(renderer)) return 'low'
+      if (/Adreno 5|Mali-G5|Apple A1[0-2]/i.test(renderer)) return 'mid'
+    }
+    const maxTex = (gl as WebGLRenderingContext).getParameter(gl.MAX_TEXTURE_SIZE)
+    if (maxTex < 4096) return 'low'
+    if (maxTex < 8192) return 'mid'
+    return 'high'
+  } catch { return 'low' }
+}
+
+// LOD canvas size by GPU tier
+const LOD_SIZE: Record<string, number> = { high: 1024, mid: 512, low: 256 }
+
+function WebGLCardWithFallback({ frontCv, backCv, cfg, showBack, isShiny, isNewClaim }: {
+  frontCv: HTMLCanvasElement; backCv: HTMLCanvasElement
+  cfg: typeof RARITY[RK]; showBack: boolean; isShiny: boolean; isNewClaim?: boolean
+}) {
+  const [contextLost, setContextLost] = useState(false)
+  const [gpuTier] = useState<'high'|'mid'|'low'>(() => detectGPUTier())
+  const [revealed, setRevealed] = useState(!isNewClaim)
+  const canvasRef = useRef<HTMLDivElement>(null)
+
+  // Context lost handler
+  useEffect(() => {
+    const el = canvasRef.current?.querySelector('canvas')
+    if (!el) return
+    const onLost = () => { setContextLost(true) }
+    const onRestored = () => { setContextLost(false) }
+    el.addEventListener('webglcontextlost', onLost)
+    el.addEventListener('webglcontextrestored', onRestored)
+    return () => {
+      el.removeEventListener('webglcontextlost', onLost)
+      el.removeEventListener('webglcontextrestored', onRestored)
+    }
+  })
+
+  // Reveal animation on new claim
+  useEffect(() => {
+    if (!isNewClaim) { setRevealed(true); return }
+    const t = setTimeout(() => setRevealed(true), 100)
+    return () => clearTimeout(t)
+  }, [isNewClaim])
+
+  // LOD: downscale canvas if needed
+  const lodCv = useMemo(() => {
+    const size = LOD_SIZE[gpuTier] || 512
+    if (size >= 1024) return frontCv
+    const c = document.createElement('canvas')
+    c.width = c.height = size
+    const ctx = c.getContext('2d')!
+    ctx.drawImage(frontCv, 0, 0, size, size)
+    return c
+  }, [frontCv, gpuTier])
+
+  const revealStyle = isNewClaim && !revealed ? {
+    transform: 'translateY(60px) rotateY(180deg) scale(0.6)',
+    opacity: 0,
+  } : {
+    transform: 'translateY(0) rotateY(0deg) scale(1)',
+    opacity: 1,
+    transition: 'transform 0.9s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.5s ease',
+  }
+
+  // Fallback to CSS3D on context lost or low GPU
+  if (contextLost || gpuTier === 'low') {
+    return (
+      <div style={{ zIndex:1, flexShrink:0, ...revealStyle }}>
+        <CSS3DCard frontCv={lodCv} cfg={cfg} showBack={showBack} isShiny={isShiny} />
+      </div>
+    )
+  }
+
+  return (
+    <div ref={canvasRef} style={{ width:240, height:270, cursor:'grab', zIndex:1, flexShrink:0, ...revealStyle }}>
+      {/* Glow reveal pour new claim */}
+      {isNewClaim && revealed && (
+        <motion.div
+          initial={{ opacity:0.8, scale:0.5 }}
+          animate={{ opacity:0, scale:3 }}
+          transition={{ duration:1.2, ease:'easeOut' }}
+          style={{
+            position:'absolute', width:'100%', height:'100%', borderRadius:'50%',
+            background:`radial-gradient(circle, ${cfg.c}88 0%, transparent 70%)`,
+            pointerEvents:'none', zIndex:2,
+          }}
+        />
+      )}
+      <Canvas
+        camera={{ position:[0,0,4.0], fov:42 }}
+        gl={{ antialias: gpuTier === 'high', alpha:true, powerPreference:'high-performance' }}
+        frameloop='always'
+        style={{ background:'transparent' }}
+        onCreated={({ gl }) => {
+          gl.domElement.addEventListener('webglcontextlost', () => setContextLost(true))
+          gl.domElement.addEventListener('webglcontextrestored', () => setContextLost(false))
+        }}
+      >
+        <Suspense fallback={null}>
+          <ambientLight intensity={0.3} />
+          <pointLight position={[3,4,3]} intensity={1.8} />
+          <pointLight position={[-2,-2,2]} intensity={0.6} color={cfg.c} />
+          <Environment preset='city' />
+          <HexCard3D frontCv={lodCv} cfg={cfg} showBack={showBack} isShiny={isShiny} />
+        </Suspense>
+      </Canvas>
+    </div>
+  )
+}
+
 /* ── CSS 3D Card — no WebGL needed ──────────────────────── */
 function CSS3DCard({ frontCv, cfg, showBack, isShiny }: {
   frontCv: HTMLCanvasElement; cfg: typeof RARITY[RK]; showBack: boolean; isShiny: boolean
@@ -1250,18 +1368,12 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
         background:`radial-gradient(ellipse 55% 55% at 50% 42%,${cfg.c}1a 0%,transparent 70%)`,
         filter:'blur(50px)'}} />
 
-      {/* Three.js 3D card */}
-      <div style={{width:240,height:270,cursor:'grab',zIndex:1,flexShrink:0}}>
-        <Canvas camera={{position:[0,0,4.0],fov:42}} gl={{antialias:true,alpha:true,powerPreference:'high-performance'}} frameloop='always' style={{background:'transparent'}}>
-          <Suspense fallback={null}>
-            <ambientLight intensity={0.3} />
-            <pointLight position={[3,4,3]} intensity={1.8} />
-            <pointLight position={[-2,-2,2]} intensity={0.6} color={cfg.c} />
-            <Environment preset='city' />
-            <HexCard3D frontCv={frontCv} cfg={cfg} showBack={showBack} isShiny={isShiny} />
-          </Suspense>
-        </Canvas>
-      </div>
+      {/* Three.js 3D card — avec context lost handler + LOD + GPU detection */}
+      <WebGLCardWithFallback
+        frontCv={frontCv} backCv={backCv}
+        cfg={cfg} showBack={showBack} isShiny={isShiny}
+        isNewClaim={false}
+      />
 
       {/* Label + flip */}
       <div style={{display:'flex',alignItems:'center',gap:10,zIndex:1}}>

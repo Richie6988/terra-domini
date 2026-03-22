@@ -96,31 +96,61 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
     if (method === 'puzzle') setTimeout(() => inputRef.current?.focus(), 100)
   }, [method])
 
-  const [attackResult, setAttackResult] = useState<{ victory: boolean; atk: number; def: number; win_chance: number; message: string } | null>(null)
+  type AttackType = 'assault' | 'infiltration' | 'blockade'
+  const [attackType, setAttackType] = useState<AttackType>('assault')
+  const [attackResult, setAttackResult] = useState<any | null>(null)
+
+  const ATTACK_TYPES: { id: AttackType; icon: string; label: string; desc: string; color: string; counter: string }[] = [
+    { id:'assault',      icon:'⚔️', label:'Assaut',       color:'#EF4444',
+      desc:'ATK brute vs DEF physique. Conquiert le territoire.',
+      counter:'Countered par: Fortification + Résistance prolongée' },
+    { id:'infiltration', icon:'🔓', label:'Infiltration',  color:'#8B5CF6',
+      desc:'Données vs Stabilité. Neutralise les défenses 6h sans conquérir.',
+      counter:'Countered par: Tour de contrôle + Cyberguerre' },
+    { id:'blockade',     icon:'🚢', label:'Blocus',        color:'#F59E0B',
+      desc:'Influence vs Influence. Réduit production adverse -50% pendant 24h.',
+      counter:'Countered par: Routes commerciales + Résistance prolongée' },
+  ]
 
   const attackMut = useMutation({
-    mutationFn: () => api.post('/territories/attack/', { h3_index: t.h3_index }),
+    mutationFn: () => api.post('/territories/attack/', {
+      h3_index: t.h3_index,
+      attack_type: attackType,
+    }),
     onSuccess: (res) => {
       setAttackResult(res.data)
-      if (res.data.victory) {
+      const r = res.data
+      if (r.territory_captured) {
         setClaimed(true)
         qc.invalidateQueries({ queryKey: ['player'] })
-        toast.success(`⚔️ ${name} conquered!`)
-        setTimeout(() => { onClaimed(); onClose() }, 2500)
+        qc.invalidateQueries({ queryKey: ['my-territories-overlay'] })
+        toast.success(`⚔️ ${name} conquis !`)
+        // Déclencher animation attaque victoire
+        window.dispatchEvent(new CustomEvent('hexod:attack', {
+          detail: { sourceH3: '', targetH3: t.h3_index, duration: 0, result: 'victory' }
+        }))
+        setTimeout(() => { onClaimed(); onClose() }, 3000)
+      } else if (r.victory) {
+        toast.success(`✅ ${r.report?.title || 'Succès'}`)
+        qc.invalidateQueries({ queryKey: ['player'] })
+        setTimeout(() => onClose(), 3500)
       } else {
-        toast.error('Defeat — defenses held.')
+        toast.error(r.report?.title || 'Échec')
+        window.dispatchEvent(new CustomEvent('hexod:attack', {
+          detail: { sourceH3: '', targetH3: t.h3_index, duration: 0, result: 'defeat' }
+        }))
         setAttacking(false)
         setProgress(0)
       }
     },
     onError: (e: any) => {
-      toast.error(e.response?.data?.error || 'Attack failed')
+      const msg = e.response?.data?.error || 'Attaque échouée'
+      toast.error(msg)
       setAttacking(false)
       setProgress(0)
     },
   })
 
-  // Attack: animated progress bar, then fire backend
   const startAttack = () => {
     setAttacking(true)
     setProgress(0)
@@ -128,6 +158,10 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
     const duration = Math.max(2000, 8000 - rank * 60)
     const interval = 50
     const step = (interval / duration) * 100
+    // Déclencher animation pendant l'attaque
+    window.dispatchEvent(new CustomEvent('hexod:attack', {
+      detail: { sourceH3: '', targetH3: t.h3_index, duration, result: 'pending' }
+    }))
     const timer = setInterval(() => {
       setProgress(p => {
         if (p + step >= 100) {
@@ -339,37 +373,79 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                   })()}
                 </div>
 
-                {/* Résultat attaque */}
-                {attackResult && !attackResult.victory && (
-                  <div style={{ padding:'12px', borderRadius:10, background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', marginBottom:12, textAlign:'center' }}>
-                    <div style={{ fontSize:13, color:'#F87171', fontWeight:700 }}>💀 Défaite</div>
-                    <div style={{ fontSize:11, color:'#6B7280', marginTop:4 }}>
-                      ATK {attackResult.atk} vs DEF {attackResult.def} · Chance {attackResult.win_chance}%
+                {/* Sélecteur type d'attaque */}
+                {!attacking && !attackResult && (
+                  <div style={{ marginBottom:14 }}>
+                    <div style={{ fontSize:10, color:'#4B5563', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:8 }}>Type d'attaque</div>
+                    <div style={{ display:'flex', flexDirection:'column', gap:6 }}>
+                      {ATTACK_TYPES.map(at => (
+                        <button key={at.id} onClick={() => setAttackType(at.id)} style={{
+                          padding:'9px 12px', borderRadius:10, cursor:'pointer', textAlign:'left',
+                          background: attackType===at.id ? `${at.color}18` : 'rgba(255,255,255,0.03)',
+                          border: `1.5px solid ${attackType===at.id ? at.color+'55' : 'rgba(255,255,255,0.07)'}`,
+                          transition:'all 0.15s',
+                        }}>
+                          <div style={{ display:'flex', alignItems:'center', gap:8 }}>
+                            <span style={{ fontSize:18 }}>{at.icon}</span>
+                            <div style={{ flex:1 }}>
+                              <div style={{ fontSize:12, fontWeight:700, color: attackType===at.id ? at.color : '#9CA3AF' }}>{at.label}</div>
+                              <div style={{ fontSize:10, color:'#4B5563', marginTop:2 }}>{at.desc}</div>
+                            </div>
+                            {attackType===at.id && <span style={{ color:at.color, fontSize:16 }}>●</span>}
+                          </div>
+                          {attackType===at.id && (
+                            <div style={{ marginTop:5, fontSize:9, color:'#374151', fontStyle:'italic' }}>{at.counter}</div>
+                          )}
+                        </button>
+                      ))}
                     </div>
-                    <div style={{ fontSize:11, color:'#6B7280' }}>{attackResult.message}</div>
                   </div>
                 )}
 
+                {/* Rapport de bataille */}
+                {attackResult?.report && (
+                  <motion.div initial={{opacity:0,y:8}} animate={{opacity:1,y:0}}
+                    style={{ padding:'12px 14px', borderRadius:10, marginBottom:12,
+                      background: attackResult.victory ? 'rgba(16,185,129,0.08)' : 'rgba(239,68,68,0.07)',
+                      border: `1px solid ${attackResult.victory ? 'rgba(16,185,129,0.25)' : 'rgba(239,68,68,0.2)'}`,
+                    }}>
+                    <div style={{ fontSize:14, fontWeight:800, color: attackResult.victory ? '#10B981' : '#F87171', marginBottom:6 }}>
+                      {attackResult.report.title}
+                    </div>
+                    <div style={{ fontSize:11, color:'#6B7280', marginBottom:4 }}>{attackResult.report.detail}</div>
+                    <div style={{ fontSize:11, color: attackResult.victory ? '#10B981' : '#9CA3AF', marginBottom:4 }}>{attackResult.report.loot}</div>
+                    <div style={{ fontSize:10, color:'#4B5563', fontStyle:'italic', padding:'6px 8px',
+                      background:'rgba(255,255,255,0.03)', borderRadius:6, borderLeft:'2px solid #374151' }}>
+                      💡 {attackResult.report.tip}
+                    </div>
+                  </motion.div>
+                )}
+
                 {!attacking ? (
-                  <button onClick={startAttack}
-                    style={{ width:'100%', padding:14, background:'rgba(239,68,68,0.15)', border:'1px solid rgba(239,68,68,0.4)', borderRadius:12, color:'#EF4444', fontSize:15, fontWeight:800, cursor:'pointer' }}>
-                    ⚔️ Launch Attack
+                  <button onClick={startAttack} style={{
+                    width:'100%', padding:14,
+                    background: `${(ATTACK_TYPES.find(a=>a.id===attackType)||ATTACK_TYPES[0]).color}18`,
+                    border: `1px solid ${(ATTACK_TYPES.find(a=>a.id===attackType)||ATTACK_TYPES[0]).color}44`,
+                    borderRadius:12,
+                    color: (ATTACK_TYPES.find(a=>a.id===attackType)||ATTACK_TYPES[0]).color,
+                    fontSize:14, fontWeight:800, cursor:'pointer',
+                  }}>
+                    {(ATTACK_TYPES.find(a=>a.id===attackType)||ATTACK_TYPES[0]).icon} Lancer {(ATTACK_TYPES.find(a=>a.id===attackType)||ATTACK_TYPES[0]).label}
                   </button>
                 ) : (
                   <div>
                     <div style={{ marginBottom:8, display:'flex', justifyContent:'space-between', fontSize:12, color:'#9CA3AF' }}>
-                      <span>⚔️ Forces advancing…</span>
+                      <span>{(ATTACK_TYPES.find(a=>a.id===attackType)||ATTACK_TYPES[0]).icon} {attackType === 'assault' ? 'Troupes en mouvement…' : attackType === 'infiltration' ? 'Infiltration en cours…' : 'Blocus en place…'}</span>
                       <span style={{ fontFamily:'monospace', color:'#EF4444' }}>{Math.round(attackProgress)}%</span>
                     </div>
                     <div style={{ height:10, background:'rgba(255,255,255,0.08)', borderRadius:5, overflow:'hidden', marginBottom:14 }}>
                       <motion.div
-                        style={{ height:'100%', background:'linear-gradient(90deg,#EF4444,#FF6B6B)', borderRadius:5 }}
-                        animate={{ width:`${attackProgress}%` }}
-                        transition={{ duration:0.1 }}
+                        style={{ height:'100%', background:`linear-gradient(90deg,${(ATTACK_TYPES.find(a=>a.id===attackType)||ATTACK_TYPES[0]).color},${(ATTACK_TYPES.find(a=>a.id===attackType)||ATTACK_TYPES[0]).color}cc)`, borderRadius:5 }}
+                        animate={{ width:`${attackProgress}%` }} transition={{ duration:0.1 }}
                       />
                     </div>
                     <div style={{ fontSize:11, color:'#6B7280', textAlign:'center' }}>
-                      {attackProgress < 30 ? '🏃 Troops mobilizing…' : attackProgress < 60 ? '💥 Engaging defenses…' : attackProgress < 90 ? '🔥 Breaking through…' : attackMut.isPending ? '📡 Resolving battle…' : '🏴 Planting your flag…'}
+                      {attackProgress < 30 ? '🔍 Reconnaissance…' : attackProgress < 60 ? '💥 Engagement…' : attackProgress < 90 ? '🔥 Phase critique…' : '📡 Résolution…'}
                     </div>
                   </div>
                 )}

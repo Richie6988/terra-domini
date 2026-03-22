@@ -9,6 +9,7 @@ import { AnimatePresence } from 'framer-motion'
 import { useStore } from './store'
 import { api } from './services/api'
 import { useGameSocket } from './hooks/useGameSocket'
+import { ErrorBoundary } from './components/ui/Utils'
 import { GameMap } from './components/map/GameMap'
 import { GameHUD } from './components/hud/GameHUD'
 import { TerritoryPanel } from './components/hud/TerritoryPanel'
@@ -67,16 +68,22 @@ function GameScreen() {
   return (
     <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', background: '#0a0a14' }}>
       {/* Base map */}
-      <GameMap
-        onViewportChange={(lat, lon, radius_km) => sendViewport({ lat, lon, radius_km })}
-        onTerritoryClick={(h3) => subscribeTerritory(h3)}
-      />
+      <ErrorBoundary label="GameMap">
+        <GameMap
+          onViewportChange={(lat, lon, radius_km) => sendViewport({ lat, lon, radius_km })}
+          onTerritoryClick={(h3) => subscribeTerritory(h3)}
+        />
+      </ErrorBoundary>
 
       {/* HUD */}
-      <GameHUD onClickerOpen={() => setShowClicker(true)} />
+      <ErrorBoundary label="GameHUD">
+        <GameHUD onClickerOpen={() => setShowClicker(true)} />
+      </ErrorBoundary>
 
       {/* Live war ticker */}
-      <WarTicker />
+      <ErrorBoundary label="WarTicker">
+        <WarTicker />
+      </ErrorBoundary>
 
       {/* Territory detail panel (bottom sheet) */}
       <AnimatePresence>

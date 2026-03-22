@@ -219,13 +219,9 @@ def get_kingdom_for_territory(player, h3_index: str) -> dict | None:
 def unlock_kingdom_skill(player, cluster_id: str, skill_id: int) -> dict:
     """
     Unlock a skill for a specific kingdom.
-    Deducts resources from territories in that kingdom.
-
-    cost_json format accepted:
-      - list of strings: ['res_fer', 'res_petrole']  → 10 each (legacy)
-      - list of dicts:   [{'res_fer': 50}, {'res_petrole': 30}]
+    Vérifie les forks exclusifs (Alex: décision irréversible).
     """
-    from terra_domini.apps.progression.models import SkillNode
+    from terra_domini.apps.progression.models import SkillNode, PlayerSkill
 
     try:
         skill = SkillNode.objects.get(pk=skill_id)
@@ -241,6 +237,24 @@ def unlock_kingdom_skill(player, cluster_id: str, skill_id: int) -> dict:
 
     if KingdomSkill.objects.filter(player=player, cluster_id=cluster_id, skill=skill).exists():
         return {'error': 'Déjà débloquée dans ce royaume'}
+
+    # ── Vérification fork exclusif ───────────────────────────────────────────
+    if skill.fork_group:
+        # Si le joueur a déjà unlocked un skill du même fork_group → bloqué
+        conflicting = KingdomSkill.objects.filter(
+            player=player, cluster_id=cluster_id,
+            skill__fork_group=skill.fork_group,
+            skill__branch=skill.branch,
+        ).exclude(skill=skill).select_related('skill')
+        if conflicting.exists():
+            taken = conflicting.first().skill
+            return {
+                'error': f'Décision irréversible : vous avez déjà choisi "{taken.name}". '
+                         f'Les deux voies du fork "{skill.fork_group}" sont mutuellement exclusives.',
+                'fork_conflict': True,
+                'taken_skill': taken.name,
+            }
+
 
     # Parse cost_json → {field: amount}
     costs: dict[str, float] = _parse_skill_costs(skill.cost_json or [])
@@ -303,19 +317,34 @@ def unlock_kingdom_skill(player, cluster_id: str, skill_id: int) -> dict:
 
 
 def get_kingdom_skill_tree(player, cluster_id: str) -> dict:
-    """Full skill tree for a kingdom with unlock status."""
+    """Full skill tree for a kingdom with unlock status + fork info."""
     from terra_domini.apps.progression.models import SkillNode
 
     all_skills = list(SkillNode.objects.all().values(
-        'id','branch','name','effect','cost_json','position','icon'))
-    unlocked = set(KingdomSkill.objects.filter(
+        'id','branch','name','effect','cost_json','position','icon',
+        'fork_group','tradeoff_note'))
+    unlocked_ids = set(KingdomSkill.objects.filter(
         player=player, cluster_id=cluster_id
     ).values_list('skill_id', flat=True))
 
+    # Build fork exclusion map: fork_group → list of skill ids unlocked in that fork
+    fork_taken: dict[str, int] = {}
     for s in all_skills:
-        s['unlocked'] = s['id'] in unlocked
+        if s['id'] in unlocked_ids and s['fork_group']:
+            fork_taken[f"{s['branch']}:{s['fork_group']}"] = s['id']
 
-    tree = {}
+    for s in all_skills:
+        s['unlocked'] = s['id'] in unlocked_ids
+        s['locked_by_fork'] = False
+        s['fork_taken_name'] = None
+        if s['fork_group'] and not s['unlocked']:
+            key = f"{s['branch']}:{s['fork_group']}"
+            if key in fork_taken and fork_taken[key] != s['id']:
+                s['locked_by_fork'] = True
+                taken = next((x for x in all_skills if x['id'] == fork_taken[key]), None)
+                s['fork_taken_name'] = taken['name'] if taken else None
+
+    tree: dict = {}
     for s in all_skills:
         tree.setdefault(s['branch'], []).append(s)
 

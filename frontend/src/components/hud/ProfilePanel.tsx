@@ -50,7 +50,7 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
       initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
       transition={{ type: 'spring', stiffness: 280, damping: 28 }}
       style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, width: 400,
+        position: 'fixed', top: 0, right: 0, bottom: 0, width: typeof window !== 'undefined' && window.innerWidth < 480 ? window.innerWidth - 16 : 400,
         zIndex: 1000, display: 'flex', flexDirection: 'column',
         background: 'linear-gradient(180deg, #07070f 0%, #050510 100%)',
         borderLeft: `2px solid ${spec.color}33`,

@@ -619,20 +619,28 @@ class LeaderboardSnapshot(models.Model):
 
 
 class SkillNode(models.Model):
-    """GDD Section 6 — Arbre de compétences Hexod"""
+    """GDD Section 6 — Arbre de compétences Hexod avec forks exclusifs"""
     BRANCHES = [
         ('attack','Attaque'), ('defense','Défense'), ('economy','Économie'),
         ('influence','Rayonnement'), ('tech','Technologie'),
     ]
-    branch      = models.CharField(max_length=20, choices=BRANCHES)
-    name        = models.CharField(max_length=80)
-    effect      = models.TextField()
-    cost_json   = models.JSONField(default=list)   # list of resource names
-    position    = models.IntegerField(default=0)   # order in branch
-    icon        = models.CharField(max_length=8, default='⚔️')
+    branch          = models.CharField(max_length=20, choices=BRANCHES)
+    name            = models.CharField(max_length=80)
+    effect          = models.TextField()
+    cost_json       = models.JSONField(default=list)
+    position        = models.IntegerField(default=0)
+    icon            = models.CharField(max_length=8, default='⚔️')
+    # Fork system — Alex feedback: décisions irréversibles = tension
+    fork_group      = models.CharField(max_length=40, blank=True, default='')
+    # Si fork_group défini, les skills du même groupe sont mutuellement exclusifs
+    # ex: fork_group='attack_style' → choisir Assaut OU Infiltration, pas les deux
+    tradeoff_note   = models.TextField(blank=True, default='')
+    # Skill requis pour débloquer celui-ci (dépendance)
+    requires_skill  = models.ForeignKey('self', null=True, blank=True,
+                                         on_delete=models.SET_NULL, related_name='unlocks_set')
 
     class Meta:
-        unique_together = ('branch', 'position')
+        unique_together = ('branch', 'position', 'fork_group')
         ordering = ['branch', 'position']
 
     def __str__(self):
