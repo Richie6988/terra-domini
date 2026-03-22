@@ -330,6 +330,15 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             'token_id': ter.token_id if ter else None,
             'edition': ter.edition if ter else 'genesis',
             'card_gradient': ter.get_card_gradient() if ter else None,
+            # Fenêtre vulnérabilité DEF (visible par tous pour stratégie)
+            'infiltration_count': getattr(ter,'infiltration_count',0) if ter else 0,
+            'infiltration_window_until': str(getattr(ter,'infiltration_window_until','') or '') if ter else '',
+            # Builds actifs sur le territoire
+            'buildings': [
+                {'id':str(b.id),'building_type':b.building_type,'level':getattr(b,'level',1)}
+                for b in ter.buildings.all()
+            ] if ter and hasattr(ter,'buildings') else [],
+            'fortification_level': getattr(ter,'fortification_level',0) if ter else 0,
         }
         if poi:
             data.update({
@@ -543,6 +552,12 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             logger.warning(f'Resource init failed: {e}')
 
         logger.info(f"Territory claimed: {h3_index} by {request.user.username} (method={method})")
+        # Vérifier progression campagne après claim
+        try:
+            from terra_domini.apps.progression.campaigns import check_campaign_progress
+            check_campaign_progress(request.user)
+        except Exception:
+            pass
         # Déclencher vérification progression campagnes
         try:
             from terra_domini.apps.progression.campaigns import check_campaign_progress

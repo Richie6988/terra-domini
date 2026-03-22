@@ -9,6 +9,40 @@ import { useState, useEffect, useRef } from 'react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
+import { ResourceBadge } from '../ui/ResourceTooltip'
+
+// Mini-row ressources avec tooltips pour ClaimModal
+function ResourceRowClaimModal({ territory: t }: { territory: any }) {
+  const resources: Record<string,number> = {}
+  const resFields = ['res_fer','res_petrole','res_gaz','res_uranium','res_silicium',
+    'res_terres_rares','res_lithium','res_or','res_donnees','res_influence',
+    'res_nourriture','res_eau','res_stabilite','res_hex_cristaux','res_composants',
+    'res_acier','res_main_oeuvre']
+  resFields.forEach(k => { if (t[k] && parseFloat(t[k]) > 0) resources[k] = parseFloat(t[k]) })
+  // Fallback legacy fields
+  if (!Object.keys(resources).length) {
+    if (t.resource_credits > 0) resources['res_hex_cristaux'] = t.resource_credits
+    if (t.resource_food > 0) resources['res_nourriture'] = t.resource_food
+    if (t.resource_energy > 0) resources['res_gaz'] = t.resource_energy
+  }
+  if (!Object.keys(resources).length) return (
+    <div style={{ fontSize:11, color:'#6B7280' }}>
+      +{t.tdc_per_day || t.resource_credits || 10} HEX Coin/jour
+    </div>
+  )
+  return (
+    <div style={{ display:'flex', flexWrap:'wrap', gap:8 }}>
+      {Object.entries(resources).slice(0,5).map(([k,v]) => (
+        <ResourceBadge key={k} resource={k} value={v} />
+      ))}
+      {t.poi_floor_price && (
+        <span style={{ fontSize:10, color:'#F59E0B', alignSelf:'center' }}>
+          Floor {t.poi_floor_price} HEX
+        </span>
+      )}
+    </div>
+  )
+}
 import { usePlayer } from '../../store'
 import toast from 'react-hot-toast'
 import type { TerritoryLight } from '../../types'
@@ -213,12 +247,9 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
             <button onClick={onClose} style={{ background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:6, color:'#9CA3AF', cursor:'pointer', width:30, height:30, fontSize:14 }}>✕</button>
           </div>
 
-          {/* Resources mini row */}
-          <div style={{ display:'flex', gap:12, marginTop:10, fontSize:11, color:'#6B7280' }}>
-            {(t.resource_credits||10) > 0 && <span>💰 +{t.resource_credits||10}/jour</span>}
-            {(t.resource_energy||0) > 0  && <span>⚡ +{t.resource_energy}/jour</span>}
-            {(t.resource_food||0) > 0    && <span>🌾 +{t.resource_food}/jour</span>}
-            {t.poi_floor_price           && <span style={{ color:rc }}>NFT floor {t.poi_floor_price} HEX</span>}
+          {/* Resources mini row avec tooltips (Marie spec) */}
+          <div style={{ marginTop: 10 }}>
+            <ResourceRowClaimModal territory={t} />
           </div>
         </div>
 

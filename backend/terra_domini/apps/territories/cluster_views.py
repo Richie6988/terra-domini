@@ -230,6 +230,15 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
                 'poi_wiki_url': poi.get('wiki_url'),
                 'poi_floor_price': poi.get('floor_price_tdi'),
                 'is_landmark': bool(poi),
+                'biome': getattr(t,'biome',None) or t.territory_type,
+                'tdc_per_day': float(getattr(t,'tdc_per_day',10) or 10),
+                'infiltration_count': getattr(t,'infiltration_count',0) or 0,
+                'infiltration_window_until': str(getattr(t,'infiltration_window_until','') or ''),
+                # Buildings sur ce territoire
+                'buildings': [
+                    {'id':str(b.id),'building_type':b.building_type,'level':getattr(b,'level',1)}
+                    for b in t.buildings.all()
+                ] if hasattr(t,'buildings') else [],
             })
         return Response({'territories': result, 'count': len(result)})
 
