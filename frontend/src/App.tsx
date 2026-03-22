@@ -12,6 +12,7 @@ import { useGameSocket } from './hooks/useGameSocket'
 import { ErrorBoundary } from './components/ui/Utils'
 import { GameMap } from './components/map/GameMap'
 import { WakeUpDigest } from './components/onboarding/Tutorial'
+import { OnboardingHotspots } from './components/onboarding/OnboardingHotspots'
 
 // WakeUpDigest connecté à l'API
 function WakeUpDigestConnected() {
@@ -161,6 +162,9 @@ function GameScreen() {
 
       {/* WakeUp Digest — résumé offline à la reconnexion */}
       <WakeUpDigestConnected />
+
+      {/* Hotspots onboarding — cercles pulsants sur éléments cliquables */}
+      <OnboardingHotspots />
     </div>
   )
 }

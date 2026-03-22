@@ -32,9 +32,9 @@ function calcDailyReward(staked: number, apr: number) {
   return (staked * apr / 100) / 365
 }
 
-interface Props { onClose: () => void }
+interface Props { onClose: () => void; embedded?: boolean }
 
-export function StakingPanel({ onClose }: Props) {
+export function StakingPanel({ onClose, embedded = false }: Props) {
   const player = usePlayer()
   const qc = useQueryClient()
   const [stakeAmount, setStakeAmount] = useState('')
@@ -76,7 +76,9 @@ export function StakingPanel({ onClose }: Props) {
     <motion.div
       initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
       transition={{ type: 'spring', stiffness: 280, damping: 28 }}
-      style={{
+      style={embedded ? {
+        display: 'flex', flexDirection: 'column', width: '100%',
+      } : {
         position: 'fixed', top: 0, right: 0, bottom: 0,
         width: Math.min(400, window.innerWidth - 8),
         background: 'linear-gradient(180deg,#07070f 0%,#050510 100%)',

@@ -130,6 +130,7 @@ urlpatterns = [
     path('api/solana/revenue/',          OnChainRevenueView.as_view()),
     path('api/solana/staking/',          StakingInfoView.as_view()),
     path('api/solana/stake/',            StakeView.as_view()),
+    path('api/solana/staking/action/',   StakeView.as_view()),  # alias pour StakingPanel
     path('api/solana/claim-rewards/',    ClaimStakingRewardsView.as_view()),
     path('api/social/my-referral/',   MyReferralView.as_view(),      name='my_referral'),
 

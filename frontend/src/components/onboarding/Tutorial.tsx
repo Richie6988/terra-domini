@@ -310,6 +310,13 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
     }
     setState(newState)
     saveTutorialState(newState)
+
+    // Step 4 → montrer les hotspots de l'interface
+    if (nextStep === 4) {
+      setTimeout(() => {
+        import('./OnboardingHotspots').then(m => m.showTutorialHotspots())
+      }, 600)
+    }
   }, [state, player, onComplete])
 
   const handleGPS = useCallback(() => {

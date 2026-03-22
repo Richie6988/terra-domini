@@ -119,7 +119,15 @@ function CryptoNewsfeed() {
   )
 }
 
-const TABS = [{ id: 'wallet', label: '💎 Wallet' }, { id: 'markets', label: '📈 Markets' }, { id: 'news', label: '📰 News' }, { id: 'history', label: '📋 History' }]
+import { StakingPanel } from './StakingPanel'
+
+const TABS = [
+  { id: 'wallet',  label: '💎 Wallet'  },
+  { id: 'staking', label: '🔒 Staking' },
+  { id: 'markets', label: '📈 Markets' },
+  { id: 'news',    label: '📰 News'    },
+  { id: 'history', label: '📋 History' },
+]
 
 const TX_COLORS: Record<string, string> = {
   purchase_bonus: '#00FF87', territory_yield: '#10B981', stake_reward: '#F59E0B',
@@ -168,6 +176,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
 
         <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
           {tab === 'wallet' && <WalletCard wallet={wallet} onConvert={() => setShowConvert(true)} onWithdraw={() => setShowWithdraw(true)} />}
+          {tab === 'staking' && <StakingPanel onClose={() => setTab('wallet')} embedded />}
 
           {tab === 'markets' && Object.entries(prices).map(([sym, p]: any) => (
             <div key={sym} style={{ display: 'flex', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>

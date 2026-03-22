@@ -43,6 +43,7 @@ export function OnboardingHotspots() {
       style={{
         position: 'fixed', inset: 0, zIndex: 9500,
         pointerEvents: 'none',
+        touchAction: 'none',
       }}
     >
       {/* Masque SVG avec trous pour chaque hotspot */}

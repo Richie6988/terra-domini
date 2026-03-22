@@ -12,6 +12,7 @@ import {
   IconAlliance, IconTrophy, IconProfile, IconTrade, IconCrypto,
   IconStrategy, IconClose, IconMap, IconCoin,
 } from '../ui/HexodIcons'
+import { WalletButton } from '../crypto/WalletButton'
 
 // Django DecimalField serializes as string — always parse before arithmetic
 
@@ -185,14 +186,28 @@ export function GameHUD() {
             : <><IconWifiOff size={13} color="#EF4444" /><span style={{ fontSize: 10, color: '#EF4444' }}>Offline</span></>
           }
         </div>
+
+        {/* Wallet Solana */}
+        <WalletButton />
       </div>
 
-      {/* Bottom nav */}
+      {/* Bottom nav — scrollable sur mobile */}
       <div style={{
-        position: 'absolute', bottom: 20, left: '50%', transform: 'translateX(-50%)',
-        zIndex: 900, display: 'flex', gap: 8,
-        background: 'rgba(0,0,0,0.85)', borderRadius: 16,
-        padding: '8px 12px', border: '1px solid rgba(255,255,255,0.08)',
+        position: 'absolute', bottom: 20,
+        left: 0, right: 0,
+        zIndex: 900,
+        display: 'flex', justifyContent: 'center',
+        padding: '0 8px',
+        pointerEvents: 'none',
+      }}>
+      <div style={{
+        display: 'flex', gap: 4,
+        background: 'rgba(0,0,0,0.88)', borderRadius: 16,
+        padding: '7px 10px', border: '1px solid rgba(255,255,255,0.08)',
+        maxWidth: '100%', overflowX: 'auto',
+        scrollbarWidth: 'none',
+        pointerEvents: 'auto',
+        WebkitOverflowScrolling: 'touch' as any,
       }}>
         {[
           { panel: 'combat' as const,     icon: <IconCombat size={18} />,   label: 'Combat',   badge: activeBattles.length },
@@ -228,6 +243,7 @@ export function GameHUD() {
             )}
           </button>
         ))}
+      </div>
       </div>
 
       {/* Notification dropdown */}
