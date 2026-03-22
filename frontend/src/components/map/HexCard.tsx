@@ -262,7 +262,21 @@ function HexCard3D({ frontCv, backCv, imgUrl, cfg, showBack, isShiny }: {
   const prismGeo=useMemo(()=>{ const g=new THREE.ExtrudeGeometry(hexShape,{depth:0.22,bevelEnabled:true,bevelThickness:0.04,bevelSize:0.03,bevelSegments:2}); return g },[hexShape])
 
   // Flat front/back faces
-  const faceGeo=useMemo(()=>new THREE.ShapeGeometry(hexShape),[hexShape])
+  const faceGeo=useMemo(()=>{
+    const g=new THREE.ShapeGeometry(hexShape)
+    // Remap UVs from shape coords (centered, not 0-1) to 0-1 range
+    g.computeBoundingBox()
+    const box=g.boundingBox!
+    const uvAttr=g.attributes.uv
+    for(let i=0;i<uvAttr.count;i++){
+      uvAttr.setXY(i,
+        (uvAttr.getX(i)-box.min.x)/(box.max.x-box.min.x),
+        (uvAttr.getY(i)-box.min.y)/(box.max.y-box.min.y)
+      )
+    }
+    uvAttr.needsUpdate=true
+    return g
+  },[hexShape])
 
   const [imgTex,setImgTex]=useState<THREE.Texture|null>(null)
   useEffect(()=>{ if(!imgUrl)return; new THREE.TextureLoader().load(imgUrl,tex=>{tex.colorSpace=THREE.SRGBColorSpace;setImgTex(tex)},undefined,()=>setImgTex(null)) },[imgUrl])
@@ -281,7 +295,7 @@ function HexCard3D({ frontCv, backCv, imgUrl, cfg, showBack, isShiny }: {
       ctx.fillStyle=ov; ctx.fillRect(0,imgTop,S,imgH)
       ctx.restore()
     }
-    const t=new THREE.CanvasTexture(cv); t.flipY=false; return t
+    const t=new THREE.CanvasTexture(cv); t.flipY=true; return t
   },[frontCv,imgTex,cfg])
 
   const backTex=useMemo(()=>{ const t=new THREE.CanvasTexture(backCv); t.flipY=false; return t },[backCv])

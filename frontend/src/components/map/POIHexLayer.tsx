@@ -63,16 +63,8 @@ export function POIHexLayer({ map, zoom, lat, lon, catFilter = ['all'], rarFilte
     }
 
     if (zoom >= 13) {
-      // Hex polygons from HexLayer show POI territories with rarity glow — no separate markers.
-      // Only floating name labels for legendary/mythic for discoverability.
-      pois.filter(p => p.rarity === 'mythic' || p.rarity === 'legendary').forEach(poi => {
-        const color = RC[poi.rarity] || '#9CA3AF'
-        const lbl = L.divIcon({
-          html: `<div style="background:${color}ee;border:1px solid ${color};border-radius:5px;padding:2px 6px;font-size:9px;font-weight:800;color:#000;white-space:nowrap;box-shadow:0 2px 8px ${color}66;pointer-events:none">${poi.emoji} ${poi.name.slice(0,18)}</div>`,
-          className:'td-poi-label', iconAnchor:[50,28] as any,
-        })
-        layer.addLayer(L.marker([poi.lat, poi.lon], { icon:lbl, zIndexOffset:800, interactive:false }))
-      })
+      // At close zoom the HexLayer polygon IS the POI visual. Nothing to add.
+
     } else if (zoom >= 10) {
       // Medium zoom — one pin per cluster of nearby POIs, showing top rarity
       const grid: Record<string, POIPin[]> = {}
