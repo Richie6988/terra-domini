@@ -62,8 +62,8 @@ export function POIHexLayer({ map, zoom, lat, lon, catFilter = ['all'], rarFilte
       map.flyTo([poi.lat, poi.lon], Math.max(zoom, 14), { duration: 1.2 })
     }
 
-    if (zoom >= 13) {
-      // At close zoom the HexLayer polygon IS the POI visual. Nothing to add.
+    if (zoom >= 12) {
+      // Hex polygons from HexLayer already show POI at close zoom — nothing to add
 
     } else if (zoom >= 10) {
       // Medium zoom — one pin per cluster of nearby POIs, showing top rarity

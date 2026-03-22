@@ -11,11 +11,8 @@
  *   🔬 Royaume — Resources + radial skill tree (always fully deployed)
  *   💎 NFT     — Token, marketplace
  */
-import { useState, useRef, useEffect, useMemo, Suspense } from 'react'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { Environment } from '@react-three/drei'
-import * as THREE from 'three'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
@@ -317,6 +314,141 @@ function HexCard3D({ frontCv, backCv, imgUrl, cfg, showBack, isShiny }: {
   )
 }
 
+function SkillTreeSVG({ tree, kingdom, cfg, onUnlock }: {
+  tree:Record<string,any[]>; kingdom:any; cfg:typeof RARITY[RK]; onUnlock:(id:number)=>void
+}) {
+  const [hover,setHover]=useState<number|null>(null)
+  const [selectedBranch,setSelectedBranch]=useState<string|null>(null)
+  const W=520,H=480,cx=W/2,cy=H/2-10
+  const BR=125, NR=20, SR=14, GAP=50
+
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{display:'block',margin:'0 auto',overflow:'visible'}}>
+      <defs>
+        {BRANCHES.map(b=>(
+          <filter key={b.id} id={`gsf-${b.id}`} x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="bl"/>
+            <feMerge><feMergeNode in="bl"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        ))}
+        <filter id="gsf-center" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="bl"/>
+          <feMerge><feMergeNode in="bl"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+
+      {BRANCHES.map(b=>{
+        const rad=(b.ang*Math.PI)/180
+        const bx=cx+Math.cos(rad)*BR, by=cy+Math.sin(rad)*BR
+        const skills=tree[b.id]||[]
+        const isHigh=selectedBranch===b.id
+
+        return (
+          <g key={b.id}>
+            {/* Center → branch */}
+            <line x1={cx} y1={cy} x2={bx} y2={by}
+              stroke={b.color} strokeWidth={isHigh?2.5:1.5}
+              strokeOpacity={isHigh?0.95:0.35}
+              strokeDasharray={isHigh?undefined:'5,4'} />
+
+            {/* Branch root */}
+            <g style={{cursor:'pointer'}} onClick={()=>setSelectedBranch(s=>s===b.id?null:b.id)}>
+              <circle cx={bx} cy={by} r={NR+4} fill={b.color+'15'}
+                stroke={b.color} strokeWidth={isHigh?2.5:1.5} strokeOpacity={isHigh?1:0.5}
+                filter={isHigh?`url(#gsf-${b.id})`:undefined} />
+              <text x={bx} y={by} textAnchor="middle" dominantBaseline="central"
+                fontSize={16} style={{pointerEvents:'none'}}>{b.icon}</text>
+              <text x={bx} y={by+NR+14} textAnchor="middle"
+                fontSize={9} fill={b.color} fontWeight={700} style={{pointerEvents:'none'}}>
+                {b.label}
+              </text>
+              {/* Unlocked count */}
+              <text x={bx} y={by+NR+25} textAnchor="middle"
+                fontSize={8} fill={b.color+'99'} style={{pointerEvents:'none'}}>
+                {skills.filter((s:any)=>s.unlocked).length}/{skills.length}
+              </text>
+            </g>
+
+            {/* ALL skills along branch — always visible */}
+            {skills.map((s:any,i:number)=>{
+              const dist=BR+NR+8+i*GAP
+              const sx=cx+Math.cos(rad)*dist, sy=cy+Math.sin(rad)*dist
+              const prevDist=i===0?BR:BR+NR+8+(i-1)*GAP
+              const px=cx+Math.cos(rad)*prevDist, py=cy+Math.sin(rad)*prevDist
+              const isHov=hover===s.id
+
+              return (
+                <g key={s.id}>
+                  {/* Connector */}
+                  <line x1={px} y1={py} x2={sx} y2={sy}
+                    stroke={b.color} strokeWidth={1.5}
+                    strokeOpacity={s.unlocked?0.85:0.2}
+                    strokeDasharray={s.unlocked?undefined:'3,4'} />
+
+                  {/* Skill node */}
+                  <g style={{cursor:'pointer'}}
+                    onMouseEnter={()=>setHover(s.id)} onMouseLeave={()=>setHover(null)}>
+                    <circle cx={sx} cy={sy} r={SR+3} fill={s.unlocked?b.color+'22':'rgba(10,10,20,0.9)'}
+                      stroke={b.color} strokeWidth={s.unlocked?2:1}
+                      strokeOpacity={s.unlocked?1:0.35}
+                      filter={s.unlocked?`url(#gsf-${b.id})`:undefined} />
+                    <text x={sx} y={sy} textAnchor="middle" dominantBaseline="central"
+                      fontSize={11} style={{pointerEvents:'none'}} opacity={s.unlocked?1:0.5}>
+                      {s.icon}
+                    </text>
+                    {/* Unlocked checkmark */}
+                    {s.unlocked&&(
+                      <circle cx={sx+SR+1} cy={sy-SR+1} r={7} fill="#00FF87">
+                        <title>Débloquée</title>
+                      </circle>
+                    )}
+                    {s.unlocked&&(
+                      <text x={sx+SR+1} y={sy-SR+2} textAnchor="middle" dominantBaseline="central"
+                        fontSize={8} fill="#000" fontWeight={900} style={{pointerEvents:'none'}}>✓</text>
+                    )}
+
+                    {/* Hover tooltip */}
+                    {isHov&&(
+                      <g>
+                        <rect x={sx-90} y={sy-72} width={180} height={68} rx={7}
+                          fill="rgba(4,4,20,0.98)" stroke={b.color} strokeWidth={1.5} />
+                        <text x={sx} y={sy-57} textAnchor="middle" fontSize={11} fontWeight={800} fill="#fff">
+                          {s.name.slice(0,22)}
+                        </text>
+                        <text x={sx} y={sy-40} textAnchor="middle" fontSize={9} fill={b.color}>
+                          {s.effect.slice(0,28)}
+                        </text>
+                        <text x={sx} y={sy-24} textAnchor="middle" fontSize={8} fill="#6B7280">
+                          {s.cost_json.slice(0,2).join(' · ')}
+                        </text>
+                        {!s.unlocked&&kingdom?.is_main&&(
+                          <text x={sx} y={sy-10} textAnchor="middle" fontSize={9} fill="#10B981"
+                            style={{cursor:'pointer'}} onClick={()=>onUnlock(s.id)}>
+                            ▶ Débloquer
+                          </text>
+                        )}
+                      </g>
+                    )}
+                  </g>
+                </g>
+              )
+            })}
+          </g>
+        )
+      })}
+
+      {/* Center node */}
+      <circle cx={cx} cy={cy} r={34} fill="rgba(245,158,11,0.15)" stroke="#F59E0B" strokeWidth={2.5}
+        filter="url(#gsf-center)" />
+      <text x={cx} y={cy-5} textAnchor="middle" dominantBaseline="central" fontSize={24} fill="#F59E0B">⬡</text>
+      <text x={cx} y={cy+18} textAnchor="middle" fontSize={9} fill="#F59E0B" fontWeight={800} letterSpacing="2">
+        HEXOD
+      </text>
+    </svg>
+  )
+}
+
+
 /* ── Kingdom tab ─────────────────────────────────────────── */
 function KingdomTab({ t, cfg }: { t:any; cfg:typeof RARITY[RK] }) {
   const qc=useQueryClient()
@@ -406,6 +538,123 @@ function KingdomTab({ t, cfg }: { t:any; cfg:typeof RARITY[RK] }) {
   )
 }
 
+
+/* ── CSS 3D Card — no WebGL needed ──────────────────────── */
+function CSS3DCard({ frontCv, cfg, showBack, isShiny }: {
+  frontCv: HTMLCanvasElement; cfg: typeof RARITY[RK]; showBack: boolean; isShiny: boolean
+}) {
+  const [rotY, setRotY] = useState(-12)
+  const [rotX, setRotX] = useState(6)
+  const dragRef = useRef<{active:boolean;lx:number;ly:number;vy:number;vx:number}>({active:false,lx:0,ly:0,vy:-0.3,vx:0})
+  const rafRef  = useRef<number>()
+  const cardRef = useRef<HTMLDivElement>(null!)
+
+  // Inertia animation
+  useEffect(() => {
+    const tick = () => {
+      const d = dragRef.current
+      if (!d.active) {
+        d.vy *= 0.93; d.vx *= 0.93
+        setRotY(r => r + d.vy)
+        setRotX(r => Math.max(-25, Math.min(25, r + d.vx)))
+      }
+      rafRef.current = requestAnimationFrame(tick)
+    }
+    rafRef.current = requestAnimationFrame(tick)
+    return () => { if (rafRef.current) cancelAnimationFrame(rafRef.current) }
+  }, [])
+
+  const onPointerDown = (e: React.PointerEvent) => {
+    const d = dragRef.current; d.active=true; d.lx=e.clientX; d.ly=e.clientY; d.vy=0; d.vx=0
+  }
+  const onPointerMove = (e: React.PointerEvent) => {
+    const d = dragRef.current; if(!d.active)return
+    d.vy=(e.clientX-d.lx)*0.4; d.vx=-(e.clientY-d.ly)*0.25
+    setRotY(r=>r+d.vy); setRotX(r=>Math.max(-25,Math.min(25,r+d.vx)))
+    d.lx=e.clientX; d.ly=e.clientY
+  }
+  const onPointerUp = () => { dragRef.current.active=false }
+  const onWheel = (e: React.WheelEvent) => {
+    e.preventDefault()
+    // Scale the card on wheel
+    const el = cardRef.current?.parentElement
+    if(el){ const s=parseFloat(el.style.transform?.match(/scale\((.*?)\)/)?.[1]||'1'); el.style.transform=`scale(${Math.max(0.5,Math.min(2,s-e.deltaY*0.001))})` }
+  }
+
+  // Get canvas dataURL for CSS background
+  const frontUrl = useMemo(() => frontCv.toDataURL('image/png'), [frontCv])
+
+  const shimmer = isShiny ? `linear-gradient(135deg, ${cfg.c}44 0%, rgba(255,215,0,0.3) 50%, ${cfg.c}44 100%)` : 'none'
+
+  return (
+    <div style={{ width:240, height:272, cursor:'grab', zIndex:1, flexShrink:0, perspective:800 }}
+      ref={cardRef}
+      onPointerDown={onPointerDown} onPointerMove={onPointerMove}
+      onPointerUp={onPointerUp} onPointerLeave={onPointerUp} onWheel={onWheel}
+    >
+      <div style={{
+        width:'100%', height:'100%', position:'relative',
+        transformStyle:'preserve-3d',
+        transform: `rotateY(${showBack?rotY+180:rotY}deg) rotateX(${rotX}deg)`,
+        transition: 'transform 0.05s linear',
+      }}>
+        {/* FRONT FACE */}
+        <div style={{
+          position:'absolute', inset:0, backfaceVisibility:'hidden',
+          borderRadius: '14px',
+          overflow: 'hidden',
+          backgroundImage: `url(${frontUrl})`,
+          backgroundSize: 'cover',
+          boxShadow: `0 0 30px ${cfg.c}66, 0 8px 32px rgba(0,0,0,0.8)`,
+          border: `2px solid ${cfg.c}88`,
+        }}>
+          {isShiny && <div style={{
+            position:'absolute', inset:0, borderRadius:12,
+            backgroundImage: shimmer,
+            animation: 'shinyShimmer 2s ease-in-out infinite',
+          }} />}
+        </div>
+
+        {/* BACK FACE */}
+        <div style={{
+          position:'absolute', inset:0, backfaceVisibility:'hidden',
+          transform: 'rotateY(180deg)',
+          borderRadius: '14px',
+          overflow: 'hidden',
+          background: `linear-gradient(135deg, ${cfg.bg} 0%, #020205 100%)`,
+          boxShadow: `0 0 30px ${cfg.c}66, 0 8px 32px rgba(0,0,0,0.8)`,
+          border: `2px solid ${cfg.c}88`,
+          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        }}>
+          {/* Hex watermark pattern */}
+          <div style={{
+            position:'absolute', inset:0, opacity:0.08,
+            backgroundImage: `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='70'><text y='50' font-size='40' fill='${encodeURIComponent(cfg.c)}'>⬡</text></svg>")`,
+            backgroundRepeat: 'repeat',
+          }} />
+          <div style={{ position:'relative', textAlign:'center' }}>
+            <div style={{ fontSize:64, lineHeight:1 }}>⬡</div>
+            <div style={{ fontSize:22, fontWeight:900, color:cfg.accent, letterSpacing:4, marginTop:8 }}>HEXOD</div>
+            <div style={{ fontSize:11, color:cfg.c+'aa', marginTop:6 }}>Saison 1 · Édition Genèse</div>
+          </div>
+          {isShiny && <div style={{
+            position:'absolute', inset:0, borderRadius:12,
+            backgroundImage: shimmer,
+            animation: 'shinyShimmer 2s ease-in-out infinite',
+          }} />}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes shinyShimmer {
+          0%,100% { opacity:0.4; background-position:0% 50%; }
+          50%      { opacity:0.8; background-position:100% 50%; }
+        }
+      `}</style>
+    </div>
+  )
+}
+
 /* ── Main HexCard ────────────────────────────────────────── */
 export function HexCard({ territory:t, onClose, onRequestClaim }:{
   territory:any; onClose:()=>void; onRequestClaim:()=>void
@@ -451,19 +700,8 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
         background:`radial-gradient(ellipse 55% 55% at 50% 42%,${cfg.c}1a 0%,transparent 70%)`,
         filter:'blur(50px)'}} />
 
-      {/* 3D canvas */}
-      <div style={{width:240,height:270,cursor:'grab',zIndex:1,flexShrink:0}}>
-        <Canvas camera={{position:[0,0,4.0],fov:42}} gl={{antialias:true,alpha:true,powerPreference:"high-performance",preserveDrawingBuffer:false}} frameloop="always" style={{background:'transparent'}} onCreated={({gl})=>{ gl.domElement.addEventListener("webglcontextlost",(e)=>{e.preventDefault();setTimeout(()=>gl.forceContextRestore?.(),100)}) }}>
-          <Suspense fallback={null}>
-            <ambientLight intensity={0.3} />
-            <pointLight position={[3,4,3]} intensity={1.8} />
-            <pointLight position={[-2,-2,2]} intensity={0.6} color={cfg.c} />
-            <Environment preset="city" />
-            <HexCard3D frontCv={frontCv} backCv={backCv} imgUrl={imgUrl}
-              cfg={cfg} showBack={showBack} isShiny={isShiny} />
-          </Suspense>
-        </Canvas>
-      </div>
+      {/* CSS 3D card — no WebGL, no context loss */}
+      <CSS3DCard frontCv={frontCv} cfg={cfg} showBack={showBack} isShiny={isShiny} />
 
       {/* Label + flip */}
       <div style={{display:'flex',alignItems:'center',gap:10,zIndex:1}}>
