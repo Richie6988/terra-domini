@@ -8,6 +8,7 @@
  */
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
+import { useLeafletLayer } from '../ui/Utils'
 import { useQuery } from '@tanstack/react-query'
 import { cellToBoundary } from 'h3-js'
 import { api } from '../../services/api'
@@ -60,6 +61,7 @@ function computeBorderEdges(h3Indexes: string[]): [number, number][][][] {
 
 export function KingdomBorderLayer({ map, zoom }: Props) {
   const player = usePlayer()
+  const _layerFromHook = useLeafletLayer(map)
   const layerRef = useRef<L.LayerGroup | null>(null)
 
   const { data } = useQuery<{ kingdoms: Kingdom[] }>({

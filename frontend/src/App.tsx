@@ -11,6 +11,44 @@ import { api } from './services/api'
 import { useGameSocket } from './hooks/useGameSocket'
 import { ErrorBoundary } from './components/ui/Utils'
 import { GameMap } from './components/map/GameMap'
+import { WakeUpDigest } from './components/onboarding/Tutorial'
+
+// WakeUpDigest connecté à l'API
+function WakeUpDigestConnected() {
+  const [show, setShow] = useState(false)
+  const [digestData, setDigestData] = useState<any>(null)
+  const player = useStore(s => s.player)
+  const isAuthenticated = useStore(s => s.isAuthenticated)
+
+  useEffect(() => {
+    if (!isAuthenticated || !player) return
+    const lastLogin = localStorage.getItem('hx_last_login')
+    const now = Date.now()
+    const offlineMs = lastLogin ? now - parseInt(lastLogin) : 0
+    const offlineH = offlineMs / 3600000
+    localStorage.setItem('hx_last_login', String(now))
+    if (offlineH < 0.5) return  // Moins de 30min offline → pas de digest
+
+    api.get('/progression/offline-summary/').then(r => {
+      const d = r.data
+      if (d.new_tdc > 0 || d.battles?.length > 0) {
+        setDigestData({ ...d, offlineHours: offlineH })
+        setShow(true)
+      }
+    }).catch(() => {})
+  }, [isAuthenticated])
+
+  if (!show || !digestData) return null
+  return (
+    <WakeUpDigest
+      offlineHours={digestData.offlineHours}
+      resources={{ energy:0, food:0, credits: Math.round(digestData.new_tdc || 0), materials:0 }}
+      battles={digestData.battles || []}
+      newTDC={digestData.new_tdc || 0}
+      onDismiss={() => setShow(false)}
+    />
+  )
+}
 import { GameHUD } from './components/hud/GameHUD'
 import { TerritoryPanel } from './components/hud/TerritoryPanel'
 import { CombatPanel } from './components/hud/CombatPanel'
@@ -107,15 +145,16 @@ function GameScreen() {
       <Suspense fallback={null}>
         {player && !player.tutorial_completed && (
           <Tutorial onComplete={() => {
-            // Mark complete in API
             Promise.resolve().then(() =>
               api.post('/progression/tutorial-complete/').catch(() => {})
             )
-            // Update local store
             useStore.getState().updatePlayer({ tutorial_completed: true } as any)
           }} />
         )}
       </Suspense>
+
+      {/* WakeUp Digest — résumé offline à la reconnexion */}
+      <WakeUpDigestConnected />
     </div>
   )
 }

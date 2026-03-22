@@ -730,15 +730,20 @@ function HexCard3D({ frontCv, backCv, cfg, showBack, isShiny }: {
     return ()=>{ c.removeEventListener('pointerdown',pd); window.removeEventListener('pointermove',pm); window.removeEventListener('pointerup',pu); c.removeEventListener('wheel',pw) }
   },[gl])
 
-  // Animation + shimmer shiny
-  useFrame((_, delta) => {
+  useFrame((state, delta) => {
     velY.current *= 0.93; velX.current *= 0.93
     groupRef.current.rotation.y += velY.current
     groupRef.current.rotation.x = Math.max(-0.7, Math.min(0.7, groupRef.current.rotation.x + velX.current))
-    // Shimmer rotatif pour shiny/legendary/mythic
+    // Shimmer rotatif + tilt-reactive
     if (isShiny || cfg.foil === 'rainbow' || cfg.foil === 'prismatic') {
       shimmerRef.current += delta * 0.8
       if (shimmerRef.current > Math.PI*2) shimmerRef.current -= Math.PI*2
+    }
+    // Mettre à jour uniforms du shader tilt
+    if (shaderMatRef.current) {
+      shaderMatRef.current.uniforms.tiltX.value = groupRef.current.rotation.x
+      shaderMatRef.current.uniforms.tiltY.value = groupRef.current.rotation.y
+      shaderMatRef.current.uniforms.time.value   = state.clock.elapsedTime
     }
   })
 
@@ -781,21 +786,51 @@ function HexCard3D({ frontCv, backCv, cfg, showBack, isShiny }: {
     t.flipY = true; t.needsUpdate = true; return t
   },[frontCv])
 
+  // Shimmer tilt-reactive (ARTIST3D spec) — shiny/legendary/mythic
+  const shaderMatRef = useRef<THREE.ShaderMaterial | null>(null)
+  const useTiltShader = isShiny || cfg.foil === 'rainbow' || cfg.foil === 'prismatic' || cfg.foil === 'holographic'
+
   // Matériau sides
   const sideMat = useMemo(() => new THREE.MeshStandardMaterial({
     color: new THREE.Color(cfg.c),
-    metalness: cfg.metalness,
-    roughness: cfg.roughness,
-    envMapIntensity: 1.5,
+    metalness: cfg.metalness, roughness: cfg.roughness, envMapIntensity: 1.5,
   }),[cfg])
 
-  // Matériau face avant
-  const frontMat = useMemo(() => new THREE.MeshStandardMaterial({
-    map: frontTex,
-    metalness: 0.05,
-    roughness: 0.65,
-    envMapIntensity: isShiny ? 1.2 : 0.4,
-  }),[frontTex, isShiny])
+  // Matériau face avant — ShaderMaterial pour high rarity, Standard pour le reste
+  const frontMat = useMemo(() => {
+    if (useTiltShader) {
+      const mat = new THREE.ShaderMaterial({
+        uniforms: {
+          tMap:  { value: frontTex },
+          tiltX: { value: 0.0 }, tiltY: { value: 0.0 },
+          time:  { value: 0.0 },
+          color: { value: new THREE.Color(cfg.c) },
+        },
+        vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
+        fragmentShader: `
+          uniform sampler2D tMap; uniform float tiltX,tiltY,time; uniform vec3 color;
+          varying vec2 vUv;
+          void main(){
+            vec4 tex=texture2D(tMap,vUv);
+            vec2 shimPos=vec2(0.5+tiltY*0.55,0.5-tiltX*0.55);
+            float dist=length(vUv-shimPos);
+            float hi=smoothstep(0.55,0.0,dist)*0.4;
+            float band=sin((vUv.x*2.5+vUv.y*1.8+time*0.45+tiltY*1.2)*6.28)*0.5+0.5;
+            vec3 rainbow=mix(vec3(1.,.2,.4),mix(vec3(.2,.8,1.),vec3(.7,.2,1.),vUv.y),band);
+            vec3 result=tex.rgb+rainbow*0.10+color*hi;
+            gl_FragColor=vec4(result,tex.a);
+          }
+        `,
+        transparent: true,
+      })
+      shaderMatRef.current = mat
+      return mat as unknown as THREE.MeshStandardMaterial
+    }
+    return new THREE.MeshStandardMaterial({
+      map: frontTex, metalness: 0.05, roughness: 0.65,
+      envMapIntensity: isShiny ? 1.2 : 0.4,
+    })
+  }, [frontTex, isShiny, useTiltShader, cfg.c])
 
   // Matériau face arrière — MeshPhysicalMaterial pour legendary/mythic
   // backTex — canvas texture pour Common/Uncommon (CARD spec)
@@ -849,12 +884,59 @@ function HexCard3D({ frontCv, backCv, cfg, showBack, isShiny }: {
       <mesh geometry={faceGeo} material={backMat} position={[0, 0, -0.12]} rotation={[0, Math.PI, 0]} />
       {/* Lumière rareté */}
       <pointLight position={[0, 0, 3.5]} intensity={lightIntensity} color={cfg.c} />
-      {/* Lumière rimlight pour legendary/mythic */}
+      {/* Rimlight legendary/mythic */}
       {cfg.glow > 8 && (
         <pointLight position={[2, 1, -2]} intensity={0.6} color={cfg.accent} />
       )}
+      {/* Particules orbitales legendary/mythic (ARTIST3D spec) */}
+      {cfg.particles && <OrbitalParticles color={cfg.c} accent={cfg.accent} isShiny={isShiny} />}
     </group>
   )
+}
+
+function OrbitalParticles({ color, accent, isShiny }: { color: string; accent: string; isShiny: boolean }) {
+  const ref = useRef<THREE.Points>(null!)
+  const count = isShiny ? 80 : 50
+
+  const [positions, sizes] = useMemo(() => {
+    const pos  = new Float32Array(count * 3)
+    const sz   = new Float32Array(count)
+    for (let i = 0; i < count; i++) {
+      const r     = 1.8 + Math.random() * 0.8
+      const theta = Math.random() * Math.PI * 2
+      const phi   = Math.random() * Math.PI
+      pos[i*3]   = r * Math.sin(phi) * Math.cos(theta)
+      pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta)
+      pos[i*3+2] = r * Math.cos(phi) * 0.3  // aplati
+      sz[i] = 0.04 + Math.random() * 0.06
+    }
+    return [pos, sz]
+  }, [count])
+
+  useFrame((state) => {
+    if (!ref.current) return
+    ref.current.rotation.y = state.clock.elapsedTime * 0.3
+    ref.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.15) * 0.2
+  })
+
+  const geo = useMemo(() => {
+    const g = new THREE.BufferGeometry()
+    g.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    g.setAttribute('size', new THREE.BufferAttribute(sizes, 1))
+    return g
+  }, [positions, sizes])
+
+  const mat = useMemo(() => new THREE.PointsMaterial({
+    color: new THREE.Color(color),
+    size: 0.06,
+    sizeAttenuation: true,
+    transparent: true,
+    opacity: 0.75,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  }), [color])
+
+  return <points ref={ref} geometry={geo} material={mat} />
 }
 
 

@@ -5,6 +5,7 @@
  */
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
+import { useLeafletLayer } from '../ui/Utils'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../../services/api'
 
@@ -59,6 +60,7 @@ function makeIcon(emoji: string, type: string): L.DivIcon {
 interface Props { map: L.Map | null }
 
 export function MapOverlayLayer({ map }: Props) {
+  const _layerFromHook = useLeafletLayer(map)
   const layerRef = useRef<L.LayerGroup | null>(null)
   const linesRef = useRef<L.LayerGroup | null>(null)
 

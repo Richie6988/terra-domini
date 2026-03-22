@@ -12,6 +12,7 @@
  */
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
+import { useLeafletLayer } from '../ui/Utils'
 import { cellToBoundary, cellToLatLng } from 'h3-js'
 
 interface AttackEvent {
@@ -59,6 +60,7 @@ function injectAttackStyles() {
 }
 
 export function AttackAnimationLayer({ map }: Props) {
+  const _layerFromHook = useLeafletLayer(map)
   const layerRef = useRef<L.LayerGroup | null>(null)
 
   useEffect(() => {

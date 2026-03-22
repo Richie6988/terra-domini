@@ -10,6 +10,8 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
+
+import { SkeletonList } from '../ui/Utils'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
 import toast from 'react-hot-toast'
@@ -63,13 +65,7 @@ function MissionsTab() {
   const totalAvail  = data?.total_tdc_available || 0
   const streak      = streakData?.current_streak || player?.stats?.current_streak || 0
 
-  if (isLoading) return (
-    <div style={{ padding: '28px', textAlign: 'center' }}>
-      <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-        style={{ width: 22, height: 22, border: '2px solid rgba(255,255,255,0.08)', borderTopColor: '#10B981',
-          borderRadius: '50%', margin: '0 auto' }} />
-    </div>
-  )
+  if (isLoading) return <SkeletonList count={3} />
 
   return (
     <div>

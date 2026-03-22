@@ -44,24 +44,48 @@ function getProvider(preferred?: string) {
 }
 
 export function WalletProvider({ children }: { children: ReactNode }) {
-  const [publicKey,  setPublicKey]  = useState<string | null>(null)
-  const [connected,  setConnected]  = useState(false)
+  const [publicKey,  setPublicKey]  = useState<string | null>(
+    () => localStorage.getItem('hx_wallet_pk') || null  // restore immédiat
+  )
+  const [connected,  setConnected]  = useState(
+    () => !!localStorage.getItem('hx_wallet_pk')
+  )
   const [connecting, setConnecting] = useState(false)
-  const [walletName, setWalletName] = useState<string | null>(null)
+  const [walletName, setWalletName] = useState<string | null>(
+    () => localStorage.getItem('hx_wallet') || null
+  )
 
-  // Auto-reconnect if wallet was previously connected
+  // Auto-reconnect silencieux — essai onlyIfTrusted, pas de popup
   useEffect(() => {
-    const saved = localStorage.getItem('hx_wallet')
-    if (!saved) return
+    const savedWallet = localStorage.getItem('hx_wallet')
+    const savedPk     = localStorage.getItem('hx_wallet_pk')
+    if (!savedWallet) return
+
     const provider = getProvider()
     if (!provider) return
-    // Try eager connect (no approval popup if already approved)
+
+    if (savedPk) {
+      // On a déjà la clé en cache — sync backend silencieusement
+      setPublicKey(savedPk); setConnected(true); setWalletName(provider.name)
+      api.patch('/players/update-profile/', { wallet_address: savedPk }).catch(() => {})
+    }
+
+    // Tenter la reconnexion on-chain (vérification fresh publicKey)
     provider.p.connect({ onlyIfTrusted: true })
       .then((res: any) => {
         const pk = res.publicKey?.toString()
-        if (pk) { setPublicKey(pk); setConnected(true); setWalletName(provider.name) }
+        if (pk) {
+          setPublicKey(pk); setConnected(true); setWalletName(provider.name)
+          localStorage.setItem('hx_wallet_pk', pk)
+          if (pk !== savedPk) {
+            // Clé a changé (changement de compte wallet) → resync backend
+            api.patch('/players/update-profile/', { wallet_address: pk }).catch(() => {})
+          }
+        }
       })
-      .catch(() => { localStorage.removeItem('hx_wallet') })
+      .catch(() => {
+        // onlyIfTrusted refusé → garder la session cachée, pas d'erreur visible
+      })
   }, [])
 
   const connect = useCallback(async (preferred?: 'phantom' | 'solflare' | 'backpack') => {
@@ -81,9 +105,20 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setConnected(true)
       setWalletName(provider.name)
       localStorage.setItem('hx_wallet', provider.name)
+      localStorage.setItem('hx_wallet_pk', pk)
+      localStorage.setItem('hx_wallet_connected_at', Date.now().toString())
 
-      // Sync wallet address to backend
+      // Sync wallet + vérifier ownership NFTs
       await api.patch('/players/update-profile/', { wallet_address: pk }).catch(() => {})
+
+      // Vérification ownership on-chain (SOLANA spec — prévenir spoofing)
+      api.post('/solana/verify-ownership/', { wallet_address: pk })
+        .then(r => {
+          if (r.data.owns === false) {
+            toast('⚠️ Wallet connecté mais aucun NFT Hexod détecté', { icon: '🔍' })
+          }
+        }).catch(() => {})
+
       toast.success(`${provider.name} connecté · ${pk.slice(0,4)}…${pk.slice(-4)}`)
     } catch (e: any) {
       if (e?.code !== 4001) toast.error('Connexion annulée')
@@ -99,6 +134,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     setConnected(false)
     setWalletName(null)
     localStorage.removeItem('hx_wallet')
+    localStorage.removeItem('hx_wallet_pk')
   }, [])
 
   // Listen for wallet disconnect events

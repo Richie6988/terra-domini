@@ -259,6 +259,11 @@ def unlock_kingdom_skill(player, cluster_id: str, skill_id: int) -> dict:
     # Parse cost_json → {field: amount}
     costs: dict[str, float] = _parse_skill_costs(skill.cost_json or [])
 
+    # BOARD spec: premier skill (position 0) de chaque branche = GRATUIT
+    # Supprime la barrière d'entrée sans casser l'économie des skills avancés
+    if skill.position == 0:
+        costs = {}
+
     if costs:
         # Check aggregate resources across kingdom territories
         kingdom_terrs = list(Territory.objects.filter(

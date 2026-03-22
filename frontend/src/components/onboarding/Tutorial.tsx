@@ -553,14 +553,15 @@ interface WakeUpDigestProps {
 export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismiss }: WakeUpDigestProps) {
   const totalResources = Object.values(resources).reduce((a, b) => a + b, 0)
 
+  const h = Math.round(offlineHours)
   const items: DigestItem[] = [
-    { icon: '⏰', text: `You were away for ${Math.round(offlineHours)} hours`, color: 'rgba(255,255,255,0.4)' },
-    { icon: '⚙️', text: 'Resources accumulated (40% offline rate)', value: `+${totalResources.toLocaleString()}`, color: '#10B981' },
-    ...(newTDC > 0 ? [{ icon: '🪙', text: 'Ad revenue earned while offline', value: `+${parseFloat(String(newTDC ?? 0)).toFixed(0)} HEX Coin`, color: '#FFB800' }] : []),
+    { icon: '⏰', text: `Tu étais absent${h >= 2 ? 'e' : ''} depuis ${h < 1 ? 'moins d\'une heure' : h === 1 ? '1 heure' : `${h} heures`}`, color: 'rgba(255,255,255,0.4)' },
+    ...(totalResources > 0 ? [{ icon: '📦', text: 'Ressources accumulées pendant ton absence', value: `+${totalResources.toLocaleString()}`, color: '#10B981' }] : []),
+    ...(newTDC > 0 ? [{ icon: '💎', text: 'HEX Coin gagnés offline', value: `+${parseFloat(String(newTDC ?? 0)).toFixed(0)} 💎`, color: '#F59E0B' }] : []),
     ...battles.map(b => ({
-      icon: b.won ? '🏆' : '💀',
-      text: b.won ? `Battle won: captured ${b.territory}` : `Defense failed: lost ${b.territory}`,
-      value: b.won && b.resources ? `+${b.resources} resources` : undefined,
+      icon: b.won ? '🏴' : '💀',
+      text: b.won ? `Victoire : ${b.territory} conquis !` : `Défense échouée : ${b.territory} perdu`,
+      value: b.won && b.resources ? `+${b.resources} 📦` : undefined,
       color: b.won ? '#10B981' : '#EF4444',
     })),
   ]
@@ -595,10 +596,10 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
             fontFamily: "'Bebas Neue', sans-serif",
             fontSize: 26, letterSpacing: '1px', color: '#fff',
           }}>
-            WHILE YOU WERE AWAY
+            PENDANT TON ABSENCE
           </div>
           <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-            Your empire didn't stop working
+            Ton empire n'a jamais cessé de travailler
           </div>
         </div>
 

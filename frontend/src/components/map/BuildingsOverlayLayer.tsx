@@ -12,6 +12,7 @@
  */
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
+import { useLeafletLayer } from '../ui/Utils'
 import { useQuery } from '@tanstack/react-query'
 import { cellToLatLng } from 'h3-js'
 import { api } from '../../services/api'
@@ -197,6 +198,7 @@ function makeBuildIcon(type: string, level: number, size: number): L.DivIcon {
 }
 
 export function BuildingsOverlayLayer({ map, zoom, playerId }: Props) {
+  const _layerFromHook = useLeafletLayer(map)
   const layerRef = useRef<L.LayerGroup | null>(null)
 
   const { data } = useQuery<{ territories: any[] }>({

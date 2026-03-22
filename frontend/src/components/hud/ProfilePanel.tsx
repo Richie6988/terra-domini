@@ -8,6 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { LogOut, Copy, Camera, ChevronRight, TrendingUp, Shield, Zap, Globe, FlaskConical } from 'lucide-react'
 import { api } from '../../services/api'
+import { SkeletonList } from '../ui/Utils'
 import { useStore, usePlayer } from '../../store'
 import toast from 'react-hot-toast'
 
@@ -799,13 +800,7 @@ function KPI({ label, value, icon, color }: any) {
   )
 }
 function LoadingState() {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'center', padding: '32px 0' }}>
-      <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-        style={{ width: 24, height: 24, border: '2px solid rgba(255,255,255,0.1)',
-          borderTopColor: '#3B82F6', borderRadius: '50%' }} />
-    </div>
-  )
+  return <SkeletonList count={4} />
 }
 function EmptyState({ icon, msg, sub }: any) {
   return (

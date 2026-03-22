@@ -24,7 +24,7 @@ from terra_domini.apps.accounts.views import UpdateProfileView
 from terra_domini.apps.accounts.views import PlayerViewSet
 from terra_domini.apps.social.views import TradeViewSet
 from terra_domini.apps.blockchain.wallet_views import WalletViewSet
-from terra_domini.apps.blockchain.solana_views import TokenomicsView, VerifyNFTOwnershipView, SPLTokenInfoView
+from terra_domini.apps.blockchain.solana_views import TokenomicsView, VerifyNFTOwnershipView, SPLTokenInfoView, StakingInfoView, StakeView, ClaimStakingRewardsView
 from terra_domini.apps.territories.cluster_views import TerritoryClusterViewSet
 from terra_domini.apps.progression.views import SkillTreeView, SkillUnlockView
 from terra_domini.apps.progression.clicker_views import ClickerViewSet
@@ -124,6 +124,9 @@ urlpatterns = [
     path('api/solana/tokenomics/',      TokenomicsView.as_view()),
     path('api/solana/verify-ownership/', VerifyNFTOwnershipView.as_view()),
     path('api/solana/spl-token/',        SPLTokenInfoView.as_view()),
+    path('api/solana/staking/',          StakingInfoView.as_view()),
+    path('api/solana/stake/',            StakeView.as_view()),
+    path('api/solana/claim-rewards/',    ClaimStakingRewardsView.as_view()),
     path('api/social/my-referral/',   MyReferralView.as_view(),      name='my_referral'),
 
     # ── Router (all ViewSets) ─────────────────────────────────────────────────

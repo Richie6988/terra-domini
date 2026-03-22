@@ -783,6 +783,21 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             # Check si défenseur a Fortification → DEF ×1.25
             if getattr(territory, 'fortification_level', 0) > 0:
                 def_val *= 1.25
+
+            # BOARD spec: Coalition anti-dominant
+            # Si l'attaquant contrôle >8% des territoires → défenseurs reçoivent DEF +25%
+            import sqlite3 as _sq3c
+            _db3 = str(__import__('django').conf.settings.DATABASES['default'].get('NAME','db.sqlite3'))
+            _c3  = _sq3c.connect(_db3)
+            _c3.execute("SELECT COUNT(*) FROM territories")
+            _total_terr = _c3.fetchone()[0] or 1
+            _c3.execute("SELECT COUNT(*) FROM territories WHERE owner_id=?", [str(attacker.id)])
+            _atk_count = _c3.fetchone()[0] or 0
+            _c3.close()
+            _dominance_pct = _atk_count / _total_terr
+            if _dominance_pct > 0.08:
+                def_val *= 1.25  # Coalition: +25% DEF contre le dominant
+
             atk_ratio  = atk / max(def_val, 1)
             win_chance = min(0.90, max(0.10, 0.35 + atk_ratio * 0.35))
             victory    = _r.random() < win_chance
