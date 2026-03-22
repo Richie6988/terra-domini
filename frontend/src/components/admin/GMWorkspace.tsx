@@ -4,11 +4,11 @@
  *
  * Sections:
  * - Live dashboard (players, battles, economy)
- * - Player management (search, ban, grant TDC)
+ * - Player management (search, ban, grant HEX Coin)
  * - Control Tower management (create, force-start, cancel)
  * - World POI manager (activate Hormuz, edit effects)
  * - Broadcast to all players
- * - Economy controls (TDC rate, circuit breakers)
+ * - Economy controls (HEX Coin rate, circuit breakers)
  */
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -163,9 +163,9 @@ function DashboardSection() {
       {/* Economy */}
       <div style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgba(123,47,255,0.5)', letterSpacing: '0.15em', marginBottom: 8 }}>ECONOMY</div>
       <div style={S.grid}>
-        <KPI n={`${(toNum(data.economy.tdc_in_game_total) / 1000).toFixed(1)}K`} l="TDC in Circulation" color="#7B2FFF" />
+        <KPI n={`${(toNum(data.economy.tdc_in_game_total) / 1000).toFixed(1)}K`} l="HEX Coin in Circulation" color="#7B2FFF" />
         <KPI n={data.economy.purchases_today_count} l="Purchases Today"  color="#C084FC" />
-        <KPI n={`${toNum(data.economy.purchases_today_tdc).toFixed(0)} TDC`} l="Revenue Today" color="#FFB800" />
+        <KPI n={`${toNum(data.economy.purchases_today_tdc).toFixed(0)} HEX Coin`} l="Revenue Today" color="#FFB800" />
         <KPI n={data.events.towers_upcoming} l="Towers Scheduled" color="#06B6D4" />
       </div>
     </div>
@@ -210,7 +210,7 @@ function PlayersSection() {
           style={{ ...S.input, width: 'auto', maxWidth: 200 }}>
           <option value="-commander_rank">Rank ↓</option>
           <option value="commander_rank">Rank ↑</option>
-          <option value="-tdc_in_game">TDC ↓</option>
+          <option value="-tdc_in_game">HEX Coin ↓</option>
           <option value="-last_active">Last Active</option>
           <option value="-date_joined">Newest</option>
         </select>
@@ -225,7 +225,7 @@ function PlayersSection() {
             <tr>
               <th style={S.th}>Player</th>
               <th style={S.th}>Rank</th>
-              <th style={S.th}>TDC</th>
+              <th style={S.th}>HEX Coin</th>
               <th style={S.th}>Zones</th>
               <th style={S.th}>Status</th>
               <th style={S.th}>Actions</th>
@@ -257,7 +257,7 @@ function PlayersSection() {
                       onClick={() => setSelectedPlayer(selectedPlayer === p.id ? null : p.id)}
                       style={S.btn('#FFB800')}
                     >
-                      + TDC
+                      + HEX Coin
                     </button>
                     <button
                       onClick={() => {
@@ -280,7 +280,7 @@ function PlayersSection() {
                         }}
                         style={{ ...S.btn('#FFB800'), background: 'rgba(255,184,0,0.12)' }}
                       >
-                        Grant TDC
+                        Grant HEX Coin
                       </button>
                     </div>
                   )}
@@ -575,8 +575,8 @@ function EconomySection() {
       <div style={S.h2}>ECONOMY CONTROLS</div>
 
       <div style={{ ...S.grid, gridTemplateColumns: 'repeat(3, 1fr)' }}>
-        <KPI n={`€${data?.tdc_eur_rate ?? 0.01}`}          l="TDC → EUR Rate" color="#FFB800" />
-        <KPI n={`${(toNum(data?.total_tdc_supply) / 1000).toFixed(1)}K`} l="Total TDC Supply" color="#7B2FFF" />
+        <KPI n={`€${data?.tdc_eur_rate ?? 0.01}`}          l="HEX Coin → EUR Rate" color="#FFB800" />
+        <KPI n={`${(toNum(data?.total_tdc_supply) / 1000).toFixed(1)}K`} l="Total HEX Coin Supply" color="#7B2FFF" />
         <KPI n={data?.max_withdrawal_daily ?? 500}           l="Max Withdrawal/Day" color="#60A5FA" />
       </div>
 
@@ -596,9 +596,9 @@ function EconomySection() {
       </div>
 
       <div style={S.card}>
-        <div style={{ fontSize: 14, fontWeight: 500, color: '#fff', marginBottom: 14 }}>Adjust TDC Rate</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: '#fff', marginBottom: 14 }}>Adjust HEX Coin Rate</div>
         <div style={{ ...S.row, alignItems: 'center' }}>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>1 TDC =</span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>1 HEX Coin =</span>
           <input type="number" value={rate} onChange={e => setRate(+e.target.value)}
             step={0.001} min={0.001} max={1.0}
             style={{ ...S.input, width: 100 }} />
@@ -607,7 +607,7 @@ function EconomySection() {
             style={{ ...S.btn('#FFB800'), background: 'rgba(255,184,0,0.1)' }}>Set Rate</button>
         </div>
         <div style={{ marginTop: 8, fontSize: 11, color: 'rgba(255,255,255,0.2)' }}>
-          Current: 1 TDC = €{data?.tdc_eur_rate ?? 0.01} · Broadcast rate change to players before modifying.
+          Current: 1 HEX Coin = €{data?.tdc_eur_rate ?? 0.01} · Broadcast rate change to players before modifying.
         </div>
       </div>
     </div>

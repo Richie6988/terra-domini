@@ -65,7 +65,7 @@ export function TerritoryCustomizer({ territory, onClose }: { territory: Territo
         <div style={{ padding: '10px 20px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: 11, color: '#6B7280' }}>Cluster: {clusterSize} zones · Tier {currentTier}</span>
-            <span style={{ fontSize: 11, color: '#FFB800' }}>{myCluster?.tdc_per_24h?.toFixed(1) ?? 0} TDC/day</span>
+            <span style={{ fontSize: 11, color: '#FFB800' }}>{myCluster?.tdc_per_24h?.toFixed(1) ?? 0} HEX Coin/day</span>
           </div>
           <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
             {TIER_MIN_ZONES.map((min, i) => (

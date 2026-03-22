@@ -63,53 +63,16 @@ export function POIHexLayer({ map, zoom, lat, lon, catFilter = ['all'], rarFilte
     }
 
     if (zoom >= 13) {
-      // At close zoom, the HexLayer already draws POI hexes with rarity glow.
-      // We only add a small floating label above epic/legendary/mythic hexes.
-      pois.filter(p => ['epic','legendary','mythic'].includes(p.rarity) || p.is_shiny).forEach(poi => {
-        const color  = RC[poi.rarity] || '#9CA3AF'
-        const isPulse = poi.rarity === 'legendary' || poi.rarity === 'mythic' || poi.is_shiny
-        const size   = poi.rarity === 'mythic' ? 36 : poi.rarity === 'legendary' ? 32 : poi.is_shiny ? 28 : 22
-
-        const pulse = isPulse ? `animation:poiPulse${poi.rarity} 2s ease-in-out infinite;` : ''
-
-        const icon = L.divIcon({
-          html: `
-            <style>
-              @keyframes poiPulselegendary { 0%,100%{box-shadow:0 0 ${size/2}px ${color}99} 50%{box-shadow:0 0 ${size}px ${color}ff,0 0 ${size*2}px ${color}44} }
-              @keyframes poiPulsemythic    { 0%,100%{box-shadow:0 0 ${size/2}px ${color}bb} 50%{box-shadow:0 0 ${size*1.5}px ${color}ff,0 0 ${size*3}px ${color}55} }
-            </style>
-            <div style="
-              width:${size}px;height:${size}px;
-              clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-              background:${poi.is_shiny ? `linear-gradient(135deg,${color}44,#FFD70055,${color}44)` : `${color}22`};
-              border:2px solid ${color};
-              display:flex;align-items:center;justify-content:center;
-              font-size:${Math.round(size * 0.44)}px;
-              box-shadow:0 0 ${size/2}px ${color}88;
-              cursor:pointer;
-              ${pulse}
-            ">${poi.emoji || '📍'}</div>`,
-          className: 'td-poi-pin',
-          iconSize: [size, size],
-          iconAnchor: [size / 2, size / 2],
+      // Hex polygons from HexLayer show POI territories with rarity glow — no separate markers.
+      // Only floating name labels for legendary/mythic for discoverability.
+      pois.filter(p => p.rarity === 'mythic' || p.rarity === 'legendary').forEach(poi => {
+        const color = RC[poi.rarity] || '#9CA3AF'
+        const lbl = L.divIcon({
+          html: `<div style="background:${color}ee;border:1px solid ${color};border-radius:5px;padding:2px 6px;font-size:9px;font-weight:800;color:#000;white-space:nowrap;box-shadow:0 2px 8px ${color}66;pointer-events:none">${poi.emoji} ${poi.name.slice(0,18)}</div>`,
+          className:'td-poi-label', iconAnchor:[50,28] as any,
         })
-
-        const marker = L.marker([poi.lat, poi.lon], {
-          icon,
-          zIndexOffset: poi.rarity === 'mythic' ? 1000 : poi.rarity === 'legendary' ? 900 : poi.is_shiny ? 850 : 700,
-        })
-
-        marker.bindTooltip(
-          `<div style="font-size:11px;font-weight:800;color:#fff">${poi.emoji} ${poi.name}</div>
-           <div style="font-size:9px;color:${color};text-transform:uppercase;font-weight:700;margin-top:2px">${poi.rarity}${poi.is_shiny ? ' ✨ Shiny' : ''}</div>
-           <div style="font-size:9px;color:#6B7280;margin-top:1px">${poi.category}</div>`,
-          { className: 'td-tooltip', direction: 'top', offset: [0, -size / 2] }
-        )
-
-        marker.on('click', () => flyTo(poi))
-        layer.addLayer(marker)
+        layer.addLayer(L.marker([poi.lat, poi.lon], { icon:lbl, zIndexOffset:800, interactive:false }))
       })
-
     } else if (zoom >= 10) {
       // Medium zoom — one pin per cluster of nearby POIs, showing top rarity
       const grid: Record<string, POIPin[]> = {}

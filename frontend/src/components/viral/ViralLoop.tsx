@@ -1,7 +1,7 @@
 /**
  * Viral Loop Engine
  * Generates shareable moments at key dopamine peaks.
- * Triggered automatically on: capture, rank up, daily TDC, streak milestone, alliance win.
+ * Triggered automatically on: capture, rank up, daily HEX Coin, streak milestone, alliance win.
  *
  * Strategy: every "wow moment" → instant share card → TikTok/Instagram → new players
  */
@@ -131,7 +131,7 @@ export function StreakCelebration({
   const milestones: Record<number, { emoji: string; title: string; subtitle: string }> = {
     7:   { emoji: '🔥', title: 'Une semaine !',      subtitle: 'Connexion 7 jours de suite' },
     30:  { emoji: '💎', title: 'Un mois entier !',   subtitle: 'Fidélité légendaire' },
-    100: { emoji: '👑', title: '100 jours !',         subtitle: 'Tu es une légende Terra Domini' },
+    100: { emoji: '👑', title: '100 jours !',         subtitle: 'Tu es une légende Hexod' },
     365: { emoji: '🌍', title: 'UN AN !',              subtitle: 'La Terre t\'appartient vraiment' },
   }
 
@@ -216,7 +216,7 @@ export function StreakCelebration({
               fontSize: 40, letterSpacing: '2px',
               color: '#FFB800',
             }}>
-              +{rewardTDC} TDC
+              +{rewardTDC} HEX Coin
             </div>
           </motion.div>
 
@@ -233,14 +233,14 @@ export function StreakCelebration({
               fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '1px',
             }}
           >
-            RÉCUPÉRER {rewardTDC} TDC →
+            RÉCUPÉRER {rewardTDC} HEX Coin →
           </motion.button>
 
           {/* Next milestone teaser */}
           <div style={{ marginTop: 12, fontSize: 11, color: 'rgba(255,255,255,0.2)', fontFamily: 'monospace' }}>
-            {streakDays < 7 && `Encore ${7 - streakDays} jours → Bonus semaine : 100 TDC`}
-            {streakDays >= 7 && streakDays < 30 && `Encore ${30 - streakDays} jours → Bonus mois : 500 TDC`}
-            {streakDays >= 30 && streakDays < 100 && `Encore ${100 - streakDays} jours → Bonus 100 jours : 3000 TDC`}
+            {streakDays < 7 && `Encore ${7 - streakDays} jours → Bonus semaine : 100 HEX Coin`}
+            {streakDays >= 7 && streakDays < 30 && `Encore ${30 - streakDays} jours → Bonus mois : 500 HEX Coin`}
+            {streakDays >= 30 && streakDays < 100 && `Encore ${100 - streakDays} jours → Bonus 100 jours : 3000 HEX Coin`}
           </div>
         </div>
       </motion.div>
@@ -251,15 +251,15 @@ export function StreakCelebration({
 // ─── Daily Spin Wheel ─────────────────────────────────────────────────────────
 
 const WHEEL_SEGMENTS = [
-  { label: '+25 TDC',      color: '#374151', tier: 'common'    },
-  { label: '+50 TDC',      color: '#374151', tier: 'common'    },
+  { label: '+25 HEX Coin',      color: '#374151', tier: 'common'    },
+  { label: '+50 HEX Coin',      color: '#374151', tier: 'common'    },
   { label: '4h Shield',    color: '#374151', tier: 'common'    },
-  { label: '+80 TDC',      color: '#1F2937', tier: 'rare'      },
-  { label: '+150 TDC',     color: '#1F2937', tier: 'rare'      },
+  { label: '+80 HEX Coin',      color: '#1F2937', tier: 'rare'      },
+  { label: '+150 HEX Coin',     color: '#1F2937', tier: 'rare'      },
   { label: '8h Shield',    color: '#1F2937', tier: 'rare'      },
-  { label: '+500 TDC',     color: '#1D3A5F', tier: 'epic'      },
+  { label: '+500 HEX Coin',     color: '#1D3A5F', tier: 'epic'      },
   { label: 'Mil Boost ×2', color: '#1D3A5F', tier: 'epic'      },
-  { label: '+2000 TDC 🎉', color: '#2D1B00', tier: 'legendary' },
+  { label: '+2000 HEX Coin 🎉', color: '#2D1B00', tier: 'legendary' },
 ]
 
 export function DailySpin({

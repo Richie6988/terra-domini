@@ -1,6 +1,6 @@
 /**
  * TradePanel — RISK-style resource trading.
- * Trade TDC, territories, units with allies or open market.
+ * Trade HEX Coin, territories, units with allies or open market.
  * Inspired by Catan trading + RISK territory cards.
  */
 import { useState } from 'react'
@@ -13,9 +13,9 @@ import toast from 'react-hot-toast'
 const toNum = (v: unknown) => parseFloat(String(v ?? 0)) || 0
 
 const TRADE_PRESETS = [
-  { id: 'tdc_for_units', label: '💰 → ⚔️', desc: 'TDC for units', offer: { tdc: 100 }, request: { units: { infantry: 3 } } },
-  { id: 'units_for_tdc', label: '⚔️ → 💰', desc: 'Units for TDC', offer: { units: { infantry: 5 } }, request: { tdc: 150 } },
-  { id: 'tdc_transfer',  label: '💸 Transfer', desc: 'Send TDC to ally', offer: { tdc: 0 }, request: {} },
+  { id: 'tdc_for_units', label: '💰 → ⚔️', desc: 'HEX Coin for units', offer: { tdc: 100 }, request: { units: { infantry: 3 } } },
+  { id: 'units_for_tdc', label: '⚔️ → 💰', desc: 'Units for HEX Coin', offer: { units: { infantry: 5 } }, request: { tdc: 150 } },
+  { id: 'tdc_transfer',  label: '💸 Transfer', desc: 'Send HEX Coin to ally', offer: { tdc: 0 }, request: {} },
 ]
 
 interface TradeOffer {
@@ -85,7 +85,7 @@ export function TradePanel() {
       {/* SEND OFFER */}
       {mode === 'send' && (
         <div>
-          <div style={{ fontSize:11, color:'#6B7280', marginBottom:12 }}>Your balance: <span style={{color:'#F59E0B',fontWeight:600}}>{balance.toFixed(0)} TDC</span></div>
+          <div style={{ fontSize:11, color:'#6B7280', marginBottom:12 }}>Your balance: <span style={{color:'#F59E0B',fontWeight:600}}>{balance.toFixed(0)} HEX Coin</span></div>
           
           <Field label="To player (username)">
             <input value={targetUser} onChange={e=>setTargetUser(e.target.value)} placeholder="ally_username"
@@ -93,10 +93,10 @@ export function TradePanel() {
           </Field>
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:12 }}>
-            <Field label="You offer (TDC)">
+            <Field label="You offer (HEX Coin)">
               <AmountInput value={offerTdc} onChange={setOfferTdc} max={balance} color="#EF4444" />
             </Field>
-            <Field label="You request (TDC)">
+            <Field label="You request (HEX Coin)">
               <AmountInput value={requestTdc} onChange={setRequestTdc} color="#10B981" />
             </Field>
           </div>
@@ -113,7 +113,7 @@ export function TradePanel() {
               {[50, 100, 200, 500].map(amt => (
                 <button key={amt} onClick={()=>setOfferTdc(amt)}
                   style={{ padding:'4px 10px', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:6, color:'#9CA3AF', fontSize:11, cursor:'pointer' }}>
-                  {amt} TDC
+                  {amt} HEX Coin
                 </button>
               ))}
             </div>
@@ -142,8 +142,8 @@ export function TradePanel() {
                 <span style={{ fontSize:10, color: o.status==='pending'?'#F59E0B':'#6B7280', fontFamily:'monospace' }}>{o.status.toUpperCase()}</span>
               </div>
               <div style={{ display:'flex', gap:12, marginBottom:8, fontSize:12 }}>
-                <div><span style={{color:'#EF4444'}}>Offers:</span> <span style={{color:'#fff',fontWeight:600}}>{o.offer_tdc} TDC</span></div>
-                <div><span style={{color:'#10B981'}}>Wants:</span> <span style={{color:'#fff',fontWeight:600}}>{o.request_tdc} TDC</span></div>
+                <div><span style={{color:'#EF4444'}}>Offers:</span> <span style={{color:'#fff',fontWeight:600}}>{o.offer_tdc} HEX Coin</span></div>
+                <div><span style={{color:'#10B981'}}>Wants:</span> <span style={{color:'#fff',fontWeight:600}}>{o.request_tdc} HEX Coin</span></div>
               </div>
               {o.message && <div style={{ fontSize:11, color:'#6B7280', marginBottom:8, fontStyle:'italic' }}>"{o.message}"</div>}
               {o.status === 'pending' && (

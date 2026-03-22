@@ -6,7 +6,7 @@
  * Step 2: Explain zones (not "hexagons")
  * Step 3: Claim first zone (forced click)
  * Step 4: Watch resources tick (dopamine moment)
- * Step 5: Reveal coins (TDC) earned, CTA to explore
+ * Step 5: Reveal coins (HEX Coin) earned, CTA to explore
  */
 import { useState, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -67,8 +67,8 @@ export const HINTS: Record<string, HintDef> = {
   },
   // HUD
   'tdc-balance': {
-    id: 'tdc-balance', title: '🪙 Your Coins (TDC)',
-    body: 'TDC are your in-game currency — but they\'re also real crypto! Earn them by owning territories, win battles, and from brand ads shown on your land.',
+    id: 'tdc-balance', title: '🪙 Your Coins (HEX Coin)',
+    body: 'HEX Coin are your in-game currency — but they\'re also real crypto! Earn them by owning territories, win battles, and from brand ads shown on your land.',
   },
   'territory-count': {
     id: 'territory-count', title: 'Your Zones',
@@ -85,7 +85,7 @@ export const HINTS: Record<string, HintDef> = {
   },
   'ad-revenue': {
     id: 'ad-revenue', title: '📢 Ad Revenue',
-    body: 'Brands pay to show ads on popular zones. The more players see your territory, the more TDC you earn. Famous landmarks earn the most!',
+    body: 'Brands pay to show ads on popular zones. The more players see your territory, the more HEX Coin you earn. Famous landmarks earn the most!',
   },
   // Combat
   'attack-button': {
@@ -223,7 +223,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 0,
     emoji: '🌍',
-    title: 'Welcome to Terra Domini',
+    title: 'Welcome to Hexod',
     body: 'The real world is your game board. Claim zones near you. Build an empire. Earn real Coins from brand ads on your land.',
     action: 'Start Playing →',
     requiresGPS: true,
@@ -256,7 +256,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     id: 4,
     emoji: '🪙',
     title: 'Coins = Real Crypto',
-    body: 'TDC Coins are your reward. Brands pay to show ads on popular zones. You receive 70% of that revenue as Coins — which are tradeable on the Polygon blockchain.',
+    body: 'HEX Coin Coins are your reward. Brands pay to show ads on popular zones. You receive 70% of that revenue as Coins — which are tradeable on the Polygon blockchain.',
     action: '🚀 Start Exploring!',
     hint: 'tdc-balance',
   },
@@ -294,7 +294,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
 
       // Grant tutorial completion reward
       if (player) {
-        // Trigger 100 TDC reward via backend
+        // Trigger 100 HEX Coin reward via backend
         fetch('/api/progression/tutorial-complete/', {
           method: 'POST',
           headers: { 'Authorization': `Bearer ${useStore.getState().accessToken}` }
@@ -549,7 +549,7 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
   const items: DigestItem[] = [
     { icon: '⏰', text: `You were away for ${Math.round(offlineHours)} hours`, color: 'rgba(255,255,255,0.4)' },
     { icon: '⚙️', text: 'Resources accumulated (40% offline rate)', value: `+${totalResources.toLocaleString()}`, color: '#10B981' },
-    ...(newTDC > 0 ? [{ icon: '🪙', text: 'Ad revenue earned while offline', value: `+${parseFloat(String(newTDC ?? 0)).toFixed(0)} TDC`, color: '#FFB800' }] : []),
+    ...(newTDC > 0 ? [{ icon: '🪙', text: 'Ad revenue earned while offline', value: `+${parseFloat(String(newTDC ?? 0)).toFixed(0)} HEX Coin`, color: '#FFB800' }] : []),
     ...battles.map(b => ({
       icon: b.won ? '🏆' : '💀',
       text: b.won ? `Battle won: captured ${b.territory}` : `Defense failed: lost ${b.territory}`,

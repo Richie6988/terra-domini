@@ -1,6 +1,6 @@
 /**
  * TradePanel — RISK-style resource trading.
- * Trade TDC, resources, territories with other players or the market.
+ * Trade HEX Coin, resources, territories with other players or the market.
  * Accessible from the bottom nav as 5th tab.
  */
 import { useState } from 'react'
@@ -14,7 +14,7 @@ import toast from 'react-hot-toast'
 const toNum = (v: unknown) => parseFloat(String(v ?? 0)) || 0
 
 const RESOURCES = [
-  { id: 'tdc',       label: 'TDC Coins',    emoji: '🪙', color: '#FFB800' },
+  { id: 'tdc',       label: 'HEX Coin Coins',    emoji: '🪙', color: '#FFB800' },
   { id: 'food',      label: 'Food',         emoji: '🌾', color: '#10B981' },
   { id: 'materials', label: 'Materials',    emoji: '⚙️',  color: '#6B7280' },
   { id: 'energy',    label: 'Energy',       emoji: '⚡', color: '#F59E0B' },
@@ -23,7 +23,7 @@ const RESOURCES = [
 
 // Market rates (simplified — in prod these fluctuate based on supply/demand)
 const MARKET_RATES: Record<string, number> = {
-  food:      2.5,    // 2.5 TDC per unit
+  food:      2.5,    // 2.5 HEX Coin per unit
   materials: 5.0,
   energy:    8.0,
   intel:     12.0,

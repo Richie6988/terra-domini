@@ -264,7 +264,7 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
                 </div>
                 <button onClick={() => trainMut.mutate()} disabled={tdc < totalCost || trainMut.isPending}
                   style={{ width: '100%', padding: '13px', background: tdc >= totalCost ? 'rgba(0,255,135,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${tdc >= totalCost ? 'rgba(0,255,135,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 12, color: tdc >= totalCost ? '#00FF87' : '#4B5563', fontSize: 14, fontWeight: 800, cursor: tdc >= totalCost ? 'pointer' : 'not-allowed' }}>
-                  {trainMut.isPending ? '⏳ Sending to barracks…' : `🪖 Train Units (−${totalCost} TDC)`}
+                  {trainMut.isPending ? '⏳ Sending to barracks…' : `🪖 Train Units (−${totalCost} HEX Coin)`}
                 </button>
               </div>
             )}

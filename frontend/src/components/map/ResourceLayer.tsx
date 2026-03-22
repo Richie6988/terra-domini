@@ -97,7 +97,7 @@ function ResourceDetail({ resource, onClose }: { resource: Resource; onClose: ()
               <div style={{ fontSize: 10, color: '#9CA3AF', textTransform: 'capitalize' }}>{resource.game_resource}</div>
             </div>
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 9, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.08em' }}>TDC Income</div>
+              <div style={{ fontSize: 9, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.08em' }}>HEX Coin Income</div>
               <div style={{ fontSize: 20, fontWeight: 800, color: '#FFB800', fontFamily: 'monospace' }}>{resource.tdc_per_24h}</div>
               <div style={{ fontSize: 10, color: '#9CA3AF' }}>per 24h</div>
             </div>
@@ -186,7 +186,7 @@ export function ResourceLayer({ map, viewportLat, viewportLon, viewportRadius, v
           <div style="font-weight:700;font-size:13px">${r.emoji} ${r.name}</div>
           <div style="color:${r.color};font-size:10px;margin-top:2px">${r.category_label}</div>
           <div style="color:${r.rarity_color};font-size:10px;margin-top:4px;text-transform:capitalize">${r.rarity}</div>
-          <div style="color:#FFB800;font-size:11px;margin-top:4px">+${r.bonus_pct}% ${r.game_resource} · ${r.tdc_per_24h} TDC/day</div>
+          <div style="color:#FFB800;font-size:11px;margin-top:4px">+${r.bonus_pct}% ${r.game_resource} · ${r.tdc_per_24h} HEX Coin/day</div>
         </div>
       `, { className: 'td-resource-tooltip', direction: 'top', sticky: true })
       marker.on('click', () => setSelected(r))

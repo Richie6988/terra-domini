@@ -60,7 +60,7 @@ export default function RegisterPage() {
         password: form.password, display_name: form.display_name || form.username,
       })
       setAuth(data.player, data.access, data.refresh)
-      toast.success(`Welcome to Terra Domini, ${data.player.username}! 🌍`)
+      toast.success(`Welcome to Hexod, ${data.player.username}! 🌍`)
       navigate('/')
     } catch (e: any) {
       toast.error(e?.response?.data?.error ?? 'Registration failed')
@@ -100,7 +100,7 @@ export default function RegisterPage() {
           <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(16,185,129,0.08)', borderRadius: 8, fontSize: 11, color: '#6B7280', lineHeight: 1.6 }}>
             🛡️ Beginner protection for 7 days. No attacks while you learn the game.
             <br />
-            🪙 First territory earns you 100 TDC bonus.
+            🪙 First territory earns you 100 HEX Coin bonus.
           </div>
 
           <button type="submit" disabled={loading} style={btnStyle}>
@@ -115,7 +115,7 @@ export default function RegisterPage() {
 
         <div style={{ textAlign: 'center', marginTop: 12, fontSize: 11, color: '#374151' }}>
           By registering you accept the Terms of Service and Privacy Policy.
-          TDC is a utility token. Not financial advice.
+          HEX Coin is a utility token. Not financial advice.
         </div>
       </motion.div>
     </div>

@@ -2,7 +2,7 @@
  * DailyClicker — Mini-jeu 60s quotidien.
  * Cibles apparaissent aléatoirement sur l'écran.
  * Cliquer = points. Bombes = malus. Multiplicateurs = bonus.
- * Récompenses : TDC + TDI + loot aléatoire.
+ * Récompenses : HEX Coin + HEX + loot aléatoire.
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
@@ -55,8 +55,8 @@ function spawnTarget(): Target {
 const LOOT_LABELS: Record<string, string> = {
   resource_food: '🌾 Food', resource_materials: '⚙️ Materials',
   resource_energy: '⚡ Energy', boost_defense_6h: '🛡️ Defense Boost 6h',
-  boost_income_24h: '💰 Income Boost 24h', tdc_jackpot: '🎰 TDC Jackpot!',
-  nft_territory_skin: '🎨 NFT Skin', tdi_bonus_10: '💎 +10 TDI',
+  boost_income_24h: '💰 Income Boost 24h', tdc_jackpot: '🎰 HEX Coin Jackpot!',
+  nft_territory_skin: '🎨 NFT Skin', tdi_bonus_10: '💎 +10 HEX',
 }
 
 type SessionState = { session_id: number; already_done: boolean; tdc_earned?: number; loot_tier?: string; loot_item?: string; loot_qty?: number; streak_mult: number }
@@ -180,7 +180,7 @@ export function DailyClicker({ onClose }: { onClose: () => void }) {
               Click targets as fast as you can — 60 seconds.<br />
               🪙 Coins +10 · 📦 Crates +25 · 💣 Bombs -30<br />
               ⚡ Multipliers boost score · 💎 Gems +150<br />
-              Earn TDC + TDI + random loot!
+              Earn HEX Coin + HEX + random loot!
             </div>
             {streakMult > 1 && <div style={{ fontSize: 13, color: '#FFB800', fontWeight: 600 }}>🔥 Streak bonus active: x{streakMult}</div>}
             <button onClick={startGame} style={{ padding: '14px 48px', background: 'rgba(0,255,135,0.15)', border: '1px solid rgba(0,255,135,0.4)', borderRadius: 14, color: '#00FF87', fontSize: 16, fontWeight: 800, cursor: 'pointer', letterSpacing: '0.05em' }}>
@@ -194,7 +194,7 @@ export function DailyClicker({ onClose }: { onClose: () => void }) {
           <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: 32, gap: 12 }}>
             <div style={{ fontSize: 50 }}>✅</div>
             <div style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>Already done today!</div>
-            <div style={{ fontSize: 28, color: '#FFB800', fontWeight: 800, fontFamily: 'monospace' }}>🪙 +{parseFloat(String(session.tdc_earned || 0)).toFixed(1)} TDC</div>
+            <div style={{ fontSize: 28, color: '#FFB800', fontWeight: 800, fontFamily: 'monospace' }}>🪙 +{parseFloat(String(session.tdc_earned || 0)).toFixed(1)} HEX Coin</div>
             {session.loot_item && (
               <div style={{ fontSize: 14, color: TIER_COLORS[session.loot_tier || 'common'] }}>
                 {LOOT_LABELS[session.loot_item] || session.loot_item} ×{session.loot_qty}
@@ -265,11 +265,11 @@ export function DailyClicker({ onClose }: { onClose: () => void }) {
             <div style={{ fontSize: 13, color: '#6B7280' }}>{result.clicks} clicks · {result.score} points</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginTop: 8, width: '100%' }}>
               <div style={{ background: 'rgba(255,184,0,0.08)', border: '1px solid rgba(255,184,0,0.2)', borderRadius: 12, padding: '14px 12px', textAlign: 'center' }}>
-                <div style={{ fontSize: 10, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>TDC Earned</div>
+                <div style={{ fontSize: 10, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>HEX Coin Earned</div>
                 <div style={{ fontSize: 24, fontWeight: 800, color: '#FFB800', fontFamily: 'monospace', marginTop: 4 }}>+{parseFloat(result.tdc_earned).toFixed(1)}</div>
               </div>
               <div style={{ background: 'rgba(0,255,135,0.06)', border: '1px solid rgba(0,255,135,0.15)', borderRadius: 12, padding: '14px 12px', textAlign: 'center' }}>
-                <div style={{ fontSize: 10, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>TDI Earned</div>
+                <div style={{ fontSize: 10, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.1em' }}>HEX Earned</div>
                 <div style={{ fontSize: 24, fontWeight: 800, color: '#00FF87', fontFamily: 'monospace', marginTop: 4 }}>+{parseFloat(result.tdi_earned).toFixed(4)}</div>
               </div>
             </div>

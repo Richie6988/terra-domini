@@ -26,7 +26,7 @@ export const JARGON_FREE: Record<string, string> = {
   'territory': 'zone',
   'fortify': 'defend',
   'fortification': 'defense wall',
-  'TDC': 'Coins',
+  'HEX Coin': 'Coins',
   'tdc': 'coins',
   'TerraDominiCoin': 'Coins',
   'intel': 'spy info',
@@ -66,7 +66,7 @@ export const TRANSLATIONS_EN = {
   'map.poi_event': 'Live World Event',
 
   // Tutorial
-  'tutorial.step1.title': 'Welcome to Terra Domini',
+  'tutorial.step1.title': 'Welcome to Hexod',
   'tutorial.step1.body': 'The real world is your game board. Claim zones near you. Build an empire. Earn real Coins.',
   'tutorial.step1.action': 'Start Playing →',
   'tutorial.step2.title': 'Zones are your currency',
@@ -79,7 +79,7 @@ export const TRANSLATIONS_EN = {
   'tutorial.step4.body': 'Your zone earns resources every 5 minutes — even offline. More zones = more earnings.',
   'tutorial.step4.action': 'What are Coins? →',
   'tutorial.step5.title': 'Coins = Real Crypto',
-  'tutorial.step5.body': 'TDC Coins are real cryptocurrency. Earn from brand ads on your zones. Withdraw to your wallet anytime.',
+  'tutorial.step5.body': 'HEX Coin Coins are real cryptocurrency. Earn from brand ads on your zones. Withdraw to your wallet anytime.',
   'tutorial.step5.action': '🚀 Start Exploring!',
 
   // Territory panel
@@ -121,7 +121,7 @@ export const TRANSLATIONS_EN = {
   'alliance.war_score': 'War Score',
   'alliance.diplomacy': 'Diplomacy',
 
-  // Shop / TDC
+  // Shop / HEX Coin
   'shop.buy_coins': 'Buy Coins',
   'shop.balance': 'Your Coins',
   'shop.withdraw': 'Withdraw to Wallet',
@@ -135,7 +135,7 @@ export const TRANSLATIONS_EN = {
   'notif.battle_lost': '💀 You lost {territory} to {player}.',
   'notif.streak_risk': '⚠️ Your {days}-day streak expires in {hours}h!',
   'notif.offline_harvest': '🌅 You earned {amount} Coins while sleeping.',
-  'notif.ad_revenue': '🪙 +{amount} TDC from ads on {territory}.',
+  'notif.ad_revenue': '🪙 +{amount} HEX Coin from ads on {territory}.',
   'notif.friend_request': '👥 {player} wants to be your ally!',
 
   // Errors
@@ -172,7 +172,7 @@ export const TRANSLATIONS_FR: Partial<typeof TRANSLATIONS_EN> = {
   'map.your_zone': 'Votre zone',
   'map.under_attack': 'Sous attaque',
 
-  'tutorial.step1.title': 'Bienvenue sur Terra Domini',
+  'tutorial.step1.title': 'Bienvenue sur Hexod',
   'tutorial.step1.body': 'Le monde réel est votre terrain de jeu. Revendiquez des zones près de chez vous. Construisez un empire. Gagnez de vraies Pièces.',
   'tutorial.step1.action': 'Commencer →',
   'tutorial.step2.title': 'Les zones sont votre monnaie',
@@ -185,7 +185,7 @@ export const TRANSLATIONS_FR: Partial<typeof TRANSLATIONS_EN> = {
   'tutorial.step4.body': 'Votre zone génère des ressources toutes les 5 minutes — même hors ligne. Plus de zones = plus de gains.',
   'tutorial.step4.action': 'C\'est quoi les Pièces ? →',
   'tutorial.step5.title': 'Les Pièces = Vraie Crypto',
-  'tutorial.step5.body': 'Les Pièces TDC sont de la vraie cryptomonnaie. Gagnez-en grâce aux publicités sur vos zones. Retirez vers votre portefeuille à tout moment.',
+  'tutorial.step5.body': 'Les Pièces HEX Coin sont de la vraie cryptomonnaie. Gagnez-en grâce aux publicités sur vos zones. Retirez vers votre portefeuille à tout moment.',
   'tutorial.step5.action': '🚀 Explorer la carte !',
 
   'territory.production': 'Gains toutes les 5 min',
@@ -234,7 +234,7 @@ export const TRANSLATIONS_PT_BR: Partial<typeof TRANSLATIONS_EN> = {
   'map.your_zone': 'Sua zona',
   'map.under_attack': 'Sob ataque',
 
-  'tutorial.step1.title': 'Bem-vindo ao Terra Domini',
+  'tutorial.step1.title': 'Bem-vindo ao Hexod',
   'tutorial.step1.body': 'O mundo real é seu tabuleiro. Reivindique zonas perto de você. Construa um império. Ganhe Moedas reais.',
   'tutorial.step1.action': 'Começar →',
 
@@ -289,7 +289,7 @@ export const TRANSLATIONS_ZH_CN: Partial<typeof TRANSLATIONS_EN> = {
   'map.your_zone': '您的区域',
   'map.under_attack': '受到攻击',
 
-  'tutorial.step1.title': '欢迎来到 Terra Domini',
+  'tutorial.step1.title': '欢迎来到 Hexod',
   'tutorial.step1.body': '真实的地球是您的游戏棋盘。占领您附近的区域，建立帝国，赚取真实货币。',
   'tutorial.step1.action': '开始游戏 →',
 

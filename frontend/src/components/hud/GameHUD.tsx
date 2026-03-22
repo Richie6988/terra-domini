@@ -1,5 +1,5 @@
 /**
- * GameHUD — persistent top overlay with player stats, TDC, active battles.
+ * GameHUD — persistent top overlay with player stats, HEX Coin, active battles.
  */
 import { useState, useEffect } from 'react'
 import { Sword, Shield, Users, Trophy, Wifi, WifiOff, Bell, Map, ArrowRightLeft, Bitcoin, Star } from 'lucide-react'
@@ -100,7 +100,7 @@ export function GameHUD() {
           </div>
         </div>
 
-        {/* TDC Balance */}
+        {/* HEX Coin Balance */}
         <button
           onClick={() => setShowShop(true)}
           style={{ ...glassPill, pointerEvents: 'auto', cursor: 'pointer', gap: 8 }}
@@ -108,7 +108,7 @@ export function GameHUD() {
           <span style={{ fontSize: 16 }}>🪙</span>
           <div>
             <div style={{ fontSize: 13, fontWeight: 600, color: '#F59E0B' }}>
-              {toNum(balance?.in_game ?? player.tdc_in_game).toFixed(0)} TDC
+              {toNum(balance?.in_game ?? player.tdc_in_game).toFixed(0)} HEX Coin
             </div>
             <StaminaBar />
             <div style={{ fontSize: 10, color: '#6B7280' }}>≈ €{(toNum(balance?.in_game ?? player.tdc_in_game) / toNum(balance?.tdc_eur_rate ?? 100)).toFixed(2)}</div>

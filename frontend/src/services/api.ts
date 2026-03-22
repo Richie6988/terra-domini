@@ -55,7 +55,7 @@ api.interceptors.response.use(
           .catch((err) => {
             useStore.getState().logout()
             // Clear stale localStorage tokens
-            try { localStorage.removeItem('terra-domini-store') } catch {}
+            try { localStorage.removeItem('hexod-store') } catch {}
             return Promise.reject(new Error('Session expired — please log in again'))
           })
           .finally(() => { refreshPromise = null })

@@ -5,11 +5,11 @@ import { useState, useEffect, useRef } from 'react'
 import { useStore } from '../../store'
 
 const STATIC_EVENTS = [
-  { id: 's1', icon: '🌍', text: 'Terra Domini is live — capture territories to build your empire', color: '#10B981' },
-  { id: 's2', icon: '🗼', text: 'Control Towers award 2× TDC to the winning alliance', color: '#FFB800' },
+  { id: 's1', icon: '🌍', text: 'Hexod is live — capture territories to build your empire', color: '#10B981' },
+  { id: 's2', icon: '🗼', text: 'Control Towers award 2× HEX Coin to the winning alliance', color: '#FFB800' },
   { id: 's3', icon: '⚔️', text: 'Attack adjacent territories from the map', color: '#EF4444' },
-  { id: 's4', icon: '🏆', text: 'Season 1 — 50,000 TDC prize pool', color: '#8B5CF6' },
-  { id: 's5', icon: '💎', text: 'Claim your first territory for free — no TDC needed', color: '#00FF87' },
+  { id: 's4', icon: '🏆', text: 'Saison 1 — 50,000 HEX Coin prize pool', color: '#8B5CF6' },
+  { id: 's5', icon: '💎', text: 'Claim your first territory for free — no HEX Coin needed', color: '#00FF87' },
 ]
 
 export function WarTicker() {

@@ -11,7 +11,7 @@ import toast from 'react-hot-toast'
 
 const SPEC_PATHS = [
   { id: 'tactician',   emoji: '⚔️',  label: 'Tactician',   desc: 'Combat +20%' },
-  { id: 'merchant',    emoji: '💰',  label: 'Merchant',    desc: 'TDC income +25%' },
+  { id: 'merchant',    emoji: '💰',  label: 'Merchant',    desc: 'HEX Coin income +25%' },
   { id: 'diplomat',    emoji: '🤝',  label: 'Diplomat',    desc: 'Alliance bonus +30%' },
   { id: 'engineer',    emoji: '⚙️',  label: 'Engineer',    desc: 'Build speed +40%' },
   { id: 'spymaster',   emoji: '🕵️',  label: 'Spymaster',  desc: 'Intel ×2' },

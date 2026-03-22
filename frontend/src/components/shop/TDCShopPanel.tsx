@@ -1,6 +1,6 @@
 /**
- * TDC Wallet + Shop panel.
- * Shows balance, buy TDC (Stripe), shop catalog, transaction history.
+ * HEX Coin Wallet + Shop panel.
+ * Shows balance, buy HEX Coin (Stripe), shop catalog, transaction history.
  */
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -73,7 +73,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
     mutationFn: ({ code, qty }: { code: string; qty: number }) =>
       tdcApi.purchase(code, qty),
     onSuccess: (data, { code }) => {
-      toast.success(`✅ Purchased! ${toNum(data.tdc_spent).toFixed(0)} TDC spent`)
+      toast.success(`✅ Purchased! ${toNum(data.tdc_spent).toFixed(0)} HEX Coin spent`)
       qc.invalidateQueries({ queryKey: ['tdc-balance'] })
     },
     onError: (e: any) => {
@@ -110,8 +110,8 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
         <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <div>
-              <div style={{ fontSize: 20, fontWeight: 500, color: '#fff' }}>TDC Wallet</div>
-              <div style={{ fontSize: 12, color: '#6B7280' }}>Terra Domini Coin · Polygon Network</div>
+              <div style={{ fontSize: 20, fontWeight: 500, color: '#fff' }}>HEX Coin Wallet</div>
+              <div style={{ fontSize: 12, color: '#6B7280' }}>Hexod Coin · Polygon Network</div>
             </div>
             <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', color: '#9CA3AF' }}>
               <X size={18} />
@@ -122,13 +122,13 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
           <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
             <BalanceCard
               label="In-Game Balance"
-              value={`${toNum(inGame).toFixed(2)} TDC`}
+              value={`${toNum(inGame).toFixed(2)} HEX Coin`}
               sub={`≈ €${(toNum(inGame) / toNum(tdcRate)).toFixed(2)}`}
               color="#10B981"
             />
             <BalanceCard
               label="Wallet Balance"
-              value={balance?.wallet ? `${toNum(balance.wallet).toFixed(2)} TDC` : 'Connect wallet'}
+              value={balance?.wallet ? `${toNum(balance.wallet).toFixed(2)} HEX Coin` : 'Connect wallet'}
               sub={balance?.wallet ? `Polygon mainnet` : 'Link in profile'}
               color="#8B5CF6"
             />
@@ -139,7 +139,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
         <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
           {([
             { id: 'balance', label: 'Wallet', icon: <Wallet size={13} /> },
-            { id: 'buy', label: 'Buy TDC', icon: <TrendingUp size={13} /> },
+            { id: 'buy', label: 'Buy HEX Coin', icon: <TrendingUp size={13} /> },
             { id: 'shop', label: 'Shop', icon: <ShoppingCart size={13} /> },
             { id: 'history', label: 'History', icon: <History size={13} /> },
           ] as const).map(t => (
@@ -162,13 +162,13 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
           {tab === 'balance' && (
             <div>
               <div style={{ fontSize: 13, color: '#9CA3AF', lineHeight: 1.6, marginBottom: 16 }}>
-                <strong style={{ color: '#E5E7EB' }}>TDC (Terra Domini Coin)</strong> is an ERC-20 token on Polygon.
+                <strong style={{ color: '#E5E7EB' }}>HEX Coin (Hexod Coin)</strong> is an ERC-20 token on Polygon.
                 Your in-game balance is held by the contract and can be withdrawn to your wallet at any time.
-                Withdrawal fee: 3%. Minimum withdrawal: 50 TDC.
+                Withdrawal fee: 3%. Minimum withdrawal: 50 HEX Coin.
               </div>
               <div style={{ padding: 16, background: 'rgba(139,92,246,0.1)', borderRadius: 10, border: '1px solid rgba(139,92,246,0.3)', fontSize: 12, color: '#C4B5FD' }}>
-                📈 TDC is tradeable on QuickSwap and SushiSwap (Polygon).
-                The more players and ad revenue, the more valuable your TDC.
+                📈 HEX Coin is tradeable on QuickSwap and SushiSwap (Polygon).
+                The more players and ad revenue, the more valuable your HEX Coin.
               </div>
               {!balance?.wallet && (
                 <button
@@ -189,11 +189,11 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
             </div>
           )}
 
-          {/* ── BUY TDC ─────────────────────────────────────────────────── */}
+          {/* ── BUY HEX Coin ─────────────────────────────────────────────────── */}
           {tab === 'buy' && (
             <div>
               <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 16 }}>
-                1 EUR = {tdcRate} TDC. Larger packs include a bonus. Payment secured by Stripe.
+                1 EUR = {tdcRate} HEX Coin. Larger packs include a bonus. Payment secured by Stripe.
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 {EUR_PACKAGES.map(pkg => (
@@ -223,11 +223,11 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
                       }}>BEST VALUE</span>
                     )}
                     <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 2 }}>
-                      {pkg.tdc.toLocaleString()} TDC
+                      {pkg.tdc.toLocaleString()} HEX Coin
                     </div>
                     {pkg.bonus > 0 && (
                       <div style={{ fontSize: 11, color: '#10B981', marginBottom: 6 }}>
-                        +{pkg.bonus} bonus TDC
+                        +{pkg.bonus} bonus HEX Coin
                       </div>
                     )}
                     <div style={{ fontSize: 13, color: '#9CA3AF' }}>{pkg.label}</div>
@@ -238,7 +238,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
                 ))}
               </div>
               <div style={{ marginTop: 16, fontSize: 11, color: '#4B5563', textAlign: 'center', lineHeight: 1.6 }}>
-                Payments processed by Stripe. TDC minted on Polygon within ~2 min of payment confirmation.
+                Payments processed by Stripe. HEX Coin minted on Polygon within ~2 min of payment confirmation.
                 No refunds on digital goods. By purchasing you accept the Terms of Service.
               </div>
             </div>
@@ -273,7 +273,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
                   balance={inGame}
                   onBuy={(qty) => {
                     if (inGame < item.price_tdc * qty) {
-                      toast.error('Insufficient TDC balance')
+                      toast.error('Insufficient HEX Coin balance')
                       return
                     }
                     purchaseMutation.mutate({ code: item.code, qty })
@@ -304,7 +304,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
                     fontWeight: 500,
                     color: tx.amount > 0 ? '#10B981' : '#EF4444',
                   }}>
-                    {tx.amount > 0 ? '+' : ''}{toNum(tx.amount).toFixed(2)} TDC
+                    {tx.amount > 0 ? '+' : ''}{toNum(tx.amount).toFixed(2)} HEX Coin
                   </div>
                 </div>
               ))}
@@ -366,7 +366,7 @@ function ShopItemRow({ item, balance, onBuy }: { item: ShopItem; balance: number
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
         <div style={{ fontSize: 14, fontWeight: 600, color: canAfford ? '#F59E0B' : '#6B7280', marginBottom: 4 }}>
-          {item.price_tdc} TDC
+          {item.price_tdc} HEX Coin
         </div>
         {item.price_eur_display && (
           <div style={{ fontSize: 10, color: '#4B5563', marginBottom: 6 }}>{item.price_eur_display}</div>
@@ -381,7 +381,7 @@ function ShopItemRow({ item, balance, onBuy }: { item: ShopItem; balance: number
             fontSize: 12, cursor: canAfford && item.is_available ? 'pointer' : 'not-allowed',
           }}
         >
-          {!item.is_available ? 'Sold out' : canAfford ? 'Buy' : 'Need TDC'}
+          {!item.is_available ? 'Sold out' : canAfford ? 'Buy' : 'Need HEX Coin'}
         </button>
       </div>
     </div>

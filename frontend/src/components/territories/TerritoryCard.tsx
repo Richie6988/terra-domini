@@ -162,7 +162,7 @@ export function TerritoryCard({ card, size = 'md', onClick, showDetails = false 
             {[
               ['Resource', `${RESOURCE_EMOJI[card.primary_resource] || '💎'} ${card.primary_resource}`, cfg.color],
               ['Richness', `×${card.resource_richness.toFixed(1)}`, '#10B981'],
-              ['TDC/day', card.tdc_per_day.toFixed(0), '#FFB800'],
+              ['HEX Coin/day', card.tdc_per_day.toFixed(0), '#FFB800'],
             ].map(([label, val, color]) => (
               <div key={String(label)} style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 7, color: '#6B7280', textTransform: 'uppercase' }}>{label}</div>

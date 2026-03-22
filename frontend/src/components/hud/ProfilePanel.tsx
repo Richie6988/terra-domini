@@ -197,7 +197,7 @@ function OverviewTab({ player, spec }: any) {
       { k: 'total_attack_power', label: 'Puissance attaque', color: '#EF4444' },
     ]},
     { label: 'Économique', icon: '💰', items: [
-      { k: 'tdc_earned_total', label: 'TDC gagnés total', color: '#F59E0B' },
+      { k: 'tdc_earned_total', label: 'HEX Coin gagnés total', color: '#F59E0B' },
       { k: 'income_per_tick', label: 'Revenus / tick', color: '#F59E0B' },
       { k: 'cluster_count', label: 'Clusters actifs', color: '#10B981' },
     ]},
@@ -296,7 +296,7 @@ function TerritoriesTab({ player, onClose }: any) {
       {/* KPIs */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6, marginBottom: 14 }}>
         <KPI label="Territoires" value={all.length} icon="🗺️" color="#3B82F6" />
-        <KPI label="Revenus/tick" value={`+${Math.round(totalIncome)}`} icon="💰" color="#F59E0B" />
+        <KPI label="Revenus/jour" value={`+${Math.round(totalIncome)}`} icon="💰" color="#F59E0B" />
         <KPI label="POI" value={poiCount} icon="📍" color="#EC4899" />
       </div>
 
@@ -357,7 +357,7 @@ function TerritoryCard({ territory: t, onClick }: any) {
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
         <div style={{ fontSize: 12, color: '#F59E0B', fontFamily: 'monospace', fontWeight: 700 }}>+{Math.round(income)}</div>
-        <div style={{ fontSize: 8, color: '#374151' }}>cristaux/tick</div>
+        <div style={{ fontSize: 8, color: '#374151' }}>HEX Coin/jour</div>
         <div style={{ fontSize: 9, color: '#374151', marginTop: 2 }}>📍</div>
       </div>
     </motion.button>
@@ -384,7 +384,7 @@ const RESOURCES = [
   { key:'res_eau',         label:'Eau',           icon:'💧', cat:'vital',    color:'#10B981' },
   { key:'res_influence',   label:'Influence',     icon:'🌐', cat:'info',     color:'#3B82F6' },
   { key:'res_stabilite',   label:'Stabilité',     icon:'⚖️', cat:'vital',    color:'#10B981' },
-  { key:'res_hex_cristaux',label:'Cristaux HEX',  icon:'💠', cat:'hex',      color:'#EC4899' },
+  { key:'res_hex_HEX Coin',label:'HEX Coin',  icon:'💠', cat:'hex',      color:'#EC4899' },
 ]
 
 const CAT_CONFIG: Record<string, { label:string; color:string }> = {
@@ -393,7 +393,7 @@ const CAT_CONFIG: Record<string, { label:string; color:string }> = {
   tech:     { label:'🔬 Technologie',     color:'#8B5CF6' },
   info:     { label:'📡 Informationnel',  color:'#3B82F6' },
   vital:    { label:'🌱 Vital',           color:'#10B981' },
-  hex:      { label:'💠 Cristaux HEX',    color:'#EC4899' },
+  hex:      { label:'💠 HEX Coin',    color:'#EC4899' },
 }
 
 function ResourcesTab() {
@@ -457,8 +457,8 @@ function ResourcesTab() {
                     </div>
                     <div style={{ fontSize: 11, fontWeight: 800, color: val > 0 ? res.color : '#374151',
                       fontFamily: 'monospace' }}>
-                      {res.key === 'res_hex_cristaux' ? val.toFixed(2) : Math.round(val)}
-                      <span style={{ fontSize: 8, color: '#4B5563', fontWeight: 400 }}>/tick</span>
+                      {res.key === 'res_hex_HEX Coin' ? val.toFixed(2) : Math.round(val)}
+                      <span style={{ fontSize: 8, color: '#4B5563', fontWeight: 400 }}>/jour</span>
                     </div>
                   </div>
                 )
@@ -637,7 +637,7 @@ function MissionsTab() {
           <span style={{ fontSize: 12, color: '#F59E0B' }}>
             {completed} récompense{completed > 1 ? 's' : ''} disponible{completed > 1 ? 's' : ''}
           </span>
-          <span style={{ fontSize: 11, color: '#FCD34D', fontWeight: 700 }}>+{totalReward} TDC</span>
+          <span style={{ fontSize: 11, color: '#FCD34D', fontWeight: 700 }}>+{totalReward} HEX Coin</span>
         </div>
       )}
 
@@ -661,7 +661,7 @@ function MissionRow({ mission: m, onClaim }: any) {
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
             <span style={{ fontSize: 12, color: '#fff', fontWeight: 600 }}>{m.title}</span>
-            <span style={{ fontSize: 11, color: '#F59E0B', fontFamily: 'monospace', fontWeight: 700 }}>+{m.reward_tdc} TDC</span>
+            <span style={{ fontSize: 11, color: '#F59E0B', fontFamily: 'monospace', fontWeight: 700 }}>+{m.reward_tdc} HEX Coin</span>
           </div>
           <div style={{ height: 4, background: 'rgba(255,255,255,0.07)', borderRadius: 2, marginBottom: 4 }}>
             <motion.div
@@ -699,7 +699,7 @@ function SettingsTab({ player, spec }: any) {
   const EMOJIS = ['🎖️','⚔️','🛡️','👑','🔬','💰','🌐','🏴','🎯','🔥','❄️','⚡','💎','🧠','🤝']
   const PATHS: [string, string, string][] = [
     ['military',   '⚔️ Militaire',    'Attaque +15%, défense +10%'],
-    ['economic',   '💰 Économique',   'Revenus +20%, cristaux +15%'],
+    ['economic',   '💰 Économique',   'Revenus +20%, HEX Coin +15%'],
     ['diplomatic', '🤝 Diplomatique', 'Influence +25%, coûts attaque -10%'],
     ['scientific', '🔬 Scientifique', 'Recherche x2, déblocages accélérés'],
   ]

@@ -116,7 +116,7 @@ export default function App() {
       <BrowserRouter>
         <Suspense fallback={
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0a0a14', color: '#10B981', fontSize: 18 }}>
-            Loading Terra Domini…
+            Loading Hexod…
           </div>
         }>
           <Routes>

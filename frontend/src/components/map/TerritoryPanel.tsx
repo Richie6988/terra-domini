@@ -177,7 +177,7 @@ function InfoTab({ t, isFree, isOwned, player, hasPOI, rc, onRequestClaim }: any
             </div>
           )}
           <div style={{ display:'flex', gap:10, flexWrap:'wrap' }}>
-            {t.poi_floor_price && <MiniStat label="Floor NFT" val={`${t.poi_floor_price} TDI`} color={rc} />}
+            {t.poi_floor_price && <MiniStat label="Floor NFT" val={`${t.poi_floor_price} HEX`} color={rc} />}
             {t.poi_visitors && <MiniStat label="Visiteurs" val={`${(t.poi_visitors/1e6).toFixed(1)}M/an`} color="#10B981" />}
             {t.poi_geo_score && <MiniStat label="Géo score" val={t.poi_geo_score} color="#3B82F6" />}
           </div>
@@ -230,7 +230,7 @@ function InfoTab({ t, isFree, isOwned, player, hasPOI, rc, onRequestClaim }: any
 const HEXOD_RES = [
   {key:'res_fer',label:'Fer',icon:'🪨'},{key:'res_petrole',label:'Pétrole',icon:'🛢️'},
   {key:'res_silicium',label:'Silicium',icon:'💠'},{key:'res_donnees',label:'Données',icon:'📊'},
-  {key:'res_uranium',label:'Uranium',icon:'☢️'},{key:'res_hex_cristaux',label:'Cristaux HEX',icon:'💎'},
+  {key:'res_uranium',label:'Uranium',icon:'☢️'},{key:'res_hex_HEX Coin',label:'HEX Coin',icon:'💎'},
   {key:'res_influence',label:'Influence',icon:'🌐'},{key:'res_stabilite',label:'Stabilité',icon:'⚖️'},
 ]
 
@@ -253,7 +253,7 @@ function ResourcesTab({ t }: any) {
                   <span style={{ fontSize:10, color:'#9CA3AF' }}>{r.label}</span>
                 </div>
                 <div style={{ fontSize:13, fontWeight:800, color: val > 0 ? '#F59E0B' : '#374151', fontFamily:'monospace' }}>
-                  {val > 0 ? `+${val.toFixed(r.key==='res_hex_cristaux'?3:1)}/tick` : '—'}
+                  {val > 0 ? `+${val.toFixed(r.key==='res_hex_HEX Coin'?3:1)}/jour` : '—'}
                 </div>
               </div>
             )
@@ -274,9 +274,9 @@ function RevenueTab({ t, rc }: any) {
   return (
     <div>
       <Sec label="Revenus estimés">
-        <BigStat icon="💠" val={`${income24h.toFixed(0)} cristaux`} label="estimé / 24h" color="#F59E0B" />
-        {t.poi_floor_price && <BigStat icon="💎" val={`${t.poi_floor_price} TDI`} label="Floor NFT" color={rc} />}
-        {t.ad_revenue_today > 0 && <BigStat icon="📢" val={`${t.ad_revenue_today} TDC`} label="Revenus pub aujourd'hui" color="#F59E0B" />}
+        <BigStat icon="💠" val={`${income24h.toFixed(0)} HEX Coin`} label="estimé / 24h" color="#F59E0B" />
+        {t.poi_floor_price && <BigStat icon="💎" val={`${t.poi_floor_price} HEX`} label="Floor NFT" color={rc} />}
+        {t.ad_revenue_today > 0 && <BigStat icon="📢" val={`${t.ad_revenue_today} HEX Coin`} label="Revenus pub aujourd'hui" color="#F59E0B" />}
       </Sec>
       <Sec label="NFT">
         <KV label="Version" val={`Édition v${t.nft_version||1}`} />
@@ -457,7 +457,7 @@ function BuyTab({ t, player }: any) {
       <div style={{ padding:'12px 13px', background:'rgba(59,130,246,0.08)',
         borderRadius:10, border:'1px solid rgba(59,130,246,0.2)', marginBottom:14,
         fontSize:12, color:'#9CA3AF', lineHeight:1.6 }}>
-        Envoyez une offre en cristaux HEX à <strong style={{ color:'#fff' }}>{t.owner_username}</strong>.
+        Envoyez une offre en HEX Coin à <strong style={{ color:'#fff' }}>{t.owner_username}</strong>.
         Ils peuvent accepter ou refuser. Un accord transfère le territoire instantanément.
       </div>
 
@@ -479,8 +479,8 @@ function BuyTab({ t, player }: any) {
             border:'1px solid rgba(255,255,255,0.12)', borderRadius:9, color:'#fff',
             fontSize:16, fontFamily:'monospace', fontWeight:800, boxSizing:'border-box' }} />
         <div style={{ fontSize:10, color:'#374151', marginTop:4 }}>
-          Votre balance: {tdc.toFixed(0)} cristaux ·
-          Plancher suggéré: {Math.round(floor)} cristaux
+          Votre balance: {tdc.toFixed(0)} HEX Coin ·
+          Plancher suggéré: {Math.round(floor)} HEX Coin
         </div>
       </Sec>
 
@@ -489,7 +489,7 @@ function BuyTab({ t, player }: any) {
         background: offer > tdc ? 'rgba(255,255,255,0.08)' : '#D97706',
         color: offer > tdc ? '#4B5563' : '#fff', fontSize:14, fontWeight:900,
       }}>
-        {loading ? 'Envoi…' : offer > tdc ? 'Solde insuffisant' : `💸 Proposer ${offer} cristaux`}
+        {loading ? 'Envoi…' : offer > tdc ? 'Solde insuffisant' : `💸 Proposer ${offer} HEX Coin`}
       </button>
     </div>
   )

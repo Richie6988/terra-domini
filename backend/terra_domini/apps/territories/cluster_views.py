@@ -282,9 +282,13 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
         h3_index = request.query_params.get('h3', '')
         if not h3_index:
             return Response({'error': 'h3 required'}, status=400)
-        from terra_domini.apps.territories.kingdom_engine import get_kingdom_for_territory
-        kingdom = get_kingdom_for_territory(request.user, h3_index)
-        return Response({'kingdom': kingdom})
+        try:
+            from terra_domini.apps.territories.kingdom_engine import get_kingdom_for_territory
+            kingdom = get_kingdom_for_territory(request.user, h3_index)
+            return Response({'kingdom': kingdom})
+        except Exception as e:
+            import logging; logging.getLogger(__name__).error(f'territory_kingdom error: {e}', exc_info=True)
+            return Response({'kingdom': None, 'error': str(e)})
 
     @action(detail=False, methods=['GET'], url_path='overlay')
     def overlay(self, request):

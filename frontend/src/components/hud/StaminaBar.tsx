@@ -201,7 +201,7 @@ export function StaminaBar() {
               <div style={{ fontSize: 9, color: '#6B7280', lineHeight: 1.6 }}>
                 🎯 Win clicker daily → faster regen<br />
                 🏆 Control Towers → extra slots<br />
-                💎 TDI staking → attack power bonus
+                💎 HEX staking → attack power bonus
               </div>
             </div>
           </motion.div>

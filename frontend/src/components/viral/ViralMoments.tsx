@@ -57,15 +57,15 @@ export function buildViralMoment(type: ViralMomentType, data: Record<string, unk
       accentColor: '#FFB800',
       title: `[${data.alliance_tag}] CAPTURES ${String(data.tower_name).toUpperCase()}`,
       subtitle: `${data.participants} players · ${data.duration_minutes}min battle`,
-      shareText: `🗼 My alliance [${data.alliance_tag}] just captured ${data.tower_name} in Terra Domini! ${data.participants} players fought for ${data.duration_minutes} minutes. terradomini.io`,
+      shareText: `🗼 My alliance [${data.alliance_tag}] just captured ${data.tower_name} in Hexod! ${data.participants} players fought for ${data.duration_minutes} minutes. terradomini.io`,
       tiktokHook: `"${data.participants} joueurs pour 1 tour. Le verdict :"`,
     },
     famous_landmark_claimed: {
       emoji: data.emoji as string || '🏛️',
       accentColor: '#00FF87',
       title: `YOU OWN ${String(data.name).toUpperCase()}`,
-      subtitle: `Estimated ad revenue: ~${data.daily_tdc_estimate} TDC/day`,
-      shareText: `🏛️ I just claimed ${data.name} in Terra Domini! Earning ~${data.daily_tdc_estimate} TDC/day from brand ads. terradomini.io`,
+      subtitle: `Estimated ad revenue: ~${data.daily_tdc_estimate} HEX Coin/day`,
+      shareText: `🏛️ I just claimed ${data.name} in Hexod! Earning ~${data.daily_tdc_estimate} HEX Coin/day from brand ads. terradomini.io`,
       tiktokHook: `"J'ai acheté ${data.name} pour 0€. Voici ce que ça rapporte."`,
     },
     revenge_notification: {
@@ -73,7 +73,7 @@ export function buildViralMoment(type: ViralMomentType, data: Record<string, unk
       accentColor: '#FF3B30',
       title: `${String(data.attacker).toUpperCase()} ATTACKED YOU`,
       subtitle: `${data.territory_name} — Counter-attack window: ${data.hours_remaining}h`,
-      shareText: `⚔️ ${data.attacker} attacked my ${data.territory_name} in Terra Domini. Counter-attack in progress. terradomini.io`,
+      shareText: `⚔️ ${data.attacker} attacked my ${data.territory_name} in Hexod. Counter-attack in progress. terradomini.io`,
       tiktokHook: `"${data.attacker} a attaqué ma zone. Voici ma vengeance :"`,
     },
     alliance_war_declared: {
@@ -81,15 +81,15 @@ export function buildViralMoment(type: ViralMomentType, data: Record<string, unk
       accentColor: '#7B2FFF',
       title: `WAR DECLARED`,
       subtitle: `[${data.attacking_alliance}] → [${data.defending_alliance}]`,
-      shareText: `🏰 War declared in Terra Domini! [${data.attacking_alliance}] vs [${data.defending_alliance}]. Sides being chosen now. terradomini.io`,
+      shareText: `🏰 War declared in Hexod! [${data.attacking_alliance}] vs [${data.defending_alliance}]. Sides being chosen now. terradomini.io`,
       tiktokHook: `"La guerre vient d'être déclarée. 2 alliances. Tout le monde choisit son camp."`,
     },
     daily_earnings_reveal: {
       emoji: '🪙',
       accentColor: '#FFB800',
-      title: `+${data.tdc_earned} TDC TODAY`,
+      title: `+${data.tdc_earned} HEX Coin TODAY`,
       subtitle: `From ${data.territory_count} territories · ${data.top_territory} was #1`,
-      shareText: `🪙 My Terra Domini territories earned ${data.tdc_earned} TDC today (≈€${Number(data.tdc_earned) / 100}) from brand ads. ${data.territory_count} territories · ${data.top_territory} top earner. terradomini.io`,
+      shareText: `🪙 My Hexod territories earned ${data.tdc_earned} HEX Coin today (≈€${Number(data.tdc_earned) / 100}) from brand ads. ${data.territory_count} territories · ${data.top_territory} top earner. terradomini.io`,
       tiktokHook: `"Combien j'ai gagné aujourd'hui sans jouer :"`,
     },
     poi_crisis_alert: {
@@ -97,7 +97,7 @@ export function buildViralMoment(type: ViralMomentType, data: Record<string, unk
       accentColor: '#FF3B30',
       title: `${String(data.poi_name).toUpperCase()} — ACTIVE`,
       subtitle: `${data.effect_summary} · Your territories affected`,
-      shareText: `🔥 The ${data.poi_name} just changed my Terra Domini empire! ${data.effect_summary}. Only game where real-world events affect your territory. terradomini.io`,
+      shareText: `🔥 The ${data.poi_name} just changed my Hexod empire! ${data.effect_summary}. Only game where real-world events affect your territory. terradomini.io`,
       tiktokHook: `"L'actualité mondiale vient de changer mon empire virtuel. Regarde :"`,
     },
     rank_up: {
@@ -105,7 +105,7 @@ export function buildViralMoment(type: ViralMomentType, data: Record<string, unk
       accentColor: '#00FF87',
       title: `COMMANDER RANK ${data.new_rank}`,
       subtitle: `${data.rank_title} · Top ${data.percentile}% globally`,
-      shareText: `🎖️ Just reached Commander Rank ${data.new_rank} (${data.rank_title}) in Terra Domini. Top ${data.percentile}% of all players. terradomini.io`,
+      shareText: `🎖️ Just reached Commander Rank ${data.new_rank} (${data.rank_title}) in Hexod. Top ${data.percentile}% of all players. terradomini.io`,
       tiktokHook: `"Du rang 1 au rang ${data.new_rank}. Voici comment :"`,
     },
     local_pride: {
@@ -113,23 +113,23 @@ export function buildViralMoment(type: ViralMomentType, data: Record<string, unk
       accentColor: '#00FF87',
       title: `YOUR STREET IS IN THE GAME`,
       subtitle: `GPS detected: ${data.street_name} · Available to claim`,
-      shareText: `📍 My actual street (${data.street_name}) is a playable territory in Terra Domini. Just claimed it. terradomini.io`,
+      shareText: `📍 My actual street (${data.street_name}) is a playable territory in Hexod. Just claimed it. terradomini.io`,
       tiktokHook: `"Clique sur ta propre rue."`,
     },
     streak_milestone: {
       emoji: '🔥',
       accentColor: '#FF6B35',
       title: `${data.streak_days}-DAY STREAK`,
-      subtitle: `+${data.reward_tdc} TDC bonus · Keep it going`,
-      shareText: `🔥 ${data.streak_days}-day login streak in Terra Domini! Earned ${data.reward_tdc} TDC bonus. terradomini.io`,
+      subtitle: `+${data.reward_tdc} HEX Coin bonus · Keep it going`,
+      shareText: `🔥 ${data.streak_days}-day login streak in Hexod! Earned ${data.reward_tdc} HEX Coin bonus. terradomini.io`,
       tiktokHook: `"${data.streak_days} jours de suite. Voici le bonus :"`,
     },
     first_tdc_earned: {
       emoji: '🪙',
       accentColor: '#FFB800',
-      title: `YOU EARNED YOUR FIRST TDC`,
-      subtitle: `+${data.amount} TDC on Polygon · Withdraw anytime`,
-      shareText: `🪙 Just earned my first ${data.amount} TDC in Terra Domini. Real cryptocurrency from a free browser game. terradomini.io`,
+      title: `YOU EARNED YOUR FIRST HEX Coin`,
+      subtitle: `+${data.amount} HEX Coin on Polygon · Withdraw anytime`,
+      shareText: `🪙 Just earned my first ${data.amount} HEX Coin in Hexod. Real cryptocurrency from a free browser game. terradomini.io`,
       tiktokHook: `"J'ai gagné ma première vraie crypto en jouant à un jeu gratuit."`,
     },
   }
@@ -318,7 +318,7 @@ export function useViralMoments() {
 
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Terra Domini', text, url })
+        await navigator.share({ title: 'Hexod', text, url })
         toast.success('Shared! 🚀')
       } catch {}
     } else {

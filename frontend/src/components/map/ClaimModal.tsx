@@ -1,7 +1,7 @@
 /**
  * ClaimModal — 4 ways to claim a territory
  * FREE    : first zone — gift
- * BUY     : from system (TDC) OR from owner (offer)
+ * BUY     : from system (HEX Coin) OR from owner (offer)
  * PUZZLE  : solve a math challenge — free but takes brain
  * ATTACK  : military takeover — progress bar based on rank
  */
@@ -146,10 +146,10 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
 
           {/* Resources mini row */}
           <div style={{ display:'flex', gap:12, marginTop:10, fontSize:11, color:'#6B7280' }}>
-            {(t.resource_credits||10) > 0 && <span>💰 +{t.resource_credits||10}/tick</span>}
-            {(t.resource_energy||0) > 0  && <span>⚡ +{t.resource_energy}/tick</span>}
-            {(t.resource_food||0) > 0    && <span>🌾 +{t.resource_food}/tick</span>}
-            {t.poi_floor_price           && <span style={{ color:rc }}>NFT floor {t.poi_floor_price} TDI</span>}
+            {(t.resource_credits||10) > 0 && <span>💰 +{t.resource_credits||10}/jour</span>}
+            {(t.resource_energy||0) > 0  && <span>⚡ +{t.resource_energy}/jour</span>}
+            {(t.resource_food||0) > 0    && <span>🌾 +{t.resource_food}/jour</span>}
+            {t.poi_floor_price           && <span style={{ color:rc }}>NFT floor {t.poi_floor_price} HEX</span>}
           </div>
         </div>
 
@@ -178,8 +178,8 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                 <div style={{ textAlign:'center', marginBottom:20 }}>
                   <div style={{ fontSize:44, marginBottom:8 }}>🎁</div>
                   <div style={{ fontSize:15, fontWeight:700, color:'#00FF87' }}>Your first territory is FREE!</div>
-                  <div style={{ fontSize:12, color:'#6B7280', marginTop:6, lineHeight:1.6 }}>Welcome to Terra Domini. Claim this zone to start your empire.</div>
-                  <div style={{ marginTop:10, padding:'8px 16px', background:'rgba(0,255,135,0.06)', borderRadius:8, fontSize:12, color:'#00FF87' }}>🎁 +100 TDC bonus!</div>
+                  <div style={{ fontSize:12, color:'#6B7280', marginTop:6, lineHeight:1.6 }}>Welcome to Hexod. Claim this zone to start your empire.</div>
+                  <div style={{ marginTop:10, padding:'8px 16px', background:'rgba(0,255,135,0.06)', borderRadius:8, fontSize:12, color:'#00FF87' }}>🎁 +100 HEX Coin bonus!</div>
                 </div>
                 <button onClick={() => claimMut.mutate({ method:'free' })} disabled={claimMut.isPending}
                   style={{ width:'100%', padding:14, background:'rgba(0,255,135,0.15)', border:'1px solid rgba(0,255,135,0.4)', borderRadius:12, color:'#00FF87', fontSize:15, fontWeight:800, cursor:'pointer' }}>
@@ -194,7 +194,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                 {isEnemy ? (
                   <>
                     <div style={{ fontSize:13, color:'#6B7280', marginBottom:14 }}>
-                      Send a TDC offer to <strong style={{ color:'#F87171' }}>{t.owner_username}</strong>. They can accept or decline.
+                      Send a HEX Coin offer to <strong style={{ color:'#F87171' }}>{t.owner_username}</strong>. They can accept or decline.
                     </div>
                     <div style={{ display:'flex', gap:10, marginBottom:14, fontSize:12 }}>
                       <div style={{ flex:1, background:'rgba(255,255,255,0.04)', borderRadius:8, padding:'8px 12px' }}>
@@ -204,7 +204,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                       {t.poi_floor_price && (
                         <div style={{ flex:1, background:'rgba(255,255,255,0.04)', borderRadius:8, padding:'8px 12px' }}>
                           <div style={{ color:'#4B5563', fontSize:10 }}>NFT floor</div>
-                          <div style={{ color:rc, fontWeight:700, fontFamily:'monospace' }}>{t.poi_floor_price} TDI</div>
+                          <div style={{ color:rc, fontWeight:700, fontFamily:'monospace' }}>{t.poi_floor_price} HEX</div>
                         </div>
                       )}
                     </div>
@@ -212,7 +212,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                       style={{ width:'100%', padding:'11px 14px', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:10, color:'#fff', fontSize:16, fontFamily:'monospace', fontWeight:700, boxSizing:'border-box', marginBottom:12 }} />
                     <button onClick={() => offerMut.mutate()} disabled={offerMut.isPending}
                       style={{ width:'100%', padding:13, background:'rgba(59,130,246,0.15)', border:'1px solid rgba(59,130,246,0.35)', borderRadius:12, color:'#60A5FA', fontSize:14, fontWeight:700, cursor:'pointer' }}>
-                      {offerMut.isPending ? '…' : `💸 Send offer of ${offer} TDC`}
+                      {offerMut.isPending ? '…' : `💸 Send offer of ${offer} HEX Coin`}
                     </button>
                   </>
                 ) : (
@@ -220,7 +220,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                     <div style={{ textAlign:'center', marginBottom:20 }}>
                       <div style={{ fontSize:40, marginBottom:8 }}>🪙</div>
                       <div style={{ fontSize:15, fontWeight:700, color:'#FFB800' }}>Instant Claim</div>
-                      <div style={{ fontSize:12, color:'#6B7280', marginTop:6 }}>No puzzle. Pay TDC and it's yours.</div>
+                      <div style={{ fontSize:12, color:'#6B7280', marginTop:6 }}>No puzzle. Pay HEX Coin and it's yours.</div>
                       <div style={{ display:'flex', justifyContent:'center', gap:24, marginTop:14 }}>
                         <div style={{ textAlign:'center' }}>
                           <div style={{ fontSize:10, color:'#4B5563' }}>Cost</div>
@@ -238,7 +238,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                     </div>
                     <button onClick={() => claimMut.mutate({ method:'buy' })} disabled={!canAfford || claimMut.isPending}
                       style={{ width:'100%', padding:14, background: canAfford ? 'rgba(255,184,0,0.15)' : 'rgba(255,255,255,0.04)', border:`1px solid ${canAfford ? 'rgba(255,184,0,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius:12, color: canAfford ? '#FFB800' : '#4B5563', fontSize:15, fontWeight:800, cursor: canAfford ? 'pointer' : 'not-allowed' }}>
-                      {claimMut.isPending ? '…' : canAfford ? `🪙 Buy for ${CLAIM_COST} TDC` : `Need ${CLAIM_COST - tdc} more TDC`}
+                      {claimMut.isPending ? '…' : canAfford ? `🪙 Buy for ${CLAIM_COST} HEX Coin` : `Need ${CLAIM_COST - tdc} more HEX Coin`}
                     </button>
                   </>
                 )}

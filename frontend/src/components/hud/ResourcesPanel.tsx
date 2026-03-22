@@ -25,7 +25,7 @@ const RESOURCES = [
   { key:'res_eau',         label:'Eau',           icon:'💧', cat:'vital'    },
   { key:'res_influence',   label:'Influence',     icon:'🌐', cat:'info'     },
   { key:'res_stabilite',   label:'Stabilité',     icon:'⚖️',  cat:'info'     },
-  { key:'res_hex_cristaux',label:'Cristaux HEX',  icon:'💠', cat:'hex'      },
+  { key:'res_hex_HEX Coin',label:'HEX Coin',  icon:'💠', cat:'hex'      },
 ]
 
 const CAT_COLOR: Record<string,string> = {
@@ -83,7 +83,7 @@ export function ResourcesPanel({ onClose }: { onClose: () => void }) {
               letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 5, paddingLeft: 2 }}>
               {cat === 'physique' ? 'Physique' : cat === 'energie' ? 'Énergie' :
                cat === 'tech' ? 'Tech' : cat === 'info' ? 'Informationnel' :
-               cat === 'vital' ? 'Vital' : 'Cristaux HEX'}
+               cat === 'vital' ? 'Vital' : 'HEX Coin'}
             </div>
             {resources.map(r => (
               <div key={r.key} style={{
@@ -95,7 +95,7 @@ export function ResourcesPanel({ onClose }: { onClose: () => void }) {
                 <span style={{ flex: 1, fontSize: 11, color: '#9CA3AF' }}>{r.label}</span>
                 <span style={{ fontSize: 11, fontWeight: 700, fontFamily: 'monospace',
                   color: CAT_COLOR[r.cat] }}>
-                  {(data?.[r.key] || 0).toFixed(r.key === 'res_hex_cristaux' ? 2 : 0)}
+                  {(data?.[r.key] || 0).toFixed(r.key === 'res_hex_HEX Coin' ? 2 : 0)}
                 </span>
               </div>
             ))}

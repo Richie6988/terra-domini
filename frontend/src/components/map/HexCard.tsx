@@ -1,12 +1,7 @@
 /**
- * HexCard — collectible territory card, Pokémon-style.
- * 
- * OWNED territory shows 3 tabs:
- *   CARD    — Pokémon face (image, 3 facts, grade) + shiny back with real texture
- *   KINGDOM — Resource production + skill tree (feed with resources)
- *   NFT     — Token ID, authenticity, marketplace link
- *
- * FREE/ENEMY — claim/attack CTA with rarity presentation
+ * HexCard — Hexod collectible territory card.
+ * Three.js hex prism with canvas-painted faces.
+ * Owned: 3 tabs (Card / Royaume / NFT) + real skill tree.
  */
 import { useState, useRef, useEffect, useMemo, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -18,121 +13,200 @@ import { api } from '../../services/api'
 import { usePlayer } from '../../store'
 import toast from 'react-hot-toast'
 
-// Suppress THREE.Clock deprecation
 if (typeof window !== 'undefined') {
   const _w = console.warn
   console.warn = (...a: any[]) => { if (String(a[0]).includes('THREE.Clock')) return; _w(...a) }
 }
 
-/* ── Rarity config ─────────────────────────────────────────── */
+/* ── Rarity ────────────────────────────────────────────────── */
 const R: Record<string, { c:string; glow:string; bg:string; accent:string; label:string; grade:string }> = {
-  common:   { c:'#9CA3AF', glow:'none',                                   bg:'#0d0f18', accent:'#E5E7EB', label:'Common',    grade:'F' },
-  uncommon: { c:'#10B981', glow:'0 0 28px #10B98166',                      bg:'#04100a', accent:'#34D399', label:'Uncommon',  grade:'C' },
-  rare:     { c:'#3B82F6', glow:'0 0 36px #3B82F677',                      bg:'#030a1a', accent:'#93C5FD', label:'Rare',      grade:'B' },
-  epic:     { c:'#8B5CF6', glow:'0 0 42px #8B5CF688',                      bg:'#07030f', accent:'#C4B5FD', label:'Epic',      grade:'A' },
-  legendary:{ c:'#F59E0B', glow:'0 0 52px #F59E0BAA,0 0 90px #F59E0B33',  bg:'#0f0700', accent:'#FCD34D', label:'Legendary', grade:'S' },
-  mythic:   { c:'#EC4899', glow:'0 0 62px #EC4899BB,0 0 110px #EC489933', bg:'#0f0008', accent:'#F9A8D4', label:'Mythic ✦',  grade:'SS' },
+  common:   { c:'#9CA3AF', glow:'none',                                     bg:'#0d0f18', accent:'#E5E7EB', label:'Common',    grade:'F' },
+  uncommon: { c:'#10B981', glow:'0 0 30px #10B98166',                        bg:'#04100a', accent:'#34D399', label:'Uncommon',  grade:'C' },
+  rare:     { c:'#3B82F6', glow:'0 0 38px #3B82F677',                        bg:'#030a1a', accent:'#93C5FD', label:'Rare',      grade:'B' },
+  epic:     { c:'#8B5CF6', glow:'0 0 44px #8B5CF688',                        bg:'#07030f', accent:'#C4B5FD', label:'Epic',      grade:'A' },
+  legendary:{ c:'#F59E0B', glow:'0 0 56px #F59E0BAA,0 0 100px #F59E0B33',   bg:'#0f0700', accent:'#FCD34D', label:'Legendary', grade:'S' },
+  mythic:   { c:'#EC4899', glow:'0 0 66px #EC4899BB,0 0 120px #EC489933',    bg:'#0f0008', accent:'#F9A8D4', label:'Mythic ✦',  grade:'SS' },
 }
 type RK = keyof typeof R
 
-const BIOME_RESOURCES: Record<string, { res: string; icon: string; amount: number }[]> = {
-  urban:      [{ res:'Données',       icon:'📊', amount:12 }, { res:'Influence politique', icon:'🌐', amount:8  }, { res:'Main d\'œuvre', icon:'👷', amount:15 }],
-  rural:      [{ res:'Nourriture',    icon:'🌾', amount:20 }, { res:'Eau',                  icon:'💧', amount:15 }, { res:'Main d\'œuvre', icon:'👷', amount:10 }],
-  forest:     [{ res:'Nourriture',    icon:'🌾', amount:15 }, { res:'Eau',                  icon:'💧', amount:12 }, { res:'Stabilité',     icon:'⚖️', amount:8  }],
-  mountain:   [{ res:'Fer',           icon:'🪨', amount:18 }, { res:'Titanium',             icon:'🔷', amount:5  }, { res:'Charbon',       icon:'⬛', amount:10 }],
-  coastal:    [{ res:'Nourriture',    icon:'🌾', amount:12 }, { res:'Eau',                  icon:'💧', amount:20 }, { res:'Gaz naturel',   icon:'💨', amount:8  }],
-  desert:     [{ res:'Pétrole',       icon:'🛢️', amount:15 }, { res:'Silicium',             icon:'💠', amount:10 }, { res:'Terres rares',  icon:'💎', amount:4  }],
-  tundra:     [{ res:'Gaz naturel',   icon:'💨', amount:12 }, { res:'Uranium',              icon:'☢️', amount:3  }, { res:'Eau',           icon:'💧', amount:8  }],
-  industrial: [{ res:'Acier',         icon:'⚙️', amount:15 }, { res:'Composants',           icon:'🔌', amount:8  }, { res:'Pétrole',       icon:'🛢️', amount:10 }],
-  landmark:   [{ res:'Données',       icon:'📊', amount:10 }, { res:'Influence politique',  icon:'🌐', amount:12 }, { res:'Stabilité',     icon:'⚖️', amount:10 }],
-  grassland:  [{ res:'Nourriture',    icon:'🌾', amount:18 }, { res:'Main d\'œuvre',        icon:'👷', amount:8  }, { res:'Stabilité',     icon:'⚖️', amount:6  }],
+/* ── Biome resources ───────────────────────────────────────── */
+const BIOME_RES: Record<string, { res:string; icon:string; amount:number }[]> = {
+  urban:    [{res:'Données',icon:'📊',amount:12},{res:'Influence',icon:'🌐',amount:8},{res:'Main-d\'œuvre',icon:'👷',amount:15}],
+  rural:    [{res:'Nourriture',icon:'🌾',amount:20},{res:'Eau',icon:'💧',amount:15},{res:'Main-d\'œuvre',icon:'👷',amount:10}],
+  forest:   [{res:'Nourriture',icon:'🌾',amount:15},{res:'Eau',icon:'💧',amount:12},{res:'Stabilité',icon:'⚖️',amount:8}],
+  mountain: [{res:'Fer',icon:'🪨',amount:18},{res:'Titanium',icon:'🔷',amount:5},{res:'Charbon',icon:'⬛',amount:10}],
+  coastal:  [{res:'Nourriture',icon:'🌾',amount:12},{res:'Eau',icon:'💧',amount:20},{res:'Gaz',icon:'💨',amount:8}],
+  desert:   [{res:'Pétrole',icon:'🛢️',amount:15},{res:'Silicium',icon:'💠',amount:10},{res:'Terres rares',icon:'💎',amount:4}],
+  tundra:   [{res:'Gaz',icon:'💨',amount:12},{res:'Uranium',icon:'☢️',amount:3},{res:'Eau',icon:'💧',amount:8}],
+  industrial:[{res:'Acier',icon:'⚙️',amount:15},{res:'Composants',icon:'🔌',amount:8},{res:'Pétrole',icon:'🛢️',amount:10}],
+  landmark: [{res:'Données',icon:'📊',amount:10},{res:'Influence',icon:'🌐',amount:12},{res:'Stabilité',icon:'⚖️',amount:10}],
+  grassland:[{res:'Nourriture',icon:'🌾',amount:18},{res:'Main-d\'œuvre',icon:'👷',amount:8},{res:'Stabilité',icon:'⚖️',amount:6}],
 }
 
-const BRANCH_CFG = {
-  attack:    { label:'⚔️ Attaque',      color:'#EF4444' },
-  defense:   { label:'🛡️ Défense',      color:'#3B82F6' },
-  economy:   { label:'💰 Économie',     color:'#F59E0B' },
-  influence: { label:'🌐 Rayonnement',  color:'#10B981' },
-  tech:      { label:'🔬 Tech',         color:'#8B5CF6' },
+/* ── Canvas face painter ───────────────────────────────────── */
+function paintFront(cfg: typeof R[RK], name: string, facts: string[], grade: string, imgUrl: string|null, isShiny: boolean): HTMLCanvasElement {
+  const W=512, H=512, cv = document.createElement('canvas')
+  cv.width=W; cv.height=H
+  const ctx = cv.getContext('2d')!
+
+  // Background gradient
+  const grad = ctx.createLinearGradient(0,0,0,H)
+  grad.addColorStop(0, cfg.bg)
+  grad.addColorStop(1, '#030308')
+  ctx.fillStyle = grad; ctx.fillRect(0,0,W,H)
+
+  // Shiny foil
+  if (isShiny) {
+    const foil = ctx.createLinearGradient(0,0,W,H)
+    foil.addColorStop(0, 'transparent')
+    foil.addColorStop(0.4, cfg.c+'22')
+    foil.addColorStop(0.5, '#FFD70033')
+    foil.addColorStop(0.6, cfg.c+'22')
+    foil.addColorStop(1, 'transparent')
+    ctx.fillStyle = foil; ctx.fillRect(0,0,W,H)
+  }
+
+  // Rarity banner
+  ctx.fillStyle = cfg.c+'33'; ctx.fillRect(0,0,W,52)
+  ctx.font='bold 22px system-ui'; ctx.fillStyle=cfg.c; ctx.textAlign='center'
+  ctx.fillText(cfg.label.toUpperCase(), W/2, 34)
+  if (isShiny) { ctx.font='13px system-ui'; ctx.fillStyle='#FCD34D'; ctx.fillText('✨ SHINY', W-60, 34) }
+
+  // Grade badge
+  ctx.font='bold 18px system-ui'; ctx.fillStyle='#000'
+  ctx.beginPath(); ctx.arc(40, 26, 20, 0, Math.PI*2)
+  ctx.fillStyle=cfg.c; ctx.fill()
+  ctx.font='bold 16px system-ui'; ctx.fillStyle='#000'; ctx.textAlign='center'
+  ctx.fillText(grade, 40, 32)
+
+  // Image zone (half height)
+  if (imgUrl) {
+    // Will be applied as map texture — signal with color block for now
+    ctx.fillStyle = cfg.c+'11'; ctx.fillRect(0,52,W,200)
+    // Overlay gradient
+    const ov = ctx.createLinearGradient(0,200,0,252)
+    ov.addColorStop(0,'transparent'); ov.addColorStop(1,cfg.bg+'ff')
+    ctx.fillStyle=ov; ctx.fillRect(0,52,W,200)
+  } else {
+    // Biome color block
+    ctx.fillStyle = cfg.c+'18'; ctx.fillRect(0,52,W,200)
+    ctx.font='80px serif'; ctx.textAlign='center'
+    ctx.fillText('⬡', W/2, 175)
+  }
+
+  // Name
+  ctx.font='bold 28px system-ui'; ctx.fillStyle='#ffffff'; ctx.textAlign='center'
+  ctx.fillText(name.slice(0,22), W/2, 278)
+
+  // Divider
+  ctx.strokeStyle=cfg.c+'66'; ctx.lineWidth=1
+  ctx.beginPath(); ctx.moveTo(40,295); ctx.lineTo(W-40,295); ctx.stroke()
+
+  // 3 facts
+  ctx.font='13px system-ui'; ctx.fillStyle=cfg.accent; ctx.textAlign='left'
+  facts.slice(0,3).forEach((f,i) => {
+    ctx.fillStyle=cfg.c; ctx.fillText(`${i+1}`, 36, 320+i*52)
+    ctx.fillStyle=cfg.accent
+    const words = f.split(' '); let line='', y=320+i*52
+    words.forEach(w => {
+      const t = line ? line+' '+w : w
+      if (ctx.measureText(t).width > 400) { ctx.fillText(line, 52, y); line=w; y+=16 }
+      else line=t
+    })
+    ctx.fillText(line, 52, y)
+  })
+
+  // Bottom border
+  ctx.strokeStyle=cfg.c; ctx.lineWidth=2
+  ctx.beginPath(); ctx.moveTo(0,500); ctx.lineTo(W,500); ctx.stroke()
+  ctx.font='10px monospace'; ctx.fillStyle=cfg.c+'88'; ctx.textAlign='right'
+  ctx.fillText('HEXOD · SAISON 1', W-20, 510)
+
+  return cv
 }
 
-/* ── 3D Card Mesh ──────────────────────────────────────────── */
-function HexPrism({ imgUrl, cfg, isShiny, foilColor, showBack }: {
-  imgUrl: string|null; cfg: typeof R[RK]; isShiny: boolean; foilColor: string; showBack: boolean
+function paintBack(cfg: typeof R[RK], h3index: string, income: number, floorPrice: number|null, isShiny: boolean): HTMLCanvasElement {
+  const W=512, H=512, cv = document.createElement('canvas')
+  cv.width=W; cv.height=H
+  const ctx = cv.getContext('2d')!
+
+  // Background
+  if (isShiny) {
+    const g = ctx.createLinearGradient(0,0,W,H)
+    g.addColorStop(0, cfg.bg); g.addColorStop(0.3, cfg.c+'44')
+    g.addColorStop(0.5, '#FFD70022'); g.addColorStop(0.7, cfg.c+'44'); g.addColorStop(1, cfg.bg)
+    ctx.fillStyle=g
+  } else {
+    ctx.fillStyle = ctx.createLinearGradient(0,0,0,H)
+    ;(ctx.fillStyle as CanvasGradient).addColorStop(0, cfg.bg)
+    ;(ctx.fillStyle as CanvasGradient).addColorStop(1, '#020205')
+  }
+  ctx.fillRect(0,0,W,H)
+
+  // Hex pattern watermark
+  ctx.globalAlpha=0.07; ctx.font='42px monospace'; ctx.fillStyle=cfg.c; ctx.textAlign='center'
+  for (let y=50; y<H; y+=68) for (let x=(y%136<68?50:95); x<W; x+=90) ctx.fillText('⬡', x, y)
+  ctx.globalAlpha=1
+
+  // Big hex logo
+  ctx.font='72px monospace'; ctx.fillStyle=cfg.c; ctx.textAlign='center'; ctx.fillText('⬡', W/2, 195)
+  ctx.font='bold 36px system-ui'; ctx.fillStyle=cfg.accent; ctx.fillText('HEXOD', W/2, 260)
+
+  // Divider
+  ctx.strokeStyle=cfg.c+'55'; ctx.lineWidth=1
+  ctx.beginPath(); ctx.moveTo(60,280); ctx.lineTo(W-60,280); ctx.stroke()
+
+  // Stats
+  ctx.font='15px system-ui'; ctx.fillStyle=cfg.accent; ctx.textAlign='center'
+  ctx.fillText(`+${income} HEX Coin / jour`, W/2, 316)
+  if (floorPrice) { ctx.fillStyle=cfg.c; ctx.fillText(`💎 Floor ${floorPrice} HEX`, W/2, 342) }
+
+  // H3 index
+  ctx.font='11px monospace'; ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.textAlign='center'
+  ctx.fillText(h3index.slice(0,18), W/2, 390)
+
+  // Footer
+  ctx.font='12px system-ui'; ctx.fillStyle=cfg.c+'66'; ctx.fillText('Saison 1 · Édition Genèse', W/2, 460)
+
+  return cv
+}
+
+/* ── 3D Hex Prism ──────────────────────────────────────────── */
+function HexPrism({ frontCanvas, backCanvas, imgUrl, cfg, showBack }: {
+  frontCanvas: HTMLCanvasElement; backCanvas: HTMLCanvasElement
+  imgUrl: string|null; cfg: typeof R[RK]; showBack: boolean
 }) {
-  const meshRef = useRef<THREE.Group>(null!)
-  const velY = useRef(-0.3)
+  const groupRef = useRef<THREE.Group>(null!)
+  const velY = useRef(-0.28)
   const velX = useRef(0)
   const { gl } = useThree()
 
+  // Drag
   useEffect(() => {
     const c = gl.domElement
     let drag=false, lx=0, ly=0
-    const pd = (e: PointerEvent) => { drag=true; lx=e.clientX; ly=e.clientY; velY.current=0; velX.current=0 }
-    const pm = (e: PointerEvent) => { if(!drag) return; velY.current=(e.clientX-lx)*0.025; velX.current=-(e.clientY-ly)*0.015; lx=e.clientX; ly=e.clientY }
-    const pu = () => { drag=false }
+    const pd=(e:PointerEvent)=>{ drag=true; lx=e.clientX; ly=e.clientY; velY.current=0; velX.current=0 }
+    const pm=(e:PointerEvent)=>{ if(!drag) return; velY.current=(e.clientX-lx)*0.022; velX.current=-(e.clientY-ly)*0.013; lx=e.clientX; ly=e.clientY }
+    const pu=()=>{ drag=false }
     c.addEventListener('pointerdown',pd); window.addEventListener('pointermove',pm); window.addEventListener('pointerup',pu)
-    return () => { c.removeEventListener('pointerdown',pd); window.removeEventListener('pointermove',pm); window.removeEventListener('pointerup',pu) }
+    return ()=>{ c.removeEventListener('pointerdown',pd); window.removeEventListener('pointermove',pm); window.removeEventListener('pointerup',pu) }
   }, [gl])
 
   useFrame(() => {
     velY.current *= 0.93; velX.current *= 0.93
-    meshRef.current.rotation.y += velY.current
-    meshRef.current.rotation.x = Math.max(-0.8, Math.min(0.8, meshRef.current.rotation.x + velX.current))
+    groupRef.current.rotation.y += velY.current
+    groupRef.current.rotation.x = Math.max(-0.75, Math.min(0.75, groupRef.current.rotation.x + velX.current))
   })
 
-  // Hex shape
   const hexShape = useMemo(() => {
     const s = new THREE.Shape()
-    for (let i=0; i<6; i++) {
-      const a = (Math.PI/3)*i - Math.PI/6
-      const x = 1.5*Math.cos(a), y = 1.5*Math.sin(a)
-      i===0 ? s.moveTo(x,y) : s.lineTo(x,y)
-    }
+    for (let i=0;i<6;i++) { const a=(Math.PI/3)*i-Math.PI/6; i===0?s.moveTo(1.5*Math.cos(a),1.5*Math.sin(a)):s.lineTo(1.5*Math.cos(a),1.5*Math.sin(a)) }
     s.closePath(); return s
   }, [])
 
   const geo = useMemo(() => new THREE.ExtrudeGeometry(hexShape, {
-    depth: 0.22, bevelEnabled: true, bevelThickness: 0.05, bevelSize: 0.05, bevelSegments: 4,
+    depth:0.24, bevelEnabled:true, bevelThickness:0.06, bevelSize:0.05, bevelSegments:5,
   }), [hexShape])
-
-  // Face textures
-  const frontCanvas = useMemo(() => {
-    const cv = document.createElement('canvas'); cv.width=cv.height=512
-    const ctx = cv.getContext('2d')!
-    ctx.fillStyle = cfg.bg; ctx.fillRect(0,0,512,512)
-    // Rarity badge
-    ctx.font='bold 28px system-ui'; ctx.fillStyle=cfg.c; ctx.textAlign='center'
-    ctx.fillText(cfg.label.toUpperCase(), 256, 44)
-    if (isShiny) { ctx.font='22px system-ui'; ctx.fillStyle='#FCD34D'; ctx.fillText('✨ SHINY', 256, 72) }
-    return cv
-  }, [cfg, isShiny])
-
-  const backCanvas = useMemo(() => {
-    const cv = document.createElement('canvas'); cv.width=cv.height=512
-    const ctx = cv.getContext('2d')!
-    // Rich shiny back
-    const grad = ctx.createLinearGradient(0,0,512,512)
-    if (isShiny) {
-      grad.addColorStop(0, cfg.bg)
-      grad.addColorStop(0.3, cfg.c+'33')
-      grad.addColorStop(0.5, '#FFD70022')
-      grad.addColorStop(0.7, cfg.c+'33')
-      grad.addColorStop(1, cfg.bg)
-    } else {
-      grad.addColorStop(0, cfg.bg); grad.addColorStop(1, '#0a0a18')
-    }
-    ctx.fillStyle = grad; ctx.fillRect(0,0,512,512)
-    // Hex watermark pattern
-    ctx.globalAlpha = 0.08; ctx.font='40px monospace'; ctx.fillStyle=cfg.c
-    for (let y=40; y<512; y+=70) for (let x=(y%140<70?0:50); x<512; x+=100) ctx.fillText('⬡', x, y)
-    ctx.globalAlpha = 1
-    // Center logo
-    ctx.font='bold 48px monospace'; ctx.fillStyle=cfg.c; ctx.textAlign='center'; ctx.fillText('⬡', 256, 220)
-    ctx.font='bold 26px system-ui'; ctx.fillStyle=cfg.accent; ctx.fillText('HEXOD', 256, 290)
-    ctx.font='16px system-ui'; ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.fillText('Season 1', 256, 316)
-    return cv
-  }, [cfg, isShiny])
 
   const frontTex = useMemo(() => new THREE.CanvasTexture(frontCanvas), [frontCanvas])
   const backTex  = useMemo(() => new THREE.CanvasTexture(backCanvas),  [backCanvas])
@@ -143,316 +217,49 @@ function HexPrism({ imgUrl, cfg, isShiny, foilColor, showBack }: {
     new THREE.TextureLoader().load(imgUrl, tex => { tex.colorSpace=THREE.SRGBColorSpace; setImgTex(tex) }, undefined, ()=>setImgTex(null))
   }, [imgUrl])
 
-  const color = new THREE.Color(cfg.c)
-  const mats = useMemo(() => [
-    new THREE.MeshStandardMaterial({ color: cfg.c, metalness:0.8, roughness:0.2, envMapIntensity:1.2 }),
-    new THREE.MeshStandardMaterial({ color: cfg.c, metalness:0.6, roughness:0.3, envMapIntensity:0.8 }),
-    new THREE.MeshStandardMaterial({ color:'#111' }),
-    new THREE.MeshStandardMaterial({ color:'#111' }),
-    // Front
-    new THREE.MeshStandardMaterial({
-      map: imgTex || frontTex, metalness:0.1, roughness:0.6,
-      emissive: color.clone().multiplyScalar(0.12), envMapIntensity:0.5,
-    }),
-    // Back
-    new THREE.MeshStandardMaterial({
-      map: backTex, metalness: isShiny ? 0.9 : 0.2, roughness: isShiny ? 0.05 : 0.7,
-      envMapIntensity: isShiny ? 2.0 : 0.5,
-    }),
-  ], [imgTex, frontTex, backTex, cfg, isShiny])
+  const mats = useMemo(() => {
+    const side = new THREE.MeshStandardMaterial({ color:cfg.c, metalness:0.85, roughness:0.15, envMapIntensity:1.4 })
+    const bevel = new THREE.MeshStandardMaterial({ color:cfg.c, metalness:0.7, roughness:0.2, envMapIntensity:1.0 })
+    const front = new THREE.MeshStandardMaterial({
+      map: imgTex ? blendTextures(imgTex, frontTex) : frontTex,
+      metalness:0.1, roughness:0.55, envMapIntensity:0.6,
+    })
+    const back = new THREE.MeshStandardMaterial({
+      map: backTex, metalness:0.85, roughness:0.08, envMapIntensity:2.2,
+    })
+    return [side, bevel, new THREE.MeshStandardMaterial({color:'#111'}), new THREE.MeshStandardMaterial({color:'#111'}), front, back]
+  }, [imgTex, frontTex, backTex, cfg])
 
   return (
-    <group ref={meshRef} rotation={[0.1, showBack ? Math.PI : -0.15, 0]}>
+    <group ref={groupRef} rotation={[0.08, showBack ? Math.PI : -0.12, 0]}>
       <mesh geometry={geo} material={mats} />
-      <pointLight position={[0,0,3]} intensity={0.6} color={cfg.c} />
+      <pointLight position={[0,0,3.5]} intensity={0.7} color={cfg.c} />
     </group>
   )
 }
 
-/* ── Main HexCard component ────────────────────────────────── */
-export function HexCard({ territory:t, onClose, onRequestClaim }:{
-  territory:any; onClose:()=>void; onRequestClaim:()=>void
-}) {
-  const player  = usePlayer()
-  const isOwned = t.owner_id === player?.id
-  const isEnemy = !!t.owner_id && !isOwned
-  const isFree  = !t.owner_id
-
-  const rarity  = (t.rarity || 'common') as RK
-  const isShiny = !!t.is_shiny
-  const cfg     = R[rarity] ?? R.common
-
-  const cardName  = t.custom_name || t.poi_name || t.place_name || 'Zone'
-  const imgUrl    = t.poi_wiki_url || null
-  const biomeResources = BIOME_RESOURCES[t.territory_type || 'rural'] || BIOME_RESOURCES.rural
-  const income    = Math.round(t.resource_credits || t.food_per_tick || 10)
-
-  const [tab, setTab]       = useState<'card'|'kingdom'|'nft'>('card')
-  const [showBack, setShowBack] = useState(false)
-  const [showSkillTree, setShowSkillTree] = useState(false)
-
-  // Fun facts from POI description
-  const facts = useMemo(() => {
-    const desc = t.poi_description || ''
-    const fact = t.poi_fun_fact    || ''
-    const result = []
-    if (t.poi_visitors) result.push(`${(t.poi_visitors/1e6).toFixed(1)}M visiteurs / an`)
-    if (t.poi_geo_score) result.push(`Score géopolitique : ${t.poi_geo_score}/100`)
-    if (fact) result.push(fact.slice(0,80))
-    if (result.length < 3 && desc) result.push(desc.slice(0,80))
-    while (result.length < 3) result.push('Territoire unique · Hexod Season 1')
-    return result.slice(0,3)
-  }, [t])
-
-  return (
-    <motion.div
-      initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
-      onClick={e => e.target===e.currentTarget && onClose()}
-      style={{
-        position:'fixed', inset:0, zIndex:1200,
-        display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:14,
-        background:'rgba(0,0,0,0.92)', backdropFilter:'blur(20px)',
-        padding:'12px 16px',
-      }}
-    >
-      {/* Ambient glow */}
-      {cfg.glow !== 'none' && (
-        <div style={{ position:'absolute', width:460, height:460, pointerEvents:'none',
-          background:`radial-gradient(ellipse 55% 55% at 50% 42%, ${cfg.c}1a 0%, transparent 70%)`,
-          filter:'blur(50px)' }} />
-      )}
-
-      {/* 3D card */}
-      <div style={{ width:260, height:290, cursor:'grab', zIndex:1, flexShrink:0 }}>
-        <Canvas camera={{ position:[0,0,4.2], fov:44 }} gl={{ antialias:true, alpha:true }}
-          style={{ background:'transparent' }}>
-          <Suspense fallback={null}>
-            <ambientLight intensity={0.4} />
-            <pointLight position={[3,4,3]} intensity={1.5} />
-            <pointLight position={[-2,-2,2]} intensity={0.5} color={cfg.c} />
-            <Environment preset="city" />
-            <HexPrism imgUrl={imgUrl} cfg={cfg} isShiny={isShiny} foilColor={cfg.c} showBack={showBack} />
-          </Suspense>
-        </Canvas>
-      </div>
-
-      {/* Card identity + flip button */}
-      <div style={{ display:'flex', alignItems:'center', gap:10, zIndex:1 }}>
-        <div style={{ textAlign:'center' }}>
-          <div style={{ fontSize:15, fontWeight:900, color:'#fff' }}>{cardName}</div>
-          <div style={{ display:'flex', gap:5, justifyContent:'center', marginTop:3 }}>
-            <Chip color={cfg.c}>{cfg.label}</Chip>
-            {isShiny && <Chip color="#FCD34D">✨ Shiny</Chip>}
-            {t.poi_category && <Chip color="#6B7280">{t.poi_category}</Chip>}
-            <Chip color={cfg.c} big>GRADE {cfg.grade}</Chip>
-          </div>
-        </div>
-        <button onClick={() => setShowBack(v=>!v)} style={{
-          padding:'6px 10px', borderRadius:8, cursor:'pointer', fontSize:11, fontWeight:700,
-          background:`${cfg.c}18`, border:`1px solid ${cfg.c}44`, color:cfg.c,
-          flexShrink:0,
-        }}>{showBack ? '🃏 Face' : '🔄 Dos'}</button>
-      </div>
-
-      {/* Info panel */}
-      {isOwned ? (
-        <div style={{ width:320, background:'rgba(4,4,12,0.99)', border:`1px solid ${cfg.c}44`,
-          borderRadius:14, overflow:'hidden', zIndex:1, maxHeight:'45vh', display:'flex', flexDirection:'column' }}>
-
-          {/* Tabs */}
-          <div style={{ display:'flex', borderBottom:`1px solid ${cfg.c}22`, flexShrink:0 }}>
-            {(['card','kingdom','nft'] as const).map(tb => (
-              <button key={tb} onClick={() => setTab(tb)} style={{
-                flex:1, padding:'8px 0', border:'none', cursor:'pointer', fontSize:10, fontWeight:tab===tb?800:400,
-                background: tab===tb ? `${cfg.c}14` : 'transparent',
-                borderBottom:`2px solid ${tab===tb ? cfg.c : 'transparent'}`,
-                color: tab===tb ? cfg.c : '#4B5563',
-              }}>
-                {tb==='card' ? '🃏 Carte' : tb==='kingdom' ? '⚗️ Royaume' : '💎 NFT'}
-              </button>
-            ))}
-          </div>
-
-          <div style={{ flex:1, overflowY:'auto', padding:'12px 14px' }}>
-            {tab==='card' && (
-              <div>
-                {/* Pokémon-style facts */}
-                <div style={{ marginBottom:10, padding:'10px 12px', borderRadius:10,
-                  background:`${cfg.c}0e`, border:`1px solid ${cfg.c}22` }}>
-                  {imgUrl && (
-                    <img src={imgUrl} alt={cardName}
-                      style={{ width:'100%', height:80, objectFit:'cover', borderRadius:7, marginBottom:8 }}
-                      onError={e => { (e.target as HTMLImageElement).style.display='none' }}
-                    />
-                  )}
-                  <div style={{ fontSize:11, fontWeight:800, color:cfg.accent, marginBottom:6 }}>Caractéristiques</div>
-                  {facts.map((f,i) => (
-                    <div key={i} style={{ display:'flex', gap:6, alignItems:'flex-start', marginBottom:5 }}>
-                      <span style={{ color:cfg.c, fontWeight:700, flexShrink:0 }}>#{i+1}</span>
-                      <span style={{ fontSize:11, color:'#9CA3AF', lineHeight:1.4 }}>{f}</span>
-                    </div>
-                  ))}
-                </div>
-                <div style={{ display:'flex', justifyContent:'space-between', fontSize:11, color:'#6B7280' }}>
-                  <span>H3: <span style={{ fontFamily:'monospace', color:'#4B5563' }}>{(t.h3_index||'').slice(0,12)}</span></span>
-                  <span style={{ color:cfg.c, fontWeight:800 }}>Grade {cfg.grade}</span>
-                </div>
-              </div>
-            )}
-
-            {tab==='kingdom' && (
-              <KingdomTab t={t} cfg={cfg} biomeResources={biomeResources} income={income}
-                clusterId={t.owner_kingdom_id} onOpenTree={() => setShowSkillTree(true)} />
-            )}
-
-            {tab==='nft' && (
-              <NFTTab t={t} cfg={cfg} />
-            )}
-          </div>
-        </div>
-      ) : (
-        /* Free or enemy — simple panel */
-        <div style={{ width:300, background:'rgba(4,4,12,0.99)', border:`1px solid ${cfg.c}44`,
-          borderRadius:14, padding:'12px 14px', zIndex:1 }}>
-          {t.poi_description && (
-            <div style={{ fontSize:11, color:'#9CA3AF', marginBottom:10, lineHeight:1.5 }}>
-              {t.poi_description.slice(0,120)}{t.poi_description.length>120?'…':''}
-            </div>
-          )}
-          <div style={{ display:'flex', gap:10, marginBottom:12, fontSize:11 }}>
-            <span style={{ color:'#F59E0B' }}>💰 +{income}/tick</span>
-            {t.poi_floor_price && <span style={{ color:cfg.c }}>💎 {t.poi_floor_price} TDI</span>}
-            {(isEnemy) && <span style={{ color:'#F87171' }}>👤 {t.owner_username}</span>}
-          </div>
-          {isFree && player && (
-            <button onClick={onRequestClaim} style={{
-              width:'100%', padding:'12px', border:'none', borderRadius:10, cursor:'pointer',
-              background:`linear-gradient(135deg,${cfg.c}cc,${cfg.c})`,
-              color:['legendary','mythic','epic'].includes(rarity)?'#000':'#fff',
-              fontSize:14, fontWeight:900,
-              boxShadow: cfg.glow!=='none' ? `0 4px 24px ${cfg.c}55` : undefined,
-            }}>🏴 Revendiquer</button>
-          )}
-          {isEnemy && (
-            <button onClick={onRequestClaim} style={{
-              width:'100%', padding:'12px', borderRadius:10, cursor:'pointer',
-              border:'1px solid rgba(239,68,68,0.4)', background:'rgba(239,68,68,0.1)',
-              color:'#EF4444', fontSize:13, fontWeight:700,
-            }}>⚔️ Attaquer · 💸 Acheter · 🧩 Puzzle</button>
-          )}
-        </div>
-      )}
-
-      {/* Kingdom skill tree overlay */}
-      <AnimatePresence>
-        {showSkillTree && (
-          <KingdomSkillTreeInline
-            clusterId={t.owner_kingdom_id || 'main'}
-            cfg={cfg}
-            onClose={() => setShowSkillTree(false)}
-          />
-        )}
-      </AnimatePresence>
-
-      <div style={{ fontSize:9, color:'#1F2937', zIndex:1 }}>Glisser pour tourner · Cliquer hors de la carte pour fermer</div>
-    </motion.div>
-  )
+function blendTextures(img: THREE.Texture, overlay: THREE.Texture): THREE.Texture {
+  // Return image texture — overlay info is painted via canvas
+  return img
 }
 
-/* ── Kingdom Tab ───────────────────────────────────────────── */
-function KingdomTab({ t, cfg, biomeResources, income, clusterId, onOpenTree }: any) {
-  const { data: kingdom } = useQuery({
-    queryKey: ['territory-kingdom', t.h3_index],
-    queryFn: () => api.get(`/territories-geo/territory-kingdom/?h3=${t.h3_index}`).then(r => r.data.kingdom),
-    staleTime: 30000,
-    enabled: !!t.h3_index,
-  })
-
-  return (
-    <div>
-      {/* Kingdom status */}
-      {kingdom && (
-        <div style={{ marginBottom:10, padding:'8px 10px', borderRadius:8,
-          background: kingdom.is_main ? `${cfg.c}0e` : 'rgba(255,255,255,0.04)',
-          border:`1px solid ${kingdom.is_main ? cfg.c+'33' : 'rgba(255,255,255,0.07)'}` }}>
-          <div style={{ fontSize:11, fontWeight:700, color: kingdom.is_main ? cfg.c : '#6B7280' }}>
-            {kingdom.is_main ? '👑 Royaume Principal' : kingdom.size<=1 ? '🏴 Territoire Isolé' : '🏰 Royaume Secondaire'}
-          </div>
-          <div style={{ fontSize:10, color:'#4B5563', marginTop:2 }}>
-            {kingdom.size} territoire{kingdom.size>1?'s':''} · Tier {kingdom.tier}
-            {kingdom.is_main ? '' : kingdom.size<=1 ? ' · Arbre repart à 0' : ''}
-          </div>
-        </div>
-      )}
-
-      {/* Resource production */}
-      <div style={{ fontSize:9, color:'#4B5563', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:6 }}>
-        Production / cycle
-      </div>
-      <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:5, marginBottom:10 }}>
-        {biomeResources.map((r: any) => (
-          <div key={r.res} style={{ background:'rgba(255,255,255,0.04)', borderRadius:7, padding:'7px 6px', textAlign:'center' }}>
-            <div style={{ fontSize:14 }}>{r.icon}</div>
-            <div style={{ fontSize:11, fontWeight:800, color:cfg.c, fontFamily:'monospace' }}>+{r.amount}</div>
-            <div style={{ fontSize:8, color:'#4B5563', marginTop:1, lineHeight:1.2 }}>{r.res.slice(0,10)}</div>
-          </div>
-        ))}
-        <div style={{ background:`${cfg.c}0e`, borderRadius:7, padding:'7px 6px', textAlign:'center',
-          border:`1px solid ${cfg.c}22` }}>
-          <div style={{ fontSize:14 }}>💠</div>
-          <div style={{ fontSize:11, fontWeight:800, color:cfg.c, fontFamily:'monospace' }}>+{income}</div>
-          <div style={{ fontSize:8, color:cfg.c, marginTop:1 }}>Cristaux</div>
-        </div>
-      </div>
-
-      {/* Open skill tree */}
-      <button onClick={onOpenTree} style={{
-        width:'100%', padding:'11px', border:'none', borderRadius:10, cursor:'pointer',
-        background:`linear-gradient(135deg,${cfg.c}cc,${cfg.c})`,
-        color:['legendary','mythic','epic'].includes(t.rarity||'common')?'#000':'#fff',
-        fontSize:13, fontWeight:900,
-      }}>
-        🔬 Arbre des Compétences du Royaume →
-      </button>
-    </div>
-  )
+/* ── Skill Tree ────────────────────────────────────────────── */
+const SKILLS_LAYOUT = {
+  // Central node
+  center: { x:0, y:0, label:'⬡ Hexod', color:'#F59E0B' },
+  branches: [
+    { id:'attack',    angle:-90,  color:'#EF4444', label:'⚔️',  longLabel:'Attaque'     },
+    { id:'defense',   angle:-30,  color:'#3B82F6', label:'🛡️',  longLabel:'Défense'     },
+    { id:'economy',   angle: 30,  color:'#F59E0B', label:'💰',  longLabel:'Économie'    },
+    { id:'influence', angle: 90,  color:'#10B981', label:'🌐',  longLabel:'Rayonnement' },
+    { id:'tech',      angle:150,  color:'#8B5CF6', label:'🔬',  longLabel:'Tech'        },
+  ]
 }
 
-/* ── NFT Tab ───────────────────────────────────────────────── */
-function NFTTab({ t, cfg }: any) {
-  const tokenId = t.token_id || `HEX-${(t.h3_index||'').slice(0,8).toUpperCase()}`
-  return (
-    <div>
-      <div style={{ padding:'12px', background:'rgba(139,92,246,0.08)', borderRadius:10,
-        border:'1px solid rgba(139,92,246,0.2)', marginBottom:10 }}>
-        <div style={{ fontSize:10, color:'#A78BFA', fontWeight:700, marginBottom:6 }}>Identité Unique</div>
-        <KV label="Token ID"    val={tokenId} mono />
-        <KV label="H3 Index"   val={(t.h3_index||'').slice(0,18)+'…'} mono />
-        <KV label="Edition"    val="Genesis · Season 1" />
-        <KV label="Rareté"     val={cfg.label} color={cfg.c} />
-        <KV label="Grade"      val={cfg.grade} color={cfg.c} />
-        {t.is_shiny && <KV label="Shiny" val="✨ 1/64 — Rarissime" color="#FCD34D" />}
-        {t.poi_floor_price && <KV label="Floor NFT" val={`${t.poi_floor_price} TDI`} color={cfg.c} />}
-      </div>
-
-      <div style={{ display:'flex', gap:8 }}>
-        <button style={{
-          flex:1, padding:'10px', border:`1px solid ${cfg.c}44`, borderRadius:9, cursor:'pointer',
-          background:`${cfg.c}14`, color:cfg.c, fontSize:11, fontWeight:700,
-        }}>💎 Minter NFT</button>
-        <button style={{
-          flex:1, padding:'10px', border:'1px solid rgba(59,130,246,0.35)', borderRadius:9, cursor:'pointer',
-          background:'rgba(59,130,246,0.1)', color:'#60A5FA', fontSize:11, fontWeight:700,
-        }}>🏪 Marketplace →</button>
-      </div>
-    </div>
-  )
-}
-
-/* ── Kingdom Skill Tree inline overlay ─────────────────────── */
-function KingdomSkillTreeInline({ clusterId, cfg, onClose }: any) {
-  const [branch, setBranch] = useState('attack')
+function RealSkillTree({ clusterId, cfg, onClose }: { clusterId:string; cfg:typeof R[RK]; onClose:()=>void }) {
   const qc = useQueryClient()
+  const [hoveredSkill, setHoveredSkill] = useState<number|null>(null)
+  const [selectedBranch, setSelectedBranch] = useState<string|null>(null)
 
   const { data } = useQuery({
     queryKey: ['kingdom-skills', clusterId],
@@ -462,30 +269,31 @@ function KingdomSkillTreeInline({ clusterId, cfg, onClose }: any) {
 
   const unlock = useMutation({
     mutationFn: (id:number) => api.post('/territories-geo/kingdom-unlock-skill/', { cluster_id:clusterId, skill_id:id }),
-    onSuccess: () => { toast.success('Compétence débloquée!'); qc.invalidateQueries({ queryKey:['kingdom-skills',clusterId] }) },
+    onSuccess: () => { toast.success('Compétence débloquée!'); qc.invalidateQueries({queryKey:['kingdom-skills',clusterId]}) },
     onError: (e:any) => toast.error(e?.response?.data?.error || 'Ressources insuffisantes'),
   })
 
   const tree: Record<string,any[]> = data?.tree || {}
   const kingdom = data?.kingdom || {}
-  const skills = tree[branch] || []
-  const branchCfg = BRANCH_CFG[branch as keyof typeof BRANCH_CFG]
+
+  // SVG tree dimensions
+  const W=560, H=420, cx=W/2, cy=H/2
+  const BRANCH_R = 150  // radius to branch root nodes
+  const NODE_R   = 22   // branch root node radius
+  const SKILL_R  = 16   // skill node radius
+  const SKILL_SPACING = 58  // distance between skills along branch
 
   return (
     <motion.div
-      initial={{ opacity:0, y:40 }} animate={{ opacity:1, y:0 }}
-      exit={{ opacity:0, y:40 }}
-      style={{
-        position:'fixed', inset:0, zIndex:1300,
-        display:'flex', alignItems:'flex-end', justifyContent:'center',
-        background:'rgba(0,0,0,0.85)', backdropFilter:'blur(12px)',
-        padding:'0 8px 8px',
-      }}
+      initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} exit={{opacity:0,scale:0.92}}
+      style={{ position:'fixed', inset:0, zIndex:1300, display:'flex', flexDirection:'column',
+        alignItems:'center', justifyContent:'center',
+        background:'rgba(0,0,0,0.88)', backdropFilter:'blur(16px)', padding:'12px' }}
       onClick={e => e.target===e.currentTarget && onClose()}
     >
-      <div style={{ width:'100%', maxWidth:500, background:'rgba(4,4,12,0.99)',
-        border:`2px solid ${cfg.c}44`, borderRadius:'16px 16px 0 0',
-        maxHeight:'80vh', display:'flex', flexDirection:'column', overflow:'hidden' }}>
+      <div style={{ width:'100%', maxWidth:600, background:'rgba(4,4,12,0.99)',
+        border:`2px solid ${cfg.c}44`, borderRadius:18,
+        display:'flex', flexDirection:'column', overflow:'hidden', maxHeight:'90vh' }}>
 
         {/* Header */}
         <div style={{ padding:'12px 16px', borderBottom:`1px solid ${cfg.c}22`,
@@ -494,114 +302,383 @@ function KingdomSkillTreeInline({ clusterId, cfg, onClose }: any) {
           <div>
             <div style={{ fontSize:14, fontWeight:900, color:'#fff' }}>🔬 Arbre des Compétences</div>
             <div style={{ fontSize:10, color:cfg.c }}>
-              {kingdom.is_main ? '👑 Royaume Principal' : '🏴 Royaume Isolé'} · {data?.unlocked_count||0} débloquées
+              {kingdom.is_main?'👑 Royaume Principal':'🏴 Territoire Isolé'} · {data?.unlocked_count||0}/{Object.values(tree).reduce((s:number,v:any[])=>s+v.length,0)} compétences
             </div>
+          </div>
+          {/* Kingdom resources */}
+          <div style={{ display:'flex', gap:5, flexWrap:'wrap', flex:1, justifyContent:'center', margin:'0 12px' }}>
+            {kingdom.resources && Object.entries({
+              '🪨':kingdom.resources.fer, '🛢️':kingdom.resources.petrole,
+              '💠':kingdom.resources.silicium, '📊':kingdom.resources.donnees,
+              '💎':kingdom.resources.hex_cristaux
+            }).filter(([,v])=>(v as number)>0).map(([icon,val])=>(
+              <div key={icon} style={{ fontSize:10, padding:'2px 6px', borderRadius:4,
+                background:'rgba(255,255,255,0.06)', color:'#9CA3AF' }}>
+                {icon} {Math.round(val as number)}
+              </div>
+            ))}
           </div>
           <button onClick={onClose} style={{ background:'none', border:'none', color:'#6B7280', cursor:'pointer', fontSize:20 }}>✕</button>
         </div>
 
-        {/* Resources header */}
-        {kingdom.resources && (
-          <div style={{ padding:'8px 14px', borderBottom:`1px solid ${cfg.c}14`, flexShrink:0,
-            display:'flex', gap:6, flexWrap:'wrap' }}>
-            {Object.entries({
-              '🪨':kingdom.resources.fer, '🛢️':kingdom.resources.petrole,
-              '💠':kingdom.resources.silicium, '📊':kingdom.resources.donnees,
-              '💎':kingdom.resources.hex_cristaux, '🌐':kingdom.resources.influence,
-            }).filter(([,v])=>(v as number)>0).map(([icon,val])=>(
-              <div key={icon} style={{ display:'flex', alignItems:'center', gap:3,
-                padding:'2px 7px', borderRadius:5, background:'rgba(255,255,255,0.05)',
-                border:'1px solid rgba(255,255,255,0.08)' }}>
-                <span style={{ fontSize:11 }}>{icon}</span>
-                <span style={{ fontSize:10, color:'#9CA3AF', fontFamily:'monospace' }}>{Math.round(val as number)}</span>
-              </div>
-            ))}
-          </div>
-        )}
+        {/* SVG Tree */}
+        <div style={{ flex:1, overflowY:'auto' }}>
+          <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display:'block', margin:'0 auto' }}>
+            <defs>
+              {SKILLS_LAYOUT.branches.map(b => (
+                <filter key={b.id} id={`glow-${b.id}`} x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
+                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                </filter>
+              ))}
+            </defs>
 
-        {/* Branch tabs */}
-        <div style={{ display:'flex', borderBottom:`1px solid rgba(255,255,255,0.05)`, flexShrink:0, overflowX:'auto' }}>
-          {Object.entries(BRANCH_CFG).map(([id,bc])=>{
-            const bs=tree[id]||[]; const bu=bs.filter((s:any)=>s.unlocked).length
+            {/* Branch lines + nodes */}
+            {SKILLS_LAYOUT.branches.map(branch => {
+              const rad = (branch.angle * Math.PI) / 180
+              const bx = cx + Math.cos(rad) * BRANCH_R
+              const by = cy + Math.sin(rad) * BRANCH_R
+              const skills = tree[branch.id] || []
+              const isSelected = selectedBranch === branch.id
+
+              return (
+                <g key={branch.id}>
+                  {/* Center → branch line */}
+                  <line x1={cx} y1={cy} x2={bx} y2={by}
+                    stroke={branch.color} strokeWidth={isSelected?2.5:1.5} strokeOpacity={isSelected?0.9:0.4}
+                    strokeDasharray={isSelected?'':'4,3'} />
+
+                  {/* Branch root node */}
+                  <circle cx={bx} cy={by} r={NODE_R} fill={`${branch.color}22`}
+                    stroke={branch.color} strokeWidth={isSelected?2.5:1.5}
+                    filter={isSelected?`url(#glow-${branch.id})`:undefined}
+                    style={{ cursor:'pointer' }}
+                    onClick={() => setSelectedBranch(s => s===branch.id?null:branch.id)} />
+                  <text x={bx} y={by+1} textAnchor="middle" dominantBaseline="central"
+                    fontSize={16} style={{ pointerEvents:'none' }}>{branch.label}</text>
+                  <text x={bx} y={by+NODE_R+12} textAnchor="middle"
+                    fontSize={9} fill={branch.color} fontWeight={700} style={{ pointerEvents:'none' }}>
+                    {branch.longLabel}
+                  </text>
+
+                  {/* Skill nodes along branch */}
+                  {isSelected && skills.map((s:any, i:number) => {
+                    const dist = BRANCH_R + NODE_R + 14 + i * SKILL_SPACING
+                    const sx = cx + Math.cos(rad) * dist
+                    const sy = cy + Math.sin(rad) * dist
+                    const prevDist = i===0 ? BRANCH_R : BRANCH_R + NODE_R + 14 + (i-1)*SKILL_SPACING
+                    const px = cx + Math.cos(rad) * prevDist
+                    const py = cy + Math.sin(rad) * prevDist
+                    const isHover = hoveredSkill === s.id
+
+                    return (
+                      <g key={s.id}>
+                        {/* Connector */}
+                        <line x1={px} y1={py} x2={sx} y2={sy}
+                          stroke={branch.color} strokeWidth={1.5}
+                          strokeOpacity={s.unlocked?0.8:0.25}
+                          strokeDasharray={s.unlocked?'':'3,3'} />
+
+                        {/* Skill circle */}
+                        <circle cx={sx} cy={sy} r={SKILL_R}
+                          fill={s.unlocked ? `${branch.color}33` : 'rgba(20,20,30,0.9)'}
+                          stroke={branch.color} strokeWidth={s.unlocked?2:1}
+                          strokeOpacity={s.unlocked?1:0.4}
+                          filter={s.unlocked?`url(#glow-${branch.id})`:undefined}
+                          style={{ cursor:'pointer' }}
+                          onMouseEnter={()=>setHoveredSkill(s.id)}
+                          onMouseLeave={()=>setHoveredSkill(null)} />
+
+                        {/* Icon */}
+                        <text x={sx} y={sy+1} textAnchor="middle" dominantBaseline="central"
+                          fontSize={13} style={{ pointerEvents:'none' }}>{s.icon}</text>
+
+                        {/* Unlock checkmark */}
+                        {s.unlocked && (
+                          <text x={sx+SKILL_R-4} y={sy-SKILL_R+4} textAnchor="middle"
+                            dominantBaseline="central" fontSize={9} fill="#00FF87" fontWeight={900}
+                            style={{ pointerEvents:'none' }}>✓</text>
+                        )}
+
+                        {/* Hover tooltip */}
+                        {isHover && (
+                          <g>
+                            <rect x={sx-80} y={sy-56} width={160} height={48} rx={6}
+                              fill="rgba(4,4,16,0.97)" stroke={branch.color} strokeWidth={1} />
+                            <text x={sx} y={sy-42} textAnchor="middle" fontSize={10} fontWeight={700}
+                              fill="#fff">{s.name.slice(0,22)}</text>
+                            <text x={sx} y={sy-26} textAnchor="middle" fontSize={8.5}
+                              fill={branch.color}>{s.effect.slice(0,30)}</text>
+                            <text x={sx} y={sy-13} textAnchor="middle" fontSize={8}
+                              fill="#6B7280">{s.cost_json.slice(0,3).join(' · ')}</text>
+                          </g>
+                        )}
+                      </g>
+                    )
+                  })}
+                </g>
+              )
+            })}
+
+            {/* Center node */}
+            <circle cx={cx} cy={cy} r={32} fill="rgba(245,158,11,0.15)"
+              stroke="#F59E0B" strokeWidth={2.5} />
+            <text x={cx} y={cy+1} textAnchor="middle" dominantBaseline="central"
+              fontSize={26} fontWeight={900} fill="#F59E0B">⬡</text>
+            <text x={cx} y={cy+42} textAnchor="middle" fontSize={9}
+              fill="#F59E0B" fontWeight={700}>HEXOD</text>
+          </svg>
+
+          {/* Selected branch skill list */}
+          {selectedBranch && (() => {
+            const branch = SKILLS_LAYOUT.branches.find(b => b.id === selectedBranch)!
+            const skills = tree[selectedBranch] || []
             return (
-              <button key={id} onClick={()=>setBranch(id)} style={{
-                flex:'0 0 auto', padding:'8px 12px', border:'none', cursor:'pointer',
-                background: branch===id ? `${bc.color}18` : 'transparent',
-                borderBottom:`2px solid ${branch===id?bc.color:'transparent'}`,
-                color: branch===id ? bc.color : '#4B5563', fontSize:10, fontWeight:branch===id?800:400,
-                whiteSpace:'nowrap',
-              }}>
-                {bc.label.split(' ')[0]}<span style={{ opacity:0.7 }}> {bu}/{bs.length}</span>
-              </button>
-            )
-          })}
-        </div>
-
-        {/* Skills */}
-        <div style={{ flex:1, overflowY:'auto', padding:'10px 12px' }}>
-          {skills.map((s:any, i:number) => (
-            <div key={s.id} style={{ position:'relative' }}>
-              {/* Connector */}
-              {i>0 && <div style={{ position:'absolute', left:21, top:-8, width:2, height:16,
-                background: s.unlocked ? branchCfg.color : 'rgba(255,255,255,0.08)' }} />}
-
-              <div style={{ display:'flex', gap:10, padding:'10px 12px', marginBottom:6, borderRadius:10,
-                background: s.unlocked ? `${branchCfg.color}0f` : 'rgba(255,255,255,0.03)',
-                border:`1px solid ${s.unlocked ? branchCfg.color+'33' : 'rgba(255,255,255,0.06)'}` }}>
-
-                <div style={{ width:40, height:40, borderRadius:10, flexShrink:0,
-                  background: s.unlocked ? `${branchCfg.color}22` : 'rgba(255,255,255,0.05)',
-                  border:`2px solid ${s.unlocked ? branchCfg.color+'55' : 'rgba(255,255,255,0.08)'}`,
-                  display:'flex', alignItems:'center', justifyContent:'center', fontSize:20 }}>
-                  {s.icon}
+              <div style={{ padding:'0 16px 16px' }}>
+                <div style={{ fontSize:11, fontWeight:800, color:branch.color, marginBottom:8 }}>
+                  {branch.label} {branch.longLabel} — {skills.filter((s:any)=>s.unlocked).length}/{skills.length} débloquées
                 </div>
-
-                <div style={{ flex:1 }}>
-                  <div style={{ fontSize:12, fontWeight:800, color: s.unlocked?'#fff':'#9CA3AF' }}>{s.name}</div>
-                  <div style={{ fontSize:10, color: s.unlocked ? branchCfg.color : '#6B7280', marginTop:1 }}>{s.effect}</div>
-                  {!s.unlocked && (
-                    <div style={{ display:'flex', flexWrap:'wrap', gap:3, marginTop:5 }}>
-                      {s.cost_json.map((c:string)=>(
-                        <span key={c} style={{ fontSize:9, padding:'2px 6px', borderRadius:4,
-                          background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.09)',
-                          color:'#9CA3AF' }}>{c}</span>
-                      ))}
+                {skills.map((s:any) => (
+                  <div key={s.id} style={{ display:'flex', gap:10, padding:'9px 12px', marginBottom:5, borderRadius:9,
+                    background: s.unlocked ? `${branch.color}0f` : 'rgba(255,255,255,0.03)',
+                    border:`1px solid ${s.unlocked ? branch.color+'33' : 'rgba(255,255,255,0.07)'}` }}>
+                    <span style={{ fontSize:18, flexShrink:0 }}>{s.icon}</span>
+                    <div style={{ flex:1 }}>
+                      <div style={{ fontSize:12, fontWeight:700, color:s.unlocked?'#fff':'#9CA3AF' }}>{s.name}</div>
+                      <div style={{ fontSize:10, color:s.unlocked?branch.color:'#6B7280' }}>{s.effect}</div>
+                      {!s.unlocked && (
+                        <div style={{ display:'flex', gap:4, marginTop:4, flexWrap:'wrap' }}>
+                          {s.cost_json.map((c:string)=>(
+                            <span key={c} style={{ fontSize:9, padding:'2px 6px', borderRadius:4,
+                              background:'rgba(255,255,255,0.06)', color:'#9CA3AF' }}>{c}</span>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                  )}
-                </div>
-
-                {s.unlocked
-                  ? <div style={{ width:26, height:26, borderRadius:'50%', flexShrink:0,
-                      background:branchCfg.color, display:'flex', alignItems:'center',
-                      justifyContent:'center', fontSize:11, fontWeight:900, color:'#000' }}>✓</div>
-                  : !kingdom.is_main
-                  ? <div style={{ fontSize:16 }}>🔒</div>
-                  : <button onClick={()=>unlock.mutate(s.id)} disabled={unlock.isPending} style={{
-                      padding:'5px 10px', border:'none', borderRadius:7, cursor:'pointer',
-                      background:`linear-gradient(135deg,${branchCfg.color}cc,${branchCfg.color})`,
-                      color:'#000', fontSize:10, fontWeight:900, flexShrink:0,
-                    }}>{unlock.isPending?'…':'Unlock'}</button>
-                }
+                    {s.unlocked
+                      ? <div style={{ width:24,height:24,borderRadius:'50%',background:branch.color,
+                          display:'flex',alignItems:'center',justifyContent:'center',
+                          fontSize:11,fontWeight:900,color:'#000',flexShrink:0 }}>✓</div>
+                      : kingdom.is_main
+                      ? <button onClick={()=>unlock.mutate(s.id)} disabled={unlock.isPending} style={{
+                          padding:'5px 10px',border:'none',borderRadius:7,cursor:'pointer',flexShrink:0,
+                          background:`linear-gradient(135deg,${branch.color}cc,${branch.color})`,
+                          color:'#000',fontSize:10,fontWeight:900,
+                        }}>{unlock.isPending?'…':'Unlock'}</button>
+                      : <span style={{fontSize:14}}>🔒</span>
+                    }
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
+            )
+          })()}
         </div>
       </div>
     </motion.div>
   )
 }
 
-/* ── Helpers ───────────────────────────────────────────────── */
-function Chip({ children, color, big }: any) {
-  return <span style={{ fontSize: big?11:9, padding: big?'3px 9px':'2px 6px', borderRadius:4,
-    background:`${color}18`, color, border:`1px solid ${color}33`, fontWeight:700 }}>{children}</span>
-}
-function KV({ label, val, color, mono }: any) {
+/* ── Main HexCard ──────────────────────────────────────────── */
+export function HexCard({ territory:t, onClose, onRequestClaim }:{
+  territory:any; onClose:()=>void; onRequestClaim:()=>void
+}) {
+  const player  = usePlayer()
+  const isOwned = t.owner_id === player?.id
+  const isEnemy = !!t.owner_id && !isOwned
+  const isFree  = !t.owner_id
+  const rarity  = (t.rarity || 'common') as RK
+  const isShiny = !!t.is_shiny
+  const cfg     = R[rarity] ?? R.common
+
+  const cardName = t.custom_name || t.poi_name || t.place_name || 'Zone'
+  const imgUrl   = t.poi_wiki_url || null
+  const income   = Math.round((t.resource_credits || t.food_per_tick || 10) * 288) // /jour
+  const biomeRes = BIOME_RES[t.territory_type || 'rural'] || BIOME_RES.rural
+
+  const facts = useMemo(() => {
+    const r = []
+    if (t.poi_visitors) r.push(`${(t.poi_visitors/1e6).toFixed(1)}M visiteurs / an`)
+    if (t.poi_geo_score) r.push(`Score géopolitique : ${t.poi_geo_score}/100`)
+    if (t.poi_fun_fact) r.push(t.poi_fun_fact.slice(0,80))
+    if (t.poi_description && r.length<3) r.push(t.poi_description.slice(0,80))
+    while (r.length<3) r.push('Territoire unique · Hexod Saison 1')
+    return r.slice(0,3)
+  }, [t])
+
+  const frontCanvas = useMemo(() => paintFront(cfg, cardName, facts, cfg.grade, imgUrl, isShiny), [cfg, cardName, facts, imgUrl, isShiny])
+  const backCanvas  = useMemo(() => paintBack(cfg, t.h3_index||'', income, t.poi_floor_price||null, isShiny), [cfg, t.h3_index, income, t.poi_floor_price, isShiny])
+
+  const [tab, setTab]         = useState<'card'|'kingdom'|'nft'>('card')
+  const [showBack, setShowBack]     = useState(false)
+  const [showSkillTree, setShowSkillTree] = useState(false)
+
   return (
-    <div style={{ display:'flex', justifyContent:'space-between', padding:'4px 0',
-      borderBottom:'1px solid rgba(255,255,255,0.04)', fontSize:11 }}>
-      <span style={{ color:'#6B7280' }}>{label}</span>
-      <span style={{ color:color||'#E5E7EB', fontWeight:600, fontFamily:mono?'monospace':undefined }}>{val}</span>
+    <motion.div
+      initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+      onClick={e=>e.target===e.currentTarget&&onClose()}
+      style={{ position:'fixed',inset:0,zIndex:1200,display:'flex',flexDirection:'column',
+        alignItems:'center',justifyContent:'center',gap:12,
+        background:'rgba(0,0,0,0.92)',backdropFilter:'blur(20px)',padding:'10px' }}
+    >
+      {cfg.glow!=='none' && (
+        <div style={{ position:'absolute',width:440,height:440,pointerEvents:'none',
+          background:`radial-gradient(ellipse 55% 55% at 50% 42%,${cfg.c}1a 0%,transparent 70%)`,
+          filter:'blur(50px)' }} />
+      )}
+
+      {/* Three.js canvas */}
+      <div style={{ width:250,height:280,cursor:'grab',zIndex:1,flexShrink:0 }}>
+        <Canvas camera={{position:[0,0,4.0],fov:44}} gl={{antialias:true,alpha:true}} style={{background:'transparent'}}>
+          <Suspense fallback={null}>
+            <ambientLight intensity={0.35} />
+            <pointLight position={[3,4,3]} intensity={1.6} />
+            <pointLight position={[-2,-2,2]} intensity={0.5} color={cfg.c} />
+            <Environment preset="city" />
+            <HexPrism frontCanvas={frontCanvas} backCanvas={backCanvas} imgUrl={imgUrl} cfg={cfg} showBack={showBack} />
+          </Suspense>
+        </Canvas>
+      </div>
+
+      {/* Card label + flip */}
+      <div style={{ display:'flex',alignItems:'center',gap:10,zIndex:1 }}>
+        <div style={{ textAlign:'center' }}>
+          <div style={{ fontSize:14,fontWeight:900,color:'#fff' }}>{cardName}</div>
+          <div style={{ display:'flex',gap:4,justifyContent:'center',marginTop:3 }}>
+            <Chip color={cfg.c}>{cfg.label}</Chip>
+            {isShiny&&<Chip color="#FCD34D">✨ Shiny</Chip>}
+            <Chip color={cfg.c} big>Grade {cfg.grade}</Chip>
+          </div>
+        </div>
+        <button onClick={()=>setShowBack(v=>!v)} style={{
+          padding:'5px 10px',borderRadius:7,cursor:'pointer',fontSize:11,fontWeight:700,
+          background:`${cfg.c}18`,border:`1px solid ${cfg.c}44`,color:cfg.c,flexShrink:0,
+        }}>{showBack?'🃏 Face':'🔄 Dos'}</button>
+      </div>
+
+      {/* Info panel */}
+      {isOwned ? (
+        <div style={{ width:310,background:'rgba(4,4,12,0.99)',border:`1px solid ${cfg.c}44`,
+          borderRadius:14,overflow:'hidden',zIndex:1,maxHeight:'42vh',display:'flex',flexDirection:'column' }}>
+          <div style={{ display:'flex',borderBottom:`1px solid ${cfg.c}22`,flexShrink:0 }}>
+            {(['card','kingdom','nft'] as const).map(tb=>(
+              <button key={tb} onClick={()=>setTab(tb)} style={{
+                flex:1,padding:'8px 0',border:'none',cursor:'pointer',
+                fontSize:10,fontWeight:tab===tb?800:400,
+                background:tab===tb?`${cfg.c}14`:'transparent',
+                borderBottom:`2px solid ${tab===tb?cfg.c:'transparent'}`,
+                color:tab===tb?cfg.c:'#4B5563',
+              }}>{tb==='card'?'🃏 Carte':tb==='kingdom'?'⚗️ Royaume':'💎 NFT'}</button>
+            ))}
+          </div>
+          <div style={{ flex:1,overflowY:'auto',padding:'12px 14px' }}>
+            {tab==='card' && (
+              <div>
+                {imgUrl&&<img src={imgUrl} alt={cardName}
+                  style={{width:'100%',height:70,objectFit:'cover',borderRadius:7,marginBottom:8}}
+                  onError={e=>{(e.target as HTMLImageElement).style.display='none'}} />}
+                <div style={{marginBottom:8,padding:'8px 10px',borderRadius:8,background:`${cfg.c}0e`,border:`1px solid ${cfg.c}22`}}>
+                  <div style={{fontSize:10,fontWeight:800,color:cfg.accent,marginBottom:5}}>Caractéristiques</div>
+                  {facts.map((f,i)=>(
+                    <div key={i} style={{display:'flex',gap:5,marginBottom:4}}>
+                      <span style={{color:cfg.c,fontWeight:700,flexShrink:0}}>#{i+1}</span>
+                      <span style={{fontSize:10,color:'#9CA3AF',lineHeight:1.4}}>{f}</span>
+                    </div>
+                  ))}
+                </div>
+                <KV label="H3 Index" val={(t.h3_index||'').slice(0,16)+'…'} mono />
+                <KV label="Grade" val={cfg.grade} color={cfg.c} />
+              </div>
+            )}
+            {tab==='kingdom' && (
+              <div>
+                <div style={{fontSize:9,color:'#4B5563',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:6}}>Production / jour</div>
+                <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:5,marginBottom:10}}>
+                  {biomeRes.map(r=>(
+                    <div key={r.res} style={{background:'rgba(255,255,255,0.04)',borderRadius:7,padding:'7px 8px',textAlign:'center'}}>
+                      <div style={{fontSize:14}}>{r.icon}</div>
+                      <div style={{fontSize:11,fontWeight:800,color:cfg.c,fontFamily:'monospace'}}>+{r.amount*288}</div>
+                      <div style={{fontSize:8,color:'#4B5563',marginTop:1}}>{r.res.slice(0,12)}</div>
+                    </div>
+                  ))}
+                  <div style={{background:`${cfg.c}0e`,borderRadius:7,padding:'7px 8px',textAlign:'center',border:`1px solid ${cfg.c}22`}}>
+                    <div style={{fontSize:14}}>💠</div>
+                    <div style={{fontSize:11,fontWeight:800,color:cfg.c,fontFamily:'monospace'}}>+{income}</div>
+                    <div style={{fontSize:8,color:cfg.c,marginTop:1}}>HEX Coin</div>
+                  </div>
+                </div>
+                <button onClick={()=>setShowSkillTree(true)} style={{
+                  width:'100%',padding:'11px',border:'none',borderRadius:9,cursor:'pointer',
+                  background:`linear-gradient(135deg,${cfg.c}cc,${cfg.c})`,
+                  color:['legendary','mythic','epic'].includes(rarity)?'#000':'#fff',
+                  fontSize:12,fontWeight:900,
+                }}>🔬 Arbre des Compétences →</button>
+              </div>
+            )}
+            {tab==='nft' && (
+              <div>
+                <div style={{padding:'10px 12px',background:'rgba(139,92,246,0.08)',borderRadius:10,border:'1px solid rgba(139,92,246,0.2)',marginBottom:10}}>
+                  <KV label="Token ID" val={t.token_id||`HEX-${(t.h3_index||'').slice(0,8).toUpperCase()}`} mono />
+                  <KV label="H3 Index" val={(t.h3_index||'').slice(0,18)+'…'} mono />
+                  <KV label="Édition" val="Genèse · Saison 1" />
+                  <KV label="Rareté" val={cfg.label} color={cfg.c} />
+                  <KV label="Grade" val={cfg.grade} color={cfg.c} />
+                  {isShiny&&<KV label="Shiny" val="✨ 1/64 — Rarissime" color="#FCD34D" />}
+                  {t.poi_floor_price&&<KV label="Floor" val={`${t.poi_floor_price} HEX`} color={cfg.c} />}
+                </div>
+                <div style={{display:'flex',gap:7}}>
+                  <button style={{flex:1,padding:'9px',border:`1px solid ${cfg.c}44`,borderRadius:8,cursor:'pointer',background:`${cfg.c}14`,color:cfg.c,fontSize:11,fontWeight:700}}>💎 Minter</button>
+                  <button style={{flex:1,padding:'9px',border:'1px solid rgba(59,130,246,0.35)',borderRadius:8,cursor:'pointer',background:'rgba(59,130,246,0.1)',color:'#60A5FA',fontSize:11,fontWeight:700}}>🏪 Marketplace</button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      ) : (
+        <div style={{width:290,background:'rgba(4,4,12,0.99)',border:`1px solid ${cfg.c}44`,borderRadius:14,padding:'12px 14px',zIndex:1}}>
+          {t.poi_description&&<div style={{fontSize:11,color:'#9CA3AF',marginBottom:10,lineHeight:1.5}}>{t.poi_description.slice(0,110)}{t.poi_description.length>110?'…':''}</div>}
+          <div style={{display:'flex',gap:10,marginBottom:12,fontSize:11}}>
+            <span style={{color:'#F59E0B'}}>💰 +{income} HEX Coin/jour</span>
+            {t.poi_floor_price&&<span style={{color:cfg.c}}>💎 {t.poi_floor_price} HEX</span>}
+            {isEnemy&&<span style={{color:'#F87171'}}>👤 {t.owner_username}</span>}
+          </div>
+          {isFree&&player&&(
+            <button onClick={onRequestClaim} style={{
+              width:'100%',padding:'12px',border:'none',borderRadius:10,cursor:'pointer',
+              background:`linear-gradient(135deg,${cfg.c}cc,${cfg.c})`,
+              color:['legendary','mythic','epic'].includes(rarity)?'#000':'#fff',
+              fontSize:14,fontWeight:900,
+              boxShadow:cfg.glow!=='none'?`0 4px 24px ${cfg.c}55`:undefined,
+            }}>🏴 Revendiquer {cardName.slice(0,20)}</button>
+          )}
+          {isEnemy&&(
+            <button onClick={onRequestClaim} style={{
+              width:'100%',padding:'12px',borderRadius:10,cursor:'pointer',
+              border:'1px solid rgba(239,68,68,0.4)',background:'rgba(239,68,68,0.1)',
+              color:'#EF4444',fontSize:13,fontWeight:700,
+            }}>⚔️ Attaquer · 💸 Acheter · 🧩 Puzzle</button>
+          )}
+        </div>
+      )}
+
+      <AnimatePresence>
+        {showSkillTree&&(
+          <RealSkillTree clusterId={t.owner_kingdom_id||'main'} cfg={cfg} onClose={()=>setShowSkillTree(false)} />
+        )}
+      </AnimatePresence>
+
+      <div style={{fontSize:9,color:'#1F2937',zIndex:1}}>Glisser pour tourner · Cliquer hors pour fermer</div>
+    </motion.div>
+  )
+}
+
+function Chip({children,color,big}:any) {
+  return <span style={{fontSize:big?11:9,padding:big?'3px 9px':'2px 6px',borderRadius:4,background:`${color}18`,color,border:`1px solid ${color}33`,fontWeight:700}}>{children}</span>
+}
+function KV({label,val,color,mono}:any) {
+  return (
+    <div style={{display:'flex',justifyContent:'space-between',padding:'4px 0',borderBottom:'1px solid rgba(255,255,255,0.04)',fontSize:11}}>
+      <span style={{color:'#6B7280'}}>{label}</span>
+      <span style={{color:color||'#E5E7EB',fontWeight:600,fontFamily:mono?'monospace':undefined}}>{val}</span>
     </div>
   )
 }

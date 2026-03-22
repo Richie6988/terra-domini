@@ -19,7 +19,7 @@ const BRANCH_CFG = {
 
 const RESOURCE_ICONS: Record<string,string> = {
   'Pétrole':'🛢️','Acier':'⚙️','Main d\'œuvre':'👷','Données':'📊',
-  'Composants électroniques':'🔌','HEX (cristaux)':'💠','Influence politique':'🌐',
+  'Composants électroniques':'🔌','HEX (HEX Coin)':'💠','Influence politique':'🌐',
   'Terres rares':'💎','Silicium':'💠','Fer':'🪨','Uranium':'☢️',
   'Charbon':'⬛','Titanium':'🔷','Nourriture':'🌾','Eau':'💧',
   'Stabilité':'⚖️','Aluminium':'⬜','Cuivre':'🟠','Gaz naturel':'💨',
@@ -135,7 +135,7 @@ export function KingdomSkillTree({ clusterId, onClose }: Props) {
               'donnees': ['📊', resources.donnees],
               'acier': ['⚙️', resources.acier],
               'uranium': ['☢️', resources.uranium],
-              'hex_cristaux': ['💎', resources.hex_cristaux],
+              'hex_HEX Coin': ['💎', resources.hex_HEX Coin],
               'influence': ['🌐', resources.influence],
             }).filter(([, [, v]]) => (v as number) > 0).map(([k, [icon, val]]) => (
               <div key={k} style={{

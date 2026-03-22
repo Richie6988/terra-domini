@@ -139,7 +139,7 @@ export function makeHexPolygon({ territory: t, playerId, onClick }: HexConfig): 
     : ''
 
   const incomeVal = ta.resource_credits || ta.food_per_tick || 10
-  const incomeLine = `<div style="color:#10B981;font-size:10px">+${Math.round(incomeVal)} cristaux/tick</div>`
+  const incomeLine = `<div style="color:#10B981;font-size:10px">+${Math.round(incomeVal)} HEX Coin/jour</div>`
   const nftLine = ta.token_id ? `<div style="color:#8B5CF6;font-size:9px">NFT #${ta.token_id}</div>` : ''
 
   poly.bindTooltip(`

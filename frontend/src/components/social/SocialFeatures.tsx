@@ -272,7 +272,7 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
                 🎁 Referral Program
               </div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: 16 }}>
-                Earn <strong style={{ color: '#00FF87' }}>5% TDC commission</strong> on every purchase by players you invite — for 90 days. There's no limit.
+                Earn <strong style={{ color: '#00FF87' }}>5% HEX Coin commission</strong> on every purchase by players you invite — for 90 days. There's no limit.
               </div>
               <div style={{
                 padding: '10px 12px', background: 'rgba(0,0,0,0.4)',
@@ -350,8 +350,8 @@ function ReferralStats() {
         {[
           { label: 'Players Invited', value: data.total_referrals ?? 0, color: '#8B5CF6' },
           { label: 'Active (30d)', value: data.active_referrals ?? 0, color: '#10B981' },
-          { label: 'TDC Earned', value: `${(data.total_commission_tdc ?? 0).toFixed(0)} TDC`, color: '#FFB800' },
-          { label: 'This Month', value: `${(data.this_month_tdc ?? 0).toFixed(0)} TDC`, color: '#00FF87' },
+          { label: 'HEX Coin Earned', value: `${(data.total_commission_tdc ?? 0).toFixed(0)} HEX Coin`, color: '#FFB800' },
+          { label: 'This Month', value: `${(data.this_month_tdc ?? 0).toFixed(0)} HEX Coin`, color: '#00FF87' },
         ].map(stat => (
           <div key={stat.label} style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: 6 }}>
             <div style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 600, color: stat.color }}>{stat.value}</div>
@@ -388,25 +388,25 @@ export function ShareCard({ type, data, onClose }: ShareCardProps) {
       emoji: '⚔️', color: '#EF4444',
       headline: `I just captured ${data.territory_name || 'a territory'}!`,
       sub: data.from_player ? `Taken from ${data.from_player}` : 'Expanded my empire',
-      shareText: `⚔️ I just captured ${data.territory_name} in Terra Domini! Come fight me: terradomini.io`,
+      shareText: `⚔️ I just captured ${data.territory_name} in Hexod! Come fight me: terradomini.io`,
     },
     rank_up: {
       emoji: '🏆', color: '#FFB800',
       headline: `Commander Rank ${data.new_rank}!`,
-      sub: 'Leveled up on Terra Domini',
-      shareText: `🏆 I just reached Commander Rank ${data.new_rank} in Terra Domini! terradomini.io`,
+      sub: 'Leveled up on Hexod',
+      shareText: `🏆 I just reached Commander Rank ${data.new_rank} in Hexod! terradomini.io`,
     },
     alliance_victory: {
       emoji: '🏰', color: '#8B5CF6',
       headline: `[${data.alliance_tag}] won the Control Tower!`,
       sub: 'Alliance warfare victory',
-      shareText: `🏰 My alliance [${data.alliance_tag}] just won a Control Tower battle in Terra Domini! terradomini.io`,
+      shareText: `🏰 My alliance [${data.alliance_tag}] just won a Control Tower battle in Hexod! terradomini.io`,
     },
     ad_revenue: {
       emoji: '🪙', color: '#FFB800',
-      headline: `+${data.tdc_earned?.toFixed(0)} TDC from ads today!`,
+      headline: `+${data.tdc_earned?.toFixed(0)} HEX Coin from ads today!`,
       sub: 'My territories earned real crypto',
-      shareText: `🪙 My territories earned ${data.tdc_earned?.toFixed(0)} TDC (≈€${((data.tdc_earned ?? 0) / 100).toFixed(2)}) from brand ads today in Terra Domini! terradomini.io`,
+      shareText: `🪙 My territories earned ${data.tdc_earned?.toFixed(0)} HEX Coin (≈€${((data.tdc_earned ?? 0) / 100).toFixed(2)}) from brand ads today in Hexod! terradomini.io`,
     },
   }
 
@@ -415,7 +415,7 @@ export function ShareCard({ type, data, onClose }: ShareCardProps) {
   const handleShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share({ title: 'Terra Domini', text: config.shareText, url: 'https://terradomini.io' })
+        await navigator.share({ title: 'Hexod', text: config.shareText, url: 'https://terradomini.io' })
       } catch {}
     } else {
       navigator.clipboard.writeText(config.shareText)

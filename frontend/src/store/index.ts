@@ -49,7 +49,7 @@ interface GameState {
   resolveBattle: (battleId: string, result?: unknown) => void
 }
 
-// ─── TDC Slice ───────────────────────────────────────────────────────────────
+// ─── HEX Coin Slice ───────────────────────────────────────────────────────────────
 
 interface TDCState {
   balance: TDCBalance | null
@@ -167,7 +167,7 @@ export const useStore = create<Store>()(
         }
       }),
 
-      // ── TDC ─────────────────────────────────────────────────────────────
+      // ── HEX Coin ─────────────────────────────────────────────────────────────
       balance: null,
       recentTransactions: [],
 
@@ -199,7 +199,7 @@ export const useStore = create<Store>()(
       setWsConnected: (connected) => set({ wsConnected: connected }),
     }),
     {
-      name: 'terra-domini-store',
+      name: 'hexod-store',
       storage: {
         getItem: (name) => {
           try { return localStorage.getItem(name) } catch { return null }
