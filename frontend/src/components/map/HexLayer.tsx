@@ -1,48 +1,61 @@
 /**
- * HexLayer — H3 territory polygons on Leaflet.
- *
- * Territory types:
- *   owned-own   → green glow
- *   owned-enemy → blue glow
- *   poi-free    → rarity color glow (pulsing for legendary/mythic)
- *   standard    → faint white dashed ghost on hover only
- *
- * POI is NOT a sublayer — it IS the territory identity.
- * A hex with a POI has the POI's rarity/color baked into the polygon itself.
+ * HexLayer — H3 territory polygons.
+ * POI hexes ARE the territory — highlighted strongly by rarity.
+ * No icons. The polygon fill + glow = the visual identity.
  */
 import L from 'leaflet'
 import type { TerritoryLight } from '../../types'
 
 const RARITY_COLOR: Record<string, string> = {
-  common:   '#9CA3AF',
-  uncommon: '#10B981',
-  rare:     '#3B82F6',
-  epic:     '#8B5CF6',
-  legendary:'#F59E0B',
-  mythic:   '#EC4899',
+  common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
+  epic:'#8B5CF6', legendary:'#F59E0B', mythic:'#EC4899',
 }
 
-const RARITY_FILL_OPACITY: Record<string, number> = {
-  common:   0.08, uncommon: 0.12, rare: 0.16,
-  epic:     0.20, legendary: 0.25, mythic: 0.30,
-}
-
-// Inject SVG glow filters once
 export function injectGlowFilter() {
   if (document.getElementById('td-svg-filters')) return
   const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg')
-  svg.setAttribute('id', 'td-svg-filters')
-  svg.setAttribute('style', 'position:absolute;width:0;height:0')
-  svg.innerHTML = `
-    <defs>
-      <filter id="glow-green"    x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      <filter id="glow-gold"     x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      <filter id="glow-blue"     x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      <filter id="glow-mythic"   x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur in="SourceGraphic" stdDeviation="7" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-      <filter id="glow-red"      x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    </defs>
-  `
+  svg.id = 'td-svg-filters'
+  svg.setAttribute('style', 'position:absolute;width:0;height:0;overflow:hidden')
+  svg.innerHTML = `<defs>
+    <filter id="gf-green"    x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gf-gold"     x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gf-blue"     x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gf-purple"   x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gf-mythic"   x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>`
   document.body.appendChild(svg)
+}
+
+export function injectHexAnimations() {
+  if (document.getElementById('td-hex-anim')) return
+  const s = document.createElement('style')
+  s.id = 'td-hex-anim'
+  s.textContent = `
+    /* POI hexes pulse — the polygon itself glows */
+    .td-poi-mythic    { animation: hexMythic 2s ease-in-out infinite; }
+    .td-poi-legendary { animation: hexLegend 2.5s ease-in-out infinite; }
+    .td-poi-epic      { animation: hexEpic 3s ease-in-out infinite; }
+    .td-poi-rare      { filter: drop-shadow(0 0 6px #3B82F6aa) !important; }
+    .td-poi-uncommon  { filter: drop-shadow(0 0 4px #10B98188) !important; }
+
+    @keyframes hexMythic {
+      0%,100% { filter: drop-shadow(0 0 8px #EC4899cc) drop-shadow(0 0 2px #EC4899ff); }
+      50%     { filter: drop-shadow(0 0 22px #EC4899ff) drop-shadow(0 0 44px #EC489966); }
+    }
+    @keyframes hexLegend {
+      0%,100% { filter: drop-shadow(0 0 7px #F59E0Bbb) drop-shadow(0 0 2px #F59E0Bff); }
+      50%     { filter: drop-shadow(0 0 18px #F59E0Bff) drop-shadow(0 0 36px #F59E0B55); }
+    }
+    @keyframes hexEpic {
+      0%,100% { filter: drop-shadow(0 0 5px #8B5CF6aa); }
+      50%     { filter: drop-shadow(0 0 14px #8B5CF6ff) drop-shadow(0 0 28px #8B5CF644); }
+    }
+
+    .td-hex-own     { filter: drop-shadow(0 0 6px rgba(0,255,135,0.9)); }
+    .td-hex-tower   { filter: drop-shadow(0 0 8px rgba(255,184,0,0.9)); animation: hexLegend 2s ease-in-out infinite; }
+    .td-hex-enemy   { filter: drop-shadow(0 0 4px rgba(99,145,255,0.7)); }
+  `
+  document.body.appendChild(s)
 }
 
 export interface HexConfig {
@@ -53,151 +66,71 @@ export interface HexConfig {
 
 export function makeHexPolygon({ territory: t, playerId, onClick }: HexConfig): L.Polygon | null {
   if (!t.boundary_points?.length) return null
-  const pts = (t.boundary_points as [number, number][]).map(p => [p[0], p[1]] as L.LatLngTuple)
+  const pts = (t.boundary_points as [number,number][]).map(p => [p[0],p[1]] as L.LatLngTuple)
+  const ta = t as any
 
   const isOwn   = t.owner_id === playerId
   const isEnemy = !!t.owner_id && !isOwn
-  const isFree  = !t.owner_id
-  const ta      = t as any
-
-  const rarity  = ta.rarity || 'common'
   const hasPOI  = !!(ta.poi_name || ta.is_landmark)
-  const isShiny = !!ta.is_shiny
-  const rarityColor = RARITY_COLOR[rarity] || '#9CA3AF'
+  const rarity  = ta.rarity || 'common'
+  const rc      = RARITY_COLOR[rarity] || '#9CA3AF'
 
-  // ── Visual config ─────────────────────────────────────────
-  let fill: string, fillOp: number, stroke: string, weight: number,
-      dash: string, cssClass: string, glowFilter: string
+  let fill: string, fillOp: number, stroke: string, weight: number, dash: string, cls: string
 
   if (ta.is_control_tower) {
-    fill = '#FFB800'; fillOp = 0.45; stroke = '#FFD700'; weight = 2.5
-    dash = '6,3'; cssClass = 'td-hex-tower'; glowFilter = 'url(#glow-gold)'
+    fill='#FFB800'; fillOp=0.45; stroke='#FFD700'; weight=2.5; dash='6,3'; cls='td-hex-tower'
 
   } else if (isOwn) {
-    // Owned: use custom border_color if set, else spec green
-    const ownColor = ta.border_color || '#00FF87'
-    fill   = ownColor; fillOp = 0.35; stroke = ownColor; weight = 2.5
-    dash   = ''; cssClass = 'td-hex-own'; glowFilter = 'url(#glow-green)'
-
-    // POI owned: richer border
-    if (hasPOI) {
-      fill   = rarityColor; fillOp = RARITY_FILL_OPACITY[rarity] + 0.1
-      stroke = rarityColor; weight = 3
-      glowFilter = rarity === 'mythic' ? 'url(#glow-mythic)' : 'url(#glow-gold)'
-    }
+    const oc = ta.border_color || '#00FF87'
+    fill=oc; stroke=oc; weight=2.5; dash=''; cls='td-hex-own'
+    fillOp = hasPOI ? 0.40 : 0.35
+    if (hasPOI) { fill=rc; stroke=rc; weight=3; cls=`td-hex-own td-poi-${rarity}` }
 
   } else if (isEnemy) {
-    fill = '#4B8BF5'; fillOp = 0.25; stroke = '#60A5FA'; weight = 1.5
-    dash = ''; cssClass = 'td-hex-enemy'; glowFilter = 'url(#glow-blue)'
+    fill='#4B8BF5'; fillOp=0.25; stroke='#60A5FA'; weight=1.5; dash=''; cls='td-hex-enemy'
+    if (hasPOI) { fill=rc; fillOp=0.25; stroke=rc; weight=2; cls=`td-hex-enemy td-poi-${rarity}` }
 
-    if (hasPOI) {
-      fill   = rarityColor; fillOp = RARITY_FILL_OPACITY[rarity]
-      stroke = rarityColor; weight = 2
-    }
+  } else if (hasPOI) {
+    // FREE POI hex — looks like "mouseover/selected" state — unmistakably highlighted
+    fill = rc
+    fillOp = rarity==='mythic' ? 0.62 : rarity==='legendary' ? 0.54 : rarity==='epic' ? 0.44 : rarity==='rare' ? 0.34 : rarity==='uncommon' ? 0.24 : 0.16
+    stroke = rc; weight = 4; dash = ''
+    cls = `td-poi-${rarity}`
 
   } else {
-    // Free territory
-    if (hasPOI) {
-      // POI hex = always visible, highlighted like "selected" — the hex IS the POI
-      // No logo, no icon — the hex polygon itself is the visual identity
-      fill   = rarityColor
-      fillOp = rarity === 'mythic' ? 0.45 : rarity === 'legendary' ? 0.38 : rarity === 'epic' ? 0.30 : rarity === 'rare' ? 0.22 : 0.16
-      stroke = rarityColor; weight = 3; dash = ''
-      cssClass = `td-hex-poi td-hex-poi-${rarity}`
-      glowFilter = rarity === 'mythic'    ? 'url(#glow-mythic)'
-                 : rarity === 'legendary' ? 'url(#glow-gold)'
-                 : rarity === 'epic'      ? 'url(#glow-mythic)'
-                 : rarity === 'rare'      ? 'url(#glow-blue)'
-                 : 'none'
-    } else {
-      fill = '#fff'; fillOp = 0.0; stroke = '#fff'; weight = 0
-      dash = ''; cssClass = 'td-hex-free'; glowFilter = 'none'
-    }
+    // Standard free hex — invisible (shown only on hover)
+    fill='#fff'; fillOp=0.0; stroke='#fff'; weight=0; dash=''; cls='td-hex-free'
   }
 
   const poly = L.polygon(pts, {
-    fillColor:    fill,
-    fillOpacity:  fillOp,
-    color:        stroke,
-    weight:       weight,
-    opacity:      0.85,
-    dashArray:    dash || undefined,
-    className:    cssClass,
+    fillColor: fill, fillOpacity: fillOp,
+    color: stroke, weight: weight,
+    opacity: 0.9, dashArray: dash || undefined,
+    className: cls,
+    interactive: true,
   })
 
-  // ── Tooltip ────────────────────────────────────────────────
-  const stateLabel = ta.is_control_tower ? '🗼 Tour de contrôle'
-    : isOwn   ? '🟢 Votre territoire'
+  // Tooltip
+  const badge = ta.is_control_tower ? '🗼 Tour'
+    : isOwn   ? '✅ Votre territoire'
     : isEnemy ? `👤 ${ta.owner_username}`
-    : hasPOI  ? `📍 POI · ${rarity}`
+    : hasPOI  ? `⬡ ${rarity.toUpperCase()}`
     : '⬜ Libre'
 
-  const poiLine = hasPOI
-    ? `<div style="color:${rarityColor};font-size:10px;font-weight:700;margin-top:2px">
-         ${ta.poi_emoji || '📍'} ${ta.poi_name}${isShiny ? ' ✨' : ''}
-       </div>`
-    : ''
-
-  const incomeVal = ta.resource_credits || ta.food_per_tick || 10
-  const incomeLine = `<div style="color:#10B981;font-size:10px">+${Math.round(incomeVal)} HEX Coin/jour</div>`
-  const nftLine = ta.token_id ? `<div style="color:#8B5CF6;font-size:9px">NFT #${ta.token_id}</div>` : ''
+  const income = Math.round((ta.resource_credits || ta.food_per_tick || 10) * 288)
 
   poly.bindTooltip(`
-    <div style="font-size:11px;line-height:1.6;font-family:system-ui,sans-serif;min-width:160px;max-width:220px">
-      <div style="font-weight:800;color:#fff;font-size:12px">${ta.custom_name || ta.poi_name || ta.place_name || 'Zone ' + t.h3_index.slice(0,6)}</div>
-      <div style="color:#9CA3AF">${stateLabel}</div>
-      ${poiLine}
-      ${incomeLine}
-      ${nftLine}
-      <div style="color:#374151;font-size:9px;margin-top:3px">${t.h3_index.slice(0,14)}…</div>
+    <div style="font-size:11px;line-height:1.7;font-family:system-ui;min-width:160px">
+      <div style="font-weight:900;color:#fff;font-size:13px">
+        ${ta.custom_name || ta.poi_name || ta.place_name || 'Zone ' + t.h3_index.slice(0,6)}
+      </div>
+      <div style="color:${hasPOI ? rc : '#9CA3AF'}">${badge}</div>
+      ${hasPOI ? `<div style="color:${rc};font-size:10px;font-weight:700">${ta.poi_category||''}</div>` : ''}
+      <div style="color:#10B981;font-size:10px">+${income} HEX Coin/jour</div>
+      <div style="color:#374151;font-size:9px;margin-top:2px">${t.h3_index.slice(0,14)}…</div>
     </div>
-  `, { className: 'td-tooltip', direction: 'top', sticky: true })
+  `, { className:'td-tooltip', direction:'top', sticky:true })
 
   poly.on('click', () => onClick(t))
-
   return poly
-}
-
-// ── CSS for animations (injected once) ──────────────────────
-export function injectHexAnimations() {
-  if (document.getElementById('td-hex-animations')) return
-  const style = document.createElement('style')
-  style.id = 'td-hex-animations'
-  style.textContent = `
-    /* POI pulse animations by rarity */
-    .td-hex-poi-legendary path,
-    .td-hex-poi-legendary {
-      animation: hexPulseLegendary 2.5s ease-in-out infinite !important;
-    }
-    .td-hex-poi-mythic path,
-    .td-hex-poi-mythic {
-      animation: hexPulseMythic 2s ease-in-out infinite !important;
-    }
-    .td-hex-poi-epic {
-      animation: hexPulseEpic 3s ease-in-out infinite !important;
-    }
-    .td-hex-tower {
-      animation: td-pulse 2s ease-in-out infinite !important;
-    }
-    @keyframes hexPulseLegendary {
-      0%,100% { filter: drop-shadow(0 0 6px #F59E0Baa); opacity: 0.85; }
-      50%      { filter: drop-shadow(0 0 14px #F59E0Bff) drop-shadow(0 0 28px #F59E0B55); opacity: 1; }
-    }
-    @keyframes hexPulseMythic {
-      0%,100% { filter: drop-shadow(0 0 8px #EC4899cc); opacity: 0.85; }
-      50%      { filter: drop-shadow(0 0 20px #EC4899ff) drop-shadow(0 0 40px #EC489966); opacity: 1; }
-    }
-    @keyframes hexPulseEpic {
-      0%,100% { filter: drop-shadow(0 0 5px #8B5CF6aa); }
-      50%      { filter: drop-shadow(0 0 12px #8B5CF6ff); }
-    }
-    @keyframes td-pulse {
-      0%,100% { filter: drop-shadow(0 0 8px rgba(255,184,0,0.9)); }
-      50%      { filter: drop-shadow(0 0 16px rgba(255,184,0,1.0)); }
-    }
-    .td-hex-own     { filter: drop-shadow(0 0 6px rgba(0,255,135,0.8)); }
-    .td-hex-enemy   { filter: drop-shadow(0 0 4px rgba(99,145,255,0.6)); }
-    .td-hex-poi-rare { filter: drop-shadow(0 0 6px #3B82F6aa); }
-  `
-  document.body.appendChild(style)
 }

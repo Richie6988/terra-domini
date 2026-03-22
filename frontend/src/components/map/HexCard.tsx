@@ -1,7 +1,15 @@
 /**
  * HexCard — Hexod collectible territory card.
- * Three.js hex prism with canvas-painted faces.
- * Owned: 3 tabs (Card / Royaume / NFT) + real skill tree.
+ *
+ * Architecture Three.js:
+ *   - Prism (ExtrudeGeometry, 1 material: sides)
+ *   - Front flat hex (ShapeGeometry, canvas texture with all text)
+ *   - Back flat hex  (ShapeGeometry, shiny canvas texture)
+ *
+ * Owned tabs:
+ *   🃏 Carte   — Pokémon-style card info
+ *   🔬 Royaume — Resources + radial skill tree (always fully deployed)
+ *   💎 NFT     — Token, marketplace
  */
 import { useState, useRef, useEffect, useMemo, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -18,532 +26,590 @@ if (typeof window !== 'undefined') {
   console.warn = (...a: any[]) => { if (String(a[0]).includes('THREE.Clock')) return; _w(...a) }
 }
 
-/* ── Rarity ────────────────────────────────────────────────── */
-const R: Record<string, { c:string; glow:string; bg:string; accent:string; label:string; grade:string }> = {
-  common:   { c:'#9CA3AF', glow:'none',                                     bg:'#0d0f18', accent:'#E5E7EB', label:'Common',    grade:'F' },
-  uncommon: { c:'#10B981', glow:'0 0 30px #10B98166',                        bg:'#04100a', accent:'#34D399', label:'Uncommon',  grade:'C' },
-  rare:     { c:'#3B82F6', glow:'0 0 38px #3B82F677',                        bg:'#030a1a', accent:'#93C5FD', label:'Rare',      grade:'B' },
-  epic:     { c:'#8B5CF6', glow:'0 0 44px #8B5CF688',                        bg:'#07030f', accent:'#C4B5FD', label:'Epic',      grade:'A' },
-  legendary:{ c:'#F59E0B', glow:'0 0 56px #F59E0BAA,0 0 100px #F59E0B33',   bg:'#0f0700', accent:'#FCD34D', label:'Legendary', grade:'S' },
-  mythic:   { c:'#EC4899', glow:'0 0 66px #EC4899BB,0 0 120px #EC489933',    bg:'#0f0008', accent:'#F9A8D4', label:'Mythic ✦',  grade:'SS' },
+/* ── Rarity ─────────────────────────────────────────────── */
+const RARITY: Record<string, { c:string; bg:string; accent:string; label:string; grade:string; metalness:number; roughness:number }> = {
+  common:   { c:'#9CA3AF', bg:'#0d0f18', accent:'#E5E7EB', label:'Common',    grade:'F',  metalness:0.1, roughness:0.9 },
+  uncommon: { c:'#10B981', bg:'#04100a', accent:'#34D399', label:'Uncommon',  grade:'C',  metalness:0.3, roughness:0.7 },
+  rare:     { c:'#3B82F6', bg:'#030a1a', accent:'#93C5FD', label:'Rare',      grade:'B',  metalness:0.5, roughness:0.5 },
+  epic:     { c:'#8B5CF6', bg:'#07030f', accent:'#C4B5FD', label:'Epic',      grade:'A',  metalness:0.7, roughness:0.3 },
+  legendary:{ c:'#F59E0B', bg:'#0f0700', accent:'#FCD34D', label:'Legendary', grade:'S',  metalness:0.9, roughness:0.1 },
+  mythic:   { c:'#EC4899', bg:'#0f0008', accent:'#F9A8D4', label:'Mythic ✦',  grade:'SS', metalness:0.95,roughness:0.05 },
 }
-type RK = keyof typeof R
+type RK = keyof typeof RARITY
 
-/* ── Biome resources ───────────────────────────────────────── */
-const BIOME_RES: Record<string, { res:string; icon:string; amount:number }[]> = {
-  urban:    [{res:'Données',icon:'📊',amount:12},{res:'Influence',icon:'🌐',amount:8},{res:'Main-d\'œuvre',icon:'👷',amount:15}],
-  rural:    [{res:'Nourriture',icon:'🌾',amount:20},{res:'Eau',icon:'💧',amount:15},{res:'Main-d\'œuvre',icon:'👷',amount:10}],
-  forest:   [{res:'Nourriture',icon:'🌾',amount:15},{res:'Eau',icon:'💧',amount:12},{res:'Stabilité',icon:'⚖️',amount:8}],
-  mountain: [{res:'Fer',icon:'🪨',amount:18},{res:'Titanium',icon:'🔷',amount:5},{res:'Charbon',icon:'⬛',amount:10}],
-  coastal:  [{res:'Nourriture',icon:'🌾',amount:12},{res:'Eau',icon:'💧',amount:20},{res:'Gaz',icon:'💨',amount:8}],
-  desert:   [{res:'Pétrole',icon:'🛢️',amount:15},{res:'Silicium',icon:'💠',amount:10},{res:'Terres rares',icon:'💎',amount:4}],
-  tundra:   [{res:'Gaz',icon:'💨',amount:12},{res:'Uranium',icon:'☢️',amount:3},{res:'Eau',icon:'💧',amount:8}],
-  industrial:[{res:'Acier',icon:'⚙️',amount:15},{res:'Composants',icon:'🔌',amount:8},{res:'Pétrole',icon:'🛢️',amount:10}],
-  landmark: [{res:'Données',icon:'📊',amount:10},{res:'Influence',icon:'🌐',amount:12},{res:'Stabilité',icon:'⚖️',amount:10}],
-  grassland:[{res:'Nourriture',icon:'🌾',amount:18},{res:'Main-d\'œuvre',icon:'👷',amount:8},{res:'Stabilité',icon:'⚖️',amount:6}],
+/* ── Biome resources ─────────────────────────────────────── */
+const BIOME_RES: Record<string, { res:string; icon:string; base:number }[]> = {
+  urban:    [{res:'Données',    icon:'📊',amount:12},{res:'Influence', icon:'🌐',amount:8},{res:'Main-d\'œuvre',icon:'👷',amount:15}],
+  rural:    [{res:'Nourriture', icon:'🌾',amount:20},{res:'Eau',       icon:'💧',amount:15},{res:'Main-d\'œuvre',icon:'👷',amount:10}],
+  forest:   [{res:'Nourriture', icon:'🌾',amount:15},{res:'Eau',       icon:'💧',amount:12},{res:'Stabilité',   icon:'⚖️',amount:8}],
+  mountain: [{res:'Fer',        icon:'🪨',amount:18},{res:'Titanium',  icon:'🔷',amount:5},{res:'Charbon',      icon:'⬛',amount:10}],
+  coastal:  [{res:'Nourriture', icon:'🌾',amount:12},{res:'Eau',       icon:'💧',amount:20},{res:'Gaz',         icon:'💨',amount:8}],
+  desert:   [{res:'Pétrole',    icon:'🛢️',amount:15},{res:'Silicium',  icon:'💠',amount:10},{res:'Terres rares',icon:'💎',amount:4}],
+  tundra:   [{res:'Gaz',        icon:'💨',amount:12},{res:'Uranium',   icon:'☢️',amount:3},{res:'Eau',          icon:'💧',amount:8}],
+  industrial:[{res:'Acier',     icon:'⚙️',amount:15},{res:'Composants',icon:'🔌',amount:8},{res:'Pétrole',     icon:'🛢️',amount:10}],
+  landmark: [{res:'Données',    icon:'📊',amount:10},{res:'Influence', icon:'🌐',amount:12},{res:'Stabilité',   icon:'⚖️',amount:10}],
+  grassland:[{res:'Nourriture', icon:'🌾',amount:18},{res:'Main-d\'œuvre',icon:'👷',amount:8},{res:'Stabilité',icon:'⚖️',amount:6}],
+}
+const BIOME_RES_MAPPED = Object.fromEntries(Object.entries(BIOME_RES).map(([k,v])=>[k,v.map(r=>({...r,amount:r.base||10}))]))
+
+/* ── Canvas painters ─────────────────────────────────────── */
+function makeHexClip(ctx: CanvasRenderingContext2D, cx:number, cy:number, r:number) {
+  ctx.beginPath()
+  for (let i=0;i<6;i++) {
+    const a=(Math.PI/3)*i-Math.PI/6
+    i===0 ? ctx.moveTo(cx+r*Math.cos(a), cy+r*Math.sin(a))
+           : ctx.lineTo(cx+r*Math.cos(a), cy+r*Math.sin(a))
+  }
+  ctx.closePath()
 }
 
-/* ── Canvas face painter ───────────────────────────────────── */
-function paintFront(cfg: typeof R[RK], name: string, facts: string[], grade: string, imgUrl: string|null, isShiny: boolean): HTMLCanvasElement {
-  const W=512, H=512, cv = document.createElement('canvas')
-  cv.width=W; cv.height=H
-  const ctx = cv.getContext('2d')!
+function paintFrontCanvas(cfg: typeof RARITY[RK], name:string, grade:string, facts:string[], imgUrl:string|null, isShiny:boolean): HTMLCanvasElement {
+  const S=1024, cv=document.createElement('canvas')
+  cv.width=S; cv.height=S
+  const ctx=cv.getContext('2d')!
 
-  // Background gradient
-  const grad = ctx.createLinearGradient(0,0,0,H)
-  grad.addColorStop(0, cfg.bg)
-  grad.addColorStop(1, '#030308')
-  ctx.fillStyle = grad; ctx.fillRect(0,0,W,H)
+  /* BACKGROUND */
+  const bg=ctx.createRadialGradient(S/2,S*0.35,0,S/2,S/2,S*0.75)
+  bg.addColorStop(0, cfg.bg+'ff')
+  bg.addColorStop(0.6, cfg.bg+'ee')
+  bg.addColorStop(1, '#020205ff')
+  ctx.fillStyle=bg; ctx.fillRect(0,0,S,S)
 
-  // Shiny foil
+  /* SHINY FOIL */
   if (isShiny) {
-    const foil = ctx.createLinearGradient(0,0,W,H)
-    foil.addColorStop(0, 'transparent')
-    foil.addColorStop(0.4, cfg.c+'22')
-    foil.addColorStop(0.5, '#FFD70033')
-    foil.addColorStop(0.6, cfg.c+'22')
-    foil.addColorStop(1, 'transparent')
-    ctx.fillStyle = foil; ctx.fillRect(0,0,W,H)
+    const foil=ctx.createLinearGradient(0,0,S,S)
+    foil.addColorStop(0,'rgba(0,0,0,0)')
+    foil.addColorStop(0.35, cfg.c+'44')
+    foil.addColorStop(0.5,'rgba(255,215,0,0.25)')
+    foil.addColorStop(0.65, cfg.c+'44')
+    foil.addColorStop(1,'rgba(0,0,0,0)')
+    ctx.fillStyle=foil; ctx.fillRect(0,0,S,S)
   }
 
-  // Rarity banner
-  ctx.fillStyle = cfg.c+'33'; ctx.fillRect(0,0,W,52)
-  ctx.font='bold 22px system-ui'; ctx.fillStyle=cfg.c; ctx.textAlign='center'
-  ctx.fillText(cfg.label.toUpperCase(), W/2, 34)
-  if (isShiny) { ctx.font='13px system-ui'; ctx.fillStyle='#FCD34D'; ctx.fillText('✨ SHINY', W-60, 34) }
-
-  // Grade badge
-  ctx.font='bold 18px system-ui'; ctx.fillStyle='#000'
-  ctx.beginPath(); ctx.arc(40, 26, 20, 0, Math.PI*2)
+  /* RARITY BANNER */
+  const bannerH=110
+  ctx.fillStyle=cfg.c+'33'
+  ctx.fillRect(0,0,S,bannerH)
+  // Rarity label
+  ctx.font=`bold 52px 'Arial Black',Arial,sans-serif`
+  ctx.fillStyle=cfg.c
+  ctx.textAlign='center'
+  ctx.textBaseline='middle'
+  ctx.fillText(cfg.label.toUpperCase(), S/2, bannerH/2)
+  // Grade badge (left)
+  ctx.beginPath(); ctx.arc(60,bannerH/2,42,0,Math.PI*2)
   ctx.fillStyle=cfg.c; ctx.fill()
-  ctx.font='bold 16px system-ui'; ctx.fillStyle='#000'; ctx.textAlign='center'
-  ctx.fillText(grade, 40, 32)
-
-  // Image zone (half height)
-  if (imgUrl) {
-    // Will be applied as map texture — signal with color block for now
-    ctx.fillStyle = cfg.c+'11'; ctx.fillRect(0,52,W,200)
-    // Overlay gradient
-    const ov = ctx.createLinearGradient(0,200,0,252)
-    ov.addColorStop(0,'transparent'); ov.addColorStop(1,cfg.bg+'ff')
-    ctx.fillStyle=ov; ctx.fillRect(0,52,W,200)
-  } else {
-    // Biome color block
-    ctx.fillStyle = cfg.c+'18'; ctx.fillRect(0,52,W,200)
-    ctx.font='80px serif'; ctx.textAlign='center'
-    ctx.fillText('⬡', W/2, 175)
+  ctx.font=`bold 34px Arial,sans-serif`
+  ctx.fillStyle='#000'; ctx.textAlign='center'; ctx.textBaseline='middle'
+  ctx.fillText(grade, 60, bannerH/2+2)
+  // Shiny (right)
+  if (isShiny) {
+    ctx.font=`bold 28px Arial,sans-serif`
+    ctx.fillStyle='#FCD34D'; ctx.textAlign='right'; ctx.textBaseline='middle'
+    ctx.fillText('✨ SHINY', S-24, bannerH/2)
   }
 
-  // Name
-  ctx.font='bold 28px system-ui'; ctx.fillStyle='#ffffff'; ctx.textAlign='center'
-  ctx.fillText(name.slice(0,22), W/2, 278)
+  /* IMAGE ZONE */
+  const imgTop=bannerH+10, imgH=320
+  ctx.save()
+  makeHexClip(ctx, S/2, imgTop+imgH/2, 155)
+  ctx.clip()
+  ctx.fillStyle=cfg.c+'22'; ctx.fillRect(0,imgTop,S,imgH)
+  // Large hex watermark
+  ctx.font=`${imgH*0.85}px serif`
+  ctx.fillStyle=cfg.c+'18'
+  ctx.textAlign='center'; ctx.textBaseline='middle'
+  ctx.fillText('⬡', S/2, imgTop+imgH/2)
+  ctx.restore()
+  // Image gradient overlay bottom
+  const imgOv=ctx.createLinearGradient(0,imgTop+imgH*0.55,0,imgTop+imgH)
+  imgOv.addColorStop(0,'rgba(0,0,0,0)'); imgOv.addColorStop(1,cfg.bg+'ff')
+  ctx.fillStyle=imgOv; ctx.fillRect(0,imgTop,S,imgH)
+  // Rarity glow line below image
+  ctx.fillStyle=cfg.c+'77'; ctx.fillRect(0,imgTop+imgH-8,S,8)
 
-  // Divider
-  ctx.strokeStyle=cfg.c+'66'; ctx.lineWidth=1
-  ctx.beginPath(); ctx.moveTo(40,295); ctx.lineTo(W-40,295); ctx.stroke()
+  /* NAME PLATE */
+  const nameY=imgTop+imgH+10
+  ctx.fillStyle='rgba(0,0,0,0.6)'
+  ctx.fillRect(0,nameY,S,80)
+  ctx.font=`bold 46px 'Arial Black',Arial,sans-serif`
+  ctx.fillStyle='#ffffff'
+  ctx.textAlign='center'; ctx.textBaseline='middle'
+  const shortName = name.length>20 ? name.slice(0,18)+'…' : name
+  ctx.fillText(shortName, S/2, nameY+40)
 
-  // 3 facts
-  ctx.font='13px system-ui'; ctx.fillStyle=cfg.accent; ctx.textAlign='left'
-  facts.slice(0,3).forEach((f,i) => {
-    ctx.fillStyle=cfg.c; ctx.fillText(`${i+1}`, 36, 320+i*52)
-    ctx.fillStyle=cfg.accent
-    const words = f.split(' '); let line='', y=320+i*52
+  /* DIVIDER */
+  ctx.strokeStyle=cfg.c+'88'; ctx.lineWidth=2
+  ctx.beginPath(); ctx.moveTo(50,nameY+90); ctx.lineTo(S-50,nameY+90); ctx.stroke()
+  // "CARACTÉRISTIQUES" label
+  ctx.font=`bold 22px Arial,sans-serif`
+  ctx.fillStyle=cfg.c; ctx.textAlign='left'; ctx.textBaseline='middle'
+  ctx.fillText('CARACTÉRISTIQUES', 50, nameY+115)
+
+  /* 3 FACTS */
+  const factY=nameY+145
+  facts.slice(0,3).forEach((fact,i) => {
+    const fy=factY+i*90
+    // Number circle
+    ctx.beginPath(); ctx.arc(60,fy+20,20,0,Math.PI*2)
+    ctx.fillStyle=cfg.c+'33'; ctx.fill()
+    ctx.strokeStyle=cfg.c+'88'; ctx.lineWidth=1.5; ctx.stroke()
+    ctx.font=`bold 20px Arial,sans-serif`
+    ctx.fillStyle=cfg.c; ctx.textAlign='center'; ctx.textBaseline='middle'
+    ctx.fillText(`${i+1}`, 60, fy+21)
+    // Fact text — word wrap at 840px
+    ctx.font=`18px Arial,sans-serif`
+    ctx.fillStyle='rgba(255,255,255,0.88)'
+    ctx.textAlign='left'; ctx.textBaseline='top'
+    const words=fact.split(' '); let line='', ly=fy
     words.forEach(w => {
-      const t = line ? line+' '+w : w
-      if (ctx.measureText(t).width > 400) { ctx.fillText(line, 52, y); line=w; y+=16 }
+      const t=line?line+' '+w:w
+      if (ctx.measureText(t).width>800) { ctx.fillText(line,90,ly); line=w; ly+=22 }
       else line=t
     })
-    ctx.fillText(line, 52, y)
+    ctx.fillText(line,90,ly)
   })
 
-  // Bottom border
-  ctx.strokeStyle=cfg.c; ctx.lineWidth=2
-  ctx.beginPath(); ctx.moveTo(0,500); ctx.lineTo(W,500); ctx.stroke()
-  ctx.font='10px monospace'; ctx.fillStyle=cfg.c+'88'; ctx.textAlign='right'
-  ctx.fillText('HEXOD · SAISON 1', W-20, 510)
+  /* BOTTOM STRIP */
+  ctx.fillStyle=cfg.c+'22'; ctx.fillRect(0,S-50,S,50)
+  ctx.strokeStyle=cfg.c+'55'; ctx.lineWidth=1
+  ctx.beginPath(); ctx.moveTo(0,S-50); ctx.lineTo(S,S-50); ctx.stroke()
+  ctx.font=`bold 18px Arial,sans-serif`
+  ctx.fillStyle=cfg.c+'cc'; ctx.textAlign='center'; ctx.textBaseline='middle'
+  ctx.fillText('HEXOD  ·  SAISON 1  ·  ÉDITION GENÈSE', S/2, S-25)
 
   return cv
 }
 
-function paintBack(cfg: typeof R[RK], h3index: string, income: number, floorPrice: number|null, isShiny: boolean): HTMLCanvasElement {
-  const W=512, H=512, cv = document.createElement('canvas')
-  cv.width=W; cv.height=H
-  const ctx = cv.getContext('2d')!
+function paintBackCanvas(cfg: typeof RARITY[RK], h3:string, income:number, floor:number|null, isShiny:boolean): HTMLCanvasElement {
+  const S=1024, cv=document.createElement('canvas')
+  cv.width=S; cv.height=S
+  const ctx=cv.getContext('2d')!
 
   // Background
-  if (isShiny) {
-    const g = ctx.createLinearGradient(0,0,W,H)
-    g.addColorStop(0, cfg.bg); g.addColorStop(0.3, cfg.c+'44')
-    g.addColorStop(0.5, '#FFD70022'); g.addColorStop(0.7, cfg.c+'44'); g.addColorStop(1, cfg.bg)
-    ctx.fillStyle=g
-  } else {
-    ctx.fillStyle = ctx.createLinearGradient(0,0,0,H)
-    ;(ctx.fillStyle as CanvasGradient).addColorStop(0, cfg.bg)
-    ;(ctx.fillStyle as CanvasGradient).addColorStop(1, '#020205')
-  }
-  ctx.fillRect(0,0,W,H)
+  const bg=ctx.createLinearGradient(0,0,S,S)
+  bg.addColorStop(0,cfg.bg)
+  bg.addColorStop(1,'#020205')
+  ctx.fillStyle=bg; ctx.fillRect(0,0,S,S)
 
-  // Hex pattern watermark
-  ctx.globalAlpha=0.07; ctx.font='42px monospace'; ctx.fillStyle=cfg.c; ctx.textAlign='center'
-  for (let y=50; y<H; y+=68) for (let x=(y%136<68?50:95); x<W; x+=90) ctx.fillText('⬡', x, y)
+  if (isShiny) {
+    const f=ctx.createLinearGradient(0,0,S,S)
+    f.addColorStop(0,'rgba(0,0,0,0)'); f.addColorStop(0.4,cfg.c+'55')
+    f.addColorStop(0.5,'rgba(255,215,0,0.3)'); f.addColorStop(0.6,cfg.c+'55')
+    f.addColorStop(1,'rgba(0,0,0,0)')
+    ctx.fillStyle=f; ctx.fillRect(0,0,S,S)
+  }
+
+  // Hex watermark tiling
+  ctx.globalAlpha=0.06; ctx.font=`80px serif`; ctx.fillStyle=cfg.c; ctx.textAlign='center'; ctx.textBaseline='middle'
+  for(let y=80;y<S;y+=130) for(let x=(y%260<130?80:145);x<S;x+=180) ctx.fillText('⬡',x,y)
   ctx.globalAlpha=1
 
-  // Big hex logo
-  ctx.font='72px monospace'; ctx.fillStyle=cfg.c; ctx.textAlign='center'; ctx.fillText('⬡', W/2, 195)
-  ctx.font='bold 36px system-ui'; ctx.fillStyle=cfg.accent; ctx.fillText('HEXOD', W/2, 260)
+  // Big hex center
+  ctx.font=`bold 200px serif`; ctx.fillStyle=cfg.c+'44'; ctx.textAlign='center'; ctx.textBaseline='middle'
+  ctx.fillText('⬡',S/2,S*0.38)
+
+  // HEXOD
+  ctx.font=`bold 80px 'Arial Black',Arial,sans-serif`; ctx.fillStyle=cfg.accent; ctx.textAlign='center'; ctx.textBaseline='middle'
+  ctx.fillText('HEXOD',S/2,S*0.38+20)
 
   // Divider
-  ctx.strokeStyle=cfg.c+'55'; ctx.lineWidth=1
-  ctx.beginPath(); ctx.moveTo(60,280); ctx.lineTo(W-60,280); ctx.stroke()
+  ctx.strokeStyle=cfg.c+'55'; ctx.lineWidth=2
+  ctx.beginPath(); ctx.moveTo(80,S*0.56); ctx.lineTo(S-80,S*0.56); ctx.stroke()
 
   // Stats
-  ctx.font='15px system-ui'; ctx.fillStyle=cfg.accent; ctx.textAlign='center'
-  ctx.fillText(`+${income} HEX Coin / jour`, W/2, 316)
-  if (floorPrice) { ctx.fillStyle=cfg.c; ctx.fillText(`💎 Floor ${floorPrice} HEX`, W/2, 342) }
+  ctx.font=`bold 32px Arial,sans-serif`; ctx.fillStyle=cfg.accent; ctx.textAlign='center'; ctx.textBaseline='middle'
+  ctx.fillText(`💠 +${income} HEX Coin / jour`,S/2,S*0.62)
+  if(floor){ctx.font=`28px Arial,sans-serif`; ctx.fillStyle=cfg.c; ctx.fillText(`💎 Floor : ${floor} HEX`,S/2,S*0.68)}
 
   // H3 index
-  ctx.font='11px monospace'; ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.textAlign='center'
-  ctx.fillText(h3index.slice(0,18), W/2, 390)
+  ctx.font=`22px 'Courier New',monospace`; ctx.fillStyle='rgba(255,255,255,0.3)'; ctx.textAlign='center'; ctx.textBaseline='middle'
+  ctx.fillText(h3.slice(0,20),S/2,S*0.78)
 
   // Footer
-  ctx.font='12px system-ui'; ctx.fillStyle=cfg.c+'66'; ctx.fillText('Saison 1 · Édition Genèse', W/2, 460)
+  ctx.font=`20px Arial,sans-serif`; ctx.fillStyle=cfg.c+'66'; ctx.fillText('Saison 1 · Édition Genèse',S/2,S*0.88)
 
   return cv
 }
 
-/* ── 3D Hex Prism ──────────────────────────────────────────── */
-function HexPrism({ frontCanvas, backCanvas, imgUrl, cfg, showBack }: {
-  frontCanvas: HTMLCanvasElement; backCanvas: HTMLCanvasElement
-  imgUrl: string|null; cfg: typeof R[RK]; showBack: boolean
+/* ── 3D Card (3 meshes) ──────────────────────────────────── */
+function HexCard3D({ frontCv, backCv, imgUrl, cfg, showBack, isShiny }: {
+  frontCv:HTMLCanvasElement; backCv:HTMLCanvasElement
+  imgUrl:string|null; cfg:typeof RARITY[RK]; showBack:boolean; isShiny:boolean
 }) {
   const groupRef = useRef<THREE.Group>(null!)
-  const velY = useRef(-0.28)
-  const velX = useRef(0)
+  const velY=useRef(-0.25); const velX=useRef(0)
   const { gl } = useThree()
 
-  // Drag
   useEffect(() => {
-    const c = gl.domElement
-    let drag=false, lx=0, ly=0
+    const c=gl.domElement; let drag=false,lx=0,ly=0
     const pd=(e:PointerEvent)=>{ drag=true; lx=e.clientX; ly=e.clientY; velY.current=0; velX.current=0 }
-    const pm=(e:PointerEvent)=>{ if(!drag) return; velY.current=(e.clientX-lx)*0.022; velX.current=-(e.clientY-ly)*0.013; lx=e.clientX; ly=e.clientY }
+    const pm=(e:PointerEvent)=>{ if(!drag)return; velY.current=(e.clientX-lx)*0.022; velX.current=-(e.clientY-ly)*0.013; lx=e.clientX; ly=e.clientY }
     const pu=()=>{ drag=false }
     c.addEventListener('pointerdown',pd); window.addEventListener('pointermove',pm); window.addEventListener('pointerup',pu)
     return ()=>{ c.removeEventListener('pointerdown',pd); window.removeEventListener('pointermove',pm); window.removeEventListener('pointerup',pu) }
-  }, [gl])
+  },[gl])
 
-  useFrame(() => {
-    velY.current *= 0.93; velX.current *= 0.93
-    groupRef.current.rotation.y += velY.current
-    groupRef.current.rotation.x = Math.max(-0.75, Math.min(0.75, groupRef.current.rotation.x + velX.current))
+  useFrame(()=>{
+    velY.current*=0.93; velX.current*=0.93
+    groupRef.current.rotation.y+=velY.current
+    groupRef.current.rotation.x=Math.max(-0.7,Math.min(0.7,groupRef.current.rotation.x+velX.current))
   })
 
-  const hexShape = useMemo(() => {
-    const s = new THREE.Shape()
-    for (let i=0;i<6;i++) { const a=(Math.PI/3)*i-Math.PI/6; i===0?s.moveTo(1.5*Math.cos(a),1.5*Math.sin(a)):s.lineTo(1.5*Math.cos(a),1.5*Math.sin(a)) }
-    s.closePath(); return s
-  }, [])
+  const hexShape=useMemo(()=>{ const s=new THREE.Shape(); for(let i=0;i<6;i++){const a=(Math.PI/3)*i-Math.PI/6; i===0?s.moveTo(1.5*Math.cos(a),1.5*Math.sin(a)):s.lineTo(1.5*Math.cos(a),1.5*Math.sin(a))} s.closePath(); return s },[])
 
-  const geo = useMemo(() => new THREE.ExtrudeGeometry(hexShape, {
-    depth:0.24, bevelEnabled:true, bevelThickness:0.06, bevelSize:0.05, bevelSegments:5,
-  }), [hexShape])
+  // Prism = just the walls (no faces)
+  const prismGeo=useMemo(()=>{ const g=new THREE.ExtrudeGeometry(hexShape,{depth:0.22,bevelEnabled:true,bevelThickness:0.04,bevelSize:0.03,bevelSegments:2}); return g },[hexShape])
 
-  const frontTex = useMemo(() => new THREE.CanvasTexture(frontCanvas), [frontCanvas])
-  const backTex  = useMemo(() => new THREE.CanvasTexture(backCanvas),  [backCanvas])
+  // Flat front/back faces
+  const faceGeo=useMemo(()=>new THREE.ShapeGeometry(hexShape),[hexShape])
 
-  const [imgTex, setImgTex] = useState<THREE.Texture|null>(null)
-  useEffect(() => {
-    if (!imgUrl) return
-    new THREE.TextureLoader().load(imgUrl, tex => { tex.colorSpace=THREE.SRGBColorSpace; setImgTex(tex) }, undefined, ()=>setImgTex(null))
-  }, [imgUrl])
+  const [imgTex,setImgTex]=useState<THREE.Texture|null>(null)
+  useEffect(()=>{ if(!imgUrl)return; new THREE.TextureLoader().load(imgUrl,tex=>{tex.colorSpace=THREE.SRGBColorSpace;setImgTex(tex)},undefined,()=>setImgTex(null)) },[imgUrl])
 
-  const mats = useMemo(() => {
-    const side = new THREE.MeshStandardMaterial({ color:cfg.c, metalness:0.85, roughness:0.15, envMapIntensity:1.4 })
-    const bevel = new THREE.MeshStandardMaterial({ color:cfg.c, metalness:0.7, roughness:0.2, envMapIntensity:1.0 })
-    const front = new THREE.MeshStandardMaterial({
-      map: imgTex ? blendTextures(imgTex, frontTex) : frontTex,
-      metalness:0.1, roughness:0.55, envMapIntensity:0.6,
-    })
-    const back = new THREE.MeshStandardMaterial({
-      map: backTex, metalness:0.85, roughness:0.08, envMapIntensity:2.2,
-    })
-    return [side, bevel, new THREE.MeshStandardMaterial({color:'#111'}), new THREE.MeshStandardMaterial({color:'#111'}), front, back]
-  }, [imgTex, frontTex, backTex, cfg])
+  const frontTex=useMemo(()=>{
+    const cv=frontCv
+    if(imgTex){
+      // Paint image into front canvas
+      const ctx=cv.getContext('2d')!; const S=cv.width
+      const imgTop=120, imgH=320
+      ctx.save()
+      makeHexClip(ctx,S/2,imgTop+imgH/2,155); ctx.clip()
+      ctx.drawImage(imgTex.image,0,imgTop,S,imgH)
+      const ov=ctx.createLinearGradient(0,imgTop+imgH*0.55,0,imgTop+imgH)
+      ov.addColorStop(0,'rgba(0,0,0,0)'); ov.addColorStop(1,cfg.bg+'ff')
+      ctx.fillStyle=ov; ctx.fillRect(0,imgTop,S,imgH)
+      ctx.restore()
+    }
+    const t=new THREE.CanvasTexture(cv); t.flipY=false; return t
+  },[frontCv,imgTex,cfg])
+
+  const backTex=useMemo(()=>{ const t=new THREE.CanvasTexture(backCv); t.flipY=false; return t },[backCv])
+
+  const sideMat=useMemo(()=>new THREE.MeshStandardMaterial({
+    color:cfg.c, metalness:cfg.metalness, roughness:cfg.roughness, envMapIntensity:1.5
+  }),[cfg])
+
+  const frontMat=useMemo(()=>new THREE.MeshStandardMaterial({
+    map:frontTex, metalness:0.05, roughness:0.65, envMapIntensity:isShiny?1.2:0.4,
+  }),[frontTex,isShiny])
+
+  const backMat=useMemo(()=>new THREE.MeshStandardMaterial({
+    map:backTex, metalness:isShiny?0.95:0.2, roughness:isShiny?0.04:0.7, envMapIntensity:isShiny?2.5:0.5,
+  }),[backTex,isShiny])
+
+  const D=0.22 // depth
 
   return (
-    <group ref={groupRef} rotation={[0.08, showBack ? Math.PI : -0.12, 0]}>
-      <mesh geometry={geo} material={mats} />
-      <pointLight position={[0,0,3.5]} intensity={0.7} color={cfg.c} />
+    <group ref={groupRef} rotation={[0.06, showBack?Math.PI:-0.1, 0]}>
+      {/* Side walls only */}
+      <mesh geometry={prismGeo} material={sideMat} />
+      {/* Front face at z=D+0.001 */}
+      <mesh geometry={faceGeo} material={frontMat} position={[0,0,D+0.001]} rotation={[0,0,0]} />
+      {/* Back face at z=-0.001, flipped */}
+      <mesh geometry={faceGeo} material={backMat} position={[0,0,-0.001]} rotation={[0,Math.PI,0]} />
+      {/* Rarity point light */}
+      <pointLight position={[0,0,3.5]} intensity={0.8} color={cfg.c} />
     </group>
   )
 }
 
-function blendTextures(img: THREE.Texture, overlay: THREE.Texture): THREE.Texture {
-  // Return image texture — overlay info is painted via canvas
-  return img
-}
+/* ── Skill Tree SVG (radial, fully deployed) ─────────────── */
+const BRANCHES = [
+  { id:'attack',    ang:-90,  color:'#EF4444', icon:'⚔️', label:'Attaque'     },
+  { id:'defense',   ang:-26,  color:'#3B82F6', icon:'🛡️', label:'Défense'     },
+  { id:'economy',   ang: 38,  color:'#F59E0B', icon:'💰', label:'Économie'    },
+  { id:'influence', ang:102,  color:'#10B981', icon:'🌐', label:'Influence'   },
+  { id:'tech',      ang:166,  color:'#8B5CF6', icon:'🔬', label:'Technologie' },
+] as const
 
-/* ── Skill Tree ────────────────────────────────────────────── */
-const SKILLS_LAYOUT = {
-  // Central node
-  center: { x:0, y:0, label:'⬡ Hexod', color:'#F59E0B' },
-  branches: [
-    { id:'attack',    angle:-90,  color:'#EF4444', label:'⚔️',  longLabel:'Attaque'     },
-    { id:'defense',   angle:-30,  color:'#3B82F6', label:'🛡️',  longLabel:'Défense'     },
-    { id:'economy',   angle: 30,  color:'#F59E0B', label:'💰',  longLabel:'Économie'    },
-    { id:'influence', angle: 90,  color:'#10B981', label:'🌐',  longLabel:'Rayonnement' },
-    { id:'tech',      angle:150,  color:'#8B5CF6', label:'🔬',  longLabel:'Tech'        },
-  ]
-}
-
-function RealSkillTree({ clusterId, cfg, onClose }: { clusterId:string; cfg:typeof R[RK]; onClose:()=>void }) {
-  const qc = useQueryClient()
-  const [hoveredSkill, setHoveredSkill] = useState<number|null>(null)
-  const [selectedBranch, setSelectedBranch] = useState<string|null>(null)
-
-  const { data } = useQuery({
-    queryKey: ['kingdom-skills', clusterId],
-    queryFn: () => api.get(`/territories-geo/kingdom-skill-tree/?cluster_id=${clusterId}`).then(r => r.data),
-    staleTime: 15000,
-  })
-
-  const unlock = useMutation({
-    mutationFn: (id:number) => api.post('/territories-geo/kingdom-unlock-skill/', { cluster_id:clusterId, skill_id:id }),
-    onSuccess: () => { toast.success('Compétence débloquée!'); qc.invalidateQueries({queryKey:['kingdom-skills',clusterId]}) },
-    onError: (e:any) => toast.error(e?.response?.data?.error || 'Ressources insuffisantes'),
-  })
-
-  const tree: Record<string,any[]> = data?.tree || {}
-  const kingdom = data?.kingdom || {}
-
-  // SVG tree dimensions
-  const W=560, H=420, cx=W/2, cy=H/2
-  const BRANCH_R = 150  // radius to branch root nodes
-  const NODE_R   = 22   // branch root node radius
-  const SKILL_R  = 16   // skill node radius
-  const SKILL_SPACING = 58  // distance between skills along branch
+function SkillTreeSVG({ tree, kingdom, cfg, onUnlock }: {
+  tree:Record<string,any[]>; kingdom:any; cfg:typeof RARITY[RK]; onUnlock:(id:number)=>void
+}) {
+  const [hover,setHover]=useState<number|null>(null)
+  const [selectedBranch,setSelectedBranch]=useState<string|null>(null)
+  const W=520,H=480,cx=W/2,cy=H/2-10
+  const BR=125, NR=20, SR=14, GAP=50
 
   return (
-    <motion.div
-      initial={{opacity:0,scale:0.95}} animate={{opacity:1,scale:1}} exit={{opacity:0,scale:0.92}}
-      style={{ position:'fixed', inset:0, zIndex:1300, display:'flex', flexDirection:'column',
-        alignItems:'center', justifyContent:'center',
-        background:'rgba(0,0,0,0.88)', backdropFilter:'blur(16px)', padding:'12px' }}
-      onClick={e => e.target===e.currentTarget && onClose()}
-    >
-      <div style={{ width:'100%', maxWidth:600, background:'rgba(4,4,12,0.99)',
-        border:`2px solid ${cfg.c}44`, borderRadius:18,
-        display:'flex', flexDirection:'column', overflow:'hidden', maxHeight:'90vh' }}>
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{display:'block',margin:'0 auto',overflow:'visible'}}>
+      <defs>
+        {BRANCHES.map(b=>(
+          <filter key={b.id} id={`gsf-${b.id}`} x="-80%" y="-80%" width="260%" height="260%">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="bl"/>
+            <feMerge><feMergeNode in="bl"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+        ))}
+        <filter id="gsf-center" x="-80%" y="-80%" width="260%" height="260%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="6" result="bl"/>
+          <feMerge><feMergeNode in="bl"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
 
-        {/* Header */}
-        <div style={{ padding:'12px 16px', borderBottom:`1px solid ${cfg.c}22`,
-          background:`linear-gradient(90deg,${cfg.c}18,transparent)`,
-          display:'flex', justifyContent:'space-between', alignItems:'center', flexShrink:0 }}>
-          <div>
-            <div style={{ fontSize:14, fontWeight:900, color:'#fff' }}>🔬 Arbre des Compétences</div>
-            <div style={{ fontSize:10, color:cfg.c }}>
-              {kingdom.is_main?'👑 Royaume Principal':'🏴 Territoire Isolé'} · {data?.unlocked_count||0}/{Object.values(tree).reduce((s:number,v:any[])=>s+v.length,0)} compétences
-            </div>
-          </div>
-          {/* Kingdom resources */}
-          <div style={{ display:'flex', gap:5, flexWrap:'wrap', flex:1, justifyContent:'center', margin:'0 12px' }}>
-            {kingdom.resources && Object.entries({
-              '🪨':kingdom.resources.fer, '🛢️':kingdom.resources.petrole,
-              '💠':kingdom.resources.silicium, '📊':kingdom.resources.donnees,
-              '💎':kingdom.resources.hex_cristaux
-            }).filter(([,v])=>(v as number)>0).map(([icon,val])=>(
-              <div key={icon} style={{ fontSize:10, padding:'2px 6px', borderRadius:4,
-                background:'rgba(255,255,255,0.06)', color:'#9CA3AF' }}>
-                {icon} {Math.round(val as number)}
-              </div>
-            ))}
-          </div>
-          <button onClick={onClose} style={{ background:'none', border:'none', color:'#6B7280', cursor:'pointer', fontSize:20 }}>✕</button>
-        </div>
+      {BRANCHES.map(b=>{
+        const rad=(b.ang*Math.PI)/180
+        const bx=cx+Math.cos(rad)*BR, by=cy+Math.sin(rad)*BR
+        const skills=tree[b.id]||[]
+        const isHigh=selectedBranch===b.id
 
-        {/* SVG Tree */}
-        <div style={{ flex:1, overflowY:'auto' }}>
-          <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display:'block', margin:'0 auto' }}>
-            <defs>
-              {SKILLS_LAYOUT.branches.map(b => (
-                <filter key={b.id} id={`glow-${b.id}`} x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="blur"/>
-                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-              ))}
-            </defs>
+        return (
+          <g key={b.id}>
+            {/* Center → branch */}
+            <line x1={cx} y1={cy} x2={bx} y2={by}
+              stroke={b.color} strokeWidth={isHigh?2.5:1.5}
+              strokeOpacity={isHigh?0.95:0.35}
+              strokeDasharray={isHigh?undefined:'5,4'} />
 
-            {/* Branch lines + nodes */}
-            {SKILLS_LAYOUT.branches.map(branch => {
-              const rad = (branch.angle * Math.PI) / 180
-              const bx = cx + Math.cos(rad) * BRANCH_R
-              const by = cy + Math.sin(rad) * BRANCH_R
-              const skills = tree[branch.id] || []
-              const isSelected = selectedBranch === branch.id
+            {/* Branch root */}
+            <g style={{cursor:'pointer'}} onClick={()=>setSelectedBranch(s=>s===b.id?null:b.id)}>
+              <circle cx={bx} cy={by} r={NR+4} fill={b.color+'15'}
+                stroke={b.color} strokeWidth={isHigh?2.5:1.5} strokeOpacity={isHigh?1:0.5}
+                filter={isHigh?`url(#gsf-${b.id})`:undefined} />
+              <text x={bx} y={by} textAnchor="middle" dominantBaseline="central"
+                fontSize={16} style={{pointerEvents:'none'}}>{b.icon}</text>
+              <text x={bx} y={by+NR+14} textAnchor="middle"
+                fontSize={9} fill={b.color} fontWeight={700} style={{pointerEvents:'none'}}>
+                {b.label}
+              </text>
+              {/* Unlocked count */}
+              <text x={bx} y={by+NR+25} textAnchor="middle"
+                fontSize={8} fill={b.color+'99'} style={{pointerEvents:'none'}}>
+                {skills.filter((s:any)=>s.unlocked).length}/{skills.length}
+              </text>
+            </g>
+
+            {/* ALL skills along branch — always visible */}
+            {skills.map((s:any,i:number)=>{
+              const dist=BR+NR+8+i*GAP
+              const sx=cx+Math.cos(rad)*dist, sy=cy+Math.sin(rad)*dist
+              const prevDist=i===0?BR:BR+NR+8+(i-1)*GAP
+              const px=cx+Math.cos(rad)*prevDist, py=cy+Math.sin(rad)*prevDist
+              const isHov=hover===s.id
 
               return (
-                <g key={branch.id}>
-                  {/* Center → branch line */}
-                  <line x1={cx} y1={cy} x2={bx} y2={by}
-                    stroke={branch.color} strokeWidth={isSelected?2.5:1.5} strokeOpacity={isSelected?0.9:0.4}
-                    strokeDasharray={isSelected?'':'4,3'} />
+                <g key={s.id}>
+                  {/* Connector */}
+                  <line x1={px} y1={py} x2={sx} y2={sy}
+                    stroke={b.color} strokeWidth={1.5}
+                    strokeOpacity={s.unlocked?0.85:0.2}
+                    strokeDasharray={s.unlocked?undefined:'3,4'} />
 
-                  {/* Branch root node */}
-                  <circle cx={bx} cy={by} r={NODE_R} fill={`${branch.color}22`}
-                    stroke={branch.color} strokeWidth={isSelected?2.5:1.5}
-                    filter={isSelected?`url(#glow-${branch.id})`:undefined}
-                    style={{ cursor:'pointer' }}
-                    onClick={() => setSelectedBranch(s => s===branch.id?null:branch.id)} />
-                  <text x={bx} y={by+1} textAnchor="middle" dominantBaseline="central"
-                    fontSize={16} style={{ pointerEvents:'none' }}>{branch.label}</text>
-                  <text x={bx} y={by+NODE_R+12} textAnchor="middle"
-                    fontSize={9} fill={branch.color} fontWeight={700} style={{ pointerEvents:'none' }}>
-                    {branch.longLabel}
-                  </text>
+                  {/* Skill node */}
+                  <g style={{cursor:'pointer'}}
+                    onMouseEnter={()=>setHover(s.id)} onMouseLeave={()=>setHover(null)}>
+                    <circle cx={sx} cy={sy} r={SR+3} fill={s.unlocked?b.color+'22':'rgba(10,10,20,0.9)'}
+                      stroke={b.color} strokeWidth={s.unlocked?2:1}
+                      strokeOpacity={s.unlocked?1:0.35}
+                      filter={s.unlocked?`url(#gsf-${b.id})`:undefined} />
+                    <text x={sx} y={sy} textAnchor="middle" dominantBaseline="central"
+                      fontSize={11} style={{pointerEvents:'none'}} opacity={s.unlocked?1:0.5}>
+                      {s.icon}
+                    </text>
+                    {/* Unlocked checkmark */}
+                    {s.unlocked&&(
+                      <circle cx={sx+SR+1} cy={sy-SR+1} r={7} fill="#00FF87">
+                        <title>Débloquée</title>
+                      </circle>
+                    )}
+                    {s.unlocked&&(
+                      <text x={sx+SR+1} y={sy-SR+2} textAnchor="middle" dominantBaseline="central"
+                        fontSize={8} fill="#000" fontWeight={900} style={{pointerEvents:'none'}}>✓</text>
+                    )}
 
-                  {/* Skill nodes along branch */}
-                  {isSelected && skills.map((s:any, i:number) => {
-                    const dist = BRANCH_R + NODE_R + 14 + i * SKILL_SPACING
-                    const sx = cx + Math.cos(rad) * dist
-                    const sy = cy + Math.sin(rad) * dist
-                    const prevDist = i===0 ? BRANCH_R : BRANCH_R + NODE_R + 14 + (i-1)*SKILL_SPACING
-                    const px = cx + Math.cos(rad) * prevDist
-                    const py = cy + Math.sin(rad) * prevDist
-                    const isHover = hoveredSkill === s.id
-
-                    return (
-                      <g key={s.id}>
-                        {/* Connector */}
-                        <line x1={px} y1={py} x2={sx} y2={sy}
-                          stroke={branch.color} strokeWidth={1.5}
-                          strokeOpacity={s.unlocked?0.8:0.25}
-                          strokeDasharray={s.unlocked?'':'3,3'} />
-
-                        {/* Skill circle */}
-                        <circle cx={sx} cy={sy} r={SKILL_R}
-                          fill={s.unlocked ? `${branch.color}33` : 'rgba(20,20,30,0.9)'}
-                          stroke={branch.color} strokeWidth={s.unlocked?2:1}
-                          strokeOpacity={s.unlocked?1:0.4}
-                          filter={s.unlocked?`url(#glow-${branch.id})`:undefined}
-                          style={{ cursor:'pointer' }}
-                          onMouseEnter={()=>setHoveredSkill(s.id)}
-                          onMouseLeave={()=>setHoveredSkill(null)} />
-
-                        {/* Icon */}
-                        <text x={sx} y={sy+1} textAnchor="middle" dominantBaseline="central"
-                          fontSize={13} style={{ pointerEvents:'none' }}>{s.icon}</text>
-
-                        {/* Unlock checkmark */}
-                        {s.unlocked && (
-                          <text x={sx+SKILL_R-4} y={sy-SKILL_R+4} textAnchor="middle"
-                            dominantBaseline="central" fontSize={9} fill="#00FF87" fontWeight={900}
-                            style={{ pointerEvents:'none' }}>✓</text>
-                        )}
-
-                        {/* Hover tooltip */}
-                        {isHover && (
-                          <g>
-                            <rect x={sx-80} y={sy-56} width={160} height={48} rx={6}
-                              fill="rgba(4,4,16,0.97)" stroke={branch.color} strokeWidth={1} />
-                            <text x={sx} y={sy-42} textAnchor="middle" fontSize={10} fontWeight={700}
-                              fill="#fff">{s.name.slice(0,22)}</text>
-                            <text x={sx} y={sy-26} textAnchor="middle" fontSize={8.5}
-                              fill={branch.color}>{s.effect.slice(0,30)}</text>
-                            <text x={sx} y={sy-13} textAnchor="middle" fontSize={8}
-                              fill="#6B7280">{s.cost_json.slice(0,3).join(' · ')}</text>
-                          </g>
+                    {/* Hover tooltip */}
+                    {isHov&&(
+                      <g>
+                        <rect x={sx-90} y={sy-72} width={180} height={68} rx={7}
+                          fill="rgba(4,4,20,0.98)" stroke={b.color} strokeWidth={1.5} />
+                        <text x={sx} y={sy-57} textAnchor="middle" fontSize={11} fontWeight={800} fill="#fff">
+                          {s.name.slice(0,22)}
+                        </text>
+                        <text x={sx} y={sy-40} textAnchor="middle" fontSize={9} fill={b.color}>
+                          {s.effect.slice(0,28)}
+                        </text>
+                        <text x={sx} y={sy-24} textAnchor="middle" fontSize={8} fill="#6B7280">
+                          {s.cost_json.slice(0,2).join(' · ')}
+                        </text>
+                        {!s.unlocked&&kingdom?.is_main&&(
+                          <text x={sx} y={sy-10} textAnchor="middle" fontSize={9} fill="#10B981"
+                            style={{cursor:'pointer'}} onClick={()=>onUnlock(s.id)}>
+                            ▶ Débloquer
+                          </text>
                         )}
                       </g>
-                    )
-                  })}
+                    )}
+                  </g>
                 </g>
               )
             })}
+          </g>
+        )
+      })}
 
-            {/* Center node */}
-            <circle cx={cx} cy={cy} r={32} fill="rgba(245,158,11,0.15)"
-              stroke="#F59E0B" strokeWidth={2.5} />
-            <text x={cx} y={cy+1} textAnchor="middle" dominantBaseline="central"
-              fontSize={26} fontWeight={900} fill="#F59E0B">⬡</text>
-            <text x={cx} y={cy+42} textAnchor="middle" fontSize={9}
-              fill="#F59E0B" fontWeight={700}>HEXOD</text>
-          </svg>
-
-          {/* Selected branch skill list */}
-          {selectedBranch && (() => {
-            const branch = SKILLS_LAYOUT.branches.find(b => b.id === selectedBranch)!
-            const skills = tree[selectedBranch] || []
-            return (
-              <div style={{ padding:'0 16px 16px' }}>
-                <div style={{ fontSize:11, fontWeight:800, color:branch.color, marginBottom:8 }}>
-                  {branch.label} {branch.longLabel} — {skills.filter((s:any)=>s.unlocked).length}/{skills.length} débloquées
-                </div>
-                {skills.map((s:any) => (
-                  <div key={s.id} style={{ display:'flex', gap:10, padding:'9px 12px', marginBottom:5, borderRadius:9,
-                    background: s.unlocked ? `${branch.color}0f` : 'rgba(255,255,255,0.03)',
-                    border:`1px solid ${s.unlocked ? branch.color+'33' : 'rgba(255,255,255,0.07)'}` }}>
-                    <span style={{ fontSize:18, flexShrink:0 }}>{s.icon}</span>
-                    <div style={{ flex:1 }}>
-                      <div style={{ fontSize:12, fontWeight:700, color:s.unlocked?'#fff':'#9CA3AF' }}>{s.name}</div>
-                      <div style={{ fontSize:10, color:s.unlocked?branch.color:'#6B7280' }}>{s.effect}</div>
-                      {!s.unlocked && (
-                        <div style={{ display:'flex', gap:4, marginTop:4, flexWrap:'wrap' }}>
-                          {s.cost_json.map((c:string)=>(
-                            <span key={c} style={{ fontSize:9, padding:'2px 6px', borderRadius:4,
-                              background:'rgba(255,255,255,0.06)', color:'#9CA3AF' }}>{c}</span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                    {s.unlocked
-                      ? <div style={{ width:24,height:24,borderRadius:'50%',background:branch.color,
-                          display:'flex',alignItems:'center',justifyContent:'center',
-                          fontSize:11,fontWeight:900,color:'#000',flexShrink:0 }}>✓</div>
-                      : kingdom.is_main
-                      ? <button onClick={()=>unlock.mutate(s.id)} disabled={unlock.isPending} style={{
-                          padding:'5px 10px',border:'none',borderRadius:7,cursor:'pointer',flexShrink:0,
-                          background:`linear-gradient(135deg,${branch.color}cc,${branch.color})`,
-                          color:'#000',fontSize:10,fontWeight:900,
-                        }}>{unlock.isPending?'…':'Unlock'}</button>
-                      : <span style={{fontSize:14}}>🔒</span>
-                    }
-                  </div>
-                ))}
-              </div>
-            )
-          })()}
-        </div>
-      </div>
-    </motion.div>
+      {/* Center node */}
+      <circle cx={cx} cy={cy} r={34} fill="rgba(245,158,11,0.15)" stroke="#F59E0B" strokeWidth={2.5}
+        filter="url(#gsf-center)" />
+      <text x={cx} y={cy-5} textAnchor="middle" dominantBaseline="central" fontSize={24} fill="#F59E0B">⬡</text>
+      <text x={cx} y={cy+18} textAnchor="middle" fontSize={9} fill="#F59E0B" fontWeight={800} letterSpacing="2">
+        HEXOD
+      </text>
+    </svg>
   )
 }
 
-/* ── Main HexCard ──────────────────────────────────────────── */
+/* ── Kingdom tab ─────────────────────────────────────────── */
+function KingdomTab({ t, cfg }: { t:any; cfg:typeof RARITY[RK] }) {
+  const qc=useQueryClient()
+  const clusterId=t.owner_kingdom_id||'main'
+
+  const {data}=useQuery({
+    queryKey:['kingdom-skills',clusterId],
+    queryFn:()=>api.get(`/territories-geo/kingdom-skill-tree/?cluster_id=${clusterId}`).then(r=>r.data),
+    staleTime:15000,
+  })
+
+  const unlock=useMutation({
+    mutationFn:(id:number)=>api.post('/territories-geo/kingdom-unlock-skill/',{cluster_id:clusterId,skill_id:id}),
+    onSuccess:()=>{ toast.success('Compétence débloquée!'); qc.invalidateQueries({queryKey:['kingdom-skills',clusterId]}) },
+    onError:(e:any)=>toast.error(e?.response?.data?.error||'Ressources insuffisantes'),
+  })
+
+  const tree=data?.tree||{}
+  const kingdom=data?.kingdom||{}
+  const resources=kingdom.resources||{}
+  const biomeRes=BIOME_RES_MAPPED[t.territory_type||'rural']||BIOME_RES_MAPPED.rural
+  const income=Math.round((t.resource_credits||t.food_per_tick||10)*288)
+
+  const RES_LABELS: Record<string,string> = {
+    fer:'🪨',petrole:'🛢️',silicium:'💠',donnees:'📊',
+    hex_cristaux:'💎',influence:'🌐',acier:'⚙️',
+    terres_rares:'💎',composants:'🔌',uranium:'☢️',
+  }
+
+  return (
+    <div>
+      {/* Kingdom status */}
+      <div style={{padding:'8px 10px',borderRadius:8,marginBottom:10,
+        background:kingdom.is_main?`${cfg.c}12`:'rgba(255,255,255,0.03)',
+        border:`1px solid ${kingdom.is_main?cfg.c+'33':'rgba(255,255,255,0.07)'}`}}>
+        <span style={{fontSize:11,fontWeight:700,color:kingdom.is_main?cfg.c:'#6B7280'}}>
+          {kingdom.is_main?'👑 Royaume Principal':kingdom.size<=1?'🏴 Territoire Isolé — arbre repart à 0':'🏰 Royaume Secondaire'}
+        </span>
+        <span style={{fontSize:10,color:'#4B5563',marginLeft:8}}>
+          {kingdom.size||0} territoires · Tier {kingdom.tier||0}
+        </span>
+      </div>
+
+      {/* Production */}
+      <div style={{fontSize:9,color:'#4B5563',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:6}}>Production / jour</div>
+      <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:4,marginBottom:12}}>
+        {biomeRes.map((r:any)=>(
+          <div key={r.res} style={{background:'rgba(255,255,255,0.04)',borderRadius:7,padding:'6px 4px',textAlign:'center'}}>
+            <div style={{fontSize:14}}>{r.icon}</div>
+            <div style={{fontSize:10,fontWeight:800,color:cfg.c,fontFamily:'monospace'}}>+{r.amount*288}</div>
+            <div style={{fontSize:7,color:'#4B5563',marginTop:1}}>{r.res.slice(0,9)}</div>
+          </div>
+        ))}
+        <div style={{background:`${cfg.c}12`,borderRadius:7,padding:'6px 4px',textAlign:'center',border:`1px solid ${cfg.c}22`}}>
+          <div style={{fontSize:14}}>💠</div>
+          <div style={{fontSize:10,fontWeight:800,color:cfg.c,fontFamily:'monospace'}}>+{income}</div>
+          <div style={{fontSize:7,color:cfg.c,marginTop:1}}>HEX Coin</div>
+        </div>
+      </div>
+
+      {/* Available resources for skill tree */}
+      <div style={{fontSize:9,color:'#4B5563',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:5}}>
+        Ressources du royaume — allouer aux compétences
+      </div>
+      <div style={{display:'flex',gap:4,flexWrap:'wrap',marginBottom:12}}>
+        {Object.entries(RES_LABELS).filter(([k])=>resources[k]>0).map(([k,icon])=>(
+          <div key={k} style={{display:'flex',alignItems:'center',gap:3,padding:'3px 8px',
+            borderRadius:5,background:`${cfg.c}14`,border:`1px solid ${cfg.c}33`}}>
+            <span style={{fontSize:12}}>{icon}</span>
+            <span style={{fontSize:10,color:cfg.accent,fontFamily:'monospace',fontWeight:700}}>
+              {Math.round(resources[k])}
+            </span>
+          </div>
+        ))}
+        {Object.keys(resources).filter(k=>RES_LABELS[k]&&resources[k]>0).length===0&&(
+          <span style={{fontSize:10,color:'#374151'}}>Aucune ressource — agrandissez votre royaume</span>
+        )}
+      </div>
+
+      {/* Skill tree */}
+      <div style={{fontSize:9,color:'#4B5563',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:4}}>
+        Arbre des compétences — hover pour détails · cliquer pour débloquer
+      </div>
+      <SkillTreeSVG tree={tree} kingdom={kingdom} cfg={cfg}
+        onUnlock={(id)=>unlock.mutate(id)} />
+    </div>
+  )
+}
+
+/* ── Main HexCard ────────────────────────────────────────── */
 export function HexCard({ territory:t, onClose, onRequestClaim }:{
   territory:any; onClose:()=>void; onRequestClaim:()=>void
 }) {
-  const player  = usePlayer()
-  const isOwned = t.owner_id === player?.id
-  const isEnemy = !!t.owner_id && !isOwned
-  const isFree  = !t.owner_id
-  const rarity  = (t.rarity || 'common') as RK
-  const isShiny = !!t.is_shiny
-  const cfg     = R[rarity] ?? R.common
+  const player=usePlayer()
+  const isOwned=t.owner_id===player?.id
+  const isEnemy=!!t.owner_id&&!isOwned
+  const isFree=!t.owner_id
+  const rarity=(t.rarity||'common') as RK
+  const cfg=RARITY[rarity]??RARITY.common
+  const isShiny=!!t.is_shiny
 
-  const cardName = t.custom_name || t.poi_name || t.place_name || 'Zone'
-  const imgUrl   = t.poi_wiki_url || null
-  const income   = Math.round((t.resource_credits || t.food_per_tick || 10) * 288) // /jour
-  const biomeRes = BIOME_RES[t.territory_type || 'rural'] || BIOME_RES.rural
+  const cardName=t.custom_name||t.poi_name||t.place_name||'Zone'
+  const imgUrl=t.poi_wiki_url||null
+  const income=Math.round((t.resource_credits||t.food_per_tick||10)*288)
 
-  const facts = useMemo(() => {
-    const r = []
-    if (t.poi_visitors) r.push(`${(t.poi_visitors/1e6).toFixed(1)}M visiteurs / an`)
-    if (t.poi_geo_score) r.push(`Score géopolitique : ${t.poi_geo_score}/100`)
-    if (t.poi_fun_fact) r.push(t.poi_fun_fact.slice(0,80))
-    if (t.poi_description && r.length<3) r.push(t.poi_description.slice(0,80))
-    while (r.length<3) r.push('Territoire unique · Hexod Saison 1')
+  const facts=useMemo(()=>{
+    const r=[]
+    if(t.poi_visitors) r.push(`${(t.poi_visitors/1e6).toFixed(1)}M visiteurs / an`)
+    if(t.poi_geo_score) r.push(`Score géopolitique : ${t.poi_geo_score}/100`)
+    if(t.poi_fun_fact) r.push(t.poi_fun_fact.slice(0,90))
+    if(t.poi_description&&r.length<3) r.push(t.poi_description.slice(0,90))
+    while(r.length<3) r.push('Territoire unique · Hexod Saison 1')
     return r.slice(0,3)
-  }, [t])
+  },[t])
 
-  const frontCanvas = useMemo(() => paintFront(cfg, cardName, facts, cfg.grade, imgUrl, isShiny), [cfg, cardName, facts, imgUrl, isShiny])
-  const backCanvas  = useMemo(() => paintBack(cfg, t.h3_index||'', income, t.poi_floor_price||null, isShiny), [cfg, t.h3_index, income, t.poi_floor_price, isShiny])
+  const frontCv=useMemo(()=>paintFrontCanvas(cfg,cardName,cfg.grade,facts,imgUrl,isShiny),[cfg,cardName,facts,imgUrl,isShiny])
+  const backCv =useMemo(()=>paintBackCanvas(cfg,t.h3_index||'',income,t.poi_floor_price||null,isShiny),[cfg,t.h3_index,income,t.poi_floor_price,isShiny])
 
-  const [tab, setTab]         = useState<'card'|'kingdom'|'nft'>('card')
-  const [showBack, setShowBack]     = useState(false)
-  const [showSkillTree, setShowSkillTree] = useState(false)
+  const [tab,setTab]=useState<'card'|'kingdom'|'nft'>('card')
+  const [showBack,setShowBack]=useState(false)
 
   return (
     <motion.div
       initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
       onClick={e=>e.target===e.currentTarget&&onClose()}
-      style={{ position:'fixed',inset:0,zIndex:1200,display:'flex',flexDirection:'column',
-        alignItems:'center',justifyContent:'center',gap:12,
-        background:'rgba(0,0,0,0.92)',backdropFilter:'blur(20px)',padding:'10px' }}
+      style={{position:'fixed',inset:0,zIndex:1200,display:'flex',flexDirection:'column',
+        alignItems:'center',justifyContent:'center',gap:10,
+        background:'rgba(0,0,0,0.92)',backdropFilter:'blur(20px)',padding:'10px'}}
     >
-      {cfg.glow!=='none' && (
-        <div style={{ position:'absolute',width:440,height:440,pointerEvents:'none',
-          background:`radial-gradient(ellipse 55% 55% at 50% 42%,${cfg.c}1a 0%,transparent 70%)`,
-          filter:'blur(50px)' }} />
-      )}
+      {/* Ambient */}
+      <div style={{position:'absolute',width:420,height:420,pointerEvents:'none',
+        background:`radial-gradient(ellipse 55% 55% at 50% 42%,${cfg.c}1a 0%,transparent 70%)`,
+        filter:'blur(50px)'}} />
 
-      {/* Three.js canvas */}
-      <div style={{ width:250,height:280,cursor:'grab',zIndex:1,flexShrink:0 }}>
-        <Canvas camera={{position:[0,0,4.0],fov:44}} gl={{antialias:true,alpha:true}} style={{background:'transparent'}}>
+      {/* 3D canvas */}
+      <div style={{width:240,height:270,cursor:'grab',zIndex:1,flexShrink:0}}>
+        <Canvas camera={{position:[0,0,4.0],fov:42}} gl={{antialias:true,alpha:true}} style={{background:'transparent'}}>
           <Suspense fallback={null}>
-            <ambientLight intensity={0.35} />
-            <pointLight position={[3,4,3]} intensity={1.6} />
-            <pointLight position={[-2,-2,2]} intensity={0.5} color={cfg.c} />
+            <ambientLight intensity={0.3} />
+            <pointLight position={[3,4,3]} intensity={1.8} />
+            <pointLight position={[-2,-2,2]} intensity={0.6} color={cfg.c} />
             <Environment preset="city" />
-            <HexPrism frontCanvas={frontCanvas} backCanvas={backCanvas} imgUrl={imgUrl} cfg={cfg} showBack={showBack} />
+            <HexCard3D frontCv={frontCv} backCv={backCv} imgUrl={imgUrl}
+              cfg={cfg} showBack={showBack} isShiny={isShiny} />
           </Suspense>
         </Canvas>
       </div>
 
-      {/* Card label + flip */}
-      <div style={{ display:'flex',alignItems:'center',gap:10,zIndex:1 }}>
-        <div style={{ textAlign:'center' }}>
-          <div style={{ fontSize:14,fontWeight:900,color:'#fff' }}>{cardName}</div>
-          <div style={{ display:'flex',gap:4,justifyContent:'center',marginTop:3 }}>
+      {/* Label + flip */}
+      <div style={{display:'flex',alignItems:'center',gap:10,zIndex:1}}>
+        <div style={{textAlign:'center'}}>
+          <div style={{fontSize:14,fontWeight:900,color:'#fff'}}>{cardName}</div>
+          <div style={{display:'flex',gap:4,justifyContent:'center',marginTop:3}}>
             <Chip color={cfg.c}>{cfg.label}</Chip>
             {isShiny&&<Chip color="#FCD34D">✨ Shiny</Chip>}
             <Chip color={cfg.c} big>Grade {cfg.grade}</Chip>
@@ -556,10 +622,10 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
       </div>
 
       {/* Info panel */}
-      {isOwned ? (
-        <div style={{ width:310,background:'rgba(4,4,12,0.99)',border:`1px solid ${cfg.c}44`,
-          borderRadius:14,overflow:'hidden',zIndex:1,maxHeight:'42vh',display:'flex',flexDirection:'column' }}>
-          <div style={{ display:'flex',borderBottom:`1px solid ${cfg.c}22`,flexShrink:0 }}>
+      {isOwned?(
+        <div style={{width:330,background:'rgba(4,4,12,0.99)',border:`1px solid ${cfg.c}44`,
+          borderRadius:14,overflow:'hidden',zIndex:1,maxHeight:'46vh',display:'flex',flexDirection:'column'}}>
+          <div style={{display:'flex',borderBottom:`1px solid ${cfg.c}22`,flexShrink:0}}>
             {(['card','kingdom','nft'] as const).map(tb=>(
               <button key={tb} onClick={()=>setTab(tb)} style={{
                 flex:1,padding:'8px 0',border:'none',cursor:'pointer',
@@ -570,13 +636,11 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
               }}>{tb==='card'?'🃏 Carte':tb==='kingdom'?'⚗️ Royaume':'💎 NFT'}</button>
             ))}
           </div>
-          <div style={{ flex:1,overflowY:'auto',padding:'12px 14px' }}>
-            {tab==='card' && (
+          <div style={{flex:1,overflowY:'auto',padding:'12px 14px'}}>
+            {tab==='card'&&(
               <div>
-                {imgUrl&&<img src={imgUrl} alt={cardName}
-                  style={{width:'100%',height:70,objectFit:'cover',borderRadius:7,marginBottom:8}}
-                  onError={e=>{(e.target as HTMLImageElement).style.display='none'}} />}
-                <div style={{marginBottom:8,padding:'8px 10px',borderRadius:8,background:`${cfg.c}0e`,border:`1px solid ${cfg.c}22`}}>
+                {imgUrl&&<img src={imgUrl} alt={cardName} style={{width:'100%',height:70,objectFit:'cover',borderRadius:7,marginBottom:8}} onError={e=>{(e.target as HTMLImageElement).style.display='none'}} />}
+                <div style={{padding:'8px 10px',borderRadius:8,background:`${cfg.c}0e`,border:`1px solid ${cfg.c}22`,marginBottom:8}}>
                   <div style={{fontSize:10,fontWeight:800,color:cfg.accent,marginBottom:5}}>Caractéristiques</div>
                   {facts.map((f,i)=>(
                     <div key={i} style={{display:'flex',gap:5,marginBottom:4}}>
@@ -589,32 +653,8 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
                 <KV label="Grade" val={cfg.grade} color={cfg.c} />
               </div>
             )}
-            {tab==='kingdom' && (
-              <div>
-                <div style={{fontSize:9,color:'#4B5563',textTransform:'uppercase',letterSpacing:'0.1em',marginBottom:6}}>Production / jour</div>
-                <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:5,marginBottom:10}}>
-                  {biomeRes.map(r=>(
-                    <div key={r.res} style={{background:'rgba(255,255,255,0.04)',borderRadius:7,padding:'7px 8px',textAlign:'center'}}>
-                      <div style={{fontSize:14}}>{r.icon}</div>
-                      <div style={{fontSize:11,fontWeight:800,color:cfg.c,fontFamily:'monospace'}}>+{r.amount*288}</div>
-                      <div style={{fontSize:8,color:'#4B5563',marginTop:1}}>{r.res.slice(0,12)}</div>
-                    </div>
-                  ))}
-                  <div style={{background:`${cfg.c}0e`,borderRadius:7,padding:'7px 8px',textAlign:'center',border:`1px solid ${cfg.c}22`}}>
-                    <div style={{fontSize:14}}>💠</div>
-                    <div style={{fontSize:11,fontWeight:800,color:cfg.c,fontFamily:'monospace'}}>+{income}</div>
-                    <div style={{fontSize:8,color:cfg.c,marginTop:1}}>HEX Coin</div>
-                  </div>
-                </div>
-                <button onClick={()=>setShowSkillTree(true)} style={{
-                  width:'100%',padding:'11px',border:'none',borderRadius:9,cursor:'pointer',
-                  background:`linear-gradient(135deg,${cfg.c}cc,${cfg.c})`,
-                  color:['legendary','mythic','epic'].includes(rarity)?'#000':'#fff',
-                  fontSize:12,fontWeight:900,
-                }}>🔬 Arbre des Compétences →</button>
-              </div>
-            )}
-            {tab==='nft' && (
+            {tab==='kingdom'&&<KingdomTab t={t} cfg={cfg} />}
+            {tab==='nft'&&(
               <div>
                 <div style={{padding:'10px 12px',background:'rgba(139,92,246,0.08)',borderRadius:10,border:'1px solid rgba(139,92,246,0.2)',marginBottom:10}}>
                   <KV label="Token ID" val={t.token_id||`HEX-${(t.h3_index||'').slice(0,8).toUpperCase()}`} mono />
@@ -633,7 +673,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
             )}
           </div>
         </div>
-      ) : (
+      ):(
         <div style={{width:290,background:'rgba(4,4,12,0.99)',border:`1px solid ${cfg.c}44`,borderRadius:14,padding:'12px 14px',zIndex:1}}>
           {t.poi_description&&<div style={{fontSize:11,color:'#9CA3AF',marginBottom:10,lineHeight:1.5}}>{t.poi_description.slice(0,110)}{t.poi_description.length>110?'…':''}</div>}
           <div style={{display:'flex',gap:10,marginBottom:12,fontSize:11}}>
@@ -647,7 +687,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
               background:`linear-gradient(135deg,${cfg.c}cc,${cfg.c})`,
               color:['legendary','mythic','epic'].includes(rarity)?'#000':'#fff',
               fontSize:14,fontWeight:900,
-              boxShadow:cfg.glow!=='none'?`0 4px 24px ${cfg.c}55`:undefined,
+              boxShadow:`0 4px 24px ${cfg.c}44`,
             }}>🏴 Revendiquer {cardName.slice(0,20)}</button>
           )}
           {isEnemy&&(
@@ -655,16 +695,10 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
               width:'100%',padding:'12px',borderRadius:10,cursor:'pointer',
               border:'1px solid rgba(239,68,68,0.4)',background:'rgba(239,68,68,0.1)',
               color:'#EF4444',fontSize:13,fontWeight:700,
-            }}>⚔️ Attaquer · 💸 Acheter · 🧩 Puzzle</button>
+            }}>⚔️ Attaquer · 💸 Acheter</button>
           )}
         </div>
       )}
-
-      <AnimatePresence>
-        {showSkillTree&&(
-          <RealSkillTree clusterId={t.owner_kingdom_id||'main'} cfg={cfg} onClose={()=>setShowSkillTree(false)} />
-        )}
-      </AnimatePresence>
 
       <div style={{fontSize:9,color:'#1F2937',zIndex:1}}>Glisser pour tourner · Cliquer hors pour fermer</div>
     </motion.div>
