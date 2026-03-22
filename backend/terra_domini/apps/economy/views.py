@@ -472,13 +472,21 @@ class ShopViewSet(viewsets.GenericViewSet):
                 sold_count=F('sold_count') + quantity
             )
 
-        return Response({
-            'message': 'Purchase successful',
+        # Booster pack — ajouter les cartes tirées dans la réponse
+        booster_result = None
+        if item.effect_type == 'booster_pack':
+            booster_result = _open_booster_pack(item_code)
+
+        resp = {
+            'message': 'Achat réussi !',
             'item': item_code,
             'quantity': quantity,
             'tdc_spent': float(total_cost),
             'tdc_remaining': float(player.tdc_in_game),
-        })
+        }
+        if booster_result:
+            resp['booster'] = booster_result
+        return Response(resp)
 
 
 class TDCViewSet(viewsets.GenericViewSet):
@@ -678,3 +686,97 @@ def _apply_item_effect(player, item, quantity, territory_h3=None):
             boost_value=min(item.effect_value, _game('MAX_BUILD_SPEED_BOOST_PCT', 50)),
             expires_at=timezone.now() + duration,
         )
+
+    elif item.effect_type in ('atk_multiplier', 'def_multiplier', 'production_multiplier',
+                               'double_attack', 'stealth_once', 'build_speed', 'build_cost_reduction'):
+        duration = timedelta(seconds=item.effect_duration_seconds * max(quantity, 1))
+        expires = (timezone.now() + duration) if duration.total_seconds() > 0 else None
+        ActiveBoost.objects.create(
+            player=player, item=item,
+            boost_type=item.effect_type,
+            boost_value=item.effect_value,
+            expires_at=expires,
+        )
+
+    elif item.effect_type == 'hex_bonus':
+        from django.db.models import F
+        bonus = item.effect_value * quantity
+        player.__class__.objects.filter(id=player.id).update(
+            tdc_in_game=F('tdc_in_game') + bonus
+        )
+
+    elif item.effect_type == 'nuke_strike':
+        # Enregistrer la frappe disponible pour la prochaine attaque
+        ActiveBoost.objects.create(
+            player=player, item=item,
+            boost_type='nuke_strike',
+            boost_value=item.effect_value,  # DEF ratio (0.10 = réduit à 10%)
+            expires_at=timezone.now() + timedelta(hours=72),
+        )
+
+    elif item.effect_type == 'build_instant_once':
+        ActiveBoost.objects.create(
+            player=player, item=item,
+            boost_type='build_instant_once',
+            boost_value=1,
+            expires_at=timezone.now() + timedelta(hours=24),
+        )
+
+    elif item.effect_type == 'border_color':
+        # Appliquer la couleur de bordure (icon_url contient la couleur hex)
+        color = item.icon_url or '#FFD700'
+        from terra_domini.apps.territories.models import Territory
+        Territory.objects.filter(owner=player).update(border_color=color)
+
+    elif item.effect_type == 'booster_pack':
+        # Ouvrir un booster : retourner les territoires tirés dans la réponse
+        # La logique de tirage est dans la vue purchase (voir _open_booster_pack)
+        pass  # géré dans la vue purchase
+
+
+def _open_booster_pack(item_code: str) -> dict:
+    """
+    Tire aléatoirement des territoires POI selon les garanties du pack.
+    Retourne la liste des territoires tirés (pour l'animation d'ouverture).
+    """
+    import random
+    from terra_domini.apps.territories.models import Territory
+
+    PACK_ODDS = {
+        'booster_standard': [
+            ('common',    0.35), ('uncommon', 0.35), ('rare', 0.25),
+            ('epic',      0.04), ('legendary',0.01),
+        ],
+        'booster_premium': [
+            ('rare',      0.40), ('epic',     0.40), ('legendary', 0.15),
+            ('mythic',    0.05),
+        ],
+        'booster_mythic': [
+            ('epic',      0.20), ('legendary',0.45), ('mythic',    0.35),
+        ],
+    }
+    PACK_COUNT = {'booster_standard': 3, 'booster_premium': 5, 'booster_mythic': 3}
+
+    odds   = PACK_ODDS.get(item_code, PACK_ODDS['booster_standard'])
+    count  = PACK_COUNT.get(item_code, 3)
+    cards  = []
+
+    rarities_pool = [r for r, _ in odds]
+    weights       = [w for _, w in odds]
+
+    for _ in range(count):
+        rarity = random.choices(rarities_pool, weights=weights)[0]
+        # Tirer un territoire POI libre de cette rareté
+        pool = list(Territory.objects.filter(
+            rarity=rarity, is_landmark=True, owner__isnull=True
+        ).values('h3_index','poi_name','territory_type','biome','is_shiny','rarity').order_by('?')[:20])
+        if pool:
+            cards.append(random.choice(pool))
+        else:
+            # Fallback: n'importe quel territoire de cette rareté
+            fb = Territory.objects.filter(rarity=rarity).values(
+                'h3_index','poi_name','territory_type','biome','is_shiny','rarity'
+            ).order_by('?').first()
+            if fb:
+                cards.append(fb)
+    return {'cards': cards, 'count': len(cards)}
