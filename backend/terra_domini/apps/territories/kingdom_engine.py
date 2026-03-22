@@ -317,8 +317,8 @@ def unlock_kingdom_skill(player, cluster_id: str, skill_id: int) -> dict:
 
 
 def get_kingdom_skill_tree(player, cluster_id: str) -> dict:
-    """Full skill tree for a kingdom with unlock status + fork info."""
-    from terra_domini.apps.progression.models import SkillNode
+    """Full skill tree for a kingdom with unlock status + fork info + free first skill."""
+    from terra_domini.apps.progression.models import SkillNode, PlayerSkill
 
     all_skills = list(SkillNode.objects.all().values(
         'id','branch','name','effect','cost_json','position','icon',
@@ -326,21 +326,51 @@ def get_kingdom_skill_tree(player, cluster_id: str) -> dict:
     unlocked_ids = set(KingdomSkill.objects.filter(
         player=player, cluster_id=cluster_id
     ).values_list('skill_id', flat=True))
+    # Also count PlayerSkill (campaign rewards)
+    unlocked_ids |= set(PlayerSkill.objects.filter(player=player).values_list('skill_id', flat=True))
 
-    # Build fork exclusion map: fork_group → list of skill ids unlocked in that fork
+    # First skill per branch that is free (BOARD spec: no entry barrier)
+    # position=0 + fork_group='' → free for all players
+    free_first_ids = set(
+        s['id'] for s in all_skills if s['position'] == 0 and not s['fork_group']
+    )
+
+    # Fork exclusion map
     fork_taken: dict[str, int] = {}
     for s in all_skills:
         if s['id'] in unlocked_ids and s['fork_group']:
             fork_taken[f"{s['branch']}:{s['fork_group']}"] = s['id']
 
+    # Branch → max position unlocked (to determine which next skill is available)
+    branch_max_unlocked: dict[str, int] = {}
     for s in all_skills:
-        s['unlocked'] = s['id'] in unlocked_ids
+        if s['id'] in unlocked_ids:
+            branch_max_unlocked[s['branch']] = max(
+                branch_max_unlocked.get(s['branch'], -1), s['position']
+            )
+
+    for s in all_skills:
+        s['unlocked']      = s['id'] in unlocked_ids
+        s['is_free_first'] = s['id'] in free_first_ids
         s['locked_by_fork'] = False
         s['fork_taken_name'] = None
+
+        # can_unlock: position is next in branch OR is free_first
+        prev_max = branch_max_unlocked.get(s['branch'], -1)
+        s['can_unlock'] = (
+            not s['unlocked']
+            and not s['locked_by_fork']
+            and (s['is_free_first'] or s['position'] == prev_max + 1)
+        )
+        # If free first and not yet unlocked → mark cost as free
+        if s['is_free_first'] and not s['unlocked']:
+            s['cost_json'] = []  # Free! No resources needed
+
         if s['fork_group'] and not s['unlocked']:
             key = f"{s['branch']}:{s['fork_group']}"
             if key in fork_taken and fork_taken[key] != s['id']:
                 s['locked_by_fork'] = True
+                s['can_unlock'] = False
                 taken = next((x for x in all_skills if x['id'] == fork_taken[key]), None)
                 s['fork_taken_name'] = taken['name'] if taken else None
 
@@ -351,7 +381,8 @@ def get_kingdom_skill_tree(player, cluster_id: str) -> dict:
     cluster = TerritoryCluster.objects.filter(player=player, cluster_id=cluster_id).first()
     return {
         'tree': tree,
-        'unlocked_count': len(unlocked),
+        'unlocked_count': len(unlocked_ids),
+        'free_first_ids': list(free_first_ids),
         'kingdom': {
             'cluster_id': cluster_id,
             'size': cluster.size if cluster else 0,
@@ -360,17 +391,17 @@ def get_kingdom_skill_tree(player, cluster_id: str) -> dict:
             'poi_count': cluster.poi_count if cluster else 0,
             'tdc_per_24h': float(cluster.tdc_per_24h) if cluster else 0,
             'resources': {
-                'fer': float(cluster.agg_fer) if cluster else 0,
-                'petrole': float(cluster.agg_petrole) if cluster else 0,
-                'silicium': float(cluster.agg_silicium) if cluster else 0,
-                'donnees': float(cluster.agg_donnees) if cluster else 0,
-                'uranium': float(cluster.agg_uranium) if cluster else 0,
-                'hex_cristaux': float(cluster.agg_hex_cristaux) if cluster else 0,
-                'influence': float(cluster.agg_influence) if cluster else 0,
-                'stabilite': float(cluster.agg_stabilite) if cluster else 0,
-                'acier': float(cluster.agg_acier) if cluster else 0,
-                'terres_rares': float(cluster.agg_terres_rares) if cluster else 0,
-                'composants': float(cluster.agg_composants) if cluster else 0,
+                'fer': float(getattr(cluster,'agg_fer',0) or 0) if cluster else 0,
+                'petrole': float(getattr(cluster,'agg_petrole',0) or 0) if cluster else 0,
+                'silicium': float(getattr(cluster,'agg_silicium',0) or 0) if cluster else 0,
+                'donnees': float(getattr(cluster,'agg_donnees',0) or 0) if cluster else 0,
+                'uranium': float(getattr(cluster,'agg_uranium',0) or 0) if cluster else 0,
+                'hex_cristaux': float(getattr(cluster,'agg_hex_cristaux',0) or 0) if cluster else 0,
+                'influence': float(getattr(cluster,'agg_influence',0) or 0) if cluster else 0,
+                'stabilite': float(getattr(cluster,'agg_stabilite',0) or 0) if cluster else 0,
+                'acier': float(getattr(cluster,'agg_acier',0) or 0) if cluster else 0,
+                'terres_rares': float(getattr(cluster,'agg_terres_rares',0) or 0) if cluster else 0,
+                'composants': float(getattr(cluster,'agg_composants',0) or 0) if cluster else 0,
             }
         }
     }
