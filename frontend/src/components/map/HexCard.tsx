@@ -239,15 +239,16 @@ function HexCard3D({ frontCv, backCv, imgUrl, cfg, showBack, isShiny }: {
 }) {
   const groupRef = useRef<THREE.Group>(null!)
   const velY=useRef(-0.25); const velX=useRef(0)
-  const { gl } = useThree()
+  const { gl, camera } = useThree()
 
   useEffect(() => {
     const c=gl.domElement; let drag=false,lx=0,ly=0
     const pd=(e:PointerEvent)=>{ drag=true; lx=e.clientX; ly=e.clientY; velY.current=0; velX.current=0 }
     const pm=(e:PointerEvent)=>{ if(!drag)return; velY.current=(e.clientX-lx)*0.022; velX.current=-(e.clientY-ly)*0.013; lx=e.clientX; ly=e.clientY }
     const pu=()=>{ drag=false }
-    c.addEventListener('pointerdown',pd); window.addEventListener('pointermove',pm); window.addEventListener('pointerup',pu)
-    return ()=>{ c.removeEventListener('pointerdown',pd); window.removeEventListener('pointermove',pm); window.removeEventListener('pointerup',pu) }
+    const pw=(e:WheelEvent)=>{ e.preventDefault(); camera.position.z=Math.max(2.5,Math.min(8,camera.position.z+e.deltaY*0.005)) }
+    c.addEventListener('pointerdown',pd); window.addEventListener('pointermove',pm); window.addEventListener('pointerup',pu); c.addEventListener('wheel',pw,{passive:false})
+    return ()=>{ c.removeEventListener('pointerdown',pd); window.removeEventListener('pointermove',pm); window.removeEventListener('pointerup',pu); c.removeEventListener('wheel',pw) }
   },[gl])
 
   useFrame(()=>{
@@ -418,7 +419,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
   const isShiny=!!t.is_shiny
 
   const cardName=t.custom_name||t.poi_name||t.place_name||'Zone'
-  const imgUrl=t.poi_wiki_url||null
+  const imgUrl=null  // No external images (rate limit)
   const income=Math.round((t.resource_credits||t.food_per_tick||10)*288)
 
   const facts=useMemo(()=>{
@@ -452,7 +453,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
 
       {/* 3D canvas */}
       <div style={{width:240,height:270,cursor:'grab',zIndex:1,flexShrink:0}}>
-        <Canvas camera={{position:[0,0,4.0],fov:42}} gl={{antialias:true,alpha:true,powerPreference:"high-performance"}} frameloop="demand" style={{background:'transparent'}}>
+        <Canvas camera={{position:[0,0,4.0],fov:42}} gl={{antialias:true,alpha:true,powerPreference:"high-performance",preserveDrawingBuffer:false}} frameloop="always" style={{background:'transparent'}} onCreated={({gl})=>{ gl.domElement.addEventListener("webglcontextlost",(e)=>{e.preventDefault();setTimeout(()=>gl.forceContextRestore?.(),100)}) }}>
           <Suspense fallback={null}>
             <ambientLight intensity={0.3} />
             <pointLight position={[3,4,3]} intensity={1.8} />

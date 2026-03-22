@@ -15,7 +15,6 @@ import { AttackPanel } from '../hud/AttackPanel'
 import { ClaimModal } from './ClaimModal'
 import { HexodBottomBar } from '../hud/HexodBottomBar'
 import { injectGlowFilter, makeHexPolygon, injectHexAnimations } from './HexLayer'
-import { POIHexLayer } from './POIHexLayer'
 import { POIFilterPanel } from './POIFilterPanel'
 import { latLngToCell, cellToBoundary, gridDisk } from 'h3-js'
 import type { TerritoryLight } from '../../types'
@@ -423,10 +422,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         onFilterChange={(cats, rars) => { setPoiCatFilter(cats); setPoiRarFilter(rars) }}
       />
 
-      <POIHexLayer
-        map={mapRef.current} zoom={zoom} lat={center[0]} lon={center[1]}
-        catFilter={poiCatFilter} rarFilter={poiRarFilter}
-      />
+
 
       <HexodBottomBar />
     </div>

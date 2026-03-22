@@ -152,7 +152,7 @@ function InfoTab({ t, isFree, isOwned, player, hasPOI, rc, onRequestClaim }: any
       {hasPOI && (
         <div style={{ marginBottom:14, padding:'12px 13px', borderRadius:10,
           background:`${rc}0d`, border:`1px solid ${rc}33` }}>
-          {t.poi_wiki_url && (
+          {false && t.poi_wiki_url && (
             <img src={t.poi_wiki_url} alt={t.poi_name}
               style={{ width:'100%', height:100, objectFit:'cover', borderRadius:7, marginBottom:8 }}
               onError={e => { (e.target as HTMLImageElement).style.display='none' }}
