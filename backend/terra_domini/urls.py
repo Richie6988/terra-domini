@@ -24,7 +24,6 @@ from terra_domini.apps.accounts.views import UpdateProfileView
 from terra_domini.apps.accounts.views import PlayerViewSet
 from terra_domini.apps.social.views import TradeViewSet
 from terra_domini.apps.blockchain.wallet_views import WalletViewSet
-from terra_domini.apps.blockchain.views import TDCBalanceView, TDCPurchaseView, TDCWithdrawView
 from terra_domini.apps.blockchain.solana_views import (
     TokenomicsView, VerifyNFTOwnershipView, SPLTokenInfoView,
     TokenomicsWhitepaperView, OnChainRevenueView,
@@ -40,7 +39,7 @@ from terra_domini.apps.events.poi_views import UnifiedPOIViewSet
 from terra_domini.apps.territories.trade_views import ResourceTradeViewSet
 
 from terra_domini.apps.combat.views import BattleViewSet
-from terra_domini.apps.economy.views import ShopViewSet, TDCViewSet, StripeWebhookView, AdCampaignViewSet
+from terra_domini.apps.economy.views import ShopViewSet, StripeWebhookView, AdCampaignViewSet
 from terra_domini.apps.alliances.views import AllianceViewSet, DiplomacyViewSet
 from terra_domini.apps.events.views import ControlTowerViewSet, EventViewSet
 from terra_domini.apps.blockchain.marketplace_views import (
@@ -103,9 +102,6 @@ urlpatterns = [
     path('api/players/<str:username>/profile/', PublicProfileView.as_view(), name='public_profile'),
 
     # ── Blockchain / TDC ─────────────────────────────────────────────────────
-    path('api/tdc/balance/',   TDCBalanceView.as_view(),   name='tdc_balance'),
-    path('api/tdc/purchase/',  TDCPurchaseView.as_view(),  name='tdc_purchase'),
-    path('api/tdc/withdraw/',  TDCWithdrawView.as_view(),  name='tdc_withdraw'),
 
     # ── Marketplace NFT ──────────────────────────────────────────────────────
     path('api/marketplace/listings/',       MarketplaceListingsView.as_view(),   name='marketplace_listings'),
