@@ -1,7 +1,7 @@
 from django.urls import path
 from terra_domini.apps.admin_gm.views import (
     GMDashboardView, GMPlayerListView, GMPlayerActionView,
-    GMTowerView, GMPOIView, GMBroadcastView, GMEconomyView,
+    GMTowerView, GMPOIView, GMBroadcastView, GMEconomyView, GMLogsView,
 )
 
 urlpatterns = [

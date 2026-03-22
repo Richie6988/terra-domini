@@ -67,10 +67,11 @@ export default function LoginPage() {
         style={cardStyle}
       >
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ fontSize: 32, fontWeight: 700, color: '#10B981', letterSpacing: -1, marginBottom: 4 }}>
-            TERRA DOMINI
+          <div style={{ fontSize: 42, marginBottom: 6 }}>⬡</div>
+          <div style={{ fontSize: 32, fontWeight: 900, color: '#10B981', letterSpacing: -1, marginBottom: 4 }}>
+            HEXOD
           </div>
-          <div style={{ fontSize: 13, color: '#6B7280' }}>Real-world territory strategy</div>
+          <div style={{ fontSize: 13, color: '#6B7280' }}>Jeu de stratégie géopolitique mondial</div>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -81,13 +82,13 @@ export default function LoginPage() {
           <input style={inputStyle} type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••••" />
 
           <button type="submit" disabled={loading} style={btnStyle}>
-            {loading ? 'Connecting…' : 'Enter the World'}
+            {loading ? 'Connexion…' : '⬡ Entrer dans le monde'}
           </button>
         </form>
 
         <div style={{ textAlign: 'center', marginTop: 20, fontSize: 13, color: '#6B7280' }}>
-          New commander?{' '}
-          <Link to="/register" style={{ color: '#10B981', textDecoration: 'none' }}>Create account</Link>
+          Nouveau commandant ?{' '}
+          <Link to="/register" style={{ color: '#10B981', textDecoration: 'none' }}>Créer un compte</Link>
         </div>
       </motion.div>
     </div>

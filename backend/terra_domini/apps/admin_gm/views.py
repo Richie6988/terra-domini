@@ -436,3 +436,98 @@ class GMEconomyView(GMRequiredMixin, APIView):
             return Response({'done': True, 'new_rate': rate})
 
         return Response({'error': f'Unknown action: {action}'}, status=400)
+
+
+# ─── Logs Admin ───────────────────────────────────────────────────────────────
+
+class GMLogsView(GMRequiredMixin, APIView):
+    """GET /api/gm/logs/ — dernières actions importantes du jeu."""
+
+    def get(self, request):
+        import sqlite3, os
+        from django.conf import settings as _s
+
+        db = str(_s.DATABASES['default'].get('NAME', 'db.sqlite3'))
+        conn = sqlite3.connect(db)
+        c    = conn.cursor()
+        logs = []
+
+        # Claims récents
+        try:
+            c.execute("""
+                SELECT 'claim' as type, u.username, t.h3_index, t.rarity, t.poi_name,
+                       t.captured_at, t.territory_type
+                FROM territories t
+                JOIN accounts_player u ON CAST(t.owner_id AS TEXT) = CAST(u.id AS TEXT)
+                WHERE t.captured_at IS NOT NULL
+                ORDER BY t.captured_at DESC LIMIT 30
+            """)
+            for r in c.fetchall():
+                logs.append({
+                    'type': 'claim', 'icon': '🏴',
+                    'player': r[1], 'h3': r[2], 'rarity': r[3],
+                    'poi': r[4] or r[2][:12], 'biome': r[6],
+                    'at': r[5] or '',
+                    'label': f"{r[1]} a revendiqué {r[4] or r[2][:10]} ({r[3]})",
+                })
+        except Exception as e:
+            logs.append({'type': 'info', 'label': f'Claims: {e}', 'at': ''})
+
+        # Batailles récentes
+        try:
+            c.execute("""
+                SELECT 'battle' as type, attacker_id, defender_id,
+                       territory_h3, result, resolved_at
+                FROM battle_log
+                ORDER BY resolved_at DESC LIMIT 20
+            """)
+            for r in c.fetchall():
+                logs.append({
+                    'type': 'battle', 'icon': '⚔️',
+                    'label': f"Bataille sur {r[3][:10]} — {r[4]}",
+                    'at': r[5] or '',
+                })
+        except Exception:
+            pass
+
+        # Achats shop récents
+        try:
+            c.execute("""
+                SELECT p.username, si.name, p.created_at
+                FROM player_inventory pi
+                JOIN accounts_player p ON pi.player_id = CAST(p.id AS TEXT)
+                JOIN shop_items si ON pi.item_id = si.id
+                ORDER BY pi.acquired_at DESC LIMIT 20
+            """)
+            for r in c.fetchall():
+                logs.append({
+                    'type': 'shop', 'icon': '🛒',
+                    'label': f"{r[0]} a acheté {r[1]}",
+                    'at': r[2] or '',
+                })
+        except Exception:
+            pass
+
+        # Connexions récentes
+        try:
+            c.execute("""
+                SELECT username, last_login, commander_rank, tdc_in_game
+                FROM accounts_player
+                WHERE last_login IS NOT NULL
+                ORDER BY last_login DESC LIMIT 20
+            """)
+            for r in c.fetchall():
+                logs.append({
+                    'type': 'login', 'icon': '🟢',
+                    'label': f"{r[0]} connecté — rang {r[2]} — {float(r[3] or 0):.0f} HEX",
+                    'at': r[1] or '',
+                    'player': r[0],
+                })
+        except Exception:
+            pass
+
+        conn.close()
+
+        # Trier par date desc
+        logs.sort(key=lambda x: x.get('at',''), reverse=True)
+        return Response({'logs': logs[:100]})

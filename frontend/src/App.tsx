@@ -182,6 +182,7 @@ export default function App() {
           <Routes>
             <Route path="/login"    element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/gm"       element={<AdminPanel />} />
             <Route path="/" element={
               <PrivateRoute>
                 <GameScreen />

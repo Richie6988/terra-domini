@@ -834,12 +834,6 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 territory.captured_at = timezone.now()
                 territory.defense_points = float(territory.max_defense_points or 100) * 0.25
                 territory.save(update_fields=['owner', 'captured_at', 'defense_points'])
-        # Déclencher vérification progression campagnes
-        try:
-            from terra_domini.apps.progression.campaigns import check_campaign_progress
-            check_campaign_progress(request.user)
-        except Exception:
-            pass
                 P.objects.filter(id=attacker.id).update(
                     territories_captured=F('territories_captured') + 1,
                     battles_won=F('battles_won') + 1,
