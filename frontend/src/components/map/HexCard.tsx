@@ -11,7 +11,7 @@
  *   🔬 Royaume — Resources + radial skill tree (always fully deployed)
  *   💎 NFT     — Token, marketplace
  */
-import { useState, useRef, useEffect, useMemo } from 'react'
+import { useState, useRef, useEffect, useMemo, Suspense } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../services/api'
@@ -314,6 +314,15 @@ function HexCard3D({ frontCv, backCv, imgUrl, cfg, showBack, isShiny }: {
   )
 }
 
+
+const BRANCHES = [
+  { id:'attack',    ang:-90,  color:'#EF4444', icon:'⚔️', label:'Attaque'     },
+  { id:'defense',   ang:-26,  color:'#3B82F6', icon:'🛡️', label:'Défense'     },
+  { id:'economy',   ang: 38,  color:'#F59E0B', icon:'💰', label:'Économie'    },
+  { id:'influence', ang:102,  color:'#10B981', icon:'🌐', label:'Influence'   },
+  { id:'tech',      ang:166,  color:'#8B5CF6', icon:'🔬', label:'Technologie' },
+] as const
+
 function SkillTreeSVG({ tree, kingdom, cfg, onUnlock }: {
   tree:Record<string,any[]>; kingdom:any; cfg:typeof RARITY[RK]; onUnlock:(id:number)=>void
 }) {
@@ -447,6 +456,7 @@ function SkillTreeSVG({ tree, kingdom, cfg, onUnlock }: {
     </svg>
   )
 }
+
 
 
 /* ── Kingdom tab ─────────────────────────────────────────── */
@@ -590,7 +600,7 @@ function CSS3DCard({ frontCv, cfg, showBack, isShiny }: {
     <div style={{ width:240, height:272, cursor:'grab', zIndex:1, flexShrink:0, perspective:800 }}
       ref={cardRef}
       onPointerDown={onPointerDown} onPointerMove={onPointerMove}
-      onPointerUp={onPointerUp} onPointerLeave={onPointerUp} onWheel={onWheel}
+      onPointerUp={onPointerUp} onPointerLeave={onPointerUp}
     >
       <div style={{
         width:'100%', height:'100%', position:'relative',
@@ -700,8 +710,18 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
         background:`radial-gradient(ellipse 55% 55% at 50% 42%,${cfg.c}1a 0%,transparent 70%)`,
         filter:'blur(50px)'}} />
 
-      {/* CSS 3D card — no WebGL, no context loss */}
-      <CSS3DCard frontCv={frontCv} cfg={cfg} showBack={showBack} isShiny={isShiny} />
+      {/* Three.js 3D card */}
+      <div style={{width:240,height:270,cursor:'grab',zIndex:1,flexShrink:0}}>
+        <Canvas camera={{position:[0,0,4.0],fov:42}} gl={{antialias:true,alpha:true,powerPreference:'high-performance'}} frameloop='always' style={{background:'transparent'}}>
+          <Suspense fallback={null}>
+            <ambientLight intensity={0.3} />
+            <pointLight position={[3,4,3]} intensity={1.8} />
+            <pointLight position={[-2,-2,2]} intensity={0.6} color={cfg.c} />
+            <Environment preset='city' />
+            <HexCard3D frontCv={frontCv} cfg={cfg} showBack={showBack} isShiny={isShiny} />
+          </Suspense>
+        </Canvas>
+      </div>
 
       {/* Label + flip */}
       <div style={{display:'flex',alignItems:'center',gap:10,zIndex:1}}>
