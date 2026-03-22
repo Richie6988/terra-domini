@@ -12,6 +12,10 @@
  *   💎 NFT     — Token, marketplace
  */
 import { useState, useRef, useEffect, useMemo, Suspense } from 'react'
+import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Environment } from '@react-three/drei'
+import * as THREE from 'three'
+
 import { motion, AnimatePresence } from 'framer-motion'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../services/api'

@@ -74,10 +74,38 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             return Response([], status=200)
 
         from terra_domini.apps.territories.models import Territory
-        # Load ALL territories in viewport: owned + landmark/seeded
-        all_terrs = {t.h3_index: t for t in
+        import sqlite3 as _sqlite3, os as _os
+
+        # Load ORM territories (for owner, alliance, etc.)
+        orm_terrs = {t.h3_index: t for t in
                      Territory.objects.filter(h3_index__in=hex_ids).select_related('owner')}
-        owned = all_terrs  # alias for backward compat
+
+        # Load raw territory data (rarity, is_landmark, poi_name etc.) via direct SQL
+        # This bypasses ORM model sync issues
+        raw_terrs = {}
+        try:
+            from django.conf import settings as _s
+            _db_cfg = _s.DATABASES.get('default', {})
+            _db = _db_cfg.get('NAME', 'db.sqlite3')
+            _conn = _sqlite3.connect(str(_db))
+            _c = _conn.cursor()
+            _ph = ','.join(['?'] * len(hex_ids))
+            _c.execute(f"""SELECT h3_index, rarity, is_landmark, is_shiny, poi_name, poi_wiki_url,
+                territory_type, tdc_per_day, resource_credits,
+                res_hex_cristaux, res_donnees, res_influence, res_fer, res_petrole,
+                res_nourriture, res_eau, res_stabilite, res_acier, res_composants,
+                res_main_oeuvre, res_silicium, res_terres_rares, res_uranium, res_gaz,
+                center_lat, center_lon, country_code, place_name, landmark_name, nft_version,
+                custom_name, custom_emoji, border_color
+                FROM territories WHERE h3_index IN ({_ph})""", hex_ids)
+            cols = [d[0] for d in _c.description]
+            for row in _c.fetchall():
+                raw_terrs[row[0]] = dict(zip(cols, row))
+            _conn.close()
+        except Exception as _e:
+            pass
+
+        owned = orm_terrs  # ORM for owner/alliance
 
         player = request.user
 
@@ -122,7 +150,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             except Exception:
                 continue
             t = owned.get(hx)
-            poi = poi_index.get(hx, {})   # POI makes this hex special
+            raw = raw_terrs.get(hx, {})    # Raw DB data (rarity, resources, etc.)
+            poi = poi_index.get(hx, {})    # UnifiedPOI data
             result.append({
                 'h3_index': hx, 'h3': hx, 'h3_resolution': res,
                 'owner_id': str(t.owner_id) if t and t.owner_id else None,
@@ -133,12 +162,12 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 'owner_kingdom_tier': kingdom_map.get(hx, {}).get('kingdom_tier', 0),
                 'owner_emoji': getattr(t.owner, 'avatar_emoji', '🏴') if t and t.owner_id else None,
                 'alliance_id': None, 'alliance_tag': None,
-                'territory_type': t.territory_type if t else _biome_from_poi(poi) if poi else 'rural',
-                'type': t.territory_type if t else _biome_from_poi(poi) if poi else 'rural',
+                'territory_type': (t.territory_type if t else None) or raw.get('territory_type') or _biome_from_poi(poi) or 'rural',
+                'type': (t.territory_type if t else None) or raw.get('territory_type') or _biome_from_poi(poi) or 'rural',
                 'defense_tier': t.defense_tier if t else 1,
                 'defense_points': float(t.defense_points) if t else 100.0,
                 'is_control_tower': bool(t.is_control_tower) if t else False,
-                'is_landmark': bool(poi),
+                'is_landmark': bool(raw.get('is_landmark',0)) or bool(poi),
                 'is_under_attack': False,
                 'ad_slot_enabled': False,
                 'landmark_name': poi.get('name'),
@@ -147,17 +176,17 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 'boundary_points': boundary,
                 'resource_food': float(getattr(t, 'resource_food', 5)),
                 'resource_energy': float(getattr(t, 'resource_energy', 5)),
-                'resource_credits': float(getattr(t,'tdc_per_day',None) or getattr(t,'resource_credits',None) or poi.get('tdc_per_24h',10) or 10),
+                'resource_credits': float(raw.get('tdc_per_day') or raw.get('resource_credits') or poi.get('tdc_per_24h',10) or 10),
                 'resource_materials': float(getattr(t, 'resource_materials', 3)),
                 'resource_intel': float(getattr(t, 'resource_intel', 2)),
                 'food_per_tick': float(getattr(t, 'resource_food', poi.get('tdc_per_24h', 10))),
-                'rarity': getattr(t,'rarity',None) or poi.get('rarity') or 'common',
+                'rarity': raw.get('rarity') or poi.get('rarity') or 'common',
                 'nft_version': getattr(t, 'nft_version', 1),
                 'token_id': poi.get('token_id') or getattr(t, 'token_id', None),
-                'is_shiny': bool(getattr(t,'is_shiny',False)) or bool(poi.get('is_shiny',False)),
-                'custom_name': getattr(t, 'custom_name', None) if t else None,
+                'is_shiny': bool(raw.get('is_shiny',0)) or bool(poi.get('is_shiny',False)),
+                'custom_name': raw.get('custom_name') or (getattr(t,'custom_name',None) if t else None),
                 'custom_emoji': getattr(t, 'custom_emoji', None) if t else None,
-                'border_color': getattr(t, 'border_color', None) if t else None,
+                'border_color': raw.get('border_color') or (getattr(t,'border_color',None) if t else None),
                 # POI — hex identity when POI present
                 'poi_name': poi.get('name'),
                 'poi_category': poi.get('category'),
