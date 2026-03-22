@@ -836,9 +836,20 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             victory    = _r.random() < win_chance
 
             if victory:
-                # Neutralise défenses pendant 6h (shield_expires_at utilisé comme timer)
+                # Neutralise défenses pendant 6h
                 from datetime import timedelta
-                territory.defense_points = max(10, float(territory.defense_points or 100) * 0.5)
+                import sqlite3 as _sq3b
+                _db = str(__import__('django').conf.settings.DATABASES['default'].get('NAME','db.sqlite3'))
+                _c2 = _sq3b.connect(_db)
+                # Incrémenter compteur infiltrations
+                _c2.execute("SELECT infiltration_count FROM territories WHERE h3_index=?", [h3_index])
+                _row = _c2.fetchone()
+                _inf_count = (_row[0] or 0) + 1 if _row else 1
+                _def_mult = 0.15 if _inf_count >= 3 else 0.5  # 3+ infiltrations → DEF 15%
+                _c2.execute("UPDATE territories SET infiltration_count=?, infiltration_window_until=datetime('now','+6 hours') WHERE h3_index=?",
+                            [_inf_count, h3_index])
+                _c2.commit(); _c2.close()
+                territory.defense_points = max(10, float(territory.defense_points or 100) * _def_mult)
                 territory.save(update_fields=['defense_points'])
                 return Response({
                     'victory': True, 'attack_type': 'infiltration',

@@ -709,8 +709,8 @@ function paintBackCanvas(cfg: typeof RARITY[RK], h3:string, income:number, floor
 //   Legendary/Mythic → MeshPhysicalMaterial (clearcoat + iridescence)
 //   Shiny → transmission + iridescence animée
 
-function HexCard3D({ frontCv, cfg, showBack, isShiny }: {
-  frontCv:HTMLCanvasElement
+function HexCard3D({ frontCv, backCv, cfg, showBack, isShiny }: {
+  frontCv: HTMLCanvasElement; backCv?: HTMLCanvasElement
   cfg:typeof RARITY[RK]; showBack:boolean; isShiny:boolean
 }) {
   const groupRef = useRef<THREE.Group>(null!)
@@ -798,30 +798,41 @@ function HexCard3D({ frontCv, cfg, showBack, isShiny }: {
   }),[frontTex, isShiny])
 
   // Matériau face arrière — MeshPhysicalMaterial pour legendary/mythic
+  // backTex — canvas texture pour Common/Uncommon (CARD spec)
+  const backTex = useMemo(() => {
+    if (!backCv || cfg.foil !== 'none' && cfg.foil !== 'subtle') return null
+    const t = new THREE.CanvasTexture(backCv)
+    t.flipY = true; t.needsUpdate = true; return t
+  }, [backCv, cfg.foil])
+
   const backMat = useMemo(() => {
+    // Common + Uncommon → canvas texture (CARD spec: cohérence visuelle)
+    if (backTex) {
+      return new THREE.MeshStandardMaterial({
+        map: backTex, metalness: 0.1, roughness: 0.8,
+      })
+    }
+    // Rare+ → MeshPhysicalMaterial avec iridescence
     const isHighRarity = cfg.foil === 'rainbow' || cfg.foil === 'prismatic'
     if (isHighRarity || isShiny) {
       return new THREE.MeshPhysicalMaterial({
         color: new THREE.Color(cfg.c),
-        metalness: cfg.metalness,
-        roughness: cfg.roughness,
-        clearcoat: isShiny ? 1.0 : 0.7,
-        clearcoatRoughness: 0.05,
+        metalness: cfg.metalness, roughness: cfg.roughness,
+        clearcoat: isShiny ? 1.0 : 0.7, clearcoatRoughness: 0.05,
         iridescence: isShiny ? 1.0 : cfg.foil === 'prismatic' ? 0.9 : 0.6,
-        iridescenceIOR: 1.8,
-        iridescenceThicknessRange: [100, 400],
+        iridescenceIOR: 1.8, iridescenceThicknessRange: [100, 400],
         envMapIntensity: isShiny ? 3.0 : 2.0,
         emissive: new THREE.Color(cfg.c).multiplyScalar(isShiny ? 0.25 : 0.12),
       })
     }
+    // Shimmer/holographic (Rare/Epic)
     return new THREE.MeshStandardMaterial({
       color: new THREE.Color(cfg.c),
-      metalness: cfg.metalness,
-      roughness: cfg.roughness + 0.1,
+      metalness: cfg.metalness, roughness: cfg.roughness + 0.1,
       envMapIntensity: 1.8,
       emissive: new THREE.Color(cfg.c).multiplyScalar(0.06),
     })
-  },[cfg, isShiny])
+  }, [backTex, cfg, isShiny])
 
   const D = 0.18
 
@@ -1192,7 +1203,7 @@ function WebGLCardWithFallback({ frontCv, backCv, cfg, showBack, isShiny, isNewC
           <pointLight position={[3,4,3]} intensity={1.8} />
           <pointLight position={[-2,-2,2]} intensity={0.6} color={cfg.c} />
           <Environment preset='city' />
-          <HexCard3D frontCv={lodCv} cfg={cfg} showBack={showBack} isShiny={isShiny} />
+          <HexCard3D frontCv={lodCv} backCv={backCv} cfg={cfg} showBack={showBack} isShiny={isShiny} />
         </Suspense>
       </Canvas>
     </div>
@@ -1316,8 +1327,8 @@ function CSS3DCard({ frontCv, cfg, showBack, isShiny }: {
 }
 
 /* ── Main HexCard ────────────────────────────────────────── */
-export function HexCard({ territory:t, onClose, onRequestClaim }:{
-  territory:any; onClose:()=>void; onRequestClaim:()=>void
+export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = false }:{
+  territory:any; onClose:()=>void; onRequestClaim:()=>void; isNewClaim?: boolean
 }) {
   const player=usePlayer()
   const isOwned=t.owner_id===player?.id
@@ -1372,7 +1383,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim }:{
       <WebGLCardWithFallback
         frontCv={frontCv} backCv={backCv}
         cfg={cfg} showBack={showBack} isShiny={isShiny}
-        isNewClaim={false}
+        isNewClaim={isNewClaim}
       />
 
       {/* Label + flip */}
