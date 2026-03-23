@@ -125,8 +125,8 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
     onError: (e: any) => toast.error(e.response?.data?.error || e.message || 'Training failed'),
   })
 
-  const battles = battlesData?.results ?? []
-  const history = historyData?.results ?? []
+  const battles = Array.isArray(battlesData) ? battlesData : (battlesData?.results ?? [])
+  const history = Array.isArray(historyData) ? historyData : (historyData?.results ?? [])
   const active = battles.filter((b: any) => b.status !== 'completed' && b.status !== 'cancelled')
   const completed = battles.filter((b: any) => b.status === 'completed' || b.status === 'cancelled')
 

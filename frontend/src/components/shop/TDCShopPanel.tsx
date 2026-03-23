@@ -82,7 +82,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
     },
   })
 
-  const items: ShopItem[] = catalogData ?? []
+  const items: ShopItem[] = Array.isArray(catalogData) ? catalogData : []
   const categories = [...new Set(items.map(i => i.category))]
   const filteredItems = selectedCategory ? items.filter(i => i.category === selectedCategory) : items
 
