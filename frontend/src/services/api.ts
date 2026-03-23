@@ -106,7 +106,7 @@ export const combatApi = {
 }
 
 export const tdcApi = {
-  balance: () => api.get('/tdc/balance/').then(r => r.data),
+  balance: () => api.get('/wallet/me/').then(r => ({ balance: r.data?.tdc_balance || r.data?.tdc_in_game || 0 })),
   catalog: () => api.get('/shop/catalog/').then(r => r.data),
   purchase: (item_code: string, quantity: number, territory_h3?: string) =>
     api.post('/shop/purchase/', { item_code, quantity, territory_h3 }).then(r => r.data),

@@ -27,7 +27,12 @@ export function MetaDashboard({ onClose }: Props) {
 
   const { data: leaderboard } = useQuery({
     queryKey: ['leaderboard-meta'],
-    queryFn: () => api.get('/social/leaderboard/').then(r => r.data),
+    queryFn: () => api.get('/territories-geo/ladder/?scope=global').then(r => ({
+      top_players: (r.data?.entries || []).slice(0,10).map((e: any) => ({
+        username: e.username, territories: e.territories,
+        tdc_earned: e.daily_income, rank: e.rank,
+      }))
+    })),
     staleTime: 60000,
   })
 
