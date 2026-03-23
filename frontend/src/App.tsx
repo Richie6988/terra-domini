@@ -192,6 +192,7 @@ export default function App() {
           </Routes>
         </Suspense>
       </BrowserRouter>
+      </WalletProvider>
 
       <Toaster
         position="top-center"
