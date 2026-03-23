@@ -1,89 +1,79 @@
 #!/bin/bash
 # ═══════════════════════════════════════════════════════════
-#  HEXOD — setup.sh
-#  Usage: bash setup.sh
-#  Fait tout : migrations, build front, démarrage serveur
+#  HEXOD — setup.sh  |  bash setup.sh
 # ═══════════════════════════════════════════════════════════
 set -e
 cd "$(dirname "$0")"
-
-GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RED='\033[0;31m'; RESET='\033[0m'
+GREEN='\033[0;32m'; YELLOW='\033[1;33m'; RESET='\033[0m'
 ok()   { echo -e "${GREEN}✅ $1${RESET}"; }
 info() { echo -e "${YELLOW}→  $1${RESET}"; }
-err()  { echo -e "${RED}❌ $1${RESET}"; }
 
-# ── 1. VENV ──────────────────────────────────────────────────────────────────
-info "Activation venv Python..."
-cd backend
-source venv/bin/activate || { err "venv absent — run: python3 -m venv venv && pip install -r requirements.txt"; exit 1; }
-ok "venv actif"
+info "Venv..."
+cd backend && source venv/bin/activate && ok "venv actif"
 
-# ── 2. MIGRATIONS ────────────────────────────────────────────────────────────
-info "Migration base de données..."
-
-# Nettoyer django_migrations — garder seulement les apps tierces stables
-python3 -c "
-import sqlite3, os
-db = 'db.sqlite3'
-if not os.path.exists(db): exit(0)
-conn = sqlite3.connect(db)
-c = conn.cursor()
-KEEP = {'auth','contenttypes','sessions','django_celery_beat','django_celery_results'}
-c.execute(\"DELETE FROM django_migrations WHERE app NOT IN ('{}')\".format(\"','\".join(KEEP)))
-conn.commit(); conn.close()
-print('  DB migrations nettoyées')
-" 2>/dev/null || true
-
-# Fake-initial : marque toutes les migrations comme appliquées (schema existe déjà)
-python manage.py migrate --fake-initial 2>/dev/null || python manage.py migrate --fake 2>/dev/null || true
-
+info "Migrations..."
+python manage.py migrate --verbosity=0 2>/dev/null || \
+  (python manage.py migrate --fake-initial --verbosity=0 2>/dev/null || true)
 ok "Migrations OK"
 
-# ── 3. ADMIN ─────────────────────────────────────────────────────────────────
-info "Vérification compte admin..."
-python manage.py shell -c "
+info "Admin + seed..."
+python3 << 'EOF'
+import os,sys
+os.environ['DJANGO_SETTINGS_MODULE']='terra_domini.settings.dev'
+os.environ['DJANGO_SECRET_KEY']='dev-secret-key-change-in-prod'
+sys.path.insert(0,'.')
+import django; django.setup()
+
 from terra_domini.apps.accounts.models import Player
 try:
     u = Player.objects.get(email='admin@td.com')
     u.set_password('admin123')
-    u.is_staff = True
-    u.is_superuser = True
-    u.tdc_in_game = 999999
-    u.save()
-    print('Admin OK')
 except Player.DoesNotExist:
-    u = Player.objects.create_superuser(username='admin', email='admin@td.com', password='admin123')
-    u.tdc_in_game = 999999
-    u.save()
-    print('Admin créé')
-" 2>/dev/null
-ok "Admin: admin@td.com / admin123"
+    u = Player(username='admin', email='admin@td.com')
+    u.set_password('admin123')
+u.is_staff=True; u.is_superuser=True; u.tdc_in_game=999999; u.save()
+print("Admin: admin@td.com / admin123")
 
-# ── 4. BUILD FRONTEND ────────────────────────────────────────────────────────
+from terra_domini.apps.territories.models import Territory
+if Territory.objects.count() == 0:
+    import csv, h3
+    objs = []
+    if os.path.exists('terra_domini_pois.csv'):
+        with open('terra_domini_pois.csv') as f:
+            for row in csv.DictReader(f):
+                try:
+                    lat=float(row.get('lat',0) or 0); lon=float(row.get('lon',0) or 0)
+                    if not lat and not lon: continue
+                    h3i=h3.geo_to_h3(lat,lon,10)
+                    bd=[[p[0],p[1]] for p in h3.h3_to_geo_boundary(h3i)]
+                    name=(row.get('name','') or '')[:200]
+                    objs.append(Territory(
+                        h3_index=h3i,h3_resolution=10,
+                        geom_geojson={'type':'Polygon','coordinates':[bd]},
+                        territory_type=row.get('category','landmark'),
+                        country_code=row.get('country_code','XX') or 'XX',
+                        region_name='',place_name=name,
+                        center_lat=lat,center_lon=lon,
+                        rarity=row.get('rarity','common') or 'common',
+                        biome=row.get('category','landmark'),
+                        tdc_per_day=float(row.get('tdc_per_24h',10) or 10),
+                        defense_tier=1,defense_points=100.0,max_defense_points=100.0,
+                        is_landmark=True,poi_name=name,
+                        is_shiny=bool(int(row.get('is_shiny',0) or 0)),
+                    ))
+                except: pass
+        Territory.objects.bulk_create(objs,ignore_conflicts=True)
+print(f"Territoires: {Territory.objects.count()}")
+EOF
+ok "Seed OK"
+
+info "Build frontend..."
 cd ../frontend
-info "Build frontend React..."
+command -v npm &>/dev/null && npm install --silent 2>/dev/null && npm run build 2>/dev/null && ok "Frontend buildé" || echo "⚠️  npm absent"
 
-if ! command -v npm &>/dev/null; then
-    err "npm absent"
-    info "Tentative installation Node..."
-    sudo apk add nodejs npm 2>/dev/null \
-    || sudo apt-get install -y nodejs npm 2>/dev/null \
-    || { err "Impossible d'installer Node. Lancez le frontend manuellement dans un 2ème terminal: cd frontend && npm run dev -- --host"; }
-fi
-
-if command -v npm &>/dev/null; then
-    npm install --silent 2>/dev/null || npm install
-    npm run build 2>/dev/null && ok "Frontend buildé → dist/"
-fi
-
-# ── 5. DÉMARRAGE SERVEUR ────────────────────────────────────────────────────
 cd ../backend
-info "Démarrage serveur Django sur :8000..."
 echo ""
-echo "  🌍 Jeu disponible sur : http://localhost:8000"
-echo "  👑 Admin panel        : http://localhost:8000/admin"
-echo "  🎮 GM panel           : http://localhost:8000/gm"
-echo "  Login                 : admin@td.com / admin123"
+echo "  🌍 Port 8000 → jeu  |  /admin  |  /gm"
+echo "  Login: admin@td.com / admin123"
 echo ""
-
 exec python manage.py runserver 0.0.0.0:8000
