@@ -71,6 +71,7 @@ import { WarTicker } from './components/hud/WarTicker'
 const LoginPage    = lazy(() => import('./pages/LoginPage'))
 const Tutorial     = lazy(() => import('./components/onboarding/Tutorial'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
+const AdminPanel   = lazy(() => import('./pages/AdminPanel'))
 
 const queryClient = new QueryClient({
   defaultOptions: {
