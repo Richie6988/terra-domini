@@ -165,10 +165,8 @@ CELERY_TASK_EAGER_PROPAGATES = True
 
 # ── Static / Media ────────────────────────────────────────────────────────────
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-# Tell Django where to find the built React app (before collectstatic)
 STATICFILES_DIRS = [
-    BASE_DIR.parent / 'frontend' / 'dist',  # Vite build output
+    BASE_DIR.parent / 'frontend' / 'dist',
 ]
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'

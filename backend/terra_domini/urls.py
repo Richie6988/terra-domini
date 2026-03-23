@@ -4,6 +4,9 @@ Clean version: no duplicate registrations, no duplicate health path.
 """
 from django.contrib import admin
 from django.urls import path, include, re_path
+from django.conf import settings
+from django.conf.urls.static import static
+from django.views.static import serve as static_serve
 from rest_framework.routers import DefaultRouter
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView as SpectacularSwaggerUIView
 
@@ -140,6 +143,10 @@ urlpatterns = [
     # ── React SPA catch-all (must be LAST) ───────────────────────────────────
     # Any URL that doesn't match /api/ /admin/ /health/ /static/ /ws/
     # gets served the React app — React Router handles client-side routing
-    re_path(r'^(?!api/|admin/|health/|static/|media/|ws/|robots[.]txt).*$',
+    # Servir les assets Vite buildés (/assets/index-xxx.js etc.)
+    re_path(r'^assets/(?P<path>.*)$', static_serve, {
+        'document_root': str(settings.BASE_DIR.parent / 'frontend' / 'dist' / 'assets'),
+    }),
+        re_path(r'^(?!api/|admin/|health/|static/|assets/|media/|ws/|robots[.]txt).*$',
             FrontendAppView.as_view(), name='frontend'),
 ]
