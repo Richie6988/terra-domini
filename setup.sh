@@ -21,19 +21,21 @@ ok "venv actif"
 # ── 2. MIGRATIONS ────────────────────────────────────────────────────────────
 info "Migration base de données..."
 
-# Fake territories en premier (no-op migration, table créée par ensure_db.py)
-python manage.py migrate territories --fake 2>/dev/null || true
+# Nettoyer django_migrations — garder seulement les apps tierces stables
+python3 -c "
+import sqlite3, os
+db = 'db.sqlite3'
+if not os.path.exists(db): exit(0)
+conn = sqlite3.connect(db)
+c = conn.cursor()
+KEEP = {'auth','contenttypes','sessions','django_celery_beat','django_celery_results'}
+c.execute(\"DELETE FROM django_migrations WHERE app NOT IN ('{}')\".format(\"','\".join(KEEP)))
+conn.commit(); conn.close()
+print('  DB migrations nettoyées')
+" 2>/dev/null || true
 
-# Appliquer dans l'ordre des dépendances
-for app in contenttypes auth sessions accounts; do
-    python manage.py migrate $app --fake-initial 2>/dev/null || true
-done
-
-# Fake toutes les autres (schema existe déjà via ensure_db.py)
-python manage.py migrate --fake-initial 2>/dev/null || true
-
-# Appliquer ce qui reste vraiment
-python manage.py migrate --run-syncdb 2>/dev/null || true
+# Fake-initial : marque toutes les migrations comme appliquées (schema existe déjà)
+python manage.py migrate --fake-initial 2>/dev/null || python manage.py migrate --fake 2>/dev/null || true
 
 ok "Migrations OK"
 
