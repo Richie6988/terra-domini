@@ -576,14 +576,7 @@ function paintBackCanvas(cfg: typeof RARITY[RK], h3:string, income:number, floor
 
   return cv
 }
-  const S=1024, cv=document.createElement('canvas')
-  cv.width=S; cv.height=S
-  const ctx=cv.getContext('2d')!
 
-  // Background
-  /* corps remplacé par la nouvelle implémentation ci-dessus — ne jamais supprimer cette ligne */
-  return cv
-}
 
 /* ── 3D Card — Artist3D spec ─────────────────────────────── */
 // Règles Artist3D :
