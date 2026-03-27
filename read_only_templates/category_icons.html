@@ -88,8 +88,3 @@ categories = {
     },
 }
 
-# Display the organized structure
-import json
-print(json.dumps(list(categories.keys()), indent=2))
-print(f"\nTotal categories: {len(categories)}")
-print(f"Total icons: {sum(len(v) for v in categories.values())}")
