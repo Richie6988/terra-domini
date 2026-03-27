@@ -1,1 +1,145 @@
+# HEXOD — AGENT OPTIMIZATION WEIGHTS v1.0
+# Learned heuristics from real sessions.
+# Not literal neural weights — symbolic decision weights that improve routing,
+# confidence calibration, and error avoidance over time.
+# Updated after each session.
 
+## TASK ROUTING — AUTONOMY WEIGHTS
+# 1.0 = execute immediately / 0.0 = always ask first
+
+task_type                       autonomy   note
+──────────────────────────────────────────────────────────────────
+syntax_fix                       1.0       just fix it
+import_fix                       1.0       just fix it
+css_styling                      0.8       unless direction change
+api_endpoint_bug                 0.9       fix + verify both sides
+react_component_bug              0.9       fix + check JSX balance
+django_migration_issue           0.8       if no data loss risk
+db_schema_change                 0.4       flag before acting
+new_ui_screen                    0.2       consult ARIA first
+gameplay_mechanic_change         0.1       consult GAME + BOARD first
+tokenomics_change                0.05      always propose first
+
+## FILE RISK WEIGHTS
+# How often edits to this file cause regressions → use accordingly
+
+file                             risk    preferred_method
+──────────────────────────────────────────────────────────────────
+urls.py                          HIGH    str_replace + verify imports both sides
+views.py                         HIGH    str_replace + check indentation depth
+HexCard.tsx                      HIGH    str_replace + check for orphan blocks after
+App.tsx                          MEDIUM  str_replace + count JSX open/close tags
+settings/dev.py                  HIGH    str_replace + python syntax check after
+migrations/                      HIGH    never edit manually — use management commands
+store/index.ts                   MEDIUM  str_replace
+api.ts                           LOW     str_replace
+brain/ files                     LOW     overwrite + push (no token in content)
+
+## TRANSFORMER-STYLE ATTENTION WEIGHTS
+# Which signals to attend to most when processing owner messages
+
+signal                              weight   action
+──────────────────────────────────────────────────────────────────
+stacktrace pasted                    1.0     fix immediately, no commentary
+"continuer" / "continue"             1.0     keep going, same direction
+"clean it" / "proprement"            0.9     quality over speed
+"de zéro" / "from scratch"           0.9     full reset, clean approach
+"buggy" / "bugs"                     1.0     fix immediately
+"valide" / "validate"                0.8     review + confirm then push
+"tu n'as pas fait" / "you didn't"   0.9     check git log, fix gap
+paste of HTML/CSS template           0.8     read fully before converting
+new file in read_only_templates/     0.9     read + integrate if approved
+question mark in message             0.5     answer concisely then act
+
+## ERROR PATTERN RECOGNITION
+# Known patterns → fix → weight assigned to prevent recurrence
+
+PATTERN: append Python code at wrong indentation
+CAUSED:  IndentationError views.py line 843
+FIX:     Read last 20 lines of file before any append. Use str_replace instead.
+WEIGHT:  always_read_context_before_append = 1.0
+
+PATTERN: two versions of same function in same file
+CAUSED:  Unexpected } in HexCard.tsx (orphan code block)
+FIX:     After any HexCard.tsx edit, grep for "}\n  const S=1024" pattern
+WEIGHT:  check_orphan_after_hexcard_edit = 1.0
+
+PATTERN: lazy import missing in App.tsx
+CAUSED:  AdminPanel is not defined at runtime
+FIX:     Check existing lazy imports before adding new component to routes
+WEIGHT:  verify_lazy_import_before_route = 1.0
+
+PATTERN: JSX provider opened but not closed
+CAUSED:  Unterminated JSX in App.tsx (WalletProvider)
+FIX:     Count opening/closing tags after wrapping in providers
+WEIGHT:  count_jsx_tags_after_provider_wrap = 1.0
+
+PATTERN: django_migrations has entries for deleted files
+CAUSED:  InconsistentMigrationHistory on every migrate
+FIX:     DELETE FROM django_migrations WHERE app NOT IN (safe_apps) then fake-initial
+WEIGHT:  clean_migrations_table_before_migrate = 1.0
+
+PATTERN: whitenoise in MIDDLEWARE but not installed in venv
+CAUSED:  ModuleNotFoundError on every request
+FIX:     Remove from INSTALLED_APPS + MIDDLEWARE both
+WEIGHT:  check_installed_before_middleware = 1.0
+
+PATTERN: token_blacklist still referenced after removal
+CAUSED:  OperationalError on login (missing table)
+FIX:     Remove from INSTALLED_APPS + clean django_migrations table
+WEIGHT:  full_removal_requires_settings_and_db = 1.0
+
+PATTERN: Vite /assets/*.js served as text/html
+CAUSED:  MIME type error, app completely broken
+FIX:     Add /assets/ exclusion in catchall + static_serve route
+WEIGHT:  vite_assets_need_explicit_django_route = 1.0
+
+PATTERN: API returns object, .map() called on it
+CAUSED:  TypeError: s.map is not a function
+FIX:     Array.isArray(data) ? data : (data?.results ?? [])
+WEIGHT:  always_guard_api_data_before_map = 1.0
+
+PATTERN: raw PAT in committed file
+CAUSED:  GitHub push protection rejects push
+FIX:     Never store raw tokens in files. Use <PAT> placeholder.
+         Store token only in git remote URL (not committed).
+WEIGHT:  never_commit_raw_token = 1.0
+
+PATTERN: squash reset picks up stale file from repo (not local)
+CAUSED:  brain files appear empty after force push
+FIX:     After reset --soft, verify file content before committing
+WEIGHT:  verify_file_content_after_reset = 1.0
+
+## QUALITY THRESHOLDS
+
+Before any commit:
+  □ No raw tokens (ghp_xxx) in any file
+  □ python syntax check if .py was edited
+  □ grep for orphan blocks if HexCard.tsx was edited
+  □ JSX tag count if App.tsx providers were modified
+  □ Array.isArray guard on all .map() calls on API data
+
+Before push:
+  □ npm run build passes (if frontend changed)
+  □ Server starts without error (if backend changed)
+  □ git remote URL has current PAT embedded
+
+## SPEED CALIBRATION
+# How many iterations each task typically needs
+
+task                          iterations   notes
+──────────────────────────────────────────────────────────────────
+simple import fix              1           reliable
+migration cleanup              2-3         always inspect DB first
+static file serving config     2-3         Django+Vite interaction tricky
+new React component            1-2         reliable
+DB seed from CSV               2           column mismatch common → use ORM
+Three.js shader                2-3         UV + frameloop traps
+git push with token            1-2         network or protection issues
+
+## SELF-IMPROVEMENT PROTOCOL
+After each session, add to this file:
+  - New error patterns discovered
+  - Autonomy weight adjustments based on outcomes
+  - Speed calibration updates
+  - New owner signal interpretations
