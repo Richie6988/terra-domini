@@ -183,3 +183,29 @@
     "cursor": "Default pointer with custom hover states"
   }
 }
+
+## ICON LIBRARY (from read_only_templates/category_icons.html)
+# 10 categories × ~5 icons each = 48 total SVG icons
+# All SVGs are viewBox="0 0 256 256", circular bg with colored fill
+# Source of truth: read_only_templates/category_icons.html
+
+CATEGORIES:
+  natural_disasters:  earthquake, tsunami, volcano, nuclear (+ more)
+  places_structures:  city, capitalCity, museum, monument, wonder, cult, port, tower, observatory, farm, mine
+  nature_geography:   waterfall, cave, mountain, glacier, island, forest, ocean, desert
+  knowledge_science:  science, tech, intelligence, medicine
+  industry_economy:   industry, infrastructure, treasure
+  culture_society:    celebs, entertainment, art, sport, music, food, history
+  conflict_intrigue:  chokepoint, weapon, war, conspiracy, mystery, piracy, diplomacy
+  life_organisms:     vegetal, microOrganism, animal, insect, mushroom, fossil
+  special_epic:       space, mythology, countries, sponsored, gift
+  news:               news
+
+ICON STYLE RULES:
+  - viewBox: "0 0 256 256"
+  - Structure: <circle> (background) + <g transform="translate+scale+translate"> (content)
+  - Background fill uses category color (see CATEGORY COLOR SYSTEM above)
+  - Content is white/light on dark bg, max 3 colors
+  - Scale factor: 0.6 (content occupies ~60% of circle)
+  - No text in SVGs
+  - Geometric, symbolic, instantly recognizable at 32px
