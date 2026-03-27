@@ -11,7 +11,7 @@ branch: main
 admin_login: admin@td.com / admin123
 
 ## GIT ACCESS & PUSH
-token: see git remote URL (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)
+token: see git remote URL (not show in brain)
 # Token rotated — always use current PAT in remote URL
 
 PUSH WORKFLOW (sandbox blocks github.com via proxy — workaround required):
