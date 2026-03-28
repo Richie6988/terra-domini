@@ -16,6 +16,7 @@ import { OnboardingHotspots } from './components/onboarding/OnboardingHotspots'
 import { NewsTicker } from './components/shared/NewsTicker'
 import { HexodTopHUD } from './components/shared/HexodTopHUD'
 import { HexodDock } from './components/shared/HexodDock'
+import { RadarTrigger, RadarFilterPanel } from './components/shared/RadarFilterPanel'
 
 // WakeUpDigest connecté à l'API
 function WakeUpDigestConnected() {
@@ -109,7 +110,22 @@ function GameScreen() {
     }
   }, [accessToken])
   const [showClicker, setShowClicker] = useState(false)
+  const [radarOpen, setRadarOpen] = useState(false)
+  const [radarActive, setRadarActive] = useState(false)
   const setActivePanel       = useStore((s) => s.setActivePanel)
+
+  // Keyboard: 'R' toggles radar panel
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'r' || e.key === 'R') {
+        if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+          setRadarOpen(v => !v)
+        }
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [])
 
   return (
     <div
@@ -131,6 +147,17 @@ function GameScreen() {
       <ErrorBoundary label="HexodTopHUD">
         <HexodTopHUD />
       </ErrorBoundary>
+
+      {/* Radar trigger (left edge) + filter panel */}
+      <RadarTrigger
+        onClick={() => setRadarOpen(v => !v)}
+        scanning={radarActive}
+      />
+      <RadarFilterPanel
+        open={radarOpen}
+        onClose={() => setRadarOpen(false)}
+        onFilterChange={(ids) => setRadarActive(ids.size > 0)}
+      />
 
       {/* Base map — full screen background */}
       <ErrorBoundary label="GameMap">
