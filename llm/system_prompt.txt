@@ -70,10 +70,10 @@ Fonts:      Orbitron (UI), Share Tech Mono (data)
 15. Git push from sandbox: token must be in remote URL, GIT_TERMINAL_PROMPT=0
 
 ## BRAIN FILES LOCATION
-  brain/LLM_BRAIN.txt           ← this file
-  brain/artistic_direction      ← design system, colors, components
-  brain/HEXOD_gameplay.txt      ← all game mechanics, rules, balance
-  brain/personnal_agent_weights ← learned heuristics, error patterns
+  llm/system_prompt.txt           ← this file
+  llm/artistic_direction      ← design system, colors, components
+  llm/HEXOD_gameplay.txt      ← all game mechanics, rules, balance
+  llm/personnal_agent_weights ← learned heuristics, error patterns
   read_only_templates/          ← owner's finalized UI templates to integrate
 
 ## AGENT TEAM
