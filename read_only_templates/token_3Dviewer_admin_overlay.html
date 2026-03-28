@@ -1,0 +1,1238 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <title>HEXOD - VAULT PRESTIGE v25.0 HOLOGRAPHIC</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { 
+            margin: 0; 
+            overflow: hidden; 
+            background: radial-gradient(ellipse at center, #0a0a12 0%, #000000 70%);
+        }
+        canvas { display: block; cursor: grab; opacity: 0; transition: opacity 2s ease-out; }
+        canvas:active { cursor: grabbing; }
+        #ui-container {
+            position: absolute; top: 20px; left: 20px;
+            font-family: 'Orbitron', sans-serif;
+            color: white; z-index: 10; padding: 24px;
+            background: rgba(5,5,10,0.92); border-radius: 4px; backdrop-filter: blur(25px);
+            border: 1px solid rgba(255,255,255,0.08); width: 320px;
+            max-height: 85vh; overflow-y: auto;
+            transform: translateX(-120%); transition: transform 1.2s cubic-bezier(0.2, 0.8, 0.2, 1) 1s;
+            box-shadow: 0 0 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .label { font-size: 10px; opacity: 0.6; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 8px; }
+        
+        /* Custom Select Styling */
+        .custom-select-wrapper {
+            position: relative;
+            margin-bottom: 15px;
+        }
+        
+        .custom-select-trigger {
+            background: #000;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 12px;
+            cursor: pointer;
+            font-family: Orbitron;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .custom-options {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: rgba(0,0,0,0.98);
+            border: 1px solid #444;
+            border-top: none;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+            z-index: 100;
+        }
+        
+        .custom-option {
+            padding: 10px 12px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+        
+        .custom-option:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .custom-option .icon-svg {
+            width: 16px;
+            height: 16px;
+            margin-right: 10px;
+            fill: currentColor;
+            flex-shrink: 0;
+        }
+        
+        .custom-select-wrapper.open .custom-options {
+            display: block;
+        }
+        
+        .arrow {
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-top: 4px solid #fff;
+            margin-left: 8px;
+        }
+
+        /* Native select fallback hidden */
+        select {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="ui-container">
+        <div class="label">RARITY</div>
+        <select id="tier-selector">
+            <option value="0">BRONZE TYPE-01</option>
+            <option value="1">SILVER TYPE-02</option>
+            <option value="2">GOLD TYPE-03</option>
+            <option value="3">EMERALD TYPE-04</option>
+        </select>
+        <div id="tier-custom" class="custom-select-wrapper">
+            <div class="custom-select-trigger" onclick="toggleTier()">
+                <span id="tier-selected">BRONZE TYPE-01</span>
+                <span class="arrow"></span>
+            </div>
+            <div class="custom-options" id="tier-options"></div>
+        </div>
+
+        <div class="label">Territory Registry (57)</div>
+        <select id="cat-selector"></select>
+        <div id="cat-custom" class="custom-select-wrapper">
+            <div class="custom-select-trigger" onclick="toggleCat()">
+                <span id="cat-selected" style="display:flex;align-items:center;">
+                    <span style="width:16px;height:16px;margin-right:8px;" id="cat-selected-icon"></span>
+                    <span id="cat-selected-text">ANCIENT FOREST</span>
+                </span>
+                <span class="arrow"></span>
+            </div>
+            <div class="custom-options" id="cat-options" style="max-height:400px;"></div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+
+    <script>
+        // ==========================================
+        // CONFIGURATION - Restored to original quality with optimizations
+        // ==========================================
+        
+        const CONFIG = {
+            textureSize: 2048,
+            cardThickness: 0.14,
+            anisotropy: 16,
+            maxPixelRatio: 2.0,
+            rotationSpeed: 0.002,
+            zoomDamping: 0.08,
+            zoomSpeed: 0.6
+        };
+
+        // 5 Rarity Tiers
+        const TIERS = [
+          { 
+            id: 'BRONZE', 
+            metal: '#CD7F32',        // Richer Bronze
+            carbon: '#1C1610',       // Warm Brown-Black
+            title: '#EBC49F',        // High-contrast Highlight
+            engrave_metal: '#5C3317' // Deep shadow-brown
+          },
+          { 
+            id: 'SILVER', 
+            metal: '#C0C0C0',        // True Silver
+            carbon: '#16181A',       // Cool Steel-Black
+            title: '#FFFFFF',        // Pure White contrast
+            engrave_metal: '#4A4A4A' // Deep Charcoal shadow
+          },
+          { 
+            id: 'GOLD', 
+            metal: '#D4AF37',        // Metallic Gold
+            carbon: '#1A1608',       // Deep Amber-Black
+            title: '#FFECB3',        // Soft Gold highlight
+            engrave_metal: '#634E14' // Burnished Gold shadow
+          },
+          { 
+            id: 'EMERALD', 
+            metal: '#2ECC71',        // Vibrant Emerald
+            carbon: '#051209',       // Deep Forest-Black
+            title: '#A9DFBF',        // Minty highlight
+            engrave_metal: '#145A32' // Dark Evergreen shadow
+          }
+        ];
+
+        // ==========================================
+        // 57 CATEGORIES - Proprietary SVG Icons
+        // ==========================================
+    
+        const RAW_CATS = [
+            { id: 'FOR', label: 'ANCIENT FOREST', cat_color: '#39FF14', icon: 'forest', multiCats: null },
+            { id: 'RUI', label: 'ANCIENT RUIN', cat_color: '#FF6B35', icon: 'ruin' },
+            { id: 'ANI', label: 'ANIMAL', cat_color: '#FF10F0', icon: 'animal' },
+            { id: 'ART', label: 'ART', cat_color: '#00F0FF', icon: 'art' },
+            { id: 'CAN', label: 'CANYON', cat_color: '#FF4500', icon: 'canyon' },
+
+        ];
+        
+        const CATEGORIES = RAW_CATS.map(c => ({...c, count: Math.floor(Math.random()*800)+100}));
+        let tier = TIERS[0];
+        let token = {
+            title: 'CRIMSON PEAK',
+            description: null, // Custom description or null for default
+            edition: 'GENESIS',
+            tier: 'GOLD',
+            date: '2026-03-27',
+            owner: 'VAULT_HOLDER',
+            serial: 42,
+            maxSupply: 1000,
+            power: 87,
+            rarity: 94
+        };
+        let cat = CATEGORIES[0];
+        let currentBiome = token.biome || 'EUROPA';
+        let shineOffset = -2000;
+        let holoAngle = 0; // Pour effet holographique
+        let frameCount = 0;
+        
+        CATEGORIES[0].multiCats = [CATEGORIES[0], CATEGORIES[3], CATEGORIES[2]]; 
+
+        // ==========================================
+        // SVG ICONS LIBRARY - PLACE YOUR SVG DICT HERE
+        // ==========================================
+        
+ const ICONS = {
+            forest: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L4 22h16L12 2zm0 4l5 12H7l5-12z"/><rect x="11" y="16" width="2" height="6"/></svg>',
+            ruin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 22V10l4-4h8l4 4v12M8 22v-8M16 22v-8M12 22v-6"/><circle cx="12" cy="6" r="2"/></svg>',
+            animal: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M4 12c0-4 3-8 8-8s8 4 8 8-4 10-8 10-8-6-8-10z"/><circle cx="9" cy="11" r="1.5"/><circle cx="15" cy="11" r="1.5"/><path d="M9 16c1.5 1 4.5 1 6 0" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+            art: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M8 12c0-2 2-4 4-4s4 2 4 4-2 4-4 4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="12" r="2"/></svg>',
+            canyon: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M2 22h4l3-12 3 8 3-16 3 12 4 8h2" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>',
+    
+        };
+
+
+        // ==========================================
+        // UI SETUP with Custom Dropdown for SVG Support
+        // ==========================================
+        
+        function initCustomSelects() {
+            // Tier selector
+            const tierOptions = document.getElementById('tier-options');
+            TIERS.forEach((tier, idx) => {
+                const div = document.createElement('div');
+                div.className = 'custom-option';
+                div.innerHTML = `<span style="color:${tier.foil}">◆</span> ${tier.id} TYPE-0${idx+1}`;
+                div.onclick = () => selectTier(idx);
+                tierOptions.appendChild(div);
+            });
+
+            // Category selector
+            const catOptions = document.getElementById('cat-options');
+            CATEGORIES.forEach((cat, idx) => {
+                const div = document.createElement('div');
+                div.className = 'custom-option';
+                div.style.color = cat.cat_color;
+                div.innerHTML = `<span class="icon-svg" style="fill:currentColor">${ICONS[cat.icon]}</span> ${cat.label}`;
+                div.onclick = () => selectCat(idx);
+                catOptions.appendChild(div);
+            });
+
+            // Set initial selected
+            document.getElementById('cat-selected-icon').innerHTML = ICONS[CATEGORIES[0].icon];
+            document.getElementById('cat-selected-icon').style.fill = CATEGORIES[0].cat_color;
+        }
+
+        function toggleTier() {
+            document.getElementById('tier-custom').classList.toggle('open');
+            document.getElementById('cat-custom').classList.remove('open');
+        }
+
+        function toggleCat() {
+            document.getElementById('cat-custom').classList.toggle('open');
+            document.getElementById('tier-custom').classList.remove('open');
+        }
+
+        function selectTier(idx) {
+            tier = TIERS[idx];
+            document.getElementById('tier-selected').textContent = tier.id + ' TYPE-0' + (idx+1);
+            document.getElementById('tier-selector').value = idx;
+            document.getElementById('tier-custom').classList.remove('open');
+            updateAll();
+        }
+
+        function selectCat(idx) {
+            cat = CATEGORIES[idx];
+            currentBiome = cat.biome || 'UNKNOWN';
+            document.getElementById('cat-selected-text').textContent = cat.label;
+            document.getElementById('cat-selected-icon').innerHTML = ICONS[cat.icon];
+            document.getElementById('cat-selected-icon').style.fill = cat.cat_color;
+            document.getElementById('cat-selector').value = idx;
+            document.getElementById('cat-custom').classList.remove('open');
+            updateAll();
+        }
+
+        // Close dropdowns when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.custom-select-wrapper')) {
+                document.querySelectorAll('.custom-select-wrapper').forEach(el => el.classList.remove('open'));
+            }
+        });
+
+        initCustomSelects();
+
+        // ==========================================
+        // THREE.JS SETUP
+        // ==========================================
+        
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(28, window.innerWidth / window.innerHeight, 0.1, 100);
+        camera.position.set(0, 0, 9);
+
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: "high-performance" });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, CONFIG.maxPixelRatio));
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.6;
+        renderer.outputEncoding = THREE.sRGBEncoding;
+        document.body.appendChild(renderer.domElement);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 2.2));
+        
+        // Key light (main)
+        const keyLight = new THREE.PointLight(0xffffff, 3.5, 25);
+        keyLight.position.set(3, 3, 6);
+        scene.add(keyLight);
+        
+        // Rim light (back glow)
+        const rim = new THREE.PointLight(0xffffff, 2.5, 18); 
+        rim.position.set(-5, -5, 4); 
+        scene.add(rim);
+        
+        // Fill light (softer)
+        const fillLight = new THREE.PointLight(0x8888ff, 1.5, 15);
+        fillLight.position.set(-4, 2, 3);
+        scene.add(fillLight);
+        
+        // Top highlight
+        const topLight = new THREE.PointLight(0xffffff, 1.5, 12);
+        topLight.position.set(0, 6, 4);
+        scene.add(topLight);
+
+        const cardImg = new Image(); 
+        cardImg.crossOrigin = "anonymous";
+        cardImg.src = 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=1000';
+
+        const frontCanvas = document.createElement('canvas'); 
+        frontCanvas.width = CONFIG.textureSize; 
+        frontCanvas.height = CONFIG.textureSize;
+        const fCtx = frontCanvas.getContext('2d');
+
+        const backCanvas = document.createElement('canvas'); 
+        backCanvas.width = CONFIG.textureSize; 
+        backCanvas.height = CONFIG.textureSize;
+        const bCtx = backCanvas.getContext('2d');
+
+        function drawHex(ctx, x, y, r, angle = 0) {
+            ctx.beginPath();
+            for(let i=0; i<6; i++){
+                const a = (i * Math.PI / 3) - Math.PI/2 + angle;
+                ctx.lineTo(x + r * Math.cos(a), y + r * Math.sin(a));
+            }
+            ctx.closePath();
+        }
+
+        function wrapTextCentered(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = text.split(' '); 
+            let lines = []; 
+            let line = '';
+            for(let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                if (ctx.measureText(testLine).width > maxWidth && n > 0) {
+                    lines.push(line.trim()); 
+                    line = words[n] + ' ';
+                } else { 
+                    line = testLine; 
+                }
+            }
+            lines.push(line.trim());
+            const totalHeight = lines.length * lineHeight;
+            let startY = y - (totalHeight / 2) + (lineHeight / 2);
+            lines.forEach(l => { 
+                ctx.fillText(l, x, startY); 
+                startY += lineHeight; 
+            });
+        }
+
+        function drawFront() {
+            const s = CONFIG.textureSize;
+            const c = s / 2;
+            
+            // Deep black background for max contrast
+            fCtx.fillStyle = '#020202'; 
+            fCtx.fillRect(0, 0, s, s);
+            
+            const boxW = s * 0.71, boxX = (s - boxW) / 2;
+            
+            // ==========================================
+            // HOLOGRAPHIC RAINBOW OVERLAY (the $1000 effect)
+            // ==========================================
+            fCtx.save();
+            const holoRadius = s * 0.4;
+            const holoGradient = fCtx.createLinearGradient(
+                c + Math.cos(holoAngle) * holoRadius, 
+                c + Math.sin(holoAngle) * holoRadius,
+                c - Math.cos(holoAngle) * holoRadius, 
+                c - Math.sin(holoAngle) * holoRadius
+            );
+            holoGradient.addColorStop(0, 'rgba(255,0,128,0.15)');
+            holoGradient.addColorStop(0.2, 'rgba(255,128,0,0.12)');
+            holoGradient.addColorStop(0.4, 'rgba(255,255,0,0.15)');
+            holoGradient.addColorStop(0.6, 'rgba(0,255,128,0.12)');
+            holoGradient.addColorStop(0.8, 'rgba(0,128,255,0.15)');
+            holoGradient.addColorStop(1, 'rgba(128,0,255,0.12)');
+            fCtx.fillStyle = holoGradient;
+            drawHex(fCtx, c, c, s * 0.49);
+            fCtx.fill();
+            fCtx.restore();
+            
+            // Gradient for metallic text effects - MORE SHINE
+            const shineWidth = s * 0.5;
+            let g = fCtx.createLinearGradient(shineOffset * 2, 0, shineOffset * 2 + shineWidth, 0);
+            g.addColorStop(0, tier.metal); 
+            g.addColorStop(0.4, "#ffffff");
+            g.addColorStop(0.5, "#ffffff"); 
+            g.addColorStop(0.6, "#ffffff");
+            g.addColorStop(1, tier.metal);
+
+            // ==========================================
+            // RARITY BADGE (top-right corner, always visible)
+            // ==========================================
+            const badgeX = boxX + boxW - s * 0.06;
+            const badgeY = s * 0.14;
+            const badgeSize = s * 0.042;
+            
+            fCtx.save();
+            fCtx.shadowBlur = 50;
+            fCtx.shadowColor = tier.metal;
+            
+            // Badge hexagon background
+            fCtx.fillStyle = tier.carbon;
+            drawHex(fCtx, badgeX, badgeY, badgeSize);
+            fCtx.fill();
+            
+            // Badge border glow
+            fCtx.strokeStyle = tier.metal;
+            fCtx.lineWidth = 5;
+            fCtx.stroke();
+            
+            // Tier letter
+            fCtx.fillStyle = tier.metal;
+            fCtx.font = `900 ${s * 0.03}px Orbitron`;
+            fCtx.textAlign = 'center';
+            fCtx.fillText(tier.id[0], badgeX, badgeY + s * 0.01);
+            fCtx.restore();
+        
+            // ==========================================
+            // SECTION 1: CATEGORY (stays at top)
+            // ==========================================
+            fCtx.textAlign = 'center';
+            fCtx.fillStyle = g; 
+            fCtx.font = `bold ${s * 0.032}px Orbitron`;
+            fCtx.fillText(`${cat.label}`, c, s * 0.166);
+        
+            // ==========================================
+            // SECTION 2: MULTI-CATEGORY ICON ROW
+            // ==========================================
+        
+            const tokenCategories = cat.multiCats || [cat];
+        
+            const iconRow = {
+                startY: s * 0.205,
+                iconSize: s * 0.032,
+                gapX: s * 0.04,
+                maxCats: 4
+            };
+        
+            const catsToShow = Math.min(tokenCategories.length, iconRow.maxCats);
+            const totalRowWidth = (catsToShow * iconRow.iconSize) + ((catsToShow - 1) * iconRow.gapX);
+            const startX = c - (totalRowWidth / 2) + (iconRow.iconSize / 2);
+        
+            for (let i = 0; i < catsToShow; i++) {
+                const catIcon = tokenCategories[i];
+                const iconX = startX + (i * (iconRow.iconSize + iconRow.gapX));
+                const iconY = iconRow.startY;
+                drawSVGIcon(fCtx, iconX, iconY, iconRow.iconSize, catIcon.icon, catIcon.cat_color);
+            }
+        
+            // ==========================================
+            // SECTION 2bis: BIOME
+            // ==========================================
+        
+            fCtx.textAlign = 'center';
+            fCtx.fillStyle = g; 
+            fCtx.font = `bold ${s * 0.032}px Orbitron`;
+            fCtx.fillText(`${currentBiome}`, c, s * 0.264);
+            
+            // ==========================================
+            // SECTION 3: IMAGE + TITLE OVERLAY
+            // ==========================================
+            
+            const imageY = s * 0.293;
+            const imageH = s * 0.342;
+            
+            // Draw image with shadow
+            fCtx.save();
+            fCtx.shadowBlur = s * 0.05; 
+            fCtx.shadowColor = cat.cat_color;
+            if (cardImg.complete) {
+                fCtx.drawImage(cardImg, boxX, imageY, boxW, imageH);
+            }
+            fCtx.restore();
+        
+            // Title overlay on image - GUARANTEED VISIBILITY
+            const titleY = imageY + imageH - s * 0.034;
+            const titleBarH = s * 0.05;
+            const fadeW = s * 0.025;
+            
+            // Solid dark bar behind title (works on ANY image)
+            fCtx.save();
+            fCtx.fillStyle = 'rgba(0,0,0,0.88)';
+            fCtx.fillRect(boxX, titleY - titleBarH * 0.55, boxW, titleBarH);
+            
+            // Gradient fade edges
+            let titleFadeL = fCtx.createLinearGradient(boxX - fadeW, 0, boxX, 0);
+            titleFadeL.addColorStop(0, 'rgba(0,0,0,0)');
+            titleFadeL.addColorStop(1, 'rgba(0,0,0,0.88)');
+            fCtx.fillStyle = titleFadeL;
+            fCtx.fillRect(boxX - fadeW, titleY - titleBarH * 0.55, fadeW, titleBarH);
+            
+            let titleFadeR = fCtx.createLinearGradient(boxX + boxW, 0, boxX + boxW + fadeW, 0);
+            titleFadeR.addColorStop(0, 'rgba(0,0,0,0.88)');
+            titleFadeR.addColorStop(1, 'rgba(0,0,0,0)');
+            fCtx.fillStyle = titleFadeR;
+            fCtx.fillRect(boxX + boxW, titleY - titleBarH * 0.55, fadeW, titleBarH);
+            fCtx.restore();
+            
+            // Title text with stroke for extra contrast
+            fCtx.save();
+            fCtx.textAlign = 'center';
+            fCtx.font = `900 ${s * 0.047}px Orbitron`;
+            
+            // Text stroke (outline)
+            fCtx.strokeStyle = 'rgba(0,0,0,0.9)';
+            fCtx.lineWidth = s * 0.003;
+            fCtx.strokeText(token.title || 'TERRITORY', c, titleY + s * 0.008);
+            
+            // Main text with gradient
+            fCtx.fillStyle = g;
+            fCtx.shadowBlur = 40;
+            fCtx.shadowColor = cat.cat_color;
+            fCtx.fillText(token.title || 'TERRITORY', c, titleY + s * 0.008);
+            fCtx.restore();
+        
+            // ==========================================
+            // SECTION 4: SIDE VERTICAL TEXT (TIER + SERIAL)
+            // ==========================================
+            
+            fCtx.font = `900 ${s * 0.026}px Orbitron`;
+            
+            // LEFT: TIER
+            fCtx.save(); 
+            fCtx.translate(boxX - s * 0.035, imageY + (imageH / 2)); 
+            fCtx.rotate(-Math.PI / 2);
+            fCtx.fillStyle = g;
+            fCtx.shadowBlur = 25;
+            fCtx.shadowColor = tier.metal;
+            fCtx.fillText(`${tier.id}`, 0, 0); 
+            fCtx.restore();
+            
+            // RIGHT: SERIAL (format: 42/1000)
+            fCtx.save(); 
+            fCtx.translate(boxX + boxW + s * 0.035, imageY + (imageH / 2)); 
+            fCtx.rotate(Math.PI / 2);
+            fCtx.fillStyle = g;
+            fCtx.shadowBlur = 25;
+            fCtx.shadowColor = tier.metal;
+            const serialDisplay = `${token.serial}/${token.maxSupply}`;
+            fCtx.fillText(serialDisplay, 0, 0); 
+            fCtx.restore();
+        
+            // ==========================================
+            // SECTION 5: DESCRIPTION BOX
+            // ==========================================
+            
+            const descY = imageY + imageH + s * 0.02;
+            const descH = s * 0.352;
+            
+            fCtx.save();
+            fCtx.shadowBlur = 40;
+            fCtx.shadowColor = cat.cat_color;
+            fCtx.fillStyle = 'rgba(5,5,5,0.98)'; 
+            fCtx.fillRect(boxX, descY, boxW, descH);
+            fCtx.restore();
+            
+            fCtx.strokeStyle = g; 
+            fCtx.lineWidth = 4; 
+            fCtx.strokeRect(boxX + s * 0.01, descY + s * 0.01, boxW - s * 0.02, descH - s * 0.02);
+            
+            fCtx.strokeStyle = cat.cat_color;
+            fCtx.globalAlpha = 0.35;
+            fCtx.lineWidth = 2;
+            fCtx.strokeRect(boxX + s * 0.012, descY + s * 0.012, boxW - s * 0.024, descH - s * 0.024);
+            fCtx.globalAlpha = 1;
+            
+            // Description text - TOP ALIGNED with margin
+            fCtx.textAlign = 'center'; 
+            fCtx.fillStyle = '#e0e0e0';
+            fCtx.font = `italic 42px Georgia`;
+            
+            const text = token.description || "Ce jeton certifie la propriété souveraine du territoire HEXOD identifié. Données géospatiales cryptées via protocole Vault Alpha. Rareté garantie par Tier " + tier.id + ".";
+            
+            wrapTextCentered(fCtx, text, c, descY + s * 0.08, boxW - s * 0.1, s * 0.03);
+        
+            // ==========================================
+            // SECTION 6: OUTER BORDER + VIGNETTE
+            // ==========================================
+            
+            // Vignette overlay
+            fCtx.save();
+            const vignette = fCtx.createRadialGradient(c, c, s * 0.25, c, c, s * 0.55);
+            vignette.addColorStop(0, 'rgba(0,0,0,0)');
+            vignette.addColorStop(1, 'rgba(0,0,0,0.45)');
+            fCtx.fillStyle = vignette;
+            fCtx.fillRect(0, 0, s, s);
+            fCtx.restore();
+
+            // Film grain subtle
+            fCtx.save();
+            fCtx.globalAlpha = 0.02;
+            for(let i = 0; i < 3000; i++) {
+                const gx = Math.random() * s;
+                const gy = Math.random() * s;
+                fCtx.fillStyle = Math.random() > 0.5 ? '#fff' : '#000';
+                fCtx.fillRect(gx, gy, 2, 2);
+            }
+            fCtx.globalAlpha = 1;
+            fCtx.restore();
+            
+            // Outer hex border
+            fCtx.strokeStyle = tier.metal; 
+            fCtx.lineWidth = s * 0.022; 
+            drawHex(fCtx, c, c, s * 0.492); 
+            fCtx.stroke();
+            
+            fMat.map.needsUpdate = true;
+        }
+        
+        function parseAttributes(attrString) {
+            const attrs = {};
+            const regex = /(\w+[-\w]*)="([^"]*)"/g;
+            let match;
+            
+            while ((match = regex.exec(attrString)) !== null) {
+                attrs[match[1]] = match[2];
+            }
+            
+            return attrs;
+        }
+        
+        function drawSVGIcon(ctx, x, y, size, iconKey, iconColor) {
+            const svgString = ICONS[iconKey];
+            if (!svgString) return;
+            
+            const useColor = iconColor || cat.cat_color;
+            const lineW = Math.max(2, size * 0.04);
+            
+            ctx.save();
+            ctx.translate(x, y);
+            
+            // Glow effect behind icon
+            ctx.shadowBlur = size * 0.4;
+            ctx.shadowColor = useColor;
+            
+            // Background hexagon (not circle!)
+            ctx.fillStyle = 'rgba(2, 2, 2, 0.95)';
+            drawHex(ctx, 0, 0, size / 2);
+            ctx.fill();
+            
+            // Outer ring hex
+            ctx.strokeStyle = tier.metal;
+            ctx.lineWidth = lineW;
+            ctx.stroke();
+            
+            // Inner accent hex
+            ctx.beginPath();
+            drawHex(ctx, 0, 0, (size / 2) - size * 0.08);
+            ctx.strokeStyle = useColor;
+            ctx.globalAlpha = 0.5;
+            ctx.lineWidth = lineW * 0.6;
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+            
+            ctx.restore();
+            
+            // Draw SVG content
+            ctx.save();
+            ctx.translate(x, y);
+            
+            const viewBoxMatch = svgString.match(/viewBox="([^"]+)"/);
+            let viewBoxSize = 24;
+            
+            if (viewBoxMatch) {
+                const parts = viewBoxMatch[1].split(/\s+/).map(parseFloat);
+                if (parts.length === 4) {
+                    viewBoxSize = parts[2];
+                }
+            }
+            
+            const scale = (size - size * 0.35) / viewBoxSize;
+            ctx.scale(scale, scale);
+            ctx.translate(-viewBoxSize / 2, -viewBoxSize / 2);
+            
+            ctx.fillStyle = useColor;
+            ctx.strokeStyle = useColor;
+            
+            drawSVGContent(ctx, svgString, useColor);
+            
+            ctx.restore();
+        }
+        
+        function drawSVGContent(ctx, svgString, useColor) {
+            const iconColor = useColor || cat.cat_color;
+            
+            // Extract viewBox
+            const viewBoxMatch = svgString.match(/viewBox="([^"]+)"/);
+            let viewBox = { x: 0, y: 0, w: 24, h: 24 };
+            
+            if (viewBoxMatch) {
+                const parts = viewBoxMatch[1].split(/\s+/).map(parseFloat);
+                if (parts.length === 4) {
+                    viewBox = { x: parts[0], y: parts[1], w: parts[2], h: parts[3] };
+                }
+            }
+            
+            // Draw circles
+            const circleRegex = /<circle([^>]*)\/?>/g;
+            let match;
+            while ((match = circleRegex.exec(svgString)) !== null) {
+                const attrs = parseAttributes(match[1]);
+                
+                ctx.beginPath();
+                ctx.arc(
+                    parseFloat(attrs.cx || 0),
+                    parseFloat(attrs.cy || 0),
+                    parseFloat(attrs.r || 0),
+                    0,
+                    Math.PI * 2
+                );
+                
+                if (attrs.fill && attrs.fill !== 'none') {
+                    ctx.fillStyle = attrs.fill === 'currentColor' ? iconColor : attrs.fill;
+                    ctx.fill();
+                }
+                
+                if (attrs.stroke && attrs.stroke !== 'none') {
+                    ctx.strokeStyle = attrs.stroke === 'currentColor' ? iconColor : attrs.stroke;
+                    ctx.lineWidth = parseFloat(attrs['stroke-width'] || 1);
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw paths
+            const pathRegex = /<path([^>]*)\/?>/g;
+            while ((match = pathRegex.exec(svgString)) !== null) {
+                const attrs = parseAttributes(match[1]);
+                const d = attrs.d;
+                
+                if (!d) continue;
+                
+                try {
+                    const path = new Path2D(d);
+                    
+                    if (attrs.fill && attrs.fill !== 'none') {
+                        ctx.fillStyle = attrs.fill === 'currentColor' ? iconColor : attrs.fill;
+                        ctx.fill(path);
+                    }
+                    
+                    if (attrs.stroke && attrs.stroke !== 'none') {
+                        ctx.strokeStyle = attrs.stroke === 'currentColor' ? iconColor : attrs.stroke;
+                        ctx.lineWidth = parseFloat(attrs['stroke-width'] || 1);
+                        ctx.lineCap = attrs['stroke-linecap'] || 'butt';
+                        ctx.lineJoin = attrs['stroke-linejoin'] || 'miter';
+                        ctx.stroke(path);
+                    }
+                } catch (e) {
+                    console.warn('Failed to parse path:', e);
+                }
+            }
+            
+            // Draw rects
+            const rectRegex = /<rect([^>]*)\/?>/g;
+            while ((match = rectRegex.exec(svgString)) !== null) {
+                const attrs = parseAttributes(match[1]);
+                const x = parseFloat(attrs.x || 0);
+                const y = parseFloat(attrs.y || 0);
+                const w = parseFloat(attrs.width || 0);
+                const h = parseFloat(attrs.height || 0);
+                
+                if (attrs.fill && attrs.fill !== 'none') {
+                    ctx.fillStyle = attrs.fill === 'currentColor' ? iconColor : attrs.fill;
+                    ctx.fillRect(x, y, w, h);
+                }
+                
+                if (attrs.stroke && attrs.stroke !== 'none') {
+                    ctx.strokeStyle = attrs.stroke === 'currentColor' ? iconColor : attrs.stroke;
+                    ctx.lineWidth = parseFloat(attrs['stroke-width'] || 1);
+                    ctx.strokeRect(x, y, w, h);
+                }
+            }
+}
+
+        // ==========================================
+        // BACK: Carbon Outside, Tier Metal Core
+        // ==========================================
+        
+       function drawBack() {
+            const s = CONFIG.textureSize;
+            const c = s / 2;
+            const metalColor = tier.metal;
+            const carbonColor = tier.carbon;
+            const catColor = cat.cat_color;
+            const coreRadius = s * 0.22;
+            
+            // ==========================================
+            // 1. FULL CARBON BASE
+            // ==========================================
+            bCtx.fillStyle = carbonColor;
+            bCtx.fillRect(0, 0, s, s);
+            
+            // Carbon fiber weave pattern
+            bCtx.save();
+            bCtx.beginPath();
+            drawHex(bCtx, c, c, s * 0.47);
+            bCtx.clip();
+            
+            // Diagonal weave - direction 1
+            bCtx.strokeStyle = 'carbonColor';
+            bCtx.lineWidth = 1;
+            const weaveStep = s * 0.008;
+            for (let i = -s; i < s * 2; i += weaveStep) {
+                bCtx.beginPath();
+                bCtx.moveTo(i, 0);
+                bCtx.lineTo(i + s * 0.5, s);
+                bCtx.stroke();
+            }
+            // Diagonal weave - direction 2
+            for (let i = -s; i < s * 2; i += weaveStep) {
+                bCtx.beginPath();
+                bCtx.moveTo(i, 0);
+                bCtx.lineTo(i - s * 0.5, s);
+                bCtx.stroke();
+            }
+            bCtx.restore();
+            
+            // ==========================================
+            // 2. OUTER BORDER (tier metal)
+            // ==========================================
+            bCtx.strokeStyle = metalColor;
+            bCtx.lineWidth = s * 0.035;
+            bCtx.shadowColor = metalColor;
+            bCtx.shadowBlur = 40;
+            drawHex(bCtx, c, c, s * 0.49);
+            bCtx.stroke();
+            bCtx.shadowBlur = 0;
+            
+            // Inner border line
+            bCtx.strokeStyle = metalColor;
+            bCtx.lineWidth = 2;
+            bCtx.globalAlpha = 0.5;
+            drawHex(bCtx, c, c, s * 0.455);
+            bCtx.stroke();
+            bCtx.globalAlpha = 1;
+            
+            // ==========================================
+            // 3. "NON FUNGIBLE TERRITORY" - TOP (on carbon)
+            // ==========================================
+            bCtx.textAlign = 'center';
+            bCtx.font = `bold ${s * 0.022}px Orbitron`;
+            bCtx.fillStyle = metalColor;
+            bCtx.shadowBlur = 25;
+            bCtx.shadowColor = metalColor;
+            bCtx.fillText('NON FUNGIBLE TERRITORY', c, c - coreRadius - s * 0.055);
+            bCtx.shadowBlur = 0;
+            
+            // Decorative line under text
+            bCtx.strokeStyle = metalColor;
+            bCtx.lineWidth = 1;
+            bCtx.globalAlpha = 0.4;
+            bCtx.beginPath();
+            bCtx.moveTo(c - s * 0.15, c - coreRadius - s * 0.035);
+            bCtx.lineTo(c + s * 0.15, c - coreRadius - s * 0.035);
+            bCtx.stroke();
+            bCtx.globalAlpha = 1;
+            
+            // ==========================================
+            // 4. CENTRAL CORE - FULL TIER METAL
+            // ==========================================
+            
+            // Core fill with metallic gradient
+            const coreGrad = bCtx.createRadialGradient(c - coreRadius * 0.3, c - coreRadius * 0.3, 0, c, c, coreRadius);
+
+            coreGrad.addColorStop(0.3, metalColor);
+            coreGrad.addColorStop(1, tier.engrave_metal);
+            
+            bCtx.fillStyle = coreGrad;
+            bCtx.shadowBlur = 50;
+            bCtx.shadowColor = metalColor;
+            drawHex(bCtx, c, c, coreRadius);
+            bCtx.fill();
+            bCtx.shadowBlur = 0;
+            
+            // Core border highlight
+            bCtx.strokeStyle = catColor;
+            bCtx.lineWidth = 42;
+            bCtx.globalAlpha = 0.6;
+            drawHex(bCtx, c, c, coreRadius);
+            bCtx.stroke();
+            bCtx.globalAlpha = 1;
+            
+            // Inner bevel
+            bCtx.strokeStyle = tier.engrave_metal;
+            bCtx.lineWidth = 2;
+            drawHex(bCtx, c, c, coreRadius - s * 0.012);
+            bCtx.stroke();
+            
+            // ==========================================
+            // 5. METADATA - ENGRAVED IN METAL CORE
+            // ==========================================
+            const fontSize = s * 0.018; // Slightly larger for clarity
+            const lineH = fontSize * 1.7;
+            
+            const lines = [
+                `#HEX-${cat?.id ?? 'XXX'}-${String(cat?.count ?? 0).padStart(4, '0')}`,
+                `${token?.edition ?? 'GENESIS'}`,
+                `TIER ${tier.id}`,
+                `${token?.date ?? '2026-03-27'}`,
+                `${token?.owner ?? 'VAULT_HOLDER'}`,
+            ];
+            
+            const totalH = lines.length * lineH;
+            const startY = c - totalH / 2 + lineH * 0.4;
+            
+            // Font: Heavy weight monospaced fonts look more "stamped"
+            bCtx.font = `700 ${fontSize}px "Roboto Mono", "Courier New", monospace`;
+            bCtx.textAlign = 'center';
+            bCtx.textBaseline = 'middle';
+            bCtx.letterSpacing = "2px"; // Wider tracking for that CNC machine look
+            
+            lines.forEach((line, i) => {
+                const x = c;
+                const y = startY + i * lineH;
+                const baseAlpha = (i === 0 || i === 2) ? 1.0 : 0.7;
+    
+    bCtx.save();
+
+    // 1. THE BRIGHT RIM (Light hitting the bottom edge of the cut)
+    // We move this further down (2px) to suggest a deeper hole
+    bCtx.globalAlpha = baseAlpha * 0.3;
+    bCtx.fillStyle = '#ffffff'; 
+    bCtx.fillText(line, x, y + 2); 
+
+    // 2. THE MULTI-LAYER INTERNAL WALLS (The "Deep" part)
+    // We draw the black text 3 times with different offsets to simulate depth
+    bCtx.fillStyle = '#000000';
+    bCtx.globalAlpha = baseAlpha * 0.4;
+    bCtx.fillText(line, x, y - 1.5); // Deepest shadow
+    bCtx.fillText(line, x - 1, y - 1); // Side shadow
+    bCtx.fillText(line, x + 1, y - 1); // Side shadow
+
+    // 3. THE "FLOOR" OF THE CUT
+    // A very dark, slightly blurred version of the tier color
+    bCtx.globalAlpha = baseAlpha;
+    bCtx.shadowColor = 'rgba(0,0,0,0.8)';
+    bCtx.shadowBlur = 3;
+    bCtx.fillStyle = tier.engrave_metal; // Should be very dark (e.g., #1a1a1a)
+    bCtx.fillText(line, x, y);
+
+    // 4. OPTIONAL: INNER GLOW (Makes it look "freshly milled")
+    // This adds a tiny bit of grit to the edges
+    bCtx.globalAlpha = 0.1;
+    bCtx.strokeStyle = '#000000';
+    bCtx.lineWidth = 0.5;
+    bCtx.strokeText(line, x, y);
+
+    bCtx.restore();
+});
+            
+            // Hash signature
+            const hash = '0x' + Math.random().toString(16).slice(2, 10).toUpperCase();
+            bCtx.font = `500 ${fontSize * 0.6}px Orbitron`;
+            bCtx.globalAlpha = 0.5;
+            bCtx.fillText(hash, c, startY + lines.length * lineH + s * 0.008);
+            bCtx.globalAlpha = 1;
+            
+            // ==========================================
+            // 6. "HEXOD" - BOTTOM (on carbon)
+            // ==========================================
+            bCtx.font = `900 ${s * 0.055}px Orbitron`;
+            bCtx.fillStyle = metalColor;
+            bCtx.shadowBlur = 45;
+            bCtx.shadowColor = metalColor;
+            bCtx.fillText('HEXOD', c, c + coreRadius + s * 0.075);
+            bCtx.shadowBlur = 0;
+            
+            // Decorative line above HEXOD
+            bCtx.strokeStyle = metalColor;
+            bCtx.lineWidth = 1;
+            bCtx.globalAlpha = 0.4;
+            bCtx.beginPath();
+            bCtx.moveTo(c - s * 0.12, c + coreRadius + s * 0.035);
+            bCtx.lineTo(c + s * 0.12, c + coreRadius + s * 0.035);
+            bCtx.stroke();
+            bCtx.globalAlpha = 1;
+            
+            // ==========================================
+            // 7. CORNER HEX ACCENTS (metal on carbon)
+            // ==========================================
+            bCtx.fillStyle = metalColor;
+            bCtx.globalAlpha = 0.7;
+            
+            // Top corners
+            drawHex(bCtx, s * 0.15, s * 0.12, s * 0.018);
+            bCtx.fill();
+            drawHex(bCtx, s * 0.85, s * 0.12, s * 0.018);
+            bCtx.fill();
+            
+            // Bottom corners
+            drawHex(bCtx, s * 0.15, s * 0.88, s * 0.018);
+            bCtx.fill();
+            drawHex(bCtx, s * 0.85, s * 0.88, s * 0.018);
+            bCtx.fill();
+            
+            bCtx.globalAlpha = 1;
+        
+            bMat.map.needsUpdate = true;
+        }
+        
+        function drawCarbon() {
+            const s = CONFIG.textureSize;
+            const c = s / 2;
+            const carbonColor = tier.carbon;
+            
+            // DEEP SPACE BACKGROUND
+            bCtx.fillStyle = carbonColor;
+            bCtx.fillRect(0, 0, s, s);
+        }
+
+        const fTex = new THREE.CanvasTexture(frontCanvas); 
+        fTex.rotation = Math.PI/2; 
+        fTex.center.set(0.5,0.5); 
+        fTex.anisotropy = CONFIG.anisotropy;
+        
+        const bTex = new THREE.CanvasTexture(backCanvas); 
+        bTex.rotation = -Math.PI/2; 
+        bTex.center.set(0.5,0.5); 
+        bTex.repeat.set(-1,-1); 
+        bTex.anisotropy = CONFIG.anisotropy;
+
+        const fMat = new THREE.MeshPhysicalMaterial({ 
+            map: fTex, 
+            roughness: 0.02, 
+            metalness: 0.88, 
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.01,
+            reflectivity: 1.0,
+            envMapIntensity: 10
+        });
+        
+        const bMat = new THREE.MeshPhysicalMaterial({ 
+            map: bTex, 
+            clearcoat: 1, 
+            roughness: 0.01,
+            metalness: 0.9,
+            emissive: new THREE.Color(tier.metal),
+            emissiveIntensity: 0.08,
+            clearcoatRoughness: 0.01,
+            reflectivity: 1.0
+        });
+        
+        
+        const sMat = new THREE.MeshPhysicalMaterial({ 
+            metalness: 1.0, 
+            roughness: 0.0,
+            emissive: new THREE.Color(tier.metal),
+            emissiveIntensity: 0.25,
+            clearcoat: 1.0,
+            clearcoatRoughness: 0.0,
+            reflectivity: 1.0
+        });
+
+        const geo = new THREE.CylinderGeometry(1.5, 1.5, CONFIG.cardThickness, 6); 
+        geo.rotateX(Math.PI/2);
+        
+        const card = new THREE.Group();
+        const cardMesh = new THREE.Mesh(geo, [sMat, fMat, bMat]);
+        card.add(cardMesh); 
+        scene.add(card);
+
+        let entryProgress = 0;
+        card.rotation.y = -Math.PI; 
+        card.scale.set(0,0,0);
+
+        // ==========================================
+        // OPTIMIZED CONTROLS
+        // ==========================================
+        
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true;
+        controls.dampingFactor = CONFIG.zoomDamping;
+        controls.zoomSpeed = CONFIG.zoomSpeed;
+        controls.minDistance = 4;
+        controls.maxDistance = 15;
+        controls.enablePan = false;
+        controls.rotateSpeed = 0.5;
+
+        function updateAll() {
+            sMat.color.set(cat.cat_color); 
+            sMat.emissive.set(tier.metal);
+            bMat.emissive.set(tier.metal);
+            rim.color.set(tier.metal);
+            drawCarbon();
+            drawBack();
+        }
+
+        const clock = new THREE.Clock();
+
+        function animate() {
+            requestAnimationFrame(animate);
+            
+            const delta = clock.getDelta();
+
+            if(entryProgress < 1) {
+                entryProgress += 0.008;
+                const ease = 1 - Math.pow(1 - entryProgress, 3);
+                card.scale.set(ease, ease, ease);
+                card.rotation.y = -Math.PI + (ease * Math.PI);
+                if(entryProgress >= 1) {
+                    document.getElementById('ui-container').style.transform = "translateX(0)";
+                }
+            } else { 
+                card.rotation.y += CONFIG.rotationSpeed; 
+            }
+            
+            // Shimmer update every 4th frame for performance
+            frameCount++;
+            if(frameCount % 4 === 0) {
+                shineOffset += 25;
+                if(shineOffset > 3500) shineOffset = -1500;
+                holoAngle += 0.03;
+                drawFront();
+            }
+            
+            controls.update();
+            renderer.render(scene, camera);
+        }
+
+        // Native select fallbacks for accessibility
+        document.getElementById('tier-selector').onchange = (e) => selectTier(e.target.value);
+        document.getElementById('cat-selector').onchange = (e) => selectCat(e.target.value);
+        
+        updateAll(); 
+        animate();
+        
+        window.onresize = () => { 
+            camera.aspect = window.innerWidth / window.innerHeight; 
+            camera.updateProjectionMatrix(); 
+            renderer.setSize(window.innerWidth, window.innerHeight); 
+        };
+
+        // ==========================================
+        // PUBLIC API - renderToken(data)
+        // ==========================================
+        window.HEXOD = {
+            renderToken: function(data) {
+                // Update token data
+                if (data.title) token.title = data.title;
+                if (data.description !== undefined) token.description = data.description;
+                if (data.serial !== undefined) token.serial = data.serial;
+                if (data.maxSupply) token.maxSupply = data.maxSupply;
+                if (data.power !== undefined) token.power = data.power;
+                if (data.rarity !== undefined) token.rarity = data.rarity;
+                if (data.edition) token.edition = data.edition;
+                if (data.date) token.date = data.date;
+                if (data.owner) token.owner = data.owner;
+                if (data.biome) currentBiome = data.biome;
+                
+                // Update tier by index or id
+                if (data.tierIndex !== undefined) {
+                    tier = TIERS[data.tierIndex];
+                } else if (data.tier) {
+                    tier = TIERS.find(t => t.id === data.tier.toUpperCase()) || tier;
+                }
+                
+                // Update category by index or id
+                if (data.catIndex !== undefined) {
+                    cat = CATEGORIES[data.catIndex];
+                } else if (data.category) {
+                    cat = CATEGORIES.find(c => c.id === data.category.toUpperCase()) || cat;
+                }
+                
+                // Update image if provided
+                if (data.imageUrl) {
+                    cardImg.src = data.imageUrl;
+                }
+                
+                // Refresh everything
+                updateAll();
+                drawFront();
+                
+                return { success: true, token, tier: tier.id, category: cat.id };
+            },
+            
+            getState: function() {
+                return { token, tier: tier.id, category: cat.id, biome: currentBiome };
+            },
+            
+            setTier: function(tierIdOrIndex) {
+                if (typeof tierIdOrIndex === 'number') {
+                    selectTier(tierIdOrIndex);
+                } else {
+                    const idx = TIERS.findIndex(t => t.id === tierIdOrIndex.toUpperCase());
+                    if (idx >= 0) selectTier(idx);
+                }
+            },
+            
+            setCategory: function(catIdOrIndex) {
+                if (typeof catIdOrIndex === 'number') {
+                    selectCat(catIdOrIndex);
+                } else {
+                    const idx = CATEGORIES.findIndex(c => c.id === catIdOrIndex.toUpperCase());
+                    if (idx >= 0) selectCat(idx);
+                }
+            }
+        };
+        
+        // Expose for debugging
+        console.log('🔷 HEXOD Token Viewer v25.0 loaded');
+        console.log('📖 API: window.HEXOD.renderToken({ title, serial, tier, ... })');
+        
+        window.onload = () => { 
+            document.querySelector('canvas').style.opacity = "1"; 
+        };
+    </script>
+</body>
+</html>
