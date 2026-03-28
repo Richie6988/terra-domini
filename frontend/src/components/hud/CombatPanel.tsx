@@ -8,6 +8,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
+import { useKingdomStore } from '../../store/kingdomStore'
+import { getBranchProgress, SKILL_BRANCHES } from '../../types/kingdom.types'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
@@ -78,6 +80,8 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
   const player = usePlayer()
   const qc = useQueryClient()
   const setActivePanel = useStore(s => s.setActivePanel)
+  const activeKingdom = useKingdomStore(s => s.getActiveKingdom())
+  const atkProgress = activeKingdom ? getBranchProgress(activeKingdom.skillStates, 'attack') : null
   const tdc = parseFloat(String(player?.tdc_in_game ?? 0))
 
   const { data: battlesData } = useQuery({
@@ -135,6 +139,36 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <GlassPanel title="MILITARY COMMAND" onClose={onClose} accent="#dc2626" width={390}>
+      {/* Kingdom attack branch status */}
+      {activeKingdom && atkProgress && (
+        <div style={{
+          display:'flex', alignItems:'center', gap:8, marginBottom:10,
+          padding:'6px 10px', borderRadius:8,
+          background:'rgba(220,38,38,0.04)', border:'1px solid rgba(220,38,38,0.12)',
+        }}>
+          <span style={{ fontSize:14 }}>⚔️</span>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:6, fontWeight:700, color:'#dc2626', letterSpacing:2, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
+              ASSAULT TACTICS — {atkProgress.completed}/{atkProgress.total}
+            </div>
+            <div style={{
+              height:3, borderRadius:2, background:'rgba(0,60,100,0.06)', marginTop:3, overflow:'hidden',
+            }}>
+              <div style={{
+                height:'100%', width:`${(atkProgress.completed/atkProgress.total)*100}%`,
+                background:'linear-gradient(90deg, #dc2626, #ef4444)', borderRadius:2,
+              }} />
+            </div>
+          </div>
+          <div style={{
+            fontSize:8, fontWeight:900, color:'rgba(26,42,58,0.35)',
+            fontFamily:"'Share Tech Mono', monospace",
+          }}>
+            {Math.floor(activeKingdom.crystalReservoirs.attack)} ◆
+          </div>
+        </div>
+      )}
+
       {/* Balance bar */}
       <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:12,
         padding:'8px 12px', background:'rgba(255,255,255,0.5)', borderRadius:8,

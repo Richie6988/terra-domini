@@ -11,6 +11,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { useStore, useTDCBalance, usePlayer } from '../../store'
+import { useKingdomStore } from '../../store/kingdomStore'
 import { SkeletonList } from '../ui/Utils'
 import { BoosterOpenAnimation } from './BoosterOpenAnimation'
 import { GlassPanel } from '../shared/GlassPanel'
@@ -63,6 +64,7 @@ export function ShopPanel({ onClose }: Props) {
   const qc = useQueryClient()
   const balance = useTDCBalance()
   const player  = usePlayer()
+  const activeKingdom = useKingdomStore(s => s.getActiveKingdom())
 
   const { data: catalog = [], isLoading } = useQuery<any[]>({
     queryKey: ['shop-catalog'],
@@ -104,6 +106,37 @@ export function ShopPanel({ onClose }: Props) {
   return (
     <>
       <GlassPanel title="SHOP" onClose={onClose} accent="#cc8800" width={Math.min(420, window.innerWidth - 8)}>
+        {/* Kingdom active bonuses banner */}
+        {activeKingdom && (
+          <div style={{
+            display:'flex', alignItems:'center', gap:8, marginBottom:10,
+            padding:'8px 12px', borderRadius:8,
+            background:`linear-gradient(90deg, ${activeKingdom.color}08, transparent)`,
+            border:`1px solid ${activeKingdom.color}15`,
+          }}>
+            <div style={{
+              width:24, height:24, borderRadius:'50%',
+              background:`linear-gradient(135deg, ${activeKingdom.color}, ${activeKingdom.color}aa)`,
+              display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:11, boxShadow:`0 0 8px ${activeKingdom.color}30`,
+            }}>🏰</div>
+            <div style={{ flex:1 }}>
+              <div style={{ fontSize:7, fontWeight:800, color:activeKingdom.color, letterSpacing:2, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
+                {activeKingdom.name.toUpperCase()}
+              </div>
+              <div style={{ fontSize:6, color:'rgba(26,42,58,0.4)', letterSpacing:1 }}>
+                BOOSTS APPLY TO THIS KINGDOM
+              </div>
+            </div>
+            <div style={{
+              fontSize:7, color:'#7950f2', fontWeight:700, fontFamily:"'Share Tech Mono', monospace",
+              display:'flex', alignItems:'center', gap:3,
+            }}>
+              <CrystalIcon size="sm" />{activeKingdom.dailyCrystals}/d
+            </div>
+          </div>
+        )}
+
         {/* Balance display */}
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12,
           padding:'8px 12px', background:'rgba(255,255,255,0.5)', borderRadius:8,

@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRightLeft, TrendingUp, Package } from 'lucide-react'
 import { api } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
+import { useKingdomStore } from '../../store/kingdomStore'
 import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
 
@@ -270,9 +271,40 @@ function PriceBoard() {
 export function TradePanel({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState('market')
   const setActivePanel = useStore(s => s.setActivePanel)
+  const activeKingdom = useKingdomStore(s => s.getActiveKingdom())
 
   return (
     <GlassPanel title="TRADE" onClose={onClose} accent="#22c55e">
+      {/* Kingdom resources summary */}
+      {activeKingdom && Object.keys(activeKingdom.dailyProduction).length > 0 && (
+        <div style={{
+          padding:'8px 10px', borderRadius:8, marginBottom:10,
+          background:'rgba(34,197,94,0.04)', border:'1px solid rgba(34,197,94,0.12)',
+        }}>
+          <div style={{
+            fontSize:6, fontWeight:700, letterSpacing:2, color:'rgba(26,42,58,0.35)',
+            fontFamily:"'Orbitron', system-ui, sans-serif", marginBottom:4,
+          }}>
+            YOUR KINGDOM PRODUCES (DAILY)
+          </div>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:3 }}>
+            {Object.entries(activeKingdom.dailyProduction)
+              .filter(([,v]) => (v as number) > 0)
+              .slice(0, 8)
+              .map(([res, amount]) => (
+              <div key={res} style={{
+                padding:'2px 6px', borderRadius:10,
+                background:'rgba(255,255,255,0.5)',
+                fontSize:6, fontWeight:700, color:'#1a2a3a',
+                fontFamily:"'Share Tech Mono', monospace",
+              }}>
+                {res.slice(0,3).toUpperCase()}: {(amount as number).toLocaleString()}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       <Tabs
         tabs={[
           { id: 'market',  label: 'Market',  icon: <TrendingUp size={14} /> },

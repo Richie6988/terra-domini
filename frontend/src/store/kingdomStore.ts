@@ -95,16 +95,21 @@ export const useKingdomStore = create<KingdomStore>()(
           capitalHex,
           territories: [capitalHex],
           center,
-          shieldActive: false,
-          shieldExpiresAt: null,
+          shieldActive: true, // New kingdoms get 7-day protection
+          shieldExpiresAt: new Date(Date.now() + 7 * 86400000).toISOString(),
           warZone: false,
           skillStates: initSkillStates(),
           forkChoices: {},
-          crystalReservoirs: { attack: 0, defense: 0, economy: 0, influence_branch: 0, tech: 0, extraction: 0 },
+          // Starter crystals — enough to unlock first skill in 2 branches
+          crystalReservoirs: { attack: 500, defense: 500, economy: 500, influence_branch: 300, tech: 300, extraction: 400 },
           resourceAllocation: defaultResourceAlloc(),
           branchAllocation: { ...DEFAULT_BRANCH_ALLOC },
-          dailyProduction: {},
-          dailyCrystals: 0,
+          // Starter production from capital territory
+          dailyProduction: {
+            fer: 10, petrole: 5, nourriture: 8, eau: 12,
+            donnees: 6, influence: 3, main_oeuvre: 5, stabilite: 4,
+          },
+          dailyCrystals: 150, // Initial estimate
           createdAt: new Date().toISOString(),
         }
         set(s => ({ kingdoms: [...s.kingdoms, kingdom], activeKingdomId: kingdom.id }))
