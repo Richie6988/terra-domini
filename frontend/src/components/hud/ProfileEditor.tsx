@@ -73,7 +73,7 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
           <div style={{ textAlign: 'center', marginBottom: 20 }}>
             <button onClick={() => setShowAvatarPicker(!showAvatarPicker)} style={{
               width: 72, height: 72, borderRadius: '50%', fontSize: 36,
-              background: 'rgba(255,255,255,0.5)', border: '2px solid rgba(0,255,135,0.4)',
+              background: 'rgba(255,255,255,0.5)', border: '2px solid rgba(0,136,74,0.4)',
               cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               transition: 'border-color 0.2s',
             }}>
@@ -89,8 +89,8 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
                   <button key={e} onClick={() => { setAvatar(e); setShowAvatarPicker(false) }}
                     style={{
                       width: 36, height: 36, borderRadius: 8, fontSize: 20, cursor: 'pointer',
-                      background: avatar === e ? 'rgba(0,255,135,0.2)' : 'transparent',
-                      border: avatar === e ? '1px solid rgba(0,255,135,0.5)' : '1px solid transparent',
+                      background: avatar === e ? 'rgba(0,136,74,0.2)' : 'transparent',
+                      border: avatar === e ? '1px solid rgba(0,136,74,0.5)' : '1px solid transparent',
                     }}>
                     {e}
                   </button>
@@ -128,8 +128,8 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
               {SPEC_PATHS.map(s => (
                 <button key={s.id} onClick={() => setSpecPath(s.id)} style={{
                   padding: '10px 12px', borderRadius: 10, cursor: 'pointer', textAlign: 'left',
-                  background: specPath === s.id ? 'rgba(0,255,135,0.1)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${specPath === s.id ? 'rgba(0,255,135,0.4)' : 'rgba(0,60,100,0.1)'}`,
+                  background: specPath === s.id ? 'rgba(0,136,74,0.1)' : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${specPath === s.id ? 'rgba(0,136,74,0.4)' : 'rgba(0,60,100,0.1)'}`,
                   transition: 'all 0.15s',
                 }}>
                   <div style={{ fontSize: 18, marginBottom: 4 }}>{s.emoji}</div>

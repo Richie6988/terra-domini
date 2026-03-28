@@ -120,7 +120,7 @@ export function TradePanel() {
           </div>
 
           <button onClick={()=>sendMut.mutate()} disabled={sendMut.isPending||!targetUser||offerTdc<0}
-            style={{ width:'100%', padding:'12px', background:'rgba(0,255,135,0.15)', border:'1px solid rgba(0,255,135,0.3)', borderRadius:10, color:'#00884a', fontSize:14, fontWeight:600, cursor:'pointer', opacity:sendMut.isPending?0.7:1 }}>
+            style={{ width:'100%', padding:'12px', background:'rgba(0,136,74,0.15)', border:'1px solid rgba(0,136,74,0.3)', borderRadius:10, color:'#00884a', fontSize:14, fontWeight:600, cursor:'pointer', opacity:sendMut.isPending?0.7:1 }}>
             {sendMut.isPending ? 'Sending…' : '📤 Send Trade Offer'}
           </button>
         </div>
@@ -148,7 +148,7 @@ export function TradePanel() {
               {o.message && <div style={{ fontSize:11, color:'rgba(26,42,58,0.45)', marginBottom:8, fontStyle:'italic' }}>"{o.message}"</div>}
               {o.status === 'pending' && (
                 <div style={{ display:'flex', gap:6 }}>
-                  <button onClick={()=>acceptMut.mutate(o.id)} style={{ flex:1, padding:'7px', background:'rgba(0,255,135,0.12)', border:'1px solid rgba(0,255,135,0.25)', borderRadius:8, color:'#00884a', cursor:'pointer', fontSize:12, fontWeight:600 }}>✓ Accept</button>
+                  <button onClick={()=>acceptMut.mutate(o.id)} style={{ flex:1, padding:'7px', background:'rgba(0,136,74,0.12)', border:'1px solid rgba(0,136,74,0.25)', borderRadius:8, color:'#00884a', cursor:'pointer', fontSize:12, fontWeight:600 }}>✓ Accept</button>
                   <button onClick={()=>rejectMut.mutate(o.id)} style={{ padding:'7px 12px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:8, color:'#EF4444', cursor:'pointer', fontSize:12 }}>✗</button>
                 </div>
               )}

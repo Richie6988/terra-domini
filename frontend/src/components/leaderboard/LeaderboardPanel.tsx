@@ -21,11 +21,11 @@ function PlayerRow({ entry, onClick }: { entry: any; onClick: () => void }) {
   const medal = MEDAL[entry.rank]
   return (
     <motion.div whileTap={{ scale: 0.98 }} onClick={onClick}
-      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderRadius: 12, background: entry.is_me ? 'rgba(0,255,135,0.06)' : 'rgba(255,255,255,0.02)', border: `1px solid ${entry.is_me ? 'rgba(0,255,135,0.2)' : 'rgba(255,255,255,0.05)'}`, marginBottom: 6, cursor: 'pointer' }}>
+      style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 14px', borderRadius: 12, background: entry.is_me ? 'rgba(0,136,74,0.06)' : 'rgba(255,255,255,0.02)', border: `1px solid ${entry.is_me ? 'rgba(0,136,74,0.2)' : 'rgba(255,255,255,0.05)'}`, marginBottom: 6, cursor: 'pointer' }}>
       <div style={{ width: 28, textAlign: 'center', fontFamily: 'monospace', fontSize: entry.rank <= 3 ? 18 : 12, color: entry.rank <= 3 ? '#fff' : '#4B5563', flexShrink: 0 }}>
         {medal ?? `#${entry.rank}`}
       </div>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', background: entry.is_me ? 'rgba(0,255,135,0.15)' : 'rgba(0,60,100,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', background: entry.is_me ? 'rgba(0,136,74,0.15)' : 'rgba(0,60,100,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
         {entry.avatar_emoji || '🎖️'}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
@@ -33,7 +33,7 @@ function PlayerRow({ entry, onClick }: { entry: any; onClick: () => void }) {
           <span style={{ fontSize: 13, fontWeight: entry.is_me ? 700 : 500, color: entry.is_me ? '#00884a' : '#E5E7EB', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {entry.display_name || entry.username}
           </span>
-          {entry.is_me && <span style={{ fontSize: 9, color: '#00884a', background: 'rgba(0,255,135,0.15)', padding: '1px 6px', borderRadius: 4 }}>YOU</span>}
+          {entry.is_me && <span style={{ fontSize: 9, color: '#00884a', background: 'rgba(0,136,74,0.15)', padding: '1px 6px', borderRadius: 4 }}>YOU</span>}
           <RankDelta delta={entry.delta_rank} />
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>

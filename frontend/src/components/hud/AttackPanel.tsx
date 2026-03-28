@@ -246,7 +246,7 @@ export function AttackPanel({ target, onClose }: Props) {
                   🔄 Attack Again
                 </button>
                 <button onClick={onClose}
-                  style={{ flex: 1, padding: '12px', background: 'rgba(0,255,135,0.1)', border: '1px solid rgba(0,255,135,0.3)', borderRadius: 10, color: '#00884a', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>
+                  style={{ flex: 1, padding: '12px', background: 'rgba(0,136,74,0.1)', border: '1px solid rgba(0,136,74,0.3)', borderRadius: 10, color: '#00884a', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>
                   Map →
                 </button>
               </div>

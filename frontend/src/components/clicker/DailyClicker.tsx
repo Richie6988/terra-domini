@@ -183,7 +183,7 @@ export function DailyClicker({ onClose }: { onClose: () => void }) {
               Earn HEX Coin + HEX + random loot!
             </div>
             {streakMult > 1 && <div style={{ fontSize: 13, color: '#FFB800', fontWeight: 600 }}>🔥 Streak bonus active: x{streakMult}</div>}
-            <button onClick={startGame} style={{ padding: '14px 48px', background: 'rgba(0,255,135,0.15)', border: '1px solid rgba(0,255,135,0.4)', borderRadius: 14, color: '#00884a', fontSize: 16, fontWeight: 800, cursor: 'pointer', letterSpacing: '0.05em' }}>
+            <button onClick={startGame} style={{ padding: '14px 48px', background: 'rgba(0,136,74,0.15)', border: '1px solid rgba(0,136,74,0.4)', borderRadius: 14, color: '#00884a', fontSize: 16, fontWeight: 800, cursor: 'pointer', letterSpacing: '0.05em' }}>
               START
             </button>
           </div>
@@ -207,7 +207,7 @@ export function DailyClicker({ onClose }: { onClose: () => void }) {
 
         {/* PLAYING */}
         {phase === 'playing' && (
-          <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minHeight: 380, background: 'radial-gradient(ellipse at center, rgba(0,255,135,0.03) 0%, transparent 70%)' }}>
+          <div style={{ flex: 1, position: 'relative', overflow: 'hidden', minHeight: 380, background: 'radial-gradient(ellipse at center, rgba(0,136,74,0.03) 0%, transparent 70%)' }}>
             {/* HUD bar */}
             <div style={{ position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10, display: 'flex', alignItems: 'center', padding: '10px 16px', background: 'rgba(0,0,0,0.6)', gap: 16 }}>
               <div style={{ flex: 1 }}>
@@ -268,7 +268,7 @@ export function DailyClicker({ onClose }: { onClose: () => void }) {
                 <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>HEX Coin Earned</div>
                 <div style={{ fontSize: 24, fontWeight: 800, color: '#FFB800', fontFamily: 'monospace', marginTop: 4 }}>+{parseFloat(result.tdc_earned).toFixed(1)}</div>
               </div>
-              <div style={{ background: 'rgba(0,255,135,0.06)', border: '1px solid rgba(0,255,135,0.15)', borderRadius: 12, padding: '14px 12px', textAlign: 'center' }}>
+              <div style={{ background: 'rgba(0,136,74,0.06)', border: '1px solid rgba(0,136,74,0.15)', borderRadius: 12, padding: '14px 12px', textAlign: 'center' }}>
                 <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>HEX Earned</div>
                 <div style={{ fontSize: 24, fontWeight: 800, color: '#00884a', fontFamily: 'monospace', marginTop: 4 }}>+{parseFloat(result.tdi_earned).toFixed(4)}</div>
               </div>
@@ -283,7 +283,7 @@ export function DailyClicker({ onClose }: { onClose: () => void }) {
               </div>
             )}
             {result.streak_mult > 1 && <div style={{ fontSize: 12, color: '#FFB800' }}>🔥 Streak x{result.streak_mult} applied</div>}
-            <button onClick={onClose} style={{ marginTop: 8, padding: '12px 32px', background: 'rgba(0,255,135,0.12)', border: '1px solid rgba(0,255,135,0.3)', borderRadius: 12, color: '#00884a', cursor: 'pointer', fontSize: 14, fontWeight: 700 }}>Collect & Close</button>
+            <button onClick={onClose} style={{ marginTop: 8, padding: '12px 32px', background: 'rgba(0,136,74,0.12)', border: '1px solid rgba(0,136,74,0.3)', borderRadius: 12, color: '#00884a', cursor: 'pointer', fontSize: 14, fontWeight: 700 }}>Collect & Close</button>
           </div>
         )}
       </motion.div>

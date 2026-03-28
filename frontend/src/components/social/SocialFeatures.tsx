@@ -238,7 +238,7 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
               }}>
                 <div style={{
                   width: 36, height: 36, borderRadius: '50%',
-                  background: 'rgba(0,255,135,0.15)', border: '1px solid rgba(0,255,135,0.3)',
+                  background: 'rgba(0,136,74,0.15)', border: '1px solid rgba(0,136,74,0.3)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 12, color: '#00884a', fontWeight: 600, flexShrink: 0,
                 }}>
@@ -265,8 +265,8 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
         {tab === 'invite' && (
           <div>
             <div style={{
-              padding: '20px', background: 'rgba(0,255,135,0.06)',
-              border: '1px solid rgba(0,255,135,0.15)', borderRadius: 10, marginBottom: 16,
+              padding: '20px', background: 'rgba(0,136,74,0.06)',
+              border: '1px solid rgba(0,136,74,0.15)', borderRadius: 10, marginBottom: 16,
             }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: '#1a2a3a', marginBottom: 8 }}>
                 🎁 Referral Program
@@ -308,10 +308,10 @@ function FriendRow({ friend }: { friend: Friend }) {
       <div style={{ position: 'relative' }}>
         <div style={{
           width: 36, height: 36, borderRadius: '50%',
-          background: friend.is_online ? 'rgba(0,255,135,0.15)' : 'rgba(255,255,255,0.06)',
-          border: `1px solid ${friend.is_online ? 'rgba(0,255,135,0.4)' : 'rgba(255,255,255,0.1)'}`,
+          background: friend.is_online ? 'rgba(0,136,74,0.15)' : 'rgba(255,255,255,0.06)',
+          border: `1px solid ${friend.is_online ? 'rgba(0,136,74,0.4)' : 'rgba(255,255,255,0.1)'}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 12, color: friend.is_online ? '#00FF87' : '#6B7280', fontWeight: 600,
+          fontSize: 12, color: friend.is_online ? '#0099cc' : '#6B7280', fontWeight: 600,
         }}>
           {(friend.username ?? '??').slice(0, 2).toUpperCase()}
         </div>

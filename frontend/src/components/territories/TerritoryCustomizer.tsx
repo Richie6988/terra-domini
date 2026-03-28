@@ -25,7 +25,7 @@ export function TerritoryCustomizer({ territory, onClose }: { territory: Territo
   const qc = useQueryClient()
   const [displayName, setDisplayName] = useState('')
   const [flagEmoji,   setFlagEmoji]   = useState('')
-  const [borderColor, setBorderColor] = useState('#00FF87')
+  const [borderColor, setBorderColor] = useState('#0099cc')
   const [embedType,   setEmbedType]   = useState('none')
   const [embedUrl,    setEmbedUrl]    = useState('')
 
@@ -69,7 +69,7 @@ export function TerritoryCustomizer({ territory, onClose }: { territory: Territo
           </div>
           <div style={{ display: 'flex', gap: 4, marginTop: 8 }}>
             {TIER_MIN_ZONES.map((min, i) => (
-              <div key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: clusterSize >= min ? '#00FF87' : 'rgba(255,255,255,0.1)' }} />
+              <div key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: clusterSize >= min ? '#0099cc' : 'rgba(255,255,255,0.1)' }} />
             ))}
           </div>
           {myCluster?.next_unlock && (
@@ -98,7 +98,7 @@ export function TerritoryCustomizer({ territory, onClose }: { territory: Territo
               Border Color {currentTier < 1 && <span style={{ color: '#EF4444' }}>🔒 need 3 zones</span>}
             </div>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-              {['#00FF87', '#6382FF', '#FFB800', '#EF4444', '#8B5CF6', '#06B6D4', '#F59E0B', '#10B981'].map(c => (
+              {['#0099cc', '#6382FF', '#FFB800', '#EF4444', '#8B5CF6', '#06B6D4', '#F59E0B', '#10B981'].map(c => (
                 <button key={c} disabled={currentTier < 1} onClick={() => setBorderColor(c)}
                   style={{ width: 32, height: 32, borderRadius: '50%', background: c, border: borderColor === c ? '3px solid #fff' : '3px solid transparent', cursor: currentTier >= 1 ? 'pointer' : 'default' }} />
               ))}
@@ -112,9 +112,9 @@ export function TerritoryCustomizer({ territory, onClose }: { territory: Territo
                 const locked = currentTier < e.tier
                 return (
                   <button key={e.id} disabled={locked} onClick={() => setEmbedType(e.id)}
-                    style={{ padding: '8px 4px', borderRadius: 8, border: `1px solid ${embedType === e.id ? '#00FF87' : 'rgba(255,255,255,0.08)'}`, background: embedType === e.id ? 'rgba(0,255,135,0.1)' : 'transparent', cursor: locked ? 'default' : 'pointer', opacity: locked ? 0.35 : 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
+                    style={{ padding: '8px 4px', borderRadius: 8, border: `1px solid ${embedType === e.id ? '#0099cc' : 'rgba(255,255,255,0.08)'}`, background: embedType === e.id ? 'rgba(0,136,74,0.1)' : 'transparent', cursor: locked ? 'default' : 'pointer', opacity: locked ? 0.35 : 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3 }}>
                     <span style={{ fontSize: 16 }}>{e.emoji}</span>
-                    <span style={{ fontSize: 9, color: embedType === e.id ? '#00FF87' : '#6B7280', textAlign: 'center' }}>{e.label}</span>
+                    <span style={{ fontSize: 9, color: embedType === e.id ? '#0099cc' : '#6B7280', textAlign: 'center' }}>{e.label}</span>
                     {locked && <span style={{ fontSize: 8, color: '#EF4444' }}>{TIER_MIN_ZONES[e.tier]}z</span>}
                   </button>
                 )
@@ -129,7 +129,7 @@ export function TerritoryCustomizer({ territory, onClose }: { territory: Territo
 
         <div style={{ padding: '12px 20px', borderTop: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
           <button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}
-            style={{ width: '100%', padding: 13, background: 'rgba(0,255,135,0.15)', border: '1px solid rgba(0,255,135,0.35)', borderRadius: 12, color: '#00FF87', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
+            style={{ width: '100%', padding: 13, background: 'rgba(0,136,74,0.15)', border: '1px solid rgba(0,136,74,0.35)', borderRadius: 12, color: '#0099cc', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
             {saveMut.isPending ? 'Saving…' : '✓ Save'}
           </button>
         </div>

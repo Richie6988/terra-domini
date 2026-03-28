@@ -88,7 +88,7 @@ export default function AdminPanel() {
       }}>
         <div style={{ fontSize: 22 }}>⬡</div>
         <div>
-          <div style={{ fontSize: 16, fontWeight: 900, color: '#00FF87' }}>HEXOD GM</div>
+          <div style={{ fontSize: 16, fontWeight: 900, color: '#0099cc' }}>HEXOD GM</div>
           <div style={{ fontSize: 10, color: '#4B5563' }}>Game Master Dashboard</div>
         </div>
         <div style={{ flex: 1 }} />
@@ -114,8 +114,8 @@ export default function AdminPanel() {
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             padding: '12px 20px', border: 'none', background: 'transparent',
             cursor: 'pointer', fontSize: 13, fontWeight: tab===t.id ? 700 : 400,
-            color: tab===t.id ? '#00FF87' : '#6B7280',
-            borderBottom: `2px solid ${tab===t.id ? '#00FF87' : 'transparent'}`,
+            color: tab===t.id ? '#0099cc' : '#6B7280',
+            borderBottom: `2px solid ${tab===t.id ? '#0099cc' : 'transparent'}`,
           }}>{t.label}</button>
         ))}
       </div>
@@ -133,7 +133,7 @@ export default function AdminPanel() {
                 { label:'Actifs 1h',       value: stats.active_1h || 0,         icon:'⚡', color:'#F59E0B' },
                 { label:'Nouveaux/24h',    value: stats.new_today || 0,         icon:'🆕', color:'#8B5CF6' },
                 { label:'Territoires',     value: stats.total_territories || 921, icon:'🗺️', color:'#10B981' },
-                { label:'Revendiqués',     value: stats.claimed_territories || 0, icon:'🏴', color:'#00FF87' },
+                { label:'Revendiqués',     value: stats.claimed_territories || 0, icon:'🏴', color:'#0099cc' },
                 { label:'Batailles actives',value: stats.active_battles || 0,   icon:'⚔️', color:'#EF4444' },
                 { label:'TDC en jeu',      value: Math.round(toNum(stats.tdc_in_game)).toLocaleString(), icon:'💎', color:'#F59E0B' },
               ].map(s => (
@@ -160,8 +160,8 @@ export default function AdminPanel() {
                 ].map(a => (
                   <button key={a.label} onClick={a.action} style={{
                     padding:'8px 16px', borderRadius:8, cursor:'pointer',
-                    background:'rgba(0,255,135,0.1)', border:'1px solid rgba(0,255,135,0.25)',
-                    color:'#00FF87', fontSize:12, fontWeight:700,
+                    background:'rgba(0,136,74,0.1)', border:'1px solid rgba(0,136,74,0.25)',
+                    color:'#0099cc', fontSize:12, fontWeight:700,
                   }}>{a.label}</button>
                 ))}
               </div>
@@ -180,8 +180,8 @@ export default function AdminPanel() {
                 </span>
               </div>
               <button onClick={() => qc.invalidateQueries({ queryKey:['gm-logs'] })} style={{
-                padding:'6px 14px', borderRadius:8, background:'rgba(0,255,135,0.1)',
-                border:'1px solid rgba(0,255,135,0.25)', color:'#00FF87', fontSize:12, cursor:'pointer',
+                padding:'6px 14px', borderRadius:8, background:'rgba(0,136,74,0.1)',
+                border:'1px solid rgba(0,136,74,0.25)', color:'#0099cc', fontSize:12, cursor:'pointer',
               }}>🔄 Rafraîchir</button>
             </div>
 
@@ -387,7 +387,7 @@ function EconomyTab() {
         {/* Économie in-game */}
         <div style={{ background:'rgba(255,255,255,0.03)', borderRadius:12,
           border:'1px solid rgba(255,255,255,0.07)', padding:'16px 20px' }}>
-          <div style={{ fontSize:13, fontWeight:800, color:'#00FF87', marginBottom:12 }}>Économie in-game</div>
+          <div style={{ fontSize:13, fontWeight:800, color:'#0099cc', marginBottom:12 }}>Économie in-game</div>
           {[
             ['TDC total en circulation', data?.tdc_in_circulation?.toLocaleString() || '—'],
             ['TDC dépensé (shop)', data?.tdc_spent_shop?.toLocaleString() || '—'],

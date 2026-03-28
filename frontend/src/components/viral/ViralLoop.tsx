@@ -156,7 +156,7 @@ export function StreakCelebration({
         style={{
           width: '100%', maxWidth: 380, textAlign: 'center',
           background: 'rgba(10,10,20,0.99)',
-          border: `1px solid ${isMilestone ? 'rgba(255,184,0,0.3)' : 'rgba(0,255,135,0.2)'}`,
+          border: `1px solid ${isMilestone ? 'rgba(255,184,0,0.3)' : 'rgba(0,136,74,0.2)'}`,
           borderRadius: 16, overflow: 'hidden',
         }}
       >
@@ -164,7 +164,7 @@ export function StreakCelebration({
         {isMilestone && (
           <div style={{
             height: 4,
-            background: 'linear-gradient(90deg, #FF3B30, #FFB800, #00FF87, #7B2FFF, #FF3B30)',
+            background: 'linear-gradient(90deg, #FF3B30, #FFB800, #0099cc, #7B2FFF, #FF3B30)',
           }} />
         )}
 

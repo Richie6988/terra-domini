@@ -30,7 +30,7 @@ export const RESOURCE_INFO: Record<string, {
   res_nourriture:  { icon: '🌾', color: '#86EFAC', label: 'Nourriture',   desc: 'Nourrir la population = stabilité sociale.', usedFor: 'Résistance prolongée, Population, Croissance', biomes: ['rural','forest','coastal'] },
   res_eau:         { icon: '💧', color: '#38BDF8', label: 'Eau',          desc: 'Ressource vitale et stratégique.', usedFor: 'Fermes, Réacteur (refroidissement), Stabilité', biomes: ['coastal','forest','rural'] },
   res_stabilite:   { icon: '⚖️', color: '#6EE7B7', label: 'Stabilité',   desc: 'Cohésion sociale de ton empire.', usedFor: 'Résistance défensive, Skill Influence, Expansion', biomes: ['forest','rural','landmark'] },
-  res_hex_cristaux:{ icon: '⬡',  color: '#00FF87', label: 'HEX Cristaux', desc: 'La monnaie interne du jeu.', usedFor: 'Tous les builds, Skills, Marketplace', biomes: ['all'] },
+  res_hex_cristaux:{ icon: '⬡',  color: '#0099cc', label: 'HEX Cristaux', desc: 'La monnaie interne du jeu.', usedFor: 'Tous les builds, Skills, Marketplace', biomes: ['all'] },
 }
 
 interface Props {

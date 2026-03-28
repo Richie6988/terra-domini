@@ -43,7 +43,7 @@ function TrainingQueue({ orders, onComplete }: { orders: TrainingOrder[]; onComp
         const done = pct >= 100
 
         return (
-          <div key={i} style={{ background: done ? 'rgba(0,255,135,0.08)' : 'rgba(255,255,255,0.03)', border: `1px solid ${done ? 'rgba(0,255,135,0.3)' : 'rgba(0,60,100,0.1)'}`, borderRadius: 10, padding: '10px 14px', marginBottom: 8 }}>
+          <div key={i} style={{ background: done ? 'rgba(0,136,74,0.08)' : 'rgba(255,255,255,0.03)', border: `1px solid ${done ? 'rgba(0,136,74,0.3)' : 'rgba(0,60,100,0.1)'}`, borderRadius: 10, padding: '10px 14px', marginBottom: 8 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
               <span style={{ fontSize: 13, color: '#1a2a3a' }}>{unit?.emoji} {o.quantity}× {unit?.name ?? o.unit_type}</span>
               <span style={{ fontSize: 11, color: done ? '#00884a' : '#F59E0B', fontFamily: 'monospace' }}>
@@ -55,7 +55,7 @@ function TrainingQueue({ orders, onComplete }: { orders: TrainingOrder[]; onComp
                 style={{ height: '100%', background: done ? '#00884a' : 'linear-gradient(90deg, #F59E0B, #EF4444)', borderRadius: 2 }} />
             </div>
             {done && (
-              <button onClick={onComplete} style={{ marginTop: 8, width: '100%', padding: '6px', background: 'rgba(0,255,135,0.12)', border: '1px solid rgba(0,255,135,0.3)', borderRadius: 6, color: '#00884a', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>
+              <button onClick={onComplete} style={{ marginTop: 8, width: '100%', padding: '6px', background: 'rgba(0,136,74,0.12)', border: '1px solid rgba(0,136,74,0.3)', borderRadius: 6, color: '#00884a', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>
                 Collect Units
               </button>
             )}
@@ -261,7 +261,7 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
                   <span style={{ fontSize: 13, fontWeight: 700, color: tdc >= totalCost ? '#00884a' : '#EF4444', fontFamily: 'monospace' }}>{totalCost} 🪙</span>
                 </div>
                 <button onClick={() => trainMut.mutate()} disabled={tdc < totalCost || trainMut.isPending}
-                  style={{ width: '100%', padding: '13px', background: tdc >= totalCost ? 'rgba(0,255,135,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${tdc >= totalCost ? 'rgba(0,255,135,0.4)' : 'rgba(0,60,100,0.1)'}`, borderRadius: 12, color: tdc >= totalCost ? '#00884a' : '#4B5563', fontSize: 14, fontWeight: 800, cursor: tdc >= totalCost ? 'pointer' : 'not-allowed' }}>
+                  style={{ width: '100%', padding: '13px', background: tdc >= totalCost ? 'rgba(0,136,74,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${tdc >= totalCost ? 'rgba(0,136,74,0.4)' : 'rgba(0,60,100,0.1)'}`, borderRadius: 12, color: tdc >= totalCost ? '#00884a' : '#4B5563', fontSize: 14, fontWeight: 800, cursor: tdc >= totalCost ? 'pointer' : 'not-allowed' }}>
                   {trainMut.isPending ? '⏳ Sending to barracks…' : `🪖 Train Units (−${totalCost} HEX Coin)`}
                 </button>
               </div>

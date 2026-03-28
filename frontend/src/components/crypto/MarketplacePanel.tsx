@@ -240,7 +240,7 @@ function MyNFTsTab() {
                     <RarityBadge rarity={t.rarity || 'common'} shiny={t.is_shiny} />
                     {t.token_id && (
                       <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4,
-                        background: 'rgba(0,255,135,0.1)', color: '#00884a' }}>
+                        background: 'rgba(0,136,74,0.1)', color: '#00884a' }}>
                         NFT #{String(t.token_id).slice(0, 8)}
                       </span>
                     )}

@@ -62,7 +62,7 @@ export function buildViralMoment(type: ViralMomentType, data: Record<string, unk
     },
     famous_landmark_claimed: {
       emoji: data.emoji as string || '🏛️',
-      accentColor: '#00FF87',
+      accentColor: '#0099cc',
       title: `YOU OWN ${String(data.name).toUpperCase()}`,
       subtitle: `Estimated ad revenue: ~${data.daily_tdc_estimate} HEX Coin/day`,
       shareText: `🏛️ I just claimed ${data.name} in Hexod! Earning ~${data.daily_tdc_estimate} HEX Coin/day from brand ads. terradomini.io`,
@@ -102,7 +102,7 @@ export function buildViralMoment(type: ViralMomentType, data: Record<string, unk
     },
     rank_up: {
       emoji: '🎖️',
-      accentColor: '#00FF87',
+      accentColor: '#0099cc',
       title: `COMMANDER RANK ${data.new_rank}`,
       subtitle: `${data.rank_title} · Top ${data.percentile}% globally`,
       shareText: `🎖️ Just reached Commander Rank ${data.new_rank} (${data.rank_title}) in Hexod. Top ${data.percentile}% of all players. terradomini.io`,
@@ -110,7 +110,7 @@ export function buildViralMoment(type: ViralMomentType, data: Record<string, unk
     },
     local_pride: {
       emoji: '📍',
-      accentColor: '#00FF87',
+      accentColor: '#0099cc',
       title: `YOUR STREET IS IN THE GAME`,
       subtitle: `GPS detected: ${data.street_name} · Available to claim`,
       shareText: `📍 My actual street (${data.street_name}) is a playable territory in Hexod. Just claimed it. terradomini.io`,

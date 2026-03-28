@@ -191,7 +191,7 @@ function TowerCard({ tower, onPress, urgent, muted }: {
               <span key={a.id} style={{
                 fontSize: 11, padding: '2px 8px', borderRadius: 4,
                 background: tower.my_alliance_registered && a.tag === tower.registered_alliances[0]?.tag
-                  ? 'rgba(0,255,135,0.15)'
+                  ? 'rgba(0,136,74,0.15)'
                   : 'rgba(255,255,255,0.07)',
                 color: 'rgba(255,255,255,0.55)',
                 fontFamily: 'monospace',
@@ -382,7 +382,7 @@ function TowerDetailSheet({ tower, onClose }: { tower: TowerEvent; onClose: () =
             <MobileCTA
               label="Register Alliance"
               emoji="⚔️"
-              color="#00FF87"
+              color="#0099cc"
               onPress={() => registerMut.mutate(tower.id)}
               loading={registerMut.isPending}
             />
@@ -390,8 +390,8 @@ function TowerDetailSheet({ tower, onClose }: { tower: TowerEvent; onClose: () =
 
           {tower.my_alliance_registered && tower.status === 'scheduled' && (
             <div style={{
-              padding: '16px', background: 'rgba(0,255,135,0.08)',
-              border: '1px solid rgba(0,255,135,0.2)', borderRadius: 14, textAlign: 'center',
+              padding: '16px', background: 'rgba(0,136,74,0.08)',
+              border: '1px solid rgba(0,136,74,0.2)', borderRadius: 14, textAlign: 'center',
             }}>
               <div style={{ fontSize: 16, color: '#00884a', fontWeight: 500 }}>✓ Alliance Registered</div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>Your alliance will be in the battle</div>
@@ -498,9 +498,9 @@ function MobileCTA({ label, emoji, color, onPress, loading }: {
       disabled={loading}
       style={{
         width: '100%', padding: '16px',
-        background: color === '#00FF87' ? '#00FF87' : `${color}20`,
+        background: color === '#0099cc' ? '#0099cc' : `${color}20`,
         border: `1px solid ${color}50`, borderRadius: 14,
-        color: color === '#00FF87' ? '#000' : color,
+        color: color === '#0099cc' ? '#000' : color,
         fontSize: 16, fontWeight: 700, cursor: 'pointer',
         fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '1px',
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,

@@ -259,7 +259,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
             <button key={tb.id} onClick={() => !tb.disabled && setMethod(tb.id)}
               disabled={tb.disabled}
               style={{ flex:1, padding:'10px 4px', border:'none', cursor: tb.disabled ? 'not-allowed' : 'pointer',
-                background: method===tb.id ? 'rgba(0,255,135,0.08)' : 'transparent',
+                background: method===tb.id ? 'rgba(0,136,74,0.08)' : 'transparent',
                 borderBottom:`2px solid ${method===tb.id ? '#0099cc' : 'transparent'}`,
                 color: method===tb.id ? '#0099cc' : tb.disabled ? '#2D3748' : '#6B7280',
                 fontSize:11, fontWeight: method===tb.id ? 700 : 400 }}>
@@ -282,7 +282,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                   <div style={{ marginTop:10, padding:'8px 16px', background:'rgba(0,153,204,0.06)', borderRadius:8, fontSize:12, color:'#0099cc' }}>🎁 +100 HEX Coin bonus!</div>
                 </div>
                 <button onClick={() => claimMut.mutate({ method:'free' })} disabled={claimMut.isPending}
-                  style={{ width:'100%', padding:14, background:'rgba(0,153,204,0.1)', border:'1px solid rgba(0,255,135,0.4)', borderRadius:12, color:'#0099cc', fontSize:15, fontWeight:800, cursor:'pointer' }}>
+                  style={{ width:'100%', padding:14, background:'rgba(0,153,204,0.1)', border:'1px solid rgba(0,136,74,0.4)', borderRadius:12, color:'#0099cc', fontSize:15, fontWeight:800, cursor:'pointer' }}>
                   {claimMut.isPending ? '…' : '🚀 Claim for Free'}
                 </button>
               </motion.div>
@@ -365,7 +365,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                   <button onClick={() => { setPuzzle(makePuzzle()); setAnswer(''); setSolved(false) }}
                     style={{ padding:'12px 14px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'#6B7280', cursor:'pointer', fontSize:13 }}>🔄</button>
                   <button onClick={() => claimMut.mutate({ method:'puzzle', answer })} disabled={!puzzleSolved || claimMut.isPending}
-                    style={{ flex:1, padding:12, background: puzzleSolved ? 'rgba(0,255,135,0.15)' : 'rgba(255,255,255,0.04)', border:`1px solid ${puzzleSolved?'rgba(0,153,204,0.3)':'rgba(255,255,255,0.08)'}`, borderRadius:10, color: puzzleSolved ? '#0099cc' : '#4B5563', cursor: puzzleSolved ? 'pointer' : 'not-allowed', fontSize:14, fontWeight:700 }}>
+                    style={{ flex:1, padding:12, background: puzzleSolved ? 'rgba(0,136,74,0.15)' : 'rgba(255,255,255,0.04)', border:`1px solid ${puzzleSolved?'rgba(0,153,204,0.3)':'rgba(255,255,255,0.08)'}`, borderRadius:10, color: puzzleSolved ? '#0099cc' : '#4B5563', cursor: puzzleSolved ? 'pointer' : 'not-allowed', fontSize:14, fontWeight:700 }}>
                     {claimMut.isPending ? '…' : puzzleSolved ? '⚔️ Claim Zone' : 'Solve to unlock'}
                   </button>
                 </div>

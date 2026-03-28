@@ -37,7 +37,7 @@ function Tabs({ tabs, active, onChange }: { tabs: {id: string; label: string; ic
         <button key={t.id} onClick={() => onChange(t.id)} style={{
           flex: 1, padding: '10px 6px', border: 'none', cursor: 'pointer', fontSize: 11,
           background: 'transparent',
-          borderBottom: active === t.id ? '2px solid #00FF87' : '2px solid transparent',
+          borderBottom: active === t.id ? '2px solid #0099cc' : '2px solid transparent',
           color: active === t.id ? '#00884a' : '#6B7280',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
         }}>
@@ -143,7 +143,7 @@ function MarketTab() {
       </div>
 
       <button onClick={() => tradeMut.mutate()} disabled={tradeMut.isPending}
-        style={{ width: '100%', padding: '13px', background: 'rgba(0,255,135,0.15)', border: '1px solid rgba(0,255,135,0.4)', borderRadius: 12, color: '#00884a', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
+        style={{ width: '100%', padding: '13px', background: 'rgba(0,136,74,0.15)', border: '1px solid rgba(0,136,74,0.4)', borderRadius: 12, color: '#00884a', fontSize: 14, fontWeight: 700, cursor: 'pointer' }}>
         {tradeMut.isPending ? 'Trading…' : '⇄ Execute Trade'}
       </button>
     </div>
@@ -223,7 +223,7 @@ function PlayerTradeTab() {
             <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)' }}>Rank {p.commander_rank}</div>
           </div>
           <button onClick={() => proposeMut.mutate(p.id)}
-            style={{ padding: '6px 12px', background: 'rgba(0,255,135,0.1)', border: '1px solid rgba(0,255,135,0.3)', borderRadius: 8, color: '#00884a', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
+            style={{ padding: '6px 12px', background: 'rgba(0,136,74,0.1)', border: '1px solid rgba(0,136,74,0.3)', borderRadius: 8, color: '#00884a', cursor: 'pointer', fontSize: 12, fontWeight: 600 }}>
             Propose
           </button>
         </div>

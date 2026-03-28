@@ -19,7 +19,7 @@ function PriceTicker({ prices }: { prices: Record<string, any> }) {
       {Object.entries(prices).map(([sym, p]) => {
         const up = (p.change_24h ?? 0) > 0
         return (
-          <div key={sym} style={{ flexShrink: 0, background: 'rgba(255,255,255,0.5)', borderRadius: 10, padding: '8px 14px', border: `1px solid ${sym === 'HEX' ? 'rgba(0,255,135,0.25)' : 'rgba(0,60,100,0.1)'}`, minWidth: 90 }}>
+          <div key={sym} style={{ flexShrink: 0, background: 'rgba(255,255,255,0.5)', borderRadius: 10, padding: '8px 14px', border: `1px solid ${sym === 'HEX' ? 'rgba(0,136,74,0.25)' : 'rgba(0,60,100,0.1)'}`, minWidth: 90 }}>
             <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', letterSpacing: '0.1em' }}>{sym}</div>
             <div style={{ fontSize: 14, fontWeight: 700, color: sym === 'HEX' ? '#00884a' : '#fff', fontFamily: 'monospace', marginTop: 2 }}>
               ${p.price_usd < 0.01 ? parseFloat(p.price_usd).toFixed(6) : parseFloat(p.price_usd).toFixed(2)}
@@ -36,7 +36,7 @@ function PriceTicker({ prices }: { prices: Record<string, any> }) {
 
 function WalletCard({ wallet, onConvert, onWithdraw }: any) {
   return (
-    <div style={{ background: 'linear-gradient(135deg, rgba(0,255,135,0.07) 0%, rgba(139,92,246,0.07) 100%)', border: '1px solid rgba(0,255,135,0.18)', borderRadius: 16, padding: 20, marginBottom: 16 }}>
+    <div style={{ background: 'linear-gradient(135deg, rgba(0,136,74,0.07) 0%, rgba(139,92,246,0.07) 100%)', border: '1px solid rgba(0,136,74,0.18)', borderRadius: 16, padding: 20, marginBottom: 16 }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
         <div>
           <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>HEX Balance</div>
@@ -53,7 +53,7 @@ function WalletCard({ wallet, onConvert, onWithdraw }: any) {
         </div>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        <button onClick={onConvert} style={{ padding: 10, background: 'rgba(0,255,135,0.12)', border: '1px solid rgba(0,255,135,0.3)', borderRadius: 10, color: '#00884a', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>⇄ HEX → HEX Coin</button>
+        <button onClick={onConvert} style={{ padding: 10, background: 'rgba(0,136,74,0.12)', border: '1px solid rgba(0,136,74,0.3)', borderRadius: 10, color: '#00884a', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>⇄ HEX → HEX Coin</button>
         <button onClick={onWithdraw} style={{ padding: 10, background: 'rgba(139,92,246,0.12)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 10, color: '#A78BFA', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>↗ Withdraw</button>
       </div>
       {wallet?.tdi_pending > 0 && (
@@ -89,7 +89,7 @@ function ConvertModal({ wallet, onClose }: { wallet: any; onClose: () => void })
         <div style={{ textAlign: 'center', color: '#00884a', fontSize: 16, fontWeight: 700, marginBottom: 16 }}>→ 🪙 {preview.toFixed(1)} HEX Coin</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <button onClick={onClose} style={{ padding: 12, background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.12)', borderRadius: 10, color: 'rgba(26,42,58,0.45)', cursor: 'pointer' }}>Cancel</button>
-          <button onClick={() => mut.mutate()} disabled={mut.isPending} style={{ padding: 12, background: 'rgba(0,255,135,0.15)', border: '1px solid rgba(0,255,135,0.4)', borderRadius: 10, color: '#00884a', cursor: 'pointer', fontWeight: 700 }}>
+          <button onClick={() => mut.mutate()} disabled={mut.isPending} style={{ padding: 12, background: 'rgba(0,136,74,0.15)', border: '1px solid rgba(0,136,74,0.4)', borderRadius: 10, color: '#00884a', cursor: 'pointer', fontWeight: 700 }}>
             {mut.isPending ? '…' : 'Convert'}
           </button>
         </div>
@@ -183,7 +183,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
 
           {tab === 'markets' && Object.entries(prices).map(([sym, p]: any) => (
             <div key={sym} style={{ display: 'flex', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid rgba(0,60,100,0.08)' }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: sym === 'HEX' ? 'rgba(0,255,135,0.12)' : 'rgba(0,60,100,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, marginRight: 14, flexShrink: 0 }}>
+              <div style={{ width: 40, height: 40, borderRadius: '50%', background: sym === 'HEX' ? 'rgba(0,136,74,0.12)' : 'rgba(0,60,100,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, marginRight: 14, flexShrink: 0 }}>
                 {sym === 'BTC' ? '₿' : sym === 'ETH' ? 'Ξ' : sym === 'MATIC' ? '⬡' : '💎'}
               </div>
               <div style={{ flex: 1 }}>

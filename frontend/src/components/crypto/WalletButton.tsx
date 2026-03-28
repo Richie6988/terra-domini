@@ -18,8 +18,8 @@ export function WalletButton() {
           style={{
             display: 'flex', alignItems: 'center', gap: 6,
             padding: '6px 12px', borderRadius: 20, cursor: 'pointer',
-            background: 'rgba(0,255,135,0.12)', border: '1px solid rgba(0,255,135,0.35)',
-            color: '#00FF87', fontSize: 11, fontWeight: 700, fontFamily: 'monospace',
+            background: 'rgba(0,136,74,0.12)', border: '1px solid rgba(0,136,74,0.35)',
+            color: '#0099cc', fontSize: 11, fontWeight: 700, fontFamily: 'monospace',
           }}
         >
           <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#00884a', flexShrink: 0 }} />

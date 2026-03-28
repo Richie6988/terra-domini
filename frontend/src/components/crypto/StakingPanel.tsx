@@ -149,7 +149,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
 
             {/* Solde */}
             <div style={{ padding: '10px 14px', marginBottom: 14,
-              background: 'rgba(0,255,135,0.06)', border: '1px solid rgba(0,255,135,0.15)', borderRadius: 10,
+              background: 'rgba(0,136,74,0.06)', border: '1px solid rgba(0,136,74,0.15)', borderRadius: 10,
               display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)' }}>Solde disponible</span>
               <span style={{ fontSize: 14, fontWeight: 800, color: '#00884a', fontFamily: 'monospace' }}>

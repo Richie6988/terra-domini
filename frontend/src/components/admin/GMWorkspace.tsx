@@ -37,7 +37,7 @@ const S = {
   nav: { padding: '8px 16px', cursor: 'pointer', fontSize: 13, borderRadius: 6, margin: '2px 8px', display: 'flex', alignItems: 'center', gap: 8 } as const,
   content: { flex: 1, padding: 24, overflowY: 'auto' as const },
   section: { marginBottom: 32 },
-  h2: { fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, letterSpacing: 2, color: '#fff', marginBottom: 16 },
+  h2: { fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, letterSpacing: 2, color: '#1a2a3a', marginBottom: 16 },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 24 },
   kpi: { background: 'rgba(235,242,250,0.95)', borderRadius: 8, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.06)' },
   kpiN: { fontSize: 26, fontWeight: 500, fontFamily: "'Bebas Neue',sans-serif", letterSpacing: 1 },
@@ -45,9 +45,9 @@ const S = {
   table: { width: '100%', borderCollapse: 'collapse' as const, fontSize: 13 },
   th: { padding: '8px 12px', textAlign: 'left' as const, fontFamily: 'monospace', fontSize: 10, letterSpacing: '0.1em', color: 'rgba(255,255,255,0.3)', borderBottom: '1px solid rgba(255,255,255,0.07)', textTransform: 'uppercase' as const },
   td: { padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.04)', color: '#E5E7EB' },
-  btn: (color = '#00FF87') => ({ padding: '7px 14px', background: 'transparent', border: `1px solid ${color}40`, borderRadius: 6, color, cursor: 'pointer', fontSize: 12, fontWeight: 500 }),
+  btn: (color = '#0099cc') => ({ padding: '7px 14px', background: 'transparent', border: `1px solid ${color}40`, borderRadius: 6, color, cursor: 'pointer', fontSize: 12, fontWeight: 500 }),
   btnDanger: { padding: '7px 14px', background: 'rgba(239,68,68,0.12)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, color: '#EF4444', cursor: 'pointer', fontSize: 12, fontWeight: 500 },
-  input: { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '8px 12px', color: '#fff', fontSize: 13, outline: 'none', width: '100%', boxSizing: 'border-box' as const },
+  input: { background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6, padding: '8px 12px', color: '#1a2a3a', fontSize: 13, outline: 'none', width: '100%', boxSizing: 'border-box' as const },
   card: { background: '#0A0A12', border: '1px solid rgba(255,255,255,0.07)', borderRadius: 10, padding: 20, marginBottom: 16 },
   row: { display: 'flex', gap: 12, alignItems: 'flex-start', flexWrap: 'wrap' as const },
   badge: (color: string) => ({ display: 'inline-block', padding: '2px 8px', borderRadius: 4, background: `${color}20`, color, fontSize: 10, fontFamily: 'monospace', letterSpacing: '0.06em', fontWeight: 500 }),
@@ -84,7 +84,7 @@ export default function GMWorkspace() {
       {/* Sidebar */}
       <div style={S.sidebar}>
         <div style={{ padding: '0 16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', marginBottom: 12 }}>
-          <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 16, letterSpacing: 2, color: '#00FF87' }}>GM PANEL</div>
+          <div style={{ fontFamily: "'Bebas Neue',sans-serif", fontSize: 16, letterSpacing: 2, color: '#0099cc' }}>GM PANEL</div>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.25)', fontFamily: 'monospace', marginTop: 2 }}>{player.username}</div>
         </div>
         {NAV_ITEMS.map(item => (
@@ -92,8 +92,8 @@ export default function GMWorkspace() {
             onClick={() => setSection(item.id)}
             style={{
               ...S.nav,
-              background: section === item.id ? 'rgba(0,255,135,0.1)' : 'transparent',
-              color: section === item.id ? '#00FF87' : 'rgba(255,255,255,0.5)',
+              background: section === item.id ? 'rgba(0,136,74,0.1)' : 'transparent',
+              color: section === item.id ? '#0099cc' : 'rgba(255,255,255,0.5)',
             }}
           >
             <span style={{ fontSize: 14 }}>{item.icon}</span>
@@ -143,9 +143,9 @@ function DashboardSection() {
       </div>
 
       {/* Players KPIs */}
-      <div style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgba(0,255,135,0.5)', letterSpacing: '0.15em', marginBottom: 8 }}>PLAYERS</div>
+      <div style={{ fontFamily: 'monospace', fontSize: 10, color: 'rgba(0,136,74,0.5)', letterSpacing: '0.15em', marginBottom: 8 }}>PLAYERS</div>
       <div style={S.grid}>
-        <KPI n={data.players.online_now}   l="Online Now"     color="#00FF87" />
+        <KPI n={data.players.online_now}   l="Online Now"     color="#0099cc" />
         <KPI n={data.players.active_1h}    l="Active 1h"      color="#10B981" />
         <KPI n={data.players.new_today}    l="New Today"      color="#60A5FA" />
         <KPI n={data.players.total}        l="Total Accounts" color="rgba(255,255,255,0.4)" />
@@ -239,7 +239,7 @@ function PlayersSection() {
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', fontFamily: 'monospace' }}>{p.email}</div>
                 </td>
                 <td style={S.td}>
-                  <span style={S.badge('#00FF87')}>R{p.rank}</span>
+                  <span style={S.badge('#0099cc')}>R{p.rank}</span>
                 </td>
                 <td style={{ ...S.td, fontFamily: 'monospace' }}>{toNum(p.tdc).toFixed(0)}</td>
                 <td style={S.td}>{p.territories}</td>
@@ -319,20 +319,20 @@ function TowersSection() {
   })
 
   const towers = data?.towers ?? []
-  const statusColor = { scheduled: '#60A5FA', active: '#00FF87', completed: '#6B7280', cancelled: '#FF3B30' }
+  const statusColor = { scheduled: '#60A5FA', active: '#0099cc', completed: '#6B7280', cancelled: '#FF3B30' }
 
   return (
     <div>
       <div style={{ ...S.row, alignItems: 'center', marginBottom: 20 }}>
         <div style={S.h2}>CONTROL TOWERS</div>
-        <button onClick={() => setShowCreate(!showCreate)} style={{ ...S.btn('#00FF87'), marginLeft: 'auto', background: 'rgba(0,255,135,0.1)' }}>
+        <button onClick={() => setShowCreate(!showCreate)} style={{ ...S.btn('#0099cc'), marginLeft: 'auto', background: 'rgba(0,136,74,0.1)' }}>
           + Create Event
         </button>
       </div>
 
       {showCreate && (
-        <div style={{ ...S.card, borderColor: 'rgba(0,255,135,0.2)', marginBottom: 24 }}>
-          <div style={{ fontSize: 14, fontWeight: 500, color: '#fff', marginBottom: 14 }}>Create Tower Event</div>
+        <div style={{ ...S.card, borderColor: 'rgba(0,136,74,0.2)', marginBottom: 24 }}>
+          <div style={{ fontSize: 14, fontWeight: 500, color: '#1a2a3a', marginBottom: 14 }}>Create Tower Event</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 14 }}>
             <div>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 4 }}>Territory ID (must be tower)</div>
@@ -349,7 +349,7 @@ function TowersSection() {
           </div>
           <button
             onClick={() => actionMut.mutate({ action: 'create' })}
-            style={{ ...S.btn('#00FF87'), background: 'rgba(0,255,135,0.12)' }}
+            style={{ ...S.btn('#0099cc'), background: 'rgba(0,136,74,0.12)' }}
           >
             Schedule Event
           </button>
@@ -384,7 +384,7 @@ function TowersSection() {
                   <td style={S.td}>
                     <div style={{ display: 'flex', gap: 6 }}>
                       {t.status === 'scheduled' && (
-                        <button onClick={() => actionMut.mutate({ eventId: t.id, action: 'force_start' })} style={S.btn('#00FF87')}>Start Now</button>
+                        <button onClick={() => actionMut.mutate({ eventId: t.id, action: 'force_start' })} style={S.btn('#0099cc')}>Start Now</button>
                       )}
                       {t.status === 'active' && (
                         <button onClick={() => actionMut.mutate({ eventId: t.id, action: 'force_end' })} style={S.btn('#FFB800')}>End Now</button>
@@ -455,7 +455,7 @@ function POIsSection() {
                   <td style={S.td}><span style={S.badge('#8B5CF6')}>{p.category}</span></td>
                   <td style={S.td}><span style={S.badge(tc)}>{p.threat?.toUpperCase()}</span></td>
                   <td style={S.td}>
-                    <span style={S.badge(p.status === 'active' ? '#00FF87' : '#6B7280')}>
+                    <span style={S.badge(p.status === 'active' ? '#0099cc' : '#6B7280')}>
                       {p.status?.toUpperCase()}
                     </span>
                   </td>
@@ -464,7 +464,7 @@ function POIsSection() {
                     <div style={{ display: 'flex', gap: 6 }}>
                       {p.status !== 'active' && (
                         <button onClick={() => actionMut.mutate({ poi_id: p.id, action: 'activate' })}
-                          style={{ ...S.btn('#00FF87'), background: 'rgba(0,255,135,0.08)' }}>Activate</button>
+                          style={{ ...S.btn('#0099cc'), background: 'rgba(0,136,74,0.08)' }}>Activate</button>
                       )}
                       {p.status === 'active' && (
                         <button onClick={() => actionMut.mutate({ poi_id: p.id, action: 'deactivate' })}
@@ -502,8 +502,8 @@ function BroadcastSection() {
           <div style={{ display: 'flex', gap: 8 }}>
             {['announcement', 'alert', 'event'].map(t => (
               <button key={t} onClick={() => setType(t)} style={{
-                ...S.btn(type === t ? '#00FF87' : 'rgba(255,255,255,0.3)'),
-                background: type === t ? 'rgba(0,255,135,0.1)' : 'transparent',
+                ...S.btn(type === t ? '#0099cc' : 'rgba(255,255,255,0.3)'),
+                background: type === t ? 'rgba(0,136,74,0.1)' : 'transparent',
                 textTransform: 'capitalize',
               }}>{t}</button>
             ))}
@@ -524,8 +524,8 @@ function BroadcastSection() {
             onClick={() => mut.mutate()}
             disabled={!msg.trim() || mut.isPending}
             style={{
-              ...S.btn('#00FF87'), marginLeft: 'auto',
-              background: 'rgba(0,255,135,0.12)', padding: '9px 20px',
+              ...S.btn('#0099cc'), marginLeft: 'auto',
+              background: 'rgba(0,136,74,0.12)', padding: '9px 20px',
               opacity: (!msg.trim() || mut.isPending) ? 0.5 : 1,
             }}
           >
@@ -544,7 +544,7 @@ function BroadcastSection() {
         ].map(t => (
           <div key={t.label} style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.03)', borderRadius: 6, marginBottom: 6, cursor: 'pointer', display: 'flex', gap: 10, alignItems: 'center' }}
             onClick={() => setMsg(t.text)}>
-            <div style={{ fontSize: 12, color: '#00FF87', fontFamily: 'monospace', flexShrink: 0 }}>{t.label}</div>
+            <div style={{ fontSize: 12, color: '#0099cc', fontFamily: 'monospace', flexShrink: 0 }}>{t.label}</div>
             <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.text}</div>
           </div>
         ))}
@@ -581,22 +581,22 @@ function EconomySection() {
       </div>
 
       <div style={S.card}>
-        <div style={{ fontSize: 14, fontWeight: 500, color: '#fff', marginBottom: 14 }}>Circuit Breakers</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: '#1a2a3a', marginBottom: 14 }}>Circuit Breakers</div>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
           <button onClick={() => actionMut.mutate({ action: 'disable_withdrawals' })}
             style={S.btnDanger}>🔴 Disable Withdrawals</button>
           <button onClick={() => actionMut.mutate({ action: 'enable_withdrawals' })}
-            style={{ ...S.btn('#00FF87'), background: 'rgba(0,255,135,0.08)' }}>🟢 Enable Withdrawals</button>
+            style={{ ...S.btn('#0099cc'), background: 'rgba(0,136,74,0.08)' }}>🟢 Enable Withdrawals</button>
         </div>
         <div style={{ marginTop: 14, fontSize: 12, color: 'rgba(255,255,255,0.3)' }}>
-          Status: Withdrawals <span style={{ color: data?.withdrawals_enabled ? '#00FF87' : '#FF3B30', fontWeight: 500 }}>
+          Status: Withdrawals <span style={{ color: data?.withdrawals_enabled ? '#0099cc' : '#FF3B30', fontWeight: 500 }}>
             {data?.withdrawals_enabled ? 'ENABLED' : 'DISABLED'}
           </span>
         </div>
       </div>
 
       <div style={S.card}>
-        <div style={{ fontSize: 14, fontWeight: 500, color: '#fff', marginBottom: 14 }}>Adjust HEX Coin Rate</div>
+        <div style={{ fontSize: 14, fontWeight: 500, color: '#1a2a3a', marginBottom: 14 }}>Adjust HEX Coin Rate</div>
         <div style={{ ...S.row, alignItems: 'center' }}>
           <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>1 HEX Coin =</span>
           <input type="number" value={rate} onChange={e => setRate(+e.target.value)}
