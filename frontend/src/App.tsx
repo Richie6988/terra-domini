@@ -172,9 +172,9 @@ function GameScreen() {
         <HexodDock />
       </ErrorBoundary>
 
-      {/* Legacy HUD (notifications, missions, battles — kept for continuity) */}
+      {/* Legacy HUD elements (coalition alert, missions widget) */}
       <ErrorBoundary label="GameHUD">
-        <GameHUD onClickerOpen={() => setShowClicker(true)} />
+        <GameHUD />
       </ErrorBoundary>
 
       {/* Live war ticker */}
