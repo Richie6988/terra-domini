@@ -10,32 +10,43 @@ import { useStore } from '../store'
 
 const pageStyle: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center',
-  minHeight: '100vh', background: '#0a0a14', position: 'relative', overflow: 'hidden',
-  padding: '20px 0',
+  minHeight: '100vh',
+  background: 'linear-gradient(135deg, #2d5a45, #1a3d2e)',
+  position: 'relative', overflow: 'hidden', padding: '20px 0',
 }
 const bgStyle: React.CSSProperties = {
   position: 'absolute', inset: 0,
-  backgroundImage: 'radial-gradient(ellipse at 30% 40%, rgba(16,185,129,0.06) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(139,92,246,0.06) 0%, transparent 60%)',
+  backgroundImage: 'radial-gradient(ellipse at 30% 40%, rgba(0,153,204,0.08) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(204,136,0,0.06) 0%, transparent 60%)',
 }
 const cardStyle: React.CSSProperties = {
   width: 420, padding: '36px 32px',
-  background: 'rgba(255,255,255,0.03)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 16, position: 'relative', zIndex: 1,
+  background: 'linear-gradient(180deg, rgba(235,242,250,0.95) 0%, rgba(220,230,242,0.95) 100%)',
+  backdropFilter: 'blur(30px) saturate(1.2)',
+  border: '1px solid rgba(0,60,100,0.15)',
+  borderRadius: 12, position: 'relative', zIndex: 1,
+  boxShadow: '0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.8)',
 }
 const labelStyle: React.CSSProperties = {
-  display: 'block', fontSize: 11, color: '#9CA3AF', marginBottom: 5, marginTop: 12,
+  display: 'block', fontSize: 8, color: 'rgba(26,42,58,0.45)',
+  marginBottom: 5, marginTop: 12,
+  fontFamily: "'Orbitron', system-ui, sans-serif",
+  letterSpacing: 2, fontWeight: 500,
 }
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '10px 13px',
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8,
-  color: '#fff', fontSize: 13, boxSizing: 'border-box',
+  background: 'rgba(255,255,255,0.6)',
+  border: '1px solid rgba(0,60,100,0.12)', borderRadius: 8,
+  color: '#1a2a3a', fontSize: 12, boxSizing: 'border-box',
+  fontFamily: "'Share Tech Mono', monospace",
+  textTransform: 'none', letterSpacing: 0,
 }
 const btnStyle: React.CSSProperties = {
   width: '100%', padding: 13, marginTop: 20,
-  background: '#059669', border: 'none', borderRadius: 10,
-  color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+  background: '#0099cc', border: 'none', borderRadius: 20,
+  color: '#fff', fontSize: 9, fontWeight: 700, cursor: 'pointer',
+  fontFamily: "'Orbitron', system-ui, sans-serif",
+  letterSpacing: 3,
+  boxShadow: '0 4px 15px rgba(0,153,204,0.3)',
 }
 
 
@@ -82,24 +93,27 @@ export default function RegisterPage() {
       <div style={bgStyle} />
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} style={cardStyle}>
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{ fontSize: 32, marginBottom: 4 }}>⬡</div>
-          <div style={{ fontSize: 26, fontWeight: 800, color: '#10B981', letterSpacing: -1, marginBottom: 4 }}>HEXOD</div>
-          <div style={{ fontSize: 13, color: '#6B7280' }}>Réclamez votre premier territoire. Construisez votre empire.</div>
+          <div style={{ fontSize: 32, marginBottom: 4, color: '#0099cc' }}>⬡</div>
+          <div style={{ fontSize: 20, fontWeight: 900, color: '#0099cc', letterSpacing: 6, marginBottom: 4,
+            fontFamily: "'Orbitron', system-ui, sans-serif" }}>HEXOD</div>
+          <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.45)', letterSpacing: 2,
+            fontFamily: "'Orbitron', system-ui, sans-serif" }}>CLAIM YOUR FIRST TERRITORY. BUILD YOUR EMPIRE.</div>
           {refCode && (
-            <div style={{ marginTop: 12, padding: '8px 14px', background: 'rgba(16,185,129,0.1)',
-              border: '1px solid rgba(16,185,129,0.3)', borderRadius: 10, fontSize: 12, color: '#10B981' }}>
-              🎁 Invitation acceptée — <strong>+50 💎 HEX Coin</strong> offerts à l'inscription !
+            <div style={{ marginTop: 12, padding: '8px 14px', background: 'rgba(0,153,204,0.08)',
+              border: '1px solid rgba(0,153,204,0.2)', borderRadius: 20, fontSize: 8, color: '#0099cc',
+              fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>
+              🎁 INVITATION ACCEPTED — <strong>+50 ◆</strong> BONUS ON REGISTRATION
             </div>
           )}
         </div>
 
         <form onSubmit={handleSubmit}>
           {[
-            { key: 'email', label: 'Email', type: 'email', placeholder: 'commander@example.com' },
-            { key: 'username', label: 'Username (3-32 chars)', type: 'text', placeholder: 'IronGeneral42' },
-            { key: 'display_name', label: 'Display Name (optional)', type: 'text', placeholder: 'Iron General' },
-            { key: 'password', label: 'Password (min 10 chars)', type: 'password', placeholder: '••••••••••••' },
-            { key: 'confirm', label: 'Confirm Password', type: 'password', placeholder: '••••••••••••' },
+            { key: 'email', label: 'EMAIL', type: 'email', placeholder: 'commander@example.com' },
+            { key: 'username', label: 'USERNAME (3-32 CHARS)', type: 'text', placeholder: 'IronGeneral42' },
+            { key: 'display_name', label: 'DISPLAY NAME (OPTIONAL)', type: 'text', placeholder: 'Iron General' },
+            { key: 'password', label: 'PASSWORD (MIN 10 CHARS)', type: 'password', placeholder: '••••••••••••' },
+            { key: 'confirm', label: 'CONFIRM PASSWORD', type: 'password', placeholder: '••••••••••••' },
           ].map(f => (
             <div key={f.key}>
               <label style={labelStyle}>{f.label}</label>
@@ -114,25 +128,30 @@ export default function RegisterPage() {
             </div>
           ))}
 
-          <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(16,185,129,0.08)', borderRadius: 8, fontSize: 11, color: '#6B7280', lineHeight: 1.6 }}>
-            🛡️ Beginner protection for 7 days. No attacks while you learn the game.
+          <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(0,153,204,0.06)',
+            border: '1px solid rgba(0,153,204,0.12)', borderRadius: 8,
+            fontSize: 8, color: 'rgba(26,42,58,0.6)', lineHeight: 1.8,
+            fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>
+            🛡 BEGINNER PROTECTION 7 DAYS — NO ATTACKS WHILE YOU LEARN
             <br />
-            🪙 First territory earns you 100 HEX Coin bonus.
+            ◆ FIRST TERRITORY → 100 CRYSTAL BONUS
           </div>
 
           <button type="submit" disabled={loading} style={btnStyle}>
-            {loading ? 'Creating account…' : '🌍 Begin the Conquest'}
+            {loading ? 'CREATING ACCOUNT…' : '⬡ BEGIN THE CONQUEST'}
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: 18, fontSize: 13, color: '#6B7280' }}>
-          Already a commander?{' '}
-          <Link to="/login" style={{ color: '#10B981', textDecoration: 'none' }}>Sign in</Link>
+        <div style={{ textAlign: 'center', marginTop: 18, fontSize: 8, color: 'rgba(26,42,58,0.45)',
+          fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>
+          ALREADY A COMMANDER?{' '}
+          <Link to="/login" style={{ color: '#0099cc', textDecoration: 'none', fontWeight: 700 }}>SIGN IN</Link>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 12, fontSize: 11, color: '#374151' }}>
-          By registering you accept the Terms of Service and Privacy Policy.
-          HEX Coin is a utility token. Not financial advice.
+        <div style={{ textAlign: 'center', marginTop: 12, fontSize: 7, color: 'rgba(26,42,58,0.3)',
+          fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1, lineHeight: 1.6 }}>
+          BY REGISTERING YOU ACCEPT THE TERMS OF SERVICE AND PRIVACY POLICY.
+          HEX COIN IS A UTILITY TOKEN. NOT FINANCIAL ADVICE.
         </div>
       </motion.div>
     </div>

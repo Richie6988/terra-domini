@@ -6,7 +6,9 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { api } from '../../services/api'
+import { useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
+import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
 
 const toF = (v: unknown, d = 2) => parseFloat(String(v ?? 0)).toFixed(d)
@@ -142,6 +144,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
   const [wAddr, setWAddr] = useState('')
   const [wAmt, setWAmt] = useState('10')
   const qc = useQueryClient()
+  const setActivePanel = useStore(s => s.setActivePanel)
 
   const { data: wallet } = useQuery({ queryKey: ['wallet'], queryFn: () => api.get('/wallet/me/').then(r => r.data), refetchInterval: 30000 })
   const { data: prices = {} } = useQuery({ queryKey: ['prices'], queryFn: () => api.get('/wallet/prices/').then(r => r.data), refetchInterval: 60000 })
@@ -217,6 +220,32 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
               ))}
             </div>
           )}
+
+        {/* ── Cross-panel CTAs ── */}
+        <div style={{ marginTop: 16, display:'flex', gap:8 }}>
+          <button
+            onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }}
+            style={{
+              flex:1, padding:'10px', borderRadius:20,
+              background:'rgba(251,191,36,0.08)', border:'1px solid rgba(251,191,36,0.2)',
+              color:'#cc8800', fontSize:7, fontWeight:700, letterSpacing:2,
+              cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+            }}
+          >
+            🛒 SPEND → SHOP
+          </button>
+          <button
+            onClick={() => { onClose(); setTimeout(() => setActivePanel('marketplace'), 100) }}
+            style={{
+              flex:1, padding:'10px', borderRadius:20,
+              background:'rgba(204,136,0,0.08)', border:'1px solid rgba(204,136,0,0.2)',
+              color:'#cc8800', fontSize:7, fontWeight:700, letterSpacing:2,
+              cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+            }}
+          >
+            🏪 NFT MARKET →
+          </button>
+        </div>
         </div>
       </GlassPanel>
 

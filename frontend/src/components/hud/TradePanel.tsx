@@ -8,7 +8,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ArrowRightLeft, TrendingUp, Package } from 'lucide-react'
 import { api } from '../../services/api'
-import { usePlayer } from '../../store'
+import { usePlayer, useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
 
@@ -269,6 +269,7 @@ function PriceBoard() {
 // ─── Main Panel ────────────────────────────────────────────────────────────
 export function TradePanel({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState('market')
+  const setActivePanel = useStore(s => s.setActivePanel)
 
   return (
     <GlassPanel title="TRADE" onClose={onClose} accent="#22c55e">
@@ -286,6 +287,32 @@ export function TradePanel({ onClose }: { onClose: () => void }) {
         {tab === 'market'  && <MarketTab />}
         {tab === 'players' && <PlayerTradeTab />}
         {tab === 'prices'  && <PriceBoard />}
+      </div>
+
+      {/* Cross-panel CTAs */}
+      <div style={{ marginTop: 16, display:'flex', gap:8 }}>
+        <button
+          onClick={() => { onClose(); setTimeout(() => setActivePanel('marketplace'), 100) }}
+          style={{
+            flex:1, padding:'10px', borderRadius:20,
+            background:'rgba(204,136,0,0.06)', border:'1px solid rgba(204,136,0,0.2)',
+            color:'#cc8800', fontSize:7, fontWeight:700, letterSpacing:2,
+            cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+          }}
+        >
+          🏪 NFT MARKETPLACE →
+        </button>
+        <button
+          onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }}
+          style={{
+            flex:1, padding:'10px', borderRadius:20,
+            background:'rgba(168,85,247,0.06)', border:'1px solid rgba(168,85,247,0.2)',
+            color:'#a855f7', fontSize:7, fontWeight:700, letterSpacing:2,
+            cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+          }}
+        >
+          💎 WALLET →
+        </button>
       </div>
     </GlassPanel>
   )

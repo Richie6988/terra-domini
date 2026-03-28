@@ -15,7 +15,7 @@ import { useState, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
-import { usePlayer } from '../../store'
+import { usePlayer, useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
@@ -388,6 +388,7 @@ const TABS = [
 export function MarketplacePanel({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState('explore')
   const player = usePlayer()
+  const setActivePanel = useStore(s => s.setActivePanel)
 
   return (
     <GlassPanel title="MARKETPLACE" onClose={onClose} accent="#cc8800" width={400}>
@@ -429,6 +430,33 @@ export function MarketplacePanel({ onClose }: { onClose: () => void }) {
             {tab === 'my-sales' && <MySalesTab />}
           </motion.div>
         </AnimatePresence>
+      </div>
+
+      {/* ── Cross-panel CTA ── */}
+      <div style={{ marginTop: 16, display:'flex', gap:8 }}>
+        <button
+          onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }}
+          style={{
+            flex:1, padding:'10px', borderRadius:20,
+            background:'rgba(121,80,242,0.08)', border:'1px solid rgba(121,80,242,0.2)',
+            color:'#7950f2', fontSize:7, fontWeight:700, letterSpacing:2,
+            cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+            display:'flex', alignItems:'center', justifyContent:'center', gap:6,
+          }}
+        >
+          <CrystalIcon size="sm" /> TOP UP → WALLET
+        </button>
+        <button
+          onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }}
+          style={{
+            flex:1, padding:'10px', borderRadius:20,
+            background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)',
+            color:'#cc8800', fontSize:7, fontWeight:700, letterSpacing:2,
+            cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+          }}
+        >
+          🛒 BOOSTERS → SHOP
+        </button>
       </div>
     </GlassPanel>
   )

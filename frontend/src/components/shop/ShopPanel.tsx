@@ -99,6 +99,7 @@ export function ShopPanel({ onClose }: Props) {
 
   const items = catalog.filter((i:any) => cat === 'all' || i.category === cat)
   const toNum = (v: any) => parseFloat(String(v ?? 0)) || 0
+  const setActivePanel = useStore(s => s.setActivePanel)
 
   return (
     <>
@@ -167,6 +168,35 @@ export function ShopPanel({ onClose }: Props) {
               )}
             </div>
           )}
+        </div>
+
+        {/* ── Cross-panel CTAs ── */}
+        <div style={{ marginTop: 16, display:'flex', flexDirection:'column', gap:8 }}>
+          <button
+            onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }}
+            style={{
+              width:'100%', padding:'10px', borderRadius:20,
+              background:'linear-gradient(90deg, rgba(121,80,242,0.1), rgba(121,80,242,0.05))',
+              border:'1px solid rgba(121,80,242,0.25)',
+              color:'#7950f2', fontSize:8, fontWeight:700, letterSpacing:2,
+              cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+              display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+            }}
+          >
+            <CrystalIcon size="sm" /> BUY CRYSTALS → WALLET
+          </button>
+          <button
+            onClick={() => { onClose(); setTimeout(() => setActivePanel('marketplace'), 100) }}
+            style={{
+              width:'100%', padding:'10px', borderRadius:20,
+              background:'linear-gradient(90deg, rgba(204,136,0,0.08), rgba(204,136,0,0.03))',
+              border:'1px solid rgba(204,136,0,0.2)',
+              color:'#cc8800', fontSize:8, fontWeight:700, letterSpacing:2,
+              cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+            }}
+          >
+            🏪 NFT MARKETPLACE →
+          </button>
         </div>
       </GlassPanel>
 

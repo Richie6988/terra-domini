@@ -10,33 +10,44 @@ import { useStore } from '../store'
 
 const pageStyle: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center',
-  minHeight: '100vh', background: '#0a0a14', position: 'relative', overflow: 'hidden',
+  minHeight: '100vh',
+  background: 'linear-gradient(135deg, #2d5a45, #1a3d2e)',
+  position: 'relative', overflow: 'hidden',
 }
 const bgStyle: React.CSSProperties = {
   position: 'absolute', inset: 0,
-  backgroundImage: 'radial-gradient(ellipse at 20% 50%, rgba(16,185,129,0.06) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.06) 0%, transparent 60%)',
+  backgroundImage: 'radial-gradient(ellipse at 20% 50%, rgba(0,153,204,0.08) 0%, transparent 60%), radial-gradient(ellipse at 80% 20%, rgba(204,136,0,0.06) 0%, transparent 60%)',
 }
 const cardStyle: React.CSSProperties = {
   width: 400, padding: '40px 36px',
-  background: 'rgba(255,255,255,0.03)',
-  border: '1px solid rgba(255,255,255,0.08)',
-  borderRadius: 16, position: 'relative', zIndex: 1,
+  background: 'linear-gradient(180deg, rgba(235,242,250,0.95) 0%, rgba(220,230,242,0.95) 100%)',
+  backdropFilter: 'blur(30px) saturate(1.2)',
+  border: '1px solid rgba(0,60,100,0.15)',
+  borderRadius: 12, position: 'relative', zIndex: 1,
+  boxShadow: '0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.8)',
 }
 const labelStyle: React.CSSProperties = {
-  display: 'block', fontSize: 12, color: '#9CA3AF',
+  display: 'block', fontSize: 8, color: 'rgba(26,42,58,0.45)',
   marginBottom: 6, marginTop: 16,
+  fontFamily: "'Orbitron', system-ui, sans-serif",
+  letterSpacing: 2, fontWeight: 500,
 }
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '11px 14px',
-  background: 'rgba(255,255,255,0.05)',
-  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8,
-  color: '#fff', fontSize: 14, boxSizing: 'border-box',
+  background: 'rgba(255,255,255,0.6)',
+  border: '1px solid rgba(0,60,100,0.12)', borderRadius: 8,
+  color: '#1a2a3a', fontSize: 12, boxSizing: 'border-box',
   outline: 'none',
+  fontFamily: "'Share Tech Mono', monospace",
+  textTransform: 'none', letterSpacing: 0,
 }
 const btnStyle: React.CSSProperties = {
   width: '100%', padding: 14, marginTop: 24,
-  background: '#059669', border: 'none', borderRadius: 10,
-  color: '#fff', fontSize: 15, fontWeight: 600, cursor: 'pointer',
+  background: '#0099cc', border: 'none', borderRadius: 20,
+  color: '#fff', fontSize: 9, fontWeight: 700, cursor: 'pointer',
+  fontFamily: "'Orbitron', system-ui, sans-serif",
+  letterSpacing: 3,
+  boxShadow: '0 4px 15px rgba(0,153,204,0.3)',
 }
 
 
@@ -67,11 +78,15 @@ export default function LoginPage() {
         style={cardStyle}
       >
         <div style={{ textAlign: 'center', marginBottom: 32 }}>
-          <div style={{ fontSize: 42, marginBottom: 6 }}>⬡</div>
-          <div style={{ fontSize: 32, fontWeight: 900, color: '#10B981', letterSpacing: -1, marginBottom: 4 }}>
+          <div style={{ fontSize: 42, marginBottom: 6, color: '#0099cc' }}>⬡</div>
+          <div style={{ fontSize: 24, fontWeight: 900, color: '#0099cc', letterSpacing: 6, marginBottom: 4,
+            fontFamily: "'Orbitron', system-ui, sans-serif" }}>
             HEXOD
           </div>
-          <div style={{ fontSize: 13, color: '#6B7280' }}>Jeu de stratégie géopolitique mondial</div>
+          <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.45)', letterSpacing: 3,
+            fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+            GEOPOLITICAL STRATEGY GAME
+          </div>
         </div>
 
         <form onSubmit={handleSubmit}>
@@ -82,13 +97,14 @@ export default function LoginPage() {
           <input style={inputStyle} type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••••" />
 
           <button type="submit" disabled={loading} style={btnStyle}>
-            {loading ? 'Connexion…' : '⬡ Entrer dans le monde'}
+            {loading ? 'CONNECTING…' : '⬡ ENTER THE WORLD'}
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: 20, fontSize: 13, color: '#6B7280' }}>
-          Nouveau commandant ?{' '}
-          <Link to="/register" style={{ color: '#10B981', textDecoration: 'none' }}>Créer un compte</Link>
+        <div style={{ textAlign: 'center', marginTop: 20, fontSize: 8, color: 'rgba(26,42,58,0.45)',
+          fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>
+          NEW COMMANDER?{' '}
+          <Link to="/register" style={{ color: '#0099cc', textDecoration: 'none', fontWeight: 700 }}>CREATE ACCOUNT</Link>
         </div>
       </motion.div>
     </div>

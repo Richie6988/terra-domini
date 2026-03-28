@@ -7,7 +7,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
-import { usePlayer } from '../../store'
+import { usePlayer, useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
@@ -77,6 +77,7 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
   const [trainingOrders, setTrainingOrders] = useState<TrainingOrder[]>([])
   const player = usePlayer()
   const qc = useQueryClient()
+  const setActivePanel = useStore(s => s.setActivePanel)
   const tdc = parseFloat(String(player?.tdc_in_game ?? 0))
 
   const { data: battlesData } = useQuery({
@@ -288,6 +289,32 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
             ))}
           </div>
         )}
+      </div>
+
+      {/* Cross-panel CTAs */}
+      <div style={{ marginTop: 16, display:'flex', gap:8 }}>
+        <button
+          onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }}
+          style={{
+            flex:1, padding:'10px', borderRadius:20,
+            background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)',
+            color:'#cc8800', fontSize:7, fontWeight:700, letterSpacing:2,
+            cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+          }}
+        >
+          🛒 MILITARY BOOSTS → SHOP
+        </button>
+        <button
+          onClick={() => { onClose(); setTimeout(() => setActivePanel('alliance'), 100) }}
+          style={{
+            flex:1, padding:'10px', borderRadius:20,
+            background:'rgba(59,130,246,0.06)', border:'1px solid rgba(59,130,246,0.2)',
+            color:'#3b82f6', fontSize:7, fontWeight:700, letterSpacing:2,
+            cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+          }}
+        >
+          🏰 ALLIANCE DEFENSE →
+        </button>
       </div>
     </GlassPanel>
   )

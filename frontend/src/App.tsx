@@ -1,10 +1,11 @@
 /**
- * App.tsx — root component with routing and panel system.
+ * App.tsx — HEXOD root component with routing and panel system.
  */
 import { Suspense, lazy, useState, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
+import toast from 'react-hot-toast'
 import { AnimatePresence } from 'framer-motion'
 import { useStore } from './store'
 import { api } from './services/api'
@@ -13,11 +14,31 @@ import { ErrorBoundary } from './components/ui/Utils'
 import { GameMap } from './components/map/GameMap'
 import { WakeUpDigest } from './components/onboarding/Tutorial'
 import { OnboardingHotspots } from './components/onboarding/OnboardingHotspots'
+
+// ─── HEXOD Shell Components ─────────────────────────────────
 import { NewsTicker } from './components/shared/NewsTicker'
 import { HexodTopHUD } from './components/shared/HexodTopHUD'
 import { HexodDock } from './components/shared/HexodDock'
 import { RadarTrigger, RadarFilterPanel } from './components/shared/RadarFilterPanel'
 import { RadarWidget } from './components/shared/RadarWidget'
+
+// ─── Panel Components ───────────────────────────────────────
+import { GameHUD } from './components/hud/GameHUD'
+import { TerritoryPanel } from './components/hud/TerritoryPanel'
+import { CombatPanel } from './components/hud/CombatPanel'
+import { EventsPanel } from './components/hud/EventsPanel'
+import { ProfilePanel } from './components/hud/ProfilePanel'
+import { AlliancePanel } from './components/alliance/AlliancePanel'
+import { TradePanel } from './components/hud/TradePanel'
+import { CryptoPanel } from './components/crypto/CryptoPanel'
+import { ShopPanel } from './components/shop/ShopPanel'
+import { LadderPanel } from './components/hud/LadderPanel'
+import { MetaDashboard } from './components/hud/MetaDashboard'
+import { MarketplacePanel } from './components/crypto/MarketplacePanel'
+import { WarTicker } from './components/hud/WarTicker'
+
+// ─── Providers ──────────────────────────────────────────────
+import { WalletProvider } from './components/crypto/WalletProvider'
 
 // WakeUpDigest connecté à l'API
 function WakeUpDigestConnected() {
@@ -55,23 +76,6 @@ function WakeUpDigestConnected() {
     />
   )
 }
-import { GameHUD } from './components/hud/GameHUD'
-import { TerritoryPanel } from './components/hud/TerritoryPanel'
-import { CombatPanel } from './components/hud/CombatPanel'
-import { EventsPanel } from './components/hud/EventsPanel'
-import { ProfilePanel } from './components/hud/ProfilePanel'
-import { AlliancePanel } from './components/alliance/AlliancePanel'
-import { TradePanel } from './components/hud/TradePanel'
-import { CryptoPanel } from './components/crypto/CryptoPanel'
-import { LeaderboardPanel } from './components/leaderboard/LeaderboardPanel'
-import { ShopPanel }        from './components/shop/ShopPanel'
-import { LadderPanel }      from './components/hud/LadderPanel'
-import { MetaDashboard }    from './components/hud/MetaDashboard'
-import { DailyClicker } from './components/clicker/DailyClicker'
-import { WalletProvider } from './components/crypto/WalletProvider'
-import { MarketplacePanel } from './components/crypto/MarketplacePanel'
-
-import { WarTicker } from './components/hud/WarTicker'
 
 const LoginPage    = lazy(() => import('./pages/LoginPage'))
 const Tutorial     = lazy(() => import('./components/onboarding/Tutorial'))
@@ -110,7 +114,6 @@ function GameScreen() {
       setWasLoggedIn(false)
     }
   }, [accessToken])
-  const [showClicker, setShowClicker] = useState(false)
   const [radarOpen, setRadarOpen] = useState(false)
   const [radarActive, setRadarActive] = useState(false)
   const setActivePanel       = useStore((s) => s.setActivePanel)
@@ -186,12 +189,10 @@ function GameScreen() {
         <WarTicker />
       </ErrorBoundary>
 
-      {/* Territory detail panel (bottom sheet) */}
-      <AnimatePresence>
-        {selectedTerritory && <TerritoryPanel />}
-      </AnimatePresence>
+      {/* Territory detail panel */}
+      {selectedTerritory && <TerritoryPanel />}
 
-      {/* Side panels — triggered by bottom nav */}
+      {/* Side panels — triggered by HexodDock */}
       <AnimatePresence>
         {activePanel === 'combat'      && <CombatPanel     onClose={() => setActivePanel(null)} />}
         {activePanel === 'alliance'    && <AlliancePanel   onClose={() => setActivePanel(null)} />}
@@ -200,11 +201,9 @@ function GameScreen() {
         {activePanel === 'trade'       && <TradePanel      onClose={() => setActivePanel(null)} />}
         {activePanel === 'crypto'      && <CryptoPanel     onClose={() => setActivePanel(null)} />}
         {activePanel === 'marketplace' && <MarketplacePanel onClose={() => setActivePanel(null)} />}
-        {activePanel === 'leaderboard' && <LeaderboardPanel onClose={() => setActivePanel(null)} />}
         {activePanel === 'shop'        && <ShopPanel        onClose={() => setActivePanel(null)} />}
         {activePanel === 'ladder'      && <LadderPanel      onClose={() => setActivePanel(null)} />}
         {activePanel === 'meta'        && <MetaDashboard    onClose={() => setActivePanel(null)} />}
-        {showClicker && <DailyClicker onClose={() => setShowClicker(false)} />}
       </AnimatePresence>
 
       {/* Auto-tutorial for new players */}
@@ -234,8 +233,16 @@ export default function App() {
       <WalletProvider>
       <BrowserRouter>
         <Suspense fallback={
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0a0a14', color: '#10B981', fontSize: 18 }}>
-            Loading Hexod…
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            height: '100vh',
+            background: 'linear-gradient(135deg, #2d5a45, #1a3d2e)',
+            color: '#0099cc',
+            fontSize: 12,
+            fontFamily: "'Orbitron', system-ui, sans-serif",
+            letterSpacing: 3,
+          }}>
+            INITIALIZING HEXOD…
           </div>
         }>
           <Routes>
@@ -257,14 +264,18 @@ export default function App() {
         position="top-center"
         toastOptions={{
           style: {
-            background: '#1F2937',
-            color: '#E5E7EB',
-            border: '1px solid rgba(255,255,255,0.1)',
-            borderRadius: 10,
-            fontSize: 13,
+            background: 'rgba(235, 242, 250, 0.95)',
+            backdropFilter: 'blur(12px)',
+            color: '#1a2a3a',
+            border: '1px solid rgba(0, 153, 204, 0.2)',
+            borderRadius: 8,
+            fontSize: 10,
+            fontFamily: "'Orbitron', system-ui, sans-serif",
+            letterSpacing: 1,
+            textTransform: 'uppercase' as const,
           },
-          success: { iconTheme: { primary: '#10B981', secondary: '#fff' } },
-          error:   { iconTheme: { primary: '#EF4444', secondary: '#fff' } },
+          success: { iconTheme: { primary: '#00884a', secondary: '#fff' } },
+          error:   { iconTheme: { primary: '#dc2626', secondary: '#fff' } },
         }}
       />
     </QueryClientProvider>

@@ -19,6 +19,7 @@ const DOCK_ITEMS: DockItem[] = [
   { panel: 'events',      icon: '📡', label: 'Events',      color: '#f97316' },
   { panel: 'shop',        icon: '🛒', label: 'Shop',        color: '#fbbf24' },
   { panel: 'trade',       icon: '📊', label: 'Trade',       color: '#22c55e' },
+  { panel: 'marketplace', icon: '🏪', label: 'NFT',         color: '#cc8800' },
   { panel: 'alliance',    icon: '🏰', label: 'Alliance',    color: '#3b82f6' },
   { panel: 'ladder',      icon: '🏆', label: 'Ladder',      color: '#8b5cf6' },
   { panel: 'profile',     icon: '👤', label: 'Profile',     color: '#0099cc' },
