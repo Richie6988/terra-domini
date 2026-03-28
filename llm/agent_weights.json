@@ -1,33 +1,44 @@
 {
   "_meta": {
-    "format": "hexod_agent_weights_v1",
-    "description": "Serialized cognitive architecture for HEXOD lead engineer agent. Machine-readable decision weights, pattern recognition, and routing tables.",
-    "last_updated": "2026-03-28T23:30:00Z",
+    "format": "hexod_agent_weights_v2",
+    "version": 2,
+    "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
+    "last_updated": "2026-03-29T01:00:00Z",
     "session": 16,
-    "total_patterns": 18,
-    "total_weights": 47
+    "total_patterns": 22,
+    "total_weights": 87,
+    "total_icons": 98,
+    "total_components": 17,
+    "total_commits": 23,
+    "theme_migration": "COMPLETE",
+    "core_loop_completion": "60%"
   },
   "task_routing": {
-    "_description": "Autonomy level per task type. 1.0 = execute immediately, 0.0 = always ask first.",
+    "_description": "Autonomy level per task type. 1.0=execute immediately, 0.0=always ask.",
     "syntax_fix": 1.0,
     "import_fix": 1.0,
-    "css_styling": 0.8,
+    "css_styling": 0.85,
     "api_endpoint_bug": 0.9,
     "react_component_bug": 0.9,
     "django_migration_issue": 0.8,
     "db_schema_change": 0.4,
     "new_ui_screen": 0.2,
-    "gameplay_mechanic_change": 0.1,
+    "gameplay_mechanic_change": 0.15,
     "tokenomics_change": 0.05,
-    "design_system_migration": 0.8,
+    "design_system_migration": 0.85,
     "shared_component_creation": 0.9,
     "legacy_component_removal": 0.7,
     "llm_brain_file_update": 1.0,
     "cross_panel_wiring": 0.9,
-    "panel_migration_dark_to_light": 0.85
+    "panel_migration_dark_to_light": 0.9,
+    "icon_bank_extension": 0.95,
+    "kingdom_types_data_model": 0.8,
+    "store_slice_creation": 0.85,
+    "production_chain_balancing": 0.3,
+    "skill_tree_rebalancing": 0.2
   },
   "file_risk": {
-    "_description": "Regression probability per file. HIGH = always str_replace + verify.",
+    "_description": "Regression probability per file. Method + verification strategy.",
     "urls.py": {
       "risk": "HIGH",
       "method": "str_replace",
@@ -46,7 +57,7 @@
     "App.tsx": {
       "risk": "MEDIUM",
       "method": "str_replace",
-      "verify": "jsx_tag_count"
+      "verify": "jsx_tag_count+panel_routes"
     },
     "settings/dev.py": {
       "risk": "HIGH",
@@ -61,7 +72,12 @@
     "store/index.ts": {
       "risk": "MEDIUM",
       "method": "str_replace",
-      "verify": "type_union_match"
+      "verify": "type_union_match+panel_wiring"
+    },
+    "store/kingdomStore.ts": {
+      "risk": "MEDIUM",
+      "method": "str_replace",
+      "verify": "branch_id_consistency"
     },
     "index.css": {
       "risk": "MEDIUM",
@@ -72,124 +88,186 @@
       "risk": "LOW",
       "method": "overwrite",
       "verify": "none"
+    },
+    "iconBank.tsx": {
+      "risk": "LOW",
+      "method": "append",
+      "verify": "jsx_in_tsx_not_ts"
+    },
+    "kingdom.types.ts": {
+      "risk": "MEDIUM",
+      "method": "str_replace",
+      "verify": "branchid_union+reservoir_defaults"
+    },
+    "GlassPanel.tsx": {
+      "risk": "LOW",
+      "method": "str_replace",
+      "verify": "none"
+    },
+    "HexodDock.tsx": {
+      "risk": "MEDIUM",
+      "method": "str_replace",
+      "verify": "panelid_type+dock_items_count"
     }
   },
   "error_patterns": [
     {
       "id": "EP001",
       "pattern": "append_wrong_indentation",
-      "caused": "IndentationError views.py",
-      "fix": "Read last 20 lines before any append. Use str_replace.",
+      "file": "views.py",
+      "fix": "Read last 20 lines before append. Use str_replace.",
       "weight": 1.0
     },
     {
       "id": "EP002",
       "pattern": "orphan_code_block",
-      "caused": "Unexpected } in HexCard.tsx",
-      "fix": "After any HexCard.tsx edit, grep for duplicate functions",
+      "file": "HexCard.tsx",
+      "fix": "After edit, grep for duplicate functions.",
       "weight": 1.0
     },
     {
       "id": "EP003",
       "pattern": "missing_lazy_import",
-      "caused": "Component is not defined at runtime",
-      "fix": "Check existing lazy imports before adding routes",
+      "file": "App.tsx",
+      "fix": "Check existing lazy imports before adding routes.",
       "weight": 1.0
     },
     {
       "id": "EP004",
       "pattern": "jsx_unclosed_provider",
-      "caused": "Unterminated JSX in App.tsx",
-      "fix": "Count opening/closing tags after wrapping",
+      "file": "App.tsx",
+      "fix": "Count opening/closing tags after wrapping.",
       "weight": 1.0
     },
     {
       "id": "EP005",
       "pattern": "stale_migration_entries",
-      "caused": "InconsistentMigrationHistory",
-      "fix": "DELETE FROM django_migrations then fake-initial",
+      "file": "django_migrations",
+      "fix": "DELETE FROM django_migrations then fake-initial.",
       "weight": 1.0
     },
     {
       "id": "EP006",
       "pattern": "missing_middleware_package",
-      "caused": "ModuleNotFoundError whitenoise",
-      "fix": "Remove from INSTALLED_APPS + MIDDLEWARE",
+      "file": "settings.py",
+      "fix": "Remove from INSTALLED_APPS + MIDDLEWARE.",
       "weight": 1.0
     },
     {
       "id": "EP007",
       "pattern": "vite_assets_mime_type",
-      "caused": "MIME type error, app broken",
-      "fix": "Add /assets/ exclusion in Django catchall",
+      "file": "urls.py",
+      "fix": "Add /assets/ exclusion in Django catchall.",
       "weight": 1.0
     },
     {
       "id": "EP008",
       "pattern": "api_data_not_array",
-      "caused": "TypeError: s.map is not a function",
-      "fix": "Array.isArray(data) ? data : (data?.results ?? [])",
+      "file": "any",
+      "fix": "Array.isArray(data) ? data : (data?.results ?? []).",
       "weight": 1.0
     },
     {
       "id": "EP009",
       "pattern": "raw_pat_in_commit",
-      "caused": "GitHub push protection rejects",
+      "file": "any",
       "fix": "Never store tokens in files. Use git remote URL only.",
       "weight": 1.0
     },
     {
       "id": "EP010",
       "pattern": "body_uppercase_breaks_inputs",
-      "caused": "Login/register fields all caps",
-      "fix": "input,textarea { text-transform:none } in index.css",
+      "file": "index.css",
+      "fix": "input,textarea { text-transform:none }.",
       "weight": 1.0
     },
     {
       "id": "EP011",
       "pattern": "fine_grained_pat_permissions",
-      "caused": "403 Permission denied on push",
-      "fix": "Edit token \u2192 Contents \u2192 Read and write",
+      "file": "git",
+      "fix": "Edit token → Contents → Read and write.",
       "weight": 0.9
     },
     {
       "id": "EP012",
       "pattern": "double_ui_layers",
-      "caused": "2 top bars visible simultaneously",
-      "fix": "Strip old components BEFORE or SAME commit as adding new",
+      "file": "App.tsx",
+      "fix": "Strip old BEFORE or SAME commit as adding new.",
       "weight": 1.0
     },
     {
       "id": "EP013",
       "pattern": "orphan_panel_route",
-      "caused": "Panel in App.tsx but no dock button \u2192 unreachable",
-      "fix": "Audit dock items vs App.tsx routes vs store type union",
+      "file": "App.tsx+store",
+      "fix": "Audit dock items vs routes vs store union.",
       "weight": 1.0
     },
     {
       "id": "EP014",
       "pattern": "double_animate_presence",
-      "caused": "TerritoryPanel animated twice (parent + GlassPanel)",
-      "fix": "Remove outer AnimatePresence when GlassPanel handles it",
+      "file": "any",
+      "fix": "Remove outer when GlassPanel handles animation.",
       "weight": 0.8
     },
     {
       "id": "EP015",
       "pattern": "missing_import_after_refactor",
-      "caused": "toast.error() crashes \u2014 toast never imported",
-      "fix": "Verify imports when moving code between components",
+      "file": "any",
+      "fix": "Verify imports when moving code between components.",
       "weight": 1.0
     },
     {
       "id": "EP016",
       "pattern": "tsx_extension_for_jsx",
-      "caused": "Expected > but found className in .ts file",
-      "fix": "Files with JSX/React components MUST be .tsx not .ts",
+      "file": "any",
+      "fix": "Files with JSX MUST be .tsx not .ts.",
       "weight": 1.0
+    },
+    {
+      "id": "EP017",
+      "pattern": "branchid_not_in_defaults",
+      "file": "kingdomStore.ts",
+      "fix": "When adding BranchId, update ALL default objects (reservoirs, alloc, distribution).",
+      "weight": 1.0
+    },
+    {
+      "id": "EP018",
+      "pattern": "str_replace_stale_view",
+      "file": "any",
+      "fix": "Always re-view file after successful str_replace before next edit.",
+      "weight": 1.0
+    },
+    {
+      "id": "EP019",
+      "pattern": "sed_partial_match",
+      "file": "any",
+      "fix": "Use exact full-line match in sed to avoid partial replacements.",
+      "weight": 0.9
+    },
+    {
+      "id": "EP020",
+      "pattern": "missing_toast_import",
+      "file": "any",
+      "fix": "If using toast.success/error, verify import toast from react-hot-toast.",
+      "weight": 1.0
+    },
+    {
+      "id": "EP021",
+      "pattern": "kingdom_store_not_synced_with_types",
+      "file": "kingdomStore+kingdom.types",
+      "fix": "BranchId changes must propagate to store defaults.",
+      "weight": 1.0
+    },
+    {
+      "id": "EP022",
+      "pattern": "glasspanel_width_on_skilltree",
+      "file": "KingdomPanel.tsx",
+      "fix": "SkillTree tab needs width=960, other tabs width=420.",
+      "weight": 0.8
     }
   ],
   "color_translation": {
-    "_description": "Dark cyberpunk \u2192 Light tactical color mapping",
+    "_description": "Dark cyberpunk → Light tactical. COMPLETE migration.",
     "text": {
       "#fff": "#1a2a3a",
       "#E5E7EB": "#1a2a3a",
@@ -202,77 +280,126 @@
       "rgba(255,255,255,0.03)": "rgba(255,255,255,0.5)",
       "rgba(255,255,255,0.06)": "rgba(255,255,255,0.6)",
       "rgba(0,0,0,0.6)": "rgba(235,242,250,0.95)",
-      "#0A0A14": "linear-gradient(180deg, rgba(235,242,250,0.97), rgba(220,230,242,0.97))",
-      "#0D0D1A": "rgba(235,242,250,0.95)"
+      "#0A0A14": "linear-gradient(180deg,rgba(235,242,250,0.97),rgba(220,230,242,0.97))"
     },
     "borders": {
       "rgba(255,255,255,0.07)": "rgba(0,60,100,0.1)",
       "rgba(255,255,255,0.1)": "rgba(0,60,100,0.15)"
     },
     "accents": {
-      "#00FF87": "#00884a",
-      "rgba(0,255,135,0.1)": "rgba(0,153,204,0.1)",
+      "#00FF87": "#0099cc",
+      "rgba(0,255,135,X)": "rgba(0,136,74,X)",
       "#10B981": "#0099cc",
       "#F59E0B": "#cc8800",
       "#EF4444": "#dc2626"
+    },
+    "overlays": {
+      "rgba(0,0,0,0.7-0.85)": "rgba(26,42,58,0.4)"
+    },
+    "migration_stats": {
+      "total_substitutions": 734,
+      "files_migrated": 60,
+      "neon_green_remaining": 0,
+      "dark_bg_remaining": 0,
+      "intentional_white": 28
     }
   },
   "panel_config": {
-    "_description": "Panel ID \u2192 accent color + cross-link targets",
+    "_description": "Panel ID → accent, width, cross-links, dock position.",
     "combat": {
       "accent": "#dc2626",
+      "width": 390,
       "links": [
         "shop",
         "alliance"
-      ]
+      ],
+      "dock_pos": 0,
+      "dock_icon": "⚔"
     },
     "events": {
       "accent": "#f97316",
-      "links": []
+      "width": 380,
+      "links": [],
+      "dock_pos": 1,
+      "dock_icon": "📡"
+    },
+    "kingdom": {
+      "accent": "#cc8800",
+      "width": "420|960",
+      "links": [
+        "shop",
+        "trade"
+      ],
+      "dock_pos": 2,
+      "dock_icon": "👑"
     },
     "shop": {
       "accent": "#cc8800",
+      "width": 380,
       "links": [
         "crypto",
         "marketplace"
-      ]
+      ],
+      "dock_pos": 3,
+      "dock_icon": "🛒"
     },
     "trade": {
       "accent": "#22c55e",
+      "width": 380,
       "links": [
         "marketplace",
         "crypto"
-      ]
+      ],
+      "dock_pos": 4,
+      "dock_icon": "📊"
     },
     "marketplace": {
       "accent": "#cc8800",
+      "width": 400,
       "links": [
         "crypto",
         "shop"
-      ]
+      ],
+      "dock_pos": 5,
+      "dock_icon": "🏪"
     },
     "alliance": {
       "accent": "#3b82f6",
-      "links": []
+      "width": 380,
+      "links": [],
+      "dock_pos": 6,
+      "dock_icon": "🏰"
     },
     "ladder": {
       "accent": "#8b5cf6",
-      "links": []
+      "width": 380,
+      "links": [],
+      "dock_pos": 7,
+      "dock_icon": "🏆"
     },
     "profile": {
       "accent": "dynamic",
-      "links": []
+      "width": 380,
+      "links": [],
+      "dock_pos": 8,
+      "dock_icon": "👤"
     },
     "crypto": {
       "accent": "#a855f7",
+      "width": 380,
       "links": [
         "shop",
         "marketplace"
-      ]
+      ],
+      "dock_pos": 9,
+      "dock_icon": "💎"
     },
     "meta": {
       "accent": "#64748b",
-      "links": []
+      "width": 380,
+      "links": [],
+      "dock_pos": 10,
+      "dock_icon": "📋"
     }
   },
   "z_index_stack": {
@@ -312,61 +439,46 @@
       "duration": "0.25s",
       "easing": "ease"
     },
-    "pulse": {
-      "duration": "2.5s",
-      "iteration": "infinite"
-    },
-    "scanning_glow": {
-      "duration": "1.5s",
-      "iteration": "infinite"
-    },
-    "shimmer": {
-      "duration": "3s",
-      "iteration": "infinite"
-    },
-    "sweep": {
-      "duration": "3s",
-      "iteration": "infinite"
-    },
-    "panel_close_reopen_delay_ms": 100
+    "panel_close_reopen_delay_ms": 100,
+    "radar_sweep_duration": "3s"
   },
   "font_system": {
     "heading": "'Orbitron', system-ui, sans-serif",
     "mono": "'Share Tech Mono', monospace",
     "sizes": {
-      "micro": "7-8px",
-      "small": "8-9px",
-      "body": "10px",
+      "micro": "6-7px",
+      "small": "8px",
+      "body": "9-10px",
       "header": "11-12px",
-      "title": "13px",
-      "hero": "16px"
+      "title": "13-14px",
+      "hero": "16-20px"
     },
     "global_rules": {
       "text_transform": "uppercase",
       "letter_spacing": "1-3px",
-      "line_height": 1.2,
-      "inputs_override": "text-transform:none, font:Share Tech Mono"
+      "inputs_override": "text-transform:none"
     }
   },
   "glassmorphism_recipe": {
-    "background": "linear-gradient(180deg, rgba(235,242,250,0.95) 0%, rgba(220,230,242,0.95) 100%)",
+    "background": "linear-gradient(180deg,rgba(235,242,250,0.95),rgba(220,230,242,0.95))",
     "backdrop_filter": "blur(30px) saturate(1.2)",
     "border": "1px solid rgba(0,60,100,0.15)",
     "box_shadow": "8px 0 30px rgba(0,0,0,0.15), inset -1px 0 0 rgba(255,255,255,0.8)",
-    "header_bg": "linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%)",
-    "header_border": "2px solid {accent}",
-    "tab_active": "rgba({accent},0.1) + border rgba({accent},0.3)",
-    "tab_inactive": "rgba(255,255,255,0.5) + border rgba(0,60,100,0.1)",
-    "close_button": "rgba(0,60,100,0.08) + border rgba(0,60,100,0.12) + radius:6px"
+    "header_bg": "linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0.2))",
+    "close_button": "rgba(0,60,100,0.08) + border rgba(0,60,100,0.12) + radius:6px",
+    "tab_active": "rgba({accent},0.1) + border rgba({accent},0.3) + radius:20px",
+    "tab_inactive": "rgba(255,255,255,0.5) + border rgba(0,60,100,0.1)"
   },
   "owner_signals": {
     "continuer": {
       "action": "keep_going",
-      "pause": false
+      "pause": false,
+      "momentum": "maintain"
     },
     "continue": {
       "action": "keep_going",
-      "pause": false
+      "pause": false,
+      "momentum": "maintain"
     },
     "done_i_edited": {
       "action": "retry_operation",
@@ -395,13 +507,26 @@
     "no_question_mark": {
       "action": "informational",
       "wait": false
+    },
+    "i_trust_you_bro": {
+      "action": "maximum_autonomy",
+      "quality": "exhaustive",
+      "limits": "none"
+    },
+    "keep_working": {
+      "action": "batch_everything",
+      "pause": false,
+      "stop_condition": "satisfied"
+    },
+    "also_include": {
+      "action": "add_to_batch",
+      "priority": "medium"
     }
   },
   "speed_calibration": {
     "_unit": "iterations_to_completion",
     "simple_import_fix": 1,
     "migration_cleanup": 2.5,
-    "static_file_serving": 2.5,
     "new_react_component": 1.5,
     "db_seed_csv": 2,
     "threejs_shader": 2.5,
@@ -411,16 +536,172 @@
     "shell_wiring_app_tsx": 2,
     "legacy_component_strip": 1.5,
     "panel_migration_to_glass": 1,
-    "cross_panel_wiring": 1
+    "cross_panel_wiring": 1,
+    "icon_bank_extension": 1,
+    "kingdom_types_creation": 1,
+    "store_slice_creation": 1.5,
+    "full_panel_with_tabs": 2,
+    "conquest_ui": 1.5,
+    "brain_file_update": 1
   },
-  "theme_migration_status": {
-    "status": "COMPLETE",
-    "neon_green_outside_map": 0,
-    "dark_backgrounds_outside_map": 0,
-    "white_text_intentional": 28,
-    "total_files_migrated": 60,
-    "total_substitutions": 734,
-    "icon_bank_icons": 48,
-    "shared_components": 17
+  "kingdom_system": {
+    "resources": {
+      "total": 20,
+      "categories": [
+        "extraction",
+        "processed",
+        "info",
+        "social",
+        "currency"
+      ]
+    },
+    "biomes": {
+      "total": 9,
+      "list": [
+        "urban",
+        "rural",
+        "forest",
+        "mountain",
+        "coastal",
+        "desert",
+        "tundra",
+        "industrial",
+        "landmark"
+      ]
+    },
+    "skill_branches": {
+      "total": 6,
+      "list": [
+        "attack",
+        "defense",
+        "economy",
+        "influence_branch",
+        "tech",
+        "extraction"
+      ]
+    },
+    "skills_per_branch": 7,
+    "fork_tier": 2,
+    "cost_curve": [
+      0,
+      800,
+      2000,
+      4000,
+      7000,
+      15000
+    ],
+    "conquest_methods": [
+      "assault",
+      "purchase",
+      "infiltration"
+    ],
+    "adjacency_discount": 3.5,
+    "rarity_multipliers": {
+      "common": 1,
+      "uncommon": 1.5,
+      "rare": 2.5,
+      "epic": 4,
+      "legendary": 8,
+      "mythic": 20
+    },
+    "production_chains": 6
+  },
+  "navigation_map": {
+    "hud_top_left": "profile",
+    "hud_top_right": "crypto",
+    "dock_buttons": 11,
+    "panel_cross_links": {
+      "shop": [
+        "crypto",
+        "marketplace"
+      ],
+      "crypto": [
+        "shop",
+        "marketplace"
+      ],
+      "marketplace": [
+        "crypto",
+        "shop"
+      ],
+      "trade": [
+        "marketplace",
+        "crypto"
+      ],
+      "combat": [
+        "shop",
+        "alliance"
+      ],
+      "kingdom": [
+        "shop",
+        "trade"
+      ]
+    },
+    "pattern": "onClose(); setTimeout(() => setActivePanel(target), 100)",
+    "reason": "AnimatePresence exit must complete before new panel enters"
+  },
+  "icon_bank": {
+    "total": 98,
+    "category_icons": 48,
+    "resource_icons": 25,
+    "ui_icons": 5,
+    "misc_icons": 20,
+    "format": "SVG 256x256 viewBox, circle bg + centered symbol",
+    "naming": {
+      "category": "earthquake, city, volcano...",
+      "resource": "res_fer, res_petrole...",
+      "ui": "ui_combat, ui_kingdom..."
+    },
+    "helpers": [
+      "getIcon(id)",
+      "IconSVG({id,size})",
+      "getResourceIcon(resId)",
+      "ResourceIconSVG({resourceId,size})"
+    ]
+  },
+  "shared_components": {
+    "CrystalIcon": "SVG diamond #7950f2, sizes sm/md/lg/xl",
+    "NewsTicker": "28px fixed top banner, horizontal scroll",
+    "HexodTopHUD": "glassmorphism left/right segments",
+    "HexodDock": "hex-shaped bottom nav, 11 buttons",
+    "RadarFilterPanel": "380px slide-out, 48 icons, keyboard R",
+    "RadarTrigger": "left edge 48px trigger button",
+    "RadarWidget": "SVG 100x100 bottom-right, 3s sweep",
+    "Modal": "glassmorphism scale-in, z:1200",
+    "SubModal": "z:1400, capture-phase Escape",
+    "ModalTabBar": "pill tabs consistent across modules",
+    "PillButton": "consistent action buttons",
+    "GlassPanel": "slide-in panel wrapper, accent color header",
+    "SoundToggle": "bottom-left, localStorage persist",
+    "iconBank": "98 SVG icons, getIcon/IconSVG/ResourceIconSVG",
+    "radarIconData": "10 categories × 48 icon definitions",
+    "barrel_index": "shared/index.ts exports all"
+  },
+  "production_readiness": {
+    "verdict": "NOT_READY",
+    "blockers_resolved": 3,
+    "blockers_remaining": 4,
+    "resolved": [
+      "B1_territory_claim",
+      "B2_kingdom_creation",
+      "B3_processDay"
+    ],
+    "remaining": [
+      "B4_map_hex_overlay",
+      "B5_websocket_reconnect",
+      "B6_shop_kingdom_integration",
+      "B7_token_3d_viewer"
+    ],
+    "core_loop_completion": "60%",
+    "art_direction_score": "85%",
+    "game_design_score": "45%",
+    "infrastructure_score": "70%"
+  },
+  "git_workflow": {
+    "pat_format": "https://x-access-token:{TOKEN}@github.com/Richie6988/terra-domini.git",
+    "required_permission": "Contents → Read and write",
+    "conflict_resolution": "git pull origin main --rebase",
+    "commit_style": "feat:/refactor:/docs:/fix: + detailed body",
+    "build_before_commit": true,
+    "push_after_commit": true
   }
 }

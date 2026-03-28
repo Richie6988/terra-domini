@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { SKILL_BRANCHES, type BranchId, type SkillNode, type SkillBranch } from '../../types/kingdom.types'
 import type { Kingdom, SkillState } from '../../types/kingdom.types'
 import { CrystalIcon } from '../shared/CrystalIcon'
+import { SkillIconSVG } from '../shared/iconBank'
 
 interface Props {
   kingdom: Kingdom
@@ -114,9 +115,9 @@ function SkillNodeCard({
 
       {/* Header: icon + name + status */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-        <span style={{ fontSize: 20, filter: state.completed ? `drop-shadow(0 0 4px ${color})` : 'none' }}>
-          {skill.icon}
-        </span>
+        <div style={{ filter: state.completed ? `drop-shadow(0 0 4px ${color})` : 'none' }}>
+          <SkillIconSVG skillId={skill.id} size={22} color={state.completed ? color : 'rgba(26,42,58,0.6)'} />
+        </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
             fontSize: 8, fontWeight: 800, color: '#1a2a3a', letterSpacing: 1,

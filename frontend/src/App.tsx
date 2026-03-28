@@ -37,6 +37,7 @@ import { LadderPanel } from './components/hud/LadderPanel'
 import { MetaDashboard } from './components/hud/MetaDashboard'
 import { MarketplacePanel } from './components/crypto/MarketplacePanel'
 import { KingdomPanel } from './components/kingdom/KingdomPanel'
+import { CodexPanel } from './components/hud/CodexPanel'
 import { WarTicker } from './components/hud/WarTicker'
 
 // ─── Providers ──────────────────────────────────────────────
@@ -210,6 +211,7 @@ function GameScreen() {
         {activePanel === 'ladder'      && <LadderPanel      onClose={() => setActivePanel(null)} />}
         {activePanel === 'meta'        && <MetaDashboard    onClose={() => setActivePanel(null)} />}
         {activePanel === 'kingdom'     && <KingdomPanel     onClose={() => setActivePanel(null)} />}
+        {activePanel === 'codex'       && <CodexPanel       onClose={() => setActivePanel(null)} />}
       </AnimatePresence>
 
       {/* Auto-tutorial for new players */}

@@ -5,7 +5,7 @@
  */
 import { useStore, useActiveBattles } from '../../store'
 
-type PanelId = 'combat' | 'alliance' | 'events' | 'profile' | 'trade' | 'shop' | 'ladder' | 'meta' | 'crypto' | 'marketplace' | 'kingdom'
+type PanelId = 'combat' | 'alliance' | 'events' | 'profile' | 'trade' | 'shop' | 'ladder' | 'meta' | 'crypto' | 'marketplace' | 'kingdom' | 'codex'
 
 interface DockItem {
   panel: PanelId
@@ -18,6 +18,7 @@ const DOCK_ITEMS: DockItem[] = [
   { panel: 'combat',      icon: '⚔',  label: 'Military',    color: '#dc2626' },
   { panel: 'events',      icon: '📡', label: 'Events',      color: '#f97316' },
   { panel: 'kingdom',     icon: '👑', label: 'Kingdom',     color: '#cc8800' },
+  { panel: 'codex',       icon: '📖', label: 'Codex',       color: '#7950f2' },
   { panel: 'shop',        icon: '🛒', label: 'Shop',        color: '#fbbf24' },
   { panel: 'trade',       icon: '📊', label: 'Trade',       color: '#22c55e' },
   { panel: 'marketplace', icon: '🏪', label: 'NFT',         color: '#cc8800' },
