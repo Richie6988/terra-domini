@@ -57,7 +57,7 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
       <div style={{
         padding: '20px 20px 16px', flexShrink: 0,
         background: `linear-gradient(135deg, ${spec.color}14 0%, transparent 60%)`,
-        borderBottom: '1px solid rgba(255,255,255,0.06)',
+        borderBottom: '1px solid rgba(0,60,100,0.08)',
       }}>
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 14 }}>
           {/* Avatar */}
@@ -66,19 +66,19 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
             background: `linear-gradient(135deg, ${spec.color}66, ${spec.color}33)`,
             border: `2px solid ${spec.color}66`,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 22, fontWeight: 900, color: '#fff', letterSpacing: '-1px',
+            fontSize: 22, fontWeight: 900, color: '#1a2a3a', letterSpacing: '-1px',
           }}>
             {player.avatar_emoji || player.username?.slice(0,2)?.toUpperCase()}
           </div>
 
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 18, fontWeight: 900, color: '#fff', lineHeight: 1.2 }}>
+            <div style={{ fontSize: 18, fontWeight: 900, color: '#1a2a3a', lineHeight: 1.2 }}>
               {player.display_name || player.username}
             </div>
             <div style={{ fontSize: 11, color: spec.color, fontWeight: 700, marginTop: 2 }}>
               {spec.label}
             </div>
-            <div style={{ fontSize: 10, color: '#6B7280', marginTop: 1 }}>
+            <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', marginTop: 1 }}>
               Rang {player.commander_rank} · {player.email}
             </div>
           </div>
@@ -95,11 +95,11 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
 
         {/* XP bar */}
         <div style={{ marginBottom: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5, fontSize: 10, color: '#6B7280' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5, fontSize: 10, color: 'rgba(26,42,58,0.45)' }}>
             <span>XP Commandant</span>
             <span style={{ color: spec.color }}>{player.commander_xp ?? 0} XP</span>
           </div>
-          <div style={{ height: 5, background: 'rgba(255,255,255,0.06)', borderRadius: 3, overflow: 'hidden' }}>
+          <div style={{ height: 5, background: 'rgba(255,255,255,0.5)', borderRadius: 3, overflow: 'hidden' }}>
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${Math.min(100, ((player.commander_xp ?? 0) % 1000) / 10)}%` }}
@@ -107,7 +107,7 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
               style={{ height: '100%', background: `linear-gradient(90deg, ${spec.color}cc, ${spec.color})`, borderRadius: 3 }}
             />
           </div>
-          <div style={{ fontSize: 9, color: '#374151', marginTop: 3 }}>
+          <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.25)', marginTop: 3 }}>
             {1000 - ((player.commander_xp ?? 0) % 1000)} XP jusqu'au rang {(player.commander_rank ?? 1) + 1}
           </div>
         </div>
@@ -121,14 +121,14 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
             { label: 'Score', value: player.stats?.season_score ?? 0, icon: '🏆', color: '#F59E0B' },
           ].map(k => (
             <div key={k.label} style={{
-              background: 'rgba(255,255,255,0.04)', borderRadius: 8, padding: '8px 6px', textAlign: 'center',
-              border: '1px solid rgba(255,255,255,0.05)',
+              background: 'rgba(255,255,255,0.5)', borderRadius: 8, padding: '8px 6px', textAlign: 'center',
+              border: '1px solid rgba(0,60,100,0.08)',
             }}>
               <div style={{ fontSize: 14 }}>{k.icon}</div>
               <div style={{ fontSize: 13, fontWeight: 800, color: k.color, fontFamily: 'monospace', lineHeight: 1.2 }}>
                 {String(k.value).length > 6 ? String(k.value).slice(0,5)+'…' : k.value}
               </div>
-              <div style={{ fontSize: 8, color: '#4B5563', marginTop: 1 }}>{k.label}</div>
+              <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.35)', marginTop: 1 }}>{k.label}</div>
             </div>
           ))}
         </div>
@@ -137,7 +137,7 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
       {/* ── Tab nav ── */}
       <div style={{
         display: 'flex', overflowX: 'auto', flexShrink: 0,
-        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        borderBottom: '1px solid rgba(0,60,100,0.08)',
         background: 'rgba(0,0,0,0.3)',
       }}>
         {TABS.map(t => (
@@ -201,7 +201,7 @@ function OverviewTab({ player, spec }: any) {
     { label: 'Informationnel', icon: '🌐', items: [
       { k: 'influence_score', label: 'Score d\'influence', color: '#8B5CF6' },
       { k: 'season_score', label: 'Score saison', color: '#EC4899' },
-      { k: 'alliance_rank', label: 'Rang alliance', color: '#6B7280' },
+      { k: 'alliance_rank', label: 'Rang alliance', color: 'rgba(26,42,58,0.45)' },
     ]},
   ]
 
@@ -233,20 +233,20 @@ function OverviewTab({ player, spec }: any) {
       {/* 3 power layers */}
       {POWER_LAYERS.map(layer => (
         <div key={layer.label} style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 10, color: '#4B5563', letterSpacing: '0.08em',
+          <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', letterSpacing: '0.08em',
             textTransform: 'uppercase', marginBottom: 7, display: 'flex', gap: 6, alignItems: 'center' }}>
             <span>{layer.icon}</span> Couche {layer.label}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
             {layer.items.map(item => (
               <div key={item.k} style={{
-                background: 'rgba(255,255,255,0.04)', borderRadius: 9, padding: '10px 12px',
-                border: '1px solid rgba(255,255,255,0.05)',
+                background: 'rgba(255,255,255,0.5)', borderRadius: 9, padding: '10px 12px',
+                border: '1px solid rgba(0,60,100,0.08)',
               }}>
                 <div style={{ fontSize: 14, fontWeight: 800, color: item.color, fontFamily: 'monospace' }}>
                   {toNum(stats[item.k] ?? p[item.k] ?? 0).toFixed(0)}
                 </div>
-                <div style={{ fontSize: 9, color: '#4B5563', marginTop: 2 }}>{item.label}</div>
+                <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>{item.label}</div>
               </div>
             ))}
           </div>
@@ -303,7 +303,7 @@ function TerritoriesTab({ player, onClose }: any) {
           <button key={f} onClick={() => setFilter(f)} style={{
             padding: '5px 10px', borderRadius: 20, fontSize: 10, cursor: 'pointer', flexShrink: 0,
             background: filter === f ? `${RARITY_C[f] || '#3B82F6'}22` : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${filter === f ? (RARITY_C[f] || '#3B82F6') + '55' : 'rgba(255,255,255,0.07)'}`,
+            border: `1px solid ${filter === f ? (RARITY_C[f] || '#3B82F6') + '55' : 'rgba(0,60,100,0.1)'}`,
             color: filter === f ? (RARITY_C[f] || '#3B82F6') : '#6B7280', fontWeight: filter === f ? 700 : 400,
           }}>
             {f === 'all' ? `Tous (${all.length})` : f === 'poi' ? `📍 POI (${poiCount})` : `${f} (${all.filter(t => (t.rarity||'common')===f).length})`}
@@ -336,14 +336,14 @@ function TerritoryCard({ territory: t, onClick }: any) {
       onClick={onClick}
       style={{
         width: '100%', textAlign: 'left', padding: '10px 12px',
-        background: 'rgba(255,255,255,0.04)', borderRadius: 10, cursor: 'pointer',
+        background: 'rgba(255,255,255,0.5)', borderRadius: 10, cursor: 'pointer',
         border: `1px solid ${rc}22`, display: 'flex', alignItems: 'center', gap: 10,
         borderLeft: `3px solid ${t.border_color || rc}`,
       }}
     >
       <span style={{ fontSize: 22, flexShrink: 0 }}>{t.custom_emoji || t.poi_emoji || '🏴'}</span>
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#fff',
+        <div style={{ fontSize: 13, fontWeight: 700, color: '#1a2a3a',
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
         <div style={{ display: 'flex', gap: 6, marginTop: 3, flexWrap: 'wrap' }}>
           <Chip color={rc}>{rarity}</Chip>
@@ -354,8 +354,8 @@ function TerritoryCard({ territory: t, onClick }: any) {
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
         <div style={{ fontSize: 12, color: '#F59E0B', fontFamily: 'monospace', fontWeight: 700 }}>+{Math.round(income)}</div>
-        <div style={{ fontSize: 8, color: '#374151' }}>HEX Coin/jour</div>
-        <div style={{ fontSize: 9, color: '#374151', marginTop: 2 }}>📍</div>
+        <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.25)' }}>HEX Coin/jour</div>
+        <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.25)', marginTop: 2 }}>📍</div>
       </div>
     </motion.button>
   )
@@ -363,11 +363,11 @@ function TerritoryCard({ territory: t, onClick }: any) {
 
 /* ── Resources Tab ─────────────────────────────────────────── */
 const RESOURCES = [
-  { key:'res_fer',         label:'Fer',           icon:'🪨', cat:'physique', color:'#6B7280' },
-  { key:'res_cuivre',      label:'Cuivre',        icon:'🟠', cat:'physique', color:'#6B7280' },
-  { key:'res_aluminium',   label:'Aluminium',     icon:'⬜', cat:'physique', color:'#6B7280' },
-  { key:'res_acier',       label:'Acier',         icon:'⚙️', cat:'physique', color:'#6B7280' },
-  { key:'res_titanium',    label:'Titanium',      icon:'🔷', cat:'physique', color:'#6B7280' },
+  { key:'res_fer',         label:'Fer',           icon:'🪨', cat:'physique', color:'rgba(26,42,58,0.45)' },
+  { key:'res_cuivre',      label:'Cuivre',        icon:'🟠', cat:'physique', color:'rgba(26,42,58,0.45)' },
+  { key:'res_aluminium',   label:'Aluminium',     icon:'⬜', cat:'physique', color:'rgba(26,42,58,0.45)' },
+  { key:'res_acier',       label:'Acier',         icon:'⚙️', cat:'physique', color:'rgba(26,42,58,0.45)' },
+  { key:'res_titanium',    label:'Titanium',      icon:'🔷', cat:'physique', color:'rgba(26,42,58,0.45)' },
   { key:'res_petrole',     label:'Pétrole',       icon:'🛢️', cat:'energie',  color:'#F59E0B' },
   { key:'res_gaz',         label:'Gaz naturel',   icon:'💨', cat:'energie',  color:'#F59E0B' },
   { key:'res_charbon',     label:'Charbon',       icon:'⬛', cat:'energie',  color:'#F59E0B' },
@@ -385,7 +385,7 @@ const RESOURCES = [
 ]
 
 const CAT_CONFIG: Record<string, { label:string; color:string }> = {
-  physique: { label:'⚙️ Physique',       color:'#6B7280' },
+  physique: { label:'⚙️ Physique',       color:'rgba(26,42,58,0.45)' },
   energie:  { label:'⚡ Énergie',         color:'#F59E0B' },
   tech:     { label:'🔬 Technologie',     color:'#8B5CF6' },
   info:     { label:'📡 Informationnel',  color:'#3B82F6' },
@@ -419,7 +419,7 @@ function ResourcesTab() {
 
   return (
     <div>
-      <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 14, lineHeight: 1.5 }}>
+      <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginBottom: 14, lineHeight: 1.5 }}>
         Production cumulée de vos {data?.territory_count || 0} territoires.
         Les ressources alimentent l'arbre de compétences et les constructions.
       </div>
@@ -448,14 +448,14 @@ function ResourcesTab() {
                         {res.label}
                       </span>
                     </div>
-                    <div style={{ height: 3, background: 'rgba(255,255,255,0.06)', borderRadius: 2, marginBottom: 4 }}>
+                    <div style={{ height: 3, background: 'rgba(255,255,255,0.5)', borderRadius: 2, marginBottom: 4 }}>
                       <div style={{ height: '100%', width: `${(val/max)*100}%`,
                         background: res.color, borderRadius: 2, transition: 'width 0.5s' }} />
                     </div>
                     <div style={{ fontSize: 11, fontWeight: 800, color: val > 0 ? res.color : '#374151',
                       fontFamily: 'monospace' }}>
                       {res.key === 'res_hex_HEX Coin' ? val.toFixed(2) : Math.round(val)}
-                      <span style={{ fontSize: 8, color: '#4B5563', fontWeight: 400 }}>/jour</span>
+                      <span style={{ fontSize: 8, color: 'rgba(26,42,58,0.35)', fontWeight: 400 }}>/jour</span>
                     </div>
                   </div>
                 )
@@ -501,12 +501,12 @@ function SkillsTab({ spec }: any) {
   return (
     <div>
       {/* Progress */}
-      <div style={{ marginBottom: 14, padding: '10px 14px', background: 'rgba(255,255,255,0.03)', borderRadius: 10 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#6B7280', marginBottom: 5 }}>
+      <div style={{ marginBottom: 14, padding: '10px 14px', background: 'rgba(255,255,255,0.5)', borderRadius: 10 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(26,42,58,0.45)', marginBottom: 5 }}>
           <span>Compétences débloquées</span>
           <span style={{ color: spec.color, fontWeight: 700 }}>{unlockedCount} / {totalSkills}</span>
         </div>
-        <div style={{ height: 4, background: 'rgba(255,255,255,0.06)', borderRadius: 2 }}>
+        <div style={{ height: 4, background: 'rgba(255,255,255,0.5)', borderRadius: 2 }}>
           <div style={{ height: '100%', width: `${totalSkills ? (unlockedCount/totalSkills)*100 : 0}%`,
             background: spec.color, borderRadius: 2, transition: 'width 0.5s' }} />
         </div>
@@ -521,7 +521,7 @@ function SkillsTab({ spec }: any) {
             <button key={id} onClick={() => setBranch(id)} style={{
               padding: '6px 10px', borderRadius: 8, cursor: 'pointer', flexShrink: 0,
               background: branch === id ? `${bc.color}22` : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${branch === id ? bc.color + '55' : 'rgba(255,255,255,0.06)'}`,
+              border: `1px solid ${branch === id ? bc.color + '55' : 'rgba(0,60,100,0.08)'}`,
               color: branch === id ? bc.color : '#4B5563', fontSize: 10, fontWeight: branch === id ? 700 : 400,
             }}>
               {bc.label.split(' ')[0]}<br/>
@@ -550,13 +550,13 @@ function SkillRow({ skill: s, color, index, onUnlock }: any) {
     <div style={{
       marginBottom: 6, borderRadius: 10, overflow: 'hidden',
       background: s.unlocked ? `${color}0e` : 'rgba(255,255,255,0.03)',
-      border: `1px solid ${s.unlocked ? color + '33' : 'rgba(255,255,255,0.06)'}`,
+      border: `1px solid ${s.unlocked ? color + '33' : 'rgba(0,60,100,0.08)'}`,
     }}>
       <div onClick={() => setOpen(!open)} style={{ padding: '11px 13px', display: 'flex', gap: 10,
         alignItems: 'center', cursor: 'pointer' }}>
         <div style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0,
-          background: s.unlocked ? `${color}22` : 'rgba(255,255,255,0.05)',
-          border: `1px solid ${s.unlocked ? color+'44' : 'rgba(255,255,255,0.08)'}`,
+          background: s.unlocked ? `${color}22` : 'rgba(0,60,100,0.08)',
+          border: `1px solid ${s.unlocked ? color+'44' : 'rgba(0,60,100,0.1)'}`,
           display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
           {s.icon}
         </div>
@@ -573,14 +573,14 @@ function SkillRow({ skill: s, color, index, onUnlock }: any) {
         {open && (
           <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} style={{ overflow: 'hidden' }}>
             <div style={{ padding: '0 13px 12px' }}>
-              <div style={{ fontSize: 9, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
+              <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
                 Ressources requises
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
                 {s.cost_json.map((c: string) => (
                   <span key={c} style={{ fontSize: 10, padding: '3px 8px', borderRadius: 5,
-                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.09)',
-                    color: '#9CA3AF' }}>{c}</span>
+                    background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.09)',
+                    color: 'rgba(26,42,58,0.6)' }}>{c}</span>
                 ))}
               </div>
               {!s.unlocked && (
@@ -623,7 +623,7 @@ function MissionsTab() {
           border: '1px solid rgba(16,185,129,0.2)', borderRadius: 10, marginBottom: 16 }}>
           <div style={{ fontSize: 24, marginBottom: 4 }}>🎉</div>
           <div style={{ fontSize: 13, color: '#10B981', fontWeight: 700 }}>Toutes les missions complétées!</div>
-          <div style={{ fontSize: 11, color: '#4B5563', marginTop: 2 }}>Revenez demain pour de nouvelles missions</div>
+          <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>Revenez demain pour de nouvelles missions</div>
         </div>
       )}
 
@@ -651,16 +651,16 @@ function MissionRow({ mission: m, onClaim }: any) {
     <div style={{
       padding: '12px 13px', marginBottom: 8, borderRadius: 10, opacity: m.is_claimed ? 0.45 : 1,
       background: m.completed ? 'rgba(16,185,129,0.07)' : 'rgba(255,255,255,0.03)',
-      border: `1px solid ${m.completed ? 'rgba(16,185,129,0.25)' : 'rgba(255,255,255,0.06)'}`,
+      border: `1px solid ${m.completed ? 'rgba(16,185,129,0.25)' : 'rgba(0,60,100,0.08)'}`,
     }}>
       <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
         <span style={{ fontSize: 22, flexShrink: 0 }}>{m.icon ?? '🎯'}</span>
         <div style={{ flex: 1 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-            <span style={{ fontSize: 12, color: '#fff', fontWeight: 600 }}>{m.title}</span>
+            <span style={{ fontSize: 12, color: '#1a2a3a', fontWeight: 600 }}>{m.title}</span>
             <span style={{ fontSize: 11, color: '#F59E0B', fontFamily: 'monospace', fontWeight: 700 }}>+{m.reward_tdc} HEX Coin</span>
           </div>
-          <div style={{ height: 4, background: 'rgba(255,255,255,0.07)', borderRadius: 2, marginBottom: 4 }}>
+          <div style={{ height: 4, background: 'rgba(0,60,100,0.1)', borderRadius: 2, marginBottom: 4 }}>
             <motion.div
               initial={{ width: 0 }}
               animate={{ width: `${pct}%` }}
@@ -669,7 +669,7 @@ function MissionRow({ mission: m, onClaim }: any) {
             />
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 10, color: '#6B7280' }}>{m.current_count}/{m.target_count}</span>
+            <span style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)' }}>{m.current_count}/{m.target_count}</span>
             {m.completed && !m.is_claimed && (
               <button onClick={onClaim} style={{ fontSize: 10, padding: '3px 10px',
                 background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.4)',
@@ -719,8 +719,8 @@ function SettingsTab({ player, spec }: any) {
       {/* Display name */}
       <Section label="Nom d'affichage">
         <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Votre nom…"
-          style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.12)', borderRadius: 9, color: '#fff',
+          style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.5)',
+            border: '1px solid rgba(255,255,255,0.12)', borderRadius: 9, color: '#1a2a3a',
             fontSize: 14, boxSizing: 'border-box' }} />
       </Section>
 
@@ -730,7 +730,7 @@ function SettingsTab({ player, spec }: any) {
           {EMOJIS.map(e => (
             <button key={e} onClick={() => setEmoji(e)} style={{
               width: 40, height: 40, fontSize: 20, borderRadius: 9, cursor: 'pointer',
-              background: emoji === e ? `${spec.color}22` : 'rgba(255,255,255,0.05)',
+              background: emoji === e ? `${spec.color}22` : 'rgba(0,60,100,0.08)',
               border: `2px solid ${emoji === e ? spec.color : 'transparent'}`,
             }}>{e}</button>
           ))}
@@ -747,10 +747,10 @@ function SettingsTab({ player, spec }: any) {
               <button key={id} onClick={() => setPath(id)} style={{
                 padding: '10px 12px', borderRadius: 9, cursor: 'pointer', textAlign: 'left',
                 background: path === id ? `${pathColor}14` : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${path === id ? pathColor + '55' : 'rgba(255,255,255,0.06)'}`,
+                border: `1px solid ${path === id ? pathColor + '55' : 'rgba(0,60,100,0.08)'}`,
               }}>
                 <div style={{ fontSize: 12, fontWeight: 700, color: path === id ? pathColor : '#9CA3AF' }}>{label}</div>
-                <div style={{ fontSize: 10, color: '#6B7280', marginTop: 2 }}>{desc}</div>
+                <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>{desc}</div>
               </button>
             )
           })}
@@ -759,7 +759,7 @@ function SettingsTab({ player, spec }: any) {
 
       <button onClick={save} disabled={saving} style={{
         width: '100%', padding: '13px', border: 'none', borderRadius: 10, cursor: 'pointer',
-        background: saving ? 'rgba(255,255,255,0.1)' : `linear-gradient(135deg, ${spec.color}cc, ${spec.color})`,
+        background: saving ? 'rgba(0,60,100,0.12)' : `linear-gradient(135deg, ${spec.color}cc, ${spec.color})`,
         color: '#000', fontSize: 14, fontWeight: 900,
       }}>{saving ? 'Sauvegarde…' : '💾 Sauvegarder'}</button>
     </div>
@@ -770,7 +770,7 @@ function SettingsTab({ player, spec }: any) {
 function Section({ label, children }: any) {
   return (
     <div style={{ marginBottom: 18 }}>
-      <div style={{ fontSize: 9, color: '#4B5563', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
+      <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
         {label}
       </div>
       {children}
@@ -787,11 +787,11 @@ function Chip({ children, color }: any) {
 }
 function KPI({ label, value, icon, color }: any) {
   return (
-    <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 9, padding: '10px 8px', textAlign: 'center',
-      border: '1px solid rgba(255,255,255,0.05)' }}>
+    <div style={{ background: 'rgba(255,255,255,0.5)', borderRadius: 9, padding: '10px 8px', textAlign: 'center',
+      border: '1px solid rgba(0,60,100,0.08)' }}>
       <div style={{ fontSize: 14 }}>{icon}</div>
       <div style={{ fontSize: 14, fontWeight: 800, color, fontFamily: 'monospace' }}>{value}</div>
-      <div style={{ fontSize: 8, color: '#4B5563', marginTop: 1 }}>{label}</div>
+      <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.35)', marginTop: 1 }}>{label}</div>
     </div>
   )
 }
@@ -800,10 +800,10 @@ function LoadingState() {
 }
 function EmptyState({ icon, msg, sub }: any) {
   return (
-    <div style={{ textAlign: 'center', padding: '40px 20px', color: '#4B5563' }}>
+    <div style={{ textAlign: 'center', padding: '40px 20px', color: 'rgba(26,42,58,0.35)' }}>
       <div style={{ fontSize: 36, marginBottom: 10 }}>{icon}</div>
-      <div style={{ fontSize: 14, color: '#6B7280', fontWeight: 600 }}>{msg}</div>
-      <div style={{ fontSize: 11, color: '#374151', marginTop: 4 }}>{sub}</div>
+      <div style={{ fontSize: 14, color: 'rgba(26,42,58,0.45)', fontWeight: 600 }}>{msg}</div>
+      <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.25)', marginTop: 4 }}>{sub}</div>
     </div>
   )
 }

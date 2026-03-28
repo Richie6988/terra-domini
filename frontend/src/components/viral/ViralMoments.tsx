@@ -202,7 +202,7 @@ export function ViralMomentDisplay({ moment, onDismiss, onShare }: ViralMomentDi
               <div style={{
                 fontFamily: "'Bebas Neue', sans-serif",
                 fontSize: 18, letterSpacing: '1px',
-                color: '#fff', lineHeight: 1.1, marginBottom: 3,
+                color: '#1a2a3a', lineHeight: 1.1, marginBottom: 3,
               }}>
                 {moment.title}
               </div>

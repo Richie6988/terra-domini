@@ -89,7 +89,7 @@ export function MobileTowerPanel({ onClose }: { onClose: () => void }) {
           {events.length === 0 && (
             <div style={{ textAlign: 'center', padding: 40 }}>
               <div style={{ fontSize: 40, marginBottom: 12 }}>🗼</div>
-              <div style={{ fontSize: 15, color: '#fff', marginBottom: 8 }}>No tower events</div>
+              <div style={{ fontSize: 15, color: '#1a2a3a', marginBottom: 8 }}>No tower events</div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Events are scheduled 3 times daily</div>
             </div>
           )}
@@ -274,7 +274,7 @@ function TowerDetailSheet({ tower, onClose }: { tower: TowerEvent; onClose: () =
               🗼
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 18, fontWeight: 600, color: '#fff', marginBottom: 4 }}>
+              <div style={{ fontSize: 18, fontWeight: 600, color: '#1a2a3a', marginBottom: 4 }}>
                 {tower.territory_name}
               </div>
               <StatusBadge status={tower.status} large />
@@ -315,7 +315,7 @@ function TowerDetailSheet({ tower, onClose }: { tower: TowerEvent; onClose: () =
               <div style={{ fontSize: 11, color: '#FFB800', fontFamily: 'monospace', letterSpacing: '0.1em', marginBottom: 6 }}>
                 STARTS IN
               </div>
-              <div style={{ fontSize: 28, fontWeight: 600, color: '#fff', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2 }}>
+              <div style={{ fontSize: 28, fontWeight: 600, color: '#1a2a3a', fontFamily: "'Bebas Neue', sans-serif", letterSpacing: 2 }}>
                 {timeStr}
               </div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
@@ -348,7 +348,7 @@ function TowerDetailSheet({ tower, onClose }: { tower: TowerEvent; onClose: () =
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
                 {Object.entries(rewards ?? {}).slice(0, 4).map(([k, v]) => (
                   <div key={k} style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: 10 }}>
-                    <div style={{ fontSize: 18, fontWeight: 600, color: '#00FF87', fontFamily: "'Bebas Neue',sans-serif" }}>
+                    <div style={{ fontSize: 18, fontWeight: 600, color: '#00884a', fontFamily: "'Bebas Neue',sans-serif" }}>
                       {typeof v === 'number' ? (v > 10 ? `×${v}` : `+${Math.round(v * 100)}%`) : v}
                     </div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textTransform: 'capitalize', marginTop: 2 }}>
@@ -393,7 +393,7 @@ function TowerDetailSheet({ tower, onClose }: { tower: TowerEvent; onClose: () =
               padding: '16px', background: 'rgba(0,255,135,0.08)',
               border: '1px solid rgba(0,255,135,0.2)', borderRadius: 14, textAlign: 'center',
             }}>
-              <div style={{ fontSize: 16, color: '#00FF87', fontWeight: 500 }}>✓ Alliance Registered</div>
+              <div style={{ fontSize: 16, color: '#00884a', fontWeight: 500 }}>✓ Alliance Registered</div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>Your alliance will be in the battle</div>
             </div>
           )}
@@ -438,7 +438,7 @@ function MobileDrawer({
             <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.15)' }} />
           </div>
           <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{ fontSize: 17, fontWeight: 600, color: '#fff' }}>{title}</div>
+            <div style={{ fontSize: 17, fontWeight: 600, color: '#1a2a3a' }}>{title}</div>
             <button onClick={onClose} style={{
               marginLeft: 'auto', background: 'none', border: 'none',
               color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 22, padding: '0 4px',
@@ -461,9 +461,9 @@ function StatusBadge({ status, large }: { status: string; large?: boolean }) {
     active:    { color: '#FF3B30', label: '⚡ ACTIVE'    },
     scheduled: { color: '#FFB800', label: '⏰ SCHEDULED' },
     completed: { color: '#10B981', label: '✓ DONE'       },
-    cancelled: { color: '#6B7280', label: '✗ CANCELLED'  },
+    cancelled: { color: 'rgba(26,42,58,0.45)', label: '✗ CANCELLED'  },
   }
-  const c = (config as any)[status] ?? { color: '#6B7280', label: status }
+  const c = (config as any)[status] ?? { color: 'rgba(26,42,58,0.45)', label: status }
   return (
     <span style={{
       display: 'inline-block', padding: large ? '5px 12px' : '3px 8px',
@@ -524,13 +524,13 @@ function TimerDisplay({ seconds }: { seconds: number }) {
     <div style={{ display: 'flex', gap: 8, justifyContent: 'center', alignItems: 'baseline' }}>
       {h > 0 && (
         <>
-          <span style={{ fontSize: 36, fontWeight: 600, color: '#fff', fontFamily: 'monospace' }}>{fmt(h)}</span>
+          <span style={{ fontSize: 36, fontWeight: 600, color: '#1a2a3a', fontFamily: 'monospace' }}>{fmt(h)}</span>
           <span style={{ fontSize: 18, color: '#FF3B30' }}>h</span>
         </>
       )}
-      <span style={{ fontSize: 36, fontWeight: 600, color: '#fff', fontFamily: 'monospace' }}>{fmt(m)}</span>
+      <span style={{ fontSize: 36, fontWeight: 600, color: '#1a2a3a', fontFamily: 'monospace' }}>{fmt(m)}</span>
       <span style={{ fontSize: 18, color: '#FF3B30' }}>m</span>
-      <span style={{ fontSize: 36, fontWeight: 600, color: '#fff', fontFamily: 'monospace' }}>{fmt(s)}</span>
+      <span style={{ fontSize: 36, fontWeight: 600, color: '#1a2a3a', fontFamily: 'monospace' }}>{fmt(s)}</span>
       <span style={{ fontSize: 18, color: '#FF3B30' }}>s</span>
     </div>
   )

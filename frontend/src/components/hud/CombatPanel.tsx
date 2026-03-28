@@ -32,7 +32,7 @@ function TrainingQueue({ orders, onComplete }: { orders: TrainingOrder[]; onComp
   if (!orders.length) return null
   return (
     <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 11, color: '#6B7280', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>⏳ Training Queue</div>
+      <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>⏳ Training Queue</div>
       {orders.map((o, i) => {
         const unit = UNITS.find(u => u.key === o.unit_type)
         const total = o.train_seconds * 1000
@@ -43,19 +43,19 @@ function TrainingQueue({ orders, onComplete }: { orders: TrainingOrder[]; onComp
         const done = pct >= 100
 
         return (
-          <div key={i} style={{ background: done ? 'rgba(0,255,135,0.08)' : 'rgba(255,255,255,0.03)', border: `1px solid ${done ? 'rgba(0,255,135,0.3)' : 'rgba(255,255,255,0.07)'}`, borderRadius: 10, padding: '10px 14px', marginBottom: 8 }}>
+          <div key={i} style={{ background: done ? 'rgba(0,255,135,0.08)' : 'rgba(255,255,255,0.03)', border: `1px solid ${done ? 'rgba(0,255,135,0.3)' : 'rgba(0,60,100,0.1)'}`, borderRadius: 10, padding: '10px 14px', marginBottom: 8 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <span style={{ fontSize: 13, color: '#fff' }}>{unit?.emoji} {o.quantity}× {unit?.name ?? o.unit_type}</span>
-              <span style={{ fontSize: 11, color: done ? '#00FF87' : '#F59E0B', fontFamily: 'monospace' }}>
+              <span style={{ fontSize: 13, color: '#1a2a3a' }}>{unit?.emoji} {o.quantity}× {unit?.name ?? o.unit_type}</span>
+              <span style={{ fontSize: 11, color: done ? '#00884a' : '#F59E0B', fontFamily: 'monospace' }}>
                 {done ? '✅ Ready!' : `${mins}m ${secs}s`}
               </span>
             </div>
-            <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' }}>
+            <div style={{ height: 4, background: 'rgba(0,60,100,0.1)', borderRadius: 2, overflow: 'hidden' }}>
               <motion.div animate={{ width: `${pct}%` }} transition={{ duration: 1 }}
-                style={{ height: '100%', background: done ? '#00FF87' : 'linear-gradient(90deg, #F59E0B, #EF4444)', borderRadius: 2 }} />
+                style={{ height: '100%', background: done ? '#00884a' : 'linear-gradient(90deg, #F59E0B, #EF4444)', borderRadius: 2 }} />
             </div>
             {done && (
-              <button onClick={onComplete} style={{ marginTop: 8, width: '100%', padding: '6px', background: 'rgba(0,255,135,0.12)', border: '1px solid rgba(0,255,135,0.3)', borderRadius: 6, color: '#00FF87', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>
+              <button onClick={onComplete} style={{ marginTop: 8, width: '100%', padding: '6px', background: 'rgba(0,255,135,0.12)', border: '1px solid rgba(0,255,135,0.3)', borderRadius: 6, color: '#00884a', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>
                 Collect Units
               </button>
             )}
@@ -68,7 +68,7 @@ function TrainingQueue({ orders, onComplete }: { orders: TrainingOrder[]; onComp
 
 const TABS = [{ id: 'active', label: '⚔️ Active' }, { id: 'train', label: '🪖 Train' }, { id: 'history', label: '📋 History' }]
 const STATUS_COLOR: Record<string, string> = { preparing: '#F59E0B', active: '#EF4444', resolving: '#8B5CF6', completed: '#10B981', cancelled: '#4B5563' }
-const RESULT_COLOR: Record<string, string> = { attacker: '#00FF87', defender: '#EF4444', draw: '#F59E0B' }
+const RESULT_COLOR: Record<string, string> = { attacker: '#00884a', defender: '#EF4444', draw: '#F59E0B' }
 
 export function CombatPanel({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState('train')
@@ -166,15 +166,15 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
             {!active.length && (
               <div style={{ textAlign: 'center', padding: '30px 20px' }}>
                 <div style={{ fontSize: 40, marginBottom: 10 }}>🕊️</div>
-                <div style={{ fontSize: 14, color: '#4B5563' }}>No active battles</div>
+                <div style={{ fontSize: 14, color: 'rgba(26,42,58,0.35)' }}>No active battles</div>
               </div>
             )}
             {active.map((b: any) => (
               <div key={b.id} style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 12, padding: '12px 14px', marginBottom: 10 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
                   <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>⚔️ vs {b.defender_username}</div>
-                    <div style={{ fontSize: 10, color: '#6B7280', marginTop: 2 }}>{b.territory_name} · {b.type_display ?? b.battle_type}</div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1a2a3a' }}>⚔️ vs {b.defender_username}</div>
+                    <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>{b.territory_name} · {b.type_display ?? b.battle_type}</div>
                   </div>
                   <span style={{ fontSize: 10, fontWeight: 700, color: STATUS_COLOR[b.status] ?? '#fff', background: `${STATUS_COLOR[b.status] ?? '#fff'}15`, padding: '3px 8px', borderRadius: 10 }}>
                     {b.status_display ?? b.status}
@@ -183,9 +183,9 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
               </div>
             ))}
             {completed.slice(0, 3).map((b: any) => (
-              <div key={b.id} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 10, padding: '10px 14px', marginBottom: 8 }}>
+              <div key={b.id} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0,60,100,0.08)', borderRadius: 10, padding: '10px 14px', marginBottom: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontSize: 12, color: '#9CA3AF' }}>vs {b.defender_username} · {b.territory_name}</div>
+                  <div style={{ fontSize: 12, color: 'rgba(26,42,58,0.6)' }}>vs {b.defender_username} · {b.territory_name}</div>
                   {b.winner && <span style={{ fontSize: 11, fontWeight: 700, color: RESULT_COLOR[b.winner] ?? '#fff' }}>{b.winner === 'attacker' ? '🏆 W' : b.winner === 'defender' ? '❌ L' : '🤝 D'}</span>}
                 </div>
               </div>
@@ -198,7 +198,7 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
           <div style={{ padding: '12px 16px' }}>
             <TrainingQueue orders={trainingOrders} onComplete={() => setTrainingOrders([])} />
 
-            <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 12, lineHeight: 1.6 }}>
+            <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginBottom: 12, lineHeight: 1.6 }}>
               Select units to train. Each unit has a training timer before deployment.
             </div>
 
@@ -207,15 +207,15 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
               const isSelected = selected === u.key
               return (
                 <div key={u.key} onClick={() => setSel(isSelected ? null : u.key)}
-                  style={{ background: isSelected ? `rgba(239,68,68,0.08)` : 'rgba(255,255,255,0.02)', border: `1px solid ${isSelected ? 'rgba(239,68,68,0.3)' : 'rgba(255,255,255,0.06)'}`, borderRadius: 12, padding: '12px 14px', marginBottom: 8, cursor: 'pointer', transition: 'all 0.15s' }}>
+                  style={{ background: isSelected ? `rgba(239,68,68,0.08)` : 'rgba(255,255,255,0.02)', border: `1px solid ${isSelected ? 'rgba(239,68,68,0.3)' : 'rgba(0,60,100,0.08)'}`, borderRadius: 12, padding: '12px 14px', marginBottom: 8, cursor: 'pointer', transition: 'all 0.15s' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ fontSize: 26, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', borderRadius: 10, flexShrink: 0 }}>{u.emoji}</div>
+                    <div style={{ fontSize: 26, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.5)', borderRadius: 10, flexShrink: 0 }}>{u.emoji}</div>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: 14, fontWeight: 700, color: '#fff' }}>{u.name}</span>
+                        <span style={{ fontSize: 14, fontWeight: 700, color: '#1a2a3a' }}>{u.name}</span>
                         <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: 12, color: '#FFB800', fontFamily: 'monospace' }}>{u.cost} 🪙</div>
-                          <div style={{ fontSize: 9, color: '#4B5563' }}>⏱ {u.trainMins}m</div>
+                          <div style={{ fontSize: 12, color: '#cc8800', fontFamily: 'monospace' }}>{u.cost} 🪙</div>
+                          <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)' }}>⏱ {u.trainMins}m</div>
                         </div>
                       </div>
                       <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
@@ -229,20 +229,20 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
                   <AnimatePresence>
                     {isSelected && (
                       <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
-                        <div style={{ fontSize: 11, color: '#6B7280', marginTop: 8, marginBottom: 10 }}>{u.desc}</div>
+                        <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginTop: 8, marginBottom: 10 }}>{u.desc}</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                           <button onClick={e => { e.stopPropagation(); setQty(p => ({ ...p, [u.key]: Math.max(0, (p[u.key] ?? 0) - 1) })) }}
-                            style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(255,255,255,0.08)', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 16 }}>−</button>
+                            style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(0,60,100,0.1)', border: 'none', color: '#1a2a3a', cursor: 'pointer', fontSize: 16 }}>−</button>
                           <input type="number" value={q} min={0} onClick={e => e.stopPropagation()}
                             onChange={e => setQty(p => ({ ...p, [u.key]: Math.max(0, parseInt(e.target.value) || 0) }))}
-                            style={{ flex: 1, background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '8px', color: '#fff', fontSize: 16, fontFamily: 'monospace', textAlign: 'center', outline: 'none' }} />
+                            style={{ flex: 1, background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.12)', borderRadius: 8, padding: '8px', color: '#1a2a3a', fontSize: 16, fontFamily: 'monospace', textAlign: 'center', outline: 'none' }} />
                           <button onClick={e => { e.stopPropagation(); setQty(p => ({ ...p, [u.key]: (p[u.key] ?? 0) + 1 })) }}
                             style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', cursor: 'pointer', fontSize: 16 }}>+</button>
                         </div>
                         <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
                           {[5, 10, 25, 50].map(n => (
                             <button key={n} onClick={e => { e.stopPropagation(); setQty(p => ({ ...p, [u.key]: n })) }}
-                              style={{ flex: 1, padding: '5px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 6, color: '#9CA3AF', cursor: 'pointer', fontSize: 11 }}>×{n}</button>
+                              style={{ flex: 1, padding: '5px', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)', borderRadius: 6, color: 'rgba(26,42,58,0.6)', cursor: 'pointer', fontSize: 11 }}>×{n}</button>
                           ))}
                         </div>
                       </motion.div>
@@ -253,15 +253,15 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
             })}
 
             {totalCost > 0 && (
-              <div style={{ position: 'sticky', bottom: 0, background: '#0A0A14', paddingTop: 12, paddingBottom: 4, borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+              <div style={{ position: 'sticky', bottom: 0, background: '#0A0A14', paddingTop: 12, paddingBottom: 4, borderTop: '1px solid rgba(0,60,100,0.1)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ fontSize: 12, color: '#9CA3AF' }}>
+                  <span style={{ fontSize: 12, color: 'rgba(26,42,58,0.6)' }}>
                     {Object.entries(qty).filter(([,n])=>n>0).map(([k,n]) => `${n}× ${UNITS.find(u=>u.key===k)?.name}`).join(', ')}
                   </span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: tdc >= totalCost ? '#00FF87' : '#EF4444', fontFamily: 'monospace' }}>{totalCost} 🪙</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: tdc >= totalCost ? '#00884a' : '#EF4444', fontFamily: 'monospace' }}>{totalCost} 🪙</span>
                 </div>
                 <button onClick={() => trainMut.mutate()} disabled={tdc < totalCost || trainMut.isPending}
-                  style={{ width: '100%', padding: '13px', background: tdc >= totalCost ? 'rgba(0,255,135,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${tdc >= totalCost ? 'rgba(0,255,135,0.4)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 12, color: tdc >= totalCost ? '#00FF87' : '#4B5563', fontSize: 14, fontWeight: 800, cursor: tdc >= totalCost ? 'pointer' : 'not-allowed' }}>
+                  style={{ width: '100%', padding: '13px', background: tdc >= totalCost ? 'rgba(0,255,135,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${tdc >= totalCost ? 'rgba(0,255,135,0.4)' : 'rgba(0,60,100,0.1)'}`, borderRadius: 12, color: tdc >= totalCost ? '#00884a' : '#4B5563', fontSize: 14, fontWeight: 800, cursor: tdc >= totalCost ? 'pointer' : 'not-allowed' }}>
                   {trainMut.isPending ? '⏳ Sending to barracks…' : `🪖 Train Units (−${totalCost} HEX Coin)`}
                 </button>
               </div>
@@ -272,13 +272,13 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
         {/* HISTORY */}
         {tab === 'history' && (
           <div style={{ padding: '12px 16px' }}>
-            {!history.length && <div style={{ textAlign: 'center', color: '#4B5563', padding: '30px 0', fontSize: 13 }}>No battles yet</div>}
+            {!history.length && <div style={{ textAlign: 'center', color: 'rgba(26,42,58,0.35)', padding: '30px 0', fontSize: 13 }}>No battles yet</div>}
             {history.map((b: any) => (
-              <div key={b.id} style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+              <div key={b.id} style={{ padding: '10px 0', borderBottom: '1px solid rgba(0,60,100,0.08)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                   <div>
-                    <div style={{ fontSize: 13, color: '#fff', fontWeight: 500 }}>vs {b.defender_username}</div>
-                    <div style={{ fontSize: 10, color: '#4B5563', marginTop: 2 }}>{b.territory_name} · {b.started_at ? new Date(b.started_at).toLocaleDateString() : ''}</div>
+                    <div style={{ fontSize: 13, color: '#1a2a3a', fontWeight: 500 }}>vs {b.defender_username}</div>
+                    <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>{b.territory_name} · {b.started_at ? new Date(b.started_at).toLocaleDateString() : ''}</div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     {b.winner ? <span style={{ fontSize: 12, fontWeight: 700, color: RESULT_COLOR[b.winner] ?? '#fff' }}>{b.winner === 'attacker' ? '🏆 Win' : b.winner === 'defender' ? '❌ Loss' : '🤝 Draw'}</span>

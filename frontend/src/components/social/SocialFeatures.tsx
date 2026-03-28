@@ -106,15 +106,15 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <Users size={18} color="#8B5CF6" />
-            <span style={{ fontSize: 16, fontWeight: 500, color: '#fff' }}>Friends</span>
+            <span style={{ fontSize: 16, fontWeight: 500, color: '#1a2a3a' }}>Friends</span>
             {requests.length > 0 && (
               <span style={{
-                background: '#EF4444', color: '#fff', fontSize: 10, fontWeight: 700,
+                background: '#EF4444', color: '#1a2a3a', fontSize: 10, fontWeight: 700,
                 borderRadius: '50%', width: 18, height: 18, display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>{requests.length}</span>
             )}
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 20 }}>×</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(26,42,58,0.45)', cursor: 'pointer', fontSize: 20 }}>×</button>
         </div>
         {/* Tabs */}
         <div style={{ display: 'flex', gap: 4, marginTop: 12 }}>
@@ -134,7 +134,7 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
                   position: 'absolute', top: -4, right: -4,
                   background: '#EF4444', borderRadius: '50%',
                   width: 12, height: 12, fontSize: 8,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#1a2a3a',
                 }}>{requests.length}</span>
               )}
             </button>
@@ -198,14 +198,14 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
                       {(req.from_player?.username ?? '??').slice(0, 2).toUpperCase()}
                     </div>
                     <div>
-                      <div style={{ fontSize: 13, fontWeight: 500, color: '#fff' }}>{req.from_player.username}</div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: '#1a2a3a' }}>{req.from_player.username}</div>
                       <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)' }}>Rank {req.from_player.commander_rank}</div>
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button onClick={() => acceptMut.mutate(req.id)} style={{
                       flex: 1, padding: '7px', background: '#059669', border: 'none',
-                      borderRadius: 6, color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer',
+                      borderRadius: 6, color: '#1a2a3a', fontSize: 12, fontWeight: 600, cursor: 'pointer',
                     }}>Accept</button>
                     <button onClick={() => declineMut.mutate(req.id)} style={{
                       padding: '7px 12px', background: 'rgba(239,68,68,0.12)',
@@ -228,7 +228,7 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
               style={{
                 width: '100%', padding: '10px 12px', marginBottom: 12,
                 background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-                borderRadius: 8, color: '#fff', fontSize: 13, boxSizing: 'border-box',
+                borderRadius: 8, color: '#1a2a3a', fontSize: 13, boxSizing: 'border-box',
               }}
             />
             {searchResults.map(p => (
@@ -240,13 +240,13 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
                   width: 36, height: 36, borderRadius: '50%',
                   background: 'rgba(0,255,135,0.15)', border: '1px solid rgba(0,255,135,0.3)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 12, color: '#00FF87', fontWeight: 600, flexShrink: 0,
+                  fontSize: 12, color: '#00884a', fontWeight: 600, flexShrink: 0,
                 }}>
                   {(p.username ?? '??').slice(0, 2).toUpperCase()}
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, color: '#E5E7EB', fontWeight: 500 }}>{p.username}</div>
-                  <div style={{ fontSize: 11, color: '#6B7280' }}>Rank {p.commander_rank} · {p.territories_owned} zones</div>
+                  <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)' }}>Rank {p.commander_rank} · {p.territories_owned} zones</div>
                 </div>
                 <button onClick={() => sendRequestMut.mutate(p.id)} style={{
                   display: 'flex', alignItems: 'center', gap: 5,
@@ -268,16 +268,16 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
               padding: '20px', background: 'rgba(0,255,135,0.06)',
               border: '1px solid rgba(0,255,135,0.15)', borderRadius: 10, marginBottom: 16,
             }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginBottom: 8 }}>
+              <div style={{ fontSize: 14, fontWeight: 600, color: '#1a2a3a', marginBottom: 8 }}>
                 🎁 Referral Program
               </div>
               <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, marginBottom: 16 }}>
-                Earn <strong style={{ color: '#00FF87' }}>5% HEX Coin commission</strong> on every purchase by players you invite — for 90 days. There's no limit.
+                Earn <strong style={{ color: '#00884a' }}>5% HEX Coin commission</strong> on every purchase by players you invite — for 90 days. There's no limit.
               </div>
               <div style={{
                 padding: '10px 12px', background: 'rgba(0,0,0,0.4)',
                 border: '1px solid rgba(255,255,255,0.1)', borderRadius: 6,
-                fontFamily: 'monospace', fontSize: 11, color: '#00FF87',
+                fontFamily: 'monospace', fontSize: 11, color: '#00884a',
                 marginBottom: 10, wordBreak: 'break-all',
               }}>
                 {inviteLink}
@@ -327,7 +327,7 @@ function FriendRow({ friend }: { friend: Friend }) {
           {friend.username}
           {friend.alliance_tag && <span style={{ fontSize: 10, color: '#8B5CF6', marginLeft: 6 }}>[{friend.alliance_tag}]</span>}
         </div>
-        <div style={{ fontSize: 11, color: '#6B7280' }}>Rank {friend.commander_rank} · {friend.territories_owned} zones</div>
+        <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)' }}>Rank {friend.commander_rank} · {friend.territories_owned} zones</div>
       </div>
     </div>
   )
@@ -351,7 +351,7 @@ function ReferralStats() {
           { label: 'Players Invited', value: data.total_referrals ?? 0, color: '#8B5CF6' },
           { label: 'Active (30d)', value: data.active_referrals ?? 0, color: '#10B981' },
           { label: 'HEX Coin Earned', value: `${(data.total_commission_tdc ?? 0).toFixed(0)} HEX Coin`, color: '#FFB800' },
-          { label: 'This Month', value: `${(data.this_month_tdc ?? 0).toFixed(0)} HEX Coin`, color: '#00FF87' },
+          { label: 'This Month', value: `${(data.this_month_tdc ?? 0).toFixed(0)} HEX Coin`, color: '#00884a' },
         ].map(stat => (
           <div key={stat.label} style={{ padding: '10px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: 6 }}>
             <div style={{ fontFamily: 'monospace', fontSize: 18, fontWeight: 600, color: stat.color }}>{stat.value}</div>
@@ -461,7 +461,7 @@ export function ShareCard({ type, data, onClose }: ShareCardProps) {
               <div style={{ fontSize: 48, marginBottom: 12 }}>{config.emoji}</div>
               <div style={{
                 fontFamily: "'Bebas Neue', sans-serif",
-                fontSize: 28, letterSpacing: '1px', color: '#fff', lineHeight: 1.1, marginBottom: 8,
+                fontSize: 28, letterSpacing: '1px', color: '#1a2a3a', lineHeight: 1.1, marginBottom: 8,
               }}>
                 {config.headline}
               </div>
@@ -485,7 +485,7 @@ export function ShareCard({ type, data, onClose }: ShareCardProps) {
                   {player?.username?.slice(0, 2)?.toUpperCase() ?? '??'}
                 </div>
                 <div style={{ textAlign: 'left' }}>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{player?.username}</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#1a2a3a' }}>{player?.username}</div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
                     Rank {player?.commander_rank} · {data.territory_count ?? player?.stats?.territories_owned ?? 0} zones
                   </div>
@@ -514,7 +514,7 @@ export function ShareCard({ type, data, onClose }: ShareCardProps) {
           <button onClick={onClose} style={{
             padding: '13px 20px', background: 'rgba(255,255,255,0.06)',
             border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10,
-            color: '#9CA3AF', fontSize: 14, cursor: 'pointer',
+            color: 'rgba(26,42,58,0.6)', fontSize: 14, cursor: 'pointer',
           }}>
             Later
           </button>

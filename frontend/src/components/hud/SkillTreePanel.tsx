@@ -61,14 +61,14 @@ export function SkillTreePanel({ onClose }: { onClose: () => void }) {
         background: `linear-gradient(90deg, ${cfg.color}18, transparent)`,
         flexShrink: 0 }}>
         <div>
-          <div style={{ fontSize: 15, fontWeight: 900, color: '#fff' }}>🔬 Arbre de Compétences</div>
-          <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>
+          <div style={{ fontSize: 15, fontWeight: 900, color: '#1a2a3a' }}>🔬 Arbre de Compétences</div>
+          <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>
             {data?.unlocked_count || 0} compétences débloquées
           </div>
         </div>
-        <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.07)',
+        <button onClick={onClose} style={{ background: 'rgba(0,60,100,0.1)',
           border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8,
-          color: '#9CA3AF', cursor: 'pointer', width: 32, height: 32, fontSize: 16 }}>✕</button>
+          color: 'rgba(26,42,58,0.6)', cursor: 'pointer', width: 32, height: 32, fontSize: 16 }}>✕</button>
       </div>
 
       {/* Branch tabs */}
@@ -110,7 +110,7 @@ function SkillCard({ skill: s, color, onUnlock, isUnlocking }:{
       initial={{ opacity: 0, x: -12 }} animate={{ opacity: 1, x: 0 }}
       style={{
         background: s.unlocked ? `${color}12` : 'rgba(255,255,255,0.03)',
-        border: `1px solid ${s.unlocked ? color + '44' : 'rgba(255,255,255,0.07)'}`,
+        border: `1px solid ${s.unlocked ? color + '44' : 'rgba(0,60,100,0.1)'}`,
         borderRadius: 12, overflow: 'hidden',
       }}
     >
@@ -137,7 +137,7 @@ function SkillCard({ skill: s, color, onUnlock, isUnlocking }:{
         <div style={{ flexShrink: 0 }}>
           {s.unlocked
             ? <span style={{ fontSize: 18 }}>✅</span>
-            : <span style={{ fontSize: 12, color: '#374151' }}>🔒</span>
+            : <span style={{ fontSize: 12, color: 'rgba(26,42,58,0.25)' }}>🔒</span>
           }
         </div>
       </div>
@@ -150,13 +150,13 @@ function SkillCard({ skill: s, color, onUnlock, isUnlocking }:{
             style={{ overflow: 'hidden' }}
           >
             <div style={{ padding: '0 14px 12px' }}>
-              <div style={{ fontSize: 10, color: '#4B5563', marginBottom: 6,
+              <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', marginBottom: 6,
                 textTransform: 'uppercase', letterSpacing: '0.08em' }}>Coût de débloquage</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 10 }}>
                 {s.cost_json.map(c => (
                   <span key={c} style={{ fontSize: 10, padding: '3px 8px', borderRadius: 6,
-                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
-                    color: '#9CA3AF' }}>{c}</span>
+                    background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)',
+                    color: 'rgba(26,42,58,0.6)' }}>{c}</span>
                 ))}
               </div>
               {!s.unlocked && (

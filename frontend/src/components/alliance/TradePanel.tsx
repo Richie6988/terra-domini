@@ -85,11 +85,11 @@ export function TradePanel() {
       {/* SEND OFFER */}
       {mode === 'send' && (
         <div>
-          <div style={{ fontSize:11, color:'#6B7280', marginBottom:12 }}>Your balance: <span style={{color:'#F59E0B',fontWeight:600}}>{balance.toFixed(0)} HEX Coin</span></div>
+          <div style={{ fontSize:11, color:'rgba(26,42,58,0.45)', marginBottom:12 }}>Your balance: <span style={{color:'#F59E0B',fontWeight:600}}>{balance.toFixed(0)} HEX Coin</span></div>
           
           <Field label="To player (username)">
             <input value={targetUser} onChange={e=>setTargetUser(e.target.value)} placeholder="ally_username"
-              style={{ width:'100%', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'9px 12px', color:'#fff', fontSize:13, outline:'none', boxSizing:'border-box' }} />
+              style={{ width:'100%', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'9px 12px', color:'#1a2a3a', fontSize:13, outline:'none', boxSizing:'border-box' }} />
           </Field>
 
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:10, marginBottom:12 }}>
@@ -103,16 +103,16 @@ export function TradePanel() {
 
           <Field label="Message (optional)">
             <input value={message} onChange={e=>setMessage(e.target.value.slice(0,80))} placeholder="Trade proposal…"
-              style={{ width:'100%', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'9px 12px', color:'#fff', fontSize:13, outline:'none', boxSizing:'border-box' }} />
+              style={{ width:'100%', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:8, padding:'9px 12px', color:'#1a2a3a', fontSize:13, outline:'none', boxSizing:'border-box' }} />
           </Field>
 
           {/* Quick presets */}
           <div style={{ marginBottom:12 }}>
-            <div style={{ fontSize:11, color:'#6B7280', marginBottom:6 }}>Quick presets</div>
+            <div style={{ fontSize:11, color:'rgba(26,42,58,0.45)', marginBottom:6 }}>Quick presets</div>
             <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
               {[50, 100, 200, 500].map(amt => (
                 <button key={amt} onClick={()=>setOfferTdc(amt)}
-                  style={{ padding:'4px 10px', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:6, color:'#9CA3AF', fontSize:11, cursor:'pointer' }}>
+                  style={{ padding:'4px 10px', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:6, color:'rgba(26,42,58,0.6)', fontSize:11, cursor:'pointer' }}>
                   {amt} HEX Coin
                 </button>
               ))}
@@ -120,7 +120,7 @@ export function TradePanel() {
           </div>
 
           <button onClick={()=>sendMut.mutate()} disabled={sendMut.isPending||!targetUser||offerTdc<0}
-            style={{ width:'100%', padding:'12px', background:'rgba(0,255,135,0.15)', border:'1px solid rgba(0,255,135,0.3)', borderRadius:10, color:'#00FF87', fontSize:14, fontWeight:600, cursor:'pointer', opacity:sendMut.isPending?0.7:1 }}>
+            style={{ width:'100%', padding:'12px', background:'rgba(0,255,135,0.15)', border:'1px solid rgba(0,255,135,0.3)', borderRadius:10, color:'#00884a', fontSize:14, fontWeight:600, cursor:'pointer', opacity:sendMut.isPending?0.7:1 }}>
             {sendMut.isPending ? 'Sending…' : '📤 Send Trade Offer'}
           </button>
         </div>
@@ -130,25 +130,25 @@ export function TradePanel() {
       {mode === 'market' && (
         <div>
           {(!offers || offers.length === 0) ? (
-            <div style={{ textAlign:'center', padding:'32px 0', color:'#4B5563' }}>
+            <div style={{ textAlign:'center', padding:'32px 0', color:'rgba(26,42,58,0.35)' }}>
               <div style={{ fontSize:32, marginBottom:8 }}>🤝</div>
               <div style={{ fontSize:13 }}>No trade offers</div>
               <div style={{ fontSize:11, marginTop:4 }}>Send offers to allies to start trading</div>
             </div>
           ) : offers.map((o: TradeOffer) => (
-            <div key={o.id} style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(255,255,255,0.07)', borderRadius:10, padding:'12px 14px', marginBottom:8 }}>
+            <div key={o.id} style={{ background:'rgba(255,255,255,0.03)', border:'1px solid rgba(0,60,100,0.1)', borderRadius:10, padding:'12px 14px', marginBottom:8 }}>
               <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
-                <span style={{ fontSize:12, fontWeight:600, color:'#fff' }}>From {o.from_username}</span>
+                <span style={{ fontSize:12, fontWeight:600, color:'#1a2a3a' }}>From {o.from_username}</span>
                 <span style={{ fontSize:10, color: o.status==='pending'?'#F59E0B':'#6B7280', fontFamily:'monospace' }}>{o.status.toUpperCase()}</span>
               </div>
               <div style={{ display:'flex', gap:12, marginBottom:8, fontSize:12 }}>
-                <div><span style={{color:'#EF4444'}}>Offers:</span> <span style={{color:'#fff',fontWeight:600}}>{o.offer_tdc} HEX Coin</span></div>
-                <div><span style={{color:'#10B981'}}>Wants:</span> <span style={{color:'#fff',fontWeight:600}}>{o.request_tdc} HEX Coin</span></div>
+                <div><span style={{color:'#EF4444'}}>Offers:</span> <span style={{color:'#1a2a3a',fontWeight:600}}>{o.offer_tdc} HEX Coin</span></div>
+                <div><span style={{color:'#10B981'}}>Wants:</span> <span style={{color:'#1a2a3a',fontWeight:600}}>{o.request_tdc} HEX Coin</span></div>
               </div>
-              {o.message && <div style={{ fontSize:11, color:'#6B7280', marginBottom:8, fontStyle:'italic' }}>"{o.message}"</div>}
+              {o.message && <div style={{ fontSize:11, color:'rgba(26,42,58,0.45)', marginBottom:8, fontStyle:'italic' }}>"{o.message}"</div>}
               {o.status === 'pending' && (
                 <div style={{ display:'flex', gap:6 }}>
-                  <button onClick={()=>acceptMut.mutate(o.id)} style={{ flex:1, padding:'7px', background:'rgba(0,255,135,0.12)', border:'1px solid rgba(0,255,135,0.25)', borderRadius:8, color:'#00FF87', cursor:'pointer', fontSize:12, fontWeight:600 }}>✓ Accept</button>
+                  <button onClick={()=>acceptMut.mutate(o.id)} style={{ flex:1, padding:'7px', background:'rgba(0,255,135,0.12)', border:'1px solid rgba(0,255,135,0.25)', borderRadius:8, color:'#00884a', cursor:'pointer', fontSize:12, fontWeight:600 }}>✓ Accept</button>
                   <button onClick={()=>rejectMut.mutate(o.id)} style={{ padding:'7px 12px', background:'rgba(239,68,68,0.08)', border:'1px solid rgba(239,68,68,0.2)', borderRadius:8, color:'#EF4444', cursor:'pointer', fontSize:12 }}>✗</button>
                 </div>
               )}
@@ -163,7 +163,7 @@ export function TradePanel() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom:12 }}>
-      <label style={{ fontSize:11, color:'#6B7280', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:5 }}>{label}</label>
+      <label style={{ fontSize:11, color:'rgba(26,42,58,0.45)', letterSpacing:'0.06em', textTransform:'uppercase', display:'block', marginBottom:5 }}>{label}</label>
       {children}
     </div>
   )
@@ -172,10 +172,10 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
 function AmountInput({ value, onChange, max, color='#fff' }: { value:number; onChange:(n:number)=>void; max?:number; color?:string }) {
   return (
     <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-      <button onClick={()=>onChange(Math.max(0,value-50))} style={{ width:28,height:28,borderRadius:6,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',color:'#fff',cursor:'pointer',fontSize:14 }}>−</button>
+      <button onClick={()=>onChange(Math.max(0,value-50))} style={{ width:28,height:28,borderRadius:6,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',color:'#1a2a3a',cursor:'pointer',fontSize:14 }}>−</button>
       <input type="number" value={value} min={0} max={max} onChange={e=>onChange(Math.max(0,parseInt(e.target.value)||0))}
         style={{ flex:1,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',borderRadius:8,padding:'7px',color,fontSize:14,fontFamily:'monospace',fontWeight:700,outline:'none',textAlign:'center' }} />
-      <button onClick={()=>onChange(value+50)} style={{ width:28,height:28,borderRadius:6,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',color:'#fff',cursor:'pointer',fontSize:14 }}>+</button>
+      <button onClick={()=>onChange(value+50)} style={{ width:28,height:28,borderRadius:6,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.1)',color:'#1a2a3a',cursor:'pointer',fontSize:14 }}>+</button>
     </div>
   )
 }

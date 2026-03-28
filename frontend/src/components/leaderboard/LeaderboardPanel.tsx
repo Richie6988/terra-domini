@@ -13,7 +13,7 @@ const MEDAL: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
 function RankDelta({ delta }: { delta?: number | null }) {
   if (delta == null) return null
-  if (delta === 0) return <span style={{ fontSize: 10, color: '#4B5563' }}>—</span>
+  if (delta === 0) return <span style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)' }}>—</span>
   return <span style={{ fontSize: 10, color: delta > 0 ? '#10B981' : '#EF4444' }}>{delta > 0 ? `▲${delta}` : `▼${Math.abs(delta)}`}</span>
 }
 
@@ -25,26 +25,26 @@ function PlayerRow({ entry, onClick }: { entry: any; onClick: () => void }) {
       <div style={{ width: 28, textAlign: 'center', fontFamily: 'monospace', fontSize: entry.rank <= 3 ? 18 : 12, color: entry.rank <= 3 ? '#fff' : '#4B5563', flexShrink: 0 }}>
         {medal ?? `#${entry.rank}`}
       </div>
-      <div style={{ width: 36, height: 36, borderRadius: '50%', background: entry.is_me ? 'rgba(0,255,135,0.15)' : 'rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
+      <div style={{ width: 36, height: 36, borderRadius: '50%', background: entry.is_me ? 'rgba(0,255,135,0.15)' : 'rgba(0,60,100,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>
         {entry.avatar_emoji || '🎖️'}
       </div>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 13, fontWeight: entry.is_me ? 700 : 500, color: entry.is_me ? '#00FF87' : '#E5E7EB', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 13, fontWeight: entry.is_me ? 700 : 500, color: entry.is_me ? '#00884a' : '#E5E7EB', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
             {entry.display_name || entry.username}
           </span>
-          {entry.is_me && <span style={{ fontSize: 9, color: '#00FF87', background: 'rgba(0,255,135,0.15)', padding: '1px 6px', borderRadius: 4 }}>YOU</span>}
+          {entry.is_me && <span style={{ fontSize: 9, color: '#00884a', background: 'rgba(0,255,135,0.15)', padding: '1px 6px', borderRadius: 4 }}>YOU</span>}
           <RankDelta delta={entry.delta_rank} />
         </div>
         <div style={{ display: 'flex', gap: 8, marginTop: 2 }}>
-          <span style={{ fontSize: 10, color: '#6B7280' }}>⬡ {entry.territories}</span>
-          <span style={{ fontSize: 10, color: '#6B7280' }}>⚔️ {entry.battles_won}</span>
-          {entry.alliance && <span style={{ fontSize: 10, color: '#6B7280' }}>🤝 {entry.alliance}</span>}
+          <span style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)' }}>⬡ {entry.territories}</span>
+          <span style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)' }}>⚔️ {entry.battles_won}</span>
+          {entry.alliance && <span style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)' }}>🤝 {entry.alliance}</span>}
         </div>
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
         <div style={{ fontSize: 14, fontWeight: 700, color: '#FFB800', fontFamily: 'monospace' }}>{entry.score?.toLocaleString()}</div>
-        <div style={{ fontSize: 10, color: '#4B5563' }}>pts</div>
+        <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)' }}>pts</div>
       </div>
     </motion.div>
   )
@@ -57,32 +57,32 @@ function PlayerProfile({ playerId, onBack }: { playerId: string; onBack: () => v
   })
   const setMapCenter = useStore(s => s.setMapCenter)
 
-  if (!data) return <div style={{ textAlign: 'center', padding: 40, color: '#6B7280' }}>Loading…</div>
+  if (!data) return <div style={{ textAlign: 'center', padding: 40, color: 'rgba(26,42,58,0.45)' }}>Loading…</div>
 
   const p = data.player
   return (
     <div>
-      <button onClick={onBack} style={{ background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: 13, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
+      <button onClick={onBack} style={{ background: 'none', border: 'none', color: 'rgba(26,42,58,0.45)', cursor: 'pointer', fontSize: 13, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 6 }}>
         ← Back
       </button>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 20 }}>
-        <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, border: '2px solid rgba(255,255,255,0.12)' }}>
+        <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(0,60,100,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, border: '2px solid rgba(255,255,255,0.12)' }}>
           {p.avatar_emoji || '🎖️'}
         </div>
         <div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{p.display_name || p.username}</div>
-          <div style={{ fontSize: 12, color: '#6B7280' }}>Commander Rank {p.commander_rank} · {p.territories_owned} zones</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#1a2a3a' }}>{p.display_name || p.username}</div>
+          <div style={{ fontSize: 12, color: 'rgba(26,42,58,0.45)' }}>Commander Rank {p.commander_rank} · {p.territories_owned} zones</div>
         </div>
       </div>
-      <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 10 }}>Their territories (click to navigate)</div>
+      <div style={{ fontSize: 12, color: 'rgba(26,42,58,0.45)', marginBottom: 10 }}>Their territories (click to navigate)</div>
       <div style={{ maxHeight: 340, overflowY: 'auto' }}>
         {(data.territories as any[]).map((t: any, i: number) => (
           <div key={i} onClick={() => { setMapCenter([t.center_lat, t.center_lon], 15) }}
-            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: 8, marginBottom: 4, cursor: 'pointer' }}>
+            style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', background: 'rgba(255,255,255,0.5)', borderRadius: 8, marginBottom: 4, cursor: 'pointer' }}>
             <span style={{ fontSize: 16 }}>{t.is_control_tower ? '🗼' : '⬡'}</span>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12, color: '#E5E7EB' }}>{t.place_name || t.h3_index?.slice(0, 10)}</div>
-              <div style={{ fontSize: 10, color: '#4B5563' }}>{t.country_code} · Tier {t.defense_tier}</div>
+              <div style={{ fontSize: 12, color: '#1a2a3a' }}>{t.place_name || t.h3_index?.slice(0, 10)}</div>
+              <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)' }}>{t.country_code} · Tier {t.defense_tier}</div>
             </div>
           </div>
         ))}

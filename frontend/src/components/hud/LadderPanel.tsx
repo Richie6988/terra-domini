@@ -135,7 +135,7 @@ export function LadderPanel({ onClose }: Props) {
               daily_income: 0,
               battles_won: 0,
               max_rarity: 'Common',
-              max_rarity_color: '#9CA3AF',
+              max_rarity_color: 'rgba(26,42,58,0.6)',
               is_me: true,
             }}
             index={myRank - 1}
@@ -188,7 +188,7 @@ function LadderRow({ entry, index, compact = false }: { entry:any; index:number;
           {entry.is_me && <span style={{ fontSize:10 }}>★</span>}
           {entry.username}
         </div>
-        <div style={{ fontSize:9, color:'#4B5563', marginTop:1, display:'flex', gap:6 }}>
+        <div style={{ fontSize:9, color:'rgba(26,42,58,0.35)', marginTop:1, display:'flex', gap:6 }}>
           <span>Rang {entry.commander_rank}</span>
           {entry.max_rarity && (
             <span style={{ color: entry.max_rarity_color, fontWeight:700 }}>{entry.max_rarity}</span>
@@ -201,7 +201,7 @@ function LadderRow({ entry, index, compact = false }: { entry:any; index:number;
 
       {/* Territoires */}
       <div style={{ textAlign:'center', fontSize:12, fontWeight:700,
-        color: isTop3 ? '#00FF87' : '#fff' }}>
+        color: isTop3 ? '#00884a' : '#fff' }}>
         {entry.territories}
       </div>
 
@@ -214,7 +214,7 @@ function LadderRow({ entry, index, compact = false }: { entry:any; index:number;
       </div>
 
       {/* Batailles */}
-      <div style={{ textAlign:'center', fontSize:11, color:'#6B7280' }}>
+      <div style={{ textAlign:'center', fontSize:11, color:'rgba(26,42,58,0.45)' }}>
         {entry.battles_won}
       </div>
     </motion.div>

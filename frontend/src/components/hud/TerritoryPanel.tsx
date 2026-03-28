@@ -26,15 +26,15 @@ const UNIT_ICONS: Record<UnitType, string> = {
   infantry: '⚔️', cavalry: '🐴', artillery: '💣', air: '✈️', naval: '⚓'
 }
 const closeBtn: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 6, color: '#9CA3AF', cursor: 'pointer',
+  background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.12)',
+  borderRadius: 6, color: 'rgba(26,42,58,0.6)', cursor: 'pointer',
   width: 32, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
   flexShrink: 0,
 }
 const primaryBtn: React.CSSProperties = {
   width: '100%', padding: '12px', marginTop: 4,
   background: '#059669', border: 'none', borderRadius: 8,
-  color: '#fff', fontSize: 14, fontWeight: 500, cursor: 'pointer',
+  color: '#1a2a3a', fontSize: 14, fontWeight: 500, cursor: 'pointer',
 }
 const tagBtn: React.CSSProperties = {
   padding: '6px 12px', borderRadius: 6, border: '1px solid',
@@ -42,8 +42,8 @@ const tagBtn: React.CSSProperties = {
 }
 const numInput: React.CSSProperties = {
   width: 72, padding: '5px 8px',
-  background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.12)',
-  borderRadius: 6, color: '#fff', fontSize: 13, textAlign: 'center',
+  background: 'rgba(0,60,100,0.1)', border: '1px solid rgba(255,255,255,0.12)',
+  borderRadius: 6, color: '#1a2a3a', fontSize: 13, textAlign: 'center',
 }
 
 
@@ -132,24 +132,24 @@ export function TerritoryPanel() {
             {isOwned ? (
               <span style={{ color: '#10B981', fontSize: 13 }}>✓ Your territory</span>
             ) : isUnclaimed ? (
-              <span style={{ color: '#6B7280', fontSize: 13 }}>Unclaimed</span>
+              <span style={{ color: 'rgba(26,42,58,0.45)', fontSize: 13 }}>Unclaimed</span>
             ) : (
               <span style={{ color: '#F87171', fontSize: 13 }}>
                 {territory.alliance_tag ? `[${territory.alliance_tag}] ` : ''}{territory.owner_username}
               </span>
             )}
-            <span style={{ color: '#4B5563', fontSize: 12 }}>
+            <span style={{ color: 'rgba(26,42,58,0.35)', fontSize: 12 }}>
               {territory.country_code ? `• ${territory.country_code.toUpperCase()}` : ''}
             </span>
           </div>
 
           {/* Defense bar */}
           <div style={{ marginTop: 10 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: '#9CA3AF', marginBottom: 4 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(26,42,58,0.6)', marginBottom: 4 }}>
               <span>Defense: {DEFENSE_TIER_NAMES[territory.defense_tier ?? 1]}</span>
               <span>{territory.defense_points?.toFixed(0)} / {territory.max_defense_points}</span>
             </div>
-            <div style={{ height: 4, background: 'rgba(255,255,255,0.1)', borderRadius: 2 }}>
+            <div style={{ height: 4, background: 'rgba(0,60,100,0.12)', borderRadius: 2 }}>
               <div style={{
                 height: '100%',
                 width: `${((territory.defense_points ?? 0) / (territory.max_defense_points || 1)) * 100}%`,
@@ -161,7 +161,7 @@ export function TerritoryPanel() {
           </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
+        <div style={{ display: 'flex', borderBottom: '1px solid rgba(0,60,100,0.1)' }}>
           {(['info', isOwned ? 'build' : null, territory.can_be_attacked ? 'attack' : null] as const)
             .filter(Boolean)
             .map(t => (
@@ -203,7 +203,7 @@ export function TerritoryPanel() {
                   <div style={{ marginBottom: 16 }}>
                     {territory.buildings.map(b => (
                       <div key={b.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: 12 }}>
-                        <span style={{ color: '#E5E7EB' }}>
+                        <span style={{ color: '#1a2a3a' }}>
                           {BUILDING_ICONS[b.building_type] ?? '🏗️'} {b.building_type.replace('_', ' ')} L{b.level}
                         </span>
                         <span style={{ color: b.under_construction ? '#F59E0B' : b.is_operational ? '#10B981' : '#6B7280', fontSize: 11 }}>
@@ -217,7 +217,7 @@ export function TerritoryPanel() {
 
               {/* Terrain */}
               <SectionTitle icon={<Eye size={13} />} title="Terrain modifiers" />
-              <div style={{ fontSize: 12, color: '#9CA3AF' }}>
+              <div style={{ fontSize: 12, color: 'rgba(26,42,58,0.6)' }}>
                 <div>ATK modifier: {((territory.terrain_attack_modifier ?? 1) * 100).toFixed(0)}%</div>
                 <div>DEF modifier: {((territory.terrain_defense_modifier ?? 1) * 100).toFixed(0)}%</div>
                 {territory.elevation_meters > 0 && <div>Elevation: {territory.elevation_meters.toFixed(0)}m</div>}
@@ -227,7 +227,7 @@ export function TerritoryPanel() {
               {territory.ad_slot_enabled && (
                 <div style={{ marginTop: 16, padding: 10, background: 'rgba(245,158,11,0.1)', borderRadius: 8, border: '1px solid rgba(245,158,11,0.3)', fontSize: 12 }}>
                   <div style={{ color: '#F59E0B', fontWeight: 500, marginBottom: 4 }}>📢 Ad Slot Active</div>
-                  <div style={{ color: '#9CA3AF' }}>{territory.daily_viewer_count} viewers today</div>
+                  <div style={{ color: 'rgba(26,42,58,0.6)' }}>{territory.daily_viewer_count} viewers today</div>
                 </div>
               )}
 
@@ -243,7 +243,7 @@ export function TerritoryPanel() {
           {/* ── ATTACK TAB ───────────────────────────────────────────────── */}
           {tab === 'attack' && (
             <div>
-              <div style={{ marginBottom: 12, fontSize: 12, color: '#9CA3AF' }}>
+              <div style={{ marginBottom: 12, fontSize: 12, color: 'rgba(26,42,58,0.6)' }}>
                 Select units to deploy for this assault.
               </div>
 
@@ -261,7 +261,7 @@ export function TerritoryPanel() {
                   </button>
                 ))}
               </div>
-              <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 16 }}>
+              <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginBottom: 16 }}>
                 {attackType === 'conquest' && 'Capture the territory if you win.'}
                 {attackType === 'raid' && 'Steal resources. No territory capture.'}
                 {attackType === 'surprise' && 'Half timer, +30% attack, high risk if failed.'}
@@ -272,7 +272,7 @@ export function TerritoryPanel() {
               {UNIT_TYPES.map(unit => (
                 <div key={unit} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                   <span style={{ width: 32, textAlign: 'center', fontSize: 18 }}>{UNIT_ICONS[unit]}</span>
-                  <span style={{ flex: 1, fontSize: 13, color: '#E5E7EB', textTransform: 'capitalize' }}>{unit}</span>
+                  <span style={{ flex: 1, fontSize: 13, color: '#1a2a3a', textTransform: 'capitalize' }}>{unit}</span>
                   <input
                     type="number" min={0}
                     value={attackUnits[unit] ?? ''}
@@ -295,7 +295,7 @@ export function TerritoryPanel() {
           {/* ── BUILD TAB ────────────────────────────────────────────────── */}
           {tab === 'build' && isOwned && (
             <div>
-              <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 12 }}>
+              <div style={{ fontSize: 12, color: 'rgba(26,42,58,0.6)', marginBottom: 12 }}>
                 Select a building to construct. Costs resources from this territory.
               </div>
               {[
@@ -315,14 +315,14 @@ export function TerritoryPanel() {
                     width: '100%', textAlign: 'left',
                     padding: '10px 12px', marginBottom: 6,
                     background: buildingType === b.type ? 'rgba(16,185,129,0.15)' : 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${buildingType === b.type ? '#10B981' : 'rgba(255,255,255,0.07)'}`,
-                    borderRadius: 8, cursor: 'pointer', color: '#E5E7EB',
+                    border: `1px solid ${buildingType === b.type ? '#10B981' : 'rgba(0,60,100,0.1)'}`,
+                    borderRadius: 8, cursor: 'pointer', color: '#1a2a3a',
                   }}
                 >
                   <div style={{ fontSize: 13, fontWeight: 500 }}>
                     {BUILDING_ICONS[b.type] ?? '🏗️'} {b.type.replace('_', ' ')}
                   </div>
-                  <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>Cost: {b.cost}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>Cost: {b.cost}</div>
                 </button>
               ))}
 
@@ -350,7 +350,7 @@ function Tag({ children, color }: { children: React.ReactNode; color: string }) 
 
 function SectionTitle({ title, icon }: { title: string; icon?: React.ReactNode }) {
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: '#6B7280', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8, marginTop: 4 }}>
+    <div style={{ display: 'flex', alignItems: 'center', gap: 5, color: 'rgba(26,42,58,0.45)', fontSize: 11, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 8, marginTop: 4 }}>
       {icon}{title}
     </div>
   )
@@ -358,12 +358,12 @@ function SectionTitle({ title, icon }: { title: string; icon?: React.ReactNode }
 
 function ResourceRow({ icon, label, value, secondary }: { icon: string; label: string; value: string; secondary: string }) {
   return (
-    <div style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 6, padding: '7px 10px' }}>
+    <div style={{ background: 'rgba(255,255,255,0.5)', borderRadius: 6, padding: '7px 10px' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <span style={{ fontSize: 12, color: '#D1D5DB' }}>{icon} {label}</span>
         <span style={{ fontSize: 13, fontWeight: 500, color: '#10B981' }}>{value}</span>
       </div>
-      <div style={{ fontSize: 10, color: '#4B5563', marginTop: 2 }}>{secondary}</div>
+      <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>{secondary}</div>
     </div>
   )
 }

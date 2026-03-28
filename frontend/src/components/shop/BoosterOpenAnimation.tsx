@@ -98,7 +98,7 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
             style={{ cursor:'pointer', display:'flex', flexDirection:'column', alignItems:'center', gap:16 }}
           >
             {/* Titre */}
-            <div style={{ fontSize:13, color:'#9CA3AF', textAlign:'center', marginBottom:8 }}>
+            <div style={{ fontSize:13, color:'rgba(26,42,58,0.6)', textAlign:'center', marginBottom:8 }}>
               {packName || 'Booster Pack'}
             </div>
 
@@ -116,7 +116,7 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
             >
               <div style={{ fontSize:56 }}>🎁</div>
               <div style={{ fontSize:13, color:'#F59E0B', fontWeight:800 }}>HEXOD</div>
-              <div style={{ fontSize:9, color:'#6B7280', textAlign:'center', padding:'0 12px' }}>
+              <div style={{ fontSize:9, color:'rgba(26,42,58,0.45)', textAlign:'center', padding:'0 12px' }}>
                 {cards.length} cartes à l'intérieur
               </div>
             </motion.div>
@@ -168,7 +168,7 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
             initial={{ opacity:0 }} animate={{ opacity:1 }}
             style={{ width:'100%', maxWidth:500, display:'flex', flexDirection:'column', gap:12 }}
           >
-            <div style={{ fontSize:12, color:'#6B7280', textAlign:'center', marginBottom:4 }}>
+            <div style={{ fontSize:12, color:'rgba(26,42,58,0.45)', textAlign:'center', marginBottom:4 }}>
               {phase === 'done' ? '✨ Cartes obtenues !' : 'Révélation en cours…'}
             </div>
 
@@ -293,7 +293,7 @@ function CardReveal({ card, index, revealed, flipped }: {
 
           {/* Name */}
           <div style={{
-            fontSize:9, fontWeight:800, color:'#fff', textAlign:'center',
+            fontSize:9, fontWeight:800, color:'#1a2a3a', textAlign:'center',
             overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
             lineHeight:1.3,
           }}>

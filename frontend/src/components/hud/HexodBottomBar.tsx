@@ -18,8 +18,8 @@ const ACTIONS = [
   { id:'research',  icon:<IconResearch size={20} />, label:'Recherche',   color:'#8B5CF6' },
   { id:'trade',     icon:<IconTrade size={20} />,    label:'Commerce',    color:'#10B981' },
   { id:'alliances', icon:<IconAlliance size={20} />, label:'Alliances',   color:'#3B82F6' },
-  { id:'strategy',  icon:<IconStrategy size={20} />, label:'Stratégie',   color:'#6B7280' },
-  { id:'logs',      icon:<IconLogs size={20} />,     label:'Logs',        color:'#4B5563' },
+  { id:'strategy',  icon:<IconStrategy size={20} />, label:'Stratégie',   color:'rgba(26,42,58,0.45)' },
+  { id:'logs',      icon:<IconLogs size={20} />,     label:'Logs',        color:'rgba(26,42,58,0.35)' },
 ] as const
 
 export function HexodBottomBar() {
@@ -97,13 +97,13 @@ function BuildPanel({ onClose }: { onClose: () => void }) {
         {BUILDINGS.map(b => (
           <button key={b.name} style={{
             padding: '10px', borderRadius: 10, cursor: 'pointer',
-            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-            textAlign: 'left', color: '#fff',
+            background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)',
+            textAlign: 'left', color: '#1a2a3a',
           }}>
             <div style={{ fontSize: 22, marginBottom: 4 }}>{b.icon}</div>
             <div style={{ fontSize: 12, fontWeight: 700 }}>{b.name}</div>
             <div style={{ fontSize: 10, color: '#10B981', marginTop: 2 }}>{b.desc}</div>
-            <div style={{ fontSize: 9, color: '#6B7280', marginTop: 3 }}>{b.cost}</div>
+            <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.45)', marginTop: 3 }}>{b.cost}</div>
             <div style={{ fontSize: 9, color: '#F59E0B', marginTop: 2 }}>⏱ {b.time}</div>
           </button>
         ))}
@@ -124,20 +124,20 @@ function StrategyPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <SlidePanel title="🗺️ Carte stratégique" color="#6B7280" onClose={onClose}>
-      <div style={{ fontSize: 12, color: '#6B7280', marginBottom: 12 }}>
+      <div style={{ fontSize: 12, color: 'rgba(26,42,58,0.45)', marginBottom: 12 }}>
         Activez les couches d'information sur la carte
       </div>
       {LAYERS.map(l => (
         <div key={l.name} style={{
           display: 'flex', alignItems: 'center', gap: 12,
           padding: '10px 12px', marginBottom: 6,
-          background: 'rgba(255,255,255,0.04)', borderRadius: 8,
+          background: 'rgba(255,255,255,0.5)', borderRadius: 8,
           border: '1px solid rgba(255,255,255,0.06)',
         }}>
           <span style={{ fontSize: 20 }}>{l.icon}</span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 600, color: '#fff' }}>{l.name}</div>
-            <div style={{ fontSize: 11, color: '#6B7280' }}>{l.desc}</div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: '#1a2a3a' }}>{l.name}</div>
+            <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)' }}>{l.desc}</div>
           </div>
           <div style={{ width: 36, height: 20, borderRadius: 10, background: 'rgba(255,255,255,0.1)',
             border: '1px solid rgba(255,255,255,0.15)', cursor: 'pointer' }} />
@@ -166,9 +166,9 @@ function SlidePanel({ title, color, children, onClose }: {
       <div style={{ padding: '12px 16px', display: 'flex', justifyContent: 'space-between',
         alignItems: 'center', borderBottom: `1px solid ${color}22`,
         background: `linear-gradient(90deg, ${color}18, transparent)` }}>
-        <span style={{ fontSize: 14, fontWeight: 800, color: '#fff' }}>{title}</span>
+        <span style={{ fontSize: 14, fontWeight: 800, color: '#1a2a3a' }}>{title}</span>
         <button onClick={onClose} style={{ background: 'none', border: 'none',
-          color: '#6B7280', cursor: 'pointer', fontSize: 18 }}>✕</button>
+          color: 'rgba(26,42,58,0.45)', cursor: 'pointer', fontSize: 18 }}>✕</button>
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: 14 }}>{children}</div>
     </motion.div>

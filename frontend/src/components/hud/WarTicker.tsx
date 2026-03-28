@@ -9,7 +9,7 @@ const STATIC_EVENTS = [
   { id: 's2', icon: '🗼', text: 'Control Towers award 2× HEX Coin to the winning alliance', color: '#FFB800' },
   { id: 's3', icon: '⚔️', text: 'Attack adjacent territories from the map', color: '#EF4444' },
   { id: 's4', icon: '🏆', text: 'Saison 1 — 50,000 HEX Coin prize pool', color: '#8B5CF6' },
-  { id: 's5', icon: '💎', text: 'Claim your first territory for free — no HEX Coin needed', color: '#00FF87' },
+  { id: 's5', icon: '💎', text: 'Claim your first territory for free — no HEX Coin needed', color: '#00884a' },
 ]
 
 export function WarTicker() {
@@ -49,7 +49,7 @@ export function WarTicker() {
     }}>
       <div style={{
         background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)',
-        border: '1px solid rgba(255,255,255,0.08)', borderRadius: 20,
+        border: '1px solid rgba(0,60,100,0.1)', borderRadius: 20,
         padding: '6px 16px', display: 'flex', alignItems: 'center', gap: 8,
         maxWidth: 480, opacity: visible ? 1 : 0, transition: 'opacity 0.3s',
       }}>

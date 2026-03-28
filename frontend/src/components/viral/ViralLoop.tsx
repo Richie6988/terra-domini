@@ -182,7 +182,7 @@ export function StreakCelebration({
           <div style={{
             fontFamily: "'Bebas Neue', sans-serif",
             fontSize: isMilestone ? 36 : 28,
-            letterSpacing: '1px', color: '#fff',
+            letterSpacing: '1px', color: '#1a2a3a',
             marginBottom: 8,
           }}>
             {isMilestone ? milestone?.title : `Jour ${streakDays} !`}
@@ -251,9 +251,9 @@ export function StreakCelebration({
 // ─── Daily Spin Wheel ─────────────────────────────────────────────────────────
 
 const WHEEL_SEGMENTS = [
-  { label: '+25 HEX Coin',      color: '#374151', tier: 'common'    },
-  { label: '+50 HEX Coin',      color: '#374151', tier: 'common'    },
-  { label: '4h Shield',    color: '#374151', tier: 'common'    },
+  { label: '+25 HEX Coin',      color: 'rgba(26,42,58,0.25)', tier: 'common'    },
+  { label: '+50 HEX Coin',      color: 'rgba(26,42,58,0.25)', tier: 'common'    },
+  { label: '4h Shield',    color: 'rgba(26,42,58,0.25)', tier: 'common'    },
   { label: '+80 HEX Coin',      color: '#1F2937', tier: 'rare'      },
   { label: '+150 HEX Coin',     color: '#1F2937', tier: 'rare'      },
   { label: '8h Shield',    color: '#1F2937', tier: 'rare'      },
@@ -309,7 +309,7 @@ export function DailySpin({
         border: '1px solid rgba(255,255,255,0.08)',
         borderRadius: 16, padding: '28px 24px',
       }}>
-        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 28, letterSpacing: '2px', color: '#fff', marginBottom: 4 }}>
+        <div style={{ fontFamily: "'Bebas Neue', sans-serif", fontSize: 28, letterSpacing: '2px', color: '#1a2a3a', marginBottom: 4 }}>
           RÉCOMPENSE DU JOUR
         </div>
         <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.3)', marginBottom: 24 }}>

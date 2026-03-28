@@ -65,16 +65,16 @@ export function ResourcesPanel({ onClose }: { onClose: () => void }) {
       style={{
         position: 'fixed', top: 60, left: 8, bottom: 80, width: 220, zIndex: 900,
         background: 'rgba(4,4,12,0.98)', backdropFilter: 'blur(16px)',
-        border: '1px solid rgba(255,255,255,0.07)', borderRadius: 14,
+        border: '1px solid rgba(0,60,100,0.1)', borderRadius: 14,
         overflow: 'hidden', display: 'flex', flexDirection: 'column',
       }}
     >
       <div style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)',
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         flexShrink: 0 }}>
-        <span style={{ fontSize: 13, fontWeight: 800, color: '#fff' }}>📦 Ressources</span>
+        <span style={{ fontSize: 13, fontWeight: 800, color: '#1a2a3a' }}>📦 Ressources</span>
         <button onClick={onClose} style={{ background: 'none', border: 'none',
-          color: '#6B7280', cursor: 'pointer', fontSize: 16 }}>✕</button>
+          color: 'rgba(26,42,58,0.45)', cursor: 'pointer', fontSize: 16 }}>✕</button>
       </div>
       <div style={{ flex: 1, overflowY: 'auto', padding: '8px 10px' }}>
         {Object.entries(byCategory).map(([cat, resources]) => (
@@ -89,10 +89,10 @@ export function ResourcesPanel({ onClose }: { onClose: () => void }) {
               <div key={r.key} style={{
                 display: 'flex', alignItems: 'center', gap: 8,
                 padding: '5px 8px', borderRadius: 7, marginBottom: 2,
-                background: 'rgba(255,255,255,0.03)',
+                background: 'rgba(255,255,255,0.5)',
               }}>
                 <span style={{ fontSize: 14 }}>{r.icon}</span>
-                <span style={{ flex: 1, fontSize: 11, color: '#9CA3AF' }}>{r.label}</span>
+                <span style={{ flex: 1, fontSize: 11, color: 'rgba(26,42,58,0.6)' }}>{r.label}</span>
                 <span style={{ fontSize: 11, fontWeight: 700, fontFamily: 'monospace',
                   color: CAT_COLOR[r.cat] }}>
                   {(data?.[r.key] || 0).toFixed(r.key === 'res_hex_HEX Coin' ? 2 : 0)}

@@ -13,11 +13,11 @@ import type { Alliance, AllianceMember } from '../../types'
 import { TradePanel } from './TradePanel'
 
 const textInput: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.06)',
-  border: '1px solid rgba(255,255,255,0.1)',
+  background: 'rgba(255,255,255,0.5)',
+  border: '1px solid rgba(0,60,100,0.12)',
   borderRadius: 8,
   padding: '9px 12px',
-  color: '#fff',
+  color: '#1a2a3a',
   fontSize: 13,
   outline: 'none',
   width: '100%',
@@ -51,7 +51,7 @@ function AlliancePanelTabBar({ tabs, active, onChange }: { tabs: string[]; activ
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ fontSize: 11, color: '#6B7280', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '12px 0 6px', fontWeight: 500 }}>
+    <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '12px 0 6px', fontWeight: 500 }}>
       {children}
     </div>
   )
@@ -128,10 +128,10 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                 width: 52, height: 52, borderRadius: 12,
                 background: alliance.banner_color ?? '#10B981',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 20, fontWeight: 700, color: '#fff',
+                fontSize: 20, fontWeight: 700, color: '#1a2a3a',
               }}>[{alliance.tag}]</div>
               <div>
-                <div style={{ fontSize: 17, fontWeight: 500, color: '#fff' }}>{alliance.name}</div>
+                <div style={{ fontSize: 17, fontWeight: 500, color: '#1a2a3a' }}>{alliance.name}</div>
                 <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
                   <MiniTag color={TIER_COLORS[alliance.tier] ?? '#6B7280'}>{alliance.tier}</MiniTag>
                   <MiniTag color="#6B7280">{player?.alliance?.role ?? 'member'}</MiniTag>
@@ -167,12 +167,12 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
               }}>
                 <span style={{ fontSize: 18, width: 28 }}>{ROLE_ICONS[m.role] ?? '⚔️'}</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, color: '#E5E7EB', fontWeight: 500 }}>{m.username}</div>
-                  <div style={{ fontSize: 11, color: '#6B7280' }}>
+                  <div style={{ fontSize: 13, color: '#1a2a3a', fontWeight: 500 }}>{m.username}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)' }}>
                     Rank {m.commander_rank} • {m.territories_owned} territories
                   </div>
                 </div>
-                <span style={{ fontSize: 11, color: '#4B5563', textTransform: 'capitalize' }}>{m.role}</span>
+                <span style={{ fontSize: 11, color: 'rgba(26,42,58,0.35)', textTransform: 'capitalize' }}>{m.role}</span>
               </div>
             ))}
             {members.length === 0 && <Empty text="No members data" />}
@@ -195,7 +195,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                   cursor: 'pointer',
                   background: proposeState === s ? '#4B5563' : 'rgba(255,255,255,0.04)',
                   color: s === 'war' ? '#EF4444' : s === 'alliance' ? '#10B981' : '#E5E7EB',
-                  borderColor: proposeState === s ? '#6B7280' : 'rgba(255,255,255,0.07)',
+                  borderColor: proposeState === s ? '#6B7280' : 'rgba(0,60,100,0.1)',
                 }}>
                   {s === 'war' ? '⚔️' : s === 'alliance' ? '🤝' : s === 'nap' ? '🕊️' : s === 'trade' ? '💰' : '⏸️'} {s}
                 </button>
@@ -252,17 +252,17 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
             />
             {(searchResults as Alliance[] ?? []).map((a: Alliance) => (
               <div key={a.id} style={{
-                padding: '12px', background: 'rgba(255,255,255,0.04)',
+                padding: '12px', background: 'rgba(255,255,255,0.5)',
                 borderRadius: 10, marginBottom: 8,
-                border: '1px solid rgba(255,255,255,0.07)',
+                border: '1px solid rgba(0,60,100,0.1)',
                 display: 'flex', alignItems: 'center', gap: 10,
               }}>
-                <div style={{ width: 40, height: 40, borderRadius: 8, background: '#8B5CF6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#fff' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 8, background: '#8B5CF6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#1a2a3a' }}>
                   [{a.tag}]
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: '#E5E7EB' }}>{a.name}</div>
-                  <div style={{ fontSize: 11, color: '#6B7280' }}>{a.member_count} members • {a.tier}</div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: '#1a2a3a' }}>{a.name}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)' }}>{a.member_count} members • {a.tier}</div>
                 </div>
                 {a.is_recruiting && (
                   <button onClick={() => joinMut.mutate(a.id)} style={{ ...primaryBtn, width: 'auto', padding: '6px 14px', fontSize: 12, marginTop: 0 }}>

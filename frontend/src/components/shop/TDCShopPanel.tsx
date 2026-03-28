@@ -34,12 +34,12 @@ const CATEGORY_LABELS: Record<string, string> = {
 }
 const primaryBtn: React.CSSProperties = {
   width: '100%', padding: '12px', background: '#059669',
-  border: 'none', borderRadius: 8, color: '#fff',
+  border: 'none', borderRadius: 8, color: '#1a2a3a',
   fontSize: 14, fontWeight: 500, cursor: 'pointer',
 }
 const catBtn: React.CSSProperties = {
-  padding: '5px 12px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.08)',
-  color: '#E5E7EB', fontSize: 12, cursor: 'pointer',
+  padding: '5px 12px', borderRadius: 6, border: '1px solid rgba(0,60,100,0.1)',
+  color: '#1a2a3a', fontSize: 12, cursor: 'pointer',
 }
 
 export function TDCShopPanel({ onClose }: { onClose: () => void }) {
@@ -137,8 +137,8 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
           {/* ── WALLET TAB ──────────────────────────────────────────────── */}
           {tab === 'balance' && (
             <div>
-              <div style={{ fontSize: 13, color: '#9CA3AF', lineHeight: 1.6, marginBottom: 16 }}>
-                <strong style={{ color: '#E5E7EB' }}>HEX Coin (Hexod Coin)</strong> is an ERC-20 token on Polygon.
+              <div style={{ fontSize: 13, color: 'rgba(26,42,58,0.6)', lineHeight: 1.6, marginBottom: 16 }}>
+                <strong style={{ color: '#1a2a3a' }}>HEX Coin (Hexod Coin)</strong> is an ERC-20 token on Polygon.
                 Your in-game balance is held by the contract and can be withdrawn to your wallet at any time.
                 Withdrawal fee: 3%. Minimum withdrawal: 50 HEX Coin.
               </div>
@@ -168,7 +168,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
           {/* ── BUY HEX Coin ─────────────────────────────────────────────────── */}
           {tab === 'buy' && (
             <div>
-              <div style={{ fontSize: 12, color: '#9CA3AF', marginBottom: 16 }}>
+              <div style={{ fontSize: 12, color: 'rgba(26,42,58,0.6)', marginBottom: 16 }}>
                 1 EUR = {tdcRate} HEX Coin. Larger packs include a bonus. Payment secured by Stripe.
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
@@ -186,7 +186,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
                       padding: '14px', background: pkg.popular
                         ? 'rgba(16,185,129,0.12)'
                         : 'rgba(255,255,255,0.04)',
-                      border: `1px solid ${pkg.popular ? '#10B981' : 'rgba(255,255,255,0.08)'}`,
+                      border: `1px solid ${pkg.popular ? '#10B981' : 'rgba(0,60,100,0.1)'}`,
                       borderRadius: 10, cursor: 'pointer', textAlign: 'left',
                       position: 'relative',
                     }}
@@ -194,11 +194,11 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
                     {pkg.popular && (
                       <span style={{
                         position: 'absolute', top: -10, right: 10,
-                        background: '#10B981', color: '#fff',
+                        background: '#10B981', color: '#1a2a3a',
                         fontSize: 10, padding: '2px 8px', borderRadius: 4,
                       }}>BEST VALUE</span>
                     )}
-                    <div style={{ fontSize: 15, fontWeight: 600, color: '#fff', marginBottom: 2 }}>
+                    <div style={{ fontSize: 15, fontWeight: 600, color: '#1a2a3a', marginBottom: 2 }}>
                       {pkg.tdc.toLocaleString()} HEX Coin
                     </div>
                     {pkg.bonus > 0 && (
@@ -206,14 +206,14 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
                         +{pkg.bonus} bonus HEX Coin
                       </div>
                     )}
-                    <div style={{ fontSize: 13, color: '#9CA3AF' }}>{pkg.label}</div>
-                    <div style={{ fontSize: 16, fontWeight: 600, color: '#E5E7EB', marginTop: 8 }}>
+                    <div style={{ fontSize: 13, color: 'rgba(26,42,58,0.6)' }}>{pkg.label}</div>
+                    <div style={{ fontSize: 16, fontWeight: 600, color: '#1a2a3a', marginTop: 8 }}>
                       €{pkg.eur}
                     </div>
                   </button>
                 ))}
               </div>
-              <div style={{ marginTop: 16, fontSize: 11, color: '#4B5563', textAlign: 'center', lineHeight: 1.6 }}>
+              <div style={{ marginTop: 16, fontSize: 11, color: 'rgba(26,42,58,0.35)', textAlign: 'center', lineHeight: 1.6 }}>
                 Payments processed by Stripe. HEX Coin minted on Polygon within ~2 min of payment confirmation.
                 No refunds on digital goods. By purchasing you accept the Terms of Service.
               </div>
@@ -269,10 +269,10 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
                   fontSize: 12,
                 }}>
                   <div>
-                    <div style={{ color: '#E5E7EB', marginBottom: 2 }}>
+                    <div style={{ color: '#1a2a3a', marginBottom: 2 }}>
                       {formatTxType(tx.type)} {tx.item_code && `— ${tx.item_code}`}
                     </div>
-                    <div style={{ color: '#4B5563' }}>
+                    <div style={{ color: 'rgba(26,42,58,0.35)' }}>
                       {new Date(tx.date).toLocaleDateString()}
                     </div>
                   </div>
@@ -285,7 +285,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
                 </div>
               ))}
               {!historyData?.transactions?.length && (
-                <div style={{ textAlign: 'center', color: '#4B5563', padding: '40px 0', fontSize: 13 }}>
+                <div style={{ textAlign: 'center', color: 'rgba(26,42,58,0.35)', padding: '40px 0', fontSize: 13 }}>
                   No transactions yet
                 </div>
               )}
@@ -305,9 +305,9 @@ function BalanceCard({ label, value, sub, color }: { label: string; value: strin
       background: `${color}12`, borderRadius: 10,
       border: `1px solid ${color}30`,
     }}>
-      <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4 }}>{label}</div>
+      <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginBottom: 4 }}>{label}</div>
       <div style={{ fontSize: 16, fontWeight: 600, color, marginBottom: 2 }}>{value}</div>
-      <div style={{ fontSize: 11, color: '#4B5563' }}>{sub}</div>
+      <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.35)' }}>{sub}</div>
     </div>
   )
 }
@@ -325,7 +325,7 @@ function ShopItemRow({ item, balance, onBuy }: { item: ShopItem; balance: number
     }}>
       <div style={{
         width: 44, height: 44, borderRadius: 8,
-        background: 'rgba(255,255,255,0.06)',
+        background: 'rgba(255,255,255,0.5)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 22, flexShrink: 0,
         border: `1px solid ${rarityColors[item.rarity] ?? '#6B7280'}44`,
@@ -333,10 +333,10 @@ function ShopItemRow({ item, balance, onBuy }: { item: ShopItem; balance: number
         {item.icon_url ? <img src={item.icon_url} style={{ width: 28, height: 28 }} alt="" /> : getCategoryIcon(item.category)}
       </div>
       <div style={{ flex: 1 }}>
-        <div style={{ fontSize: 13, fontWeight: 500, color: '#E5E7EB' }}>{item.name}</div>
-        <div style={{ fontSize: 11, color: '#6B7280', marginTop: 1 }}>{item.description}</div>
+        <div style={{ fontSize: 13, fontWeight: 500, color: '#1a2a3a' }}>{item.name}</div>
+        <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginTop: 1 }}>{item.description}</div>
         {item.max_per_day > 0 && (
-          <div style={{ fontSize: 10, color: '#4B5563', marginTop: 2 }}>Max {item.max_per_day}/day</div>
+          <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>Max {item.max_per_day}/day</div>
         )}
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -344,7 +344,7 @@ function ShopItemRow({ item, balance, onBuy }: { item: ShopItem; balance: number
           {item.price_tdc} HEX Coin
         </div>
         {item.price_eur_display && (
-          <div style={{ fontSize: 10, color: '#4B5563', marginBottom: 6 }}>{item.price_eur_display}</div>
+          <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', marginBottom: 6 }}>{item.price_eur_display}</div>
         )}
         <button
           onClick={() => onBuy(1)}

@@ -82,7 +82,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
         position: 'fixed', top: 0, right: 0, bottom: 0,
         width: Math.min(400, window.innerWidth - 8),
         background: 'linear-gradient(180deg,#07070f 0%,#050510 100%)',
-        border: '1px solid rgba(255,255,255,0.08)',
+        border: '1px solid rgba(0,60,100,0.1)',
         zIndex: 1300, display: 'flex', flexDirection: 'column',
         boxShadow: '-8px 0 40px rgba(0,0,0,0.7)',
       }}
@@ -91,12 +91,12 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
       <div style={{ padding: '16px 18px 10px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: '#fff' }}>⚡ Staking HEX</div>
-            <div style={{ fontSize: 10, color: '#4B5563', marginTop: 2 }}>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#1a2a3a' }}>⚡ Staking HEX</div>
+            <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>
               Soleil sur ton épargne — jusqu'à 25% APR
             </div>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 20 }}>×</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(26,42,58,0.35)', cursor: 'pointer', fontSize: 20 }}>×</button>
         </div>
         <div style={{ display: 'flex', gap: 4 }}>
           {['stake', 'positions'].map(t => (
@@ -118,7 +118,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
           <>
             {/* Tiers */}
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 9, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
+              <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
                 Tiers de récompense
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
@@ -128,17 +128,17 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
                     <div key={t.label} style={{
                       padding: '10px 12px', borderRadius: 10,
                       background: isActive ? `${t.color}18` : 'rgba(255,255,255,0.03)',
-                      border: `1px solid ${isActive ? t.color + '55' : 'rgba(255,255,255,0.07)'}`,
+                      border: `1px solid ${isActive ? t.color + '55' : 'rgba(0,60,100,0.1)'}`,
                       transition: 'all 0.2s',
                     }}>
                       <div style={{ fontSize: 16, marginBottom: 4 }}>{t.badge}</div>
                       <div style={{ fontSize: 13, fontWeight: 800, color: t.color }}>
                         {t.apr}% APR
                       </div>
-                      <div style={{ fontSize: 9, color: '#6B7280', marginTop: 2 }}>
+                      <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>
                         {t.min.toLocaleString()}+ HEX
                       </div>
-                      <div style={{ fontSize: 9, color: '#374151', fontStyle: 'italic' }}>
+                      <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.25)', fontStyle: 'italic' }}>
                         {t.label}
                       </div>
                     </div>
@@ -151,15 +151,15 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
             <div style={{ padding: '10px 14px', marginBottom: 14,
               background: 'rgba(0,255,135,0.06)', border: '1px solid rgba(0,255,135,0.15)', borderRadius: 10,
               display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, color: '#6B7280' }}>Solde disponible</span>
-              <span style={{ fontSize: 14, fontWeight: 800, color: '#00FF87', fontFamily: 'monospace' }}>
+              <span style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)' }}>Solde disponible</span>
+              <span style={{ fontSize: 14, fontWeight: 800, color: '#00884a', fontFamily: 'monospace' }}>
                 {balance.toFixed(2)} 💎
               </span>
             </div>
 
             {/* Input */}
             <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 10, color: '#4B5563', marginBottom: 6 }}>
+              <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', marginBottom: 6 }}>
                 Montant à staker (min 100 HEX)
               </div>
               <div style={{ display: 'flex', gap: 6 }}>
@@ -169,14 +169,14 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
                   placeholder="100"
                   style={{
                     flex: 1, padding: '10px 12px',
-                    background: 'rgba(255,255,255,0.06)',
+                    background: 'rgba(255,255,255,0.5)',
                     border: `1px solid ${tier ? tier.color + '55' : 'rgba(255,255,255,0.1)'}`,
-                    borderRadius: 8, color: '#fff', fontSize: 14, fontFamily: 'monospace',
+                    borderRadius: 8, color: '#1a2a3a', fontSize: 14, fontFamily: 'monospace',
                   }}
                 />
                 <button onClick={() => setStakeAmount(balance.toFixed(0))} style={{
                   padding: '0 14px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)',
-                  background: 'rgba(255,255,255,0.05)', color: '#6B7280', cursor: 'pointer', fontSize: 11,
+                  background: 'rgba(255,255,255,0.5)', color: 'rgba(26,42,58,0.45)', cursor: 'pointer', fontSize: 11,
                 }}>MAX</button>
               </div>
             </div>
@@ -199,7 +199,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
                   ].map(r => (
                     <div key={r.label} style={{ textAlign: 'center', padding: '8px', background: 'rgba(0,0,0,0.3)', borderRadius: 8 }}>
                       <div style={{ fontSize: 13, fontWeight: 800, color: tier.color, fontFamily: 'monospace' }}>{r.val}</div>
-                      <div style={{ fontSize: 9, color: '#4B5563' }}>HEX{r.label}</div>
+                      <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)' }}>HEX{r.label}</div>
                     </div>
                   ))}
                 </div>
@@ -213,7 +213,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
               style={{
                 width: '100%', padding: 14,
                 background: tier ? `${tier.color}20` : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${tier ? tier.color + '44' : 'rgba(255,255,255,0.08)'}`,
+                border: `1px solid ${tier ? tier.color + '44' : 'rgba(0,60,100,0.1)'}`,
                 borderRadius: 12, color: tier ? tier.color : '#374151',
                 fontSize: 14, fontWeight: 800, cursor: tier ? 'pointer' : 'not-allowed',
                 opacity: (!tier || amount < 100 || amount > balance) ? 0.5 : 1,
@@ -222,7 +222,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
               {stakeMut.isPending ? '⏳ En cours…' : `⚡ Staker ${amount ? amount.toLocaleString() : '?'} HEX`}
             </button>
 
-            <div style={{ fontSize: 10, color: '#374151', textAlign: 'center', marginTop: 10, lineHeight: 1.5 }}>
+            <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.25)', textAlign: 'center', marginTop: 10, lineHeight: 1.5 }}>
               Staking via programme Solana (devnet). Unlock à tout moment.{'\n'}
               Les récompenses sont distribuées toutes les 24h.
             </div>
@@ -237,7 +237,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
                 borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: '#F59E0B' }}>Récompenses à réclamer</div>
-                  <div style={{ fontSize: 11, color: '#6B7280', marginTop: 2 }}>Distribuées chaque 24h</div>
+                  <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>Distribuées chaque 24h</div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ fontSize: 14, fontWeight: 800, color: '#F59E0B', fontFamily: 'monospace' }}>
@@ -258,10 +258,10 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
 
             {/* Total staké */}
             <div style={{ padding: '12px 14px', marginBottom: 14,
-              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)',
+              background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)',
               borderRadius: 10 }}>
-              <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 6 }}>Total en staking</div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#fff', fontFamily: 'monospace' }}>
+              <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginBottom: 6 }}>Total en staking</div>
+              <div style={{ fontSize: 22, fontWeight: 900, color: '#1a2a3a', fontFamily: 'monospace' }}>
                 {(stakingData?.total_staked || 0).toLocaleString()} 💎
               </div>
               {getTier(stakingData?.total_staked || 0) && (
@@ -273,7 +273,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
 
             {/* Positions */}
             {(stakingData?.positions || []).length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '32px 0', color: '#374151', fontSize: 12 }}>
+              <div style={{ textAlign: 'center', padding: '32px 0', color: 'rgba(26,42,58,0.25)', fontSize: 12 }}>
                 Aucune position active.{'\n'}Stakez des HEX pour commencer à gagner.
               </div>
             ) : (
@@ -281,17 +281,17 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
                 const t = getTier(pos.amount)
                 return (
                   <div key={i} style={{ padding: '12px 14px', marginBottom: 8,
-                    background: 'rgba(255,255,255,0.03)', borderRadius: 10,
+                    background: 'rgba(255,255,255,0.5)', borderRadius: 10,
                     border: `1px solid ${t ? t.color + '30' : 'rgba(255,255,255,0.05)'}` }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: '#fff', fontFamily: 'monospace' }}>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: '#1a2a3a', fontFamily: 'monospace' }}>
                         {pos.amount.toLocaleString()} HEX
                       </span>
                       <span style={{ fontSize: 11, color: t?.color || '#6B7280', fontWeight: 700 }}>
                         {t?.apr || 0}% APR
                       </span>
                     </div>
-                    <div style={{ fontSize: 10, color: '#4B5563' }}>
+                    <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)' }}>
                       Depuis le {new Date(pos.staked_at).toLocaleDateString('fr-FR')} · +{(pos.daily_reward || 0).toFixed(4)} HEX/j
                     </div>
                   </div>

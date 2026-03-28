@@ -63,9 +63,9 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
         style={{ width: 420, maxWidth: '95vw', background: '#0A0A14', borderRadius: 16, border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}
       >
         {/* Header */}
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center' }}>
-          <span style={{ fontSize: 17, fontWeight: 600, color: '#fff', flex: 1 }}>Edit Profile</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 20 }}>×</button>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(0,60,100,0.1)', display: 'flex', alignItems: 'center' }}>
+          <span style={{ fontSize: 17, fontWeight: 600, color: '#1a2a3a', flex: 1 }}>Edit Profile</span>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(26,42,58,0.35)', cursor: 'pointer', fontSize: 20 }}>×</button>
         </div>
 
         <div style={{ padding: '20px', maxHeight: '70vh', overflowY: 'auto' }}>
@@ -73,17 +73,17 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
           <div style={{ textAlign: 'center', marginBottom: 20 }}>
             <button onClick={() => setShowAvatarPicker(!showAvatarPicker)} style={{
               width: 72, height: 72, borderRadius: '50%', fontSize: 36,
-              background: 'rgba(255,255,255,0.06)', border: '2px solid rgba(0,255,135,0.4)',
+              background: 'rgba(255,255,255,0.5)', border: '2px solid rgba(0,255,135,0.4)',
               cursor: 'pointer', display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               transition: 'border-color 0.2s',
             }}>
               {avatar}
             </button>
-            <div style={{ fontSize: 11, color: '#4B5563', marginTop: 4 }}>Tap to change avatar</div>
+            <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.35)', marginTop: 4 }}>Tap to change avatar</div>
             {showAvatarPicker && (
               <div style={{
                 display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6, marginTop: 10,
-                background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: 10,
+                background: 'rgba(255,255,255,0.5)', borderRadius: 10, padding: 10,
               }}>
                 {AVATAR_EMOJIS.map(e => (
                   <button key={e} onClick={() => { setAvatar(e); setShowAvatarPicker(false) }}
@@ -101,27 +101,27 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
 
           {/* Display name */}
           <div style={{ marginBottom: 14 }}>
-            <label style={{ fontSize: 11, color: '#6B7280', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+            <label style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
               Display Name
             </label>
             <input value={displayName} onChange={e => setDisplayName(e.target.value)} maxLength={30}
-              style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
+              style={{ width: '100%', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '9px 12px', color: '#1a2a3a', fontSize: 14, outline: 'none', boxSizing: 'border-box' }}
               placeholder="Your display name..." />
           </div>
 
           {/* Bio */}
           <div style={{ marginBottom: 16 }}>
-            <label style={{ fontSize: 11, color: '#6B7280', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
-              Bio <span style={{ color: '#374151' }}>({(bio || '').length}/80)</span>
+            <label style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 6 }}>
+              Bio <span style={{ color: 'rgba(26,42,58,0.25)' }}>({(bio || '').length}/80)</span>
             </label>
             <textarea value={bio} onChange={e => setBio(e.target.value.slice(0, 80))} rows={2}
-              style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
+              style={{ width: '100%', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '9px 12px', color: '#1a2a3a', fontSize: 13, outline: 'none', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit' }}
               placeholder="Short bio... (80 chars)" />
           </div>
 
           {/* Spec path */}
           <div style={{ marginBottom: 20 }}>
-            <label style={{ fontSize: 11, color: '#6B7280', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>
+            <label style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', letterSpacing: '0.06em', textTransform: 'uppercase', display: 'block', marginBottom: 8 }}>
               Specialization
             </label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
@@ -129,12 +129,12 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
                 <button key={s.id} onClick={() => setSpecPath(s.id)} style={{
                   padding: '10px 12px', borderRadius: 10, cursor: 'pointer', textAlign: 'left',
                   background: specPath === s.id ? 'rgba(0,255,135,0.1)' : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${specPath === s.id ? 'rgba(0,255,135,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                  border: `1px solid ${specPath === s.id ? 'rgba(0,255,135,0.4)' : 'rgba(0,60,100,0.1)'}`,
                   transition: 'all 0.15s',
                 }}>
                   <div style={{ fontSize: 18, marginBottom: 4 }}>{s.emoji}</div>
-                  <div style={{ fontSize: 12, fontWeight: 600, color: specPath === s.id ? '#00FF87' : '#fff' }}>{s.label}</div>
-                  <div style={{ fontSize: 10, color: '#6B7280', marginTop: 1 }}>{s.desc}</div>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: specPath === s.id ? '#00884a' : '#fff' }}>{s.label}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', marginTop: 1 }}>{s.desc}</div>
                 </button>
               ))}
             </div>
@@ -144,7 +144,7 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
           <button
             onClick={() => saveMut.mutate()}
             disabled={saveMut.isPending}
-            style={{ width: '100%', padding: '13px', background: '#00FF87', border: 'none', borderRadius: 10, color: '#000', fontSize: 14, fontWeight: 700, cursor: 'pointer', opacity: saveMut.isPending ? 0.7 : 1 }}
+            style={{ width: '100%', padding: '13px', background: '#00884a', border: 'none', borderRadius: 10, color: '#000', fontSize: 14, fontWeight: 700, cursor: 'pointer', opacity: saveMut.isPending ? 0.7 : 1 }}
           >
             {saveMut.isPending ? 'Saving…' : 'Save Profile'}
           </button>

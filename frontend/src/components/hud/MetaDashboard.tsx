@@ -91,11 +91,11 @@ export function MetaDashboard({ onClose }: Props) {
                           <div key={rarity} style={{ marginBottom:8 }}>
                             <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
                               <span style={{ fontSize:11, color, fontWeight:600 }}>{rarity}</span>
-                              <span style={{ fontSize:11, color:'#6B7280', fontFamily:'monospace' }}>
+                              <span style={{ fontSize:11, color:'rgba(26,42,58,0.45)', fontFamily:'monospace' }}>
                                 {count.toLocaleString()} ({pct.toFixed(1)}%)
                               </span>
                             </div>
-                            <div style={{ height:6, background:'rgba(255,255,255,0.06)', borderRadius:3 }}>
+                            <div style={{ height:6, background:'rgba(255,255,255,0.5)', borderRadius:3 }}>
                               <motion.div
                                 initial={{width:0}} animate={{width:`${pct}%`}} transition={{duration:0.6,ease:'easeOut'}}
                                 style={{ height:'100%', background:color, borderRadius:3 }}
@@ -114,13 +114,13 @@ export function MetaDashboard({ onClose }: Props) {
                         .map(([biome, count]) => (
                           <div key={biome} style={{
                             padding:'8px 10px', borderRadius:8,
-                            background:'rgba(255,255,255,0.03)',
-                            border:'1px solid rgba(255,255,255,0.06)',
+                            background:'rgba(255,255,255,0.5)',
+                            border:'1px solid rgba(0,60,100,0.08)',
                           }}>
                             <div style={{ fontSize:12, fontWeight:700, color: BIOME_COLOR[biome] || '#9CA3AF' }}>
                               {biome}
                             </div>
-                            <div style={{ fontSize:11, color:'#4B5563', fontFamily:'monospace' }}>
+                            <div style={{ fontSize:11, color:'rgba(26,42,58,0.35)', fontFamily:'monospace' }}>
                               {count.toLocaleString()}
                             </div>
                           </div>
@@ -139,11 +139,11 @@ export function MetaDashboard({ onClose }: Props) {
                           ['HEX émis (24h)',   meta.global_stats.hex_emitted_24h?.toLocaleString()],
                         ].map(([label, value]) => (
                           <div key={label as string} style={{
-                            padding:'8px 10px', background:'rgba(255,255,255,0.03)',
-                            borderRadius:8, border:'1px solid rgba(255,255,255,0.05)',
+                            padding:'8px 10px', background:'rgba(255,255,255,0.5)',
+                            borderRadius:8, border:'1px solid rgba(0,60,100,0.08)',
                           }}>
-                            <div style={{ fontSize:11, color:'#00FF87', fontWeight:700 }}>{value || '—'}</div>
-                            <div style={{ fontSize:9, color:'#4B5563', marginTop:2 }}>{label}</div>
+                            <div style={{ fontSize:11, color:'#00884a', fontWeight:700 }}>{value || '—'}</div>
+                            <div style={{ fontSize:9, color:'rgba(26,42,58,0.35)', marginTop:2 }}>{label}</div>
                           </div>
                         ))}
                       </div>
@@ -163,18 +163,18 @@ export function MetaDashboard({ onClose }: Props) {
                       <div key={r.resource} style={{
                         display:'flex', alignItems:'center', gap:10,
                         padding:'8px 10px', marginBottom:6,
-                        background:'rgba(255,255,255,0.03)', borderRadius:8,
+                        background:'rgba(255,255,255,0.5)', borderRadius:8,
                         border:`1px solid ${color}22`,
                       }}>
                         <div style={{ flex:1 }}>
-                          <div style={{ fontSize:11, fontWeight:700, color:'#fff' }}>{r.resource}</div>
-                          <div style={{ fontSize:9, color:'#4B5563' }}>
+                          <div style={{ fontSize:11, fontWeight:700, color:'#1a2a3a' }}>{r.resource}</div>
+                          <div style={{ fontSize:9, color:'rgba(26,42,58,0.35)' }}>
                             Offre {r.supply?.toLocaleString()} · Demande {r.demand?.toLocaleString()}
                           </div>
                         </div>
                         <div style={{ textAlign:'right', flexShrink:0 }}>
                           <div style={{ fontSize:11, fontWeight:700, color }}>{label}</div>
-                          <div style={{ fontSize:9, color:'#4B5563', fontFamily:'monospace' }}>
+                          <div style={{ fontSize:9, color:'rgba(26,42,58,0.35)', fontFamily:'monospace' }}>
                             ×{pct.toFixed(2)}
                           </div>
                         </div>
@@ -195,17 +195,17 @@ export function MetaDashboard({ onClose }: Props) {
                       <div key={p.id} style={{
                         display:'flex', alignItems:'center', gap:10,
                         padding:'8px 10px', marginBottom:5,
-                        background:'rgba(255,255,255,0.03)', borderRadius:8,
+                        background:'rgba(255,255,255,0.5)', borderRadius:8,
                       }}>
                         <div style={{
                           width:24, height:24, borderRadius:'50%', flexShrink:0,
-                          background: i < 3 ? ['#FFD700','#C0C0C0','#CD7F32'][i]+'33' : 'rgba(255,255,255,0.06)',
+                          background: i < 3 ? ['#FFD700','#C0C0C0','#CD7F32'][i]+'33' : 'rgba(0,60,100,0.08)',
                           display:'flex', alignItems:'center', justifyContent:'center',
                           fontSize:12, fontWeight:800, color: i < 3 ? ['#FFD700','#C0C0C0','#CD7F32'][i] : '#6B7280',
                         }}>{i+1}</div>
                         <div style={{ flex:1 }}>
-                          <div style={{ fontSize:12, fontWeight:700, color:'#fff' }}>{p.username}</div>
-                          <div style={{ fontSize:9, color:'#4B5563' }}>
+                          <div style={{ fontSize:12, fontWeight:700, color:'#1a2a3a' }}>{p.username}</div>
+                          <div style={{ fontSize:9, color:'rgba(26,42,58,0.35)' }}>
                             {p.territories_owned} zones · rang {p.commander_rank}
                           </div>
                         </div>
@@ -234,10 +234,10 @@ export function MetaDashboard({ onClose }: Props) {
                         display:'flex', alignItems:'center', justifyContent:'center',
                         fontSize:10, fontWeight:800, color:'#EF4444', flexShrink:0 }}>{i+1}</div>
                       <div style={{ flex:1 }}>
-                        <div style={{ fontSize:11, fontWeight:700, color:'#fff' }}>
+                        <div style={{ fontSize:11, fontWeight:700, color:'#1a2a3a' }}>
                           {z.poi_name || z.h3_index?.slice(0,12)}
                         </div>
-                        <div style={{ fontSize:9, color:'#6B7280' }}>
+                        <div style={{ fontSize:9, color:'rgba(26,42,58,0.45)' }}>
                           {z.rarity} · {z.battle_count} batailles · {z.owner_changes} changements de main
                         </div>
                       </div>
@@ -263,11 +263,11 @@ export function MetaDashboard({ onClose }: Props) {
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom:20 }}>
-      <div style={{ fontSize:9, color:'#4B5563', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:10,
+      <div style={{ fontSize:9, color:'rgba(26,42,58,0.35)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:10,
         display:'flex', alignItems:'center', gap:6 }}>
-        <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.05)' }}/>
+        <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.5)' }}/>
         {label}
-        <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.05)' }}/>
+        <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.5)' }}/>
       </div>
       {children}
     </div>
@@ -275,5 +275,5 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 }
 
 function EmptyState({ msg }: { msg: string }) {
-  return <div style={{ padding:'16px', textAlign:'center', color:'#374151', fontSize:12 }}>{msg}</div>
+  return <div style={{ padding:'16px', textAlign:'center', color:'rgba(26,42,58,0.25)', fontSize:12 }}>{msg}</div>
 }

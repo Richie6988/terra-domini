@@ -51,17 +51,17 @@ function ListingCard({ listing, onBuy, isMine }: { listing: any; onBuy?: () => v
   const name = listing.poi_name || listing.h3_index?.slice(0, 12) + '…'
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: '12px 14px',
+      background: 'rgba(255,255,255,0.5)', borderRadius: 12, padding: '12px 14px',
       border: `1px solid ${rc}22`, borderLeft: `3px solid ${rc}`,
       display: 'flex', flexDirection: 'column', gap: 8,
     }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
         <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{name}</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: '#1a2a3a', marginBottom: 4 }}>{name}</div>
           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
             <RarityBadge rarity={listing.rarity} shiny={listing.is_shiny} />
             <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4,
-              background: 'rgba(255,255,255,0.06)', color: '#6B7280' }}>{listing.biome}</span>
+              background: 'rgba(255,255,255,0.5)', color: 'rgba(26,42,58,0.45)' }}>{listing.biome}</span>
             {listing.nft_version > 1 && (
               <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4,
                 background: 'rgba(139,92,246,0.12)', color: '#A78BFA' }}>v{listing.nft_version}</span>
@@ -70,12 +70,12 @@ function ListingCard({ listing, onBuy, isMine }: { listing: any; onBuy?: () => v
         </div>
         <div style={{ textAlign: 'right' }}>
           <PriceTag price={listing.price_hex_coin} />
-          <div style={{ fontSize: 9, color: '#4B5563', marginTop: 2 }}>HEX Coin</div>
+          <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>HEX Coin</div>
         </div>
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 10, color: '#4B5563' }}>
+        <span style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)' }}>
           Par {listing.seller_username}
           {listing.status === 'sold' && <span style={{ color: '#10B981', marginLeft: 6 }}>✓ Vendu</span>}
         </span>
@@ -139,10 +139,10 @@ function ExplorerTab() {
             { label: 'Volume', value: `${(stats.total_volume_hex_coin||0).toLocaleString()} 💎`, color: '#F59E0B' },
             { label: 'Prix moy.', value: `${stats.avg_list_price||0} 💎`, color: '#8B5CF6' },
           ].map(s => (
-            <div key={s.label} style={{ flex: '1 1 80px', background: 'rgba(255,255,255,0.04)',
-              borderRadius: 9, padding: '8px 10px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <div key={s.label} style={{ flex: '1 1 80px', background: 'rgba(255,255,255,0.5)',
+              borderRadius: 9, padding: '8px 10px', border: '1px solid rgba(0,60,100,0.08)' }}>
               <div style={{ fontSize: 12, fontWeight: 800, color: s.color, fontFamily: 'monospace' }}>{s.value}</div>
-              <div style={{ fontSize: 8, color: '#4B5563', marginTop: 1 }}>{s.label}</div>
+              <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.35)', marginTop: 1 }}>{s.label}</div>
             </div>
           ))}
         </div>
@@ -154,20 +154,20 @@ function ExplorerTab() {
           <button key={r} onClick={() => setRarity(r)} style={{
             padding: '4px 9px', borderRadius: 16, fontSize: 9, cursor: 'pointer', flexShrink: 0,
             background: rarity === r ? `${RARITY_C[r]||'#3B82F6'}22` : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${rarity === r ? (RARITY_C[r]||'#3B82F6')+'55' : 'rgba(255,255,255,0.08)'}`,
+            border: `1px solid ${rarity === r ? (RARITY_C[r]||'#3B82F6')+'55' : 'rgba(0,60,100,0.1)'}`,
             color: rarity === r ? (RARITY_C[r]||'#3B82F6') : '#6B7280', fontWeight: rarity === r ? 700 : 400,
           }}>{r || 'Tous'}</button>
         ))}
         <button onClick={() => setShiny(s => !s)} style={{
           padding: '4px 9px', borderRadius: 16, fontSize: 9, cursor: 'pointer', flexShrink: 0,
           background: shiny ? 'rgba(252,211,77,0.15)' : 'rgba(255,255,255,0.04)',
-          border: `1px solid ${shiny ? 'rgba(252,211,77,0.5)' : 'rgba(255,255,255,0.08)'}`,
+          border: `1px solid ${shiny ? 'rgba(252,211,77,0.5)' : 'rgba(0,60,100,0.1)'}`,
           color: shiny ? '#FCD34D' : '#6B7280', fontWeight: shiny ? 700 : 400,
         }}>✨ Shiny</button>
 
         <select value={sort} onChange={e => setSort(e.target.value)} style={{
-          marginLeft: 'auto', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 8, color: '#9CA3AF', fontSize: 9, padding: '4px 8px', cursor: 'pointer',
+          marginLeft: 'auto', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.12)',
+          borderRadius: 8, color: 'rgba(26,42,58,0.6)', fontSize: 9, padding: '4px 8px', cursor: 'pointer',
         }}>
           <option value="recent">Récents</option>
           <option value="price_asc">Prix ↑</option>
@@ -230,17 +230,17 @@ function MyNFTsTab() {
 
           return (
             <div key={t.h3_index} style={{
-              background: 'rgba(255,255,255,0.03)', borderRadius: 12, padding: '12px 14px',
+              background: 'rgba(255,255,255,0.5)', borderRadius: 12, padding: '12px 14px',
               border: `1px solid ${rc}22`, borderLeft: `3px solid ${rc}`,
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: isListing ? 10 : 0 }}>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 4 }}>{name}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#1a2a3a', marginBottom: 4 }}>{name}</div>
                   <div style={{ display: 'flex', gap: 5 }}>
                     <RarityBadge rarity={t.rarity || 'common'} shiny={t.is_shiny} />
                     {t.token_id && (
                       <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4,
-                        background: 'rgba(0,255,135,0.1)', color: '#00FF87' }}>
+                        background: 'rgba(0,255,135,0.1)', color: '#00884a' }}>
                         NFT #{String(t.token_id).slice(0, 8)}
                       </span>
                     )}
@@ -264,7 +264,7 @@ function MyNFTsTab() {
                   <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }}
                     exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
                     <div style={{ paddingTop: 6 }}>
-                      <div style={{ fontSize: 10, color: '#6B7280', marginBottom: 6 }}>
+                      <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', marginBottom: 6 }}>
                         Prix de vente (HEX Coin) · vous recevrez <span style={{ color: '#10B981', fontWeight: 700 }}>
                           {(listingPrice * 0.95).toFixed(0)} HEX Coin
                         </span> (95% après royalties 5%)
@@ -274,8 +274,8 @@ function MyNFTsTab() {
                           type="number" min={1} value={listingPrice}
                           onChange={e => setListingPrice(Math.max(1, parseInt(e.target.value) || 1))}
                           style={{
-                            flex: 1, padding: '9px 12px', background: 'rgba(255,255,255,0.07)',
-                            border: `1px solid ${rc}44`, borderRadius: 8, color: '#fff', fontSize: 14,
+                            flex: 1, padding: '9px 12px', background: 'rgba(0,60,100,0.1)',
+                            border: `1px solid ${rc}44`, borderRadius: 8, color: '#1a2a3a', fontSize: 14,
                             fontFamily: 'monospace', fontWeight: 700,
                           }}
                         />
@@ -333,7 +333,7 @@ function MySalesTab() {
       {(data?.total_earned || 0) > 0 && (
         <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(16,185,129,0.08)',
           border: '1px solid rgba(16,185,129,0.2)', marginBottom: 14 }}>
-          <div style={{ fontSize: 11, color: '#6B7280' }}>Total gagné (après royalties)</div>
+          <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)' }}>Total gagné (après royalties)</div>
           <div style={{ fontSize: 18, fontWeight: 800, color: '#10B981', fontFamily: 'monospace' }}>
             {parseFloat(data.total_earned).toFixed(0)} 💎
           </div>
@@ -343,7 +343,7 @@ function MySalesTab() {
       {/* Annonces actives */}
       {active.length > 0 && (
         <div style={{ marginBottom: 16 }}>
-          <div style={{ fontSize: 9, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
+          <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
             En vente ({active.length})
           </div>
           {active.map(l => (
@@ -364,7 +364,7 @@ function MySalesTab() {
       {/* Vendus */}
       {sold.length > 0 && (
         <div>
-          <div style={{ fontSize: 9, color: '#4B5563', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
+          <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
             Vendus ({sold.length})
           </div>
           {sold.map(l => <ListingCard key={l.id} listing={l} isMine />)}
@@ -467,17 +467,17 @@ function Spinner() {
   return (
     <div style={{ display: 'flex', justifyContent: 'center', padding: '28px 0' }}>
       <motion.div animate={{ rotate: 360 }} transition={{ duration: 1, repeat: Infinity, ease: 'linear' }}
-        style={{ width: 22, height: 22, border: '2px solid rgba(255,255,255,0.08)',
+        style={{ width: 22, height: 22, border: '2px solid rgba(0,60,100,0.1)',
           borderTopColor: '#F59E0B', borderRadius: '50%' }} />
     </div>
   )
 }
 function Empty({ icon, msg, sub }: { icon: string; msg: string; sub: string }) {
   return (
-    <div style={{ textAlign: 'center', padding: '36px 20px', color: '#4B5563' }}>
+    <div style={{ textAlign: 'center', padding: '36px 20px', color: 'rgba(26,42,58,0.35)' }}>
       <div style={{ fontSize: 34, marginBottom: 8 }}>{icon}</div>
-      <div style={{ fontSize: 13, color: '#6B7280', fontWeight: 600 }}>{msg}</div>
-      <div style={{ fontSize: 10, color: '#374151', marginTop: 4 }}>{sub}</div>
+      <div style={{ fontSize: 13, color: 'rgba(26,42,58,0.45)', fontWeight: 600 }}>{msg}</div>
+      <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.25)', marginTop: 4 }}>{sub}</div>
     </div>
   )
 }
