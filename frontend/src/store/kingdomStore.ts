@@ -16,7 +16,7 @@ import {
 
 // ── Default allocation: evenly split across branches ──
 const DEFAULT_BRANCH_ALLOC: Record<BranchId, number> = {
-  attack: 20, defense: 20, economy: 20, influence_branch: 20, tech: 20,
+  attack: 15, defense: 15, economy: 20, influence_branch: 15, tech: 15, extraction: 20,
 }
 
 // ── Default resource allocation: 50% to crystals ──
@@ -100,7 +100,7 @@ export const useKingdomStore = create<KingdomStore>()(
           warZone: false,
           skillStates: initSkillStates(),
           forkChoices: {},
-          crystalReservoirs: { attack: 0, defense: 0, economy: 0, influence_branch: 0, tech: 0 },
+          crystalReservoirs: { attack: 0, defense: 0, economy: 0, influence_branch: 0, tech: 0, extraction: 0 },
           resourceAllocation: defaultResourceAlloc(),
           branchAllocation: { ...DEFAULT_BRANCH_ALLOC },
           dailyProduction: {},
@@ -259,7 +259,7 @@ export const useKingdomStore = create<KingdomStore>()(
       // ── Day progression ───────────────────────────────────────
       processDay: (kingdomId, territories) => {
         const kingdom = get().kingdoms.find(k => k.id === kingdomId)
-        if (!kingdom) return { resourcesProduced: {}, crystalsGenerated: 0, branchDistribution: { attack: 0, defense: 0, economy: 0, influence_branch: 0, tech: 0 } }
+        if (!kingdom) return { resourcesProduced: {}, crystalsGenerated: 0, branchDistribution: { attack: 0, defense: 0, economy: 0, influence_branch: 0, tech: 0, extraction: 0 } }
 
         // 1. Calculate production from territories
         const production = calculateKingdomProduction(territories as any)
@@ -269,7 +269,7 @@ export const useKingdomStore = create<KingdomStore>()(
 
         // 3. Distribute crystals across branches
         const totalBranchPct = Object.values(kingdom.branchAllocation).reduce((a, b) => a + b, 0)
-        const branchDistribution: Record<BranchId, number> = { attack: 0, defense: 0, economy: 0, influence_branch: 0, tech: 0 }
+        const branchDistribution: Record<BranchId, number> = { attack: 0, defense: 0, economy: 0, influence_branch: 0, tech: 0, extraction: 0 }
         const newReservoirs = { ...kingdom.crystalReservoirs }
 
         for (const [branchId, pct] of Object.entries(kingdom.branchAllocation)) {

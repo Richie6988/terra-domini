@@ -128,7 +128,7 @@ export const PRODUCTION_CHAINS: ProductionChain[] = [
 // SKILL TREE (5 branches × 6 nodes + fork at position 2)
 // ═══════════════════════════════════════════════════════════════
 
-export type BranchId = 'attack' | 'defense' | 'economy' | 'influence_branch' | 'tech'
+export type BranchId = 'attack' | 'defense' | 'economy' | 'influence_branch' | 'tech' | 'extraction'
 
 export interface SkillNode {
   id: string
@@ -226,6 +226,19 @@ export const SKILL_BRANCHES: SkillBranch[] = [
       { id: 'tech3', name: 'Nanorobots',              icon: '🤖', cost: 4000,  effect: '-30% construction time & cost', description: 'Molecular assembly technology', prereqs: ['tech2a', 'tech2b'], tier: 3 },
       { id: 'tech4', name: 'AI Intelligence',         icon: '🧠', cost: 7000,  effect: 'Auto-defense + smart targeting', description: 'Autonomous combat systems', prereqs: ['tech3'], tier: 4 },
       { id: 'tech5', name: 'Singularity',             icon: '⚛️', cost: 15000, effect: 'Ultimate: All abilities x2',     description: 'Technological transcendence', prereqs: ['tech4'], tier: 5, isUltimate: true },
+    ],
+  },
+  {
+    id: 'extraction', name: 'Resource Extraction', icon: '⛏️', color: '#b45309',
+    crystalType: 'Amber', description: 'Deep mining, refining & resource maximization',
+    skills: [
+      { id: 'ext0', name: 'Surveyor Drones',           icon: '🛸', cost: 0,     effect: 'Reveal hidden resource deposits',  description: 'Automated geological survey', prereqs: [], tier: 0 },
+      { id: 'ext1', name: 'Deep Bore Mining',           icon: '🕳️', cost: 800,   effect: '+25% extraction from mountains',   description: 'Reach deeper mineral veins', prereqs: ['ext0'], tier: 1 },
+      { id: 'ext2a', name: 'Strip Mining',              icon: '🏗️', cost: 2000,  effect: 'x2 output, -10% stability',        description: 'Massive open-pit operations — fast but destabilizing', prereqs: ['ext1'], tier: 2, isFork: true, forkGroup: 'ext_fork' },
+      { id: 'ext2b', name: 'Sustainable Harvest',       icon: '♻️', cost: 2000,  effect: '+50% output, +15% stability',       description: 'Green extraction with renewable cycles', prereqs: ['ext1'], tier: 2, isFork: true, forkGroup: 'ext_fork' },
+      { id: 'ext3', name: 'Rare Earth Refinery',        icon: '💎', cost: 4000,  effect: 'Unlock terres_rares + lithium x2',  description: 'Process rare minerals from any biome', prereqs: ['ext2a', 'ext2b'], tier: 3 },
+      { id: 'ext4', name: 'Orbital Prospecting',        icon: '🛰️', cost: 7000,  effect: 'See all resource deposits on map',  description: 'Satellite-based resource detection', prereqs: ['ext3'], tier: 4 },
+      { id: 'ext5', name: 'Transmutation Engine',       icon: '⚗️', cost: 15000, effect: 'Ultimate: Convert any resource to any other', description: 'Alchemical mastery of matter', prereqs: ['ext4'], tier: 5, isUltimate: true },
     ],
   },
 ]

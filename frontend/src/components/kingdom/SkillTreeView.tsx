@@ -23,6 +23,7 @@ const BRANCH_COLORS: Record<BranchId, string> = {
   economy: '#d97706',
   influence_branch: '#059669',
   tech: '#7c3aed',
+  extraction: '#b45309',
 }
 
 // ── Skill Node Component ──
