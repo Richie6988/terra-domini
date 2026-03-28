@@ -16,6 +16,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
+import { GlassPanel } from '../shared/GlassPanel'
+import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
 
 const RARITY_C: Record<string, string> = {
@@ -388,67 +390,47 @@ export function MarketplacePanel({ onClose }: { onClose: () => void }) {
   const player = usePlayer()
 
   return (
-    <motion.div
-      initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-      transition={{ type: 'spring', stiffness: 280, damping: 28 }}
-      style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, width: 400,
-        zIndex: 1050, display: 'flex', flexDirection: 'column',
-        background: 'linear-gradient(180deg, #07070f 0%, #050510 100%)',
-        borderLeft: '2px solid rgba(245,158,11,0.25)',
-        boxShadow: '-8px 0 40px rgba(0,0,0,0.6)',
-      }}
-    >
-      {/* Header */}
-      <div style={{ padding: '18px 20px 14px', borderBottom: '1px solid rgba(255,255,255,0.06)',
-        background: 'rgba(245,158,11,0.06)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <div style={{ fontSize: 17, fontWeight: 800, color: '#fff' }}>🏪 Marketplace</div>
-            <div style={{ fontSize: 10, color: '#6B7280', marginTop: 2 }}>
-              5% royalties · NFTs Hexod Saison 1
-            </div>
-          </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)',
-            border: '1px solid rgba(255,255,255,0.1)', borderRadius: 7, color: '#9CA3AF',
-            cursor: 'pointer', width: 28, height: 28, fontSize: 12 }}>✕</button>
+    <GlassPanel title="MARKETPLACE" onClose={onClose} accent="#cc8800" width={400}>
+      {/* Balance */}
+      {player && (
+        <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:12,
+          padding:'8px 12px', background:'rgba(255,255,255,0.5)', borderRadius:8,
+          border:'1px solid rgba(0,60,100,0.1)' }}>
+          <CrystalIcon size="md" />
+          <span style={{ fontSize:13, fontWeight:900, color:'#7950f2', fontFamily:"'Share Tech Mono', monospace" }}>
+            {parseFloat(String(player.tdc_in_game || 0)).toFixed(0)}
+          </span>
+          <span style={{ fontSize:8, color:'rgba(26,42,58,0.4)', marginLeft:4, letterSpacing:1 }}>5% ROYALTIES · SEASON 1</span>
         </div>
-
-        {/* Balance */}
-        {player && (
-          <div style={{ marginTop: 10, fontSize: 12, color: '#9CA3AF' }}>
-            Solde : <span style={{ color: '#F59E0B', fontWeight: 700, fontFamily: 'monospace' }}>
-              {parseFloat(String(player.tdc_in_game || 0)).toFixed(0)} 💎 HEX Coin
-            </span>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
+      <div style={{ display: 'flex', gap:4, marginBottom:14 }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex: 1, padding: '10px 4px', border: 'none', cursor: 'pointer', fontSize: 10,
-            background: tab === t.id ? 'rgba(245,158,11,0.08)' : 'transparent',
-            borderBottom: `2px solid ${tab === t.id ? '#F59E0B' : 'transparent'}`,
-            color: tab === t.id ? '#F59E0B' : '#4B5563', fontWeight: tab === t.id ? 700 : 400,
+            flex: 1, padding: '7px 4px', borderRadius: 20, border: 'none', cursor: 'pointer',
+            fontSize: 7, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
+            background: tab === t.id ? 'rgba(204,136,0,0.1)' : 'rgba(255,255,255,0.5)',
+            color: tab === t.id ? '#cc8800' : 'rgba(26,42,58,0.45)',
+            fontFamily: "'Orbitron', system-ui, sans-serif",
+            border: `1px solid ${tab === t.id ? 'rgba(204,136,0,0.3)' : 'rgba(0,60,100,0.1)'}`,
           }}>{t.label}</button>
         ))}
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div>
         <AnimatePresence mode="wait">
           <motion.div key={tab} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }} transition={{ duration: 0.12 }}
-            style={{ padding: '14px 16px', paddingBottom: 80 }}>
+            style={{ paddingBottom: 40 }}>
             {tab === 'explore'  && <ExplorerTab />}
             {tab === 'my-nfts'  && <MyNFTsTab />}
             {tab === 'my-sales' && <MySalesTab />}
           </motion.div>
         </AnimatePresence>
       </div>
-    </motion.div>
+    </GlassPanel>
   )
 }
 

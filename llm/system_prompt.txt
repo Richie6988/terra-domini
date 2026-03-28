@@ -134,6 +134,10 @@ breaking_changes:     flag explicitly before acting
   - GameHUD stripped: top bar + bottom nav removed (replaced by HEXOD shell)
   - Right-click disabled globally via onContextMenu
   - Keyboard shortcut R toggles radar panel
+  - PANEL MIGRATION BATCH (11 panels → GlassPanel light_tactical):
+    ShopPanel, EventsPanel, CombatPanel, TradePanel, LadderPanel,
+    MetaDashboard, ProfilePanel, CryptoPanel, LeaderboardPanel,
+    AlliancePanel, MarketplacePanel
   NEW PAT: fine-grained token (github_pat_11ARQ...) with read+write on Contents
   PAT FORMAT: x-access-token:<PAT>@github.com (fine-grained)
               OR Richie6988:<PAT>@github.com (classic)

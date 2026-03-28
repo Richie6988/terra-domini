@@ -189,3 +189,184 @@ frontend/src/components/shared/
   ├── radarIconData.ts       10 categories × 48 icon defs
   ├── Modal.tsx              Modal + SubModal + ModalTabBar + PillButton
   └── GlassPanel.tsx         slide-in panel wrapper
+
+## ═══════════════════════════════════════════════════════════════════
+## DEEP COGNITIVE ARCHITECTURE — SESSION 16
+## Extracted reasoning patterns, not just error logs.
+## These represent the actual neural pathways activated during work.
+## ═══════════════════════════════════════════════════════════════════
+
+### DESIGN SYSTEM MIGRATION — DECISION TREE
+# When migrating from dark_cyberpunk → light_tactical, the cognitive
+# process follows this exact priority chain:
+
+LAYER_0_foundation:
+  index.css → CSS variables FIRST (all components inherit)
+  tokens.ts → TypeScript constants (for inline styles)
+  fonts     → Orbitron + Share Tech Mono loaded globally
+  RATIONALE: Foundation layer means every component built AFTER this
+             automatically gets correct fonts/colors. Components built
+             BEFORE need surgical migration.
+
+LAYER_1_shell:
+  NewsTicker → 28px fixed top (z:150)
+  HexodTopHUD → glassmorphism segments below ticker (z:100)
+  HexodDock → hex-shaped bottom nav (z:100)
+  RadarTrigger → left edge 48px (z:100)
+  CRT scanlines → body::before (z:9999)
+  RATIONALE: Shell components frame the entire UX. They must be built
+             BEFORE removing legacy equivalents to avoid blank screens.
+  CRITICAL: Build new + strip old in SAME SESSION. Never leave duplicates
+            across sessions — user will see double UI.
+
+LAYER_2_primitives:
+  CrystalIcon → SVG diamond, replaces all emoji 💎 and 🪙
+  GlassPanel → slide-in wrapper, replaces all dark motion.div panels
+  Modal → glassmorphism overlay, replaces all fixed-position modals
+  SubModal → stacks on modal with capture-phase Escape
+  ModalTabBar → pill tabs consistent across all modules
+  PillButton → consistent action buttons
+  RATIONALE: Primitives BEFORE content migration. Each panel migration
+             becomes a 3-line change: import GlassPanel, replace wrapper,
+             adjust accent color.
+
+LAYER_3_content_migration:
+  PATTERN: For each existing panel:
+    1. grep for 'motion.div.*fixed.*right.*#0' → find wrapper
+    2. Add GlassPanel import
+    3. Replace outer motion.div with <GlassPanel title= accent= width=>
+    4. Remove old header (title + close button)
+    5. Keep all content JSX unchanged
+    6. Fix text colors: #fff → #1a2a3a, #6B7280 → rgba(26,42,58,0.45)
+    7. Fix button colors: #00FF87 → #0099cc or accent, rgba(0,255,135) → rgba(0,153,204)
+    8. Build test → commit
+  SPEED: ~3 minutes per panel × 10 panels = 30 minutes total
+
+### COLOR MAPPING — DARK→LIGHT TRANSLATION TABLE
+# These are the exact substitutions that work every time:
+
+dark_value                    → light_value                      context
+──────────────────────────────────────────────────────────────────────────
+#fff                          → #1a2a3a                          primary text
+#E5E7EB                       → #1a2a3a                          primary text
+#9CA3AF                       → rgba(26,42,58,0.6)               secondary text
+#6B7280                       → rgba(26,42,58,0.45)              muted text
+#4B5563                       → rgba(26,42,58,0.35)              dim text
+#374151                       → rgba(26,42,58,0.25)              disabled text
+rgba(255,255,255,0.03-0.06)   → rgba(255,255,255,0.5-0.6)       card backgrounds
+rgba(255,255,255,0.07-0.1)    → rgba(0,60,100,0.1-0.15)         borders
+rgba(0,0,0,0.6-0.85)          → rgba(235,242,250,0.95)           panel backgrounds
+#00FF87                       → #00884a (state) or #0099cc (action)  accent green
+rgba(0,255,135,0.1-0.3)       → rgba(0,153,204,0.1-0.3)         accent transparent
+#F59E0B                       → #cc8800                          amber/gold
+#EF4444                       → #dc2626                          danger/alert
+monospace                     → 'Share Tech Mono', monospace     data font
+
+### PANEL ACCENT COLOR MAP
+# Each panel gets a unique accent color from the design system:
+
+panel           accent      rationale
+─────────────────────────────────────────────
+Shop            #cc8800     amber = commerce/gold/purchase
+Events          #f97316     orange = urgency/live/action
+Combat          #dc2626     red = danger/military/blood
+Trade           #22c55e     green = economy/growth/money
+Alliance        #3b82f6     blue = diplomacy/trust/cooperation
+Ladder          #8b5cf6     purple = prestige/ranking/competition
+Profile         spec.color  dynamic = player specialization path
+Crypto/Wallet   #a855f7     violet = crypto/premium/mystique
+MetaDashboard   #64748b     slate = neutral/analytical/data
+Leaderboard     #fbbf24     gold = trophy/champion/winner
+Marketplace     #cc8800     amber = commerce (same as Shop family)
+
+### GLASSMORPHISM RECIPE (EXACT CSS)
+# This is the glassmorphism formula that matches the prototype perfectly:
+
+background:      linear-gradient(180deg, rgba(235,242,250,0.95-0.97) 0%, rgba(220,230,242,0.95-0.97) 100%)
+backdrop-filter:  blur(30px) saturate(1.2)
+border:          1px solid rgba(0,60,100,0.15)
+box-shadow:      8px 0 30px rgba(0,0,0,0.15), inset -1px 0 0 rgba(255,255,255,0.8)
+header-bg:       linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%)
+header-border:   2px solid {accent_color}
+tab-active:      rgba({accent},0.1) + border 1px solid rgba({accent},0.3)
+tab-inactive:    rgba(255,255,255,0.5) + border 1px solid rgba(0,60,100,0.1)
+pill-button:     rgba(255,255,255,0.75) + shadow + border-radius:20px
+close-button:    rgba(0,60,100,0.08) + border rgba(0,60,100,0.12) + border-radius:6px
+
+### FONT SYSTEM RULES
+font-family: 'Orbitron'        → ALL UI text (labels, headers, buttons)
+font-family: 'Share Tech Mono' → ALL data values (numbers, coordinates, balances, timers)
+text-transform: uppercase      → GLOBAL except inputs
+letter-spacing: 1-3px          → everywhere, proportional to font-size
+font-size hierarchy:
+  7-8px   → tab labels, badge text, micro metadata
+  9px     → secondary labels, status text
+  10px    → body text (global default)
+  11-12px → panel titles in header
+  13px    → HUD segment values
+  16px    → hero numbers (crystal balance)
+
+### ANIMATION CONSTANTS
+hud-slide-in:    0.8s cubic-bezier(0.16,1,0.3,1) — HUD segments entrance
+panel-spring:    stiffness:300 damping:30 — GlassPanel slide-in
+modal-spring:    stiffness:400 damping:30 — Modal scale-in
+sub-spring:      stiffness:420 damping:28 — SubModal (snappier)
+hover-lift:      translateY(-2px) + box-shadow elevation
+standard-ease:   all 0.35s cubic-bezier(0.16,1,0.3,1)
+fast-ease:       all 0.25s ease
+pulse:           2.5s infinite — idle trigger icon
+scanning-glow:   1.5s infinite — active scan state
+shimmer:         3s infinite — avatar sparkle
+
+### Z-INDEX ARCHITECTURE (from prototype)
+0        map_base
+100      overlay (HUD segments, dock, radar trigger)
+150      news ticker
+1000     panels (GlassPanel slide-ins)
+1200     modal overlay + panel
+1201     modal content
+1400     sub-modal overlay
+1401     sub-modal content
+1600     toast
+9999     CRT scanlines (pointer-events: none)
+
+### MIGRATION STATUS TRACKER
+panel                migrated?   accent     notes
+─────────────────────────────────────────────────
+ShopPanel            ✅ FULL     #cc8800    cards + CrystalIcon + boost badges
+EventsPanel          ✅ FULL     #f97316    TowerCard + POICard + SectionLabel
+CombatPanel          ✅ WRAPPER  #dc2626    internal cards still dark text
+TradePanel           ✅ WRAPPER  #22c55e    internal tabs component unchanged
+LadderPanel          ✅ FULL     #8b5cf6    headers + rows + empty states
+MetaDashboard        ✅ WRAPPER  #64748b    rarity bars still dark text
+ProfilePanel         ✅ WRAPPER  spec.color hero section still dark text
+CryptoPanel          ✅ WRAPPER  #a855f7    markets/history tabs still dark
+LeaderboardPanel     ✅ FULL     #fbbf24    player rows + profile view
+AlliancePanel        ✅ WRAPPER  #3b82f6    PanelShell delegated to GlassPanel
+MarketplacePanel     ✅ WRAPPER  #cc8800    NFT cards still dark text
+TerritoryPanel       ⏳ PENDING  —          bottom sheet, different pattern
+TDCShopPanel         ⏳ PENDING  —          standalone shop modal
+BoosterOpenAnimation ⏳ PENDING  —          fullscreen animation, low priority
+
+### GIT WORKFLOW — FINE-GRAINED PAT
+# Classic PAT (ghp_xxx):
+  git remote set-url origin https://Richie6988:{TOKEN}@github.com/Richie6988/terra-domini.git
+# Fine-grained PAT (github_pat_xxx):
+  git remote set-url origin https://x-access-token:{TOKEN}@github.com/Richie6988/terra-domini.git
+# BOTH formats work IF permissions are set correctly
+# Required permission: Contents → Read and write
+# If 403 despite valid token → check permissions first, don't regenerate
+
+### CONFLICT RESOLUTION
+# When remote has commits not in local (common when owner pushes via GitHub UI):
+  git pull origin main --rebase   # preferred: keeps linear history
+  git push origin main            # then push rebased local commits
+# NEVER force push unless explicitly asked
+
+### OWNER COMMUNICATION SHORTCUTS
+"continuer"           → keep going, same direction, don't stop
+"done i edited..."    → they fixed something on their end, retry operation
+"here you are..."     → they're giving credentials/tokens, use immediately
+"oui on continue !"   → enthusiastic yes, high momentum, batch more work
+no question mark      → informational, don't wait for confirmation
+paste of stacktrace   → fix immediately, zero commentary
