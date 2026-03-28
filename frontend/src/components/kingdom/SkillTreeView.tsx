@@ -351,24 +351,75 @@ function BranchColumn({
 // ── Main SkillTreeView ──
 export function SkillTreeView({ kingdom, onPour, onForkChoice, onBranchAllocChange }: Props) {
   const totalAlloc = Object.values(kingdom.branchAllocation).reduce((a, b) => a + b, 0)
+  const totalReservoir = Object.values(kingdom.crystalReservoirs).reduce((a, b) => a + b, 0)
+
+  // Quick pour: distribute all reservoir crystals to cheapest available skill per branch
+  const handleQuickPour = () => {
+    let poured = 0
+    for (const branch of SKILL_BRANCHES) {
+      const reservoir = kingdom.crystalReservoirs[branch.id]
+      if (reservoir <= 0) continue
+
+      // Find cheapest available, non-completed, non-fork-locked skill
+      const available = branch.skills
+        .filter(s => {
+          const st = kingdom.skillStates[s.id]
+          return st && st.available && !st.completed && !st.forkLocked
+        })
+        .sort((a, b) => {
+          const sa = kingdom.skillStates[a.id]
+          const sb = kingdom.skillStates[b.id]
+          return (sa.max - sa.filled) - (sb.max - sb.filled)
+        })
+
+      if (available.length > 0) {
+        const target = available[0]
+        const st = kingdom.skillStates[target.id]
+        const amount = Math.min(reservoir, st.max - st.filled)
+        if (amount > 0) {
+          onPour(target.id, amount)
+          poured += amount
+        }
+      }
+    }
+    return poured
+  }
 
   return (
     <div>
-      {/* Allocation summary */}
+      {/* Allocation summary + Quick Pour */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         marginBottom: 12, padding: '8px 12px',
         background: 'rgba(255,255,255,0.4)', borderRadius: 8,
         border: '1px solid rgba(0,60,100,0.1)',
       }}>
-        <div style={{
-          fontSize: 7, letterSpacing: 2, fontWeight: 700,
-          color: totalAlloc === 100 ? '#00884a' : '#dc2626',
-          fontFamily: "'Orbitron', system-ui, sans-serif",
-        }}>
-          BRANCH ALLOCATION: {totalAlloc}%
-          {totalAlloc !== 100 && ' ⚠ MUST BE 100%'}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{
+            fontSize: 7, letterSpacing: 2, fontWeight: 700,
+            color: totalAlloc === 100 ? '#00884a' : '#dc2626',
+            fontFamily: "'Orbitron', system-ui, sans-serif",
+          }}>
+            BRANCH ALLOCATION: {totalAlloc}%
+            {totalAlloc !== 100 && ' ⚠ MUST BE 100%'}
+          </div>
+
+          {totalReservoir > 0 && (
+            <button
+              onClick={handleQuickPour}
+              style={{
+                padding: '4px 10px', borderRadius: 14, border: 'none', cursor: 'pointer',
+                background: 'linear-gradient(90deg, #7950f2, #6d28d9)',
+                color: '#fff', fontSize: 6, fontWeight: 700, letterSpacing: 2,
+                fontFamily: "'Orbitron', system-ui, sans-serif",
+                boxShadow: '0 2px 8px rgba(121,80,242,0.3)',
+              }}
+            >
+              ⚡ QUICK POUR ALL ({Math.floor(totalReservoir).toLocaleString()} ◆)
+            </button>
+          )}
         </div>
+
         <div style={{
           display: 'flex', alignItems: 'center', gap: 4,
           fontSize: 9, fontWeight: 900, color: '#7950f2',

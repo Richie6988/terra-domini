@@ -22,6 +22,7 @@ import { HexodDock } from './components/shared/HexodDock'
 import { RadarTrigger, RadarFilterPanel } from './components/shared/RadarFilterPanel'
 import { RadarWidget } from './components/shared/RadarWidget'
 import { SoundToggle } from './components/shared/SoundToggle'
+import { DayCycleWidget } from './components/shared/DayCycleWidget'
 
 // ─── Panel Components ───────────────────────────────────────
 import { GameHUD } from './components/hud/GameHUD'
@@ -154,6 +155,11 @@ function GameScreen() {
       <ErrorBoundary label="HexodTopHUD">
         <HexodTopHUD />
       </ErrorBoundary>
+
+      {/* Day cycle timer — auto-processes kingdoms */}
+      <div style={{ position: 'fixed', top: 68, right: 16, zIndex: 100 }}>
+        <DayCycleWidget />
+      </div>
 
       {/* Radar trigger (left edge) + filter panel */}
       <RadarTrigger
