@@ -142,9 +142,13 @@ breaking_changes:     flag explicitly before acting
   PAT FORMAT: x-access-token:<PAT>@github.com (fine-grained)
               OR Richie6988:<PAT>@github.com (classic)
   IN PROGRESS:
-  - Migrate existing dark panels to GlassPanel wrapper
-  - Integrate real SVG icons in RadarFilterPanel
-  - RadarWidget SVG 100×100 bottom-right (spec M17)
+  - Internal text color pass on remaining WRAPPER panels (dark #fff → #1a2a3a)
+  REMAINING:
+  - RadarWidget click → Radar Detail sub-modal
+  - Integrate real SVG icons in RadarFilterPanel (currently placeholder circles)
+  - Sound toggle button
+  - ProfilePanel hero section text colors
+  - AlliancePanel internal component colors (TradePanel import cleanup)
 - Sessions 1-15: full V0 built — biome engine, HexCard 3D, shop 23 items,
   booster animation, ladder, campaigns, skill tree forks, 3 attack types,
   Solana devnet, MetaDashboard, AdminPanel /gm, 982 territories seeded

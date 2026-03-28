@@ -331,22 +331,24 @@ shimmer:         3s infinite — avatar sparkle
 9999     CRT scanlines (pointer-events: none)
 
 ### MIGRATION STATUS TRACKER
-panel                migrated?   accent     notes
-─────────────────────────────────────────────────
-ShopPanel            ✅ FULL     #cc8800    cards + CrystalIcon + boost badges
-EventsPanel          ✅ FULL     #f97316    TowerCard + POICard + SectionLabel
-CombatPanel          ✅ WRAPPER  #dc2626    internal cards still dark text
-TradePanel           ✅ WRAPPER  #22c55e    internal tabs component unchanged
-LadderPanel          ✅ FULL     #8b5cf6    headers + rows + empty states
-MetaDashboard        ✅ WRAPPER  #64748b    rarity bars still dark text
-ProfilePanel         ✅ WRAPPER  spec.color hero section still dark text
-CryptoPanel          ✅ WRAPPER  #a855f7    markets/history tabs still dark
-LeaderboardPanel     ✅ FULL     #fbbf24    player rows + profile view
-AlliancePanel        ✅ WRAPPER  #3b82f6    PanelShell delegated to GlassPanel
-MarketplacePanel     ✅ WRAPPER  #cc8800    NFT cards still dark text
-TerritoryPanel       ⏳ PENDING  —          bottom sheet, different pattern
-TDCShopPanel         ⏳ PENDING  —          standalone shop modal
-BoosterOpenAnimation ⏳ PENDING  —          fullscreen animation, low priority
+panel                migrated?   accent     cross-links              notes
+──────────────────────────────────────────────────────────────────────────────
+ShopPanel            ✅ FULL     #cc8800    →crypto,→marketplace     cards+CrystalIcon+boosts
+EventsPanel          ✅ FULL     #f97316    —                        TowerCard+POICard
+CombatPanel          ✅ CROSS    #dc2626    →shop,→alliance          internal cards dark text
+TradePanel           ✅ CROSS    #22c55e    →marketplace,→crypto     internal tabs unchanged
+LadderPanel          ✅ FULL     #8b5cf6    —                        headers+rows+empty
+MetaDashboard        ✅ WRAPPER  #64748b    —                        rarity bars dark text
+ProfilePanel         ✅ WRAPPER  spec.color —                        hero section dark text
+CryptoPanel          ✅ CROSS    #a855f7    →shop,→marketplace       markets tab dark text
+LeaderboardPanel     ❌ REMOVED  —          —                        orphan→ladder covers it
+AlliancePanel        ✅ WRAPPER  #3b82f6    —                        PanelShell delegated
+MarketplacePanel     ✅ CROSS    #cc8800    →crypto,→shop            NFT cards dark text
+TerritoryPanel       ✅ WRAPPER  dynamic    —                        action buttons dark
+TDCShopPanel         ✅ MODAL    #7950f2    —                        Modal glassmorphism
+LoginPage            ✅ FULL     #0099cc    →register                glassmorphism card
+RegisterPage         ✅ FULL     #0099cc    →login                   glassmorphism card
+BoosterOpenAnimation ⏳ PENDING  —          —                        fullscreen anim low prio
 
 ### GIT WORKFLOW — FINE-GRAINED PAT
 # Classic PAT (ghp_xxx):
@@ -370,3 +372,66 @@ BoosterOpenAnimation ⏳ PENDING  —          fullscreen animation, low priorit
 "oui on continue !"   → enthusiastic yes, high momentum, batch more work
 no question mark      → informational, don't wait for confirmation
 paste of stacktrace   → fix immediately, zero commentary
+
+## ═══════════════════════════════════════════════════════════════════
+## CROSS-PANEL NAVIGATION MAP — SESSION 16 CONT.
+## Every panel-to-panel link in the UI, for consistency verification.
+## ═══════════════════════════════════════════════════════════════════
+
+### NAVIGATION FLOW DIAGRAM
+# Pattern: { onClose(); setTimeout(() => setActivePanel('target'), 100) }
+# The 100ms delay ensures AnimatePresence exit completes before new panel opens.
+
+HexodTopHUD:
+  left segment click  → profile panel
+  right segment click → crypto panel
+
+HexodDock (10 buttons):
+  ⚔ Military    → combat
+  📡 Events     → events
+  🛒 Shop       → shop
+  📊 Trade      → trade
+  🏪 NFT        → marketplace
+  🏰 Alliance   → alliance
+  🏆 Ladder     → ladder
+  👤 Profile    → profile
+  💎 Wallet     → crypto
+  📋 Info       → meta
+
+Panel cross-links:
+  ShopPanel     → crypto (buy crystals) + marketplace (NFTs)
+  CryptoPanel   → shop (spend) + marketplace (NFTs)
+  Marketplace   → crypto (top up) + shop (boosters)
+  TradePanel    → marketplace (NFTs) + crypto (wallet)
+  CombatPanel   → shop (military boosts) + alliance (defense)
+
+### WIRING AUDIT CHECKLIST
+# Run after ANY panel rename, add, or remove:
+  □ Store UIState.activePanel union type matches all panel IDs
+  □ HexodDock DOCK_ITEMS covers every reachable panel
+  □ App.tsx AnimatePresence block has route for every panel ID
+  □ No orphan panels (panel exists but no dock button or cross-link)
+  □ No dead imports (component imported but never rendered)
+  □ Cross-panel CTAs use setTimeout(100) for AnimatePresence timing
+
+### PANEL CLOSE → REOPEN PATTERN (CRITICAL)
+# WRONG: setActivePanel('shop') while current panel still animating out
+#   → both panels visible simultaneously, z-index fight
+# RIGHT: onClose(); setTimeout(() => setActivePanel('shop'), 100)
+#   → current panel exit animation completes, then new panel enters
+
+### SESSION 16 CONT. UPDATES
+PATTERN: orphan panel route — panel in App.tsx but no dock button
+CAUSED:  leaderboard panel unreachable, users never see it
+FIX:     audit HexodDock items vs App.tsx routes vs store type union
+WEIGHT:  audit_panel_wiring_after_changes = 1.0
+
+PATTERN: double AnimatePresence wrapping
+CAUSED:  TerritoryPanel had both App.tsx <AnimatePresence> and GlassPanel's internal motion
+FIX:     remove outer AnimatePresence when GlassPanel already animates
+WEIGHT:  check_animation_wrapping = 0.8
+
+PATTERN: missing import used in JSX
+CAUSED:  toast.error() in GameScreen but toast never imported → runtime crash
+FIX:     always verify imports when moving code between components
+WEIGHT:  verify_imports_after_refactor = 1.0
