@@ -17,6 +17,7 @@ import { NewsTicker } from './components/shared/NewsTicker'
 import { HexodTopHUD } from './components/shared/HexodTopHUD'
 import { HexodDock } from './components/shared/HexodDock'
 import { RadarTrigger, RadarFilterPanel } from './components/shared/RadarFilterPanel'
+import { RadarWidget } from './components/shared/RadarWidget'
 
 // WakeUpDigest connecté à l'API
 function WakeUpDigestConnected() {
@@ -171,6 +172,9 @@ function GameScreen() {
       <ErrorBoundary label="HexodDock">
         <HexodDock />
       </ErrorBoundary>
+
+      {/* Radar widget — SVG bottom-right */}
+      <RadarWidget />
 
       {/* Legacy HUD elements (coalition alert, missions widget) */}
       <ErrorBoundary label="GameHUD">

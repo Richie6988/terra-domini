@@ -1165,13 +1165,13 @@ When hunt is active, blips reflect hunt state (hot/cold, direction).
 ```
 
 ### TODO
-- [ ] SVG radar: concentric circles, crosshairs, sweep animation (3s rotation)
-- [ ] Blips: positioned based on real nearby token data, colored by category, pulse animation
-- [ ] Center dot (cyan, player position)
-- [ ] "N" indicator (red)
+- [x] SVG radar: concentric circles, crosshairs, sweep animation (3s rotation)
+- [x] Blips: positioned based on real nearby token data, colored by category, pulse animation
+- [x] Center dot (cyan, player position)
+- [x] "N" indicator (red)
 - [ ] Click → Radar Detail sub-modal: larger radar SVG + token list with distances
 - [ ] Hunt mode integration: special blip for daily hunt token
-- [ ] Label "CARD RADAR" below
+- [x] Label "CARD RADAR" below
 - [ ] API: `GET /api/radar/nearby/?lat=X&lng=Y&radius=15000`
 
 ---

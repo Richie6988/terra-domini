@@ -4,10 +4,11 @@
  */
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Sword, Shield, Hammer, TrendingUp, Eye, Building2 } from 'lucide-react'
+import { Sword, Shield, Hammer, TrendingUp, Eye, Building2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { useStore, useSelectedTerritory, usePlayer } from '../../store'
 import { territoryApi, combatApi } from '../../services/api'
+import { GlassPanel } from '../shared/GlassPanel'
 import type { UnitType } from '../../types'
 
 const RESOURCE_ICONS: Record<string, string> = {
@@ -108,41 +109,23 @@ export function TerritoryPanel() {
   const production = territory.production_rates ?? {}
   const stockpile = territory.stockpile ?? {}
 
+  const territoryTitle = territory.landmark_name || territory.place_name || (territory.h3 || territory.h3_index || '').slice(0, 10)
+
   return (
-    <AnimatePresence>
-      <motion.div
-        initial={{ x: 380 }}
-        animate={{ x: 0 }}
-        exit={{ x: 380 }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        style={{
-          position: 'absolute', right: 0, top: 0, bottom: 0,
-          width: 360, zIndex: 1000,
-          background: 'rgba(10, 10, 20, 0.95)',
-          backdropFilter: 'blur(12px)',
-          borderLeft: '1px solid rgba(255,255,255,0.08)',
-          display: 'flex', flexDirection: 'column', overflow: 'hidden',
-        }}
-      >
-        {/* Header */}
-        <div style={{ padding: '16px 20px 12px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
-            <div>
-              <div style={{ fontSize: 18, fontWeight: 500, color: '#fff', marginBottom: 4 }}>
-                {territory.landmark_name || territory.place_name || (territory.h3 || territory.h3_index || '').slice(0, 10) + '…'}
-              </div>
-              <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
-                <Tag color={getTerritoryTypeColor(territory.type)}>{territory.type}</Tag>
-                {territory.is_control_tower && <Tag color="#8B5CF6">Control Tower</Tag>}
-                {territory.is_landmark && <Tag color="#F59E0B">Landmark</Tag>}
-                {territory.is_under_attack && <Tag color="#EF4444">⚔️ Under Attack</Tag>}
-                {territory.owner?.is_protected && <Tag color="#10B981">🛡️ Protected</Tag>}
-              </div>
-            </div>
-            <button onClick={() => setSelectedTerritory(null)} style={closeBtn}>
-              <X size={18} />
-            </button>
-          </div>
+    <GlassPanel
+      title={territoryTitle.toUpperCase()}
+      onClose={() => setSelectedTerritory(null)}
+      accent={getTerritoryTypeColor(territory.type)}
+      width={360}
+    >
+        {/* Tags */}
+        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
+          <Tag color={getTerritoryTypeColor(territory.type)}>{territory.type}</Tag>
+          {territory.is_control_tower && <Tag color="#8b5cf6">CONTROL TOWER</Tag>}
+          {territory.is_landmark && <Tag color="#cc8800">LANDMARK</Tag>}
+          {territory.is_under_attack && <Tag color="#dc2626">⚔ UNDER ATTACK</Tag>}
+          {territory.owner?.is_protected && <Tag color="#00884a">🛡 PROTECTED</Tag>}
+        </div>
 
           {/* Owner */}
           <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -176,7 +159,6 @@ export function TerritoryPanel() {
               }} />
             </div>
           </div>
-        </div>
 
         {/* Tabs */}
         <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
@@ -350,8 +332,7 @@ export function TerritoryPanel() {
             </div>
           )}
         </div>
-      </motion.div>
-    </AnimatePresence>
+    </GlassPanel>
   )
 }
 

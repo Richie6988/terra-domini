@@ -5,10 +5,12 @@
 import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
-import { Wallet, ShoppingCart, History, TrendingUp, X } from 'lucide-react'
+import { Wallet, ShoppingCart, History, TrendingUp } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { tdcApi } from '../../services/api'
 import { useStore, useTDCBalance } from '../../store'
+import { Modal } from '../shared/Modal'
+import { CrystalIcon } from '../shared/CrystalIcon'
 import type { ShopItem } from '../../types'
 
 const toNum = (v: unknown): number => parseFloat(String(v ?? 0)) || 0
@@ -90,74 +92,47 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
   const tdcRate = balance?.tdc_eur_rate ?? balanceData?.tdc_eur_rate ?? 100
 
   return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.97 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.97 }}
-      style={{
-        position: 'fixed', inset: 0, zIndex: 2000,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(4px)',
-      }}
-      onClick={(e) => e.target === e.currentTarget && onClose()}
-    >
-      <div style={{
-        width: 600, maxHeight: '90vh',
-        background: '#0D0D1A', borderRadius: 16,
-        border: '1px solid rgba(255,255,255,0.1)',
-        display: 'flex', flexDirection: 'column', overflow: 'hidden',
-      }}>
-        {/* Header */}
-        <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <div>
-              <div style={{ fontSize: 20, fontWeight: 500, color: '#fff' }}>HEX Coin Wallet</div>
-              <div style={{ fontSize: 12, color: '#6B7280' }}>Hexod Coin · Polygon Network</div>
-            </div>
-            <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.06)', border: 'none', borderRadius: 8, padding: 8, cursor: 'pointer', color: '#9CA3AF' }}>
-              <X size={18} />
-            </button>
-          </div>
+    <Modal open={true} onClose={onClose} title="HEX COIN WALLET" accent="#7950f2" width={600}>
+      {/* Balance cards */}
+      <div style={{ display: 'flex', gap: 12, marginBottom: 16 }}>
+        <BalanceCard
+          label="In-Game Balance"
+          value={`${toNum(inGame).toFixed(2)} HEX Coin`}
+          sub={`≈ €${(toNum(inGame) / toNum(tdcRate)).toFixed(2)}`}
+          color="#00884a"
+        />
+        <BalanceCard
+          label="Wallet Balance"
+          value={balance?.wallet ? `${toNum(balance.wallet).toFixed(2)} HEX Coin` : 'Connect wallet'}
+          sub={balance?.wallet ? `Polygon mainnet` : 'Link in profile'}
+          color="#8B5CF6"
+        />
+      </div>
 
-          {/* Balance */}
-          <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-            <BalanceCard
-              label="In-Game Balance"
-              value={`${toNum(inGame).toFixed(2)} HEX Coin`}
-              sub={`≈ €${(toNum(inGame) / toNum(tdcRate)).toFixed(2)}`}
-              color="#10B981"
-            />
-            <BalanceCard
-              label="Wallet Balance"
-              value={balance?.wallet ? `${toNum(balance.wallet).toFixed(2)} HEX Coin` : 'Connect wallet'}
-              sub={balance?.wallet ? `Polygon mainnet` : 'Link in profile'}
-              color="#8B5CF6"
-            />
-          </div>
-        </div>
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+        {([
+          { id: 'balance', label: 'WALLET', icon: <Wallet size={11} /> },
+          { id: 'buy', label: 'BUY HEX', icon: <TrendingUp size={11} /> },
+          { id: 'shop', label: 'SHOP', icon: <ShoppingCart size={11} /> },
+          { id: 'history', label: 'HISTORY', icon: <History size={11} /> },
+        ] as const).map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{
+            flex: 1, padding: '7px 0', fontSize: 7, letterSpacing: 1,
+            color: tab === t.id ? '#7950f2' : 'rgba(26,42,58,0.45)',
+            background: tab === t.id ? 'rgba(121,80,242,0.1)' : 'rgba(255,255,255,0.5)',
+            border: `1px solid ${tab === t.id ? 'rgba(121,80,242,0.3)' : 'rgba(0,60,100,0.1)'}`,
+            borderRadius: 20,
+            cursor: 'pointer', fontWeight: tab === t.id ? 700 : 500,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
+            fontFamily: "'Orbitron', system-ui, sans-serif",
+          }}>
+            {t.icon} {t.label}
+          </button>
+        ))}
+      </div>
 
-        {/* Tabs */}
-        <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)' }}>
-          {([
-            { id: 'balance', label: 'Wallet', icon: <Wallet size={13} /> },
-            { id: 'buy', label: 'Buy HEX Coin', icon: <TrendingUp size={13} /> },
-            { id: 'shop', label: 'Shop', icon: <ShoppingCart size={13} /> },
-            { id: 'history', label: 'History', icon: <History size={13} /> },
-          ] as const).map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{
-              flex: 1, padding: '11px 0', fontSize: 12,
-              color: tab === t.id ? '#fff' : '#6B7280',
-              background: 'transparent', border: 'none',
-              borderBottom: `2px solid ${tab === t.id ? '#8B5CF6' : 'transparent'}`,
-              cursor: 'pointer', fontWeight: tab === t.id ? 500 : 400,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5,
-            }}>
-              {t.icon} {t.label}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px' }}>
+      <div>
 
           {/* ── WALLET TAB ──────────────────────────────────────────────── */}
           {tab === 'balance' && (
@@ -317,8 +292,7 @@ export function TDCShopPanel({ onClose }: { onClose: () => void }) {
             </div>
           )}
         </div>
-      </div>
-    </motion.div>
+    </Modal>
   )
 }
 
