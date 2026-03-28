@@ -6,6 +6,7 @@
  */
 import { useState, useCallback, useEffect, useRef } from 'react'
 import { CATEGORIES, TOTAL_ICONS } from './radarIconData'
+import { IconSVG } from './iconBank'
 
 // ── Trigger button (left edge, 48px strip) ──
 export function RadarTrigger({ onClick, scanning }: { onClick: () => void; scanning: boolean }) {
@@ -264,24 +265,14 @@ export function RadarFilterPanel({ open, onClose, onFilterChange }: Props) {
                             : 'none',
                         }}
                       >
-                        {/* Icon placeholder — circular with category color */}
+                        {/* Real SVG icon from central bank */}
                         <div style={{
-                          width: 38, height: 38,
-                          borderRadius: '50%',
-                          background: cat.color,
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: 14,
-                          color: 'white',
-                          fontWeight: 700,
                           transition: 'all 0.4s cubic-bezier(0.16, 1, 0.3, 1)',
                           filter: isSelected
                             ? `drop-shadow(0 0 8px ${cat.color})`
                             : 'drop-shadow(0 2px 4px rgba(0,0,0,0.3))',
-                          fontFamily: "'Share Tech Mono', monospace",
                         }}>
-                          {icon.name.slice(0, 2).toUpperCase()}
+                          <IconSVG id={icon.id} size={38} />
                         </div>
 
                         {/* Selected indicator dot */}

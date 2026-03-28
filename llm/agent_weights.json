@@ -1,0 +1,289 @@
+{
+  "_meta": {
+    "format": "hexod_agent_weights_v1",
+    "description": "Serialized cognitive architecture for HEXOD lead engineer agent. Machine-readable decision weights, pattern recognition, and routing tables.",
+    "last_updated": "2026-03-28T22:00:00Z",
+    "session": 16,
+    "total_patterns": 18,
+    "total_weights": 47
+  },
+
+  "task_routing": {
+    "_description": "Autonomy level per task type. 1.0 = execute immediately, 0.0 = always ask first.",
+    "syntax_fix": 1.0,
+    "import_fix": 1.0,
+    "css_styling": 0.8,
+    "api_endpoint_bug": 0.9,
+    "react_component_bug": 0.9,
+    "django_migration_issue": 0.8,
+    "db_schema_change": 0.4,
+    "new_ui_screen": 0.2,
+    "gameplay_mechanic_change": 0.1,
+    "tokenomics_change": 0.05,
+    "design_system_migration": 0.8,
+    "shared_component_creation": 0.9,
+    "legacy_component_removal": 0.7,
+    "llm_brain_file_update": 1.0,
+    "cross_panel_wiring": 0.9,
+    "panel_migration_dark_to_light": 0.85
+  },
+
+  "file_risk": {
+    "_description": "Regression probability per file. HIGH = always str_replace + verify.",
+    "urls.py": { "risk": "HIGH", "method": "str_replace", "verify": "imports_both_sides" },
+    "views.py": { "risk": "HIGH", "method": "str_replace", "verify": "indentation_depth" },
+    "HexCard.tsx": { "risk": "HIGH", "method": "str_replace", "verify": "orphan_blocks" },
+    "App.tsx": { "risk": "MEDIUM", "method": "str_replace", "verify": "jsx_tag_count" },
+    "settings/dev.py": { "risk": "HIGH", "method": "str_replace", "verify": "python_syntax" },
+    "migrations/": { "risk": "HIGH", "method": "management_commands", "verify": "never_edit_manually" },
+    "store/index.ts": { "risk": "MEDIUM", "method": "str_replace", "verify": "type_union_match" },
+    "index.css": { "risk": "MEDIUM", "method": "overwrite", "verify": "form_input_impact" },
+    "tokens.ts": { "risk": "LOW", "method": "overwrite", "verify": "none" }
+  },
+
+  "error_patterns": [
+    {
+      "id": "EP001",
+      "pattern": "append_wrong_indentation",
+      "caused": "IndentationError views.py",
+      "fix": "Read last 20 lines before any append. Use str_replace.",
+      "weight": 1.0
+    },
+    {
+      "id": "EP002",
+      "pattern": "orphan_code_block",
+      "caused": "Unexpected } in HexCard.tsx",
+      "fix": "After any HexCard.tsx edit, grep for duplicate functions",
+      "weight": 1.0
+    },
+    {
+      "id": "EP003",
+      "pattern": "missing_lazy_import",
+      "caused": "Component is not defined at runtime",
+      "fix": "Check existing lazy imports before adding routes",
+      "weight": 1.0
+    },
+    {
+      "id": "EP004",
+      "pattern": "jsx_unclosed_provider",
+      "caused": "Unterminated JSX in App.tsx",
+      "fix": "Count opening/closing tags after wrapping",
+      "weight": 1.0
+    },
+    {
+      "id": "EP005",
+      "pattern": "stale_migration_entries",
+      "caused": "InconsistentMigrationHistory",
+      "fix": "DELETE FROM django_migrations then fake-initial",
+      "weight": 1.0
+    },
+    {
+      "id": "EP006",
+      "pattern": "missing_middleware_package",
+      "caused": "ModuleNotFoundError whitenoise",
+      "fix": "Remove from INSTALLED_APPS + MIDDLEWARE",
+      "weight": 1.0
+    },
+    {
+      "id": "EP007",
+      "pattern": "vite_assets_mime_type",
+      "caused": "MIME type error, app broken",
+      "fix": "Add /assets/ exclusion in Django catchall",
+      "weight": 1.0
+    },
+    {
+      "id": "EP008",
+      "pattern": "api_data_not_array",
+      "caused": "TypeError: s.map is not a function",
+      "fix": "Array.isArray(data) ? data : (data?.results ?? [])",
+      "weight": 1.0
+    },
+    {
+      "id": "EP009",
+      "pattern": "raw_pat_in_commit",
+      "caused": "GitHub push protection rejects",
+      "fix": "Never store tokens in files. Use git remote URL only.",
+      "weight": 1.0
+    },
+    {
+      "id": "EP010",
+      "pattern": "body_uppercase_breaks_inputs",
+      "caused": "Login/register fields all caps",
+      "fix": "input,textarea { text-transform:none } in index.css",
+      "weight": 1.0
+    },
+    {
+      "id": "EP011",
+      "pattern": "fine_grained_pat_permissions",
+      "caused": "403 Permission denied on push",
+      "fix": "Edit token → Contents → Read and write",
+      "weight": 0.9
+    },
+    {
+      "id": "EP012",
+      "pattern": "double_ui_layers",
+      "caused": "2 top bars visible simultaneously",
+      "fix": "Strip old components BEFORE or SAME commit as adding new",
+      "weight": 1.0
+    },
+    {
+      "id": "EP013",
+      "pattern": "orphan_panel_route",
+      "caused": "Panel in App.tsx but no dock button → unreachable",
+      "fix": "Audit dock items vs App.tsx routes vs store type union",
+      "weight": 1.0
+    },
+    {
+      "id": "EP014",
+      "pattern": "double_animate_presence",
+      "caused": "TerritoryPanel animated twice (parent + GlassPanel)",
+      "fix": "Remove outer AnimatePresence when GlassPanel handles it",
+      "weight": 0.8
+    },
+    {
+      "id": "EP015",
+      "pattern": "missing_import_after_refactor",
+      "caused": "toast.error() crashes — toast never imported",
+      "fix": "Verify imports when moving code between components",
+      "weight": 1.0
+    },
+    {
+      "id": "EP016",
+      "pattern": "tsx_extension_for_jsx",
+      "caused": "Expected > but found className in .ts file",
+      "fix": "Files with JSX/React components MUST be .tsx not .ts",
+      "weight": 1.0
+    }
+  ],
+
+  "color_translation": {
+    "_description": "Dark cyberpunk → Light tactical color mapping",
+    "text": {
+      "#fff": "#1a2a3a",
+      "#E5E7EB": "#1a2a3a",
+      "#9CA3AF": "rgba(26,42,58,0.6)",
+      "#6B7280": "rgba(26,42,58,0.45)",
+      "#4B5563": "rgba(26,42,58,0.35)",
+      "#374151": "rgba(26,42,58,0.25)"
+    },
+    "surfaces": {
+      "rgba(255,255,255,0.03)": "rgba(255,255,255,0.5)",
+      "rgba(255,255,255,0.06)": "rgba(255,255,255,0.6)",
+      "rgba(0,0,0,0.6)": "rgba(235,242,250,0.95)",
+      "#0A0A14": "linear-gradient(180deg, rgba(235,242,250,0.97), rgba(220,230,242,0.97))",
+      "#0D0D1A": "rgba(235,242,250,0.95)"
+    },
+    "borders": {
+      "rgba(255,255,255,0.07)": "rgba(0,60,100,0.1)",
+      "rgba(255,255,255,0.1)": "rgba(0,60,100,0.15)"
+    },
+    "accents": {
+      "#00FF87": "#00884a",
+      "rgba(0,255,135,0.1)": "rgba(0,153,204,0.1)",
+      "#10B981": "#0099cc",
+      "#F59E0B": "#cc8800",
+      "#EF4444": "#dc2626"
+    }
+  },
+
+  "panel_config": {
+    "_description": "Panel ID → accent color + cross-link targets",
+    "combat":      { "accent": "#dc2626", "links": ["shop", "alliance"] },
+    "events":      { "accent": "#f97316", "links": [] },
+    "shop":        { "accent": "#cc8800", "links": ["crypto", "marketplace"] },
+    "trade":       { "accent": "#22c55e", "links": ["marketplace", "crypto"] },
+    "marketplace": { "accent": "#cc8800", "links": ["crypto", "shop"] },
+    "alliance":    { "accent": "#3b82f6", "links": [] },
+    "ladder":      { "accent": "#8b5cf6", "links": [] },
+    "profile":     { "accent": "dynamic", "links": [] },
+    "crypto":      { "accent": "#a855f7", "links": ["shop", "marketplace"] },
+    "meta":        { "accent": "#64748b", "links": [] }
+  },
+
+  "z_index_stack": {
+    "map_base": 0,
+    "overlay": 100,
+    "news_ticker": 150,
+    "panels": 1000,
+    "modal_overlay": 1200,
+    "modal_content": 1201,
+    "sub_modal_overlay": 1400,
+    "sub_modal_content": 1401,
+    "toast": 1600,
+    "scanlines": 9999
+  },
+
+  "animation_constants": {
+    "hud_slide_in": { "duration": "0.8s", "easing": "cubic-bezier(0.16,1,0.3,1)" },
+    "panel_spring": { "stiffness": 300, "damping": 30 },
+    "modal_spring": { "stiffness": 400, "damping": 30 },
+    "sub_modal_spring": { "stiffness": 420, "damping": 28 },
+    "standard_ease": { "duration": "0.35s", "easing": "cubic-bezier(0.16,1,0.3,1)" },
+    "fast_ease": { "duration": "0.25s", "easing": "ease" },
+    "pulse": { "duration": "2.5s", "iteration": "infinite" },
+    "scanning_glow": { "duration": "1.5s", "iteration": "infinite" },
+    "shimmer": { "duration": "3s", "iteration": "infinite" },
+    "sweep": { "duration": "3s", "iteration": "infinite" },
+    "panel_close_reopen_delay_ms": 100
+  },
+
+  "font_system": {
+    "heading": "'Orbitron', system-ui, sans-serif",
+    "mono": "'Share Tech Mono', monospace",
+    "sizes": {
+      "micro": "7-8px",
+      "small": "8-9px",
+      "body": "10px",
+      "header": "11-12px",
+      "title": "13px",
+      "hero": "16px"
+    },
+    "global_rules": {
+      "text_transform": "uppercase",
+      "letter_spacing": "1-3px",
+      "line_height": 1.2,
+      "inputs_override": "text-transform:none, font:Share Tech Mono"
+    }
+  },
+
+  "glassmorphism_recipe": {
+    "background": "linear-gradient(180deg, rgba(235,242,250,0.95) 0%, rgba(220,230,242,0.95) 100%)",
+    "backdrop_filter": "blur(30px) saturate(1.2)",
+    "border": "1px solid rgba(0,60,100,0.15)",
+    "box_shadow": "8px 0 30px rgba(0,0,0,0.15), inset -1px 0 0 rgba(255,255,255,0.8)",
+    "header_bg": "linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%)",
+    "header_border": "2px solid {accent}",
+    "tab_active": "rgba({accent},0.1) + border rgba({accent},0.3)",
+    "tab_inactive": "rgba(255,255,255,0.5) + border rgba(0,60,100,0.1)",
+    "close_button": "rgba(0,60,100,0.08) + border rgba(0,60,100,0.12) + radius:6px"
+  },
+
+  "owner_signals": {
+    "continuer": { "action": "keep_going", "pause": false },
+    "continue": { "action": "keep_going", "pause": false },
+    "done_i_edited": { "action": "retry_operation", "pause": false },
+    "here_you_are": { "action": "use_credentials", "pause": false },
+    "oui_on_continue": { "action": "batch_more_work", "momentum": "high" },
+    "stacktrace": { "action": "fix_immediately", "commentary": false },
+    "clean_it": { "action": "quality_over_speed", "pause": false },
+    "de_zero": { "action": "full_reset", "pause": false },
+    "no_question_mark": { "action": "informational", "wait": false }
+  },
+
+  "speed_calibration": {
+    "_unit": "iterations_to_completion",
+    "simple_import_fix": 1,
+    "migration_cleanup": 2.5,
+    "static_file_serving": 2.5,
+    "new_react_component": 1.5,
+    "db_seed_csv": 2,
+    "threejs_shader": 2.5,
+    "git_push_fine_grained": 1.5,
+    "design_tokens_overhaul": 1,
+    "css_global_overwrite": 1.5,
+    "shell_wiring_app_tsx": 2,
+    "legacy_component_strip": 1.5,
+    "panel_migration_to_glass": 1,
+    "cross_panel_wiring": 1
+  }
+}

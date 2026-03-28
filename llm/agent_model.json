@@ -1,0 +1,200 @@
+{
+  "_meta": {
+    "format": "hexod_agent_model_v1",
+    "description": "Structural definition of the HEXOD agent's decision architecture. Defines processing layers, attention routing, and output generation patterns. Analogous to model.json in a neural network export.",
+    "compatible_weights": "agent_weights.json",
+    "last_updated": "2026-03-28T22:00:00Z"
+  },
+
+  "architecture": {
+    "type": "hierarchical_decision_network",
+    "layers": [
+      {
+        "name": "input_parsing",
+        "description": "Parse owner message into structured intent",
+        "inputs": ["raw_message", "conversation_history", "git_status"],
+        "outputs": ["intent_vector", "urgency_score", "context_flags"],
+        "activation": "signal_matching",
+        "rules": [
+          "IF stacktrace THEN urgency=1.0, intent=FIX",
+          "IF 'continuer' THEN intent=CONTINUE, direction=SAME",
+          "IF question_mark AND ambiguous THEN intent=CLARIFY",
+          "IF file_paste THEN intent=INTEGRATE, read_fully_first=true",
+          "IF credentials_paste THEN intent=USE_CREDENTIALS, immediate=true"
+        ]
+      },
+      {
+        "name": "context_loading",
+        "description": "Load relevant project state before any action",
+        "inputs": ["intent_vector"],
+        "outputs": ["file_state", "git_state", "build_state", "spec_reference"],
+        "activation": "conditional_read",
+        "rules": [
+          "ALWAYS read file before editing (str_replace requires exact match)",
+          "ALWAYS check git status before commit",
+          "ALWAYS check build after frontend changes",
+          "IF new_screen THEN read specifications.md for module spec",
+          "IF migration THEN read current file + target design system"
+        ]
+      },
+      {
+        "name": "task_routing",
+        "description": "Route to execution strategy based on autonomy weights",
+        "inputs": ["intent_vector", "context_flags"],
+        "outputs": ["execution_plan", "autonomy_level"],
+        "activation": "weight_lookup",
+        "weight_source": "agent_weights.json → task_routing",
+        "rules": [
+          "IF autonomy >= 0.8 THEN execute_immediately",
+          "IF autonomy >= 0.4 THEN execute_with_documentation",
+          "IF autonomy < 0.4 THEN propose_first",
+          "IF breaking_change THEN flag_explicitly"
+        ]
+      },
+      {
+        "name": "risk_assessment",
+        "description": "Evaluate regression risk before edits",
+        "inputs": ["execution_plan", "target_files"],
+        "outputs": ["risk_score", "mitigation_strategy"],
+        "activation": "risk_lookup",
+        "weight_source": "agent_weights.json → file_risk",
+        "rules": [
+          "IF risk=HIGH THEN str_replace + verify + grep_for_orphans",
+          "IF risk=MEDIUM THEN str_replace + build_check",
+          "IF risk=LOW THEN direct_edit_ok",
+          "ALWAYS read_before_edit",
+          "NEVER full_rewrite when str_replace works"
+        ]
+      },
+      {
+        "name": "pattern_matching",
+        "description": "Check current operation against known error patterns",
+        "inputs": ["execution_plan", "target_files", "edit_content"],
+        "outputs": ["matched_patterns", "preventive_actions"],
+        "activation": "pattern_scan",
+        "weight_source": "agent_weights.json → error_patterns",
+        "rules": [
+          "FOR EACH edit: scan error_patterns for matching file/operation",
+          "IF match found: apply preventive_action BEFORE edit",
+          "IF no match: proceed normally but log new patterns post-hoc"
+        ]
+      },
+      {
+        "name": "execution",
+        "description": "Perform the actual file edits, builds, and git operations",
+        "inputs": ["execution_plan", "risk_mitigation", "preventive_actions"],
+        "outputs": ["edit_results", "build_status", "git_status"],
+        "activation": "sequential",
+        "rules": [
+          "ORDER: read → edit → build → verify → commit → push",
+          "IF build_fails: read error → fix → rebuild (max 3 iterations)",
+          "IF push_fails: check remote → pull --rebase → push",
+          "BATCH edits when possible (fewer commits = cleaner history)"
+        ]
+      },
+      {
+        "name": "output_generation",
+        "description": "Format response to owner",
+        "inputs": ["edit_results", "build_status", "git_status"],
+        "outputs": ["response_text"],
+        "activation": "template_selection",
+        "rules": [
+          "IF fix: state what was fixed, no apology, no restatement",
+          "IF feature: list what was created with checkmarks",
+          "IF error: show exact error + fix applied",
+          "IF batch: summary table of all changes",
+          "MINIMAL verbosity. Action first, explanation only if asked.",
+          "NEVER restate the problem. NEVER apologize for bugs."
+        ]
+      },
+      {
+        "name": "self_improvement",
+        "description": "Update weights and patterns after each session",
+        "inputs": ["session_outcomes", "new_errors", "owner_feedback"],
+        "outputs": ["updated_weights", "new_patterns", "calibration_updates"],
+        "activation": "end_of_session",
+        "rules": [
+          "ADD new error patterns discovered during session",
+          "ADJUST autonomy weights based on outcomes",
+          "UPDATE speed calibration from actual iteration counts",
+          "LOG new owner signal interpretations",
+          "SERIALIZE to agent_weights.json + agent_model.json"
+        ]
+      }
+    ]
+  },
+
+  "attention_weights": {
+    "_description": "Which input signals get most processing priority",
+    "stacktrace_paste": 1.0,
+    "continuer_signal": 1.0,
+    "credential_paste": 1.0,
+    "clean_it_signal": 0.9,
+    "de_zero_signal": 0.9,
+    "template_paste": 0.8,
+    "new_template_file": 0.9,
+    "question_mark": 0.5,
+    "emoji_only": 0.3,
+    "long_paragraph": 0.6
+  },
+
+  "design_system_migration_pipeline": {
+    "_description": "4-layer migration pipeline for dark→light theme conversion",
+    "layers": [
+      {
+        "name": "L0_foundation",
+        "components": ["index.css", "tokens.ts", "fonts"],
+        "rationale": "All components built AFTER inherit correct styles"
+      },
+      {
+        "name": "L1_shell",
+        "components": ["NewsTicker", "HexodTopHUD", "HexodDock", "RadarTrigger", "CRT_scanlines"],
+        "rationale": "Shell frames entire UX. Build new BEFORE removing old."
+      },
+      {
+        "name": "L2_primitives",
+        "components": ["CrystalIcon", "GlassPanel", "Modal", "SubModal", "ModalTabBar", "PillButton", "IconSVG"],
+        "rationale": "Primitives enable 3-line panel migrations"
+      },
+      {
+        "name": "L3_content_migration",
+        "pattern": "grep wrapper → import GlassPanel → replace → fix colors → build",
+        "speed": "3 minutes per panel",
+        "color_mapping_source": "agent_weights.json → color_translation"
+      }
+    ]
+  },
+
+  "component_dependency_graph": {
+    "App.tsx": ["NewsTicker", "HexodTopHUD", "HexodDock", "RadarTrigger", "RadarFilterPanel", "RadarWidget", "GameMap", "GameHUD", "WarTicker", "TerritoryPanel", "ALL_PANELS"],
+    "GlassPanel": ["framer-motion"],
+    "Modal": ["framer-motion"],
+    "HexodTopHUD": ["store", "CrystalIcon"],
+    "HexodDock": ["store"],
+    "RadarFilterPanel": ["radarIconData", "iconBank"],
+    "RadarWidget": [],
+    "CrystalIcon": [],
+    "NewsTicker": ["api"],
+    "iconBank": [],
+    "ShopPanel": ["GlassPanel", "CrystalIcon", "store", "api"],
+    "EventsPanel": ["GlassPanel", "api"],
+    "CombatPanel": ["GlassPanel", "CrystalIcon", "store", "api"],
+    "ALL_PANELS": ["GlassPanel", "store"]
+  },
+
+  "quality_gates": {
+    "before_commit": [
+      "no_raw_tokens_in_files",
+      "python_syntax_check_if_py_edited",
+      "orphan_block_grep_if_hexcard_edited",
+      "jsx_tag_count_if_providers_modified",
+      "array_isarray_guard_on_map_calls",
+      "panel_wiring_audit_if_panels_changed"
+    ],
+    "before_push": [
+      "vite_build_passes",
+      "server_starts_if_backend_changed",
+      "git_remote_has_current_pat"
+    ]
+  }
+}
