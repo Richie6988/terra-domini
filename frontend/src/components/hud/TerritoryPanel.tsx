@@ -9,6 +9,7 @@ import toast from 'react-hot-toast'
 import { useStore, useSelectedTerritory, usePlayer } from '../../store'
 import { territoryApi, combatApi } from '../../services/api'
 import { GlassPanel } from '../shared/GlassPanel'
+import { ConquestActions } from '../kingdom/ConquestActions'
 import type { UnitType } from '../../types'
 
 const RESOURCE_ICONS: Record<string, string> = {
@@ -231,11 +232,9 @@ export function TerritoryPanel() {
                 </div>
               )}
 
-              {/* Claim button */}
-              {isUnclaimed && player && (
-                <button onClick={handleClaim} disabled={loading} style={primaryBtn}>
-                  {loading ? 'Claiming…' : '🏴 Claim Territory'}
-                </button>
+              {/* Conquest actions (unclaimed or enemy territory) */}
+              {(isUnclaimed || isEnemy) && player && (
+                <ConquestActions territory={territory as any} />
               )}
             </div>
           )}
