@@ -263,7 +263,7 @@ function CardReveal({ card, index, revealed, flipped }: {
         <div style={{
           position:'absolute', inset:0, backfaceVisibility:'hidden',
           transform:'rotateY(180deg)',
-          borderRadius:12, background:'#0d0d1a',
+          borderRadius:12, background:'rgba(235,242,250,0.97)',
           border:'2px solid #1a1a2e',
           display:'flex', alignItems:'center', justifyContent:'center',
         }}>

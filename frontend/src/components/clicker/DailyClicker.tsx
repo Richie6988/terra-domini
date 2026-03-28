@@ -161,7 +161,7 @@ export function DailyClicker({ onClose }: { onClose: () => void }) {
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.92)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
       <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-        style={{ width: '100%', maxWidth: 480, maxHeight: '90vh', background: '#0A0A14', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        style={{ width: '100%', maxWidth: 480, maxHeight: '90vh', background: 'linear-gradient(180deg, rgba(235,242,250,0.97), rgba(220,230,242,0.97))', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 20, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
         {/* Header */}
         <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(0,60,100,0.1)', display: 'flex', alignItems: 'center', flexShrink: 0 }}>

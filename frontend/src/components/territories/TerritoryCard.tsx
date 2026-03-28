@@ -118,7 +118,7 @@ export function TerritoryCard({ card, size = 'md', onClick, showDetails = false 
         {/* Card header — name + rarity */}
         <div style={{ padding: '10px 12px 6px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: size === 'sm' ? 10 : 13, fontWeight: 800, color: '#fff', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            <div style={{ fontSize: size === 'sm' ? 10 : 13, fontWeight: 800, color: '#1a2a3a', lineHeight: 1.2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
               {card.poi_emoji || BIOME_EMOJI[card.biome] || '🌍'} {card.poi_name || card.name}
             </div>
             <div style={{ fontSize: 9, color: cfg.color, marginTop: 1, textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 700 }}>

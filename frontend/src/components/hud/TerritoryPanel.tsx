@@ -33,7 +33,7 @@ const closeBtn: React.CSSProperties = {
 }
 const primaryBtn: React.CSSProperties = {
   width: '100%', padding: '12px', marginTop: 4,
-  background: '#059669', border: 'none', borderRadius: 8,
+  background: '#0099cc', border: 'none', borderRadius: 8,
   color: '#1a2a3a', fontSize: 14, fontWeight: 500, cursor: 'pointer',
 }
 const tagBtn: React.CSSProperties = {

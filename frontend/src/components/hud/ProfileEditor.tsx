@@ -54,13 +54,13 @@ export function ProfileEditor({ onClose }: { onClose: () => void }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(6px)' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(26,42,58,0.4)', backdropFilter: 'blur(6px)' }}
       onClick={e => e.target === e.currentTarget && onClose()}
     >
       <motion.div
         initial={{ scale: 0.9, y: 20 }}
         animate={{ scale: 1, y: 0 }}
-        style={{ width: 420, maxWidth: '95vw', background: '#0A0A14', borderRadius: 16, border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}
+        style={{ width: 420, maxWidth: '95vw', background: 'linear-gradient(180deg, rgba(235,242,250,0.97), rgba(220,230,242,0.97))', borderRadius: 16, border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden' }}
       >
         {/* Header */}
         <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(0,60,100,0.1)', display: 'flex', alignItems: 'center' }}>

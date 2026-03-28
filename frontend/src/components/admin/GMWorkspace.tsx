@@ -39,7 +39,7 @@ const S = {
   section: { marginBottom: 32 },
   h2: { fontFamily: "'Bebas Neue', sans-serif", fontSize: 22, letterSpacing: 2, color: '#fff', marginBottom: 16 },
   grid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 12, marginBottom: 24 },
-  kpi: { background: '#0F0F1A', borderRadius: 8, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.06)' },
+  kpi: { background: 'rgba(235,242,250,0.95)', borderRadius: 8, padding: '14px 16px', border: '1px solid rgba(255,255,255,0.06)' },
   kpiN: { fontSize: 26, fontWeight: 500, fontFamily: "'Bebas Neue',sans-serif", letterSpacing: 1 },
   kpiL: { fontSize: 11, color: 'rgba(255,255,255,0.35)', fontFamily: 'monospace', letterSpacing: '0.08em', marginTop: 2 },
   table: { width: '100%', borderCollapse: 'collapse' as const, fontSize: 13 },

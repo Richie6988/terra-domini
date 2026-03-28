@@ -52,7 +52,7 @@ export function TerritoryPanel({ territory, onClose, onRequestClaim }: Props) {
       style={{
         position:'absolute', right:0, top:0, bottom:0, width:360,
         zIndex:1000, display:'flex', flexDirection:'column',
-        background:'linear-gradient(180deg, #07070f 0%, #050510 100%)',
+        background:'linear-gradient(180deg, rgba(235,242,250,0.97) 0%, rgba(220,230,242,0.97) 100%)',
         borderLeft:`2px solid ${border}44`,
         boxShadow:`-6px 0 30px rgba(0,0,0,0.5), inset 0 0 0 1px ${border}11`,
       }}

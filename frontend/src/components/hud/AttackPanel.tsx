@@ -10,6 +10,7 @@ import { StaminaBar } from './StaminaBar'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
+import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
 import type { TerritoryLight } from '../../types'
 
@@ -121,24 +122,13 @@ export function AttackPanel({ target, onClose }: Props) {
   const probColor = winProb >= 0.65 ? '#00884a' : winProb >= 0.4 ? '#F59E0B' : '#EF4444'
 
   return (
-    <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-      transition={{ type: 'spring', stiffness: 320, damping: 32 }}
-      style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 390, zIndex: 1000,
-        display: 'flex', flexDirection: 'column', background: '#0A0A14',
-        borderLeft: '1px solid rgba(239,68,68,0.2)' }}>
-
-      {/* Header */}
-      <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(0,60,100,0.1)', background: 'linear-gradient(180deg, rgba(239,68,68,0.08) 0%, transparent 100%)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: '#EF4444' }}>⚔️ ATTACK</div>
-            <div style={{ fontSize: 14, color: '#1a2a3a', fontWeight: 600, marginTop: 2 }}>{target.place_name || 'Enemy Zone'}</div>
-            <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.35)', marginTop: 1 }}>
-              Owned by: <span style={{ color: '#1a2a3a' }}>{target.owner_username ?? 'Unknown'}</span>
-              {target.defense_tier > 0 && <span style={{ color: 'rgba(26,42,58,0.45)', marginLeft: 8 }}>🛡️ Tier {target.defense_tier}</span>}
-            </div>
-          </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(26,42,58,0.35)', cursor: 'pointer', fontSize: 22 }}>×</button>
+    <GlassPanel title="⚔ ATTACK" onClose={onClose} accent="#dc2626" width={390}>
+      {/* Target info */}
+      <div style={{ marginBottom: 12 }}>
+        <div style={{ fontSize: 11, color: '#1a2a3a', fontWeight: 700, letterSpacing: 1 }}>{target.place_name || 'ENEMY ZONE'}</div>
+        <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>
+          OWNED BY: <span style={{ color: '#1a2a3a' }}>{target.owner_username ?? 'Unknown'}</span>
+          {target.defense_tier > 0 && <span style={{ marginLeft: 8 }}>🛡 TIER {target.defense_tier}</span>}
         </div>
       </div>
 
@@ -264,6 +254,6 @@ export function AttackPanel({ target, onClose }: Props) {
           )}
         </AnimatePresence>
       </div>
-    </motion.div>
+    </GlassPanel>
   )
 }

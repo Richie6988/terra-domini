@@ -81,7 +81,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
       } : {
         position: 'fixed', top: 0, right: 0, bottom: 0,
         width: Math.min(400, window.innerWidth - 8),
-        background: 'linear-gradient(180deg,#07070f 0%,#050510 100%)',
+        background: 'linear-gradient(180deg, rgba(235,242,250,0.97) 0%, rgba(220,230,242,0.97) 100%)',
         border: '1px solid rgba(0,60,100,0.1)',
         zIndex: 1300, display: 'flex', flexDirection: 'column',
         boxShadow: '-8px 0 40px rgba(0,0,0,0.7)',

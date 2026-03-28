@@ -187,7 +187,7 @@ export function HintTooltip({ hintId, children, forceShow = false }: HintTooltip
               borderTop: '6px solid rgba(0,255,135,0.3)',
             }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#00FF87' }}>{hint.title}</div>
+              <div style={{ fontSize: 12, fontWeight: 600, color: '#0099cc' }}>{hint.title}</div>
               <button onClick={dismiss} style={{
                 background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)',
                 cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '0 0 0 8px',
@@ -430,7 +430,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
               <div key={i} style={{
                 width: i === state.currentStep ? 20 : 6,
                 height: 6, borderRadius: 3,
-                background: i < state.currentStep ? '#00FF87' : i === state.currentStep ? '#00FF87' : 'rgba(255,255,255,0.15)',
+                background: i < state.currentStep ? '#0099cc' : i === state.currentStep ? '#0099cc' : 'rgba(255,255,255,0.15)',
                 transition: 'all 0.3s',
               }} />
             ))}
@@ -470,7 +470,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
                   marginBottom: 16, padding: '10px',
                   background: 'rgba(0,255,135,0.08)',
                   border: '1px solid rgba(0,255,135,0.2)',
-                  borderRadius: 8, fontSize: 13, color: '#00FF87', textAlign: 'center',
+                  borderRadius: 8, fontSize: 13, color: '#0099cc', textAlign: 'center',
                 }}
               >
                 👆 Tap any grey zone on the map → then tap "Claim Zone"
@@ -486,7 +486,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
                 disabled={gpsLoading}
                 style={{
                   width: '100%', padding: '16px',
-                  background: '#00FF87', border: 'none', borderRadius: 10,
+                  background: '#0099cc', border: 'none', borderRadius: 10,
                   color: '#000', fontSize: 16, fontWeight: 700, cursor: 'pointer',
                   fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '1px',
                   opacity: gpsLoading ? 0.7 : 1,
@@ -645,7 +645,7 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
             onClick={onDismiss}
             style={{
               width: '100%', padding: '14px',
-              background: '#00FF87', border: 'none', borderRadius: 10,
+              background: '#0099cc', border: 'none', borderRadius: 10,
               color: '#000', fontSize: 15, fontWeight: 700, cursor: 'pointer',
               fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '1px',
             }}

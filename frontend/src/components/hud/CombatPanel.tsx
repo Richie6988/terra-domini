@@ -253,7 +253,7 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
             })}
 
             {totalCost > 0 && (
-              <div style={{ position: 'sticky', bottom: 0, background: '#0A0A14', paddingTop: 12, paddingBottom: 4, borderTop: '1px solid rgba(0,60,100,0.1)' }}>
+              <div style={{ position: 'sticky', bottom: 0, background: 'rgba(235,242,250,0.95)', paddingTop: 12, paddingBottom: 4, borderTop: '1px solid rgba(0,60,100,0.1)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
                   <span style={{ fontSize: 12, color: 'rgba(26,42,58,0.6)' }}>
                     {Object.entries(qty).filter(([,n])=>n>0).map(([k,n]) => `${n}× ${UNITS.find(u=>u.key===k)?.name}`).join(', ')}

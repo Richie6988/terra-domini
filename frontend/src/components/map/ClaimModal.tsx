@@ -229,13 +229,13 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
 
       <motion.div initial={{ y:'100%' }} animate={{ y:0 }} exit={{ y:'100%' }}
         transition={{ type:'spring', stiffness:350, damping:32 }}
-        style={{ width:'100%', maxWidth:440, background:'#090910', borderRadius:'20px 20px 0 0', border:'1px solid rgba(255,255,255,0.1)', overflow:'hidden' }}>
+        style={{ width:'100%', maxWidth:440, background:'linear-gradient(180deg, rgba(235,242,250,0.97), rgba(220,230,242,0.97))', borderRadius:'20px 20px 0 0', border:'1px solid rgba(255,255,255,0.1)', overflow:'hidden' }}>
 
         {/* Header */}
         <div style={{ padding:'16px 20px 10px', borderBottom:'1px solid rgba(255,255,255,0.07)', background:'linear-gradient(180deg,rgba(255,255,255,0.03) 0%,transparent 100%)' }}>
           <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center' }}>
             <div>
-              <div style={{ fontSize:16, fontWeight:700, color:'#fff' }}>
+              <div style={{ fontSize:16, fontWeight:700, color:'#1a2a3a' }}>
                 {t.poi_emoji || (isEnemy ? '🔴' : '⬡')} {name}
               </div>
               <div style={{ display:'flex', gap:6, marginTop:4 }}>
@@ -244,7 +244,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                 {isEnemy && <span style={{ fontSize:10, padding:'2px 7px', borderRadius:4, background:'rgba(239,68,68,0.15)', color:'#F87171', fontWeight:600 }}>👤 {t.owner_username}</span>}
               </div>
             </div>
-            <button onClick={onClose} style={{ background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:6, color:'#9CA3AF', cursor:'pointer', width:30, height:30, fontSize:14 }}>✕</button>
+            <button onClick={onClose} style={{ background:'rgba(255,255,255,0.6)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:6, color:'#9CA3AF', cursor:'pointer', width:30, height:30, fontSize:14 }}>✕</button>
           </div>
 
           {/* Resources mini row avec tooltips (Marie spec) */}
@@ -260,8 +260,8 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
               disabled={tb.disabled}
               style={{ flex:1, padding:'10px 4px', border:'none', cursor: tb.disabled ? 'not-allowed' : 'pointer',
                 background: method===tb.id ? 'rgba(0,255,135,0.08)' : 'transparent',
-                borderBottom:`2px solid ${method===tb.id ? '#00FF87' : 'transparent'}`,
-                color: method===tb.id ? '#00FF87' : tb.disabled ? '#2D3748' : '#6B7280',
+                borderBottom:`2px solid ${method===tb.id ? '#0099cc' : 'transparent'}`,
+                color: method===tb.id ? '#0099cc' : tb.disabled ? '#2D3748' : '#6B7280',
                 fontSize:11, fontWeight: method===tb.id ? 700 : 400 }}>
               {tb.label}
             </button>
@@ -277,12 +277,12 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
               <motion.div key="free" initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}>
                 <div style={{ textAlign:'center', marginBottom:20 }}>
                   <div style={{ fontSize:44, marginBottom:8 }}>🎁</div>
-                  <div style={{ fontSize:15, fontWeight:700, color:'#00FF87' }}>Your first territory is FREE!</div>
+                  <div style={{ fontSize:15, fontWeight:700, color:'#0099cc' }}>Your first territory is FREE!</div>
                   <div style={{ fontSize:12, color:'#6B7280', marginTop:6, lineHeight:1.6 }}>Welcome to Hexod. Claim this zone to start your empire.</div>
-                  <div style={{ marginTop:10, padding:'8px 16px', background:'rgba(0,255,135,0.06)', borderRadius:8, fontSize:12, color:'#00FF87' }}>🎁 +100 HEX Coin bonus!</div>
+                  <div style={{ marginTop:10, padding:'8px 16px', background:'rgba(0,153,204,0.06)', borderRadius:8, fontSize:12, color:'#0099cc' }}>🎁 +100 HEX Coin bonus!</div>
                 </div>
                 <button onClick={() => claimMut.mutate({ method:'free' })} disabled={claimMut.isPending}
-                  style={{ width:'100%', padding:14, background:'rgba(0,255,135,0.15)', border:'1px solid rgba(0,255,135,0.4)', borderRadius:12, color:'#00FF87', fontSize:15, fontWeight:800, cursor:'pointer' }}>
+                  style={{ width:'100%', padding:14, background:'rgba(0,153,204,0.1)', border:'1px solid rgba(0,255,135,0.4)', borderRadius:12, color:'#0099cc', fontSize:15, fontWeight:800, cursor:'pointer' }}>
                   {claimMut.isPending ? '…' : '🚀 Claim for Free'}
                 </button>
               </motion.div>
@@ -297,19 +297,19 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                       Send a HEX Coin offer to <strong style={{ color:'#F87171' }}>{t.owner_username}</strong>. They can accept or decline.
                     </div>
                     <div style={{ display:'flex', gap:10, marginBottom:14, fontSize:12 }}>
-                      <div style={{ flex:1, background:'rgba(255,255,255,0.04)', borderRadius:8, padding:'8px 12px' }}>
+                      <div style={{ flex:1, background:'rgba(255,255,255,0.5)', borderRadius:8, padding:'8px 12px' }}>
                         <div style={{ color:'#4B5563', fontSize:10 }}>Your balance</div>
                         <div style={{ color:'#FFB800', fontWeight:700, fontFamily:'monospace' }}>{tdc.toFixed(0)} 🪙</div>
                       </div>
                       {t.poi_floor_price && (
-                        <div style={{ flex:1, background:'rgba(255,255,255,0.04)', borderRadius:8, padding:'8px 12px' }}>
+                        <div style={{ flex:1, background:'rgba(255,255,255,0.5)', borderRadius:8, padding:'8px 12px' }}>
                           <div style={{ color:'#4B5563', fontSize:10 }}>NFT floor</div>
                           <div style={{ color:rc, fontWeight:700, fontFamily:'monospace' }}>{t.poi_floor_price} HEX</div>
                         </div>
                       )}
                     </div>
                     <input type="number" value={offer} min={1} onChange={e => setOffer(parseInt(e.target.value)||1)}
-                      style={{ width:'100%', padding:'11px 14px', background:'rgba(255,255,255,0.06)', border:'1px solid rgba(255,255,255,0.12)', borderRadius:10, color:'#fff', fontSize:16, fontFamily:'monospace', fontWeight:700, boxSizing:'border-box', marginBottom:12 }} />
+                      style={{ width:'100%', padding:'11px 14px', background:'rgba(255,255,255,0.6)', border:'1px solid rgba(0,60,100,0.12)', borderRadius:10, color:'#1a2a3a', fontSize:16, fontFamily:'monospace', fontWeight:700, boxSizing:'border-box', marginBottom:12 }} />
                     <button onClick={() => offerMut.mutate()} disabled={offerMut.isPending}
                       style={{ width:'100%', padding:13, background:'rgba(59,130,246,0.15)', border:'1px solid rgba(59,130,246,0.35)', borderRadius:12, color:'#60A5FA', fontSize:14, fontWeight:700, cursor:'pointer' }}>
                       {offerMut.isPending ? '…' : `💸 Send offer of ${offer} HEX Coin`}
@@ -350,7 +350,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
               <motion.div key="puzzle" initial={{ opacity:0, y:8 }} animate={{ opacity:1, y:0 }}>
                 <div style={{ textAlign:'center', marginBottom:16 }}>
                   <div style={{ fontSize:12, color:'#6B7280', marginBottom:10 }}>Solve to claim — free but takes a brain 🧠</div>
-                  <div style={{ fontSize:34, fontWeight:800, color:'#fff', fontFamily:'monospace', background:'rgba(255,255,255,0.04)', borderRadius:12, padding:'14px 24px', border:'1px solid rgba(255,255,255,0.08)', letterSpacing:'0.1em' }}>
+                  <div style={{ fontSize:34, fontWeight:800, color:'#1a2a3a', fontFamily:'monospace', background:'rgba(255,255,255,0.5)', borderRadius:12, padding:'14px 24px', border:'1px solid rgba(0,60,100,0.1)', letterSpacing:'0.1em' }}>
                     {puzzle.q} = ?
                   </div>
                 </div>
@@ -358,14 +358,14 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                   <input ref={inputRef} type="number" value={answer} onChange={e => setAnswer(e.target.value)}
                     onKeyDown={e => e.key==='Enter' && puzzleSolved && claimMut.mutate({ method:'puzzle', answer })}
                     placeholder="Your answer…"
-                    style={{ width:'100%', background:`rgba(${puzzleSolved?'0,255,135':'255,255,255'},0.06)`, border:`1px solid ${puzzleSolved?'#00FF87':'rgba(255,255,255,0.12)'}`, borderRadius:12, padding:'12px 16px', color:'#fff', fontSize:20, fontFamily:'monospace', outline:'none', textAlign:'center', boxSizing:'border-box', transition:'border-color 0.2s' }} />
+                    style={{ width:'100%', background:`rgba(${puzzleSolved?'0,255,135':'255,255,255'},0.06)`, border:`1px solid ${puzzleSolved?'#0099cc':'rgba(255,255,255,0.12)'}`, borderRadius:12, padding:'12px 16px', color:'#1a2a3a', fontSize:20, fontFamily:'monospace', outline:'none', textAlign:'center', boxSizing:'border-box', transition:'border-color 0.2s' }} />
                   {puzzleSolved && <motion.span initial={{ scale:0 }} animate={{ scale:1 }} style={{ position:'absolute', right:14, top:'50%', transform:'translateY(-50%)', fontSize:20 }}>✅</motion.span>}
                 </div>
                 <div style={{ display:'flex', gap:8 }}>
                   <button onClick={() => { setPuzzle(makePuzzle()); setAnswer(''); setSolved(false) }}
                     style={{ padding:'12px 14px', background:'rgba(255,255,255,0.05)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color:'#6B7280', cursor:'pointer', fontSize:13 }}>🔄</button>
                   <button onClick={() => claimMut.mutate({ method:'puzzle', answer })} disabled={!puzzleSolved || claimMut.isPending}
-                    style={{ flex:1, padding:12, background: puzzleSolved ? 'rgba(0,255,135,0.15)' : 'rgba(255,255,255,0.04)', border:`1px solid ${puzzleSolved?'rgba(0,255,135,0.4)':'rgba(255,255,255,0.08)'}`, borderRadius:10, color: puzzleSolved ? '#00FF87' : '#4B5563', cursor: puzzleSolved ? 'pointer' : 'not-allowed', fontSize:14, fontWeight:700 }}>
+                    style={{ flex:1, padding:12, background: puzzleSolved ? 'rgba(0,255,135,0.15)' : 'rgba(255,255,255,0.04)', border:`1px solid ${puzzleSolved?'rgba(0,153,204,0.3)':'rgba(255,255,255,0.08)'}`, borderRadius:10, color: puzzleSolved ? '#0099cc' : '#4B5563', cursor: puzzleSolved ? 'pointer' : 'not-allowed', fontSize:14, fontWeight:700 }}>
                     {claimMut.isPending ? '…' : puzzleSolved ? '⚔️ Claim Zone' : 'Solve to unlock'}
                   </button>
                 </div>
@@ -512,7 +512,7 @@ export function ClaimModal({ territory, isFree, onClose, onClaimed }: Props) {
                 style={{ textAlign:'center', padding:'10px 0' }}>
                 <motion.div animate={{ rotate:[0,-10,10,-10,10,0] }} transition={{ duration:0.6 }}
                   style={{ fontSize:52, marginBottom:10 }}>🎉</motion.div>
-                <div style={{ fontSize:18, fontWeight:800, color:'#00FF87' }}>Territory Claimed!</div>
+                <div style={{ fontSize:18, fontWeight:800, color:'#0099cc' }}>Territory Claimed!</div>
                 <div style={{ fontSize:13, color:'#6B7280', marginTop:6 }}>{name} is now yours</div>
               </motion.div>
             )}

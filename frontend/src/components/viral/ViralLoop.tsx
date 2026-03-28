@@ -214,7 +214,7 @@ export function StreakCelebration({
             <div style={{
               fontFamily: "'Bebas Neue', sans-serif",
               fontSize: 40, letterSpacing: '2px',
-              color: '#FFB800',
+              color: '#cc8800',
             }}>
               +{rewardTDC} HEX Coin
             </div>
@@ -226,7 +226,7 @@ export function StreakCelebration({
             onClick={onClaim}
             style={{
               width: '100%', padding: '15px',
-              background: isMilestone ? '#FFB800' : '#00FF87',
+              background: isMilestone ? '#cc8800' : '#00884a',
               border: 'none', borderRadius: 10,
               color: '#000', fontSize: 16, fontWeight: 700,
               cursor: 'pointer',
@@ -277,7 +277,7 @@ export function DailySpin({
     common: '#6B7280',
     rare: '#3B82F6',
     epic: '#8B5CF6',
-    legendary: '#FFB800',
+    legendary: '#cc8800',
   }
   const tierColor = tierColors[reward.tier as keyof typeof tierColors] ?? '#6B7280'
 
@@ -354,7 +354,7 @@ export function DailySpin({
         {!done ? (
           <button onClick={spin} disabled={spinning} style={{
             width: '100%', padding: '14px',
-            background: spinning ? 'rgba(255,255,255,0.1)' : '#00FF87',
+            background: spinning ? 'rgba(255,255,255,0.1)' : '#00884a',
             border: 'none', borderRadius: 10,
             color: spinning ? 'rgba(255,255,255,0.4)' : '#000',
             fontSize: 15, fontWeight: 700, cursor: spinning ? 'wait' : 'pointer',
@@ -383,7 +383,7 @@ export function DailySpin({
             </div>
             <button onClick={onClaim} style={{
               width: '100%', padding: '14px',
-              background: '#00FF87', border: 'none', borderRadius: 10,
+              background: '#0099cc', border: 'none', borderRadius: 10,
               color: '#000', fontSize: 15, fontWeight: 700, cursor: 'pointer',
               fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '1px',
             }}>

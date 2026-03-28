@@ -344,7 +344,7 @@ export function MissionsDailyWidget() {
             style={{
               position: 'fixed', left: 70, bottom: 72, zIndex: 860,
               width: 320, maxHeight: '70vh',
-              background: 'linear-gradient(180deg, #07070f 0%, #050510 100%)',
+              background: 'linear-gradient(180deg, rgba(235,242,250,0.97) 0%, rgba(220,230,242,0.97) 100%)',
               border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: 16, display: 'flex', flexDirection: 'column',
               boxShadow: '0 8px 40px rgba(0,0,0,0.7)',

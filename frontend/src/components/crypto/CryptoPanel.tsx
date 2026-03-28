@@ -80,8 +80,8 @@ function ConvertModal({ wallet, onClose }: { wallet: any; onClose: () => void })
   const preview = (parseFloat(amount) || 0) * rate
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-      <motion.div initial={{ y: 300 }} animate={{ y: 0 }} style={{ background: '#0F0F1A', borderRadius: '20px 20px 0 0', padding: 28, width: '100%', maxWidth: 420, border: '1px solid rgba(0,60,100,0.1)' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(26,42,58,0.4)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+      <motion.div initial={{ y: 300 }} animate={{ y: 0 }} style={{ background: 'linear-gradient(180deg, rgba(240,245,252,0.98), rgba(225,235,248,0.98))', borderRadius: '20px 20px 0 0', padding: 28, width: '100%', maxWidth: 420, border: '1px solid rgba(0,60,100,0.1)' }}>
         <div style={{ fontSize: 17, fontWeight: 700, color: '#1a2a3a', marginBottom: 6 }}>Convert HEX → HEX Coin</div>
         <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginBottom: 14 }}>Rate: 1 HEX ≈ {rate.toFixed(1)} HEX Coin · Available: {toF(wallet?.tdi_balance, 4)} HEX</div>
         <input type="number" value={amount} onChange={e => setAmount(e.target.value)}
@@ -252,8 +252,8 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
       {showConvert && <ConvertModal wallet={wallet} onClose={() => setShowConvert(false)} />}
 
       {showWithdraw && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
-          <motion.div initial={{ y: 300 }} animate={{ y: 0 }} style={{ background: '#0F0F1A', borderRadius: '20px 20px 0 0', padding: 28, width: '100%', maxWidth: 420 }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(26,42,58,0.4)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+          <motion.div initial={{ y: 300 }} animate={{ y: 0 }} style={{ background: 'linear-gradient(180deg, rgba(240,245,252,0.98), rgba(225,235,248,0.98))', borderRadius: '20px 20px 0 0', padding: 28, width: '100%', maxWidth: 420 }}>
             <div style={{ fontSize: 17, fontWeight: 700, color: '#1a2a3a', marginBottom: 4 }}>Withdraw HEX</div>
             <div style={{ fontSize: 11, color: '#EF4444', marginBottom: 16 }}>⚠️ KYC required · Min 10 HEX · 24-48h</div>
             <input type="number" value={wAmt} onChange={e => setWAmt(e.target.value)} placeholder="Amount HEX"

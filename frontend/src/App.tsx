@@ -21,6 +21,7 @@ import { HexodTopHUD } from './components/shared/HexodTopHUD'
 import { HexodDock } from './components/shared/HexodDock'
 import { RadarTrigger, RadarFilterPanel } from './components/shared/RadarFilterPanel'
 import { RadarWidget } from './components/shared/RadarWidget'
+import { SoundToggle } from './components/shared/SoundToggle'
 
 // ─── Panel Components ───────────────────────────────────────
 import { GameHUD } from './components/hud/GameHUD'
@@ -178,6 +179,9 @@ function GameScreen() {
 
       {/* Radar widget — SVG bottom-right */}
       <RadarWidget />
+
+      {/* Sound toggle — bottom-left */}
+      <SoundToggle />
 
       {/* Legacy HUD elements (coalition alert, missions widget) */}
       <ErrorBoundary label="GameHUD">

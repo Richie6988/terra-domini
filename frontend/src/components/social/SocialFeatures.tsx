@@ -204,7 +204,7 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
                   </div>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <button onClick={() => acceptMut.mutate(req.id)} style={{
-                      flex: 1, padding: '7px', background: '#059669', border: 'none',
+                      flex: 1, padding: '7px', background: '#0099cc', border: 'none',
                       borderRadius: 6, color: '#1a2a3a', fontSize: 12, fontWeight: 600, cursor: 'pointer',
                     }}>Accept</button>
                     <button onClick={() => declineMut.mutate(req.id)} style={{
@@ -283,7 +283,7 @@ export function FriendPanel({ onClose }: { onClose: () => void }) {
                 {inviteLink}
               </div>
               <button onClick={copyInvite} style={{
-                width: '100%', padding: '10px', background: copied ? '#059669' : '#00FF87',
+                width: '100%', padding: '10px', background: copied ? '#00884a' : '#0099cc',
                 border: 'none', borderRadius: 8, color: '#000',
                 fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'background 0.2s',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,

@@ -252,7 +252,7 @@ function TowerDetailSheet({ tower, onClose }: { tower: TowerEvent; onClose: () =
 
       {/* Sheet */}
       <div style={{
-        background: '#0A0A12',
+        background: 'rgba(235,242,250,0.97)',
         borderRadius: '20px 20px 0 0',
         borderTop: '1px solid rgba(255,255,255,0.1)',
         maxHeight: '80vh', overflowY: 'auto',
@@ -426,7 +426,7 @@ function MobileDrawer({
 
       {/* Panel */}
       <div style={{
-        flex: 1, background: '#0A0A12',
+        flex: 1, background: 'rgba(235,242,250,0.97)',
         borderRadius: '20px 20px 0 0',
         borderTop: '1px solid rgba(255,255,255,0.1)',
         display: 'flex', flexDirection: 'column',

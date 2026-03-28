@@ -52,13 +52,13 @@ export function TerritoryCustomizer({ territory, onClose }: { territory: Territo
   })
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 1500, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(26,42,58,0.4)', zIndex: 1500, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
       <motion.div initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
-        style={{ width: '100%', maxWidth: 440, background: '#0A0A14', borderRadius: '20px 20px 0 0', border: '1px solid rgba(255,255,255,0.1)', maxHeight: '88vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+        style={{ width: '100%', maxWidth: 440, background: 'linear-gradient(180deg, rgba(235,242,250,0.97), rgba(220,230,242,0.97))', borderRadius: '20px 20px 0 0', border: '1px solid rgba(0,60,100,0.12)', maxHeight: '88vh', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
 
         <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', display: 'flex', alignItems: 'center', flexShrink: 0 }}>
           <span style={{ fontSize: 18, marginRight: 10 }}>🎨</span>
-          <span style={{ fontSize: 16, fontWeight: 600, color: '#fff', flex: 1 }}>Customize Territory</span>
+          <span style={{ fontSize: 16, fontWeight: 600, color: '#1a2a3a', flex: 1 }}>Customize Territory</span>
           <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 20 }}>×</button>
         </div>
 
@@ -84,12 +84,12 @@ export function TerritoryCustomizer({ territory, onClose }: { territory: Territo
             <div>
               <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Display name</div>
               <input value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder={territory.place_name || 'Zone name…'}
-                style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                style={{ width: '100%', background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(0,60,100,0.12)', borderRadius: 8, padding: '9px 12px', color: '#1a2a3a', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
             </div>
             <div>
               <div style={{ fontSize: 11, color: '#6B7280', marginBottom: 4 }}>Flag</div>
               <input value={flagEmoji} onChange={e => setFlagEmoji(e.target.value)} placeholder="🏴" maxLength={2}
-                style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '9px 6px', color: '#fff', fontSize: 20, outline: 'none', textAlign: 'center', boxSizing: 'border-box' }} />
+                style={{ width: '100%', background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(0,60,100,0.12)', borderRadius: 8, padding: '9px 6px', color: '#1a2a3a', fontSize: 20, outline: 'none', textAlign: 'center', boxSizing: 'border-box' }} />
             </div>
           </div>
 
@@ -122,7 +122,7 @@ export function TerritoryCustomizer({ territory, onClose }: { territory: Territo
             </div>
             {embedType !== 'none' && (
               <input value={embedUrl} onChange={e => setEmbedUrl(e.target.value)} placeholder="https://…"
-                style={{ width: '100%', background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8, padding: '9px 12px', color: '#fff', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
+                style={{ width: '100%', background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(0,60,100,0.12)', borderRadius: 8, padding: '9px 12px', color: '#1a2a3a', fontSize: 13, outline: 'none', boxSizing: 'border-box' }} />
             )}
           </div>
         </div>

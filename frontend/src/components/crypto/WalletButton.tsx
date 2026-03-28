@@ -22,7 +22,7 @@ export function WalletButton() {
             color: '#00FF87', fontSize: 11, fontWeight: 700, fontFamily: 'monospace',
           }}
         >
-          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#00FF87', flexShrink: 0 }} />
+          <span style={{ width: 7, height: 7, borderRadius: '50%', background: '#00884a', flexShrink: 0 }} />
           {publicKey.slice(0,4)}…{publicKey.slice(-4)}
         </button>
 
@@ -35,7 +35,7 @@ export function WalletButton() {
               transition={{ duration: 0.15 }}
               style={{
                 position: 'absolute', top: '100%', right: 0, marginTop: 6,
-                background: '#0a0a14', border: '1px solid rgba(255,255,255,0.12)',
+                background: 'rgba(235,242,250,0.95)', border: '1px solid rgba(255,255,255,0.12)',
                 borderRadius: 12, padding: 12, minWidth: 200, zIndex: 2000,
                 boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
               }}
@@ -93,7 +93,7 @@ export function WalletButton() {
             transition={{ duration: 0.15 }}
             style={{
               position: 'absolute', top: '100%', right: 0, marginTop: 6,
-              background: '#0a0a14', border: '1px solid rgba(255,255,255,0.12)',
+              background: 'rgba(235,242,250,0.95)', border: '1px solid rgba(255,255,255,0.12)',
               borderRadius: 12, padding: 12, minWidth: 200, zIndex: 2000,
               boxShadow: '0 8px 32px rgba(0,0,0,0.6)',
             }}

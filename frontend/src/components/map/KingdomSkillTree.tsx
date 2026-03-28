@@ -78,7 +78,7 @@ export function KingdomSkillTree({ clusterId, onClose }: Props) {
     >
       <div style={{
         width: '100%', maxWidth: 520, maxHeight: '90vh',
-        background: 'linear-gradient(180deg,#07070f,#050510)',
+        background: 'linear-gradient(180deg, rgba(235,242,250,0.97), rgba(220,230,242,0.97))',
         border: `2px solid ${kingdomColor}44`,
         borderRadius: 18, overflow: 'hidden',
         display: 'flex', flexDirection: 'column',

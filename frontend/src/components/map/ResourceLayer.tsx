@@ -58,7 +58,7 @@ function ResourceDetail({ resource, onClose }: { resource: Resource; onClose: ()
     <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
       transition={{ type: 'spring', stiffness: 350, damping: 32 }}
       style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 340, zIndex: 1200,
-        background: '#0A0A14', borderLeft: '1px solid rgba(255,255,255,0.07)',
+        background: 'rgba(235,242,250,0.95)', borderLeft: '1px solid rgba(255,255,255,0.07)',
         display: 'flex', flexDirection: 'column' }}>
 
       {/* Header */}

@@ -109,7 +109,7 @@ export function MyTerritoriesOverlay({ onFlyTo }: Props) {
             style={{
               position: 'fixed', left: 68, top: 60, zIndex: 910,
               width: 310, maxHeight: 'calc(100vh - 120px)',
-              background: 'linear-gradient(180deg, #07070f 0%, #050510 100%)',
+              background: 'linear-gradient(180deg, rgba(235,242,250,0.97) 0%, rgba(220,230,242,0.97) 100%)',
               border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: 14, display: 'flex', flexDirection: 'column',
               boxShadow: '0 8px 40px rgba(0,0,0,0.7)',

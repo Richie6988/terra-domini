@@ -33,7 +33,7 @@ const CATEGORY_LABELS: Record<string, string> = {
   alliance: '🏰 Alliance',
 }
 const primaryBtn: React.CSSProperties = {
-  width: '100%', padding: '12px', background: '#059669',
+  width: '100%', padding: '12px', background: '#0099cc',
   border: 'none', borderRadius: 8, color: '#1a2a3a',
   fontSize: 14, fontWeight: 500, cursor: 'pointer',
 }
