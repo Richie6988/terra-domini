@@ -5,10 +5,13 @@
  */
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import toast from 'react-hot-toast'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
+import { ResourceIconSVG } from '../shared/iconBank'
 import { SkillTreeView } from './SkillTreeView'
 import { useKingdomStore } from '../../store/kingdomStore'
+import { useStore } from '../../store'
 import {
   RESOURCES, BIOME_PRODUCTION, SKILL_BRANCHES,
   calculateKingdomProduction, calculateDailyCrystals, getBranchProgress,
@@ -25,7 +28,7 @@ const TABS = [
 interface Props { onClose: () => void }
 
 // ── Overview Tab ──
-function OverviewTab({ kingdom }: { kingdom: Kingdom }) {
+function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay: () => void }) {
   const totalSkills = SKILL_BRANCHES.reduce((sum, b) => {
     const prog = getBranchProgress(kingdom.skillStates, b.id)
     return sum + prog.completed
@@ -132,6 +135,49 @@ function OverviewTab({ kingdom }: { kingdom: Kingdom }) {
         {kingdom.shieldActive ? '🛡 SHIELD ACTIVE' : '⚠ SHIELD INACTIVE'}
         {kingdom.warZone && <span style={{ color: '#dc2626', marginLeft: 'auto' }}>🔥 WAR ZONE</span>}
       </div>
+
+      {/* Process Day — generate resources + crystals */}
+      <button
+        onClick={onProcessDay}
+        style={{
+          width: '100%', padding: '12px', borderRadius: 20, border: 'none', cursor: 'pointer',
+          background: 'linear-gradient(90deg, #0099cc, #0891b2)',
+          color: '#fff', fontSize: 8, fontWeight: 700, letterSpacing: 3,
+          fontFamily: "'Orbitron', system-ui, sans-serif",
+          boxShadow: '0 4px 15px rgba(0,153,204,0.3)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+        }}
+      >
+        ⏭ PROCESS DAY — GENERATE RESOURCES
+      </button>
+
+      {/* Daily production summary */}
+      {Object.keys(kingdom.dailyProduction).length > 0 && (
+        <div style={{
+          padding: '10px 12px', borderRadius: 8,
+          background: 'rgba(0,153,204,0.04)',
+          border: '1px solid rgba(0,153,204,0.1)',
+        }}>
+          <div style={{
+            fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)',
+            fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 6,
+          }}>
+            LAST DAY PRODUCTION
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
+            {Object.entries(kingdom.dailyProduction).filter(([, v]) => (v as number) > 0).map(([res, amount]) => (
+              <div key={res} style={{
+                padding: '3px 8px', borderRadius: 12,
+                background: 'rgba(255,255,255,0.5)',
+                fontSize: 7, fontWeight: 700, color: '#1a2a3a',
+                fontFamily: "'Share Tech Mono', monospace",
+              }}>
+                {res}: +{(amount as number).toLocaleString()}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -200,7 +246,7 @@ function ResourcesTab({ kingdom, onAllocChange }: {
                   border: '1px solid rgba(0,60,100,0.08)',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                    <span style={{ fontSize: 16 }}>{res.icon}</span>
+                    <ResourceIconSVG resourceId={res.id} size={28} />
                     <div style={{ flex: 1 }}>
                       <div style={{
                         fontSize: 8, fontWeight: 800, color: '#1a2a3a', letterSpacing: 1,
@@ -353,10 +399,11 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
 // ── Main KingdomPanel ──
 export function KingdomPanel({ onClose }: Props) {
   const [tab, setTab] = useState('overview')
+  const setActivePanel = useStore(s => s.setActivePanel)
   const {
     kingdoms, activeKingdomId, setActiveKingdom,
     setResourceAllocation, setBranchAllocation,
-    pourCrystals, chooseFork,
+    pourCrystals, chooseFork, processDay,
   } = useKingdomStore()
 
   const kingdom = kingdoms.find(k => k.id === activeKingdomId) ?? kingdoms[0]
@@ -439,7 +486,15 @@ export function KingdomPanel({ onClose }: Props) {
           exit={{ opacity: 0 }}
           transition={{ duration: 0.12 }}
         >
-          {tab === 'overview' && <OverviewTab kingdom={demoKingdom} />}
+          {tab === 'overview' && <OverviewTab kingdom={demoKingdom} onProcessDay={() => {
+            const biomes = ['urban','rural','forest','mountain','coastal','desert','industrial','tundra','landmark'] as const
+            const mockTerritories = demoKingdom.territories.map((_, i) => ({
+              biome: biomes[i % biomes.length],
+              rarity: i === 0 ? 'rare' : i < 3 ? 'uncommon' : 'common',
+            }))
+            const result = processDay(demoKingdom.id, mockTerritories)
+            toast.success(`⏭ Day processed: +${result.crystalsGenerated.toLocaleString()} crystals generated`)
+          }} />}
           {tab === 'resources' && (
             <ResourcesTab
               kingdom={demoKingdom}
@@ -457,6 +512,32 @@ export function KingdomPanel({ onClose }: Props) {
           {tab === 'conquest' && <ConquestTab kingdom={demoKingdom} />}
         </motion.div>
       </AnimatePresence>
+
+      {/* Cross-panel CTAs */}
+      <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
+        <button
+          onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }}
+          style={{
+            flex: 1, padding: '10px', borderRadius: 20,
+            background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)',
+            color: '#cc8800', fontSize: 7, fontWeight: 700, letterSpacing: 2,
+            cursor: 'pointer', fontFamily: "'Orbitron', system-ui, sans-serif",
+          }}
+        >
+          🛒 KINGDOM BOOSTS → SHOP
+        </button>
+        <button
+          onClick={() => { onClose(); setTimeout(() => setActivePanel('trade'), 100) }}
+          style={{
+            flex: 1, padding: '10px', borderRadius: 20,
+            background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)',
+            color: '#22c55e', fontSize: 7, fontWeight: 700, letterSpacing: 2,
+            cursor: 'pointer', fontFamily: "'Orbitron', system-ui, sans-serif",
+          }}
+        >
+          📊 TRADE RESOURCES →
+        </button>
+      </div>
     </GlassPanel>
   )
 }

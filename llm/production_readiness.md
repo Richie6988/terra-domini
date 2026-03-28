@@ -11,8 +11,8 @@
 
 | # | Agent | Issue | Status | Priority |
 |---|-------|-------|--------|----------|
-| B1 | GAME | **No territory claim flow** — clicking unclaimed territory doesn't offer claim/attack/buy buttons | ❌ MISSING | P0 |
-| B2 | GAME | **No kingdom creation UX** — no way to name/color/create a kingdom from UI | ❌ MISSING | P0 |
+| B1 | GAME | **Territory claim flow** — 3 methods with cost preview + kingdom integration | ✅ DONE | P0 |
+| B2 | GAME | **Kingdom creation wizard** — name, color picker, auto-capital | ✅ DONE | P0 |
 | B3 | GAME | **processDay not wired** — crystals never actually generate, skill tree is empty forever | ❌ MISSING | P0 |
 | B4 | GAME | **Map has no H3 hex overlay** — territories are invisible, just Leaflet markers | ❌ MISSING | P0 |
 | B5 | INFRA | **No WebSocket reconnect** — connection drops silently, no real-time updates | ⚠️ PARTIAL | P0 |
