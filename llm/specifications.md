@@ -533,17 +533,17 @@ Tech: React 18 + Zustand + Framer Motion + TailwindCSS.
 ```
 
 ### TODO
-- [ ] App shell layout: fixed HUD top (70px), Map bg (100vh), Dock bottom (110px)
-- [ ] News ticker banner (28px fixed top, CSS scroll animation, data from API)
-- [ ] `<Modal />` component: glass overlay, scale-in animation, sticky header, scroll body, close button
-- [ ] `<SubModal />` component: higher z-index, separate overlay, stacks on top of Modal
+- [x] App shell layout: fixed HUD top (70px), Map bg (100vh), Dock bottom (110px)
+- [x] News ticker banner (28px fixed top, CSS scroll animation, data from API)
+- [x] `<Modal />` component: glass overlay, scale-in animation, sticky header, scroll body, close button
+- [x] `<SubModal />` component: higher z-index, separate overlay, stacks on top of Modal
 - [ ] Modal routing: `useStore.openModal(id)` → lazy-imports module → renders in `<ModalProvider />`
-- [ ] `<DockButton />` component: hex-shaped icon, label, notification badge (count or text)
-- [ ] Dock layout: horizontal scroll on mobile, centered on desktop
+- [x] `<DockButton />` component: hex-shaped icon, label, notification badge (count or text)
+- [x] Dock layout: horizontal scroll on mobile, centered on desktop
 - [ ] `<Toast />` system: max 3, auto-remove on animationend, click-to-dismiss, types: success/error/info/warning
-- [ ] Global: `oncontextmenu={e => e.preventDefault()}`, `user-select: none` except inputs
-- [ ] Keyboard: Escape chain (sub → modal → nothing), 'R' toggles radar panel
-- [ ] CRT scanline overlay (subtle, pointer-events: none)
+- [x] Global: `oncontextmenu={e => e.preventDefault()}`, `user-select: none` except inputs
+- [x] Keyboard: Escape chain (sub → modal → nothing), 'R' toggles radar panel
+- [x] CRT scanline overlay (subtle, pointer-events: none)
 - [ ] Responsive breakpoints: mobile (<480), tablet (<768), desktop
 
 ### DONE — Essential Code
@@ -672,12 +672,12 @@ Each news item has a colored dot + tag (LIVE/UPDATE/EVENT/MAINTENANCE).
 ```
 
 ### TODO
-- [ ] News ticker banner (28px fixed, horizontal scroll, auto-loop)
-- [ ] News item component with colored dot + bold title + description
-- [ ] HUD left: avatar frame + "Commander" label + "EMPIRE: 847 HEX"
-- [ ] HUD right: crystal SVG icon (28px with drop-shadow) + crystal balance
-- [ ] Both segments: glassmorphism card, hover lift, clickable
-- [ ] Slide-in animation on load
+- [x] News ticker banner (28px fixed, horizontal scroll, auto-loop)
+- [x] News item component with colored dot + bold title + description
+- [x] HUD left: avatar frame + "Commander" label + "EMPIRE: 847 HEX"
+- [x] HUD right: crystal SVG icon (28px with drop-shadow) + crystal balance
+- [x] Both segments: glassmorphism card, hover lift, clickable
+- [x] Slide-in animation on load
 - [ ] Responsive: stack or shrink on mobile
 - [ ] API: `GET /api/news/ticker/` → `NewsItem[]`
 
@@ -707,17 +707,17 @@ Filter state dispatches to the Map module to show/hide hex token categories.
 ```
 
 ### TODO
-- [ ] Left trigger button (48px strip, circular glyph with pulse animation)
-- [ ] Panel: 380px slide-in from left, glassmorphism, scrollable
-- [ ] 8 category sections: Disasters, Places, Nature, Knowledge, Conflict, Culture, Economy, Fantastic
-- [ ] 4 filter cells per category (32 total), each with emoji + color
-- [ ] Toggle active state: border glow, corner dot, color highlight
-- [ ] Active filter counter: "X/32"
-- [ ] Reset All button
-- [ ] Close button inside panel
-- [ ] Close on outside click
+- [x] Left trigger button (48px strip, circular glyph with pulse animation)
+- [x] Panel: 380px slide-in from left, glassmorphism, scrollable
+- [x] 8 category sections: Disasters, Places, Nature, Knowledge, Conflict, Culture, Economy, Fantastic
+- [x] 4 filter cells per category (32 total), each with emoji + color
+- [x] Toggle active state: border glow, corner dot, color highlight
+- [x] Active filter counter: "X/32"
+- [x] Reset All button
+- [x] Close button inside panel
+- [x] Close on outside click
 - [ ] Dispatch `setActiveFilters(categories[])` to map store
-- [ ] Keyboard: 'R' toggles panel
+- [x] Keyboard: 'R' toggles panel
 
 ### Store Slice
 ```typescript

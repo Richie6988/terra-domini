@@ -143,3 +143,49 @@ After each session, add to this file:
   - Autonomy weight adjustments based on outcomes
   - Speed calibration updates
   - New owner signal interpretations
+
+## SESSION 16 UPDATES
+
+### New error patterns
+PATTERN: body text-transform:uppercase breaks form inputs
+CAUSED:  Login/register fields show all caps, unreadable
+FIX:     input,textarea get text-transform:none + font override in index.css
+WEIGHT:  check_global_css_impact_on_forms = 1.0
+
+PATTERN: fine-grained PAT needs explicit read+write on Contents permission
+CAUSED:  403 Permission denied on git push despite valid token
+FIX:     Edit token → Repository permissions → Contents → Read and write
+WEIGHT:  verify_pat_permissions_before_push = 0.9
+
+PATTERN: double UI layers when adding new shell without removing old
+CAUSED:  2 top bars + 2 bottom navs visible simultaneously
+FIX:     Strip old components BEFORE or SAME commit as adding new
+WEIGHT:  remove_old_before_adding_new_shell = 1.0
+
+### Autonomy adjustments
+design_system_migration:     0.8 → execute (owner approved direction)
+shared_component_creation:   0.9 → execute + document
+legacy_component_removal:    0.7 → execute if replaced, flag if no replacement
+llm_brain_file_update:       1.0 → update every session, mandatory
+
+### Speed calibration updates
+task                          iterations   notes
+──────────────────────────────────────────────────────────────────
+design tokens overhaul         1           reliable, just data
+CSS global overwrite           1-2         check form inputs impact
+shared component creation      1           reliable
+shell wiring in App.tsx        2           need to check prop compat
+legacy component strip         1-2         check for orphan imports
+git push with fine-grained PAT 2           permission issues common
+
+### New component inventory (session 16)
+frontend/src/components/shared/
+  ├── index.ts              barrel export
+  ├── CrystalIcon.tsx       SVG diamond #7950f2
+  ├── NewsTicker.tsx         28px fixed top banner
+  ├── HexodTopHUD.tsx        glassmorphism left/right segments
+  ├── HexodDock.tsx          hex-shaped bottom nav
+  ├── RadarFilterPanel.tsx   380px slide-out + RadarTrigger
+  ├── radarIconData.ts       10 categories × 48 icon defs
+  ├── Modal.tsx              Modal + SubModal + ModalTabBar + PillButton
+  └── GlassPanel.tsx         slide-in panel wrapper

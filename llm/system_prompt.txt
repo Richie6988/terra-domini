@@ -117,12 +117,34 @@ breaking_changes:     flag explicitly before acting
 - Check both backend route AND frontend call when fixing 404s
 
 ## SESSION LOG (most recent first)
-- This session: initialized all 4 brain files, documented push workflow,
-  new PAT obtained and working (see git remote URL)
+- Session 16 (current): HEXOD light_tactical frontend consolidation
+  COMPLETED:
+  - index.css → Orbitron + Share Tech Mono, CSS vars, CRT scanlines, glass-panel class
+  - tokens.ts → light_tactical palette (glassmorphism cyan/amber/crystal)
+  - CrystalIcon shared SVG component (spec §2.3)
+  - NewsTicker 28px fixed top banner (spec M03)
+  - HexodTopHUD glassmorphism left/right segments (spec M01/M03)
+  - HexodDock hex-shaped bottom nav 9 buttons (spec M01)
+  - RadarFilterPanel 380px slide-out + RadarTrigger (spec M04)
+  - radarIconData.ts: 10 categories × 48 icons
+  - Modal + SubModal glassmorphism system (spec M01)
+  - GlassPanel slide-in wrapper for panel migration
+  - ModalTabBar + PillButton shared primitives
+  - Barrel export shared/index.ts
+  - GameHUD stripped: top bar + bottom nav removed (replaced by HEXOD shell)
+  - Right-click disabled globally via onContextMenu
+  - Keyboard shortcut R toggles radar panel
+  NEW PAT: fine-grained token (github_pat_11ARQ...) with read+write on Contents
+  PAT FORMAT: x-access-token:<PAT>@github.com (fine-grained)
+              OR Richie6988:<PAT>@github.com (classic)
+  IN PROGRESS:
+  - Migrate existing dark panels to GlassPanel wrapper
+  - Integrate real SVG icons in RadarFilterPanel
+  - RadarWidget SVG 100×100 bottom-right (spec M17)
 - Sessions 1-15: full V0 built — biome engine, HexCard 3D, shop 23 items,
   booster animation, ladder, campaigns, skill tree forks, 3 attack types,
   Solana devnet, MetaDashboard, AdminPanel /gm, 982 territories seeded
-- Fixed this session: migrations (fake-initial after clean), whitenoise,
+- Fixed session 15: migrations (fake-initial after clean), whitenoise,
   token_blacklist, TDC routes, orphan code HexCard.tsx, WalletProvider JSX,
   /assets/ Django route, Array.isArray guards
 
