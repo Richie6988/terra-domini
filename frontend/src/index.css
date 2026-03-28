@@ -52,6 +52,9 @@
 input, textarea, [contenteditable] {
   -webkit-user-select: text;
   user-select: text;
+  text-transform: none;
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0;
 }
 
 html { height: 100%; }
