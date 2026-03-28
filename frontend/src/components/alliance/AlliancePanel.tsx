@@ -8,6 +8,7 @@ import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { allianceApi } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
+import { GlassPanel } from '../shared/GlassPanel'
 import type { Alliance, AllianceMember } from '../../types'
 import { TradePanel } from './TradePanel'
 
@@ -299,28 +300,8 @@ function PanelShell({
   onClose: () => void
 }) {
   return (
-    <motion.div
-      initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, width: 380, zIndex: 1000,
-        display: 'flex', flexDirection: 'column',
-        background: '#0A0A14', borderLeft: '1px solid rgba(255,255,255,0.08)',
-      }}
-    >
-      <div style={{
-        display: 'flex', alignItems: 'center', padding: '16px 20px',
-        borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0,
-      }}>
-        {icon}
-        <span style={{ fontSize: 17, fontWeight: 600, color: '#fff', flex: 1, marginLeft: 10 }}>{title}</span>
-        <button onClick={onClose} style={{
-          background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', padding: 4, fontSize: 20,
-        }}>×</button>
-      </div>
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
-        {children}
-      </div>
-    </motion.div>
+    <GlassPanel title={title} onClose={onClose} accent="#3b82f6">
+      {children}
+    </GlassPanel>
   )
 }

@@ -7,6 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
+import { GlassPanel } from '../shared/GlassPanel'
 
 const MEDAL: Record<number, string> = { 1: '🥇', 2: '🥈', 3: '🥉' }
 
@@ -109,39 +110,44 @@ export function LeaderboardPanel({ onClose }: { onClose: () => void }) {
   const meRank = global_?.me_rank
 
   return (
-    <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 400, zIndex: 1000, display: 'flex', flexDirection: 'column', background: '#0A0A14', borderLeft: '1px solid rgba(255,255,255,0.07)' }}>
+    <GlassPanel title="LEADERBOARD" onClose={onClose} accent="#fbbf24" width={400}>
+      {meRank && (
+        <div style={{ display:'flex', justifyContent:'flex-end', marginBottom:8 }}>
+          <span style={{ fontSize:9, color:'#cc8800', fontWeight:700, letterSpacing:1 }}>YOUR RANK: #{meRank}</span>
+        </div>
+      )}
 
-      <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
-        <span style={{ fontSize: 20, marginRight: 10 }}>🏆</span>
-        <span style={{ fontSize: 17, fontWeight: 600, color: '#fff', flex: 1 }}>Leaderboard</span>
-        {meRank && <span style={{ fontSize: 12, color: '#6B7280', marginRight: 12 }}>You: #{meRank}</span>}
-        <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 22 }}>×</button>
-      </div>
-
-      <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
-        {([['global', '🌍 Global'], ['regional', '📍 Regional']] as const).map(([id, label]) => (
-          <button key={id} onClick={() => { setTab(id); setVisiting(null) }} style={{ flex: 1, padding: '10px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 12, borderBottom: tab === id ? '2px solid #00FF87' : '2px solid transparent', color: tab === id ? '#00FF87' : '#6B7280' }}>{label}</button>
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
+        {([['global', '🌍 GLOBAL'], ['regional', '📍 REGIONAL']] as const).map(([id, label]) => (
+          <button key={id} onClick={() => { setTab(id); setVisiting(null) }} style={{
+            flex: 1, padding: '7px', borderRadius: 20, border: 'none', cursor: 'pointer',
+            fontSize: 8, fontWeight: tab === id ? 700 : 500, letterSpacing: 1,
+            background: tab === id ? 'rgba(251,191,36,0.1)' : 'rgba(255,255,255,0.5)',
+            color: tab === id ? '#cc8800' : 'rgba(26,42,58,0.45)',
+            fontFamily: "'Orbitron', system-ui, sans-serif",
+            border: `1px solid ${tab === id ? 'rgba(251,191,36,0.3)' : 'rgba(0,60,100,0.1)'}`,
+          }}>{label}</button>
         ))}
       </div>
 
       {tab === 'regional' && regional?.country && (
-        <div style={{ padding: '8px 16px', background: 'rgba(255,255,255,0.02)', borderBottom: '1px solid rgba(255,255,255,0.05)', fontSize: 11, color: '#6B7280' }}>
-          📍 Showing leaderboard for: <strong style={{ color: '#9CA3AF' }}>{regional.country}</strong>
+        <div style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.5)', borderRadius: 6,
+          border: '1px solid rgba(0,60,100,0.1)', fontSize: 9, color: 'rgba(26,42,58,0.6)', marginBottom: 12 }}>
+          📍 SHOWING: <strong style={{ color: '#1a2a3a' }}>{regional.country}</strong>
         </div>
       )}
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
+      <div>
         {visiting ? (
           <PlayerProfile playerId={visiting} onBack={() => setVisiting(null)} />
         ) : entries.map((e: any) => (
           <PlayerRow key={e.id} entry={e} onClick={() => !e.is_me && setVisiting(e.id)} />
         ))}
         {!entries.length && (
-          <div style={{ textAlign: 'center', color: '#4B5563', padding: '40px 0', fontSize: 13 }}>Loading rankings…</div>
+          <div style={{ textAlign: 'center', color: 'rgba(26,42,58,0.35)', padding: '40px 0', fontSize: 10, letterSpacing: 2 }}>LOADING RANKINGS...</div>
         )}
       </div>
-    </motion.div>
+    </GlassPanel>
   )
 }

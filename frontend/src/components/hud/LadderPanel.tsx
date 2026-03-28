@@ -12,6 +12,7 @@ import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
+import { GlassPanel } from '../shared/GlassPanel'
 import { SkeletonList } from '../ui/Utils'
 
 interface Props { onClose: () => void }
@@ -53,72 +54,59 @@ export function LadderPanel({ onClose }: Props) {
   const myRank: number | null = data?.my_rank || null
 
   return (
-    <motion.div
-      initial={{ x:'100%' }} animate={{ x:0 }} exit={{ x:'100%' }}
-      transition={{ type:'spring', stiffness:280, damping:28 }}
-      style={{
-        position:'fixed', top:0, right:0, bottom:0,
-        width: Math.min(420, window.innerWidth - 8),
-        background:'linear-gradient(180deg,#08080f,#050510)',
-        border:'1px solid rgba(255,255,255,0.08)',
-        zIndex:1300, display:'flex', flexDirection:'column',
-        boxShadow:'-8px 0 40px rgba(0,0,0,0.8)',
-      }}
-    >
-      {/* Header */}
-      <div style={{ padding:'16px 18px 10px', borderBottom:'1px solid rgba(255,255,255,0.06)', flexShrink:0 }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
-          <div>
-            <div style={{ fontSize:16, fontWeight:800, color:'#fff' }}>🏆 Classement</div>
-            <div style={{ fontSize:10, color:'#4B5563', marginTop:2 }}>
-              {data?.total || 0} joueurs actifs
-              {myRank && <span style={{ color:'#F59E0B', marginLeft:8 }}>· Ta position : #{myRank}</span>}
-            </div>
-          </div>
-          <button onClick={onClose} style={{ background:'none',border:'none',color:'#4B5563',cursor:'pointer',fontSize:20 }}>×</button>
-        </div>
-
-        {/* Scope tabs */}
-        <div style={{ display:'flex', gap:6 }}>
-          {([['global','🌍 Mondial'],['nearby','📍 Proches']] as const).map(([s,label]) => (
-            <button key={s} onClick={() => setScope(s)} style={{
-              flex:1, padding:'8px', borderRadius:9, cursor:'pointer', fontSize:12, fontWeight: scope===s ? 700 : 400,
-              background: scope===s ? 'rgba(245,158,11,0.15)' : 'rgba(255,255,255,0.04)',
-              border:`1px solid ${scope===s ? 'rgba(245,158,11,0.35)' : 'rgba(255,255,255,0.07)'}`,
-              color: scope===s ? '#F59E0B' : '#6B7280',
-            }}>{label}</button>
-          ))}
-        </div>
+    <GlassPanel title="LADDER" onClose={onClose} accent="#8b5cf6" width={Math.min(420, window.innerWidth - 8)}>
+      {/* Stats bar */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12,
+        padding:'8px 12px', background:'rgba(255,255,255,0.5)', borderRadius:8,
+        border:'1px solid rgba(0,60,100,0.1)' }}>
+        <span style={{ fontSize:9, color:'rgba(26,42,58,0.45)', fontFamily:"'Share Tech Mono', monospace" }}>
+          {data?.total || 0} ACTIVE PLAYERS
+        </span>
+        {myRank && <span style={{ fontSize:9, color:'#8b5cf6', fontWeight:700, letterSpacing:1 }}>YOUR RANK: #{myRank}</span>}
       </div>
 
-      {/* En-têtes colonnes */}
+      {/* Scope tabs */}
+      <div style={{ display:'flex', gap:6, marginBottom:14 }}>
+        {([['global','🌍 WORLD'],['nearby','📍 NEARBY']] as const).map(([s,label]) => (
+          <button key={s} onClick={() => setScope(s)} style={{
+            flex:1, padding:'7px', borderRadius:20, cursor:'pointer', fontSize:8, fontWeight: scope===s ? 700 : 500,
+            letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif",
+            background: scope===s ? 'rgba(139,92,246,0.1)' : 'rgba(255,255,255,0.5)',
+            border:`1px solid ${scope===s ? 'rgba(139,92,246,0.3)' : 'rgba(0,60,100,0.1)'}`,
+            color: scope===s ? '#8b5cf6' : 'rgba(26,42,58,0.45)',
+          }}>{label}</button>
+        ))}
+      </div>
+
+      {/* Column headers */}
       <div style={{
         display:'grid', gridTemplateColumns:'40px 1fr 52px 60px 52px',
-        gap:4, padding:'8px 16px', flexShrink:0,
-        borderBottom:'1px solid rgba(255,255,255,0.05)',
-        fontSize:9, color:'#374151', textTransform:'uppercase', letterSpacing:'0.08em',
+        gap:4, padding:'8px 12px', marginBottom:4,
+        borderBottom:'1px solid rgba(0,60,100,0.1)',
+        fontSize:7, color:'rgba(26,42,58,0.4)', letterSpacing:2,
+        fontFamily:"'Orbitron', system-ui, sans-serif",
       }}>
         <div style={{ textAlign:'center' }}>#</div>
-        <div>Joueur</div>
-        <div style={{ textAlign:'center' }}>Zones</div>
-        <div style={{ textAlign:'right' }}>💎/j</div>
-        <div style={{ textAlign:'center' }}>⚔️</div>
+        <div>PLAYER</div>
+        <div style={{ textAlign:'center' }}>HEX</div>
+        <div style={{ textAlign:'right' }}>◆/D</div>
+        <div style={{ textAlign:'center' }}>⚔</div>
       </div>
 
-      {/* Liste */}
-      <div style={{ flex:1, overflowY:'auto' }}>
+      {/* List */}
+      <div>
         {isLoading ? (
           <div style={{ padding:'12px' }}><SkeletonList count={8} /></div>
         ) : scope === 'nearby' && !pos ? (
-          <div style={{ padding:'32px', textAlign:'center', color:'#4B5563' }}>
+          <div style={{ padding:'32px', textAlign:'center', color:'rgba(26,42,58,0.4)' }}>
             <div style={{ fontSize:24, marginBottom:8 }}>📍</div>
-            <div style={{ fontSize:12 }}>Localisation en cours…</div>
+            <div style={{ fontSize:9, letterSpacing:2 }}>LOCATING...</div>
           </div>
         ) : entries.length === 0 ? (
-          <div style={{ padding:'32px', textAlign:'center', color:'#4B5563' }}>
+          <div style={{ padding:'32px', textAlign:'center', color:'rgba(26,42,58,0.4)' }}>
             <div style={{ fontSize:24, marginBottom:8 }}>🗺️</div>
-            <div style={{ fontSize:12 }}>
-              {scope === 'nearby' ? 'Aucun joueur dans un rayon de 500km' : 'Aucun joueur classé'}
+            <div style={{ fontSize:9, letterSpacing:2 }}>
+              {scope === 'nearby' ? 'NO PLAYERS IN 500KM RANGE' : 'NO RANKED PLAYERS'}
             </div>
           </div>
         ) : (
@@ -130,13 +118,14 @@ export function LadderPanel({ onClose }: Props) {
         )}
       </div>
 
-      {/* Ma position si hors top visible */}
+      {/* My position if outside visible top */}
       {myRank && myRank > 20 && player && (
         <div style={{
-          padding:'10px 16px', borderTop:'1px solid rgba(255,255,255,0.08)',
-          background:'rgba(245,158,11,0.05)', flexShrink:0,
+          padding:'10px 12px', marginTop:8,
+          borderTop:'1px solid rgba(0,60,100,0.1)',
+          background:'rgba(139,92,246,0.05)', borderRadius:6,
         }}>
-          <div style={{ fontSize:10, color:'#4B5563', marginBottom:6 }}>Ta position</div>
+          <div style={{ fontSize:8, color:'rgba(26,42,58,0.4)', marginBottom:6, letterSpacing:2 }}>YOUR POSITION</div>
           <LadderRow
             entry={{
               rank: myRank,
@@ -154,7 +143,7 @@ export function LadderPanel({ onClose }: Props) {
           />
         </div>
       )}
-    </motion.div>
+    </GlassPanel>
   )
 }
 

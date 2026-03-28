@@ -6,6 +6,7 @@ import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import { api } from '../../services/api'
+import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
 
 const toF = (v: unknown, d = 2) => parseFloat(String(v ?? 0)).toFixed(d)
@@ -154,27 +155,26 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <>
-      <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-        style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 400, zIndex: 1000, display: 'flex', flexDirection: 'column', background: '#0A0A14', borderLeft: '1px solid rgba(255,255,255,0.07)' }}>
-
-        <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
-          <span style={{ fontSize: 20, marginRight: 10 }}>💎</span>
-          <span style={{ fontSize: 17, fontWeight: 600, color: '#fff', flex: 1 }}>Crypto</span>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 22 }}>×</button>
-        </div>
-
-        <div style={{ padding: '0 16px', borderBottom: '1px solid rgba(255,255,255,0.05)', flexShrink: 0 }}>
+      <GlassPanel title="WALLET" onClose={onClose} accent="#a855f7" width={400}>
+        <div style={{ padding: '0 0 8px', borderBottom: '1px solid rgba(0,60,100,0.1)', marginBottom: 12 }}>
           <PriceTicker prices={prices} />
         </div>
 
-        <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
           {TABS.map(t => (
-            <button key={t.id} onClick={() => setTab(t.id)} style={{ flex: 1, padding: '10px 4px', border: 'none', background: 'transparent', cursor: 'pointer', fontSize: 11, borderBottom: tab === t.id ? '2px solid #00FF87' : '2px solid transparent', color: tab === t.id ? '#00FF87' : '#6B7280' }}>{t.label}</button>
+            <button key={t.id} onClick={() => setTab(t.id)} style={{
+              flex: 1, padding: '7px 4px', borderRadius: 20, border: 'none', cursor: 'pointer',
+              fontSize: 7, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
+              background: tab === t.id ? 'rgba(168,85,247,0.1)' : 'rgba(255,255,255,0.5)',
+              color: tab === t.id ? '#a855f7' : 'rgba(26,42,58,0.45)',
+              fontFamily: "'Orbitron', system-ui, sans-serif",
+              border: `1px solid ${tab === t.id ? 'rgba(168,85,247,0.3)' : 'rgba(0,60,100,0.1)'}`,
+            }}>{t.label}</button>
           ))}
         </div>
 
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
+        <div>
           {tab === 'wallet' && <WalletCard wallet={wallet} onConvert={() => setShowConvert(true)} onWithdraw={() => setShowWithdraw(true)} />}
           {tab === 'staking' && <StakingPanel onClose={() => setTab('wallet')} embedded />}
 
@@ -218,7 +218,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
             </div>
           )}
         </div>
-      </motion.div>
+      </GlassPanel>
 
       {showConvert && <ConvertModal wallet={wallet} onClose={() => setShowConvert(false)} />}
 

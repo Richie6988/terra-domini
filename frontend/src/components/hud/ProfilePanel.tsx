@@ -11,6 +11,7 @@ import { api } from '../../services/api'
 import { SkeletonList } from '../ui/Utils'
 import { CampaignWidget } from './CampaignWidget'
 import { ResourceBadge } from '../ui/ResourceTooltip'
+import { GlassPanel } from '../shared/GlassPanel'
 import { useStore, usePlayer } from '../../store'
 import toast from 'react-hot-toast'
 
@@ -50,17 +51,8 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
   const spec = SPEC[player.spec_path as keyof typeof SPEC] || SPEC.military
 
   return (
-    <motion.div
-      initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-      transition={{ type: 'spring', stiffness: 280, damping: 28 }}
-      style={{
-        position: 'fixed', top: 0, right: 0, bottom: 0, width: typeof window !== 'undefined' && window.innerWidth < 480 ? window.innerWidth - 16 : 400,
-        zIndex: 1000, display: 'flex', flexDirection: 'column',
-        background: 'linear-gradient(180deg, #07070f 0%, #050510 100%)',
-        borderLeft: `2px solid ${spec.color}33`,
-        boxShadow: `-8px 0 40px rgba(0,0,0,0.6)`,
-      }}
-    >
+    <GlassPanel title="PROFILE" onClose={onClose} accent={spec.color}
+      width={typeof window !== 'undefined' && window.innerWidth < 480 ? window.innerWidth - 16 : 400}>
       {/* ── Commander hero ── */}
       <div style={{
         padding: '20px 20px 16px', flexShrink: 0,
@@ -181,7 +173,7 @@ export function ProfilePanel({ onClose }: { onClose: () => void }) {
           </motion.div>
         </AnimatePresence>
       </div>
-    </motion.div>
+    </GlassPanel>
   )
 }
 

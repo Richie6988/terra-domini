@@ -11,6 +11,7 @@ import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { RARITY_COLOR, BIOME_COLOR } from '../../styles/tokens'
+import { GlassPanel } from '../shared/GlassPanel'
 import { SkeletonPanel } from '../ui/Utils'
 
 interface Props { onClose: () => void }
@@ -42,49 +43,36 @@ export function MetaDashboard({ onClose }: Props) {
   const topPlayers = leaderboard?.top_players || []
 
   return (
-    <motion.div
-      initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-      transition={{ type:'spring', stiffness:280, damping:28 }}
-      style={{
-        position:'fixed', top:0, right:0, bottom:0, width: Math.min(440, window.innerWidth - 8),
-        background:'linear-gradient(180deg,#07070f 0%,#050510 100%)',
-        border:'1px solid rgba(255,255,255,0.08)',
-        zIndex:1300, display:'flex', flexDirection:'column',
-        boxShadow:'-8px 0 40px rgba(0,0,0,0.7)',
-        overflow:'hidden',
-      }}
-    >
-      {/* Header */}
-      <div style={{ padding:'16px 18px 10px', borderBottom:'1px solid rgba(255,255,255,0.06)', flexShrink:0 }}>
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12 }}>
-          <div>
-            <div style={{ fontSize:16, fontWeight:800, color:'#fff' }}>📊 Méta Mondial</div>
-            <div style={{ fontSize:10, color:'#4B5563', marginTop:2 }}>
-              {totalTerr.toLocaleString()} territoires · mise à jour en direct
-            </div>
-          </div>
-          <button onClick={onClose} style={{ background:'none',border:'none',color:'#4B5563',cursor:'pointer',fontSize:20 }}>×</button>
-        </div>
-        <div style={{ display:'flex', gap:4 }}>
-          {[
-            { id:'overview',   label:'Vue d\'ensemble' },
-            { id:'resources',  label:'Ressources' },
-            { id:'players',    label:'Joueurs' },
-            { id:'hotspots',   label:'Zones chaudes' },
-          ].map(t => (
-            <button key={t.id} onClick={() => setTab(t.id as any)} style={{
-              flex:1, padding:'6px 4px', fontSize:9, fontWeight:tab===t.id?700:400,
-              background: tab===t.id ? 'rgba(0,255,135,0.1)' : 'transparent',
-              border: `1px solid ${tab===t.id ? 'rgba(0,255,135,0.3)' : 'rgba(255,255,255,0.05)'}`,
-              borderRadius:8, cursor:'pointer',
-              color: tab===t.id ? '#00FF87' : '#6B7280',
-            }}>{t.label}</button>
-          ))}
-        </div>
+    <GlassPanel title="WORLD META" onClose={onClose} accent="#64748b" width={Math.min(440, window.innerWidth - 8)}>
+      {/* Stats bar */}
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12,
+        padding:'8px 12px', background:'rgba(255,255,255,0.5)', borderRadius:8,
+        border:'1px solid rgba(0,60,100,0.1)', fontFamily:"'Share Tech Mono', monospace" }}>
+        <span style={{ fontSize:9, color:'rgba(26,42,58,0.45)' }}>{totalTerr.toLocaleString()} TERRITORIES</span>
+        <span style={{ fontSize:8, color:'#00884a', letterSpacing:1 }}>◆ LIVE</span>
+      </div>
+
+      {/* Tabs */}
+      <div style={{ display:'flex', gap:4, marginBottom:14 }}>
+        {[
+          { id:'overview',   label:'OVERVIEW' },
+          { id:'resources',  label:'RESOURCES' },
+          { id:'players',    label:'PLAYERS' },
+          { id:'hotspots',   label:'HOTSPOTS' },
+        ].map(t => (
+          <button key={t.id} onClick={() => setTab(t.id as any)} style={{
+            flex:1, padding:'6px 4px', fontSize:7, fontWeight:tab===t.id?700:500, letterSpacing:1,
+            background: tab===t.id ? 'rgba(100,116,139,0.1)' : 'rgba(255,255,255,0.5)',
+            border: `1px solid ${tab===t.id ? 'rgba(100,116,139,0.3)' : 'rgba(0,60,100,0.1)'}`,
+            borderRadius:20, cursor:'pointer',
+            color: tab===t.id ? '#64748b' : 'rgba(26,42,58,0.4)',
+            fontFamily:"'Orbitron', system-ui, sans-serif",
+          }}>{t.label}</button>
+        ))}
       </div>
 
       {/* Content */}
-      <div style={{ flex:1, overflowY:'auto', padding:'14px 18px' }}>
+      <div>
         {isLoading ? <SkeletonPanel /> : (
           <AnimatePresence mode="wait">
             <motion.div key={tab} initial={{opacity:0,y:4}} animate={{opacity:1,y:0}} exit={{opacity:0}} transition={{duration:0.1}}>
@@ -268,7 +256,7 @@ export function MetaDashboard({ onClose }: Props) {
           </AnimatePresence>
         )}
       </div>
-    </motion.div>
+    </GlassPanel>
   )
 }
 

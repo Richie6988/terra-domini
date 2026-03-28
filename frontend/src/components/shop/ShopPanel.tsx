@@ -13,6 +13,8 @@ import { api } from '../../services/api'
 import { useStore, useTDCBalance, usePlayer } from '../../store'
 import { SkeletonList } from '../ui/Utils'
 import { BoosterOpenAnimation } from './BoosterOpenAnimation'
+import { GlassPanel } from '../shared/GlassPanel'
+import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
 
 const RARITY_COLOR: Record<string,string> = {
@@ -100,57 +102,43 @@ export function ShopPanel({ onClose }: Props) {
 
   return (
     <>
-      <motion.div
-        initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-        transition={{ type:'spring', stiffness:280, damping:28 }}
-        style={{
-          position:'fixed', top:0, right:0, bottom:0,
-          width: Math.min(420, window.innerWidth - 8),
-          background:'linear-gradient(180deg,#08080f 0%,#050510 100%)',
-          border:'1px solid rgba(255,255,255,0.08)',
-          zIndex:1300, display:'flex', flexDirection:'column',
-          boxShadow:'-8px 0 40px rgba(0,0,0,0.8)',
-        }}
-      >
-        {/* Header */}
-        <div style={{ padding:'16px 18px 10px', borderBottom:'1px solid rgba(255,255,255,0.06)', flexShrink:0 }}>
-          <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
-            <div>
-              <div style={{ fontSize:16, fontWeight:800, color:'#fff' }}>🏪 Boutique</div>
-              <div style={{ fontSize:10, color:'#4B5563', marginTop:2 }}>Boosters · Bonus · Cosmétiques</div>
-            </div>
-            <div style={{ display:'flex', alignItems:'center', gap:12 }}>
-              <div style={{ textAlign:'right' }}>
-                <div style={{ fontSize:14, fontWeight:800, color:'#F59E0B', fontFamily:'monospace' }}>
-                  {toNum(balance).toFixed(0)} 💎
-                </div>
-                <div style={{ fontSize:9, color:'#4B5563' }}>HEX Coin disponibles</div>
-              </div>
-              <button onClick={onClose} style={{ background:'none',border:'none',color:'#4B5563',cursor:'pointer',fontSize:20 }}>×</button>
-            </div>
+      <GlassPanel title="SHOP" onClose={onClose} accent="#cc8800" width={Math.min(420, window.innerWidth - 8)}>
+        {/* Balance display */}
+        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12,
+          padding:'8px 12px', background:'rgba(255,255,255,0.5)', borderRadius:8,
+          border:'1px solid rgba(0,60,100,0.1)' }}>
+          <span style={{ fontSize:9, color:'rgba(26,42,58,0.45)', letterSpacing:2, fontWeight:500 }}>BALANCE</span>
+          <div style={{ display:'flex', alignItems:'center', gap:6 }}>
+            <CrystalIcon size="lg" />
+            <span style={{ fontSize:16, fontWeight:900, color:'#7950f2', fontFamily:"'Share Tech Mono', monospace" }}>
+              {toNum(balance).toFixed(0)}
+            </span>
           </div>
+        </div>
 
-          {/* Catégories */}
-          <div style={{ display:'flex', gap:4, overflowX:'auto', paddingBottom:2 }}>
-            {CATS.map(c => (
-              <button key={c.id} onClick={() => setCat(c.id)} style={{
-                padding:'5px 10px', borderRadius:20, cursor:'pointer', whiteSpace:'nowrap',
-                fontSize:10, fontWeight: cat===c.id ? 700 : 400,
-                background: cat===c.id ? 'rgba(0,255,135,0.15)' : 'rgba(255,255,255,0.04)',
-                border:`1px solid ${cat===c.id ? 'rgba(0,255,135,0.35)' : 'rgba(255,255,255,0.07)'}`,
-                color: cat===c.id ? '#00FF87' : '#6B7280', flexShrink:0,
-              }}>
-                {c.icon} {c.label}
-              </button>
-            ))}
-          </div>
+        {/* Catégories — pill tabs */}
+        <div style={{ display:'flex', gap:4, overflowX:'auto', paddingBottom:8, marginBottom:12 }}>
+          {CATS.map(c => (
+            <button key={c.id} onClick={() => setCat(c.id)} style={{
+              padding:'6px 12px', borderRadius:20, cursor:'pointer', whiteSpace:'nowrap',
+              fontSize:8, fontWeight: cat===c.id ? 700 : 500, letterSpacing:1,
+              background: cat===c.id ? 'rgba(0,153,204,0.12)' : 'rgba(255,255,255,0.5)',
+              border:`1px solid ${cat===c.id ? 'rgba(0,153,204,0.35)' : 'rgba(0,60,100,0.1)'}`,
+              color: cat===c.id ? '#0099cc' : 'rgba(26,42,58,0.45)', flexShrink:0,
+              fontFamily:"'Orbitron', system-ui, sans-serif",
+              boxShadow: cat===c.id ? '0 2px 8px rgba(0,153,204,0.15)' : 'none',
+              transition:'all 0.25s ease',
+            }}>
+              {c.icon} {c.label}
+            </button>
+          ))}
         </div>
 
         {/* Boosts actifs */}
         {activeBoosts.length > 0 && (
-          <div style={{ padding:'10px 18px', borderBottom:'1px solid rgba(255,255,255,0.05)',
-            background:'rgba(0,255,135,0.03)', flexShrink:0 }}>
-            <div style={{ fontSize:9, color:'#4B5563', textTransform:'uppercase', marginBottom:6 }}>Boosts actifs</div>
+          <div style={{ padding:'8px 10px', marginBottom:12, borderRadius:6,
+            background:'rgba(0,136,74,0.06)', border:'1px solid rgba(0,136,74,0.15)' }}>
+            <div style={{ fontSize:8, color:'rgba(26,42,58,0.45)', letterSpacing:2, marginBottom:6, fontWeight:500 }}>ACTIVE BOOSTS</div>
             <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
               {activeBoosts.slice(0,5).map((b:any) => (
                 <ActiveBoostBadge key={b.id} boost={b} />
@@ -160,7 +148,7 @@ export function ShopPanel({ onClose }: Props) {
         )}
 
         {/* Grille items */}
-        <div style={{ flex:1, overflowY:'auto', padding:'12px 14px' }}>
+        <div>
           {isLoading ? <SkeletonList count={6} /> : (
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
               {items.map((item:any) => (
@@ -173,14 +161,14 @@ export function ShopPanel({ onClose }: Props) {
                 />
               ))}
               {items.length === 0 && (
-                <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'40px 0', color:'#374151', fontSize:12 }}>
-                  Aucun article dans cette catégorie
+                <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'40px 0', color:'rgba(26,42,58,0.35)', fontSize:10 }}>
+                  NO ITEMS IN THIS CATEGORY
                 </div>
               )}
             </div>
           )}
         </div>
-      </motion.div>
+      </GlassPanel>
 
       {/* Animation ouverture booster */}
       <AnimatePresence>
@@ -213,11 +201,11 @@ function ShopItemCard({ item, balance, onBuy, buying }: {
       onHoverEnd={() => setHovered(false)}
       whileTap={{ scale: 0.97 }}
       style={{
-        background: hovered ? `${rc}12` : 'rgba(255,255,255,0.03)',
-        border:`1.5px solid ${hovered ? rc+'55' : 'rgba(255,255,255,0.07)'}`,
-        borderRadius:12, padding:'12px 10px',
+        background: hovered ? `${rc}12` : 'rgba(255,255,255,0.6)',
+        border:`1.5px solid ${hovered ? rc+'55' : 'rgba(0,60,100,0.1)'}`,
+        borderRadius:8, padding:'12px 10px',
         display:'flex', flexDirection:'column', gap:6,
-        cursor:'pointer', transition:'all 0.15s',
+        cursor:'pointer', transition:'all 0.35s cubic-bezier(0.16,1,0.3,1)',
         position:'relative', overflow:'hidden',
       }}
     >
@@ -235,61 +223,63 @@ function ShopItemCard({ item, balance, onBuy, buying }: {
 
       {/* Name + rarity */}
       <div>
-        <div style={{ fontSize:11, fontWeight:800, color:'#fff', textAlign:'center', lineHeight:1.3 }}>
+        <div style={{ fontSize:10, fontWeight:700, color:'#1a2a3a', textAlign:'center', lineHeight:1.3, letterSpacing:1 }}>
           {item.name}
         </div>
-        <div style={{ fontSize:9, color:rc, textAlign:'center', marginTop:2, fontWeight:700 }}>
+        <div style={{ fontSize:8, color:rc, textAlign:'center', marginTop:2, fontWeight:700, letterSpacing:1 }}>
           {item.rarity}
         </div>
       </div>
 
       {/* Effect */}
-      <div style={{ fontSize:9, color:'#6B7280', textAlign:'center', lineHeight:1.4 }}>
+      <div style={{ fontSize:8, color:'rgba(26,42,58,0.45)', textAlign:'center', lineHeight:1.4, fontFamily:"'Share Tech Mono', monospace" }}>
         {effectLabel}
         {item.effect_duration_seconds > 0 && (
-          <span style={{ color:'#374151', marginLeft:4 }}>· {duration}</span>
+          <span style={{ color:'rgba(26,42,58,0.3)', marginLeft:4 }}>· {duration}</span>
         )}
       </div>
 
-      {/* Description (au hover) */}
+      {/* Description (hover) */}
       <AnimatePresence>
         {hovered && (
           <motion.div
             initial={{ opacity:0, height:0 }} animate={{ opacity:1, height:'auto' }}
             exit={{ opacity:0, height:0 }}
-            style={{ fontSize:9, color:'#4B5563', textAlign:'center', overflow:'hidden', lineHeight:1.5 }}
+            style={{ fontSize:8, color:'rgba(26,42,58,0.5)', textAlign:'center', overflow:'hidden', lineHeight:1.5 }}
           >
             {item.description}
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Prix + bouton */}
+      {/* Price + buy button */}
       <div style={{ marginTop:'auto' }}>
-        <div style={{ textAlign:'center', marginBottom:6 }}>
-          <span style={{ fontSize:13, fontWeight:900, color:'#F59E0B', fontFamily:'monospace' }}>
+        <div style={{ textAlign:'center', marginBottom:6, display:'flex', alignItems:'center', justifyContent:'center', gap:4 }}>
+          <CrystalIcon size="sm" />
+          <span style={{ fontSize:13, fontWeight:900, color:'#7950f2', fontFamily:"'Share Tech Mono', monospace" }}>
             {parseFloat(item.price_tdc).toFixed(0)}
           </span>
-          <span style={{ fontSize:10, color:'#6B7280', marginLeft:3 }}>💎</span>
         </div>
 
         <button
           onClick={e => { e.stopPropagation(); if (canAfford && !buying) onBuy() }}
           disabled={!canAfford || buying}
           style={{
-            width:'100%', padding:'7px 0', borderRadius:8,
-            background: buying ? 'rgba(255,255,255,0.05)'
-              : canAfford ? (isBooster ? `${rc}22` : 'rgba(0,255,135,0.15)')
-              : 'rgba(255,255,255,0.04)',
+            width:'100%', padding:'7px 0', borderRadius:20,
+            background: buying ? 'rgba(0,60,100,0.05)'
+              : canAfford ? (isBooster ? `${rc}15` : 'rgba(0,153,204,0.1)')
+              : 'rgba(0,60,100,0.04)',
             border: canAfford
-              ? `1px solid ${isBooster ? rc+'44' : 'rgba(0,255,135,0.3)'}`
-              : '1px solid rgba(255,255,255,0.06)',
-            color: buying ? '#374151' : canAfford ? (isBooster ? rc : '#00FF87') : '#374151',
-            fontSize:11, fontWeight:700, cursor: canAfford && !buying ? 'pointer' : 'not-allowed',
-            transition:'all 0.15s',
+              ? `1px solid ${isBooster ? rc+'44' : 'rgba(0,153,204,0.3)'}`
+              : '1px solid rgba(0,60,100,0.08)',
+            color: buying ? 'rgba(26,42,58,0.25)' : canAfford ? (isBooster ? rc : '#0099cc') : 'rgba(26,42,58,0.25)',
+            fontSize:8, fontWeight:700, cursor: canAfford && !buying ? 'pointer' : 'not-allowed',
+            transition:'all 0.25s ease',
+            fontFamily:"'Orbitron', system-ui, sans-serif",
+            letterSpacing:1,
           }}
         >
-          {buying ? '⏳' : !canAfford ? '💎 Insuffisant' : isBooster ? '🎁 Ouvrir' : '⚡ Acheter'}
+          {buying ? '⏳' : !canAfford ? 'INSUFFICIENT' : isBooster ? 'OPEN BOOSTER' : 'BUY NOW'}
         </button>
       </div>
 
@@ -297,9 +287,11 @@ function ShopItemCard({ item, balance, onBuy, buying }: {
       {item.max_per_day > 0 && (
         <div style={{
           position:'absolute', top:6, right:6,
-          background:'rgba(0,0,0,0.6)', borderRadius:10,
-          fontSize:8, color:'#4B5563', padding:'1px 5px',
-        }}>{item.max_per_day}/j</div>
+          background:'rgba(255,255,255,0.8)', borderRadius:10,
+          fontSize:7, color:'rgba(26,42,58,0.45)', padding:'2px 6px',
+          border:'1px solid rgba(0,60,100,0.1)',
+          fontFamily:"'Share Tech Mono', monospace",
+        }}>{item.max_per_day}/D</div>
       )}
     </motion.div>
   )
@@ -318,12 +310,13 @@ function ActiveBoostBadge({ boost }: { boost: any }) {
 
   return (
     <div style={{
-      padding:'4px 8px', borderRadius:20, fontSize:9, fontWeight:700,
-      background:'rgba(0,255,135,0.1)', border:'1px solid rgba(0,255,135,0.25)',
-      color:'#00FF87', display:'flex', alignItems:'center', gap:4,
+      padding:'4px 8px', borderRadius:20, fontSize:8, fontWeight:700,
+      background:'rgba(0,136,74,0.08)', border:'1px solid rgba(0,136,74,0.2)',
+      color:'#00884a', display:'flex', alignItems:'center', gap:4,
+      letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif",
     }}>
       {label}
-      {mins != null && <span style={{ color:'#4B5563', marginLeft:2 }}>· {mins < 60 ? `${mins}min` : `${Math.ceil(mins/60)}h`}</span>}
+      {mins != null && <span style={{ color:'rgba(26,42,58,0.35)', marginLeft:2 }}>· {mins < 60 ? `${mins}min` : `${Math.ceil(mins/60)}h`}</span>}
     </div>
   )
 }

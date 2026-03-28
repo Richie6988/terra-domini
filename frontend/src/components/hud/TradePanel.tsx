@@ -6,9 +6,10 @@
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, ArrowRightLeft, TrendingUp, Package } from 'lucide-react'
+import { ArrowRightLeft, TrendingUp, Package } from 'lucide-react'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
+import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
 
 const toNum = (v: unknown) => parseFloat(String(v ?? 0)) || 0
@@ -270,18 +271,7 @@ export function TradePanel({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState('market')
 
   return (
-    <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 380, zIndex: 1000,
-        display: 'flex', flexDirection: 'column', background: '#0A0A14',
-        borderLeft: '1px solid rgba(255,255,255,0.08)' }}>
-
-      <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
-        <span style={{ fontSize: 20, marginRight: 10 }}>⇄</span>
-        <span style={{ fontSize: 17, fontWeight: 600, color: '#fff', flex: 1 }}>Trade</span>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 20 }}>×</button>
-      </div>
-
+    <GlassPanel title="TRADE" onClose={onClose} accent="#22c55e">
       <Tabs
         tabs={[
           { id: 'market',  label: 'Market',  icon: <TrendingUp size={14} /> },
@@ -292,11 +282,11 @@ export function TradePanel({ onClose }: { onClose: () => void }) {
         onChange={setTab}
       />
 
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div>
         {tab === 'market'  && <MarketTab />}
         {tab === 'players' && <PlayerTradeTab />}
         {tab === 'prices'  && <PriceBoard />}
       </div>
-    </motion.div>
+    </GlassPanel>
   )
 }

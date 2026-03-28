@@ -8,6 +8,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
+import { GlassPanel } from '../shared/GlassPanel'
+import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
 
 const UNITS = [
@@ -131,37 +133,32 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
   const completed = battles.filter((b: any) => b.status === 'completed' || b.status === 'cancelled')
 
   return (
-    <motion.div initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }}
-      transition={{ type: 'spring', stiffness: 300, damping: 30 }}
-      style={{ position: 'fixed', top: 0, right: 0, bottom: 0, width: 390, zIndex: 1000,
-        display: 'flex', flexDirection: 'column', background: '#0A0A14',
-        borderLeft: '1px solid rgba(255,255,255,0.07)' }}>
-
-      <div style={{ display: 'flex', alignItems: 'center', padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0, background: 'linear-gradient(180deg, rgba(239,68,68,0.06) 0%, transparent 100%)' }}>
-        <span style={{ fontSize: 20, marginRight: 10 }}>⚔️</span>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 16, fontWeight: 700, color: '#fff' }}>Military Command</div>
-          <div style={{ fontSize: 11, color: '#4B5563' }}>
-            Balance: <span style={{ color: '#FFB800', fontFamily: 'monospace' }}>{tdc.toFixed(0)} 🪙</span>
-            {active.length > 0 && <span style={{ color: '#EF4444', marginLeft: 10 }}>⚔️ {active.length} active</span>}
-            {trainingOrders.length > 0 && <span style={{ color: '#F59E0B', marginLeft: 10 }}>⏳ {trainingOrders.length} training</span>}
-          </div>
-        </div>
-        <button onClick={onClose} style={{ background: 'none', border: 'none', color: '#4B5563', cursor: 'pointer', fontSize: 22 }}>×</button>
+    <GlassPanel title="MILITARY COMMAND" onClose={onClose} accent="#dc2626" width={390}>
+      {/* Balance bar */}
+      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:12,
+        padding:'8px 12px', background:'rgba(255,255,255,0.5)', borderRadius:8,
+        border:'1px solid rgba(0,60,100,0.1)' }}>
+        <CrystalIcon size="md" />
+        <span style={{ fontSize:13, fontWeight:900, color:'#7950f2', fontFamily:"'Share Tech Mono', monospace" }}>{tdc.toFixed(0)}</span>
+        {active.length > 0 && <span style={{ fontSize:8, color:'#dc2626', marginLeft:8, letterSpacing:1 }}>⚔ {active.length} ACTIVE</span>}
+        {trainingOrders.length > 0 && <span style={{ fontSize:8, color:'#cc8800', marginLeft:8, letterSpacing:1 }}>⏳ {trainingOrders.length} TRAINING</span>}
       </div>
 
-      <div style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0 }}>
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap:4, marginBottom:14 }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex: 1, padding: '10px', border: 'none', background: 'transparent', cursor: 'pointer',
-            fontSize: 12, fontWeight: tab === t.id ? 700 : 400,
-            borderBottom: tab === t.id ? '2px solid #EF4444' : '2px solid transparent',
-            color: tab === t.id ? '#EF4444' : '#6B7280',
+            flex: 1, padding: '7px', borderRadius: 20, border: 'none', cursor: 'pointer',
+            fontSize: 8, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
+            background: tab === t.id ? 'rgba(220,38,38,0.1)' : 'rgba(255,255,255,0.5)',
+            color: tab === t.id ? '#dc2626' : 'rgba(26,42,58,0.45)',
+            fontFamily: "'Orbitron', system-ui, sans-serif",
+            border: `1px solid ${tab === t.id ? 'rgba(220,38,38,0.3)' : 'rgba(0,60,100,0.1)'}`,
           }}>{t.label}{t.id === 'train' && trainingOrders.length > 0 ? ` (${trainingOrders.length})` : ''}</button>
         ))}
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div>
         {/* ACTIVE BATTLES */}
         {tab === 'active' && (
           <div style={{ padding: '12px 16px' }}>
@@ -292,6 +289,6 @@ export function CombatPanel({ onClose }: { onClose: () => void }) {
           </div>
         )}
       </div>
-    </motion.div>
+    </GlassPanel>
   )
 }
