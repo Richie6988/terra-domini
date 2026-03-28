@@ -2,12 +2,11 @@
   "_meta": {
     "format": "hexod_agent_weights_v1",
     "description": "Serialized cognitive architecture for HEXOD lead engineer agent. Machine-readable decision weights, pattern recognition, and routing tables.",
-    "last_updated": "2026-03-28T22:00:00Z",
+    "last_updated": "2026-03-28T23:30:00Z",
     "session": 16,
     "total_patterns": 18,
     "total_weights": 47
   },
-
   "task_routing": {
     "_description": "Autonomy level per task type. 1.0 = execute immediately, 0.0 = always ask first.",
     "syntax_fix": 1.0,
@@ -27,20 +26,54 @@
     "cross_panel_wiring": 0.9,
     "panel_migration_dark_to_light": 0.85
   },
-
   "file_risk": {
     "_description": "Regression probability per file. HIGH = always str_replace + verify.",
-    "urls.py": { "risk": "HIGH", "method": "str_replace", "verify": "imports_both_sides" },
-    "views.py": { "risk": "HIGH", "method": "str_replace", "verify": "indentation_depth" },
-    "HexCard.tsx": { "risk": "HIGH", "method": "str_replace", "verify": "orphan_blocks" },
-    "App.tsx": { "risk": "MEDIUM", "method": "str_replace", "verify": "jsx_tag_count" },
-    "settings/dev.py": { "risk": "HIGH", "method": "str_replace", "verify": "python_syntax" },
-    "migrations/": { "risk": "HIGH", "method": "management_commands", "verify": "never_edit_manually" },
-    "store/index.ts": { "risk": "MEDIUM", "method": "str_replace", "verify": "type_union_match" },
-    "index.css": { "risk": "MEDIUM", "method": "overwrite", "verify": "form_input_impact" },
-    "tokens.ts": { "risk": "LOW", "method": "overwrite", "verify": "none" }
+    "urls.py": {
+      "risk": "HIGH",
+      "method": "str_replace",
+      "verify": "imports_both_sides"
+    },
+    "views.py": {
+      "risk": "HIGH",
+      "method": "str_replace",
+      "verify": "indentation_depth"
+    },
+    "HexCard.tsx": {
+      "risk": "HIGH",
+      "method": "str_replace",
+      "verify": "orphan_blocks"
+    },
+    "App.tsx": {
+      "risk": "MEDIUM",
+      "method": "str_replace",
+      "verify": "jsx_tag_count"
+    },
+    "settings/dev.py": {
+      "risk": "HIGH",
+      "method": "str_replace",
+      "verify": "python_syntax"
+    },
+    "migrations/": {
+      "risk": "HIGH",
+      "method": "management_commands",
+      "verify": "never_edit_manually"
+    },
+    "store/index.ts": {
+      "risk": "MEDIUM",
+      "method": "str_replace",
+      "verify": "type_union_match"
+    },
+    "index.css": {
+      "risk": "MEDIUM",
+      "method": "overwrite",
+      "verify": "form_input_impact"
+    },
+    "tokens.ts": {
+      "risk": "LOW",
+      "method": "overwrite",
+      "verify": "none"
+    }
   },
-
   "error_patterns": [
     {
       "id": "EP001",
@@ -116,7 +149,7 @@
       "id": "EP011",
       "pattern": "fine_grained_pat_permissions",
       "caused": "403 Permission denied on push",
-      "fix": "Edit token → Contents → Read and write",
+      "fix": "Edit token \u2192 Contents \u2192 Read and write",
       "weight": 0.9
     },
     {
@@ -129,7 +162,7 @@
     {
       "id": "EP013",
       "pattern": "orphan_panel_route",
-      "caused": "Panel in App.tsx but no dock button → unreachable",
+      "caused": "Panel in App.tsx but no dock button \u2192 unreachable",
       "fix": "Audit dock items vs App.tsx routes vs store type union",
       "weight": 1.0
     },
@@ -143,7 +176,7 @@
     {
       "id": "EP015",
       "pattern": "missing_import_after_refactor",
-      "caused": "toast.error() crashes — toast never imported",
+      "caused": "toast.error() crashes \u2014 toast never imported",
       "fix": "Verify imports when moving code between components",
       "weight": 1.0
     },
@@ -155,9 +188,8 @@
       "weight": 1.0
     }
   ],
-
   "color_translation": {
-    "_description": "Dark cyberpunk → Light tactical color mapping",
+    "_description": "Dark cyberpunk \u2192 Light tactical color mapping",
     "text": {
       "#fff": "#1a2a3a",
       "#E5E7EB": "#1a2a3a",
@@ -185,21 +217,64 @@
       "#EF4444": "#dc2626"
     }
   },
-
   "panel_config": {
-    "_description": "Panel ID → accent color + cross-link targets",
-    "combat":      { "accent": "#dc2626", "links": ["shop", "alliance"] },
-    "events":      { "accent": "#f97316", "links": [] },
-    "shop":        { "accent": "#cc8800", "links": ["crypto", "marketplace"] },
-    "trade":       { "accent": "#22c55e", "links": ["marketplace", "crypto"] },
-    "marketplace": { "accent": "#cc8800", "links": ["crypto", "shop"] },
-    "alliance":    { "accent": "#3b82f6", "links": [] },
-    "ladder":      { "accent": "#8b5cf6", "links": [] },
-    "profile":     { "accent": "dynamic", "links": [] },
-    "crypto":      { "accent": "#a855f7", "links": ["shop", "marketplace"] },
-    "meta":        { "accent": "#64748b", "links": [] }
+    "_description": "Panel ID \u2192 accent color + cross-link targets",
+    "combat": {
+      "accent": "#dc2626",
+      "links": [
+        "shop",
+        "alliance"
+      ]
+    },
+    "events": {
+      "accent": "#f97316",
+      "links": []
+    },
+    "shop": {
+      "accent": "#cc8800",
+      "links": [
+        "crypto",
+        "marketplace"
+      ]
+    },
+    "trade": {
+      "accent": "#22c55e",
+      "links": [
+        "marketplace",
+        "crypto"
+      ]
+    },
+    "marketplace": {
+      "accent": "#cc8800",
+      "links": [
+        "crypto",
+        "shop"
+      ]
+    },
+    "alliance": {
+      "accent": "#3b82f6",
+      "links": []
+    },
+    "ladder": {
+      "accent": "#8b5cf6",
+      "links": []
+    },
+    "profile": {
+      "accent": "dynamic",
+      "links": []
+    },
+    "crypto": {
+      "accent": "#a855f7",
+      "links": [
+        "shop",
+        "marketplace"
+      ]
+    },
+    "meta": {
+      "accent": "#64748b",
+      "links": []
+    }
   },
-
   "z_index_stack": {
     "map_base": 0,
     "overlay": 100,
@@ -212,21 +287,49 @@
     "toast": 1600,
     "scanlines": 9999
   },
-
   "animation_constants": {
-    "hud_slide_in": { "duration": "0.8s", "easing": "cubic-bezier(0.16,1,0.3,1)" },
-    "panel_spring": { "stiffness": 300, "damping": 30 },
-    "modal_spring": { "stiffness": 400, "damping": 30 },
-    "sub_modal_spring": { "stiffness": 420, "damping": 28 },
-    "standard_ease": { "duration": "0.35s", "easing": "cubic-bezier(0.16,1,0.3,1)" },
-    "fast_ease": { "duration": "0.25s", "easing": "ease" },
-    "pulse": { "duration": "2.5s", "iteration": "infinite" },
-    "scanning_glow": { "duration": "1.5s", "iteration": "infinite" },
-    "shimmer": { "duration": "3s", "iteration": "infinite" },
-    "sweep": { "duration": "3s", "iteration": "infinite" },
+    "hud_slide_in": {
+      "duration": "0.8s",
+      "easing": "cubic-bezier(0.16,1,0.3,1)"
+    },
+    "panel_spring": {
+      "stiffness": 300,
+      "damping": 30
+    },
+    "modal_spring": {
+      "stiffness": 400,
+      "damping": 30
+    },
+    "sub_modal_spring": {
+      "stiffness": 420,
+      "damping": 28
+    },
+    "standard_ease": {
+      "duration": "0.35s",
+      "easing": "cubic-bezier(0.16,1,0.3,1)"
+    },
+    "fast_ease": {
+      "duration": "0.25s",
+      "easing": "ease"
+    },
+    "pulse": {
+      "duration": "2.5s",
+      "iteration": "infinite"
+    },
+    "scanning_glow": {
+      "duration": "1.5s",
+      "iteration": "infinite"
+    },
+    "shimmer": {
+      "duration": "3s",
+      "iteration": "infinite"
+    },
+    "sweep": {
+      "duration": "3s",
+      "iteration": "infinite"
+    },
     "panel_close_reopen_delay_ms": 100
   },
-
   "font_system": {
     "heading": "'Orbitron', system-ui, sans-serif",
     "mono": "'Share Tech Mono', monospace",
@@ -245,7 +348,6 @@
       "inputs_override": "text-transform:none, font:Share Tech Mono"
     }
   },
-
   "glassmorphism_recipe": {
     "background": "linear-gradient(180deg, rgba(235,242,250,0.95) 0%, rgba(220,230,242,0.95) 100%)",
     "backdrop_filter": "blur(30px) saturate(1.2)",
@@ -257,19 +359,44 @@
     "tab_inactive": "rgba(255,255,255,0.5) + border rgba(0,60,100,0.1)",
     "close_button": "rgba(0,60,100,0.08) + border rgba(0,60,100,0.12) + radius:6px"
   },
-
   "owner_signals": {
-    "continuer": { "action": "keep_going", "pause": false },
-    "continue": { "action": "keep_going", "pause": false },
-    "done_i_edited": { "action": "retry_operation", "pause": false },
-    "here_you_are": { "action": "use_credentials", "pause": false },
-    "oui_on_continue": { "action": "batch_more_work", "momentum": "high" },
-    "stacktrace": { "action": "fix_immediately", "commentary": false },
-    "clean_it": { "action": "quality_over_speed", "pause": false },
-    "de_zero": { "action": "full_reset", "pause": false },
-    "no_question_mark": { "action": "informational", "wait": false }
+    "continuer": {
+      "action": "keep_going",
+      "pause": false
+    },
+    "continue": {
+      "action": "keep_going",
+      "pause": false
+    },
+    "done_i_edited": {
+      "action": "retry_operation",
+      "pause": false
+    },
+    "here_you_are": {
+      "action": "use_credentials",
+      "pause": false
+    },
+    "oui_on_continue": {
+      "action": "batch_more_work",
+      "momentum": "high"
+    },
+    "stacktrace": {
+      "action": "fix_immediately",
+      "commentary": false
+    },
+    "clean_it": {
+      "action": "quality_over_speed",
+      "pause": false
+    },
+    "de_zero": {
+      "action": "full_reset",
+      "pause": false
+    },
+    "no_question_mark": {
+      "action": "informational",
+      "wait": false
+    }
   },
-
   "speed_calibration": {
     "_unit": "iterations_to_completion",
     "simple_import_fix": 1,
@@ -285,5 +412,15 @@
     "legacy_component_strip": 1.5,
     "panel_migration_to_glass": 1,
     "cross_panel_wiring": 1
+  },
+  "theme_migration_status": {
+    "status": "COMPLETE",
+    "neon_green_outside_map": 0,
+    "dark_backgrounds_outside_map": 0,
+    "white_text_intentional": 28,
+    "total_files_migrated": 60,
+    "total_substitutions": 734,
+    "icon_bank_icons": 48,
+    "shared_components": 17
   }
 }
