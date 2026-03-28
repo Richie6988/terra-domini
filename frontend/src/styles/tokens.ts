@@ -1,18 +1,56 @@
 /**
- * Design Tokens — Hexod Design System (Aria-approved)
- * Source unique de vérité pour couleurs, espacement, typographie.
+ * Design Tokens — HEXOD Design System (light_tactical)
+ * Source unique de vérité. Mirrors prototype CSS variables.
  */
 export const COLOR = {
-  bg: '#080810', bgCard: '#07070f', bgPanel: '#050510',
-  bgSurface: 'rgba(255,255,255,0.04)',
-  textPrimary: '#E5E7EB', textSecondary: '#9CA3AF',
-  textMuted: '#6B7280', textDim: '#374151',
-  accent: '#00FF87', accentDim: 'rgba(0,255,135,0.15)',
+  // Light tactical theme
+  bgGlass: 'rgba(235, 242, 250, 0.95)',
+  bgSecondary: 'rgba(220, 230, 242, 0.95)',
+  bgCard: 'rgba(255, 255, 255, 0.40)',
+  bgCellHover: 'rgba(255, 255, 255, 0.90)',
+  // Map background
+  bgMap: '#1a3d2e',
+  bgMapGradient: 'linear-gradient(135deg, #2d5a45, #1a3d2e)',
+  // Dark fallback (news ticker, overlays)
+  bgDark: '#0f172a',
+  bgDarkAlt: '#1e293b',
+  // Text
+  textPrimary: '#1a2a3a',
+  textSecondary: '#0077aa',
+  textMuted: 'rgba(26, 42, 58, 0.45)',
+  // HUD accents
+  hudCyan: '#0099cc',
+  hudAmber: '#cc8800',
+  hudAmberBright: '#fbbf24',
+  // States
+  stateStandby: '#996600',
+  stateActive: '#00884a',
+  stateScanning: '#00ff55',
+  stateAlert: '#dc2626',
+  // Crystal
+  crystal: '#7950f2',
+  // Borders
+  borderSubtle: 'rgba(0, 60, 100, 0.15)',
+  borderHover: 'rgba(0, 60, 100, 0.3)',
+  // Rarity
   common: '#9CA3AF', uncommon: '#10B981', rare: '#3B82F6',
   epic: '#8B5CF6', legendary: '#F59E0B', mythic: '#EC4899',
-  danger: '#EF4444', warning: '#F59E0B', success: '#10B981', info: '#3B82F6',
-  border: 'rgba(255,255,255,0.08)', borderHover: 'rgba(255,255,255,0.15)',
+  // Semantic
+  danger: '#dc2626', warning: '#F59E0B', success: '#10B981', info: '#3B82F6',
 } as const
+
+export const CATEGORY_COLOR: Record<string, string> = {
+  natural_disasters: '#f97316',
+  places_structures: '#6366f1',
+  nature_geography: '#7c3aed',
+  knowledge_science: '#2563eb',
+  economic_assets: '#64748b',
+  culture_society: '#d946ef',
+  conflict_intrigue: '#dc2626',
+  life_organisms: '#22c55e',
+  fantastic: '#a855f7',
+  game: '#0ea5e9',
+}
 
 export const RARITY_COLOR: Record<string, string> = {
   common: '#9CA3AF', uncommon: '#10B981', rare: '#3B82F6',

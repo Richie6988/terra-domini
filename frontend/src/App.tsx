@@ -13,6 +13,9 @@ import { ErrorBoundary } from './components/ui/Utils'
 import { GameMap } from './components/map/GameMap'
 import { WakeUpDigest } from './components/onboarding/Tutorial'
 import { OnboardingHotspots } from './components/onboarding/OnboardingHotspots'
+import { NewsTicker } from './components/shared/NewsTicker'
+import { HexodTopHUD } from './components/shared/HexodTopHUD'
+import { HexodDock } from './components/shared/HexodDock'
 
 // WakeUpDigest connecté à l'API
 function WakeUpDigestConnected() {
@@ -109,8 +112,27 @@ function GameScreen() {
   const setActivePanel       = useStore((s) => s.setActivePanel)
 
   return (
-    <div style={{ position: 'relative', width: '100vw', height: '100vh', overflow: 'hidden', background: '#0a0a14' }}>
-      {/* Base map */}
+    <div
+      onContextMenu={e => e.preventDefault()}
+      style={{
+        position: 'relative', width: '100vw', height: '100vh',
+        overflow: 'hidden',
+        background: 'linear-gradient(135deg, #2d5a45, #1a3d2e)',
+      }}
+    >
+      {/* ═══ HEXOD SHELL ═══ */}
+
+      {/* News ticker — 28px fixed top */}
+      <ErrorBoundary label="NewsTicker">
+        <NewsTicker />
+      </ErrorBoundary>
+
+      {/* Top HUD — glassmorphism, below ticker */}
+      <ErrorBoundary label="HexodTopHUD">
+        <HexodTopHUD />
+      </ErrorBoundary>
+
+      {/* Base map — full screen background */}
       <ErrorBoundary label="GameMap">
         <GameMap
           onViewportChange={(lat, lon, radius_km) => sendViewport({ lat, lon, radius_km })}
@@ -118,7 +140,12 @@ function GameScreen() {
         />
       </ErrorBoundary>
 
-      {/* HUD */}
+      {/* Bottom dock — hex-shaped buttons */}
+      <ErrorBoundary label="HexodDock">
+        <HexodDock />
+      </ErrorBoundary>
+
+      {/* Legacy HUD (notifications, missions, battles — kept for continuity) */}
       <ErrorBoundary label="GameHUD">
         <GameHUD onClickerOpen={() => setShowClicker(true)} />
       </ErrorBoundary>
