@@ -9,6 +9,8 @@ import { api } from '../../services/api'
 import { useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
+import { BurnTracker } from './BurnTracker'
+import { useTokenStats } from '../../hooks/useBlockchain'
 import toast from 'react-hot-toast'
 
 const toF = (v: unknown, d = 2) => parseFloat(String(v ?? 0)).toFixed(d)
@@ -125,16 +127,113 @@ function CryptoNewsfeed() {
 import { StakingPanel } from './StakingPanel'
 
 const TABS = [
-  { id: 'wallet',  label: '💎 Wallet'  },
-  { id: 'staking', label: '🔒 Staking' },
-  { id: 'markets', label: '📈 Markets' },
-  { id: 'news',    label: '📰 News'    },
-  { id: 'history', label: '📋 History' },
+  { id: 'wallet',     label: 'WALLET'     },
+  { id: 'tokenomics', label: 'TOKENOMICS' },
+  { id: 'staking',    label: 'STAKING'    },
+  { id: 'burn',       label: 'BURN'       },
+  { id: 'history',    label: 'HISTORY'    },
 ]
 
 const TX_COLORS: Record<string, string> = {
   purchase_bonus: '#00884a', territory_yield: '#10B981', stake_reward: '#F59E0B',
   withdraw: '#EF4444', convert_to_tdc: '#8B5CF6', referral_bonus: '#06B6D4',
+}
+
+// ── Tokenomics Dashboard ──
+function TokenomicsTab() {
+  const stats = useTokenStats()
+  const hardCap = 4842432
+
+  const statBlocks = [
+    { label: 'PRICE', value: `$${stats.price.toFixed(4)}`, color: '#00884a' },
+    { label: 'MARKET CAP', value: `$${(stats.marketCap).toLocaleString()}`, color: '#0099cc' },
+    { label: 'MINED', value: `${stats.percentMined}%`, color: '#cc8800' },
+    { label: 'BURNED', value: stats.totalBurned.toLocaleString(), color: '#dc2626' },
+    { label: 'HOLDERS', value: stats.holders.toLocaleString(), color: '#7950f2' },
+    { label: 'MINING RATE', value: `${stats.miningRate} HEX/claim`, color: '#059669' },
+  ]
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      {/* Supply progress */}
+      <div style={{
+        padding: 12, borderRadius: 10,
+        background: 'linear-gradient(135deg, rgba(121,80,242,0.06), transparent)',
+        border: '1px solid rgba(121,80,242,0.15)',
+        textAlign: 'center',
+      }}>
+        <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 6 }}>
+          TOTAL SUPPLY MINED
+        </div>
+        <div style={{ fontSize: 18, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace" }}>
+          {stats.circulatingSupply.toLocaleString()} / {hardCap.toLocaleString()}
+        </div>
+        <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,60,100,0.06)', marginTop: 8, overflow: 'hidden' }}>
+          <div style={{
+            height: '100%', width: `${stats.percentMined}%`, borderRadius: 3,
+            background: 'linear-gradient(90deg, #7950f2, #a855f7)',
+            boxShadow: '0 0 8px rgba(121,80,242,0.4)',
+          }} />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 6, color: 'rgba(26,42,58,0.3)', marginTop: 4, fontFamily: "'Share Tech Mono', monospace" }}>
+          <span>0</span>
+          <span>HARD CAP: {hardCap.toLocaleString()}</span>
+        </div>
+      </div>
+
+      {/* Stats grid */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+        {statBlocks.map(s => (
+          <div key={s.label} style={{
+            padding: '8px 6px', borderRadius: 8, textAlign: 'center',
+            background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.08)',
+          }}>
+            <div style={{ fontSize: 5, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 3 }}>{s.label}</div>
+            <div style={{ fontSize: 10, fontWeight: 900, color: s.color, fontFamily: "'Share Tech Mono', monospace" }}>{s.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Staking APY tiers */}
+      <div>
+        <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 6 }}>STAKING APY</div>
+        <div style={{ display: 'flex', gap: 6 }}>
+          {Object.entries(stats.stakingAPY).map(([days, apy]) => (
+            <div key={days} style={{
+              flex: 1, padding: '8px 6px', borderRadius: 8, textAlign: 'center',
+              background: 'linear-gradient(135deg, rgba(0,136,74,0.06), transparent)',
+              border: '1px solid rgba(0,136,74,0.15)',
+            }}>
+              <div style={{ fontSize: 14, fontWeight: 900, color: '#00884a', fontFamily: "'Share Tech Mono', monospace" }}>{apy}%</div>
+              <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1, marginTop: 2 }}>{days} DAYS</div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Burn mechanics info */}
+      <div style={{
+        padding: '8px 10px', borderRadius: 8,
+        background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.1)',
+        fontSize: 7, color: 'rgba(26,42,58,0.5)', lineHeight: 1.6,
+      }}>
+        <div style={{ fontWeight: 700, color: '#dc2626', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 4 }}>🔥 DAILY BURN: {stats.dailyBurned.toLocaleString()} HEX</div>
+        Skill upgrades, withdrawal fees (3%), territory tax, and marketplace royalties permanently reduce supply. More players = more burn = higher scarcity.
+      </div>
+
+      {/* Chain info */}
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 8,
+        padding: '6px 10px', borderRadius: 8,
+        background: 'rgba(0,60,100,0.03)', border: '1px solid rgba(0,60,100,0.08)',
+        fontSize: 7, color: 'rgba(26,42,58,0.4)',
+        fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
+      }}>
+        <span style={{ fontSize: 12 }}>⬡</span>
+        POLYGON POS · ERC-20 · QUICKSWAP
+      </div>
+    </div>
+  )
 }
 
 export function CryptoPanel({ onClose }: { onClose: () => void }) {
@@ -179,42 +278,24 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
 
         <div>
           {tab === 'wallet' && <WalletCard wallet={wallet} onConvert={() => setShowConvert(true)} onWithdraw={() => setShowWithdraw(true)} />}
+
+          {tab === 'tokenomics' && <TokenomicsTab />}
+
           {tab === 'staking' && <StakingPanel onClose={() => setTab('wallet')} embedded />}
-
-          {tab === 'markets' && Object.entries(prices).map(([sym, p]: any) => (
-            <div key={sym} style={{ display: 'flex', alignItems: 'center', padding: '14px 0', borderBottom: '1px solid rgba(0,60,100,0.08)' }}>
-              <div style={{ width: 40, height: 40, borderRadius: '50%', background: sym === 'HEX' ? 'rgba(0,136,74,0.12)' : 'rgba(0,60,100,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, marginRight: 14, flexShrink: 0 }}>
-                {sym === 'BTC' ? '₿' : sym === 'ETH' ? 'Ξ' : sym === 'MATIC' ? '⬡' : '💎'}
-              </div>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: '#1a2a3a' }}>{sym}</div>
-                {p.market_cap && <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)' }}>MCap ${(p.market_cap / 1e9).toFixed(1)}B</div>}
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ fontSize: 15, fontFamily: 'monospace', fontWeight: 700, color: sym === 'HEX' ? '#00884a' : '#fff' }}>
-                  ${p.price_usd < 0.01 ? p.price_usd.toFixed(6) : p.price_usd.toFixed(2)}
-                </div>
-                <div style={{ fontSize: 11, color: (p.change_24h ?? 0) > 0 ? '#10B981' : '#EF4444' }}>
-                  {(p.change_24h ?? 0) > 0 ? '▲' : '▼'} {Math.abs(p.change_24h ?? 0).toFixed(2)}%
-                </div>
-              </div>
-            </div>
-          ))}
-
-          {tab === 'news' && <CryptoNewsfeed />}
+          {tab === 'burn' && <BurnTracker />}
 
           {tab === 'history' && (
             <div>
-              {!(txHistory as any[]).length && <div style={{ textAlign: 'center', color: 'rgba(26,42,58,0.35)', padding: '30px 0' }}>No transactions yet</div>}
-              {(txHistory as any[]).map((tx, i) => (
+              {!(txHistory as any[]).length && <div style={{ textAlign: 'center', color: 'rgba(26,42,58,0.35)', padding: '30px 0', fontSize: 8, fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 2 }}>NO TRANSACTIONS YET</div>}
+              {(txHistory as any[]).map((tx: any, i: number) => (
                 <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid rgba(0,60,100,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontSize: 12, color: 'rgba(26,42,58,0.6)', fontWeight: 500 }}>{tx.type.replace(/_/g, ' ')}</div>
-                    <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>{tx.note}</div>
-                    <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.25)', marginTop: 1 }}>{new Date(tx.date).toLocaleDateString()}</div>
+                    <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.6)', fontWeight: 500, fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>{tx.type?.replace(/_/g, ' ').toUpperCase()}</div>
+                    <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>{tx.note}</div>
+                    <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.25)', marginTop: 1 }}>{new Date(tx.date).toLocaleDateString()}</div>
                   </div>
-                  <div style={{ fontSize: 14, fontWeight: 700, fontFamily: 'monospace', color: TX_COLORS[tx.type] ?? '#fff' }}>
-                    {tx.amount > 0 ? '+' : ''}{parseFloat(tx.amount).toFixed(6)} HEX
+                  <div style={{ fontSize: 12, fontWeight: 900, fontFamily: "'Share Tech Mono', monospace", color: TX_COLORS[tx.type] ?? '#1a2a3a' }}>
+                    {tx.amount > 0 ? '+' : ''}{parseFloat(tx.amount).toFixed(4)} HEX
                   </div>
                 </div>
               ))}
