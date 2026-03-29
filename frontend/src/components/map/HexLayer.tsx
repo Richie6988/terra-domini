@@ -9,11 +9,50 @@
  *   FREE std   → invisible (only shown on hover)
  */
 import L from 'leaflet'
+import * as h3 from 'h3-js'
 import type { TerritoryLight } from '../../types'
 
 const RARITY_COLOR: Record<string, string> = {
   common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
   epic:'#8B5CF6', legendary:'#F59E0B', mythic:'#EC4899',
+}
+
+/** Compute hex boundary from H3 index (client-side fallback) */
+function getHexBoundary(h3Index: string): [number, number][] {
+  try {
+    const boundary = h3.cellToBoundary(h3Index)
+    // h3-js returns [lat, lng] pairs — Leaflet needs same format
+    return boundary.map(([lat, lng]) => [lat, lng] as [number, number])
+  } catch {
+    return []
+  }
+}
+
+/** Generate grid of H3 cells visible in viewport */
+export function getVisibleHexes(lat: number, lng: number, radiusKm: number, resolution = 9): string[] {
+  try {
+    // Get center cell
+    const center = h3.latLngToCell(lat, lng, resolution)
+    // Get ring of cells around center (k-ring)
+    const k = Math.min(Math.ceil(radiusKm / 0.2), 30) // ~200m per hex at res 9
+    return h3.gridDisk(center, k)
+  } catch {
+    return []
+  }
+}
+
+/** Create a subtle grid overlay hex polygon (unclaimed area) */
+export function makeGridHex(h3Index: string, map: L.Map): L.Polygon | null {
+  const pts = getHexBoundary(h3Index)
+  if (pts.length === 0) return null
+
+  return L.polygon(pts as L.LatLngTuple[], {
+    fillColor: '#fff',
+    fillOpacity: 0.02,
+    color: 'rgba(0,153,204,0.08)',
+    weight: 0.5,
+    interactive: false,
+  })
 }
 
 export function injectGlowFilter() {
@@ -94,8 +133,17 @@ export interface HexConfig {
 }
 
 export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rarFilter }: HexConfig): L.Polygon | null {
-  if (!t.boundary_points?.length) return null
-  const pts = (t.boundary_points as [number,number][]).map(p => [p[0],p[1]] as L.LatLngTuple)
+  // Compute boundaries: prefer API data, fallback to client-side H3
+  let pts: L.LatLngTuple[]
+  if (t.boundary_points?.length) {
+    pts = (t.boundary_points as [number,number][]).map(p => [p[0],p[1]] as L.LatLngTuple)
+  } else if (t.h3_index) {
+    const computed = getHexBoundary(t.h3_index)
+    if (computed.length === 0) return null
+    pts = computed as L.LatLngTuple[]
+  } else {
+    return null
+  }
   const ta = t as any
 
   const isOwn   = t.owner_id === playerId

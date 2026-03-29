@@ -5,11 +5,11 @@
  */
 import { useStore, useActiveBattles } from '../../store'
 
-type PanelId = 'combat' | 'alliance' | 'events' | 'profile' | 'trade' | 'shop' | 'ladder' | 'meta' | 'crypto' | 'marketplace' | 'kingdom' | 'codex'
+type PanelId = 'combat' | 'alliance' | 'events' | 'profile' | 'trade' | 'shop' | 'ladder' | 'meta' | 'crypto' | 'marketplace' | 'kingdom' | 'codex' | 'hunt'
 
 interface DockItem {
   panel: PanelId
-  icon: string  // SVG path or emoji fallback — will be replaced with SVG icons
+  icon: string
   label: string
   color: string
 }
@@ -18,6 +18,7 @@ const DOCK_ITEMS: DockItem[] = [
   { panel: 'combat',      icon: '⚔',  label: 'Military',    color: '#dc2626' },
   { panel: 'events',      icon: '📡', label: 'Events',      color: '#f97316' },
   { panel: 'kingdom',     icon: '👑', label: 'Kingdom',     color: '#cc8800' },
+  { panel: 'hunt',        icon: '🎯', label: 'Hunt',        color: '#f97316' },
   { panel: 'codex',       icon: '📖', label: 'Codex',       color: '#7950f2' },
   { panel: 'shop',        icon: '🛒', label: 'Shop',        color: '#fbbf24' },
   { panel: 'trade',       icon: '📊', label: 'Trade',       color: '#22c55e' },

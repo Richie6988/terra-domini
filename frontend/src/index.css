@@ -146,6 +146,11 @@ img { pointer-events: none; -webkit-user-drag: none; }
   100% { transform: translate(0,0); }
 }
 
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
 .leaflet-container {
   background: #1a3d2e;
   font-family: var(--font-heading);

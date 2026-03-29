@@ -14,7 +14,7 @@ import { HexCard } from './HexCard'
 import { AttackPanel } from '../hud/AttackPanel'
 import { ClaimModal } from './ClaimModal'
 import { HexodBottomBar } from '../hud/HexodBottomBar'
-import { injectGlowFilter, makeHexPolygon, injectHexAnimations } from './HexLayer'
+import { injectGlowFilter, makeHexPolygon, injectHexAnimations, getVisibleHexes, makeGridHex } from './HexLayer'
 import { POIFilterPanel } from './POIFilterPanel'
 import { KingdomBorderLayer } from './KingdomBorderLayer'
 import { MyTerritoriesOverlay } from './MyTerritoriesOverlay'
@@ -58,6 +58,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const mapRef       = useRef<L.Map | null>(null)
   const tileRef      = useRef<L.TileLayer | null>(null)
   const hexRef       = useRef<L.LayerGroup | null>(null)
+  const gridRef      = useRef<L.LayerGroup | null>(null)
   const overlayRef   = useRef<L.TileLayer | null>(null)
   const vpTimer      = useRef<ReturnType<typeof setTimeout>>()
   const containerRef = useRef<HTMLDivElement>(null)
@@ -105,6 +106,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       overlayRef.current = L.tileLayer((tileCfg as any).overlay, { maxZoom: 19, opacity: 0.8 }).addTo(map)
     }
     hexRef.current  = L.layerGroup().addTo(map)
+    gridRef.current = L.layerGroup().addTo(map)
     mapRef.current  = map
 
     const onMove = () => {
@@ -316,6 +318,42 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       if (poly) layer.addLayer(poly)
     })
   }, [territories, showHex, player?.id])
+
+  // ── Draw H3 grid overlay (visible hex grid around viewport center) ──
+  useEffect(() => {
+    const grid = gridRef.current
+    const map = mapRef.current
+    if (!grid || !map) return
+
+    const drawGrid = () => {
+      grid.clearLayers()
+      const z = map.getZoom()
+      if (z < 14) return // Only show grid at zoom 14+
+
+      const center = map.getCenter()
+      // Resolution scales with zoom: z14→res8, z15→res9, z16+→res10
+      const res = z >= 16 ? 10 : z >= 15 ? 9 : 8
+      const radiusKm = z >= 16 ? 0.3 : z >= 15 ? 0.8 : 2.0
+      const hexes = getVisibleHexes(center.lat, center.lng, radiusKm, res)
+
+      // Only draw hexes NOT already in territories (avoid double-rendering)
+      const ownedH3 = new Set(territories.map(t => t.h3_index))
+
+      for (const h3 of hexes) {
+        if (ownedH3.has(h3)) continue
+        const poly = makeGridHex(h3, map)
+        if (poly) grid.addLayer(poly)
+      }
+    }
+
+    drawGrid()
+    map.on('moveend', drawGrid)
+    map.on('zoomend', drawGrid)
+    return () => {
+      map.off('moveend', drawGrid)
+      map.off('zoomend', drawGrid)
+    }
+  }, [territories])
 
   const doZoom     = useCallback((d: number) => mapRef.current?.setZoom((mapRef.current.getZoom()) + d), [])
   const navigateTo = useCallback((lat: number, lon: number, z: number) => mapRef.current?.setView([lat, lon], z), [])

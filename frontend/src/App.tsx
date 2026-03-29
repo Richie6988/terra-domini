@@ -39,6 +39,7 @@ import { MetaDashboard } from './components/hud/MetaDashboard'
 import { MarketplacePanel } from './components/crypto/MarketplacePanel'
 import { KingdomPanel } from './components/kingdom/KingdomPanel'
 import { CodexPanel } from './components/hud/CodexPanel'
+import { DailyHuntPanel } from './components/hud/DailyHuntPanel'
 import { WarTicker } from './components/hud/WarTicker'
 
 // ─── Providers ──────────────────────────────────────────────
@@ -218,6 +219,7 @@ function GameScreen() {
         {activePanel === 'meta'        && <MetaDashboard    onClose={() => setActivePanel(null)} />}
         {activePanel === 'kingdom'     && <KingdomPanel     onClose={() => setActivePanel(null)} />}
         {activePanel === 'codex'       && <CodexPanel       onClose={() => setActivePanel(null)} />}
+        {activePanel === 'hunt'        && <DailyHuntPanel   onClose={() => setActivePanel(null)} />}
       </AnimatePresence>
 
       {/* Auto-tutorial for new players */}
