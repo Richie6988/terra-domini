@@ -1,7 +1,7 @@
 /**
  * AttackAnimationLayer — animations Leaflet lors d'une attaque.
  *
- * Triggered par l'event global 'hexod:attack' dispatché depuis ClaimModal
+ * Triggered par l'event global 'hexod:attack' dispatché depuis ConquestActions
  * après lancement d'une attaque.
  *
  * Visuels :
@@ -229,7 +229,7 @@ function _playResolutionAnim(
   }, 2000)
 }
 
-// Helper pour déclencher l'animation depuis ClaimModal
+// Helper pour déclencher l'animation depuis ConquestActions
 export function triggerAttackAnimation(
   sourceH3: string,
   targetH3: string,

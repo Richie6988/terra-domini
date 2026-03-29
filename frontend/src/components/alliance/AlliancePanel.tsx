@@ -10,7 +10,6 @@ import { allianceApi } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import type { Alliance, AllianceMember } from '../../types'
-import { TradePanel } from './TradePanel'
 
 const textInput: React.CSSProperties = {
   background: 'rgba(255,255,255,0.5)',
@@ -276,8 +275,13 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
 
         {/* ── TRADE ─────────────────────────────────────────────────── */}
         {tab === 'trade' && (
-          <div style={{ padding: '0 0 20px' }}>
-            <TradePanel />
+          <div style={{
+            textAlign: 'center', padding: '40px 20px', color: 'rgba(26,42,58,0.35)',
+            fontSize: 8, letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif",
+          }}>
+            ALLIANCE TRADE
+            <br /><br />
+            COMING SOON — EXCHANGE RESOURCES WITH YOUR ALLIES
           </div>
         )}
       </div>

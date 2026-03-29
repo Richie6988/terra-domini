@@ -3,15 +3,16 @@
     "format": "hexod_agent_weights_v2",
     "version": 2,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-29T01:00:00Z",
+    "last_updated": "2026-03-29T12:00:00Z",
     "session": 16,
-    "total_patterns": 22,
+    "total_patterns": 24,
     "total_weights": 87,
     "total_icons": 98,
     "total_components": 17,
     "total_commits": 23,
     "theme_migration": "COMPLETE",
-    "core_loop_completion": "60%"
+    "core_loop_completion": "60%",
+    "cleanup_lesson": "ALWAYS delete old files when creating replacements. Double UI = #1 user-visible bug."
   },
   "task_routing": {
     "_description": "Autonomy level per task type. 1.0=execute immediately, 0.0=always ask.",
@@ -35,7 +36,9 @@
     "kingdom_types_data_model": 0.8,
     "store_slice_creation": 0.85,
     "production_chain_balancing": 0.3,
-    "skill_tree_rebalancing": 0.2
+    "skill_tree_rebalancing": 0.2,
+    "repo_cleanup_after_migration": 1.0,
+    "delete_replaced_component": 1.0
   },
   "file_risk": {
     "_description": "Regression probability per file. Method + verification strategy.",
@@ -264,6 +267,22 @@
       "file": "KingdomPanel.tsx",
       "fix": "SkillTree tab needs width=960, other tabs width=420.",
       "weight": 0.8
+    },
+    {
+      "id": "EP023",
+      "pattern": "old_components_not_deleted_after_replacement",
+      "file": "any",
+      "fix": "When creating a NEW component that replaces an OLD one: DELETE the old file in SAME commit. Check GameMap/App.tsx for double renders.",
+      "weight": 1.0,
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "EP024",
+      "pattern": "gamemap_renders_shell_components",
+      "file": "GameMap.tsx",
+      "fix": "GameMap renders ONLY map elements. Shell UI (dock, radar, ticker) belongs in App.tsx ONLY.",
+      "weight": 1.0,
+      "severity": "CRITICAL"
     }
   ],
   "color_translation": {
@@ -703,5 +722,22 @@
     "commit_style": "feat:/refactor:/docs:/fix: + detailed body",
     "build_before_commit": true,
     "push_after_commit": true
+  },
+  "quality_gates": {
+    "before_commit": [
+      "no_raw_tokens_in_files",
+      "build_passes",
+      "no_dangling_imports_to_deleted_files",
+      "no_duplicate_shell_components_in_GameMap",
+      "no_double_bottom_bar",
+      "no_double_filter_panel",
+      "no_double_claim_modal"
+    ],
+    "after_replacement": [
+      "DELETE_old_file_immediately",
+      "grep_for_old_imports_in_all_files",
+      "remove_empty_directories",
+      "update_brain_files"
+    ]
   }
 }

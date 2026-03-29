@@ -1285,7 +1285,7 @@ function CSS3DCard({ frontCv, cfg, showBack, isShiny }: {
 
 /* ── Main HexCard ────────────────────────────────────────── */
 export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = false }:{
-  territory:any; onClose:()=>void; onRequestClaim:()=>void; isNewClaim?: boolean
+  territory:any; onClose:()=>void; onRequestClaim?:()=>void; isNewClaim?: boolean
 }) {
   const player=usePlayer()
   const isOwned=t.owner_id===player?.id
