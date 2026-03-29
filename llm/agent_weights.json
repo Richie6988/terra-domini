@@ -3,7 +3,7 @@
     "format": "hexod_agent_weights_v2",
     "version": 3,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-30T10:00:00Z",
+    "last_updated": "2026-03-30T12:00:00Z",
     "session": 17,
     "total_patterns": 24,
     "total_weights": 87,
@@ -841,7 +841,7 @@
   "prototype_gap": {
     "_description": "Features in main_prototype.html NOT yet ported to React. Must be ported.",
     "shop": {
-      "status": "PARTIAL — only API-fed catalog, missing hardcoded items from prototype",
+      "status": "PORTED — 7 tabs, 3 boosters, 25 items hardcoded from prototype. API used for purchases only.",
       "prototype_items": {
         "attack": [
           "2X Mint Speed (150)",
@@ -884,7 +884,7 @@
       "priority": "HIGH"
     },
     "military": {
-      "status": "PARTIAL — basic panel exists, missing 5-tab structure from prototype",
+      "status": "NOT PORTED YET — next priority",
       "prototype_tabs": [
         "Recruit (6 unit types)",
         "Train (queue+progress)",

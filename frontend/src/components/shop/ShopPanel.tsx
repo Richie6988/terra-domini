@@ -7,12 +7,11 @@
  * Ouverture de booster → BoosterOpenAnimation
  */
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { useStore, useTDCBalance, usePlayer } from '../../store'
 import { useKingdomStore } from '../../store/kingdomStore'
-import { SkeletonList } from '../ui/Utils'
 import { BoosterOpenAnimation } from './BoosterOpenAnimation'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
@@ -24,13 +23,64 @@ const RARITY_COLOR: Record<string,string> = {
 }
 
 const CATS = [
-  { id:'all',          label:'Tout',          icon:'🏪' },
-  { id:'military',     label:'Militaire',     icon:'⚔️' },
-  { id:'shield',       label:'Boucliers',     icon:'🛡️' },
-  { id:'resource_pack',label:'Ressources',    icon:'⚡' },
-  { id:'construction', label:'Construction',  icon:'🔨' },
-  { id:'cosmetic',     label:'Cosmétiques',   icon:'✨' },
+  { id:'boosters',  label:'🎁 Boosters',  color:'#cc8800' },
+  { id:'attack',    label:'⚔ Attack',     color:'#dc2626' },
+  { id:'defense',   label:'🛡 Defense',    color:'#3b82f6' },
+  { id:'resources', label:'⛏ Resources',  color:'#cc8800' },
+  { id:'chance',    label:'🍀 Chance',     color:'#22c55e' },
+  { id:'influence', label:'📢 Influence',  color:'#a855f7' },
+  { id:'customize', label:'🎨 Customize',  color:'#ec4899' },
 ]
+
+// ═══ SHOP CATALOG — ported from main_prototype.html ═══
+const BOOSTERS = [
+  { id:'booster_standard',  name:'STANDARD BOOSTER', icon:'📦', price:200,  color:'#0099cc',
+    desc:'7 Standard Territories\n2 Rare Tokens\n1 Random Bonus', code:'booster_pack' },
+  { id:'booster_rare',      name:'RARE BOOSTER',     icon:'💜', price:500,  color:'#8b5cf6',
+    desc:'5 Standard Territories\n3 Rare Tokens\n1 Epic Token\n1 Premium Bonus', code:'booster_pack' },
+  { id:'booster_legendary', name:'LEGENDARY BOOSTER', icon:'👑', price:1500, color:'#cc8800',
+    desc:'3 Standard Territories\n3 Rare Tokens\n2 Epic Tokens\n1 Legendary Token\n1 Exclusive Bonus', code:'booster_pack' },
+]
+
+const SHOP_ITEMS: Record<string, Array<{id:string; name:string; desc:string; price:number; icon:string; code:string}>> = {
+  attack: [
+    { id:'a1', name:'2X TERRITORY MINT SPEED',  desc:'Double your territory minting speed for 24 hours',         price:150, icon:'⚔', code:'atk_multiplier' },
+    { id:'a2', name:'DISTANT TERRITORY UNLOCK', desc:'Mint territories outside your adjacent zone (1 use)',       price:300, icon:'🎯', code:'build_instant_once' },
+    { id:'a3', name:'2X ARMY POWER',            desc:'Double army strength in all combats for 24 hours',          price:250, icon:'💪', code:'double_attack' },
+    { id:'a4', name:'BLITZ MODE',               desc:'Instant deployment — skip all training time for 12h',       price:400, icon:'⚡', code:'build_speed' },
+  ],
+  defense: [
+    { id:'d1', name:'72H KINGDOM SHIELD',       desc:'Full protection from attacks on one kingdom',              price:500, icon:'🛡', code:'shield' },
+    { id:'d2', name:'2X DEFENSE RATING',        desc:'Double all defense values for 48 hours',                   price:350, icon:'🏰', code:'def_multiplier' },
+    { id:'d3', name:'ANTI-NUCLEAR SHIELD',      desc:'Protect against nuclear strikes for 7 days',               price:800, icon:'☢', code:'nuke_strike' },
+    { id:'d4', name:'INFLUENCE RESISTANCE',     desc:'Block influence attacks for 72 hours',                     price:200, icon:'🧠', code:'stealth_once' },
+  ],
+  resources: [
+    { id:'r1', name:'2X EXTRACTION RATE',       desc:'Double all resource extraction for 24 hours',              price:200, icon:'⛏', code:'production_multiplier' },
+    { id:'r2', name:'ENERGY EFFICIENCY',        desc:'-50% energy consumption for 48 hours',                     price:180, icon:'⚡', code:'build_cost_reduction' },
+    { id:'r3', name:'RARE DROP BONUS',          desc:'+50% chance for rare resource drops (24h)',                 price:350, icon:'💎', code:'hex_bonus' },
+    { id:'r4', name:'TRADE ADVANTAGE',          desc:'-10% fees on all marketplace trades for 72h',              price:250, icon:'📈', code:'build_cost_reduction' },
+  ],
+  chance: [
+    { id:'c1', name:'+CARD RARITY',             desc:'Increase card rarity probability by 25% for 24h',          price:300, icon:'🎴', code:'hex_bonus' },
+    { id:'c2', name:'+EVENT MINT PROB',          desc:'Better odds in all event card draws for 24h',              price:250, icon:'📡', code:'hex_bonus' },
+    { id:'c3', name:'SAFARI HINTS (2H)',         desc:'Extra clues and thermal overlay during safaris',           price:100, icon:'🔮', code:'hex_bonus' },
+    { id:'c4', name:'LUCK BOOSTER',             desc:'+15% chance rating across all activities (48h)',            price:400, icon:'🍀', code:'hex_bonus' },
+  ],
+  influence: [
+    { id:'i1', name:'GLOBAL MESSAGE',           desc:'Send 1 message visible to all online players',             price:50,  icon:'📢', code:'stealth_once' },
+    { id:'i2', name:'EXTENDED VISION',          desc:'See +5 hex further for territory conquest (24h)',           price:200, icon:'🔭', code:'hex_bonus' },
+    { id:'i3', name:'BRAG MODE',                desc:'Display double empire size — access reserved areas (24h)', price:350, icon:'🎭', code:'hex_bonus' },
+    { id:'i4', name:'RESERVED ACCESS',          desc:'Enter elite zones for advanced tokens and events',         price:600, icon:'👑', code:'hex_bonus' },
+  ],
+  customize: [
+    { id:'x1', name:'AVATAR SKINS',             desc:'Premium avatar frames, effects, and animations',           price:250, icon:'🖼', code:'custom_flag' },
+    { id:'x2', name:'FLAG & EMBLEM',            desc:'Custom kingdom flag and player emblem',                     price:150, icon:'🏴', code:'custom_flag' },
+    { id:'x3', name:'KINGDOM COLORS',           desc:'Custom hex colors on the global map',                      price:200, icon:'🎨', code:'border_color' },
+    { id:'x4', name:'MEDIA EMBEDDING',          desc:'Embed images/video on your hex territories',               price:300, icon:'📷', code:'custom_flag' },
+    { id:'x5', name:'LIVE STREAM SPACE',        desc:'Create a live streaming zone on your territory',            price:500, icon:'📺', code:'custom_flag' },
+  ],
+}
 
 const EFFECT_LABEL: Record<string,string> = {
   double_attack:       '⚔️⚔️ Double attaque',
@@ -59,47 +109,35 @@ function formatDuration(sec: number): string {
 interface Props { onClose: () => void }
 
 export function ShopPanel({ onClose }: Props) {
-  const [cat, setCat] = useState('all')
+  const [cat, setCat] = useState('boosters')
   const [boosterResult, setBoosterResult] = useState<any>(null)
   const qc = useQueryClient()
   const balance = useTDCBalance()
   const player  = usePlayer()
   const activeKingdom = useKingdomStore(s => s.getActiveKingdom())
 
-  const { data: catalog = [], isLoading } = useQuery<any[]>({
-    queryKey: ['shop-catalog'],
-    queryFn: () => api.get('/shop/catalog/').then(r => r.data),
-    staleTime: 300000,
-  })
-
   const { data: activeBoosts = [] } = useQuery<any[]>({
     queryKey: ['active-boosts'],
     queryFn: () => api.get('/shop/active-boosts/').then(r => r.data).catch(() => []),
     staleTime: 30000,
-    refetchInterval: 60000,
   })
 
-  const buyMut = useMutation({
-    mutationFn: (vars: { item_code: string; quantity: number }) =>
-      api.post('/shop/purchase/', vars),
-    onSuccess: (res, vars) => {
-      const item = catalog.find((i:any) => i.code === vars.item_code)
-      if (res.data.booster) {
-        // Animation d'ouverture de booster
-        setBoosterResult({ cards: res.data.booster.cards, itemName: item?.name })
-      } else {
-        toast.success(`✅ ${item?.name || 'Article'} acheté !`)
-      }
-      qc.invalidateQueries({ queryKey: ['player'] })
-      qc.invalidateQueries({ queryKey: ['active-boosts'] })
-    },
-    onError: (e: any) => {
-      const msg = e?.response?.data?.error || 'Achat échoué'
-      toast.error(msg)
-    },
-  })
+  const handleBuy = (itemName: string, itemCode: string, price: number) => {
+    const bal = toNum(balance)
+    if (bal < price) { toast.error(`Not enough crystals (need ${price}, have ${Math.floor(bal)})`); return }
+    api.post('/shop/purchase/', { item_code: itemCode, quantity: 1 })
+      .then(res => {
+        if (res.data?.booster) {
+          setBoosterResult({ cards: res.data.booster.cards, itemName })
+        } else {
+          toast.success(`✅ ${itemName} purchased!`)
+        }
+        qc.invalidateQueries({ queryKey: ['player'] })
+        qc.invalidateQueries({ queryKey: ['active-boosts'] })
+      })
+      .catch((e: any) => toast.error(e?.response?.data?.error || 'Purchase failed'))
+  }
 
-  const items = catalog.filter((i:any) => cat === 'all' || i.category === cat)
   const toNum = (v: any) => parseFloat(String(v ?? 0)) || 0
   const setActivePanel = useStore(s => s.setActivePanel)
 
@@ -150,29 +188,27 @@ export function ShopPanel({ onClose }: Props) {
           </div>
         </div>
 
-        {/* Catégories — pill tabs */}
+        {/* Category tabs — from prototype */}
         <div style={{ display:'flex', gap:4, overflowX:'auto', paddingBottom:8, marginBottom:12 }}>
           {CATS.map(c => (
             <button key={c.id} onClick={() => setCat(c.id)} style={{
-              padding:'6px 12px', borderRadius:20, cursor:'pointer', whiteSpace:'nowrap',
-              fontSize:8, fontWeight: cat===c.id ? 700 : 500, letterSpacing:1,
-              background: cat===c.id ? 'rgba(0,153,204,0.12)' : 'rgba(255,255,255,0.5)',
-              border:`1px solid ${cat===c.id ? 'rgba(0,153,204,0.35)' : 'rgba(0,60,100,0.1)'}`,
-              color: cat===c.id ? '#0099cc' : 'rgba(26,42,58,0.45)', flexShrink:0,
+              padding:'6px 10px', borderRadius:20, cursor:'pointer', whiteSpace:'nowrap',
+              fontSize:7, fontWeight: cat===c.id ? 700 : 500, letterSpacing:1,
+              background: cat===c.id ? `${c.color}15` : 'rgba(255,255,255,0.5)',
+              border:`1px solid ${cat===c.id ? `${c.color}40` : 'rgba(0,60,100,0.1)'}`,
+              color: cat===c.id ? c.color : 'rgba(26,42,58,0.45)', flexShrink:0,
               fontFamily:"'Orbitron', system-ui, sans-serif",
-              boxShadow: cat===c.id ? '0 2px 8px rgba(0,153,204,0.15)' : 'none',
-              transition:'all 0.25s ease',
             }}>
-              {c.icon} {c.label}
+              {c.label}
             </button>
           ))}
         </div>
 
-        {/* Boosts actifs */}
+        {/* Active boosts */}
         {activeBoosts.length > 0 && (
           <div style={{ padding:'8px 10px', marginBottom:12, borderRadius:6,
             background:'rgba(0,136,74,0.06)', border:'1px solid rgba(0,136,74,0.15)' }}>
-            <div style={{ fontSize:8, color:'rgba(26,42,58,0.45)', letterSpacing:2, marginBottom:6, fontWeight:500 }}>ACTIVE BOOSTS</div>
+            <div style={{ fontSize:7, color:'rgba(26,42,58,0.45)', letterSpacing:2, marginBottom:6, fontWeight:700, fontFamily:"'Orbitron', system-ui, sans-serif" }}>ACTIVE BOOSTS</div>
             <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
               {activeBoosts.slice(0,5).map((b:any) => (
                 <ActiveBoostBadge key={b.id} boost={b} />
@@ -181,59 +217,95 @@ export function ShopPanel({ onClose }: Props) {
           </div>
         )}
 
-        {/* Grille items */}
-        <div>
-          {isLoading ? <SkeletonList count={6} /> : (
-            <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:8 }}>
-              {items.map((item:any) => (
-                <ShopItemCard
-                  key={item.id || item.code}
-                  item={item}
-                  balance={toNum(balance)}
-                  onBuy={() => buyMut.mutate({ item_code: item.code, quantity: 1 })}
-                  buying={buyMut.isPending && buyMut.variables?.item_code === item.code}
-                />
-              ))}
-              {items.length === 0 && (
-                <div style={{ gridColumn:'1/-1', textAlign:'center', padding:'40px 0', color:'rgba(26,42,58,0.35)', fontSize:10 }}>
-                  NO ITEMS IN THIS CATEGORY
-                </div>
-              )}
+        {/* ═══ BOOSTERS TAB ═══ */}
+        {cat === 'boosters' && (
+          <div>
+            <div style={{ fontSize:8, fontWeight:700, letterSpacing:2, color:'rgba(26,42,58,0.4)', marginBottom:10, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
+              🎁 BOOSTER PACKS — 10 ITEMS EACH
             </div>
-          )}
-        </div>
+            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:12 }}>
+              {BOOSTERS.map(b => (
+                <button key={b.id} onClick={() => handleBuy(b.name, b.code, b.price)} style={{
+                  padding:14, borderRadius:10, cursor:'pointer', textAlign:'center',
+                  background:`linear-gradient(135deg, ${b.color}12, ${b.color}05)`,
+                  border:`2px solid ${b.color}40`,
+                  transition:'all 0.25s ease',
+                }}>
+                  <div style={{ fontSize:28, marginBottom:6 }}>{b.icon}</div>
+                  <div style={{ fontSize:9, fontWeight:900, color:b.color, marginBottom:4, fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1 }}>{b.name}</div>
+                  <div style={{ fontSize:7, color:'rgba(26,42,58,0.45)', lineHeight:1.6, textTransform:'none', fontFamily:'system-ui', marginBottom:8, whiteSpace:'pre-line' }}>{b.desc}</div>
+                  <div style={{ fontSize:14, fontWeight:900, color:b.color, fontFamily:"'Share Tech Mono', monospace" }}>{b.price} ◆</div>
+                </button>
+              ))}
+            </div>
+            <div style={{ fontSize:7, color:'rgba(26,42,58,0.35)', textAlign:'center', fontFamily:'system-ui', textTransform:'none' }}>
+              Territories are assigned to random unclaimed hexes near your empire. Tokens are added to your Codex.
+            </div>
+          </div>
+        )}
 
-        {/* ── Cross-panel CTAs ── */}
-        <div style={{ marginTop: 16, display:'flex', flexDirection:'column', gap:8 }}>
-          <button
-            onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }}
-            style={{
-              width:'100%', padding:'10px', borderRadius:20,
-              background:'linear-gradient(90deg, rgba(121,80,242,0.1), rgba(121,80,242,0.05))',
-              border:'1px solid rgba(121,80,242,0.25)',
-              color:'#7950f2', fontSize:8, fontWeight:700, letterSpacing:2,
-              cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
-              display:'flex', alignItems:'center', justifyContent:'center', gap:8,
-            }}
-          >
-            <CrystalIcon size="sm" /> BUY CRYSTALS → WALLET
-          </button>
-          <button
-            onClick={() => { onClose(); setTimeout(() => setActivePanel('marketplace'), 100) }}
-            style={{
-              width:'100%', padding:'10px', borderRadius:20,
-              background:'linear-gradient(90deg, rgba(204,136,0,0.08), rgba(204,136,0,0.03))',
-              border:'1px solid rgba(204,136,0,0.2)',
-              color:'#cc8800', fontSize:8, fontWeight:700, letterSpacing:2,
-              cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
-            }}
-          >
-            🏪 NFT MARKETPLACE →
-          </button>
+        {/* ═══ ITEM TABS (attack/defense/resources/chance/influence/customize) ═══ */}
+        {cat !== 'boosters' && SHOP_ITEMS[cat] && (
+          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+            {SHOP_ITEMS[cat].map(item => (
+              <div key={item.id} style={{
+                display:'flex', justifyContent:'space-between', alignItems:'center',
+                padding:'12px 14px', borderRadius:8,
+                background:'rgba(255,255,255,0.5)', border:'1px solid rgba(0,60,100,0.1)',
+                transition:'all 0.25s ease',
+              }}>
+                <div style={{ flex:1, minWidth:0 }}>
+                  <div style={{ fontSize:9, fontWeight:900, color:'#1a2a3a', letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
+                    {item.icon} {item.name}
+                  </div>
+                  <div style={{ fontSize:8, color:'rgba(26,42,58,0.45)', marginTop:3, lineHeight:1.4, textTransform:'none', fontFamily:'system-ui' }}>
+                    {item.desc}
+                  </div>
+                </div>
+                <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
+                  <div style={{ fontSize:13, fontWeight:900, color:'#0099cc', fontFamily:"'Share Tech Mono', monospace" }}>
+                    {item.price} ◆
+                  </div>
+                  <button onClick={() => handleBuy(item.name, item.code, item.price)} style={{
+                    padding:'6px 14px', borderRadius:16, cursor:'pointer',
+                    background: toNum(balance) >= item.price ? (CATS.find(c=>c.id===cat)?.color || '#0099cc') : 'rgba(0,60,100,0.08)',
+                    color: toNum(balance) >= item.price ? '#fff' : 'rgba(26,42,58,0.3)',
+                    border:'none', fontSize:8, fontWeight:700, letterSpacing:1,
+                    fontFamily:"'Orbitron', system-ui, sans-serif",
+                    opacity: toNum(balance) >= item.price ? 1 : 0.5,
+                  }}>
+                    Buy
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Buy crystals CTA */}
+        <div style={{ marginTop:16, padding:'14px 16px', borderRadius:8,
+          background:'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.05))',
+          border:'1px solid rgba(204,136,0,0.3)',
+          display:'flex', justifyContent:'space-between', alignItems:'center',
+        }}>
+          <div>
+            <div style={{ fontSize:9, fontWeight:900, color:'#cc8800', fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1, display:'flex', alignItems:'center', gap:6 }}>
+              <CrystalIcon size="sm" /> BUY CRYSTALS WITH HEX
+            </div>
+            <div style={{ fontSize:7, color:'rgba(26,42,58,0.4)', marginTop:2, textTransform:'none', fontFamily:'system-ui' }}>
+              In-game currency — earned from bonuses or purchased with HEX crypto
+            </div>
+          </div>
+          <button onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }} style={{
+            padding:'8px 14px', borderRadius:16, cursor:'pointer',
+            background:'#cc8800', color:'#fff', border:'none',
+            fontSize:8, fontWeight:700, letterSpacing:1,
+            fontFamily:"'Orbitron', system-ui, sans-serif",
+          }}>Buy HEX →</button>
         </div>
       </GlassPanel>
 
-      {/* Animation ouverture booster */}
+      {/* Booster open animation */}
       <AnimatePresence>
         {boosterResult && (
           <BoosterOpenAnimation
@@ -248,119 +320,6 @@ export function ShopPanel({ onClose }: Props) {
 }
 
 // ── Carte item boutique ────────────────────────────────────────────────────
-function ShopItemCard({ item, balance, onBuy, buying }: {
-  item: any; balance: number; onBuy: () => void; buying: boolean
-}) {
-  const [hovered, setHovered] = useState(false)
-  const rc = RARITY_COLOR[item.rarity] || '#9CA3AF'
-  const canAfford = balance >= parseFloat(item.price_tdc)
-  const isBooster = item.effect_type === 'booster_pack'
-  const duration  = formatDuration(item.effect_duration_seconds || 0)
-  const effectLabel = EFFECT_LABEL[item.effect_type] || item.effect_type
-
-  return (
-    <motion.div
-      onHoverStart={() => setHovered(true)}
-      onHoverEnd={() => setHovered(false)}
-      whileTap={{ scale: 0.97 }}
-      style={{
-        background: hovered ? `${rc}12` : 'rgba(255,255,255,0.6)',
-        border:`1.5px solid ${hovered ? rc+'55' : 'rgba(0,60,100,0.1)'}`,
-        borderRadius:8, padding:'12px 10px',
-        display:'flex', flexDirection:'column', gap:6,
-        cursor:'pointer', transition:'all 0.35s cubic-bezier(0.16,1,0.3,1)',
-        position:'relative', overflow:'hidden',
-      }}
-    >
-      {/* Rarity glow top */}
-      <div style={{
-        position:'absolute', top:0, left:0, right:0, height:2,
-        background:`linear-gradient(90deg, transparent, ${rc}, transparent)`,
-        opacity: hovered ? 1 : 0.4, transition:'opacity 0.15s',
-      }}/>
-
-      {/* Icon */}
-      <div style={{ fontSize:28, textAlign:'center', lineHeight:1 }}>
-        {item.icon_url && item.icon_url.length <= 4 ? item.icon_url : '🎁'}
-      </div>
-
-      {/* Name + rarity */}
-      <div>
-        <div style={{ fontSize:10, fontWeight:700, color:'#1a2a3a', textAlign:'center', lineHeight:1.3, letterSpacing:1 }}>
-          {item.name}
-        </div>
-        <div style={{ fontSize:8, color:rc, textAlign:'center', marginTop:2, fontWeight:700, letterSpacing:1 }}>
-          {item.rarity}
-        </div>
-      </div>
-
-      {/* Effect */}
-      <div style={{ fontSize:8, color:'rgba(26,42,58,0.45)', textAlign:'center', lineHeight:1.4, fontFamily:"'Share Tech Mono', monospace" }}>
-        {effectLabel}
-        {item.effect_duration_seconds > 0 && (
-          <span style={{ color:'rgba(26,42,58,0.3)', marginLeft:4 }}>· {duration}</span>
-        )}
-      </div>
-
-      {/* Description (hover) */}
-      <AnimatePresence>
-        {hovered && (
-          <motion.div
-            initial={{ opacity:0, height:0 }} animate={{ opacity:1, height:'auto' }}
-            exit={{ opacity:0, height:0 }}
-            style={{ fontSize:8, color:'rgba(26,42,58,0.5)', textAlign:'center', overflow:'hidden', lineHeight:1.5 }}
-          >
-            {item.description}
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Price + buy button */}
-      <div style={{ marginTop:'auto' }}>
-        <div style={{ textAlign:'center', marginBottom:6, display:'flex', alignItems:'center', justifyContent:'center', gap:4 }}>
-          <CrystalIcon size="sm" />
-          <span style={{ fontSize:13, fontWeight:900, color:'#7950f2', fontFamily:"'Share Tech Mono', monospace" }}>
-            {parseFloat(item.price_tdc).toFixed(0)}
-          </span>
-        </div>
-
-        <button
-          onClick={e => { e.stopPropagation(); if (canAfford && !buying) onBuy() }}
-          disabled={!canAfford || buying}
-          style={{
-            width:'100%', padding:'7px 0', borderRadius:20,
-            background: buying ? 'rgba(0,60,100,0.05)'
-              : canAfford ? (isBooster ? `${rc}15` : 'rgba(0,153,204,0.1)')
-              : 'rgba(0,60,100,0.04)',
-            border: canAfford
-              ? `1px solid ${isBooster ? rc+'44' : 'rgba(0,153,204,0.3)'}`
-              : '1px solid rgba(0,60,100,0.08)',
-            color: buying ? 'rgba(26,42,58,0.25)' : canAfford ? (isBooster ? rc : '#0099cc') : 'rgba(26,42,58,0.25)',
-            fontSize:8, fontWeight:700, cursor: canAfford && !buying ? 'pointer' : 'not-allowed',
-            transition:'all 0.25s ease',
-            fontFamily:"'Orbitron', system-ui, sans-serif",
-            letterSpacing:1,
-          }}
-        >
-          {buying ? '⏳' : !canAfford ? 'INSUFFICIENT' : isBooster ? 'OPEN BOOSTER' : 'BUY NOW'}
-        </button>
-      </div>
-
-      {/* Badge max_per_day */}
-      {item.max_per_day > 0 && (
-        <div style={{
-          position:'absolute', top:6, right:6,
-          background:'rgba(255,255,255,0.8)', borderRadius:10,
-          fontSize:7, color:'rgba(26,42,58,0.45)', padding:'2px 6px',
-          border:'1px solid rgba(0,60,100,0.1)',
-          fontFamily:"'Share Tech Mono', monospace",
-        }}>{item.max_per_day}/D</div>
-      )}
-    </motion.div>
-  )
-}
-
-// ── Boost actif badge ─────────────────────────────────────────────────────
 function ActiveBoostBadge({ boost }: { boost: any }) {
   const [, setTick] = useState(0)
   // Force re-render toutes les 30s pour le countdown
