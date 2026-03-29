@@ -12,10 +12,7 @@ import { FavoritePinsPanel } from './FavoritePins'
 import { MapOverlayLayer } from './MapOverlayLayer'
 import { HexCard } from './HexCard'
 import { AttackPanel } from '../hud/AttackPanel'
-import { ClaimModal } from './ClaimModal'
-import { HexodBottomBar } from '../hud/HexodBottomBar'
 import { injectGlowFilter, makeHexPolygon, injectHexAnimations, getVisibleHexes, makeGridHex } from './HexLayer'
-import { POIFilterPanel } from './POIFilterPanel'
 import { KingdomBorderLayer } from './KingdomBorderLayer'
 import { MyTerritoriesOverlay } from './MyTerritoriesOverlay'
 import { AttackAnimationLayer } from './AttackAnimationLayer'
@@ -65,7 +62,6 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
   const [tile,        setTile]        = useState<keyof typeof TILES>('dark')
   const [showHex,     setShowHex]     = useState(true)
-  const [showPOIPanel, setShowPOIPanel] = useState(false)
   const [poiCatFilter, setPoiCatFilter] = useState<string[]>(['all'])
   const [poiRarFilter, setPoiRarFilter] = useState<string[]>(['all'])
   const [showOverlay,  setShowOverlay]  = useState(true)
@@ -78,17 +74,11 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const selectedHexRef = useRef<string | null>(null)
   const selectedLayerRef = useRef<L.LayerGroup | null>(null)
   const [selectedHexLatLon, setSelectedHexLatLon] = useState<[number,number]|null>(null)
-  const [showClaimModal, setShowClaimModal] = useState(false)
-  const [claimTarget, setClaimTarget] = useState<TerritoryLight | null>(null)
   const [attackTarget,setAttackTarget]= useState<TerritoryLight | null>(null)
 
   const territories   = Object.values(useStore(s => s.territories))
   const player        = useStore(s => s.player)
   const storeSetCenter= useStore(s => s.setMapCenter)
-  const [hasClaimed, setHasClaimed] = useState(() => {
-    return localStorage.getItem('td_claimed_first') === '1'
-  })
-  const isFirstClaim = !hasClaimed && !(player?.territories_owned > 0)
 
   // ── Init ─────────────────────────────────────────────────────────────────
   useEffect(() => {
@@ -196,7 +186,6 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         setSelectedHex(null)
         setSelectedTerritoryState(null)
         setAttackTarget(null)
-        setClaimTarget(null)
         return
       }
 
@@ -311,8 +300,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
             } catch(_) {}
           }
           setSelectedTerritoryState(enriched)
-          if (!(enriched as any).owner_id) setClaimTarget(enriched)
-          else if ((enriched as any).owner_id !== player?.id) setAttackTarget(enriched)
+          if ((enriched as any).owner_id && (enriched as any).owner_id !== player?.id) setAttackTarget(enriched)
         }
       })
       if (poly) layer.addLayer(poly)
@@ -419,74 +407,20 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
           <HexCard
             territory={selectedTerritory}
             onClose={() => { setSelectedHex(null); setSelectedTerritoryState(null); selectedLayerRef.current?.clearLayers() }}
-            onRequestClaim={() => setShowClaimModal(true)}
           />
         )}
       </AnimatePresence>
 
-
-      {/* Claim Modal — at root level so position:fixed works */}
-      <AnimatePresence>
-        {showClaimModal && selectedTerritory && (
-          <ClaimModal
-            territory={selectedTerritory}
-            isFree={localStorage.getItem('td_claimed_first') !== '1'}
-            onClose={() => setShowClaimModal(false)}
-            onClaimed={() => {
-              setShowClaimModal(false)
-              localStorage.setItem('td_claimed_first', '1')
-              // Update store so hex shows as owned on map + in profile
-              if (selectedTerritory) {
-                const owned = { ...selectedTerritory, owner_id: player?.id, owner_username: player?.username }
-                useStore.getState().setTerritories([owned as any])
-                setSelectedTerritoryState(owned)
-              }
-              setSelectedHex(null)
-              setSelectedTerritoryState(null)
-              selectedLayerRef.current?.clearLayers()
-            }}
-          />
-        )}
-      </AnimatePresence>
-
-      {/* Modals */}
+      {/* Attack modal (direct hex-click on enemy territory) */}
       <AnimatePresence>
         {attackTarget && <AttackPanel target={attackTarget} onClose={() => setAttackTarget(null)} />}
       </AnimatePresence>
-      <AnimatePresence>
-        {claimTarget && <ClaimModal territory={claimTarget} isFree={isFirstClaim} onClose={() => setClaimTarget(null)} onClaimed={() => { setClaimTarget(null); setHasClaimed(true); localStorage.setItem('td_claimed_first','1') }} />}
-      </AnimatePresence>
-
-
-      {/* POI filter — contrôle quels territoires sont en surbrillance */}
-      <button
-        onClick={() => setShowPOIPanel(v => !v)}
-        title="Filtrer les POI en surbrillance"
-        style={{
-          position:'fixed', left:8, top:60, zIndex:920,
-          background: showPOIPanel ? 'rgba(139,92,246,0.3)' : 'rgba(4,4,12,0.92)',
-          border:`1px solid ${showPOIPanel ? 'rgba(139,92,246,0.6)' : 'rgba(255,255,255,0.1)'}`,
-          borderRadius:10, padding:'8px 10px', cursor:'pointer',
-          display:'flex', flexDirection:'column', alignItems:'center', gap:2,
-          backdropFilter:'blur(8px)',
-        }}
-      >
-        <span style={{ fontSize:16 }}>📍</span>
-        <span style={{ fontSize:8, color: showPOIPanel ? '#C4B5FD' : '#6B7280', fontWeight:700 }}>Filtres</span>
-      </button>
-
-      <POIFilterPanel
-        visible={showPOIPanel}
-        onClose={() => setShowPOIPanel(false)}
-        onFilterChange={(cats, rars) => { setPoiCatFilter(cats); setPoiRarFilter(rars) }}
-      />
 
       <KingdomBorderLayer map={mapRef.current} zoom={zoom} />
       <AttackAnimationLayer map={mapRef.current} />
       <BuildingsOverlayLayer map={mapRef.current} zoom={zoom} playerId={player?.id} />
       <TutorialArrow map={mapRef.current} />
       <MyTerritoriesOverlay onFlyTo={(lat, lon, z) => mapRef.current?.flyTo([lat, lon], z ?? 15, { duration: 1.2 })} />
-      <HexodBottomBar />
     </div>
   )
 }
