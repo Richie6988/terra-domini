@@ -8,7 +8,7 @@
     "total_patterns": 24,
     "total_weights": 87,
     "total_icons": 98,
-    "total_components": 17,
+    "total_components": 54,
     "total_commits": 23,
     "theme_migration": "COMPLETE",
     "core_loop_completion": "60%",
@@ -38,7 +38,8 @@
     "production_chain_balancing": 0.3,
     "skill_tree_rebalancing": 0.2,
     "repo_cleanup_after_migration": 1.0,
-    "delete_replaced_component": 1.0
+    "delete_replaced_component": 1.0,
+    "repo_cleanup_audit": 1.0
   },
   "file_risk": {
     "_description": "Regression probability per file. Method + verification strategy.",
@@ -281,6 +282,14 @@
       "pattern": "gamemap_renders_shell_components",
       "file": "GameMap.tsx",
       "fix": "GameMap renders ONLY map elements. Shell UI (dock, radar, ticker) belongs in App.tsx ONLY.",
+      "weight": 1.0,
+      "severity": "CRITICAL"
+    },
+    {
+      "id": "EP023",
+      "pattern": "duplicate_ui_from_unreplaced_old_components",
+      "file": "GameMap.tsx, App.tsx",
+      "fix": "ALWAYS delete old components in SAME commit as adding replacements. Audit: grep for old component names in all files after creating new.",
       "weight": 1.0,
       "severity": "CRITICAL"
     }
@@ -738,6 +747,17 @@
       "grep_for_old_imports_in_all_files",
       "remove_empty_directories",
       "update_brain_files"
+    ]
+  },
+  "cleanup_checklist": {
+    "_description": "Run after EVERY session. Richard's #1 rule.",
+    "steps": [
+      "1. grep for old component names in App.tsx, GameMap.tsx, store",
+      "2. Find orphans: for each component, check import count",
+      "3. Delete orphans (git rm)",
+      "4. Remove empty directories",
+      "5. Build check",
+      "6. Protected dirs: read_only_templates/, marketing/ — NEVER touch"
     ]
   }
 }
