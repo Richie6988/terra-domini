@@ -1,18 +1,19 @@
 {
   "_meta": {
     "format": "hexod_agent_weights_v2",
-    "version": 2,
+    "version": 3,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-29T12:00:00Z",
-    "session": 16,
+    "last_updated": "2026-03-30T10:00:00Z",
+    "session": 17,
     "total_patterns": 24,
     "total_weights": 87,
     "total_icons": 98,
     "total_components": 54,
     "total_commits": 23,
     "theme_migration": "COMPLETE",
-    "core_loop_completion": "60%",
-    "cleanup_lesson": "ALWAYS delete old files when creating replacements. Double UI = #1 user-visible bug."
+    "core_loop_completion": "65%",
+    "cleanup_lesson": "ALWAYS delete old files when creating replacements. Double UI = #1 user-visible bug.",
+    "mandatory_rules": 3
   },
   "task_routing": {
     "_description": "Autonomy level per task type. 1.0=execute immediately, 0.0=always ask.",
@@ -292,6 +293,22 @@
       "fix": "ALWAYS delete old components in SAME commit as adding replacements. Audit: grep for old component names in all files after creating new.",
       "weight": 1.0,
       "severity": "CRITICAL"
+    },
+    {
+      "id": "EP025",
+      "pattern": "claiming_work_not_done",
+      "file": "any",
+      "fix": "NEVER say a feature is integrated if it is a shortcut. Be explicit about what is a placeholder vs real integration.",
+      "weight": Infinity,
+      "severity": "TRUST_BREAKING"
+    },
+    {
+      "id": "EP026",
+      "pattern": "brain_not_read_before_task",
+      "file": "llm/agent_weights.json",
+      "fix": "ALWAYS read agent_weights.json at the START of every task. Update it during work. Commit updates with code.",
+      "weight": Infinity,
+      "severity": "PROCESS_VIOLATION"
     }
   ],
   "color_translation": {
@@ -549,6 +566,11 @@
     "also_include": {
       "action": "add_to_batch",
       "priority": "medium"
+    },
+    "you_lied": {
+      "action": "acknowledge_honestly_fix_immediately",
+      "severity": "CRITICAL",
+      "response": "Admit the shortcut. Show exactly what was faked. Fix it properly."
     }
   },
   "speed_calibration": {
@@ -759,5 +781,61 @@
       "5. Build check",
       "6. Protected dirs: read_only_templates/, marketing/ — NEVER touch"
     ]
+  },
+  "mandatory_rules": {
+    "rule_1_never_lie": {
+      "description": "NEVER claim work was done if it was not. NEVER say a feature is integrated if it is a shortcut/fake. If something is a placeholder, SAY SO explicitly.",
+      "weight": Infinity,
+      "added_by": "Richard — 2026-03-30"
+    },
+    "rule_2_brain_first": {
+      "description": "Start EVERY task by reading llm/agent_weights.json. Compile brain updates during work. Commit them in the SAME commit as code changes.",
+      "weight": Infinity,
+      "added_by": "Richard — 2026-03-30"
+    },
+    "rule_3_richards_work_is_standard": {
+      "description": "When Richard creates something (3D viewer, prototype, icon bank), it IS the quality standard. NEVER replace it with an inferior alternative. ALWAYS integrate it as the primary experience.",
+      "weight": 1.0,
+      "added_by": "Richard — 2026-03-30"
+    }
+  },
+  "game_design_v2": {
+    "codex_is_collection": {
+      "description": "The filter panel (RadarFilterPanel) BECOMES the Codex/Collection panel. Shows owned tokens. Access to 3D view, marketplace from here. Filters are INSIDE the codex, not separate.",
+      "replaces": "RadarFilterPanel as standalone filter panel"
+    },
+    "map_poi": {
+      "description": "All physical POI tokens are positioned on the map. Events and Safaris are NOT on the map — they are separate mechanics."
+    },
+    "events": {
+      "description": "News/sport-based events that create special tokens. Players register to win. Luck skill impacts loot. Potion de chance available in shop.",
+      "examples": [
+        "World Cup Final token",
+        "Election day token",
+        "SpaceX launch token"
+      ],
+      "mechanics": [
+        "register",
+        "luck_skill_impact",
+        "shop_potion_de_chance"
+      ]
+    },
+    "safaris": {
+      "description": "Random missions on fauna/dinosaur categories for tokens NOT in codex. Hex grid cell lights up (visible only to player). Player tracks with radar + clues. Part of daily challenges.",
+      "replaces": "Daily Hunt (M09)",
+      "examples": [
+        "Capture 5 fungus",
+        "Capture 20 rare dinosaurs"
+      ],
+      "mechanics": [
+        "random_spawn",
+        "player_only_visibility",
+        "radar_tracking",
+        "daily_challenges"
+      ]
+    },
+    "tokens_placement": {
+      "description": "Tokens won from Events/Safaris can be placed adjacently to already-captured territories. This creates strategic expansion."
+    }
   }
 }

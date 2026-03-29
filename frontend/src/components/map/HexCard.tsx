@@ -105,6 +105,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
       tokenName={cardName.toUpperCase()}
       category={(t.poi_category || biome || 'TERRITORY').toUpperCase()}
       catColor={cfg.c}
+      iconId={t.poi_icon || t.poi_category?.toLowerCase() || biome || 'city'}
       tier={rarity === 'mythic' ? 'EMERALD' : rarity === 'legendary' ? 'GOLD' : rarity === 'epic' ? 'SILVER' : 'BRONZE'}
       serial={serieNum || 1}
       maxSupply={cfg.serieMax}
