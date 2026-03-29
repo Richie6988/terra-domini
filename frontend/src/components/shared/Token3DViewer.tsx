@@ -141,20 +141,24 @@ export function Token3DViewer({
     el.appendChild(renderer.domElement)
     renderer.domElement.style.cursor = 'grab'
 
-    // Lights (faithful to original)
-    scene.add(new THREE.AmbientLight(0xffffff, 2.2))
-    const keyLight = new THREE.PointLight(0xffffff, 3.5, 25)
+    // Lights — boosted for front face visibility
+    scene.add(new THREE.AmbientLight(0xffffff, 3.0))
+    const keyLight = new THREE.PointLight(0xffffff, 5.0, 25)
     keyLight.position.set(5, 4, 8)
     scene.add(keyLight)
-    const rim = new THREE.PointLight(0xffffff, 2.5, 18)
+    const rim = new THREE.PointLight(0xffffff, 3.0, 18)
     rim.position.set(-5, 2, -4)
     scene.add(rim)
-    const fillLight = new THREE.PointLight(0x8888ff, 1.5, 15)
+    const fillLight = new THREE.PointLight(0x8888ff, 2.0, 15)
     fillLight.position.set(-3, -3, 5)
     scene.add(fillLight)
-    const topLight = new THREE.PointLight(0xffffff, 1.5, 12)
+    const topLight = new THREE.PointLight(0xffffff, 2.5, 12)
     topLight.position.set(0, 6, 4)
     scene.add(topLight)
+    // Front face dedicated light
+    const frontLight = new THREE.PointLight(0xffffff, 3.0, 15)
+    frontLight.position.set(0, 0, 8)
+    scene.add(frontLight)
 
     // Canvases
     const frontCanvas = document.createElement('canvas')
@@ -175,8 +179,9 @@ export function Token3DViewer({
 
     // Materials (premium physical)
     const fMat = new THREE.MeshPhysicalMaterial({
-      map: fTex, roughness: 0.02, metalness: 0.88,
-      clearcoat: 1.0, clearcoatRoughness: 0.01, reflectivity: 1.0,
+      map: fTex, roughness: 0.15, metalness: 0.6,
+      clearcoat: 1.0, clearcoatRoughness: 0.05, reflectivity: 0.8,
+      emissive: new THREE.Color(catColor), emissiveIntensity: 0.15,
     })
     const bMat = new THREE.MeshPhysicalMaterial({
       map: bTex, clearcoat: 1, roughness: 0.01, metalness: 0.9,
@@ -265,15 +270,60 @@ export function Token3DViewer({
       fCtx.fillStyle = g; fCtx.font = `bold ${s * 0.032}px Orbitron`
       fCtx.fillText(biome, c, s * 0.264)
 
-      // Image area (dark placeholder with category color glow)
+      // Central emblem — large hexagonal icon with category color
       const imageY = s * 0.293, imageH = s * 0.342
+      const imageCx = c, imageCy = imageY + imageH / 2
+      const emblemR = s * 0.13
+
+      // Background glow
       fCtx.save()
-      fCtx.shadowBlur = s * 0.05; fCtx.shadowColor = catColor
-      const imgGrad = fCtx.createRadialGradient(c, imageY + imageH / 2, 0, c, imageY + imageH / 2, boxW * 0.6)
-      imgGrad.addColorStop(0, catColor + '25')
+      fCtx.shadowBlur = s * 0.08; fCtx.shadowColor = catColor
+      const imgGrad = fCtx.createRadialGradient(imageCx, imageCy, 0, imageCx, imageCy, boxW * 0.5)
+      imgGrad.addColorStop(0, catColor + '35')
+      imgGrad.addColorStop(0.5, catColor + '10')
       imgGrad.addColorStop(1, '#020202')
       fCtx.fillStyle = imgGrad
       fCtx.fillRect(boxX, imageY, boxW, imageH)
+      fCtx.restore()
+
+      // Outer hex ring (tier metal)
+      fCtx.save()
+      fCtx.shadowBlur = 60; fCtx.shadowColor = catColor
+      fCtx.strokeStyle = tier.metal; fCtx.lineWidth = s * 0.008
+      drawHex(fCtx, imageCx, imageCy, emblemR * 1.3)
+      fCtx.stroke()
+      // Inner hex ring (category color)
+      fCtx.strokeStyle = catColor; fCtx.lineWidth = s * 0.004; fCtx.globalAlpha = 0.7
+      drawHex(fCtx, imageCx, imageCy, emblemR * 1.15)
+      fCtx.stroke(); fCtx.globalAlpha = 1
+      // Core hex fill
+      const coreGrad = fCtx.createRadialGradient(imageCx - emblemR * 0.3, imageCy - emblemR * 0.3, 0, imageCx, imageCy, emblemR)
+      coreGrad.addColorStop(0, catColor + 'cc')
+      coreGrad.addColorStop(1, catColor + '33')
+      fCtx.fillStyle = coreGrad
+      drawHex(fCtx, imageCx, imageCy, emblemR)
+      fCtx.fill()
+      fCtx.restore()
+
+      // Category initial — large centered letter
+      fCtx.save()
+      fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle'
+      fCtx.font = `900 ${s * 0.10}px Orbitron`
+      fCtx.fillStyle = '#fff'
+      fCtx.shadowBlur = 30; fCtx.shadowColor = catColor
+      fCtx.fillText(category.charAt(0), imageCx, imageCy)
+      fCtx.restore()
+
+      // Decorative orbiting dots
+      fCtx.save()
+      for (let i = 0; i < 6; i++) {
+        const ang = (i * Math.PI / 3) + state.holoAngle * 0.5
+        const dotX = imageCx + Math.cos(ang) * emblemR * 1.5
+        const dotY = imageCy + Math.sin(ang) * emblemR * 1.5
+        fCtx.fillStyle = tier.metal; fCtx.globalAlpha = 0.5 + Math.sin(state.holoAngle + i) * 0.3
+        fCtx.beginPath(); fCtx.arc(dotX, dotY, s * 0.005, 0, Math.PI * 2); fCtx.fill()
+      }
+      fCtx.globalAlpha = 1
       fCtx.restore()
 
       // Title bar
@@ -517,6 +567,10 @@ export function Token3DViewer({
     }
     window.addEventListener('resize', onResize)
 
+    // Escape key to close
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKeyDown)
+
     // Fade in
     renderer.domElement.style.opacity = '0'
     renderer.domElement.style.transition = 'opacity 1.5s ease-out'
@@ -526,6 +580,7 @@ export function Token3DViewer({
     return () => {
       cancelAnimationFrame(state.animId)
       window.removeEventListener('resize', onResize)
+      window.removeEventListener('keydown', onKeyDown)
       renderer.domElement.removeEventListener('pointerdown', onPointerDown)
       renderer.domElement.removeEventListener('pointermove', onPointerMove)
       renderer.domElement.removeEventListener('pointerup', onPointerUp)
@@ -556,30 +611,45 @@ export function Token3DViewer({
         {/* Three.js canvas container */}
         <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
 
-        {/* Close button */}
+        {/* Close button — prominent */}
         <button
           onClick={onClose}
           style={{
-            position: 'absolute', top: 20, right: 20, zIndex: 10,
-            width: 44, height: 44, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.15)',
-            color: '#fff', fontSize: 18, cursor: 'pointer',
+            position: 'absolute', top: 16, right: 16, zIndex: 10,
+            width: 48, height: 48, borderRadius: '50%',
+            background: 'rgba(255,255,255,0.1)', border: '2px solid rgba(255,255,255,0.25)',
+            color: '#fff', fontSize: 22, cursor: 'pointer',
             backdropFilter: 'blur(12px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+            transition: 'all 0.2s',
           }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.transform = 'scale(1.1)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.transform = 'scale(1)' }}
         >
           ✕
         </button>
 
-        {/* Info overlay — custom or default VAULT PRESTIGE panel */}
+        {/* Bottom hint */}
+        <div style={{
+          position: 'absolute', bottom: 16, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 10, padding: '6px 16px', borderRadius: 20,
+          background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+          color: 'rgba(255,255,255,0.3)', fontSize: 9, letterSpacing: 2,
+          fontFamily: "'Orbitron', sans-serif",
+        }}>
+          DRAG TO ROTATE · SCROLL TO ZOOM · ESC TO CLOSE
+        </div>
+
+        {/* Info overlay — custom panel at bottom or default VAULT PRESTIGE at left */}
         {infoPanel ? (
           <motion.div
-            initial={{ x: -120, opacity: 0 }}
-            animate={{ x: 0, opacity: 1 }}
-            transition={{ delay: 1.2, duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
+            initial={{ y: 80, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 1.0, duration: 0.6, ease: [0.2, 0.8, 0.2, 1] }}
             style={{
-              position: 'absolute', top: 20, left: 20, zIndex: 10,
-              maxHeight: 'calc(100vh - 40px)', overflowY: 'auto',
+              position: 'absolute', bottom: 50, left: '50%', transform: 'translateX(-50%)',
+              zIndex: 10, maxWidth: '90vw',
             }}
           >
             {infoPanel}

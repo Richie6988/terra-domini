@@ -3,8 +3,9 @@
  * Opens Token3DViewer (Richard's holographic 3D token) as the PRIMARY experience.
  * Territory info panel overlaid on the left.
  */
-import { useMemo } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { Token3DViewer } from '../shared/Token3DViewer'
+import { api } from '../../services/api'
 import { useStore, usePlayer } from '../../store'
 import toast from 'react-hot-toast'
 
@@ -73,8 +74,30 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
   const biome  = t.territory_type || t.biome || 'rural'
   const serieNum = t.token_id ? (parseInt(String(t.token_id)) % cfg.serieMax) + 1 : undefined
 
+  // Claim territory via API
+  const [claiming, setClaiming] = useState(false)
+  const handleClaim = useCallback(async () => {
+    if (claiming || !t.h3_index) return
+    setClaiming(true)
+    try {
+      const res = await api.post('/territories/claim/', {
+        h3_index: t.h3_index,
+        lat: t.center_lat ?? t.lat,
+        lon: t.center_lon ?? t.lon,
+      })
+      toast.success(`🏴 Territory claimed! Welcome to HEXOD.`)
+      // Update store with new ownership
+      const owned = { ...t, owner_id: player?.id, owner_username: player?.username }
+      useStore.getState().setTerritories([owned as any])
+      onClose()
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || err?.response?.data?.detail || 'Claim failed'
+      toast.error(msg)
+    } finally {
+      setClaiming(false)
+    }
+  }, [claiming, t, player, onClose])
 
-  // Token3DViewer is the PRIMARY experience — Richard's holographic viewer
   return (
     <Token3DViewer
       visible={true}
@@ -91,90 +114,82 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
       rarity={rarity === 'mythic' ? 99 : rarity === 'legendary' ? 95 : rarity === 'epic' ? 85 : rarity === 'rare' ? 70 : rarity === 'uncommon' ? 50 : 30}
       infoPanel={
         <div style={{
-          width: 320, padding: 20,
-          background: 'rgba(5,5,10,0.92)', borderRadius: 8,
-          backdropFilter: 'blur(25px)',
-          border: '1px solid rgba(255,255,255,0.08)',
-          boxShadow: '0 0 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05)',
-          fontFamily: "'Orbitron', sans-serif", color: '#fff',
-          maxHeight: '80vh', overflowY: 'auto',
+          display: 'flex', alignItems: 'center', gap: 12,
+          padding: '12px 20px', borderRadius: 16,
+          background: 'linear-gradient(180deg, rgba(235,242,250,0.95), rgba(220,230,242,0.92))',
+          backdropFilter: 'blur(30px) saturate(1.2)',
+          border: '1px solid rgba(0,60,100,0.15)',
+          boxShadow: '0 -4px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.8)',
+          fontFamily: "'Orbitron', system-ui, sans-serif",
+          maxWidth: 700, width: '100%',
         }}>
-          {/* Territory header */}
-          <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: 3, marginBottom: 4 }}>
-            {cardName.toUpperCase()}
-          </div>
-          <div style={{ display: 'flex', gap: 4, marginBottom: 12, flexWrap: 'wrap' }}>
-            <span style={{ padding: '2px 8px', borderRadius: 4, background: `${cfg.c}22`, color: cfg.c, fontSize: 9, fontWeight: 700, border: `1px solid ${cfg.c}44` }}>
-              {cfg.label}
-            </span>
-            {isShiny && <span style={{ padding: '2px 8px', borderRadius: 4, background: 'rgba(252,211,77,0.15)', color: '#FCD34D', fontSize: 9, fontWeight: 700 }}>✨ SHINY</span>}
-            <span style={{ padding: '2px 8px', borderRadius: 4, background: `${cfg.c}11`, color: cfg.c, fontSize: 9, fontWeight: 700 }}>
-              Grade {cfg.grade}
-            </span>
-          </div>
-
-          {/* Status */}
-          <div style={{ padding: '8px 10px', borderRadius: 6, marginBottom: 12,
-            background: isOwned ? 'rgba(0,136,74,0.1)' : isEnemy ? 'rgba(239,68,68,0.1)' : `${cfg.c}11`,
-            border: `1px solid ${isOwned ? 'rgba(0,136,74,0.3)' : isEnemy ? 'rgba(239,68,68,0.3)' : cfg.c + '33'}`,
-          }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: isOwned ? '#00FF87' : isEnemy ? '#EF4444' : cfg.c }}>
-              {isOwned ? '✅ YOUR TERRITORY' : isEnemy ? `⚔️ ${t.owner_username}` : '⬡ FREE — CLAIM IT'}
+          {/* Territory name + rarity */}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{
+              fontSize: 12, fontWeight: 900, color: '#1a2a3a', letterSpacing: 2,
+              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+            }}>
+              {cardName.toUpperCase()}
             </div>
-            <div style={{ fontSize: 9, color: '#F59E0B', marginTop: 4 }}>💰 +{income} HEX Coin/day</div>
-          </div>
-
-          {/* Facts */}
-          <div style={{ marginBottom: 12 }}>
-            {facts.map((f: string, i: number) => (
-              <div key={i} style={{ display: 'flex', gap: 6, marginBottom: 4 }}>
-                <span style={{ color: cfg.c, fontWeight: 700, fontSize: 9, flexShrink: 0 }}>#{i+1}</span>
-                <span style={{ fontSize: 9, color: '#9CA3AF', lineHeight: 1.4 }}>{f}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Token info */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 14, padding: '8px 10px', borderRadius: 6, background: 'rgba(139,92,246,0.06)', border: '1px solid rgba(139,92,246,0.15)' }}>
-            <div>
-              <div style={{ fontSize: 7, opacity: 0.4, letterSpacing: 2 }}>TOKEN ID</div>
-              <div style={{ fontSize: 9, fontWeight: 700, fontFamily: 'monospace' }}>HEX-{(t.h3_index||'').slice(0,8).toUpperCase()}</div>
-            </div>
-            <div>
-              <div style={{ fontSize: 7, opacity: 0.4, letterSpacing: 2 }}>BIOME</div>
-              <div style={{ fontSize: 9, fontWeight: 700 }}>{(biome || 'rural').toUpperCase()}</div>
+            <div style={{ display: 'flex', gap: 4, marginTop: 4 }}>
+              <span style={{
+                padding: '2px 8px', borderRadius: 10,
+                background: `${cfg.c}15`, color: cfg.c,
+                fontSize: 7, fontWeight: 700, border: `1px solid ${cfg.c}30`,
+              }}>
+                {cfg.label}
+              </span>
+              <span style={{
+                padding: '2px 8px', borderRadius: 10,
+                background: 'rgba(0,60,100,0.05)', color: 'rgba(26,42,58,0.5)',
+                fontSize: 7, fontWeight: 600,
+              }}>
+                {(biome || 'rural').toUpperCase()}
+              </span>
+              {isShiny && <span style={{
+                padding: '2px 8px', borderRadius: 10,
+                background: 'rgba(252,211,77,0.15)', color: '#cc8800',
+                fontSize: 7, fontWeight: 700,
+              }}>✨ SHINY</span>}
             </div>
           </div>
 
-          {/* Actions */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {/* Income */}
+          <div style={{ textAlign: 'center', flexShrink: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>
+              +{income}
+            </div>
+            <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.4)', letterSpacing: 1 }}>HEX/DAY</div>
+          </div>
+
+          {/* Action button */}
+          <div style={{ flexShrink: 0 }}>
             {isFree && player && (
-              <button onClick={onRequestClaim} style={{
-                width: '100%', padding: '12px', border: 'none', borderRadius: 8, cursor: 'pointer',
-                background: `linear-gradient(135deg, ${cfg.c}cc, ${cfg.c})`,
+              <button onClick={handleClaim} disabled={claiming} style={{
+                padding: '10px 20px', borderRadius: 12, border: 'none', cursor: claiming ? 'wait' : 'pointer',
+                background: claiming ? 'rgba(0,60,100,0.1)' : `linear-gradient(135deg, ${cfg.c}dd, ${cfg.c})`,
                 color: ['legendary','mythic','epic'].includes(rarity) ? '#000' : '#fff',
-                fontSize: 12, fontWeight: 900, letterSpacing: 2,
-                boxShadow: `0 4px 24px ${cfg.c}44`,
-              }}>🏴 CLAIM THIS TERRITORY</button>
+                fontSize: 10, fontWeight: 900, letterSpacing: 2,
+                boxShadow: claiming ? 'none' : `0 4px 16px ${cfg.c}44`,
+                opacity: claiming ? 0.6 : 1,
+              }}>
+                {claiming ? '⏳ CLAIMING...' : '🏴 CLAIM'}
+              </button>
             )}
             {isEnemy && (
-              <button onClick={onRequestClaim} style={{
-                width: '100%', padding: '12px', borderRadius: 8, cursor: 'pointer',
-                border: '1px solid rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.1)',
-                color: '#EF4444', fontSize: 12, fontWeight: 700, letterSpacing: 2,
-              }}>⚔️ ATTACK · 💸 PURCHASE</button>
+              <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('combat'), 100) }} style={{
+                padding: '10px 20px', borderRadius: 12, cursor: 'pointer',
+                border: '1px solid rgba(220,38,38,0.3)', background: 'rgba(220,38,38,0.08)',
+                color: '#dc2626', fontSize: 10, fontWeight: 900, letterSpacing: 2,
+              }}>⚔️ ATTACK</button>
             )}
             {isOwned && (
-              <button onClick={() => useStore.getState().setActivePanel('kingdom')} style={{
-                width: '100%', padding: '10px', borderRadius: 8, cursor: 'pointer',
-                border: '1px solid rgba(204,136,0,0.3)', background: 'rgba(204,136,0,0.1)',
-                color: '#cc8800', fontSize: 10, fontWeight: 700, letterSpacing: 2,
-              }}>👑 MANAGE KINGDOM</button>
+              <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('kingdom'), 100) }} style={{
+                padding: '10px 20px', borderRadius: 12, cursor: 'pointer',
+                border: '1px solid rgba(0,153,204,0.3)', background: 'rgba(0,153,204,0.08)',
+                color: '#0099cc', fontSize: 10, fontWeight: 900, letterSpacing: 2,
+              }}>👑 KINGDOM</button>
             )}
-          </div>
-
-          <div style={{ marginTop: 14, padding: '6px 0', borderTop: '1px solid rgba(255,255,255,0.06)', fontSize: 7, opacity: 0.25, letterSpacing: 2, textAlign: 'center' }}>
-            HEXOD · POLYGON POS · ERC-721
           </div>
         </div>
       }
