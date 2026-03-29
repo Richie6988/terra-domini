@@ -16,7 +16,7 @@ export function RadarTrigger({ onClick, scanning }: { onClick: () => void; scann
       style={{
         position: 'fixed',
         left: 0, top: 0, width: 48, height: '100%',
-        zIndex: 100,
+        zIndex: 900,
         cursor: 'pointer',
         background: 'linear-gradient(90deg, rgba(255,255,255,0.2) 0%, transparent 100%)',
         display: 'flex',

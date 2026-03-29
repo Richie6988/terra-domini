@@ -140,7 +140,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
       <button
         onClick={onProcessDay}
         style={{
-          width: '100%', padding: '12px', borderRadius: 20, border: 'none', cursor: 'pointer',
+          width: '100%', padding: '12px', borderRadius: 20, cursor: 'pointer',
           background: 'linear-gradient(90deg, #0099cc, #0891b2)',
           color: '#fff', fontSize: 8, fontWeight: 700, letterSpacing: 3,
           fontFamily: "'Orbitron', system-ui, sans-serif",
@@ -464,7 +464,7 @@ export function KingdomPanel({ onClose }: Props) {
             key={t.id}
             onClick={() => setTab(t.id)}
             style={{
-              flex: 1, padding: '7px 4px', borderRadius: 20, border: 'none', cursor: 'pointer',
+              flex: 1, padding: '7px 4px', borderRadius: 20, cursor: 'pointer',
               fontSize: 7, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
               background: tab === t.id ? `rgba(204,136,0,0.1)` : 'rgba(255,255,255,0.5)',
               color: tab === t.id ? '#cc8800' : 'rgba(26,42,58,0.45)',

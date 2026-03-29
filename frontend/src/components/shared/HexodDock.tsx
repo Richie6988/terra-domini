@@ -114,7 +114,7 @@ export function HexodDock() {
     <div style={{
       position: 'fixed',
       bottom: 0, left: 0, right: 0,
-      zIndex: 100,
+      zIndex: 900,
       display: 'flex', justifyContent: 'center',
       padding: '0 8px',
       paddingBottom: 'max(8px, env(safe-area-inset-bottom))',

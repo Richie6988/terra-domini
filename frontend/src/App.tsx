@@ -158,7 +158,7 @@ function GameScreen() {
       </ErrorBoundary>
 
       {/* Day cycle timer — auto-processes kingdoms */}
-      <div style={{ position: 'fixed', top: 68, right: 16, zIndex: 100 }}>
+      <div style={{ position: 'fixed', top: 68, right: 16, zIndex: 900 }}>
         <DayCycleWidget />
       </div>
 

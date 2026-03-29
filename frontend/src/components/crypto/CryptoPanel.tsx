@@ -268,7 +268,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
         <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
           {TABS.map(t => (
             <button key={t.id} onClick={() => setTab(t.id)} style={{
-              flex: 1, padding: '7px 4px', borderRadius: 20, border: 'none', cursor: 'pointer',
+              flex: 1, padding: '7px 4px', borderRadius: 20, cursor: 'pointer',
               fontSize: 7, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
               background: tab === t.id ? 'rgba(168,85,247,0.1)' : 'rgba(255,255,255,0.5)',
               color: tab === t.id ? '#a855f7' : 'rgba(26,42,58,0.45)',

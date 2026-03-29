@@ -30,7 +30,7 @@ export function HexodTopHUD() {
       justifyContent: 'space-between',
       alignItems: 'center',
       padding: '0 24px',
-      zIndex: 100,
+      zIndex: 900,
       pointerEvents: 'none',
     }}>
       {/* Left segment — Player identity */}

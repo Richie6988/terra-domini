@@ -67,7 +67,7 @@ export function NewsTicker() {
       position: 'fixed', top: 0, left: 0, right: 0,
       height: 28,
       background: 'linear-gradient(90deg, #0f172a, #1e293b, #0f172a)',
-      zIndex: 150, // above map overlay
+      zIndex: 900,
       display: 'flex',
       alignItems: 'center',
       overflow: 'hidden',

@@ -11,23 +11,14 @@
  *   🔬 Royaume — Resources + radial skill tree (always fully deployed)
  *   💎 NFT     — Token, marketplace
  */
-import { useState, useRef, useEffect, useMemo, Suspense } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { useState, useRef, useEffect, useMemo } from 'react'
 import { Token3DViewer } from '../shared/Token3DViewer'
-import { Environment } from '@react-three/drei'
-import * as THREE from 'three'
-
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../../services/api'
 import { useStore, usePlayer } from '../../store'
 import { ResourceBadge } from '../ui/ResourceTooltip'
 import toast from 'react-hot-toast'
-
-if (typeof window !== 'undefined') {
-  const _w = console.warn
-  console.warn = (...a: any[]) => { if (String(a[0]).includes('THREE.Clock')) return; _w(...a) }
-}
 
 /* ── Rarity ─────────────────────────────────────────────── */
 const RARITY: Record<string, {
@@ -579,246 +570,6 @@ function paintBackCanvas(cfg: typeof RARITY[RK], h3:string, income:number, floor
 }
 
 
-/* ── 3D Card — Artist3D spec ─────────────────────────────── */
-// Règles Artist3D :
-//   frameloop="always" ✓
-//   ExtrudeGeometry → sides seuls (groups 0..N-1, pas caps)
-//   Faces → ShapeGeometry séparées z=D+0.12 / z=-0.12
-//   UV remap 0→1 sur ShapeGeometry ✓
-//   Legendary/Mythic → MeshPhysicalMaterial (clearcoat + iridescence)
-//   Shiny → transmission + iridescence animée
-
-function HexCard3D({ frontCv, backCv, cfg, showBack, isShiny }: {
-  frontCv: HTMLCanvasElement; backCv?: HTMLCanvasElement
-  cfg:typeof RARITY[RK]; showBack:boolean; isShiny:boolean
-}) {
-  const groupRef = useRef<THREE.Group>(null!)
-  const velY = useRef(-0.25); const velX = useRef(0)
-  const shimmerRef = useRef(0)
-  const { gl, camera } = useThree()
-
-  // Drag + zoom
-  useEffect(() => {
-    const c = gl.domElement; let drag=false, lx=0, ly=0
-    const pd = (e:PointerEvent) => { drag=true; lx=e.clientX; ly=e.clientY; velY.current=0; velX.current=0 }
-    const pm = (e:PointerEvent) => { if(!drag)return; velY.current=(e.clientX-lx)*0.022; velX.current=-(e.clientY-ly)*0.013; lx=e.clientX; ly=e.clientY }
-    const pu = () => { drag=false }
-    const pw = (e:WheelEvent) => { e.preventDefault(); camera.position.z=Math.max(2.5,Math.min(8,camera.position.z+e.deltaY*0.005)) }
-    c.addEventListener('pointerdown',pd); window.addEventListener('pointermove',pm)
-    window.addEventListener('pointerup',pu); c.addEventListener('wheel',pw,{passive:false})
-    return ()=>{ c.removeEventListener('pointerdown',pd); window.removeEventListener('pointermove',pm); window.removeEventListener('pointerup',pu); c.removeEventListener('wheel',pw) }
-  },[gl])
-
-  useFrame((state, delta) => {
-    velY.current *= 0.93; velX.current *= 0.93
-    groupRef.current.rotation.y += velY.current
-    groupRef.current.rotation.x = Math.max(-0.7, Math.min(0.7, groupRef.current.rotation.x + velX.current))
-    // Shimmer rotatif + tilt-reactive
-    if (isShiny || cfg.foil === 'rainbow' || cfg.foil === 'prismatic') {
-      shimmerRef.current += delta * 0.8
-      if (shimmerRef.current > Math.PI*2) shimmerRef.current -= Math.PI*2
-    }
-    // Mettre à jour uniforms du shader tilt
-    if (shaderMatRef.current) {
-      shaderMatRef.current.uniforms.tiltX.value = groupRef.current.rotation.x
-      shaderMatRef.current.uniforms.tiltY.value = groupRef.current.rotation.y
-      shaderMatRef.current.uniforms.time.value   = state.clock.elapsedTime
-    }
-  })
-
-  const hexShape = useMemo(() => {
-    const s = new THREE.Shape()
-    for (let i=0; i<6; i++) {
-      const a = (Math.PI/3)*i - Math.PI/6
-      i===0 ? s.moveTo(1.5*Math.cos(a), 1.5*Math.sin(a)) : s.lineTo(1.5*Math.cos(a), 1.5*Math.sin(a))
-    }
-    s.closePath(); return s
-  },[])
-
-  // Prism sides only — ExtrudeGeometry group 0 = sides, 1 = caps
-  // Artist3D: on ne garde que le group sides
-  const sideGeo = useMemo(() => {
-    const g = new THREE.ExtrudeGeometry(hexShape, {
-      depth:0.22, bevelEnabled:true, bevelThickness:0.04, bevelSize:0.03, bevelSegments:3
-    })
-    return g
-  },[hexShape])
-
-  // Face geo avec UV remap
-  const faceGeo = useMemo(() => {
-    const g = new THREE.ShapeGeometry(hexShape)
-    g.computeBoundingBox()
-    const box = g.boundingBox!
-    const uv = g.attributes.uv
-    for (let i=0; i<uv.count; i++) {
-      uv.setXY(i,
-        (uv.getX(i)-box.min.x)/(box.max.x-box.min.x),
-        (uv.getY(i)-box.min.y)/(box.max.y-box.min.y)
-      )
-    }
-    uv.needsUpdate = true; return g
-  },[hexShape])
-
-  // Texture face avant
-  const frontTex = useMemo(() => {
-    const t = new THREE.CanvasTexture(frontCv)
-    t.flipY = true; t.needsUpdate = true; return t
-  },[frontCv])
-
-  // Shimmer tilt-reactive (ARTIST3D spec) — shiny/legendary/mythic
-  const shaderMatRef = useRef<THREE.ShaderMaterial | null>(null)
-  const useTiltShader = isShiny || cfg.foil === 'rainbow' || cfg.foil === 'prismatic' || cfg.foil === 'holographic'
-
-  // Matériau sides
-  const sideMat = useMemo(() => new THREE.MeshStandardMaterial({
-    color: new THREE.Color(cfg.c),
-    metalness: cfg.metalness, roughness: cfg.roughness, envMapIntensity: 1.5,
-  }),[cfg])
-
-  // Matériau face avant — ShaderMaterial pour high rarity, Standard pour le reste
-  const frontMat = useMemo(() => {
-    if (useTiltShader) {
-      const mat = new THREE.ShaderMaterial({
-        uniforms: {
-          tMap:  { value: frontTex },
-          tiltX: { value: 0.0 }, tiltY: { value: 0.0 },
-          time:  { value: 0.0 },
-          color: { value: new THREE.Color(cfg.c) },
-        },
-        vertexShader: `varying vec2 vUv; void main(){ vUv=uv; gl_Position=projectionMatrix*modelViewMatrix*vec4(position,1.0); }`,
-        fragmentShader: `
-          uniform sampler2D tMap; uniform float tiltX,tiltY,time; uniform vec3 color;
-          varying vec2 vUv;
-          void main(){
-            vec4 tex=texture2D(tMap,vUv);
-            vec2 shimPos=vec2(0.5+tiltY*0.55,0.5-tiltX*0.55);
-            float dist=length(vUv-shimPos);
-            float hi=smoothstep(0.55,0.0,dist)*0.4;
-            float band=sin((vUv.x*2.5+vUv.y*1.8+time*0.45+tiltY*1.2)*6.28)*0.5+0.5;
-            vec3 rainbow=mix(vec3(1.,.2,.4),mix(vec3(.2,.8,1.),vec3(.7,.2,1.),vUv.y),band);
-            vec3 result=tex.rgb+rainbow*0.10+color*hi;
-            gl_FragColor=vec4(result,tex.a);
-          }
-        `,
-        transparent: true,
-      })
-      shaderMatRef.current = mat
-      return mat as unknown as THREE.MeshStandardMaterial
-    }
-    return new THREE.MeshStandardMaterial({
-      map: frontTex, metalness: 0.05, roughness: 0.65,
-      envMapIntensity: isShiny ? 1.2 : 0.4,
-    })
-  }, [frontTex, isShiny, useTiltShader, cfg.c])
-
-  // Matériau face arrière — MeshPhysicalMaterial pour legendary/mythic
-  // backTex — canvas texture pour Common/Uncommon (CARD spec)
-  const backTex = useMemo(() => {
-    if (!backCv || cfg.foil !== 'none' && cfg.foil !== 'subtle') return null
-    const t = new THREE.CanvasTexture(backCv)
-    t.flipY = true; t.needsUpdate = true; return t
-  }, [backCv, cfg.foil])
-
-  const backMat = useMemo(() => {
-    // Common + Uncommon → canvas texture (CARD spec: cohérence visuelle)
-    if (backTex) {
-      return new THREE.MeshStandardMaterial({
-        map: backTex, metalness: 0.1, roughness: 0.8,
-      })
-    }
-    // Rare+ → MeshPhysicalMaterial avec iridescence
-    const isHighRarity = cfg.foil === 'rainbow' || cfg.foil === 'prismatic'
-    if (isHighRarity || isShiny) {
-      return new THREE.MeshPhysicalMaterial({
-        color: new THREE.Color(cfg.c),
-        metalness: cfg.metalness, roughness: cfg.roughness,
-        clearcoat: isShiny ? 1.0 : 0.7, clearcoatRoughness: 0.05,
-        iridescence: isShiny ? 1.0 : cfg.foil === 'prismatic' ? 0.9 : 0.6,
-        iridescenceIOR: 1.8, iridescenceThicknessRange: [100, 400],
-        envMapIntensity: isShiny ? 3.0 : 2.0,
-        emissive: new THREE.Color(cfg.c).multiplyScalar(isShiny ? 0.25 : 0.12),
-      })
-    }
-    // Shimmer/holographic (Rare/Epic)
-    return new THREE.MeshStandardMaterial({
-      color: new THREE.Color(cfg.c),
-      metalness: cfg.metalness, roughness: cfg.roughness + 0.1,
-      envMapIntensity: 1.8,
-      emissive: new THREE.Color(cfg.c).multiplyScalar(0.06),
-    })
-  }, [backTex, cfg, isShiny])
-
-  const D = 0.18
-
-  // Point light couleur rareté
-  const lightIntensity = isShiny ? 1.5 : cfg.glow > 0 ? 1.0 : 0.5
-
-  return (
-    <group ref={groupRef} rotation={[0.06, showBack ? Math.PI : -0.1, 0]}>
-      {/* Prism sides */}
-      <mesh geometry={sideGeo} material={sideMat} />
-      {/* Face avant — canvas texture */}
-      <mesh geometry={faceGeo} material={frontMat} position={[0, 0, D+0.12]} />
-      {/* Face arrière — metallic/iridescent */}
-      <mesh geometry={faceGeo} material={backMat} position={[0, 0, -0.12]} rotation={[0, Math.PI, 0]} />
-      {/* Lumière rareté */}
-      <pointLight position={[0, 0, 3.5]} intensity={lightIntensity} color={cfg.c} />
-      {/* Rimlight legendary/mythic */}
-      {cfg.glow > 8 && (
-        <pointLight position={[2, 1, -2]} intensity={0.6} color={cfg.accent} />
-      )}
-      {/* Particules orbitales legendary/mythic (ARTIST3D spec) */}
-      {cfg.particles && <OrbitalParticles color={cfg.c} accent={cfg.accent} isShiny={isShiny} />}
-    </group>
-  )
-}
-
-function OrbitalParticles({ color, accent, isShiny }: { color: string; accent: string; isShiny: boolean }) {
-  const ref = useRef<THREE.Points>(null!)
-  const count = isShiny ? 80 : 50
-
-  const [positions, sizes] = useMemo(() => {
-    const pos  = new Float32Array(count * 3)
-    const sz   = new Float32Array(count)
-    for (let i = 0; i < count; i++) {
-      const r     = 1.8 + Math.random() * 0.8
-      const theta = Math.random() * Math.PI * 2
-      const phi   = Math.random() * Math.PI
-      pos[i*3]   = r * Math.sin(phi) * Math.cos(theta)
-      pos[i*3+1] = r * Math.sin(phi) * Math.sin(theta)
-      pos[i*3+2] = r * Math.cos(phi) * 0.3  // aplati
-      sz[i] = 0.04 + Math.random() * 0.06
-    }
-    return [pos, sz]
-  }, [count])
-
-  useFrame((state) => {
-    if (!ref.current) return
-    ref.current.rotation.y = state.clock.elapsedTime * 0.3
-    ref.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.15) * 0.2
-  })
-
-  const geo = useMemo(() => {
-    const g = new THREE.BufferGeometry()
-    g.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-    g.setAttribute('size', new THREE.BufferAttribute(sizes, 1))
-    return g
-  }, [positions, sizes])
-
-  const mat = useMemo(() => new THREE.PointsMaterial({
-    color: new THREE.Color(color),
-    size: 0.06,
-    sizeAttenuation: true,
-    transparent: true,
-    opacity: 0.75,
-    blending: THREE.AdditiveBlending,
-    depthWrite: false,
-  }), [color])
-
-  return <points ref={ref} geometry={geo} material={mat} />
-}
-
-
 const BRANCHES = [
   { id:'attack',    ang:-90,  color:'#EF4444', icon:'⚔️', label:'Attaque'     },
   { id:'defense',   ang:-26,  color:'#3B82F6', icon:'🛡️', label:'Défense'     },
@@ -1051,67 +802,17 @@ function KingdomTab({ t, cfg }: { t:any; cfg:typeof RARITY[RK] }) {
 
 
 /* ── WebGL Card with Context Lost + LOD + GPU fallback (Artist3D spec) ─── */
-function detectGPUTier(): 'high' | 'mid' | 'low' {
-  try {
-    const canvas = document.createElement('canvas')
-    const gl = canvas.getContext('webgl2') || canvas.getContext('webgl')
-    if (!gl) return 'low'
-    const ext = (gl as WebGLRenderingContext).getExtension('WEBGL_debug_renderer_info')
-    if (ext) {
-      const renderer = (gl as any).getParameter(ext.UNMASKED_RENDERER_WEBGL) as string
-      if (/Mali-4|Adreno 3|PowerVR|Intel HD/i.test(renderer)) return 'low'
-      if (/Adreno 5|Mali-G5|Apple A1[0-2]/i.test(renderer)) return 'mid'
-    }
-    const maxTex = (gl as WebGLRenderingContext).getParameter(gl.MAX_TEXTURE_SIZE)
-    if (maxTex < 4096) return 'low'
-    if (maxTex < 8192) return 'mid'
-    return 'high'
-  } catch { return 'low' }
-}
-
-// LOD canvas size by GPU tier
-const LOD_SIZE: Record<string, number> = { high: 1024, mid: 512, low: 256 }
-
 function WebGLCardWithFallback({ frontCv, backCv, cfg, showBack, isShiny, isNewClaim }: {
   frontCv: HTMLCanvasElement; backCv: HTMLCanvasElement
   cfg: typeof RARITY[RK]; showBack: boolean; isShiny: boolean; isNewClaim?: boolean
 }) {
-  const [contextLost, setContextLost] = useState(false)
-  const [gpuTier] = useState<'high'|'mid'|'low'>(() => detectGPUTier())
   const [revealed, setRevealed] = useState(!isNewClaim)
-  const canvasRef = useRef<HTMLDivElement>(null)
 
-  // Context lost handler
-  useEffect(() => {
-    const el = canvasRef.current?.querySelector('canvas')
-    if (!el) return
-    const onLost = () => { setContextLost(true) }
-    const onRestored = () => { setContextLost(false) }
-    el.addEventListener('webglcontextlost', onLost)
-    el.addEventListener('webglcontextrestored', onRestored)
-    return () => {
-      el.removeEventListener('webglcontextlost', onLost)
-      el.removeEventListener('webglcontextrestored', onRestored)
-    }
-  })
-
-  // Reveal animation on new claim
   useEffect(() => {
     if (!isNewClaim) { setRevealed(true); return }
     const t = setTimeout(() => setRevealed(true), 100)
     return () => clearTimeout(t)
   }, [isNewClaim])
-
-  // LOD: downscale canvas if needed
-  const lodCv = useMemo(() => {
-    const size = LOD_SIZE[gpuTier] || 512
-    if (size >= 1024) return frontCv
-    const c = document.createElement('canvas')
-    c.width = c.height = size
-    const ctx = c.getContext('2d')!
-    ctx.drawImage(frontCv, 0, 0, size, size)
-    return c
-  }, [frontCv, gpuTier])
 
   const revealStyle = isNewClaim && !revealed ? {
     transform: 'translateY(60px) rotateY(180deg) scale(0.6)',
@@ -1122,48 +823,10 @@ function WebGLCardWithFallback({ frontCv, backCv, cfg, showBack, isShiny, isNewC
     transition: 'transform 0.9s cubic-bezier(0.175,0.885,0.32,1.275), opacity 0.5s ease',
   }
 
-  // Fallback to CSS3D on context lost or low GPU
-  if (contextLost || gpuTier === 'low') {
-    return (
-      <div style={{ zIndex:1, flexShrink:0, ...revealStyle }}>
-        <CSS3DCard frontCv={lodCv} cfg={cfg} showBack={showBack} isShiny={isShiny} />
-      </div>
-    )
-  }
-
+  // Always use CSS3D — WebGL causes Context Lost crashes in constrained environments
   return (
-    <div ref={canvasRef} style={{ width:240, height:270, cursor:'grab', zIndex:1, flexShrink:0, ...revealStyle }}>
-      {/* Glow reveal pour new claim */}
-      {isNewClaim && revealed && (
-        <motion.div
-          initial={{ opacity:0.8, scale:0.5 }}
-          animate={{ opacity:0, scale:3 }}
-          transition={{ duration:1.2, ease:'easeOut' }}
-          style={{
-            position:'absolute', width:'100%', height:'100%', borderRadius:'50%',
-            background:`radial-gradient(circle, ${cfg.c}88 0%, transparent 70%)`,
-            pointerEvents:'none', zIndex:2,
-          }}
-        />
-      )}
-      <Canvas
-        camera={{ position:[0,0,4.0], fov:42 }}
-        gl={{ antialias: gpuTier === 'high', alpha:true, powerPreference:'high-performance' }}
-        frameloop='always'
-        style={{ background:'transparent' }}
-        onCreated={({ gl }) => {
-          gl.domElement.addEventListener('webglcontextlost', () => setContextLost(true))
-          gl.domElement.addEventListener('webglcontextrestored', () => setContextLost(false))
-        }}
-      >
-        <Suspense fallback={null}>
-          <ambientLight intensity={0.3} />
-          <pointLight position={[3,4,3]} intensity={1.8} />
-          <pointLight position={[-2,-2,2]} intensity={0.6} color={cfg.c} />
-          <Environment preset='city' />
-          <HexCard3D frontCv={lodCv} backCv={backCv} cfg={cfg} showBack={showBack} isShiny={isShiny} />
-        </Suspense>
-      </Canvas>
+    <div style={{ zIndex:1, flexShrink:0, ...revealStyle }}>
+      <CSS3DCard frontCv={frontCv} cfg={cfg} showBack={showBack} isShiny={isShiny} />
     </div>
   )
 }

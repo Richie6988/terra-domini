@@ -23,7 +23,7 @@ export function SoundToggle() {
       style={{
         position: 'fixed',
         bottom: 80, left: 16,
-        zIndex: 100,
+        zIndex: 900,
         width: 36, height: 36,
         borderRadius: '50%',
         background: 'rgba(235,242,250,0.85)',

@@ -74,7 +74,7 @@ export function RadarWidget() {
       style={{
         position: 'fixed',
         bottom: 80, right: 16,
-        zIndex: 100,
+        zIndex: 900,
         cursor: 'pointer',
         filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))',
       }}

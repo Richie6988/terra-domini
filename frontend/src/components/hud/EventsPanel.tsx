@@ -138,7 +138,7 @@ export function EventsPanel({ onClose }: { onClose: () => void }) {
       <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
         {[{ id: 'towers', label: `TOWERS (${towers.length})` }, { id: 'world', label: `WORLD (${(pois as any[])?.length ?? 0})` }].map(t => (
           <button key={t.id} onClick={() => setTab(t.id as any)} style={{
-            flex: 1, padding: '7px', borderRadius: 20, border: 'none', cursor: 'pointer',
+            flex: 1, padding: '7px', borderRadius: 20, cursor: 'pointer',
             fontSize: 8, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
             background: tab === t.id ? 'rgba(249,115,22,0.12)' : 'rgba(255,255,255,0.5)',
             color: tab === t.id ? '#f97316' : 'rgba(26,42,58,0.45)',
