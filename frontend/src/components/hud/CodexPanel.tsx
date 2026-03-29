@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { GlassPanel } from '../shared/GlassPanel'
 import { IconSVG } from '../shared/iconBank'
 import { CrystalIcon } from '../shared/CrystalIcon'
+import { Token3DViewer } from '../shared/Token3DViewer'
 import { CATEGORIES } from '../shared/radarIconData'
 
 interface Props { onClose: () => void }
@@ -46,6 +47,7 @@ function getMockCollection(): Record<string, { owned: number; total: number; rar
 export function CodexPanel({ onClose }: Props) {
   const [selectedCat, setSelectedCat] = useState<string | null>(null)
   const [selectedToken, setSelectedToken] = useState<string | null>(null)
+  const [show3D, setShow3D] = useState(false)
   const collection = useMemo(() => getMockCollection(), [])
 
   // Category stats
@@ -334,11 +336,38 @@ export function CodexPanel({ onClose }: Props) {
                     )
                   })}
                 </div>
+
+                {/* VIEW IN 3D button */}
+                <button
+                  onClick={() => setShow3D(true)}
+                  style={{
+                    width: '100%', marginTop: 10, padding: '10px', borderRadius: 20,
+                    border: 'none', cursor: 'pointer',
+                    background: 'linear-gradient(90deg, #D4AF37, #CD7F32)',
+                    color: '#fff', fontSize: 8, fontWeight: 900, letterSpacing: 3,
+                    fontFamily: "'Orbitron', system-ui, sans-serif",
+                    boxShadow: '0 4px 20px rgba(212,175,55,0.3)',
+                  }}
+                >
+                  ◆ VIEW IN 3D — VAULT PRESTIGE
+                </button>
               </motion.div>
             )}
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Token 3D Viewer Modal */}
+      <Token3DViewer
+        visible={show3D}
+        onClose={() => setShow3D(false)}
+        tokenName={selectedToken ? activeCat?.icons.find(i => i.id === selectedToken)?.name.toUpperCase() ?? 'TERRITORY' : 'TERRITORY'}
+        category={activeCat?.name ?? 'UNKNOWN'}
+        catColor={activeCat?.color ?? '#39FF14'}
+        tier="GOLD"
+        serial={Math.floor(Math.random() * 999) + 1}
+        maxSupply={1000}
+      />
     </GlassPanel>
   )
 }

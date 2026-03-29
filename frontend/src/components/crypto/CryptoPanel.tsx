@@ -9,6 +9,7 @@ import { api } from '../../services/api'
 import { useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
+import { Token3DViewer } from '../shared/Token3DViewer'
 import { BurnTracker } from './BurnTracker'
 import { useTokenStats } from '../../hooks/useBlockchain'
 import toast from 'react-hot-toast'
@@ -240,6 +241,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState('wallet')
   const [showConvert, setShowConvert] = useState(false)
   const [showWithdraw, setShowWithdraw] = useState(false)
+  const [show3D, setShow3D] = useState(false)
   const [wAddr, setWAddr] = useState('')
   const [wAmt, setWAmt] = useState('10')
   const qc = useQueryClient()
@@ -303,29 +305,43 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
           )}
 
         {/* ── Cross-panel CTAs ── */}
-        <div style={{ marginTop: 16, display:'flex', gap:8 }}>
+        <div style={{ marginTop: 16, display:'flex', gap:8, flexDirection:'column' }}>
           <button
-            onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }}
+            onClick={() => setShow3D(true)}
             style={{
-              flex:1, padding:'10px', borderRadius:20,
-              background:'rgba(251,191,36,0.08)', border:'1px solid rgba(251,191,36,0.2)',
-              color:'#cc8800', fontSize:7, fontWeight:700, letterSpacing:2,
-              cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+              width:'100%', padding:'12px', borderRadius:20, border:'none', cursor:'pointer',
+              background:'linear-gradient(90deg, #D4AF37, #CD7F32)',
+              color:'#fff', fontSize:8, fontWeight:900, letterSpacing:3,
+              fontFamily:"'Orbitron', system-ui, sans-serif",
+              boxShadow:'0 4px 20px rgba(212,175,55,0.3)',
             }}
           >
-            🛒 SPEND → SHOP
+            ◆ VIEW NFT — VAULT PRESTIGE 3D
           </button>
-          <button
-            onClick={() => { onClose(); setTimeout(() => setActivePanel('marketplace'), 100) }}
-            style={{
-              flex:1, padding:'10px', borderRadius:20,
-              background:'rgba(204,136,0,0.08)', border:'1px solid rgba(204,136,0,0.2)',
-              color:'#cc8800', fontSize:7, fontWeight:700, letterSpacing:2,
-              cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
-            }}
-          >
-            🏪 NFT MARKET →
-          </button>
+          <div style={{ display:'flex', gap:8 }}>
+            <button
+              onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }}
+              style={{
+                flex:1, padding:'10px', borderRadius:20,
+                background:'rgba(251,191,36,0.08)', border:'1px solid rgba(251,191,36,0.2)',
+                color:'#cc8800', fontSize:7, fontWeight:700, letterSpacing:2,
+                cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+              }}
+            >
+              🛒 SPEND → SHOP
+            </button>
+            <button
+              onClick={() => { onClose(); setTimeout(() => setActivePanel('marketplace'), 100) }}
+              style={{
+                flex:1, padding:'10px', borderRadius:20,
+                background:'rgba(204,136,0,0.08)', border:'1px solid rgba(204,136,0,0.2)',
+                color:'#cc8800', fontSize:7, fontWeight:700, letterSpacing:2,
+                cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
+              }}
+            >
+              🏪 NFT MARKET →
+            </button>
+          </div>
         </div>
         </div>
       </GlassPanel>
@@ -350,6 +366,19 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
           </motion.div>
         </div>
       )}
+
+      <Token3DViewer
+        visible={show3D}
+        onClose={() => setShow3D(false)}
+        tokenName="GENESIS TERRITORY"
+        category="HEXOD VAULT"
+        catColor="#D4AF37"
+        tier="GOLD"
+        serial={1}
+        maxSupply={4842432}
+        edition="GENESIS"
+        biome="POLYGON"
+      />
     </>
   )
 }

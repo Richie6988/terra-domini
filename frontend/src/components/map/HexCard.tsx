@@ -13,6 +13,7 @@
  */
 import { useState, useRef, useEffect, useMemo, Suspense } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Token3DViewer } from '../shared/Token3DViewer'
 import { Environment } from '@react-three/drei'
 import * as THREE from 'three'
 
@@ -1322,6 +1323,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
 
   const [tab,setTab]=useState<'card'|'kingdom'|'nft'>('card')
   const [showBack,setShowBack]=useState(false)
+  const [show3D,setShow3D]=useState(false)
 
   return (
     <motion.div
@@ -1429,9 +1431,13 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                   <button style={{flex:1,padding:'9px',border:`1px solid ${cfg.c}44`,borderRadius:8,cursor:'pointer',background:`${cfg.c}14`,color:cfg.c,fontSize:11,fontWeight:700}}>💎 Minter</button>
                   <button style={{flex:1,padding:'9px',border:'1px solid rgba(59,130,246,0.35)',borderRadius:8,cursor:'pointer',background:'rgba(59,130,246,0.1)',color:'#60A5FA',fontSize:11,fontWeight:700}}
                     onClick={()=>useStore.getState().setActivePanel('marketplace')}>🏪 Marché</button>
-                  <button style={{flex:1,padding:'9px',border:'1px solid rgba(0,255,135,0.3)',borderRadius:8,cursor:'pointer',background:'rgba(0,255,135,0.1)',color:'#00FF87',fontSize:11,fontWeight:700}}
-                    onClick={()=>useStore.getState().setActivePanel('shop')}>🏪 Boutique</button>
                 </div>
+                <button onClick={()=>setShow3D(true)} style={{
+                  width:'100%',marginTop:7,padding:'10px',borderRadius:8,border:'none',cursor:'pointer',
+                  background:'linear-gradient(90deg,#D4AF37,#CD7F32)',color:'#fff',
+                  fontSize:10,fontWeight:900,letterSpacing:2,fontFamily:"'Orbitron',sans-serif",
+                  boxShadow:'0 4px 15px rgba(212,175,55,0.3)',
+                }}>◆ VIEW 3D — VAULT PRESTIGE</button>
               </div>
             )}
           </div>
@@ -1464,6 +1470,21 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
       )}
 
       <div style={{fontSize:9,color:'#1F2937',zIndex:1}}>Glisser pour tourner · Cliquer hors pour fermer</div>
+
+      <Token3DViewer
+        visible={show3D}
+        onClose={()=>setShow3D(false)}
+        tokenName={cardName.toUpperCase()}
+        category={(t.poi_category||biome).toUpperCase()}
+        catColor={cfg.c}
+        tier={rarity==='mythic'?'EMERALD':rarity==='legendary'?'GOLD':rarity==='epic'?'SILVER':'BRONZE'}
+        serial={serieNum||1}
+        maxSupply={cfg.serieMax}
+        edition="GENESIS"
+        biome={biome.toUpperCase()}
+        power={t.poi_geo_score||Math.floor(Math.random()*50)+50}
+        rarity={rarity==='mythic'?99:rarity==='legendary'?95:rarity==='epic'?85:rarity==='rare'?70:rarity==='uncommon'?50:30}
+      />
     </motion.div>
   )
 }
