@@ -837,5 +837,74 @@
     "tokens_placement": {
       "description": "Tokens won from Events/Safaris can be placed adjacently to already-captured territories. This creates strategic expansion."
     }
+  },
+  "prototype_gap": {
+    "_description": "Features in main_prototype.html NOT yet ported to React. Must be ported.",
+    "shop": {
+      "status": "PARTIAL — only API-fed catalog, missing hardcoded items from prototype",
+      "prototype_items": {
+        "attack": [
+          "2X Mint Speed (150)",
+          "Distant Territory (300)",
+          "2X Army (250)",
+          "Blitz Mode (400)"
+        ],
+        "defense": [
+          "72H Shield (500)",
+          "2X Defense (350)",
+          "Anti-Nuke (800)",
+          "Influence Resist (200)"
+        ],
+        "economy": [
+          "2X Extraction (200)",
+          "Energy Efficiency (180)",
+          "Rare Drop (350)",
+          "Trade Advantage (250)"
+        ],
+        "collection": [
+          "+Card Rarity (300)",
+          "+Event Prob (250)",
+          "Hunt Hints (100)",
+          "Luck Booster (400)"
+        ],
+        "social": [
+          "Global Message (50)",
+          "Extended Vision (200)",
+          "Brag Mode (350)",
+          "VIP Access (600)"
+        ],
+        "customize": [
+          "Avatar Skins (100-500)",
+          "Flag & Emblem (150)",
+          "Kingdom Colors (200)",
+          "Media Embed (300)",
+          "Live Stream (500)"
+        ]
+      },
+      "priority": "HIGH"
+    },
+    "military": {
+      "status": "PARTIAL — basic panel exists, missing 5-tab structure from prototype",
+      "prototype_tabs": [
+        "Recruit (6 unit types)",
+        "Train (queue+progress)",
+        "Deploy (kingdom assign)",
+        "War Room (active battles+defense bars)",
+        "History"
+      ],
+      "unit_types": [
+        "Infantry (5)",
+        "Naval (15)",
+        "Aerial (25)",
+        "Engineer (20)",
+        "Medic (30)",
+        "Spy (100)"
+      ],
+      "priority": "HIGH"
+    },
+    "token_3d": {
+      "status": "INTEGRATED — SVG icons + biome image now rendered on canvas. Image source is procedural (will be replaced with real DB images when provided by Richard).",
+      "priority": "DONE (pending real images)"
+    }
   }
 }

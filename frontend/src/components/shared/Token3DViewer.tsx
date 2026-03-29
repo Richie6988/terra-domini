@@ -378,45 +378,69 @@ export function Token3DViewer({
       fCtx.fillStyle = g; fCtx.font = `bold ${s * 0.032}px Orbitron`
       fCtx.fillText(biome, c, s * 0.264)
 
-      // Central emblem — real SVG icon from icon bank
+      // Central area — procedural biome image + SVG icon overlay
       const imageY = s * 0.293, imageH = s * 0.342
       const imageCx = c, imageCy = imageY + imageH / 2
 
-      // Background glow
+      // Biome-based procedural satellite texture
+      const biomeColors: Record<string, [string, string, string]> = {
+        URBAN: ['#2d3748', '#4a5568', '#718096'],
+        RURAL: ['#276749', '#38a169', '#68d391'],
+        FOREST: ['#1a4731', '#22543d', '#2f855a'],
+        MOUNTAIN: ['#4a3728', '#6b4226', '#a0aec0'],
+        COASTAL: ['#2b6cb0', '#3182ce', '#ebf4ff'],
+        DESERT: ['#b7791f', '#d69e2e', '#fefcbf'],
+        TUNDRA: ['#a0aec0', '#cbd5e0', '#edf2f7'],
+        INDUSTRIAL: ['#4a5568', '#718096', '#a0aec0'],
+        LANDMARK: ['#553c9a', '#6b46c1', '#d6bcfa'],
+      }
+      const bColors = biomeColors[(biome || 'URBAN').toUpperCase()] || biomeColors.URBAN
+
       fCtx.save()
-      fCtx.shadowBlur = s * 0.08; fCtx.shadowColor = catColor
-      const imgGrad = fCtx.createRadialGradient(imageCx, imageCy, 0, imageCx, imageCy, boxW * 0.5)
-      imgGrad.addColorStop(0, catColor + '35')
-      imgGrad.addColorStop(0.5, catColor + '10')
-      imgGrad.addColorStop(1, '#020202')
-      fCtx.fillStyle = imgGrad
+      fCtx.shadowBlur = s * 0.06; fCtx.shadowColor = catColor
+      // Base gradient
+      const bgGrad = fCtx.createLinearGradient(boxX, imageY, boxX + boxW, imageY + imageH)
+      bgGrad.addColorStop(0, bColors[0]); bgGrad.addColorStop(0.5, bColors[1]); bgGrad.addColorStop(1, bColors[2])
+      fCtx.fillStyle = bgGrad
       fCtx.fillRect(boxX, imageY, boxW, imageH)
+      // Procedural noise texture (terrain-like)
+      fCtx.globalAlpha = 0.15
+      for (let i = 0; i < 600; i++) {
+        const nx = boxX + Math.random() * boxW
+        const ny = imageY + Math.random() * imageH
+        const nr = Math.random() * s * 0.02 + 1
+        fCtx.fillStyle = Math.random() > 0.5 ? bColors[2] : bColors[0]
+        fCtx.beginPath(); fCtx.arc(nx, ny, nr, 0, Math.PI * 2); fCtx.fill()
+      }
+      fCtx.globalAlpha = 1
+      // Grid overlay (hex grid pattern)
+      fCtx.strokeStyle = catColor; fCtx.lineWidth = 0.5; fCtx.globalAlpha = 0.08
+      const gridStep = s * 0.04
+      for (let gx = boxX; gx < boxX + boxW; gx += gridStep) {
+        for (let gy = imageY; gy < imageY + imageH; gy += gridStep) {
+          drawHex(fCtx, gx + (Math.floor(gy / gridStep) % 2) * gridStep * 0.5, gy, gridStep * 0.45)
+          fCtx.stroke()
+        }
+      }
+      fCtx.globalAlpha = 1
       fCtx.restore()
 
-      // Render actual SVG icon (if available)
+      // SVG icon overlay on top of the biome image
       if (iconSvgString) {
         drawSVGIcon(fCtx, imageCx, imageCy, s * 0.22, iconSvgString, catColor)
       } else {
-        // Fallback: hex emblem with category initial
-        fCtx.save()
-        fCtx.shadowBlur = 60; fCtx.shadowColor = catColor
-        const coreG = fCtx.createRadialGradient(imageCx - s * 0.04, imageCy - s * 0.04, 0, imageCx, imageCy, s * 0.13)
-        coreG.addColorStop(0, catColor + 'cc'); coreG.addColorStop(1, catColor + '33')
-        fCtx.fillStyle = coreG; drawHex(fCtx, imageCx, imageCy, s * 0.13); fCtx.fill()
-        fCtx.strokeStyle = tier.metal; fCtx.lineWidth = s * 0.006; fCtx.stroke()
-        fCtx.restore()
+        // Fallback: category initial letter
         fCtx.save(); fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle'
         fCtx.font = `900 ${s * 0.08}px Orbitron`; fCtx.fillStyle = '#fff'
-        fCtx.shadowBlur = 30; fCtx.shadowColor = catColor
-        fCtx.fillText(category.charAt(0), imageCx, imageCy)
-        fCtx.restore()
+        fCtx.shadowBlur = 40; fCtx.shadowColor = catColor
+        fCtx.fillText(category.charAt(0), imageCx, imageCy); fCtx.restore()
       }
 
       // Orbiting dots (animated)
       fCtx.save()
       for (let i = 0; i < 6; i++) {
         const ang = (i * Math.PI / 3) + state.holoAngle * 0.5
-        const dotR = iconSvgString ? s * 0.15 : s * 0.19
+        const dotR = s * 0.17
         const dotX = imageCx + Math.cos(ang) * dotR
         const dotY = imageCy + Math.sin(ang) * dotR
         fCtx.fillStyle = tier.metal; fCtx.globalAlpha = 0.4 + Math.sin(state.holoAngle + i) * 0.3
