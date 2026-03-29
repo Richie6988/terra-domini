@@ -154,8 +154,13 @@ img { pointer-events: none; -webkit-user-drag: none; }
 .leaflet-container {
   background: #1a3d2e;
   font-family: var(--font-heading);
+  /* Contain Leaflet's internal z-indexes (tiles:200, markers:600, popups:700)
+     so they don't bleed above shell UI components */
+  isolation: isolate;
 }
 .leaflet-control-attribution { display: none; }
+/* Leaflet controls stay inside map, don't escape stacking context */
+.leaflet-control-container { z-index: 50 !important; }
 
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }

@@ -173,13 +173,15 @@ function GameScreen() {
         onFilterChange={(ids) => setRadarActive(ids.size > 0)}
       />
 
-      {/* Base map — full screen background */}
-      <ErrorBoundary label="GameMap">
-        <GameMap
-          onViewportChange={(lat, lon, radius_km) => sendViewport({ lat, lon, radius_km })}
-          onTerritoryClick={(h3) => subscribeTerritory(h3)}
-        />
-      </ErrorBoundary>
+      {/* Base map — full screen background, z-index isolated to prevent Leaflet bleeding */}
+      <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
+        <ErrorBoundary label="GameMap">
+          <GameMap
+            onViewportChange={(lat, lon, radius_km) => sendViewport({ lat, lon, radius_km })}
+            onTerritoryClick={(h3) => subscribeTerritory(h3)}
+          />
+        </ErrorBoundary>
+      </div>
 
       {/* Bottom dock — hex-shaped buttons */}
       <ErrorBoundary label="HexodDock">
