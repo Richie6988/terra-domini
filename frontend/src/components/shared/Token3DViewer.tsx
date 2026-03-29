@@ -47,6 +47,8 @@ export interface Token3DProps {
   power?: number
   rarity?: number
   description?: string
+  /** Custom info panel content — replaces the default VAULT PRESTIGE panel */
+  infoPanel?: React.ReactNode
 }
 
 export function Token3DViewer({
@@ -62,6 +64,7 @@ export function Token3DViewer({
   power = 87,
   rarity = 94,
   description,
+  infoPanel,
 }: Token3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const sceneRef = useRef<{
@@ -568,48 +571,62 @@ export function Token3DViewer({
           ✕
         </button>
 
-        {/* Token info overlay */}
-        <motion.div
-          initial={{ x: -120, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          transition={{ delay: 1.5, duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
-          style={{
-            position: 'absolute', top: 20, left: 20, zIndex: 10,
-            padding: 24, width: 280,
-            background: 'rgba(5,5,10,0.92)', borderRadius: 4,
-            backdropFilter: 'blur(25px)',
-            border: '1px solid rgba(255,255,255,0.08)',
-            boxShadow: '0 0 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05)',
-            fontFamily: "'Orbitron', sans-serif", color: '#fff',
-          }}
-        >
-          <div style={{ fontSize: 10, opacity: 0.6, letterSpacing: 2, marginBottom: 8 }}>VAULT PRESTIGE</div>
-          <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: 3, marginBottom: 4 }}>{tokenName}</div>
-          <div style={{ fontSize: 10, color: catColor, letterSpacing: 2, marginBottom: 16 }}>{category}</div>
+        {/* Info overlay — custom or default VAULT PRESTIGE panel */}
+        {infoPanel ? (
+          <motion.div
+            initial={{ x: -120, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 1.2, duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
+            style={{
+              position: 'absolute', top: 20, left: 20, zIndex: 10,
+              maxHeight: 'calc(100vh - 40px)', overflowY: 'auto',
+            }}
+          >
+            {infoPanel}
+          </motion.div>
+        ) : (
+          <motion.div
+            initial={{ x: -120, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            transition={{ delay: 1.5, duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
+            style={{
+              position: 'absolute', top: 20, left: 20, zIndex: 10,
+              padding: 24, width: 280,
+              background: 'rgba(5,5,10,0.92)', borderRadius: 4,
+              backdropFilter: 'blur(25px)',
+              border: '1px solid rgba(255,255,255,0.08)',
+              boxShadow: '0 0 60px rgba(0,0,0,0.8), inset 0 1px 0 rgba(255,255,255,0.05)',
+              fontFamily: "'Orbitron', sans-serif", color: '#fff',
+            }}
+          >
+            <div style={{ fontSize: 10, opacity: 0.6, letterSpacing: 2, marginBottom: 8 }}>VAULT PRESTIGE</div>
+            <div style={{ fontSize: 16, fontWeight: 900, letterSpacing: 3, marginBottom: 4 }}>{tokenName}</div>
+            <div style={{ fontSize: 10, color: catColor, letterSpacing: 2, marginBottom: 16 }}>{category}</div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {[
-              { label: 'TIER', value: tier.id, color: tier.metal },
-              { label: 'EDITION', value: edition, color: '#fff' },
-              { label: 'SERIAL', value: `${serial}/${maxSupply}`, color: '#fff' },
-              { label: 'BIOME', value: biome, color: '#fff' },
-              { label: 'POWER', value: `${power}`, color: catColor },
-              { label: 'RARITY', value: `${rarity}%`, color: tier.metal },
-            ].map(s => (
-              <div key={s.label}>
-                <div style={{ fontSize: 8, opacity: 0.4, letterSpacing: 2, marginBottom: 2 }}>{s.label}</div>
-                <div style={{ fontSize: 12, fontWeight: 700, color: s.color }}>{s.value}</div>
-              </div>
-            ))}
-          </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              {[
+                { label: 'TIER', value: tier.id, color: tier.metal },
+                { label: 'EDITION', value: edition, color: '#fff' },
+                { label: 'SERIAL', value: `${serial}/${maxSupply}`, color: '#fff' },
+                { label: 'BIOME', value: biome, color: '#fff' },
+                { label: 'POWER', value: `${power}`, color: catColor },
+                { label: 'RARITY', value: `${rarity}%`, color: tier.metal },
+              ].map(s => (
+                <div key={s.label}>
+                  <div style={{ fontSize: 8, opacity: 0.4, letterSpacing: 2, marginBottom: 2 }}>{s.label}</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: s.color }}>{s.value}</div>
+                </div>
+              ))}
+            </div>
 
-          <div style={{
-            marginTop: 16, padding: '8px 0', borderTop: '1px solid rgba(255,255,255,0.08)',
-            fontSize: 8, opacity: 0.3, letterSpacing: 2, textAlign: 'center',
-          }}>
-            HEXOD · POLYGON POS · ERC-721
-          </div>
-        </motion.div>
+            <div style={{
+              marginTop: 16, padding: '8px 0', borderTop: '1px solid rgba(255,255,255,0.08)',
+              fontSize: 8, opacity: 0.3, letterSpacing: 2, textAlign: 'center',
+            }}>
+              HEXOD · POLYGON POS · ERC-721
+            </div>
+          </motion.div>
+        )}
       </motion.div>
     </AnimatePresence>
   )
