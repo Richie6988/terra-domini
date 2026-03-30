@@ -183,27 +183,27 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       const target = e.originalEvent?.target as HTMLElement
       if (target?.closest('.territory-panel, .claim-modal, .attack-panel, .poi-panel')) return
 
-      // If a panel is open → close it and stop
-      if (selectedHexRef.current) {
-        selectedHexRef.current = null
-        selectedLayer.clearLayers()
-        selectedPoly = null
-        setSelectedHex(null)
-        setSelectedTerritoryState(null)
-        setAttackTarget(null)
-        return
-      }
-
-      // Open territory panel for clicked hex
+      // Always compute clicked hex at res 8
       try {
-        const zoom = map.getZoom()
-        const res = zoom <= 11 ? 6 : zoom <= 14 ? 7 : 8
-        const hx = latLngToCell(e.latlng.lat, e.latlng.lng, res)
+        const hx = latLngToCell(e.latlng.lat, e.latlng.lng, 8)
+
+        // If clicking the SAME hex → close
+        if (selectedHexRef.current === hx) {
+          selectedHexRef.current = null
+          selectedLayer.clearLayers()
+          selectedPoly = null
+          setSelectedHex(null)
+          setSelectedTerritoryState(null)
+          setAttackTarget(null)
+          return
+        }
+
+        // Open this hex (whether a different hex was open or not)
         const geo = e.latlng
         const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
         const existing = useStore.getState().territories[hx]
         const terr = existing || {
-          h3_index: hx, h3: hx, h3_resolution: res,
+          h3_index: hx, h3: hx, h3_resolution: 8,
           owner_id: null, owner_username: null,
           alliance_id: null, alliance_tag: null,
           territory_type: 'rural', type: 'rural',

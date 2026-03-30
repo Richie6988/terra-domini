@@ -21,7 +21,6 @@ const DOCK_ITEMS: DockItem[] = [
   { panel: 'hunt',        label: 'Safari',      color: '#f97316' },
   { panel: 'codex',       label: 'Codex',       color: '#7950f2' },
   { panel: 'auction',     label: 'Auction',     color: '#cc8800' },
-  { panel: 'tasks',       label: 'Tasks',       color: '#0099cc' },
   { panel: 'shop',        label: 'Shop',        color: '#fbbf24' },
   { panel: 'trade',       label: 'Trade',       color: '#22c55e' },
   { panel: 'marketplace', label: 'NFT',         color: '#cc8800' },
