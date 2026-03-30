@@ -84,10 +84,66 @@ export function AuctionPanel({ onClose }: Props) {
   const [selected, setSelected] = useState<Auction | null>(null)
   const [bidAmount, setBidAmount] = useState('')
   const [chatMsg, setChatMsg] = useState('')
-  const [chat, setChat] = useState(MOCK_CHAT)
+  const [chat, setChat] = useState<ChatMsg[]>([])
   const [show3D, setShow3D] = useState(false)
   const [countdowns, setCountdowns] = useState<Record<string, string>>({})
+  const [wsConnected, setWsConnected] = useState(false)
   const chatEndRef = useRef<HTMLDivElement>(null)
+  const wsRef = useRef<WebSocket | null>(null)
+
+  // WebSocket connection for selected auction
+  useEffect(() => {
+    if (!selected) {
+      wsRef.current?.close()
+      wsRef.current = null
+      setWsConnected(false)
+      return
+    }
+
+    // Connect to auction WebSocket
+    const proto = window.location.protocol === 'https:' ? 'wss' : 'ws'
+    const token = (window as any).__HEXOD_TOKEN__ || localStorage.getItem('hx_access') || ''
+    const url = `${proto}://${window.location.host}/ws/auction/${selected.id}/?token=${token}`
+
+    try {
+      const ws = new WebSocket(url)
+      wsRef.current = ws
+
+      ws.onopen = () => {
+        setWsConnected(true)
+        setChat([{ user: 'SYSTEM', text: 'Connected to auction chat', time: 'now' }])
+      }
+
+      ws.onmessage = (e) => {
+        try {
+          const data = JSON.parse(e.data)
+          if (data.type === 'chat') {
+            setChat(prev => [{ user: data.user, text: data.text, time: data.time }, ...prev])
+          } else if (data.type === 'bid') {
+            setChat(prev => [{
+              user: data.user, text: `BID: ${data.amount.toLocaleString()} HEX`, time: data.time, isBid: true,
+            }, ...prev])
+          } else if (data.type === 'system') {
+            setChat(prev => [{ user: 'SYSTEM', text: data.text, time: '' }, ...prev])
+          } else if (data.type === 'emoji') {
+            setChat(prev => [{ user: data.user, text: data.emoji, time: '' }, ...prev])
+          }
+        } catch {}
+      }
+
+      ws.onclose = () => setWsConnected(false)
+      ws.onerror = () => {
+        setWsConnected(false)
+        // Fallback to mock chat if WebSocket fails
+        setChat(MOCK_CHAT)
+      }
+    } catch {
+      // WebSocket not available — use mock
+      setChat(MOCK_CHAT)
+    }
+
+    return () => { wsRef.current?.close(); wsRef.current = null }
+  }, [selected?.id])
 
   // Update countdowns every second
   useEffect(() => {
@@ -107,18 +163,35 @@ export function AuctionPanel({ onClose }: Props) {
       toast.error(`Bid must exceed ${selected?.currentBid.toLocaleString()} HEX`)
       return
     }
+    // Send via WebSocket if connected, otherwise local mock
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'bid', amount: amt }))
+    } else {
+      setChat(prev => [{
+        user: 'YOU', text: `BID: ${amt.toLocaleString()} HEX`, time: 'now', isBid: true,
+      }, ...prev])
+    }
     toast.success(`🏷 Bid placed: ${amt.toLocaleString()} HEX`)
-    setChat(prev => [{
-      user: 'YOU', text: `BID: ${amt.toLocaleString()} HEX`, time: 'now', isBid: true,
-    }, ...prev])
     setBidAmount('')
   }, [bidAmount, selected])
 
   const handleChat = useCallback(() => {
     if (!chatMsg.trim()) return
-    setChat(prev => [{ user: 'YOU', text: chatMsg, time: 'now' }, ...prev])
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'chat', text: chatMsg.trim() }))
+    } else {
+      setChat(prev => [{ user: 'YOU', text: chatMsg, time: 'now' }, ...prev])
+    }
     setChatMsg('')
   }, [chatMsg])
+
+  const sendEmoji = useCallback((emoji: string) => {
+    if (wsRef.current?.readyState === WebSocket.OPEN) {
+      wsRef.current.send(JSON.stringify({ type: 'emoji', emoji }))
+    } else {
+      setChat(prev => [{ user: 'YOU', text: emoji, time: 'now' }, ...prev])
+    }
+  }, [])
 
   return (
     <GlassPanel title="AUCTIONS" onClose={onClose} accent="#cc8800" width="85vw">
@@ -287,8 +360,14 @@ export function AuctionPanel({ onClose }: Props) {
               padding: '8px 12px', background: 'rgba(0,60,100,0.04)',
               fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)',
               fontFamily: "'Orbitron', system-ui, sans-serif",
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              💬 LIVE CHAT · {selected.bidCount} PARTICIPANTS
+              <span>💬 LIVE CHAT · {selected.bidCount} PARTICIPANTS</span>
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%',
+                background: wsConnected ? '#22c55e' : '#f59e0b',
+                display: 'inline-block',
+              }} title={wsConnected ? 'Connected' : 'Local mode'} />
             </div>
 
             <div style={{ maxHeight: 150, overflowY: 'auto', padding: '8px 12px' }}>
@@ -299,7 +378,7 @@ export function AuctionPanel({ onClose }: Props) {
                 }}>
                   <span style={{
                     fontSize: 7, fontWeight: 900,
-                    color: msg.user === 'YOU' ? '#0099cc' : msg.isBid ? '#cc8800' : 'rgba(26,42,58,0.5)',
+                    color: msg.user === 'YOU' ? '#0099cc' : msg.user === 'SYSTEM' ? '#22c55e' : msg.isBid ? '#cc8800' : 'rgba(26,42,58,0.5)',
                     fontFamily: "'Orbitron', system-ui, sans-serif", flexShrink: 0,
                   }}>{msg.user}</span>
                   <span style={{
@@ -312,12 +391,23 @@ export function AuctionPanel({ onClose }: Props) {
               <div ref={chatEndRef} />
             </div>
 
-            {/* Chat input */}
+            {/* Emoji bar + chat input */}
+            <div style={{ display: 'flex', gap: 2, padding: '4px 8px', background: 'rgba(0,60,100,0.02)', borderTop: '1px solid rgba(0,60,100,0.04)' }}>
+              {['🔥','👀','💰','😤','👑','💎','⚡','😂'].map(em => (
+                <button key={em} onClick={() => sendEmoji(em)} style={{
+                  padding: '2px 4px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 12,
+                  opacity: 0.6, transition: 'opacity 0.15s',
+                }}
+                  onMouseEnter={e => (e.currentTarget.style.opacity = '1')}
+                  onMouseLeave={e => (e.currentTarget.style.opacity = '0.6')}
+                >{em}</button>
+              ))}
+            </div>
             <div style={{ display: 'flex', gap: 4, padding: '6px 8px', background: 'rgba(0,60,100,0.02)' }}>
               <input
                 value={chatMsg} onChange={e => setChatMsg(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleChat()}
-                placeholder="Type a message..."
+                placeholder={wsConnected ? "Type a message..." : "Chat (local mode)..."}
                 style={{
                   flex: 1, padding: '6px 10px', borderRadius: 8,
                   background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.08)',

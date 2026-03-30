@@ -1,0 +1,23 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2>Welcome to HEXOD, {{ username }}! ⬡</h2>
+<p>Your empire begins now. The world map is waiting — millions of hexagonal territories ready to be captured, traded, and built upon.</p>
+
+<div style="text-align:center;margin:24px 0">
+  <a href="{{ site_url }}" class="btn btn-primary">🗺️ ENTER THE MAP</a>
+</div>
+
+<h2 style="font-size:14px;color:#cc8800">Your first steps:</h2>
+<p>1. <strong>Claim your first territory</strong> — it's free! Click any hex on the map.<br>
+2. <strong>Complete daily tasks</strong> — earn HEX Coins to expand.<br>
+3. <strong>Track your first Safari</strong> — use the radar to find hidden creatures.<br>
+4. <strong>Join an alliance</strong> — strength in numbers.</p>
+
+<div class="stat-row">
+  <div class="stat"><div class="stat-val">🆓</div><div class="stat-label">FIRST CLAIM</div></div>
+  <div class="stat"><div class="stat-val">100◆</div><div class="stat-label">STARTER BONUS</div></div>
+  <div class="stat"><div class="stat-val">∞</div><div class="stat-label">TERRITORIES</div></div>
+</div>
+
+<p style="font-size:12px;color:#8899aa">Your referral code: <strong>{{ referral_code }}</strong> — share it and both earn 100 HEX when your friend reaches LVL 5.</p>
+{% endblock %}

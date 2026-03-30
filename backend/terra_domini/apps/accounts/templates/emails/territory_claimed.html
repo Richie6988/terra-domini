@@ -1,0 +1,10 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2>🏴 Territory Claimed!</h2>
+<p><strong>{{ username }}</strong>, you now own <strong>{{ territory_name }}</strong>!</p>
+<div class="stat-row">
+  <div class="stat"><div class="stat-val" style="color:#f59e0b">{{ rarity|upper }}</div><div class="stat-label">RARITY</div></div>
+  <div class="stat"><div class="stat-val">{{ h3_index|truncatechars:12 }}</div><div class="stat-label">H3 INDEX</div></div>
+</div>
+<div style="text-align:center;margin:20px 0"><a href="{{ site_url }}" class="btn btn-gold">👑 VIEW YOUR EMPIRE</a></div>
+{% endblock %}

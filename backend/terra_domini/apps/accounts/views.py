@@ -64,6 +64,13 @@ class RegisterView(generics.CreateAPIView):
         refresh = RefreshToken.for_user(player)
         logger.info(f"New player registered: {player.username}")
 
+        # Send welcome email (async-safe, won't block if SMTP fails)
+        try:
+            from terra_domini.apps.accounts.email_service import send_welcome_email
+            send_welcome_email(player)
+        except Exception as e:
+            logger.warning(f"Welcome email failed for {player.username}: {e}")
+
         return Response({
             'message': 'Account created',
             'access': str(refresh.access_token),

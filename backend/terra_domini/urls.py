@@ -15,6 +15,9 @@ from terra_domini.apps.accounts.views import UpdateProfileView
 from terra_domini.apps.accounts.geoip_view import GeoIPView
 from terra_domini.frontend_view import FrontendAppView
 
+# Mail
+from terra_domini.apps.mail.views import inbox as mail_inbox, mark_read as mail_mark_read
+
 # ─── Views imports ────────────────────────────────────────────────────────────
 from terra_domini.apps.accounts.views import UpdateProfileView
 from terra_domini.apps.accounts.views import (
@@ -134,6 +137,10 @@ urlpatterns = [
     path('api/solana/stake/',            StakeView.as_view()),
     path('api/solana/staking/action/',   StakeView.as_view()),  # alias pour StakingPanel
     path('api/solana/claim-rewards/',    ClaimStakingRewardsView.as_view()),
+
+    # ── Mail ──
+    path('api/mail/inbox/',          mail_inbox),
+    path('api/mail/<int:pk>/read/',  mail_mark_read),
     path('api/social/my-referral/',   MyReferralView.as_view(),      name='my_referral'),
 
     # ── Router (all ViewSets) ─────────────────────────────────────────────────

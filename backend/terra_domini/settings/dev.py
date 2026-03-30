@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'terra_domini.apps.blockchain',
     'terra_domini.apps.events',
     'terra_domini.apps.websocket',
+    'terra_domini.apps.mail',
     'terra_domini.apps.progression',
     'terra_domini.apps.social',
     'terra_domini.apps.admin_gm',

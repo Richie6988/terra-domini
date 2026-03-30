@@ -1,0 +1,10 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2>⚠️ You Have Been Outbid</h2>
+<p>Someone placed a higher bid on <strong>{{ token_name }}</strong>.</p>
+<div class="stat-row">
+  <div class="stat"><div class="stat-val" style="color:#dc2626">{{ current_bid }}◆</div><div class="stat-label">CURRENT BID</div></div>
+</div>
+<p>Act fast — the auction ends soon!</p>
+<div style="text-align:center;margin:20px 0"><a href="{{ site_url }}" class="btn btn-primary">⚡ BID NOW</a></div>
+{% endblock %}

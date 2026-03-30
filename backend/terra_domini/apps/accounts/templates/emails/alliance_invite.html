@@ -1,0 +1,7 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2>🏰 Alliance Invitation</h2>
+<p><strong>{{ inviter }}</strong> has invited you to join <strong>{{ alliance_name }}</strong>!</p>
+<p>Join forces to conquer more territory, share resources, and dominate the leaderboard.</p>
+<div style="text-align:center;margin:20px 0"><a href="{{ site_url }}" class="btn btn-primary">🤝 VIEW INVITATION</a></div>
+{% endblock %}

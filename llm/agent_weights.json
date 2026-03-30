@@ -3,7 +3,7 @@
     "format": "hexod_agent_weights_v2",
     "version": 4,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-30T18:00:00Z",
+    "last_updated": "2026-03-30T19:00:00Z",
     "session": 19,
     "total_patterns": 24,
     "total_weights": 87,
@@ -1154,5 +1154,45 @@
       "events/create_world_events.py"
     ],
     "severity": "CRITICAL — all backend endpoints crashed without this fix"
+  },
+  "email_system": {
+    "service": "terra_domini.apps.accounts.email_service",
+    "templates": [
+      "welcome",
+      "password_reset",
+      "territory_claimed",
+      "event_result",
+      "auction_won",
+      "auction_outbid",
+      "alliance_invite",
+      "attack_alert"
+    ],
+    "providers": [
+      "Mailpit (dev, port 1025/8025)",
+      "SMTP (any)",
+      "Resend API",
+      "Console (fallback)"
+    ],
+    "hooks": [
+      "RegisterView → send_welcome_email",
+      "claim endpoint → send_territory_claimed_email"
+    ]
+  },
+  "auction_chat": {
+    "backend": "AuctionChatConsumer (Django Channels)",
+    "route": "ws/auction/<auction_id>/",
+    "messages": [
+      "chat",
+      "bid",
+      "system",
+      "emoji"
+    ],
+    "frontend": "AuctionPanel WebSocket with fallback to mock",
+    "features": [
+      "emoji bar (8 emojis)",
+      "connection indicator (green/yellow)",
+      "bid via WS",
+      "system join/leave messages"
+    ]
   }
 }

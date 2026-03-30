@@ -552,23 +552,21 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             logger.warning(f'Resource init failed: {e}')
 
         logger.info(f"Territory claimed: {h3_index} by {request.user.username} (method={method})")
-        # Vérifier progression campagne après claim
+
+        # Check campaign progress (once)
         try:
             from terra_domini.apps.progression.campaigns import check_campaign_progress
             check_campaign_progress(request.user)
         except Exception:
             pass
-        # Déclencher vérification progression campagnes
+
+        # Send territory claimed email
         try:
-            from terra_domini.apps.progression.campaigns import check_campaign_progress
-            check_campaign_progress(request.user)
-        except Exception:
-            pass
-        # Vérifier progression campagnes après claim
-        try:
-            from terra_domini.apps.progression.campaigns import check_campaign_progress
-            check_campaign_progress(request.user)
-        except Exception: pass
+            from terra_domini.apps.accounts.email_service import send_territory_claimed_email
+            send_territory_claimed_email(request.user, territory)
+        except Exception as e:
+            logger.warning(f'Claim email failed: {e}')
+
         # Create map overlay event
         try:
             from terra_domini.apps.territories.models import MapOverlayEvent

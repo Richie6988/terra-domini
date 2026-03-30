@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  body { margin:0; padding:0; background:#eef2f7; font-family:'Segoe UI',Roboto,sans-serif; }
+  .container { max-width:560px; margin:0 auto; padding:20px; }
+  .card { background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 4px 24px rgba(0,0,0,0.08); }
+  .header { background:linear-gradient(135deg,#0a0a12,#1a1a2e); padding:30px; text-align:center; }
+  .logo { font-family:'Courier New',monospace; font-size:28px; font-weight:900; letter-spacing:8px; color:#fff; }
+  .logo span { color:#0099cc; }
+  .subtitle { font-size:10px; color:rgba(255,255,255,0.4); letter-spacing:4px; margin-top:6px; }
+  .body { padding:30px; color:#1a2a3a; line-height:1.7; font-size:15px; }
+  .body h2 { font-size:18px; font-weight:700; margin:0 0 12px; color:#1a2a3a; }
+  .body p { margin:0 0 14px; }
+  .btn { display:inline-block; padding:14px 32px; border-radius:12px; text-decoration:none; font-weight:700; font-size:14px; letter-spacing:1px; }
+  .btn-primary { background:linear-gradient(135deg,#0099cc,#0077aa); color:#fff; }
+  .btn-gold { background:linear-gradient(135deg,#D4AF37,#cc8800); color:#fff; }
+  .stat-row { display:flex; gap:12px; margin:16px 0; }
+  .stat { flex:1; background:#f7f9fc; border-radius:10px; padding:12px; text-align:center; border:1px solid #e8eef5; }
+  .stat-val { font-size:22px; font-weight:900; color:#0099cc; }
+  .stat-label { font-size:10px; color:#8899aa; letter-spacing:1px; margin-top:4px; }
+  .footer { padding:20px 30px; background:#f7f9fc; text-align:center; font-size:11px; color:#8899aa; border-top:1px solid #e8eef5; }
+  .footer a { color:#0099cc; text-decoration:none; }
+  .hex { display:inline-block; color:#7950f2; font-size:18px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="card">
+    <div class="header">
+      <div class="logo">HEX<span>O</span>D</div>
+      <div class="subtitle">OWN THE WORLD · HEX BY HEX</div>
+    </div>
+    <div class="body">
+      {% block content %}{% endblock %}
+    </div>
+    <div class="footer">
+      <p>HEXOD — Geo-Strategic NFT Game on Polygon</p>
+      <p><a href="https://hexod.io">hexod.io</a> · <a href="https://hexod.io/unsubscribe?token={{ unsubscribe_token }}">Unsubscribe</a></p>
+    </div>
+  </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2>🎁 Event Result: {{ event_name }}</h2>
+<p>The event <strong>{{ event_name }}</strong> has ended!</p>
+<div class="stat-row">
+  <div class="stat"><div class="stat-val" style="color:{{ status_color }}">{{ status|upper }}</div><div class="stat-label">RESULT</div></div>
+  <div class="stat"><div class="stat-val">{{ rarity|upper }}</div><div class="stat-label">RARITY</div></div>
+  <div class="stat"><div class="stat-val">{{ hex_earned }}◆</div><div class="stat-label">HEX EARNED</div></div>
+</div>
+<div style="text-align:center;margin:20px 0"><a href="{{ site_url }}" class="btn btn-primary">🎯 VIEW TOKEN</a></div>
+{% endblock %}

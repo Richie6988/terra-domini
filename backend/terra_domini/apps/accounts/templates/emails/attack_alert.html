@@ -1,0 +1,11 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2>⚔️ Territory Under Attack!</h2>
+<p><strong>{{ attacker }}</strong> is attacking your territory <strong>{{ territory_name }}</strong>!</p>
+<div class="stat-row">
+  <div class="stat"><div class="stat-val" style="color:#dc2626">{{ attacker_power }}</div><div class="stat-label">ENEMY POWER</div></div>
+  <div class="stat"><div class="stat-val" style="color:#0099cc">{{ defense_power }}</div><div class="stat-label">YOUR DEFENSE</div></div>
+</div>
+<p>Send reinforcements before it is too late!</p>
+<div style="text-align:center;margin:20px 0"><a href="{{ site_url }}" class="btn btn-primary">🚨 DEFEND NOW</a></div>
+{% endblock %}

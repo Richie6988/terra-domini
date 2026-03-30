@@ -1,0 +1,10 @@
+{% extends "emails/base.html" %}
+{% block content %}
+<h2>🏆 Auction Won!</h2>
+<p>Congratulations <strong>{{ username }}</strong>! You won the auction for <strong>{{ token_name }}</strong>.</p>
+<div class="stat-row">
+  <div class="stat"><div class="stat-val" style="color:#cc8800">{{ final_bid }}◆</div><div class="stat-label">FINAL BID</div></div>
+  <div class="stat"><div class="stat-val">#{{ serial }}</div><div class="stat-label">SERIAL</div></div>
+</div>
+<div style="text-align:center;margin:20px 0"><a href="{{ site_url }}" class="btn btn-gold">💎 VIEW IN CODEX</a></div>
+{% endblock %}
