@@ -207,109 +207,36 @@ export function Token3DViewer({
     card.rotation.y = -Math.PI
     card.scale.set(0, 0, 0)
 
-    // ═══ SVG ICON RENDERING (ported from original template) ═══
-    // Parses SVG strings and draws them on Canvas 2D
+    // ═══ SVG ICON RENDERING ═══
+    // Pre-render icon to Image via SVG blob — handles <g transform> correctly
     const iconSvgString = iconId ? getIcon(iconId) : ''
+    const iconImage = new Image()
+    let iconLoaded = false
 
-    function parseAttributes(attrString: string): Record<string, string> {
-      const attrs: Record<string, string> = {}
-      const regex = /([\w-]+)="([^"]*)"/g
-      let m: RegExpExecArray | null
-      while ((m = regex.exec(attrString)) !== null) attrs[m[1]] = m[2]
-      return attrs
+    if (iconSvgString) {
+      // Ensure SVG has xmlns for blob rendering
+      let svgStr = iconSvgString
+      if (!svgStr.includes('xmlns')) {
+        svgStr = svgStr.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
+      }
+      const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      iconImage.onload = () => {
+        iconLoaded = true
+        URL.revokeObjectURL(url)
+      }
+      iconImage.onerror = () => { URL.revokeObjectURL(url) }
+      iconImage.src = url
     }
 
-    function drawSVGContent(ctx: CanvasRenderingContext2D, svgString: string, iconColor: string) {
-      // Draw circles
-      const circleRegex = /<circle([^>]*)\/?>/g
-      let m: RegExpExecArray | null
-      while ((m = circleRegex.exec(svgString)) !== null) {
-        const a = parseAttributes(m[1])
-        ctx.beginPath()
-        ctx.arc(parseFloat(a.cx || '0'), parseFloat(a.cy || '0'), parseFloat(a.r || '0'), 0, Math.PI * 2)
-        if (a.fill && a.fill !== 'none') { ctx.fillStyle = a.fill === 'currentColor' ? iconColor : a.fill; ctx.fill() }
-        if (a.stroke && a.stroke !== 'none') { ctx.strokeStyle = a.stroke === 'currentColor' ? iconColor : a.stroke; ctx.lineWidth = parseFloat(a['stroke-width'] || '1'); ctx.stroke() }
-      }
-      // Draw paths (using Path2D)
-      const pathRegex = /<path([^>]*)\/?>/g
-      while ((m = pathRegex.exec(svgString)) !== null) {
-        const a = parseAttributes(m[1])
-        if (!a.d) continue
-        try {
-          const path = new Path2D(a.d)
-          if (a.fill && a.fill !== 'none') { ctx.fillStyle = a.fill === 'currentColor' ? iconColor : a.fill; ctx.fill(path) }
-          if (a.stroke && a.stroke !== 'none') {
-            ctx.strokeStyle = a.stroke === 'currentColor' ? iconColor : a.stroke
-            ctx.lineWidth = parseFloat(a['stroke-width'] || '1')
-            ctx.lineCap = (a['stroke-linecap'] || 'butt') as CanvasLineCap
-            ctx.lineJoin = (a['stroke-linejoin'] || 'miter') as CanvasLineJoin
-            ctx.stroke(path)
-          }
-        } catch {}
-      }
-      // Draw rects
-      const rectRegex = /<rect([^>]*)\/?>/g
-      while ((m = rectRegex.exec(svgString)) !== null) {
-        const a = parseAttributes(m[1])
-        const x = parseFloat(a.x || '0'), y = parseFloat(a.y || '0')
-        const w = parseFloat(a.width || '0'), h = parseFloat(a.height || '0')
-        if (a.fill && a.fill !== 'none') { ctx.fillStyle = a.fill === 'currentColor' ? iconColor : a.fill; ctx.fillRect(x, y, w, h) }
-        if (a.stroke && a.stroke !== 'none') { ctx.strokeStyle = a.stroke === 'currentColor' ? iconColor : a.stroke; ctx.lineWidth = parseFloat(a['stroke-width'] || '1'); ctx.strokeRect(x, y, w, h) }
-      }
-      // Draw lines
-      const lineRegex = /<line([^>]*)\/?>/g
-      while ((m = lineRegex.exec(svgString)) !== null) {
-        const a = parseAttributes(m[1])
-        ctx.beginPath()
-        ctx.moveTo(parseFloat(a.x1 || '0'), parseFloat(a.y1 || '0'))
-        ctx.lineTo(parseFloat(a.x2 || '0'), parseFloat(a.y2 || '0'))
-        ctx.strokeStyle = (a.stroke === 'currentColor' ? iconColor : a.stroke) || iconColor
-        ctx.lineWidth = parseFloat(a['stroke-width'] || '1')
-        ctx.lineCap = (a['stroke-linecap'] || 'butt') as CanvasLineCap
-        ctx.stroke()
-      }
-      // Draw polylines/polygons
-      const polyRegex = /<poly(line|gon)([^>]*)\/?>/g
-      while ((m = polyRegex.exec(svgString)) !== null) {
-        const isPolygon = m[1] === 'gon'
-        const a = parseAttributes(m[2])
-        const points = (a.points || '').trim().split(/[\s,]+/).map(Number)
-        if (points.length < 4) continue
-        ctx.beginPath()
-        ctx.moveTo(points[0], points[1])
-        for (let i = 2; i < points.length; i += 2) ctx.lineTo(points[i], points[i + 1])
-        if (isPolygon) ctx.closePath()
-        if (a.fill && a.fill !== 'none') { ctx.fillStyle = a.fill === 'currentColor' ? iconColor : a.fill; ctx.fill() }
-        if (a.stroke && a.stroke !== 'none') { ctx.strokeStyle = a.stroke === 'currentColor' ? iconColor : a.stroke; ctx.lineWidth = parseFloat(a['stroke-width'] || '1'); ctx.stroke() }
-      }
-    }
-
-    function drawSVGIcon(ctx: CanvasRenderingContext2D, x: number, y: number, iconSize: number, svgStr: string, color: string) {
-      if (!svgStr) return
-      const lineW = Math.max(2, iconSize * 0.04)
+    // Draw icon on front face using pre-rendered canvas
+    function drawIconOnCanvas(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
+      if (!iconReady) return
       ctx.save()
-      ctx.translate(x, y)
-      // Glow
-      ctx.shadowBlur = iconSize * 0.4; ctx.shadowColor = color
-      // Background hex
-      ctx.fillStyle = 'rgba(2,2,2,0.95)'
-      drawHex(ctx, 0, 0, iconSize / 2); ctx.fill()
-      // Outer ring
-      ctx.strokeStyle = tier.metal; ctx.lineWidth = lineW; ctx.stroke()
-      // Inner accent hex
-      ctx.beginPath(); drawHex(ctx, 0, 0, (iconSize / 2) - iconSize * 0.08)
-      ctx.strokeStyle = color; ctx.globalAlpha = 0.5; ctx.lineWidth = lineW * 0.6; ctx.stroke()
-      ctx.globalAlpha = 1
-      ctx.restore()
-      // SVG content
-      ctx.save(); ctx.translate(x, y)
-      const vbMatch = svgStr.match(/viewBox="([^"]+)"/)
-      let vbSize = 24
-      if (vbMatch) { const p = vbMatch[1].split(/\s+/).map(Number); if (p.length === 4) vbSize = p[2] }
-      const sc = (iconSize - iconSize * 0.35) / vbSize
-      ctx.scale(sc, sc); ctx.translate(-vbSize / 2, -vbSize / 2)
-      ctx.fillStyle = color; ctx.strokeStyle = color
-      drawSVGContent(ctx, svgStr, color)
+      ctx.shadowBlur = size * 0.3
+      ctx.shadowColor = catColor
+      // Draw the pre-rendered SVG icon (includes background circle + icon paths)
+      ctx.drawImage(iconCanvas, x - size / 2, y - size / 2, size, size)
       ctx.restore()
     }
 
@@ -425,8 +352,18 @@ export function Token3DViewer({
       fCtx.globalAlpha = 1
       fCtx.restore()
 
-      // SVG icon overlay on top of the biome image
-      if (iconSvgString) {
+      // SVG icon overlay — rendered from Image (handles all transforms)
+      if (iconLoaded && iconImage.complete) {
+        const iconSize = s * 0.24
+        fCtx.save()
+        fCtx.shadowBlur = s * 0.06; fCtx.shadowColor = catColor
+        // Draw the icon from the pre-rendered Image
+        fCtx.drawImage(iconImage,
+          imageCx - iconSize / 2, imageCy - iconSize / 2,
+          iconSize, iconSize)
+        fCtx.restore()
+      } else if (iconSvgString) {
+        // Fallback: try manual SVG parsing
         drawSVGIcon(fCtx, imageCx, imageCy, s * 0.22, iconSvgString, catColor)
       } else {
         // Fallback: category initial letter

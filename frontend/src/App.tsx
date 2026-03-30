@@ -25,8 +25,6 @@ import { SoundToggle } from './components/shared/SoundToggle'
 import { DayCycleWidget } from './components/shared/DayCycleWidget'
 
 // ─── Panel Components ───────────────────────────────────────
-import { GameHUD } from './components/hud/GameHUD'
-import { TerritoryPanel } from './components/hud/TerritoryPanel'
 import { CombatPanel } from './components/hud/CombatPanel'
 import { EventsPanel } from './components/hud/EventsPanel'
 import { ProfilePanel } from './components/hud/ProfilePanel'
@@ -41,7 +39,6 @@ import { KingdomPanel } from './components/kingdom/KingdomPanel'
 import { CodexPanel } from './components/hud/CodexPanel'
 import { DailyHuntPanel } from './components/hud/DailyHuntPanel'
 import { TaskCenter } from './components/hud/TaskCenter'
-import { WarTicker } from './components/hud/WarTicker'
 
 // ─── Providers ──────────────────────────────────────────────
 import { WalletProvider } from './components/crypto/WalletProvider'
@@ -106,7 +103,6 @@ function PrivateRoute({ children }: { children: React.ReactNode }) {
 function GameScreen() {
   const { sendViewport, subscribeTerritory } = useGameSocket()
   const setSelectedTerritory = useStore((s) => s.setSelectedTerritory)
-  const selectedTerritory    = useStore((s) => s.selectedTerritory)
   const player               = useStore((s) => s.player)
   const activePanel          = useStore((s) => s.activePanel)
   const accessToken          = useStore((s) => s.accessToken)
@@ -194,19 +190,6 @@ function GameScreen() {
 
       {/* Sound toggle — bottom-left */}
       <SoundToggle />
-
-      {/* Legacy HUD elements (coalition alert, missions widget) */}
-      <ErrorBoundary label="GameHUD">
-        <GameHUD />
-      </ErrorBoundary>
-
-      {/* Live war ticker */}
-      <ErrorBoundary label="WarTicker">
-        <WarTicker />
-      </ErrorBoundary>
-
-      {/* Territory detail panel */}
-      {selectedTerritory && <TerritoryPanel />}
 
       {/* Side panels — triggered by HexodDock */}
       <AnimatePresence>

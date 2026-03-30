@@ -93,7 +93,7 @@ export function NewsTicker() {
       {/* Scrolling items */}
       <div style={{
         display: 'flex',
-        animation: `news-scroll ${items.length * 8}s linear infinite`,
+        animation: `news-scroll ${items.length * 60}s linear infinite`,
         whiteSpace: 'nowrap',
       }}>
         {doubled.map((item, i) => (

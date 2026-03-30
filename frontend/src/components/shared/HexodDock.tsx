@@ -3,7 +3,7 @@
  * Hex-shaped icon buttons, horizontal scroll on mobile, centered on desktop.
  * Matches prototype dock layout.
  */
-import { useStore, useActiveBattles } from '../../store'
+import { useStore } from '../../store'
 
 type PanelId = 'combat' | 'alliance' | 'events' | 'profile' | 'trade' | 'shop' | 'ladder' | 'meta' | 'crypto' | 'marketplace' | 'kingdom' | 'codex' | 'hunt' | 'tasks'
 
@@ -30,8 +30,8 @@ const DOCK_ITEMS: DockItem[] = [
   { panel: 'crypto',      icon: '💎', label: 'Wallet',      color: '#a855f7' },
 ]
 
-function DockButton({ item, isActive, badge, onClick }: {
-  item: DockItem; isActive: boolean; badge: number; onClick: () => void
+function DockButton({ item, isActive, onClick }: {
+  item: DockItem; isActive: boolean; onClick: () => void
 }) {
   return (
     <button
@@ -45,7 +45,6 @@ function DockButton({ item, isActive, badge, onClick }: {
         border: 'none',
         borderTop: isActive ? `2px solid ${item.color}` : '2px solid transparent',
         cursor: 'pointer',
-        position: 'relative',
         transition: 'all 0.25s ease',
       }}
     >
@@ -76,22 +75,6 @@ function DockButton({ item, isActive, badge, onClick }: {
       }}>
         {item.label}
       </span>
-
-      {/* Notification badge */}
-      {badge > 0 && (
-        <span style={{
-          position: 'absolute', top: 2, right: 4,
-          background: 'var(--state-alert)',
-          borderRadius: '50%',
-          width: 14, height: 14,
-          fontSize: 8, fontWeight: 700,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#fff',
-          border: '1px solid rgba(0,0,0,0.3)',
-        }}>
-          {badge > 9 ? '9+' : badge}
-        </span>
-      )}
     </button>
   )
 }
@@ -99,12 +82,6 @@ function DockButton({ item, isActive, badge, onClick }: {
 export function HexodDock() {
   const activePanel = useStore(s => s.activePanel)
   const setActivePanel = useStore(s => s.setActivePanel)
-  const activeBattles = useActiveBattles()
-
-  const getBadge = (panel: PanelId): number => {
-    if (panel === 'combat') return activeBattles?.length ?? 0
-    return 0
-  }
 
   const handleClick = (panel: PanelId) => {
     setActivePanel(activePanel === panel ? null : panel)
@@ -138,7 +115,6 @@ export function HexodDock() {
             key={item.panel}
             item={item}
             isActive={activePanel === item.panel}
-            badge={getBadge(item.panel)}
             onClick={() => handleClick(item.panel)}
           />
         ))}

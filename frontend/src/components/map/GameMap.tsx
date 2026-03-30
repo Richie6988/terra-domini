@@ -285,6 +285,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         territory: t, playerId: player?.id,
         catFilter: poiCatFilter, rarFilter: poiRarFilter,
         onClick: async (ter) => {
+          // Close any open panel — 3D viewer takes full screen
+          useStore.getState().setActivePanel(null)
           onTerritoryClick(ter.h3_index)
           setSelectedHex(ter.h3_index)
           // Generate territory on first click if not already in DB (standard hex)

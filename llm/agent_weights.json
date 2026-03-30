@@ -3,8 +3,8 @@
     "format": "hexod_agent_weights_v2",
     "version": 3,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-30T13:00:00Z",
-    "session": 17,
+    "last_updated": "2026-03-30T14:00:00Z",
+    "session": 18,
     "total_patterns": 24,
     "total_weights": 87,
     "total_icons": 98,
@@ -909,5 +909,151 @@
       "status": "PORTED — 9 tabs from prototype: Overview (global progress + category grid), Favorites (top 5 + 3D Museum), Disasters, Places, Nature, Conflict, Culture, Science, Fantastic. Filters inside codex. 3D view + marketplace per token.",
       "priority": "DONE"
     }
+  },
+  "feedback_session_17": {
+    "_date": "2026-03-30",
+    "_priority_order": "P0 UX → P1 Token3D → P2 Economy → P3 Game Modes",
+    "items": [
+      {
+        "id": "F01",
+        "priority": "P0",
+        "topic": "panels_layout",
+        "desc": "ALL panels centered 80% screen. One panel at a time. Click outside closes. X button for closing.",
+        "status": "TODO"
+      },
+      {
+        "id": "F02",
+        "priority": "P0",
+        "topic": "remove_notif_bubbles",
+        "desc": "Remove notification badge bubbles above dock buttons",
+        "status": "TODO"
+      },
+      {
+        "id": "F03",
+        "priority": "P0",
+        "topic": "news_ticker_slower",
+        "desc": "Top news ticker scrolls WAY too fast, must be much slower",
+        "status": "TODO"
+      },
+      {
+        "id": "F04",
+        "priority": "P0",
+        "topic": "hide_panels_on_3d",
+        "desc": "When Token3DViewer is open, hide ALL other panels/UI",
+        "status": "TODO"
+      },
+      {
+        "id": "F05",
+        "priority": "P1",
+        "topic": "token_3d_icons",
+        "desc": "Icons and images STILL not rendering on 3D token canvas",
+        "status": "TODO"
+      },
+      {
+        "id": "F06",
+        "priority": "P1",
+        "topic": "radar_safari_connection",
+        "desc": "Safari mode connects with radar. Radar opens bigger when clicked. Dedicated safari info on radar.",
+        "status": "TODO"
+      },
+      {
+        "id": "F07",
+        "priority": "P2",
+        "topic": "economy_hex_coin",
+        "desc": "HEX Coin = game currency. 1000 HEX Coin for 0.99EUR. Used in shop + auctions. Backed by 1 HEX crypto - 25% dev fee. SVG model exists.",
+        "status": "TODO"
+      },
+      {
+        "id": "F08",
+        "priority": "P2",
+        "topic": "events_mode",
+        "desc": "Daily mode 1: Events (news/sport) create special tokens. Players register. Luck skill impacts loot. Shop potion de chance.",
+        "status": "TODO"
+      },
+      {
+        "id": "F09",
+        "priority": "P2",
+        "topic": "safaris_mode",
+        "desc": "Daily mode 2: Safaris - random fauna/dinosaur missions. Grid cell lights up (player-only). Track with radar + clues. Daily challenges.",
+        "status": "TODO"
+      },
+      {
+        "id": "F10",
+        "priority": "P2",
+        "topic": "auctions_mode",
+        "desc": "Daily mode 3: Auctions - rare++ unique edition cards. eBay style: chat + countdown timer. Bidding in HEX Coin.",
+        "status": "TODO"
+      }
+    ]
+  },
+  "economy_v2": {
+    "currency": "HEX Coin",
+    "svg_icon": "CrystalIcon component (already exists)",
+    "pricing": {
+      "pack_1000": {
+        "coins": 1000,
+        "price_eur": 0.99
+      },
+      "dev_cut": "25%",
+      "remaining": "75% backs 1 HEX token in wallet"
+    },
+    "uses": [
+      "shop_purchases",
+      "auctions",
+      "skill_upgrades",
+      "territory_conquest"
+    ],
+    "earn": [
+      "daily_tasks",
+      "safaris",
+      "events",
+      "territory_income",
+      "referrals"
+    ]
+  },
+  "daily_modes": {
+    "events": {
+      "description": "News/sport events create special tokens. Players register to win. Luck skill impacts loot.",
+      "mechanics": [
+        "register",
+        "luck_skill_impact",
+        "potion_de_chance_in_shop"
+      ],
+      "examples": [
+        "World Cup Final",
+        "Election Day",
+        "SpaceX Launch"
+      ],
+      "token_placement": "Adjacent to captured territories"
+    },
+    "safaris": {
+      "description": "Random fauna/dinosaur missions. Hex grid cell lights up (player-only). Track with radar + clues. Daily challenges.",
+      "mechanics": [
+        "random_spawn",
+        "player_only_visibility",
+        "radar_tracking",
+        "clue_system"
+      ],
+      "examples": [
+        "Capture 5 fungus",
+        "Capture 20 rare dinosaurs"
+      ],
+      "connects_to": "RadarWidget — dedicated safari mode with distance/direction"
+    },
+    "auctions": {
+      "description": "Rare++ edition unique tokens. eBay-style: auction + live chat + countdown timer.",
+      "mechanics": [
+        "bidding",
+        "live_chat",
+        "countdown_timer",
+        "snipe_protection"
+      ],
+      "currency": "HEX Coin"
+    }
+  },
+  "removed_this_session": {
+    "GameHUD": "Removed — notification bubble above dock",
+    "WarTicker": "Removed — war feed between dock and content",
+    "TerritoryPanel": "Removed — old territory panel (HexCard→Token3DViewer handles this)"
   }
 }
