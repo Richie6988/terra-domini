@@ -85,6 +85,8 @@ const LoginPage    = lazy(() => import('./pages/LoginPage'))
 const Tutorial     = lazy(() => import('./components/onboarding/Tutorial'))
 const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const AdminPanel   = lazy(() => import('./pages/AdminPanel'))
+const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
+const ResetPasswordPage  = lazy(() => import('./pages/ResetPasswordPage'))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -246,6 +248,8 @@ export default function App() {
           <Routes>
             <Route path="/login"    element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/reset-password/:uid/:token" element={<ResetPasswordPage />} />
             <Route path="/gm"       element={<AdminPanel />} />
             <Route path="/" element={
               <PrivateRoute>

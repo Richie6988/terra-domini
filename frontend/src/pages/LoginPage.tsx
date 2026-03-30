@@ -282,7 +282,7 @@ export default function LoginPage() {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, fontSize: 8, fontFamily: "'Orbitron', sans-serif" }}>
             <Link to="/register" style={{ color: 'rgba(0,200,255,0.5)', textDecoration: 'none', letterSpacing: 2 }}>NEW COMMANDER</Link>
-            <span style={{ color: 'rgba(255,255,255,0.15)', letterSpacing: 2 }}>POLYGON · ERC-721</span>
+            <Link to="/forgot-password" style={{ color: 'rgba(255,255,255,0.3)', textDecoration: 'none', letterSpacing: 1, fontSize: 7 }}>FORGOT PASSWORD?</Link>
           </div>
         </motion.div>
 
