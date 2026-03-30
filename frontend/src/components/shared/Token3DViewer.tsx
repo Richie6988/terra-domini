@@ -29,11 +29,12 @@ const TIERS: Record<string, {id:string; metal:string; carbon:string; title:strin
 }
 
 const CONFIG = {
-  textureSize: 1024,
+  textureSize: 2048,  // Match original (was 1024 = 4x less pixels)
   cardThickness: 0.14,
   rotationSpeed: 0.002,
-  zoomSpeed: 0.8,
+  zoomSpeed: 0.6,
   zoomDamping: 0.08,
+  anisotropy: 16,
 }
 
 export interface Token3DProps {
@@ -143,24 +144,20 @@ export function Token3DViewer({
     el.appendChild(renderer.domElement)
     renderer.domElement.style.cursor = 'grab'
 
-    // Lights — boosted for front face visibility
-    scene.add(new THREE.AmbientLight(0xffffff, 3.0))
-    const keyLight = new THREE.PointLight(0xffffff, 5.0, 25)
-    keyLight.position.set(5, 4, 8)
+    // Lights — EXACT match to original (5 lights, precise positions + intensities)
+    scene.add(new THREE.AmbientLight(0xffffff, 2.2))
+    const keyLight = new THREE.PointLight(0xffffff, 3.5, 25)
+    keyLight.position.set(3, 3, 6)
     scene.add(keyLight)
-    const rim = new THREE.PointLight(0xffffff, 3.0, 18)
-    rim.position.set(-5, 2, -4)
+    const rim = new THREE.PointLight(0xffffff, 2.5, 18)
+    rim.position.set(-5, -5, 4)
     scene.add(rim)
-    const fillLight = new THREE.PointLight(0x8888ff, 2.0, 15)
-    fillLight.position.set(-3, -3, 5)
+    const fillLight = new THREE.PointLight(0x8888ff, 1.5, 15)
+    fillLight.position.set(-4, 2, 3)
     scene.add(fillLight)
-    const topLight = new THREE.PointLight(0xffffff, 2.5, 12)
+    const topLight = new THREE.PointLight(0xffffff, 1.5, 12)
     topLight.position.set(0, 6, 4)
     scene.add(topLight)
-    // Front face dedicated light
-    const frontLight = new THREE.PointLight(0xffffff, 3.0, 15)
-    frontLight.position.set(0, 0, 8)
-    scene.add(frontLight)
 
     // Canvases
     const frontCanvas = document.createElement('canvas')
@@ -170,20 +167,26 @@ export function Token3DViewer({
     backCanvas.width = s; backCanvas.height = s
     const bCtx = backCanvas.getContext('2d')!
 
-    // Textures
+    // Textures — with anisotropy for sharp text at angles
     const fTex = new THREE.CanvasTexture(frontCanvas)
     fTex.rotation = Math.PI / 2
     fTex.center.set(0.5, 0.5)
+    fTex.anisotropy = CONFIG.anisotropy
     const bTex = new THREE.CanvasTexture(backCanvas)
     bTex.rotation = -Math.PI / 2
     bTex.center.set(0.5, 0.5)
     bTex.repeat.set(-1, -1)
+    bTex.anisotropy = CONFIG.anisotropy
 
-    // Materials (premium physical)
+    // Materials — EXACT match to Richard's original
     const fMat = new THREE.MeshPhysicalMaterial({
-      map: fTex, roughness: 0.15, metalness: 0.6,
-      clearcoat: 1.0, clearcoatRoughness: 0.05, reflectivity: 0.8,
-      emissive: new THREE.Color(catColor), emissiveIntensity: 0.15,
+      map: fTex,
+      roughness: 0.02,           // Ultra smooth (original: 0.02)
+      metalness: 0.88,           // Very metallic (original: 0.88)
+      clearcoat: 1.0,
+      clearcoatRoughness: 0.01,  // Mirror-like clear coat
+      reflectivity: 1.0,
+      envMapIntensity: 10,       // Extremely reflective
     })
     const bMat = new THREE.MeshPhysicalMaterial({
       map: bTex, clearcoat: 1, roughness: 0.01, metalness: 0.9,
@@ -215,11 +218,14 @@ export function Token3DViewer({
       if (!svgStr.includes('xmlns')) {
         svgStr = svgStr.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
       }
-      // data: URL loads faster than blob — browser caches it
+      // Ensure explicit width/height for canvas rendering
+      if (!svgStr.includes('width=')) {
+        svgStr = svgStr.replace('viewBox=', 'width="256" height="256" viewBox=')
+      }
       iconImage.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)))
     }
 
-    // ═══ REAL IMAGE — Unsplash/picsum based on biome (like original template) ═══
+    // ═══ REAL IMAGE — Unsplash based on biome ═══
     const cardImg = new Image()
     cardImg.crossOrigin = 'anonymous'
     const biomeImageMap: Record<string, string> = {
@@ -234,6 +240,8 @@ export function Token3DViewer({
       LANDMARK:   'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&h=400&fit=crop',
     }
     cardImg.src = biomeImageMap[(biome || 'URBAN').toUpperCase()] || biomeImageMap.URBAN
+    // Redraw front when image loads (replaces fallback)
+    cardImg.onload = () => { try { drawFront?.() } catch {} }
 
     // Store refs
     const state = {
@@ -248,10 +256,11 @@ export function Token3DViewer({
     function drawFront() {
       const boxW = s * 0.71, boxX = (s - boxW) / 2
 
+      // ═══ Deep black base ═══
       fCtx.fillStyle = '#020202'
       fCtx.fillRect(0, 0, s, s)
 
-      // Holographic rainbow overlay
+      // ═══ HOLOGRAPHIC RAINBOW OVERLAY (the $1000 effect) ═══
       fCtx.save()
       const holoR = s * 0.4
       const holoG = fCtx.createLinearGradient(
@@ -265,83 +274,108 @@ export function Token3DViewer({
       holoG.addColorStop(0.8, 'rgba(0,128,255,0.15)')
       holoG.addColorStop(1, 'rgba(128,0,255,0.12)')
       fCtx.fillStyle = holoG
-      drawHex(fCtx, c, c, s * 0.49)
-      fCtx.fill()
+      drawHex(fCtx, c, c, s * 0.49); fCtx.fill()
       fCtx.restore()
 
-      // Metallic shimmer gradient
+      // ═══ Metallic shimmer gradient ═══
       const shineW = s * 0.5
       const g = fCtx.createLinearGradient(state.shineOffset * 2, 0, state.shineOffset * 2 + shineW, 0)
       g.addColorStop(0, tier.metal)
-      g.addColorStop(0.4, '#ffffff')
-      g.addColorStop(0.6, '#ffffff')
+      g.addColorStop(0.4, '#ffffff'); g.addColorStop(0.5, '#ffffff'); g.addColorStop(0.6, '#ffffff')
       g.addColorStop(1, tier.metal)
 
-      // Rarity badge (top-right)
+      // ═══ RARITY BADGE (top-right) ═══
       const badgeX = boxX + boxW - s * 0.06, badgeY = s * 0.14, badgeSize = s * 0.042
-      fCtx.save()
-      fCtx.shadowBlur = 50; fCtx.shadowColor = tier.metal
-      fCtx.fillStyle = tier.carbon
-      drawHex(fCtx, badgeX, badgeY, badgeSize); fCtx.fill()
+      fCtx.save(); fCtx.shadowBlur = 50; fCtx.shadowColor = tier.metal
+      fCtx.fillStyle = tier.carbon; drawHex(fCtx, badgeX, badgeY, badgeSize); fCtx.fill()
       fCtx.strokeStyle = tier.metal; fCtx.lineWidth = 5; fCtx.stroke()
       fCtx.fillStyle = tier.metal
       fCtx.font = `900 ${s * 0.03}px Orbitron`; fCtx.textAlign = 'center'
       fCtx.fillText(tier.id[0], badgeX, badgeY + s * 0.01)
       fCtx.restore()
 
-      // Category label
+      // ═══ SECTION 1: CATEGORY ═══
       fCtx.textAlign = 'center'; fCtx.fillStyle = g
       fCtx.font = `bold ${s * 0.032}px Orbitron`
       fCtx.fillText(category, c, s * 0.166)
 
-      // ── SECTION 2: Category icon (larger, with fallback) ──
-      const iconRowY = s * 0.21
+      // ═══ SECTION 2: ICON ROW ═══
+      const iconRowY = s * 0.205
       const iconSz = s * 0.065
-      // Dark hex frame
+      // Hex frame background
       fCtx.save()
-      fCtx.shadowBlur = iconSz * 0.5; fCtx.shadowColor = catColor
+      fCtx.shadowBlur = iconSz * 0.4; fCtx.shadowColor = catColor
       fCtx.fillStyle = 'rgba(2,2,2,0.95)'
       drawHex(fCtx, c, iconRowY, iconSz * 0.6); fCtx.fill()
-      fCtx.strokeStyle = tier.metal; fCtx.lineWidth = 3; fCtx.stroke()
+      fCtx.strokeStyle = tier.metal; fCtx.lineWidth = Math.max(2, iconSz * 0.04); fCtx.stroke()
+      // Inner accent hex ring
+      fCtx.beginPath()
+      drawHex(fCtx, c, iconRowY, iconSz * 0.5)
+      fCtx.strokeStyle = catColor; fCtx.globalAlpha = 0.5; fCtx.lineWidth = Math.max(1, iconSz * 0.025); fCtx.stroke()
+      fCtx.globalAlpha = 1
       fCtx.restore()
-      // Icon image (from blob) or text fallback
+      // Icon image or fallback letter
       if (iconImage.complete && iconImage.naturalWidth > 0) {
-        fCtx.drawImage(iconImage, c - iconSz * 0.45, iconRowY - iconSz * 0.45, iconSz * 0.9, iconSz * 0.9)
-      } else {
-        // Guaranteed visible: category first letter
-        fCtx.save(); fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle'
-        fCtx.font = `900 ${iconSz * 0.7}px Orbitron`; fCtx.fillStyle = catColor
-        fCtx.fillText(category.charAt(0), c, iconRowY)
+        fCtx.save()
+        fCtx.drawImage(iconImage, c - iconSz * 0.4, iconRowY - iconSz * 0.4, iconSz * 0.8, iconSz * 0.8)
         fCtx.restore()
+      } else {
+        fCtx.save(); fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle'
+        fCtx.font = `900 ${iconSz * 0.6}px Orbitron`; fCtx.fillStyle = catColor
+        fCtx.shadowBlur = 20; fCtx.shadowColor = catColor
+        fCtx.fillText(category.charAt(0), c, iconRowY); fCtx.restore()
       }
 
-      // Biome
-      fCtx.fillStyle = g; fCtx.font = `bold ${s * 0.032}px Orbitron`
-      fCtx.fillText(biome, c, s * 0.27)
+      // ═══ SECTION 2bis: BIOME ═══
+      fCtx.textAlign = 'center'; fCtx.fillStyle = g
+      fCtx.font = `bold ${s * 0.032}px Orbitron`
+      fCtx.fillText(biome, c, s * 0.264)
 
-      // ── SECTION 3: Main image — real photo (like original template) ──
-      const imageY = s * 0.30, imageH = s * 0.33
+      // ═══ SECTION 3: IMAGE + TITLE OVERLAY ═══
+      const imageY = s * 0.293, imageH = s * 0.342
 
-      // Draw image with shadow (exactly like original)
+      // Image with shadow
       fCtx.save()
       fCtx.shadowBlur = s * 0.05; fCtx.shadowColor = catColor
       if (cardImg.complete && cardImg.naturalWidth > 0) {
         fCtx.drawImage(cardImg, boxX, imageY, boxW, imageH)
       } else {
-        // Fallback gradient while image loads
-        const fallG = fCtx.createLinearGradient(boxX, imageY, boxX, imageY + imageH)
-        fallG.addColorStop(0, catColor + '40'); fallG.addColorStop(1, '#020202')
-        fCtx.fillStyle = fallG
-        fCtx.fillRect(boxX, imageY, boxW, imageH)
+        // Rich fallback while loading — not a flat gradient, a proper placeholder
+        const fbG = fCtx.createRadialGradient(c, imageY + imageH * 0.4, 0, c, imageY + imageH * 0.5, boxW * 0.6)
+        fbG.addColorStop(0, catColor + '55'); fbG.addColorStop(0.5, catColor + '20'); fbG.addColorStop(1, '#020202')
+        fCtx.fillStyle = fbG; fCtx.fillRect(boxX, imageY, boxW, imageH)
+        // Loading shimmer
+        fCtx.globalAlpha = 0.1
+        const shimG = fCtx.createLinearGradient(state.shineOffset, imageY, state.shineOffset + s * 0.3, imageY + imageH)
+        shimG.addColorStop(0, 'transparent'); shimG.addColorStop(0.5, catColor); shimG.addColorStop(1, 'transparent')
+        fCtx.fillStyle = shimG; fCtx.fillRect(boxX, imageY, boxW, imageH)
+        fCtx.globalAlpha = 1
       }
       fCtx.restore()
 
-      // Title bar (matching original Section 4)
+      // Title bar with gradient fades (EXACT from original)
       const titleY = imageY + imageH - s * 0.034
-      fCtx.fillStyle = 'rgba(0,0,0,0.88)'
-      fCtx.fillRect(boxX, titleY - s * 0.025, boxW, s * 0.05)
+      const titleBarH = s * 0.05
+      const fadeW = s * 0.025
+
       fCtx.save()
-      fCtx.textAlign = 'center'
+      // Solid dark bar
+      fCtx.fillStyle = 'rgba(0,0,0,0.88)'
+      fCtx.fillRect(boxX, titleY - titleBarH * 0.55, boxW, titleBarH)
+      // Left gradient fade
+      const titleFadeL = fCtx.createLinearGradient(boxX - fadeW, 0, boxX, 0)
+      titleFadeL.addColorStop(0, 'rgba(0,0,0,0)'); titleFadeL.addColorStop(1, 'rgba(0,0,0,0.88)')
+      fCtx.fillStyle = titleFadeL
+      fCtx.fillRect(boxX - fadeW, titleY - titleBarH * 0.55, fadeW, titleBarH)
+      // Right gradient fade
+      const titleFadeR = fCtx.createLinearGradient(boxX + boxW, 0, boxX + boxW + fadeW, 0)
+      titleFadeR.addColorStop(0, 'rgba(0,0,0,0.88)'); titleFadeR.addColorStop(1, 'rgba(0,0,0,0)')
+      fCtx.fillStyle = titleFadeR
+      fCtx.fillRect(boxX + boxW, titleY - titleBarH * 0.55, fadeW, titleBarH)
+      fCtx.restore()
+
+      // Title text with stroke (EXACT from original)
+      fCtx.save(); fCtx.textAlign = 'center'
       fCtx.font = `900 ${s * 0.047}px Orbitron`
       fCtx.strokeStyle = 'rgba(0,0,0,0.9)'; fCtx.lineWidth = s * 0.003
       fCtx.strokeText(tokenName, c, titleY + s * 0.008)
@@ -349,42 +383,48 @@ export function Token3DViewer({
       fCtx.fillText(tokenName, c, titleY + s * 0.008)
       fCtx.restore()
 
-      // Side text — TIER (left) + SERIAL (right)
+      // ═══ SECTION 4: SIDE VERTICAL TEXT ═══
       fCtx.font = `900 ${s * 0.026}px Orbitron`
+      // Left: TIER
       fCtx.save()
       fCtx.translate(boxX - s * 0.035, imageY + imageH / 2); fCtx.rotate(-Math.PI / 2)
       fCtx.fillStyle = g; fCtx.shadowBlur = 25; fCtx.shadowColor = tier.metal
       fCtx.fillText(tier.id, 0, 0); fCtx.restore()
+      // Right: SERIAL
       fCtx.save()
       fCtx.translate(boxX + boxW + s * 0.035, imageY + imageH / 2); fCtx.rotate(Math.PI / 2)
       fCtx.fillStyle = g; fCtx.shadowBlur = 25; fCtx.shadowColor = tier.metal
       fCtx.fillText(`${serial}/${maxSupply}`, 0, 0); fCtx.restore()
 
-      // Description box
+      // ═══ SECTION 5: DESCRIPTION BOX ═══
       const descY = imageY + imageH + s * 0.02, descH = s * 0.352
       fCtx.save()
       fCtx.shadowBlur = 40; fCtx.shadowColor = catColor
       fCtx.fillStyle = 'rgba(5,5,5,0.98)'; fCtx.fillRect(boxX, descY, boxW, descH)
       fCtx.restore()
+      // Outer metallic border
       fCtx.strokeStyle = g; fCtx.lineWidth = 4
       fCtx.strokeRect(boxX + s * 0.01, descY + s * 0.01, boxW - s * 0.02, descH - s * 0.02)
+      // Inner accent border
       fCtx.strokeStyle = catColor; fCtx.globalAlpha = 0.35; fCtx.lineWidth = 2
       fCtx.strokeRect(boxX + s * 0.012, descY + s * 0.012, boxW - s * 0.024, descH - s * 0.024)
       fCtx.globalAlpha = 1
+      // Description text
       fCtx.textAlign = 'center'; fCtx.fillStyle = '#e0e0e0'
-      fCtx.font = `italic ${s * 0.02}px Georgia`
+      fCtx.font = `italic ${s * 0.041}px Georgia`
       const descText = description || `Ce jeton certifie la propriété souveraine du territoire HEXOD identifié. Données géospatiales cryptées via protocole Vault Alpha. Rareté garantie par Tier ${tier.id}.`
       wrapTextCentered(fCtx, descText, c, descY + s * 0.08, boxW - s * 0.1, s * 0.03)
 
+      // ═══ SECTION 6: VIGNETTE + FILM GRAIN + OUTER BORDER ═══
       // Vignette
       fCtx.save()
       const vig = fCtx.createRadialGradient(c, c, s * 0.25, c, c, s * 0.55)
       vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(0,0,0,0.45)')
       fCtx.fillStyle = vig; fCtx.fillRect(0, 0, s, s); fCtx.restore()
 
-      // Film grain
+      // Film grain (3000 particles like original)
       fCtx.save(); fCtx.globalAlpha = 0.02
-      for (let i = 0; i < 1500; i++) {
+      for (let i = 0; i < 3000; i++) {
         fCtx.fillStyle = Math.random() > 0.5 ? '#fff' : '#000'
         fCtx.fillRect(Math.random() * s, Math.random() * s, 2, 2)
       }
@@ -536,8 +576,8 @@ export function Token3DViewer({
       // Shimmer update every 4th frame (matching original)
       state.frameCount++
       if (state.frameCount % 4 === 0) {
-        state.shineOffset += 12
-        if (state.shineOffset > 1800) state.shineOffset = -800
+        state.shineOffset += 25
+        if (state.shineOffset > 3500) state.shineOffset = -1500
         state.holoAngle += 0.03
         drawFront()
       }
