@@ -200,18 +200,20 @@ export const useStore = create<Store>()(
     }),
     {
       name: 'hexod-store',
+      // @ts-ignore — Zustand persist storage type mismatch (works at runtime)
       storage: {
-        getItem: (name) => {
+        getItem: (name: string) => {
           try { return localStorage.getItem(name) } catch { return null }
         },
-        setItem: (name, value) => {
+        setItem: (name: string, value: string) => {
           try { localStorage.setItem(name, value) } catch {}
         },
-        removeItem: (name) => {
+        removeItem: (name: string) => {
           try { localStorage.removeItem(name) } catch {}
         },
       },
-      partialize: (state) => ({
+      // @ts-ignore
+      partialize: (state: any) => ({
         // Only persist auth + preferences
         player: state.player,
         accessToken: state.accessToken,

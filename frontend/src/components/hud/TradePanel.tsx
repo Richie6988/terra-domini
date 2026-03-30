@@ -16,7 +16,7 @@ import toast from 'react-hot-toast'
 const toNum = (v: unknown) => parseFloat(String(v ?? 0)) || 0
 
 const RESOURCES = [
-  { id: 'tdc',       label: 'HEX Coin Coins',    emoji: '🪙', color: '#cc8800' },
+  { id: 'tdc',       label: 'HEX Coins',    emoji: '🪙', color: '#cc8800' },
   { id: 'food',      label: 'Food',         emoji: '🌾', color: '#10B981' },
   { id: 'materials', label: 'Materials',    emoji: '⚙️',  color: 'rgba(26,42,58,0.45)' },
   { id: 'energy',    label: 'Energy',       emoji: '⚡', color: '#F59E0B' },

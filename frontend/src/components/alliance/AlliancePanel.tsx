@@ -31,6 +31,25 @@ const ROLE_ICONS: Record<string, string> = {
   leader: '👑', officer: '⭐', veteran: '🎖️', member: '⚔️', recruit: '🌱'
 }
 
+// ── Shared helpers ──
+function MiniTag({ color, children }: { color: string; children: React.ReactNode }) {
+  return <span style={{ padding: '2px 8px', borderRadius: 10, background: `${color}15`, color, fontSize: 8, fontWeight: 700, border: `1px solid ${color}30` }}>{children}</span>
+}
+function StatBox({ label, value, icon }: { label: string; value: string | number; icon?: React.ReactNode }) {
+  return (
+    <div style={{ padding: '10px 8px', borderRadius: 10, background: 'rgba(0,60,100,0.04)', border: '1px solid rgba(0,60,100,0.08)', textAlign: 'center' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, color: '#8B5CF6', marginBottom: 4 }}>{icon}<span style={{ fontSize: 16, fontWeight: 900 }}>{value}</span></div>
+      <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 1, textTransform: 'uppercase' as const }}>{label}</div>
+    </div>
+  )
+}
+function Empty({ text }: { text: string }) {
+  return <div style={{ padding: 40, textAlign: 'center', color: 'rgba(26,42,58,0.3)', fontSize: 12 }}>{text}</div>
+}
+const primaryBtn: React.CSSProperties = { padding: '10px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #8B5CF6, #7C3AED)', color: '#fff', fontSize: 11, fontWeight: 700, letterSpacing: 1 }
+const dangerBtn: React.CSSProperties = { padding: '10px 16px', borderRadius: 10, border: '1px solid rgba(220,38,38,0.3)', cursor: 'pointer', background: 'rgba(220,38,38,0.08)', color: '#dc2626', fontSize: 11, fontWeight: 700, letterSpacing: 1 }
+const labelStyle: React.CSSProperties = { fontSize: 8, color: 'rgba(26,42,58,0.4)', letterSpacing: 1, marginBottom: 6, textTransform: 'uppercase' as const }
+
 
 function AlliancePanelTabBar({ tabs, active, onChange }: { tabs: string[]; active: string; onChange: (t: string) => void }) {
   return (
@@ -61,7 +80,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient()
   const alliance = player?.alliance
 
-  const [tab, setTab] = useState<'overview' | 'members' | 'diplomacy' | 'create' | 'search'>('overview')
+  const [tab, setTab] = useState<'overview' | 'members' | 'diplomacy' | 'create' | 'search' | 'trade'>('overview')
   const [createForm, setCreateForm] = useState({ tag: '', name: '', description: '', banner_color: '#10B981' })
   const [searchQ, setSearchQ] = useState('')
   const [proposeState, setProposeState] = useState('')

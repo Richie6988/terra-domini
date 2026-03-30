@@ -79,7 +79,7 @@ export const TRANSLATIONS_EN = {
   'tutorial.step4.body': 'Your zone earns resources every 5 minutes — even offline. More zones = more earnings.',
   'tutorial.step4.action': 'What are Coins? →',
   'tutorial.step5.title': 'Coins = Real Crypto',
-  'tutorial.step5.body': 'HEX Coin Coins are real cryptocurrency. Earn from brand ads on your zones. Withdraw to your wallet anytime.',
+  'tutorial.step5.body': 'HEX Coins are real cryptocurrency. Earn from brand ads on your zones. Withdraw to your wallet anytime.',
   'tutorial.step5.action': '🚀 Start Exploring!',
 
   // Territory panel

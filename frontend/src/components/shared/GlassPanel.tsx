@@ -51,11 +51,10 @@ export function GlassPanel({
         }}
       >
         <div style={{
-          width: width || '80vw',
-          maxWidth: 720,
-          maxHeight: '80vh',
+          width: width || '90vw',
+          maxWidth: 900,
+          maxHeight: '90vh',
           pointerEvents: 'auto',
-          // Glassmorphism
           background: 'linear-gradient(180deg, rgba(235, 242, 250, 0.97) 0%, rgba(220, 230, 242, 0.97) 100%)',
           backdropFilter: 'blur(30px) saturate(1.2)',
           WebkitBackdropFilter: 'blur(30px) saturate(1.2)',
@@ -68,7 +67,7 @@ export function GlassPanel({
         }}>
         {/* Header */}
         <div style={{
-          padding: '14px 20px',
+          padding: '18px 24px',
           borderBottom: `2px solid ${accent}`,
           background: 'linear-gradient(180deg, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.2) 100%)',
           display: 'flex',
@@ -77,12 +76,12 @@ export function GlassPanel({
           flexShrink: 0,
         }}>
           <div style={{
-            fontSize: 12, fontWeight: 700, letterSpacing: 3,
+            fontSize: 14, fontWeight: 700, letterSpacing: 3,
             color: accent,
             fontFamily: "'Orbitron', system-ui, sans-serif",
             display: 'flex', alignItems: 'center', gap: 10,
           }}>
-            <span style={{ fontSize: 14 }}>◆</span>
+            <span style={{ fontSize: 16 }}>◆</span>
             {title}
           </div>
           <button
@@ -109,7 +108,7 @@ export function GlassPanel({
         <div style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '16px 20px',
+          padding: '20px 24px',
           color: '#1a2a3a',
         }}>
           {children}

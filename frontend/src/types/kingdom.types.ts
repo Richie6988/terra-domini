@@ -156,7 +156,7 @@ export interface SkillBranch {
   name: string
   icon: string
   color: string
-  crystalType: string
+  gemType: string
   description: string
   skills: SkillNode[]
 }
@@ -164,7 +164,7 @@ export interface SkillBranch {
 export const SKILL_BRANCHES: SkillBranch[] = [
   {
     id: 'attack', name: 'Assault Tactics', icon: '⚔️', color: '#dc2626',
-    crystalType: 'Ruby', description: 'Military dominance & offensive superiority',
+    gemType: 'Ruby', description: 'Military dominance & offensive superiority',
     skills: [
       { id: 'atk0', name: 'Basic Training',       icon: '🎖️', cost: 0,     effect: '+5% army speed',                 description: 'Foundation military doctrine', prereqs: [], tier: 0 },
       { id: 'atk1', name: 'Lightning Formation',   icon: '⚡', cost: 800,   effect: '+15% army speed',                description: 'Rapid deployment protocols', prereqs: ['atk0'], tier: 1 },
@@ -178,7 +178,7 @@ export const SKILL_BRANCHES: SkillBranch[] = [
   },
   {
     id: 'defense', name: 'Defensive Engineering', icon: '🛡️', color: '#2563eb',
-    crystalType: 'Sapphire', description: 'Fortification & territory protection',
+    gemType: 'Sapphire', description: 'Fortification & territory protection',
     skills: [
       { id: 'def0', name: 'Reinforced Walls',       icon: '🧱', cost: 0,     effect: '+10% wall HP',                  description: 'Basic construction upgrade', prereqs: [], tier: 0 },
       { id: 'def1', name: 'Energy Shield',           icon: '🔋', cost: 800,   effect: 'Absorb 15% incoming damage',    description: 'Passive energy barrier', prereqs: ['def0'], tier: 1 },
@@ -191,7 +191,7 @@ export const SKILL_BRANCHES: SkillBranch[] = [
   },
   {
     id: 'economy', name: 'Imperial Economy', icon: '💰', color: '#d97706',
-    crystalType: 'Topaz', description: 'Resource optimization & production chains',
+    gemType: 'Topaz', description: 'Resource optimization & production chains',
     skills: [
       { id: 'eco0', name: 'Optimized Collection',    icon: '📈', cost: 0,     effect: '+10% all resource production',  description: 'Process rationalization', prereqs: [], tier: 0 },
       { id: 'eco1', name: 'Refinery Complex',         icon: '🏭', cost: 800,   effect: 'Processing chain output x1.5', description: 'Advanced refining capacity', prereqs: ['eco0'], tier: 1 },
@@ -204,7 +204,7 @@ export const SKILL_BRANCHES: SkillBranch[] = [
   },
   {
     id: 'influence_branch', name: 'Diplomacy & Influence', icon: '🕊️', color: '#059669',
-    crystalType: 'Emerald', description: 'Soft power, expansion & intelligence',
+    gemType: 'Emerald', description: 'Soft power, expansion & intelligence',
     skills: [
       { id: 'dip0', name: 'Local Embassy',            icon: '🏛️', cost: 0,     effect: 'Influence radius +1 hex',       description: 'Diplomatic presence established', prereqs: [], tier: 0 },
       { id: 'dip1', name: 'Propaganda Network',       icon: '📢', cost: 800,   effect: '-20% territory purchase cost',  description: 'Information manipulation', prereqs: ['dip0'], tier: 1 },
@@ -217,7 +217,7 @@ export const SKILL_BRANCHES: SkillBranch[] = [
   },
   {
     id: 'tech', name: 'Research Institute', icon: '🔬', color: '#7c3aed',
-    crystalType: 'Amethyst', description: 'Innovation & technological advantage',
+    gemType: 'Amethyst', description: 'Innovation & technological advantage',
     skills: [
       { id: 'tech0', name: 'Mobile Lab',              icon: '🔭', cost: 0,     effect: '+10% research speed',           description: 'Field science capabilities', prereqs: [], tier: 0 },
       { id: 'tech1', name: 'Cryptography',            icon: '🔐', cost: 800,   effect: 'Immune to espionage',           description: 'Secure communications', prereqs: ['tech0'], tier: 1 },
@@ -230,7 +230,7 @@ export const SKILL_BRANCHES: SkillBranch[] = [
   },
   {
     id: 'extraction', name: 'Resource Extraction', icon: '⛏️', color: '#b45309',
-    crystalType: 'Amber', description: 'Deep mining, refining & resource maximization',
+    gemType: 'Amber', description: 'Deep mining, refining & resource maximization',
     skills: [
       { id: 'ext0', name: 'Surveyor Drones',           icon: '🛸', cost: 0,     effect: 'Reveal hidden resource deposits',  description: 'Automated geological survey', prereqs: [], tier: 0 },
       { id: 'ext1', name: 'Deep Bore Mining',           icon: '🕳️', cost: 800,   effect: '+25% extraction from mountains',   description: 'Reach deeper mineral veins', prereqs: ['ext0'], tier: 1 },

@@ -564,7 +564,7 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
   const items: DigestItem[] = [
     { icon: '⏰', text: `Tu étais absent${h >= 2 ? 'e' : ''} depuis ${h < 1 ? 'moins d\'une heure' : h === 1 ? '1 heure' : `${h} heures`}`, color: 'rgba(255,255,255,0.4)' },
     ...(totalResources > 0 ? [{ icon: '📦', text: 'Ressources accumulées pendant ton absence', value: `+${totalResources.toLocaleString()}`, color: '#10B981' }] : []),
-    ...(newTDC > 0 ? [{ icon: '💎', text: 'HEX Coin gagnés offline', value: `+${parseFloat(String(newTDC ?? 0)).toFixed(0)} 💎`, color: '#F59E0B' }] : []),
+    ...(newTDC > 0 ? [{ icon: '◆', text: 'HEX gagnés offline', value: `+${parseFloat(String(newTDC ?? 0)).toFixed(0)} ◆`, color: '#F59E0B' }] : []),
     ...battles.map(b => ({
       icon: b.won ? '🏴' : '💀',
       text: b.won ? `Victoire : ${b.territory} conquis !` : `Défense échouée : ${b.territory} perdu`,

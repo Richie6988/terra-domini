@@ -40,6 +40,7 @@ export interface AllianceSummary {
   name: string
   role: 'leader' | 'officer' | 'veteran' | 'member' | 'recruit'
   tier: 'squad' | 'guild' | 'federation'
+  banner_color?: string
 }
 
 // ─── Territory ───────────────────────────────────────────────────────────────
@@ -266,7 +267,8 @@ export type WSMessage =
   | { type: 'territory_update'; territory: TerritoryLight }
   | { type: 'territory_detail'; territory: TerritoryDetail }
   | { type: 'battle_event'; battle: Battle }
-  | { type: 'battle_resolved'; battle_id: string; territory_h3: string; winner: string; your_side: string; territory_captured: boolean; resources_looted: Partial<ResourceMap> }
+  | { type: 'battle_resolved'; battle_id: string; territory_h3: string; winner: string; your_side: string; territory_captured: boolean; resources_looted: Partial<ResourceMap>; result?: string }
+  | { type: 'balance_update'; tdc_delta: number; new_balance: number }
   | { type: 'notification'; notification: GameNotification }
   | { type: 'tdc_update'; balance: { in_game: number; purchased: number } }
   | { type: 'attack_incoming'; territory_h3: string; attacker: string; resolves_at: string }

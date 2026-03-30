@@ -320,11 +320,12 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     const map = mapRef.current
     if (!grid || !map) return
 
+    let isZooming = false
+
     const drawGrid = () => {
       grid.clearLayers()
+      if (isZooming) return // Never draw during zoom transition
       const z = map.getZoom()
-      // Only show grid when individual hexes are large enough to see (zoom 14+)
-      // z14 = ~9 hexes on screen, z13 = ~36 (too small)
       if (z < 14) return
 
       const b = map.getBounds()
@@ -352,12 +353,17 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       }
     }
 
+    const onZoomStart = () => { isZooming = true; grid.clearLayers() }
+    const onZoomEnd = () => { isZooming = false; drawGrid() }
+
     drawGrid()
     map.on('moveend', drawGrid)
-    map.on('zoomend', drawGrid)
+    map.on('zoomstart', onZoomStart)
+    map.on('zoomend', onZoomEnd)
     return () => {
       map.off('moveend', drawGrid)
-      map.off('zoomend', drawGrid)
+      map.off('zoomstart', onZoomStart)
+      map.off('zoomend', onZoomEnd)
     }
   }, [territories])
 

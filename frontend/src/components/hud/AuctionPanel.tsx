@@ -5,6 +5,7 @@
  * Currency: HEX Coin.
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
@@ -424,10 +425,10 @@ export function AuctionPanel({ onClose }: Props) {
         </div>
       )}
 
-      {/* 3D Viewer for selected auction token */}
-      {selected && (
+      {/* 3D Viewer via portal — outside panel DOM tree */}
+      {show3D && selected && createPortal(
         <Token3DViewer
-          visible={show3D}
+          visible={true}
           onClose={() => setShow3D(false)}
           tokenName={selected.tokenName}
           category={selected.category}
@@ -437,7 +438,8 @@ export function AuctionPanel({ onClose }: Props) {
           serial={selected.serial}
           maxSupply={selected.maxSupply}
           edition={selected.edition}
-        />
+        />,
+        document.body
       )}
     </GlassPanel>
   )

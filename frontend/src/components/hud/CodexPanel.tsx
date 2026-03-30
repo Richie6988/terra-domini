@@ -79,9 +79,9 @@ export function CodexPanel({ onClose }: Props) {
 
   // All tokens flat list
   const allTokens = useMemo(() =>
-    Object.values(CATEGORIES).flatMap(cat => cat.icons.map(icon => ({
-      ...icon, catName: cat.name, catColor: cat.color, catId: cat.id,
-      codexTab: CAT_TAB_MAP[icon.id] || CAT_TAB_MAP[cat.id] || 'places',
+    Object.entries(CATEGORIES).flatMap(([catKey, cat]) => cat.icons.map(icon => ({
+      ...icon, catName: cat.name, catColor: cat.color, catId: catKey,
+      codexTab: CAT_TAB_MAP[icon.id] || CAT_TAB_MAP[catKey] || 'places',
       ...collection[icon.id],
     }))),
   [collection])

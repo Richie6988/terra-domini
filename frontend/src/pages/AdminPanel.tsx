@@ -389,7 +389,7 @@ function EconomyTab() {
           border:'1px solid rgba(255,255,255,0.07)', padding:'16px 20px' }}>
           <div style={{ fontSize:13, fontWeight:800, color:'#0099cc', marginBottom:12 }}>Économie in-game</div>
           {[
-            ['TDC total en circulation', data?.tdc_in_circulation?.toLocaleString() || '—'],
+            ['HEX total en circulation', data?.tdc_in_circulation?.toLocaleString() || '—'],
             ['TDC dépensé (shop)', data?.tdc_spent_shop?.toLocaleString() || '—'],
             ['HEX Coin gagné (24h)', data?.tdc_earned_24h?.toLocaleString() || '—'],
             ['Territoires claimed', data?.claimed_count || '—'],

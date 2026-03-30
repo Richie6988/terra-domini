@@ -33,7 +33,7 @@ const RARITY: Record<string, {
 type RK = keyof typeof RARITY
 
 /* ── Biome resources ─────────────────────────────────────── */
-const BIOME_RES: Record<string, { res:string; icon:string; base:number }[]> = {
+const BIOME_RES: Record<string, { res:string; icon:string; amount:number }[]> = {
   urban:    [{res:'Données',    icon:'📊',amount:12},{res:'Influence', icon:'🌐',amount:8},{res:'Main-d\'œuvre',icon:'👷',amount:15}],
   rural:    [{res:'Nourriture', icon:'🌾',amount:20},{res:'Eau',       icon:'💧',amount:15},{res:'Main-d\'œuvre',icon:'👷',amount:10}],
   forest:   [{res:'Nourriture', icon:'🌾',amount:15},{res:'Eau',       icon:'💧',amount:12},{res:'Stabilité',   icon:'⚖️',amount:8}],
@@ -45,7 +45,7 @@ const BIOME_RES: Record<string, { res:string; icon:string; base:number }[]> = {
   landmark: [{res:'Données',    icon:'📊',amount:10},{res:'Influence', icon:'🌐',amount:12},{res:'Stabilité',   icon:'⚖️',amount:10}],
   grassland:[{res:'Nourriture', icon:'🌾',amount:18},{res:'Main-d\'œuvre',icon:'👷',amount:8},{res:'Stabilité',icon:'⚖️',amount:6}],
 }
-const BIOME_RES_MAPPED = Object.fromEntries(Object.entries(BIOME_RES).map(([k,v])=>[k,v.map(r=>({...r,amount:r.base||10}))]))
+const BIOME_RES_MAPPED = BIOME_RES
 
 
 /* ── Main HexCard ────────────────────────────────────────── */

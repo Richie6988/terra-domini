@@ -29,7 +29,7 @@ const TIERS: Record<string, {id:string; metal:string; carbon:string; title:strin
 }
 
 const CONFIG = {
-  textureSize: 2048,  // Match original (was 1024 = 4x less pixels)
+  textureSize: 1024,  // 1024 for smooth 60fps (2048 causes lag on zoom)
   cardThickness: 0.14,
   rotationSpeed: 0.002,
   zoomSpeed: 0.6,
@@ -91,6 +91,10 @@ export function Token3DViewer({
     holoAngle: number
     frameCount: number
   } | null>(null)
+
+  // Stable ref for onClose (prevents re-mounting Three.js on parent re-render)
+  const onCloseRef = useRef(onClose)
+  onCloseRef.current = onClose
 
   const tier = TIERS[tierKey] || TIERS.GOLD
 
@@ -210,7 +214,7 @@ export function Token3DViewer({
     card.rotation.y = -Math.PI
     card.scale.set(0, 0, 0)
 
-    // ═══ SVG ICON — data: URL approach (reliable, no async timing issues) ═══
+    // ═══ SVG ICON — blob + onload redraw (guaranteed render) ═══
     const iconSvgString = iconId ? getIcon(iconId) : ''
     const iconImage = new Image()
     if (iconSvgString) {
@@ -218,11 +222,16 @@ export function Token3DViewer({
       if (!svgStr.includes('xmlns')) {
         svgStr = svgStr.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
       }
-      // Ensure explicit width/height for canvas rendering
       if (!svgStr.includes('width=')) {
         svgStr = svgStr.replace('viewBox=', 'width="256" height="256" viewBox=')
       }
-      iconImage.src = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)))
+      const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' })
+      const url = URL.createObjectURL(blob)
+      iconImage.onload = () => {
+        URL.revokeObjectURL(url)
+        try { drawFront?.() } catch {} // Redraw with icon ready
+      }
+      iconImage.src = url
     }
 
     // ═══ REAL IMAGE — Unsplash based on biome ═══
@@ -240,7 +249,6 @@ export function Token3DViewer({
       LANDMARK:   'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?w=600&h=400&fit=crop',
     }
     cardImg.src = biomeImageMap[(biome || 'URBAN').toUpperCase()] || biomeImageMap.URBAN
-    // Redraw front when image loads (replaces fallback)
     cardImg.onload = () => { try { drawFront?.() } catch {} }
 
     // Store refs
@@ -256,23 +264,30 @@ export function Token3DViewer({
     function drawFront() {
       const boxW = s * 0.71, boxX = (s - boxW) / 2
 
-      // ═══ Deep black base ═══
-      fCtx.fillStyle = '#020202'
+      // ═══ Base — slightly brighter than pure black ═══
+      fCtx.fillStyle = '#080810'
       fCtx.fillRect(0, 0, s, s)
 
-      // ═══ HOLOGRAPHIC RAINBOW OVERLAY (the $1000 effect) ═══
+      // Subtle catColor ambient glow (prevents "too dark" feel)
+      fCtx.save()
+      const ambG = fCtx.createRadialGradient(c, c, 0, c, c, s * 0.5)
+      ambG.addColorStop(0, catColor + '18'); ambG.addColorStop(1, 'transparent')
+      fCtx.fillStyle = ambG; fCtx.fillRect(0, 0, s, s)
+      fCtx.restore()
+
+      // ═══ HOLOGRAPHIC RAINBOW OVERLAY ═══
       fCtx.save()
       const holoR = s * 0.4
       const holoG = fCtx.createLinearGradient(
         c + Math.cos(state.holoAngle) * holoR, c + Math.sin(state.holoAngle) * holoR,
         c - Math.cos(state.holoAngle) * holoR, c - Math.sin(state.holoAngle) * holoR,
       )
-      holoG.addColorStop(0, 'rgba(255,0,128,0.15)')
-      holoG.addColorStop(0.2, 'rgba(255,128,0,0.12)')
-      holoG.addColorStop(0.4, 'rgba(255,255,0,0.15)')
-      holoG.addColorStop(0.6, 'rgba(0,255,128,0.12)')
-      holoG.addColorStop(0.8, 'rgba(0,128,255,0.15)')
-      holoG.addColorStop(1, 'rgba(128,0,255,0.12)')
+      holoG.addColorStop(0, 'rgba(255,0,128,0.18)')
+      holoG.addColorStop(0.2, 'rgba(255,128,0,0.14)')
+      holoG.addColorStop(0.4, 'rgba(255,255,0,0.18)')
+      holoG.addColorStop(0.6, 'rgba(0,255,128,0.14)')
+      holoG.addColorStop(0.8, 'rgba(0,128,255,0.18)')
+      holoG.addColorStop(1, 'rgba(128,0,255,0.14)')
       fCtx.fillStyle = holoG
       drawHex(fCtx, c, c, s * 0.49); fCtx.fill()
       fCtx.restore()
@@ -285,7 +300,7 @@ export function Token3DViewer({
       g.addColorStop(1, tier.metal)
 
       // ═══ RARITY BADGE (top-right) ═══
-      const badgeX = boxX + boxW - s * 0.06, badgeY = s * 0.14, badgeSize = s * 0.042
+      const badgeX = boxX + boxW - s * 0.06, badgeY = s * 0.125, badgeSize = s * 0.042
       fCtx.save(); fCtx.shadowBlur = 50; fCtx.shadowColor = tier.metal
       fCtx.fillStyle = tier.carbon; drawHex(fCtx, badgeX, badgeY, badgeSize); fCtx.fill()
       fCtx.strokeStyle = tier.metal; fCtx.lineWidth = 5; fCtx.stroke()
@@ -294,57 +309,52 @@ export function Token3DViewer({
       fCtx.fillText(tier.id[0], badgeX, badgeY + s * 0.01)
       fCtx.restore()
 
-      // ═══ SECTION 1: CATEGORY ═══
+      // ═══ SECTION 1: CATEGORY — higher up for better spacing ═══
       fCtx.textAlign = 'center'; fCtx.fillStyle = g
-      fCtx.font = `bold ${s * 0.032}px Orbitron`
-      fCtx.fillText(category, c, s * 0.166)
+      fCtx.font = `bold ${s * 0.028}px Orbitron`
+      fCtx.fillText(category, c, s * 0.14)
 
-      // ═══ SECTION 2: ICON ROW ═══
-      const iconRowY = s * 0.205
-      const iconSz = s * 0.065
-      // Hex frame background
+      // ═══ SECTION 2: ICON ROW — larger, centered ═══
+      const iconRowY = s * 0.195
+      const iconSz = s * 0.08
       fCtx.save()
-      fCtx.shadowBlur = iconSz * 0.4; fCtx.shadowColor = catColor
+      fCtx.shadowBlur = iconSz * 0.5; fCtx.shadowColor = catColor
       fCtx.fillStyle = 'rgba(2,2,2,0.95)'
-      drawHex(fCtx, c, iconRowY, iconSz * 0.6); fCtx.fill()
+      drawHex(fCtx, c, iconRowY, iconSz * 0.55); fCtx.fill()
       fCtx.strokeStyle = tier.metal; fCtx.lineWidth = Math.max(2, iconSz * 0.04); fCtx.stroke()
-      // Inner accent hex ring
       fCtx.beginPath()
-      drawHex(fCtx, c, iconRowY, iconSz * 0.5)
+      drawHex(fCtx, c, iconRowY, iconSz * 0.45)
       fCtx.strokeStyle = catColor; fCtx.globalAlpha = 0.5; fCtx.lineWidth = Math.max(1, iconSz * 0.025); fCtx.stroke()
       fCtx.globalAlpha = 1
       fCtx.restore()
-      // Icon image or fallback letter
-      if (iconImage.complete && iconImage.naturalWidth > 0) {
+      // Icon from bank — check .complete only (naturalWidth unreliable for data: SVGs)
+      if (iconImage.complete && iconImage.src) {
         fCtx.save()
-        fCtx.drawImage(iconImage, c - iconSz * 0.4, iconRowY - iconSz * 0.4, iconSz * 0.8, iconSz * 0.8)
+        fCtx.drawImage(iconImage, c - iconSz * 0.38, iconRowY - iconSz * 0.38, iconSz * 0.76, iconSz * 0.76)
         fCtx.restore()
       } else {
         fCtx.save(); fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle'
-        fCtx.font = `900 ${iconSz * 0.6}px Orbitron`; fCtx.fillStyle = catColor
+        fCtx.font = `900 ${iconSz * 0.5}px Orbitron`; fCtx.fillStyle = catColor
         fCtx.shadowBlur = 20; fCtx.shadowColor = catColor
         fCtx.fillText(category.charAt(0), c, iconRowY); fCtx.restore()
       }
 
-      // ═══ SECTION 2bis: BIOME ═══
+      // ═══ SECTION 2bis: BIOME — more space below icon ═══
       fCtx.textAlign = 'center'; fCtx.fillStyle = g
-      fCtx.font = `bold ${s * 0.032}px Orbitron`
-      fCtx.fillText(biome, c, s * 0.264)
+      fCtx.font = `bold ${s * 0.026}px Orbitron`
+      fCtx.fillText(biome, c, s * 0.258)
 
-      // ═══ SECTION 3: IMAGE + TITLE OVERLAY ═══
-      const imageY = s * 0.293, imageH = s * 0.342
+      // ═══ SECTION 3: IMAGE ═══
+      const imageY = s * 0.285, imageH = s * 0.34
 
-      // Image with shadow
       fCtx.save()
       fCtx.shadowBlur = s * 0.05; fCtx.shadowColor = catColor
-      if (cardImg.complete && cardImg.naturalWidth > 0) {
+      if (cardImg.complete && cardImg.src) {
         fCtx.drawImage(cardImg, boxX, imageY, boxW, imageH)
       } else {
-        // Rich fallback while loading — not a flat gradient, a proper placeholder
         const fbG = fCtx.createRadialGradient(c, imageY + imageH * 0.4, 0, c, imageY + imageH * 0.5, boxW * 0.6)
-        fbG.addColorStop(0, catColor + '55'); fbG.addColorStop(0.5, catColor + '20'); fbG.addColorStop(1, '#020202')
+        fbG.addColorStop(0, catColor + '55'); fbG.addColorStop(0.5, catColor + '20'); fbG.addColorStop(1, '#080810')
         fCtx.fillStyle = fbG; fCtx.fillRect(boxX, imageY, boxW, imageH)
-        // Loading shimmer
         fCtx.globalAlpha = 0.1
         const shimG = fCtx.createLinearGradient(state.shineOffset, imageY, state.shineOffset + s * 0.3, imageY + imageH)
         shimG.addColorStop(0, 'transparent'); shimG.addColorStop(0.5, catColor); shimG.addColorStop(1, 'transparent')
@@ -353,67 +363,62 @@ export function Token3DViewer({
       }
       fCtx.restore()
 
-      // Title bar with gradient fades (EXACT from original)
+      // Title bar with gradient fades
       const titleY = imageY + imageH - s * 0.034
-      const titleBarH = s * 0.05
-      const fadeW = s * 0.025
-
+      const titleBarH = s * 0.05, fadeW = s * 0.025
       fCtx.save()
-      // Solid dark bar
       fCtx.fillStyle = 'rgba(0,0,0,0.88)'
       fCtx.fillRect(boxX, titleY - titleBarH * 0.55, boxW, titleBarH)
-      // Left gradient fade
       const titleFadeL = fCtx.createLinearGradient(boxX - fadeW, 0, boxX, 0)
       titleFadeL.addColorStop(0, 'rgba(0,0,0,0)'); titleFadeL.addColorStop(1, 'rgba(0,0,0,0.88)')
-      fCtx.fillStyle = titleFadeL
-      fCtx.fillRect(boxX - fadeW, titleY - titleBarH * 0.55, fadeW, titleBarH)
-      // Right gradient fade
+      fCtx.fillStyle = titleFadeL; fCtx.fillRect(boxX - fadeW, titleY - titleBarH * 0.55, fadeW, titleBarH)
       const titleFadeR = fCtx.createLinearGradient(boxX + boxW, 0, boxX + boxW + fadeW, 0)
       titleFadeR.addColorStop(0, 'rgba(0,0,0,0.88)'); titleFadeR.addColorStop(1, 'rgba(0,0,0,0)')
-      fCtx.fillStyle = titleFadeR
-      fCtx.fillRect(boxX + boxW, titleY - titleBarH * 0.55, fadeW, titleBarH)
+      fCtx.fillStyle = titleFadeR; fCtx.fillRect(boxX + boxW, titleY - titleBarH * 0.55, fadeW, titleBarH)
       fCtx.restore()
 
-      // Title text with stroke (EXACT from original)
+      // Title text
       fCtx.save(); fCtx.textAlign = 'center'
-      fCtx.font = `900 ${s * 0.047}px Orbitron`
+      fCtx.font = `900 ${s * 0.042}px Orbitron`
       fCtx.strokeStyle = 'rgba(0,0,0,0.9)'; fCtx.lineWidth = s * 0.003
       fCtx.strokeText(tokenName, c, titleY + s * 0.008)
       fCtx.fillStyle = g; fCtx.shadowBlur = 40; fCtx.shadowColor = catColor
       fCtx.fillText(tokenName, c, titleY + s * 0.008)
       fCtx.restore()
 
-      // ═══ SECTION 4: SIDE VERTICAL TEXT ═══
-      fCtx.font = `900 ${s * 0.026}px Orbitron`
-      // Left: TIER
+      // ═══ SECTION 4: SIDE TEXT ═══
+      fCtx.font = `900 ${s * 0.022}px Orbitron`
       fCtx.save()
       fCtx.translate(boxX - s * 0.035, imageY + imageH / 2); fCtx.rotate(-Math.PI / 2)
       fCtx.fillStyle = g; fCtx.shadowBlur = 25; fCtx.shadowColor = tier.metal
       fCtx.fillText(tier.id, 0, 0); fCtx.restore()
-      // Right: SERIAL
       fCtx.save()
       fCtx.translate(boxX + boxW + s * 0.035, imageY + imageH / 2); fCtx.rotate(Math.PI / 2)
       fCtx.fillStyle = g; fCtx.shadowBlur = 25; fCtx.shadowColor = tier.metal
       fCtx.fillText(`${serial}/${maxSupply}`, 0, 0); fCtx.restore()
 
-      // ═══ SECTION 5: DESCRIPTION BOX ═══
-      const descY = imageY + imageH + s * 0.02, descH = s * 0.352
+      // ═══ SECTION 5: DESCRIPTION — clipped to box ═══
+      const descY = imageY + imageH + s * 0.015, descH = s * 0.30
       fCtx.save()
-      fCtx.shadowBlur = 40; fCtx.shadowColor = catColor
-      fCtx.fillStyle = 'rgba(5,5,5,0.98)'; fCtx.fillRect(boxX, descY, boxW, descH)
+      fCtx.shadowBlur = 30; fCtx.shadowColor = catColor
+      fCtx.fillStyle = 'rgba(8,8,16,0.95)'; fCtx.fillRect(boxX, descY, boxW, descH)
       fCtx.restore()
-      // Outer metallic border
-      fCtx.strokeStyle = g; fCtx.lineWidth = 4
+      fCtx.strokeStyle = g; fCtx.lineWidth = 3
+      fCtx.strokeRect(boxX + s * 0.008, descY + s * 0.008, boxW - s * 0.016, descH - s * 0.016)
+      fCtx.strokeStyle = catColor; fCtx.globalAlpha = 0.35; fCtx.lineWidth = 1.5
       fCtx.strokeRect(boxX + s * 0.01, descY + s * 0.01, boxW - s * 0.02, descH - s * 0.02)
-      // Inner accent border
-      fCtx.strokeStyle = catColor; fCtx.globalAlpha = 0.35; fCtx.lineWidth = 2
-      fCtx.strokeRect(boxX + s * 0.012, descY + s * 0.012, boxW - s * 0.024, descH - s * 0.024)
       fCtx.globalAlpha = 1
-      // Description text
-      fCtx.textAlign = 'center'; fCtx.fillStyle = '#e0e0e0'
-      fCtx.font = `italic ${s * 0.041}px Georgia`
+
+      // Description text — clipped to box, smaller font
+      fCtx.save()
+      fCtx.beginPath()
+      fCtx.rect(boxX + s * 0.02, descY + s * 0.02, boxW - s * 0.04, descH - s * 0.04)
+      fCtx.clip()
+      fCtx.textAlign = 'center'; fCtx.fillStyle = '#d0d0d0'
+      fCtx.font = `italic ${s * 0.025}px Georgia`
       const descText = description || `Ce jeton certifie la propriété souveraine du territoire HEXOD identifié. Données géospatiales cryptées via protocole Vault Alpha. Rareté garantie par Tier ${tier.id}.`
-      wrapTextCentered(fCtx, descText, c, descY + s * 0.08, boxW - s * 0.1, s * 0.03)
+      wrapTextCentered(fCtx, descText, c, descY + s * 0.06, boxW - s * 0.08, s * 0.028)
+      fCtx.restore()
 
       // ═══ SECTION 6: VIGNETTE + FILM GRAIN + OUTER BORDER ═══
       // Vignette
@@ -597,7 +602,7 @@ export function Token3DViewer({
     window.addEventListener('resize', onResize)
 
     // Escape key to close
-    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    const onKeyDown = (e: KeyboardEvent) => { if (e.key === 'Escape') onCloseRef.current() }
     window.addEventListener('keydown', onKeyDown)
 
     // Fade in
@@ -618,7 +623,7 @@ export function Token3DViewer({
       if (el.contains(renderer.domElement)) el.removeChild(renderer.domElement)
       sceneRef.current = null
     }
-  }, [visible, tokenName, category, catColor, iconId, tierKey, serial, maxSupply, edition, biome, tier, description, onClose, drawHex, wrapTextCentered])
+  }, [visible, tokenName, category, catColor, iconId, tierKey, serial, maxSupply, edition, biome, tier, description, drawHex, wrapTextCentered])
 
   if (!visible) return null
 
