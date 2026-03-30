@@ -23,11 +23,11 @@ type HuntPhase = 'briefing' | 'tracking' | 'scanning' | 'found' | 'collected'
 // Mock hunt data — will come from API
 function generateDailyHunt() {
   const targets = [
-    { id: 'volcano', name: 'Dormant Volcano', category: 'natural_disasters', rarity: 'rare', crystals: 250, hint: 'Near elevated terrain, south-west of your position' },
-    { id: 'monument', name: 'Ancient Monument', category: 'places_structures', rarity: 'epic', crystals: 500, hint: 'In an urban area, look for historical landmarks' },
-    { id: 'treasure', name: 'Hidden Treasure', category: 'economic_assets', rarity: 'legendary', crystals: 1000, hint: 'Coastal region, rumored to be near old port structures' },
-    { id: 'fossil', name: 'Prehistoric Fossil', category: 'life_organisms', rarity: 'rare', crystals: 200, hint: 'Mountainous terrain with exposed rock formations' },
-    { id: 'mystery', name: 'Classified Object', category: 'conflict_intrigue', rarity: 'epic', crystals: 750, hint: 'Restricted area, high security presence detected' },
+    { id: 'volcano', name: 'Dormant Volcano', category: 'natural_disasters', rarity: 'rare', hex_reward: 250, hint: 'Near elevated terrain, south-west of your position' },
+    { id: 'monument', name: 'Ancient Monument', category: 'places_structures', rarity: 'epic', hex_reward: 500, hint: 'In an urban area, look for historical landmarks' },
+    { id: 'treasure', name: 'Hidden Treasure', category: 'economic_assets', rarity: 'legendary', hex_reward: 1000, hint: 'Coastal region, rumored to be near old port structures' },
+    { id: 'fossil', name: 'Prehistoric Fossil', category: 'life_organisms', rarity: 'rare', hex_reward: 200, hint: 'Mountainous terrain with exposed rock formations' },
+    { id: 'mystery', name: 'Classified Object', category: 'conflict_intrigue', rarity: 'epic', hex_reward: 750, hint: 'Restricted area, high security presence detected' },
   ]
   return targets[Math.floor(Math.random() * targets.length)]
 }
@@ -82,7 +82,7 @@ export function DailyHuntPanel({ onClose }: Props) {
   const [hunt] = useState(generateDailyHunt)
   const [distance, setDistance] = useState(850) // Mock distance in meters
   const [scanProgress, setScanProgress] = useState(0)
-  const [reward, setReward] = useState<{ crystals: number; xp: number } | null>(null)
+  const [reward, setReward] = useState<{ hex_reward: number; xp: number } | null>(null)
   const scanTimer = useRef<number>(0)
 
   // Simulate distance decreasing (in production: real GPS)
@@ -115,7 +115,7 @@ export function DailyHuntPanel({ onClose }: Props) {
   }, [phase])
 
   const handleCollect = useCallback(() => {
-    setReward({ crystals: hunt.crystals, xp: 50 })
+    setReward({ hex_reward: hunt.crystals, xp: 50 })
     setPhase('collected')
   }, [hunt])
 

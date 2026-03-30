@@ -1,7 +1,7 @@
 /**
  * CombatPanel — Military Command Center.
  * 5-tab structure from main_prototype.html:
- *   ⚔ Recruit — Purchase units (6 types, crystal cost)
+ *   ⚔ Recruit — Purchase units (6 types, HEX cost)
  *   🏋 Train — Training queue with progress bars
  *   📍 Deploy — Assign units to kingdoms
  *   🔥 War Room — Active battles, threats, distant warfare

@@ -1014,7 +1014,8 @@
       "territory_income",
       "referrals"
     ],
-    "ui_rename": "crystals → HEX Coin in all user-facing text. Internal variables kept as-is."
+    "ui_rename": "crystals → HEX Coin in all user-facing text. Internal variables kept as-is.",
+    "display": "HEX (◆ symbol), CrystalIcon SVG stays as visual"
   },
   "daily_modes": {
     "events": {
@@ -1063,5 +1064,12 @@
     "GameHUD": "Removed — notification bubble above dock",
     "WarTicker": "Removed — war feed between dock and content",
     "TerritoryPanel": "Removed — old territory panel (HexCard→Token3DViewer handles this)"
+  },
+  "radar_safari": {
+    "small": "100×100px bottom-right, shows safari heat + distance",
+    "expanded": "280×280px centered overlay, detailed blips + safari tracking panel",
+    "safari_blip": "Pulsing gold ring, labeled SAFARI, distance in meters, HOT/WARM/COLD",
+    "click": "Small → Expanded (AnimatePresence scale)",
+    "close": "Click outside or ESC"
   }
 }

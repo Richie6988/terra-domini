@@ -68,7 +68,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
         {[
           { label: 'TERRITORIES', value: kingdom.territories.length, color: '#0099cc' },
           { label: 'SKILLS', value: `${totalSkills}/${maxSkills}`, color: '#7950f2' },
-          { label: 'CRYSTALS/DAY', value: kingdom.dailyCrystals.toLocaleString(), color: '#7950f2', icon: true },
+          { label: 'HEX/DAY', value: kingdom.dailyCrystals.toLocaleString(), color: '#7950f2', icon: true },
         ].map(stat => (
           <div key={stat.label} style={{
             padding: '10px 8px', borderRadius: 8, textAlign: 'center',
@@ -219,7 +219,7 @@ function ResourcesTab({ kingdom, onAllocChange }: {
           fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 2,
           fontFamily: "'Orbitron', system-ui, sans-serif",
         }}>
-          CRYSTALS/DAY
+          HEX/DAY
         </span>
       </div>
 
