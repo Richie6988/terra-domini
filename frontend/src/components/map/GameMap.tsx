@@ -27,6 +27,11 @@ interface GameMapProps {
 }
 
 const TILES = {
+  light: {
+    label: '🗺️ Light',
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    maxZoom: 19,
+  },
   dark:      {
     label: '🌑 Dark',
     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
@@ -60,7 +65,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const vpTimer      = useRef<ReturnType<typeof setTimeout>>()
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const [tile,        setTile]        = useState<keyof typeof TILES>('dark')
+  const [tile,        setTile]        = useState<keyof typeof TILES>('light')
   const [showHex,     setShowHex]     = useState(true)
   const [poiCatFilter, setPoiCatFilter] = useState<string[]>(['all'])
   const [poiRarFilter, setPoiRarFilter] = useState<string[]>(['all'])
@@ -318,12 +323,12 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     const drawGrid = () => {
       grid.clearLayers()
       const z = map.getZoom()
-      if (z < 14) return // Only show grid at zoom 14+
+      if (z < 12) return // Show grid from zoom 12+
 
       const center = map.getCenter()
-      // Resolution scales with zoom: z14→res8, z15→res9, z16+→res10
-      const res = z >= 16 ? 10 : z >= 15 ? 9 : 8
-      const radiusKm = z >= 16 ? 0.3 : z >= 15 ? 0.8 : 2.0
+      // Resolution scales with zoom: z12-13→res7, z14→res8, z15→res9, z16+→res10
+      const res = z >= 16 ? 10 : z >= 15 ? 9 : z >= 14 ? 8 : 7
+      const radiusKm = z >= 16 ? 0.3 : z >= 15 ? 0.8 : z >= 14 ? 2.0 : 5.0
       const hexes = getVisibleHexes(center.lat, center.lng, radiusKm, res)
 
       // Only draw hexes NOT already in territories (avoid double-rendering)
@@ -356,7 +361,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       <style>{`
         .td-tooltip{background:rgba(5,5,15,0.97)!important;border:1px solid rgba(255,255,255,0.15)!important;border-radius:10px!important;color:#fff!important;padding:8px 12px!important;box-shadow:0 4px 32px rgba(0,0,0,0.7)!important;}
         .td-tooltip::before{display:none!important;}
-        .leaflet-container{cursor:crosshair;background:#080810;}
+        .leaflet-container{cursor:crosshair;background:#e8eef5;}
         /* Neon glow via CSS filter — works on SVG paths */
         .td-hex-own path{filter:drop-shadow(0 0 6px rgba(0,255,135,0.8))!important;}
         .td-hex-tower path{filter:drop-shadow(0 0 8px rgba(255,184,0,0.9))!important;animation:td-pulse 2s ease-in-out infinite;}
