@@ -6,6 +6,7 @@
 import { useMemo, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { Token3DViewer } from '../shared/Token3DViewer'
+import { ClaimCelebration } from '../shared/ClaimCelebration'
 import { api } from '../../services/api'
 import { useStore, usePlayer } from '../../store'
 import toast from 'react-hot-toast'
@@ -82,6 +83,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
 
   // Claim territory via API
   const [claiming, setClaiming] = useState(false)
+  const [celebrating, setCelebrating] = useState(false)
   const handleClaim = useCallback(async () => {
     if (claiming || !t.h3_index) return
     setClaiming(true)
@@ -91,20 +93,21 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
         lat: t.center_lat ?? t.lat,
         lon: t.center_lon ?? t.lon,
       })
-      toast.success(`🏴 Territory claimed! Welcome to HEXOD.`)
       // Update store with new ownership
       const owned = { ...t, owner_id: player?.id, owner_username: player?.username }
       useStore.getState().setTerritories([owned as any])
-      onClose()
+      // Trigger celebration!
+      setCelebrating(true)
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.response?.data?.detail || 'Claim failed'
       toast.error(msg)
     } finally {
       setClaiming(false)
     }
-  }, [claiming, t, player, onClose])
+  }, [claiming, t, player])
 
-  return createPortal(
+  return (<>
+    {createPortal(
     <Token3DViewer
       visible={true}
       onClose={onClose}
@@ -202,5 +205,15 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
       }
     />,
     document.body
-  )
+  )}
+  {celebrating && createPortal(
+    <ClaimCelebration
+      visible={celebrating}
+      territoryName={cardName.toUpperCase()}
+      rarity={rarity}
+      onComplete={() => { setCelebrating(false); onClose() }}
+    />,
+    document.body
+  )}
+  </>)
 }
