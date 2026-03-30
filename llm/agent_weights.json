@@ -3,7 +3,7 @@
     "format": "hexod_agent_weights_v2",
     "version": 4,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-30T20:00:00Z",
+    "last_updated": "2026-03-31T01:00:00Z",
     "session": 19,
     "total_patterns": 24,
     "total_weights": 87,
@@ -1205,5 +1205,13 @@
   "panel_centering": {
     "method": "flexbox (display:flex, align-items:center, justify-content:center)",
     "replaces": "transform:translate(-50%,-50%) which Framer Motion overrode"
+  },
+  "token3d_v3": {
+    "controls": "OrbitControls (three/examples/jsm) — enableDamping, rotateSpeed 0.5, minDist 4, maxDist 15, noPan",
+    "icon_row": "Small icons at y≈0.205 (between category and biome, matching original Section 2)",
+    "image_area": "Procedural biome texture at y≈0.293 (NO hex frame overlay covering it)",
+    "layout_sections": "1:Category 2:IconRow 3:BiomeLabel 4:MainImage 5:TitleBar 6:Description 7:Border",
+    "auto_rotate": "card.rotation.y += 0.002 when entry done and user not dragging",
+    "entry_anim": "scale 0→1 + rotation -π→0 with cubic easing"
   }
 }

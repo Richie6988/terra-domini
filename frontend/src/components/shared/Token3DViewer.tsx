@@ -15,6 +15,7 @@
  */
 import { useEffect, useRef, useCallback, useState } from 'react'
 import * as THREE from 'three'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CATEGORIES } from '../shared/radarIconData'
 import { getIcon } from '../shared/iconBank'
@@ -28,9 +29,11 @@ const TIERS: Record<string, {id:string; metal:string; carbon:string; title:strin
 }
 
 const CONFIG = {
-  textureSize: 1024, // Lower than 2048 for React perf, still crisp
+  textureSize: 1024,
   cardThickness: 0.14,
   rotationSpeed: 0.002,
+  zoomSpeed: 0.8,
+  zoomDamping: 0.08,
 }
 
 export interface Token3DProps {
@@ -86,9 +89,6 @@ export function Token3DViewer({
     shineOffset: number
     holoAngle: number
     frameCount: number
-    isDragging: boolean
-    dragStart: {x:number; y:number}
-    rotationTarget: {x:number; y:number}
   } | null>(null)
 
   const tier = TIERS[tierKey] || TIERS.GOLD
@@ -231,25 +231,12 @@ export function Token3DViewer({
       iconImage.src = url
     }
 
-    // Draw icon on front face using pre-rendered canvas
-    function drawIconOnCanvas(ctx: CanvasRenderingContext2D, x: number, y: number, size: number) {
-      if (!iconReady) return
-      ctx.save()
-      ctx.shadowBlur = size * 0.3
-      ctx.shadowColor = catColor
-      // Draw the pre-rendered SVG icon (includes background circle + icon paths)
-      ctx.drawImage(iconCanvas, x - size / 2, y - size / 2, size, size)
-      ctx.restore()
-    }
-
     // Store refs
     const state = {
       scene, camera, renderer, card, fMat, bMat, sMat,
       frontCanvas, backCanvas, fCtx, bCtx,
       animId: 0, entryProgress: 0,
       shineOffset: -2000, holoAngle: 0, frameCount: 0,
-      isDragging: false, dragStart: { x: 0, y: 0 },
-      rotationTarget: { x: 0, y: 0 },
     }
     sceneRef.current = state
 
@@ -303,11 +290,31 @@ export function Token3DViewer({
       fCtx.font = `bold ${s * 0.032}px Orbitron`
       fCtx.fillText(category, c, s * 0.166)
 
+      // ── SECTION 2: Category icon row (small icons, matching original) ──
+      const iconRowY = s * 0.205
+      const iconSize = s * 0.032
+      if (iconImage.complete) {
+        // Draw the icon from pre-loaded Image (handles all SVG transforms)
+        fCtx.save()
+        fCtx.shadowBlur = iconSize * 0.4; fCtx.shadowColor = catColor
+        // Dark hex background
+        fCtx.fillStyle = 'rgba(2,2,2,0.95)'
+        drawHex(fCtx, c, iconRowY, iconSize / 2)
+        fCtx.fill()
+        fCtx.strokeStyle = tier.metal; fCtx.lineWidth = Math.max(2, iconSize * 0.04)
+        fCtx.stroke()
+        fCtx.restore()
+        // Icon image on top
+        fCtx.save()
+        fCtx.drawImage(iconImage, c - iconSize * 0.4, iconRowY - iconSize * 0.4, iconSize * 0.8, iconSize * 0.8)
+        fCtx.restore()
+      }
+
       // Biome
       fCtx.fillStyle = g; fCtx.font = `bold ${s * 0.032}px Orbitron`
       fCtx.fillText(biome, c, s * 0.264)
 
-      // Central area — procedural biome image + SVG icon overlay
+      // ── SECTION 3: Main image area (biome texture) ──
       const imageY = s * 0.293, imageH = s * 0.342
       const imageCx = c, imageCy = imageY + imageH / 2
 
@@ -354,51 +361,7 @@ export function Token3DViewer({
       fCtx.globalAlpha = 1
       fCtx.restore()
 
-      // SVG icon overlay — prominent centered rendering
-      // First: dark hex frame (like original template)
-      fCtx.save()
-      fCtx.shadowBlur = s * 0.06; fCtx.shadowColor = catColor
-      fCtx.fillStyle = 'rgba(2,2,2,0.85)'
-      drawHex(fCtx, imageCx, imageCy, s * 0.14)
-      fCtx.fill()
-      fCtx.strokeStyle = tier.metal; fCtx.lineWidth = s * 0.005
-      fCtx.stroke()
-      // Inner accent ring
-      fCtx.strokeStyle = catColor; fCtx.lineWidth = s * 0.003; fCtx.globalAlpha = 0.6
-      drawHex(fCtx, imageCx, imageCy, s * 0.125)
-      fCtx.stroke(); fCtx.globalAlpha = 1
-      fCtx.restore()
-
-      // Then: icon image on top
-      if (iconLoaded && iconImage.complete) {
-        const iconSize = s * 0.20
-        fCtx.save()
-        fCtx.shadowBlur = s * 0.04; fCtx.shadowColor = catColor
-        fCtx.drawImage(iconImage,
-          imageCx - iconSize / 2, imageCy - iconSize / 2,
-          iconSize, iconSize)
-        fCtx.restore()
-      } else {
-        // Always show category letter as guaranteed visible fallback
-        fCtx.save(); fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle'
-        fCtx.font = `900 ${s * 0.07}px Orbitron`; fCtx.fillStyle = catColor
-        fCtx.shadowBlur = 20; fCtx.shadowColor = catColor
-        fCtx.fillText(category.charAt(0), imageCx, imageCy); fCtx.restore()
-      }
-
-      // Orbiting dots (animated)
-      fCtx.save()
-      for (let i = 0; i < 6; i++) {
-        const ang = (i * Math.PI / 3) + state.holoAngle * 0.5
-        const dotR = s * 0.17
-        const dotX = imageCx + Math.cos(ang) * dotR
-        const dotY = imageCy + Math.sin(ang) * dotR
-        fCtx.fillStyle = tier.metal; fCtx.globalAlpha = 0.4 + Math.sin(state.holoAngle + i) * 0.3
-        fCtx.beginPath(); fCtx.arc(dotX, dotY, s * 0.005, 0, Math.PI * 2); fCtx.fill()
-      }
-      fCtx.globalAlpha = 1; fCtx.restore()
-
-      // Title bar
+      // Title bar (over the image, matching original Section 4)
       const titleY = imageY + imageH - s * 0.034
       fCtx.fillStyle = 'rgba(0,0,0,0.88)'
       fCtx.fillRect(boxX, titleY - s * 0.025, boxW, s * 0.05)
@@ -564,59 +527,38 @@ export function Token3DViewer({
     drawFront()
     drawBack()
 
-    // ═══ MOUSE/TOUCH CONTROLS ═══
-    const onPointerDown = (e: PointerEvent) => {
-      state.isDragging = true
-      state.dragStart = { x: e.clientX, y: e.clientY }
-      renderer.domElement.style.cursor = 'grabbing'
-    }
-    const onPointerMove = (e: PointerEvent) => {
-      if (!state.isDragging) return
-      const dx = e.clientX - state.dragStart.x
-      const dy = e.clientY - state.dragStart.y
-      state.rotationTarget.y += dx * 0.005
-      state.rotationTarget.x += dy * 0.005
-      state.dragStart = { x: e.clientX, y: e.clientY }
-    }
-    const onPointerUp = () => {
-      state.isDragging = false
-      renderer.domElement.style.cursor = 'grab'
-    }
-    renderer.domElement.addEventListener('pointerdown', onPointerDown)
-    renderer.domElement.addEventListener('pointermove', onPointerMove)
-    renderer.domElement.addEventListener('pointerup', onPointerUp)
-    renderer.domElement.addEventListener('pointerleave', onPointerUp)
+    // ═══ CONTROLS (OrbitControls — faithful to original) ═══
+    const controls = new OrbitControls(camera, renderer.domElement)
+    controls.enableDamping = true
+    controls.dampingFactor = CONFIG.zoomDamping
+    controls.zoomSpeed = CONFIG.zoomSpeed
+    controls.minDistance = 4
+    controls.maxDistance = 15
+    controls.enablePan = false
+    controls.rotateSpeed = 0.5
+    controls.autoRotate = false // We handle auto-rotate manually after entry
 
-    // Scroll zoom
-    const onWheel = (e: WheelEvent) => {
-      e.preventDefault()
-      camera.position.z = Math.max(4, Math.min(15, camera.position.z + e.deltaY * 0.01))
-    }
-    renderer.domElement.addEventListener('wheel', onWheel, { passive: false })
+    // ═══ ANIMATION LOOP (matching original) ═══
+    const clock = new THREE.Clock()
 
-    // ═══ ANIMATION LOOP ═══
     function animate() {
       state.animId = requestAnimationFrame(animate)
+      clock.getDelta()
 
-      // Entry animation
+      // Entry animation (scale from 0 + rotate from -π)
       if (state.entryProgress < 1) {
         state.entryProgress += 0.008
         const ease = 1 - Math.pow(1 - state.entryProgress, 3)
         card.scale.set(ease, ease, ease)
         card.rotation.y = -Math.PI + ease * Math.PI
       } else {
-        // Auto-rotate when not dragging
-        if (!state.isDragging) {
-          card.rotation.y += CONFIG.rotationSpeed
-        }
-        // Apply drag rotation
-        card.rotation.y += state.rotationTarget.y
-        card.rotation.x += state.rotationTarget.x
-        state.rotationTarget.y *= 0.92
-        state.rotationTarget.x *= 0.92
+        // Auto-rotate when not user-dragging
+        card.rotation.y += CONFIG.rotationSpeed
       }
 
-      // Shimmer update every 4th frame
+      controls.update()
+
+      // Shimmer update every 4th frame (matching original)
       state.frameCount++
       if (state.frameCount % 4 === 0) {
         state.shineOffset += 12
@@ -651,13 +593,9 @@ export function Token3DViewer({
     // Cleanup
     return () => {
       cancelAnimationFrame(state.animId)
+      controls.dispose()
       window.removeEventListener('resize', onResize)
       window.removeEventListener('keydown', onKeyDown)
-      renderer.domElement.removeEventListener('pointerdown', onPointerDown)
-      renderer.domElement.removeEventListener('pointermove', onPointerMove)
-      renderer.domElement.removeEventListener('pointerup', onPointerUp)
-      renderer.domElement.removeEventListener('pointerleave', onPointerUp)
-      renderer.domElement.removeEventListener('wheel', onWheel)
       renderer.dispose()
       geo.dispose()
       fMat.dispose(); bMat.dispose(); sMat.dispose()
