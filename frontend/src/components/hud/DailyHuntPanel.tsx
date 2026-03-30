@@ -393,7 +393,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", marginTop: 4 }}>
                     +{reward.crystals}
                   </div>
-                  <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>CRYSTALS</div>
+                  <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>HEX COIN</div>
                 </div>
                 <div style={{
                   padding: '12px 20px', borderRadius: 12,

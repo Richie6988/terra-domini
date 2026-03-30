@@ -111,7 +111,7 @@ export function DayCycleWidget() {
         {mins}:{secs.toString().padStart(2, '0')}
       </div>
 
-      {/* Last crystals earned */}
+      {/* Last HEX earned */}
       {lastCrystals > 0 && (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 3,

@@ -103,7 +103,7 @@ export function CombatPanel({ onClose }: Props) {
       {tab === 'recruit' && (
         <div>
           <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 10 }}>
-            PURCHASE UNITS (CRYSTALS REQUIRED)
+            PURCHASE UNITS (HEX COIN REQUIRED)
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             {UNITS.map(u => {

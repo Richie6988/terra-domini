@@ -3,12 +3,12 @@
     "format": "hexod_agent_weights_v2",
     "version": 3,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-30T14:00:00Z",
+    "last_updated": "2026-03-30T15:00:00Z",
     "session": 18,
     "total_patterns": 24,
     "total_weights": 87,
     "total_icons": 98,
-    "total_components": 55,
+    "total_components": 57,
     "total_commits": 23,
     "theme_migration": "COMPLETE",
     "core_loop_completion": "65%",
@@ -908,6 +908,10 @@
     "codex": {
       "status": "PORTED — 9 tabs from prototype: Overview (global progress + category grid), Favorites (top 5 + 3D Museum), Disasters, Places, Nature, Conflict, Culture, Science, Fantastic. Filters inside codex. 3D view + marketplace per token.",
       "priority": "DONE"
+    },
+    "auctions": {
+      "status": "PORTED — AuctionPanel with live bidding, chat, countdown, 3D view, snipe protection. Mock data.",
+      "priority": "DONE"
     }
   },
   "feedback_session_17": {
@@ -1009,7 +1013,8 @@
       "events",
       "territory_income",
       "referrals"
-    ]
+    ],
+    "ui_rename": "crystals → HEX Coin in all user-facing text. Internal variables kept as-is."
   },
   "daily_modes": {
     "events": {
@@ -1024,7 +1029,8 @@
         "Election Day",
         "SpaceX Launch"
       ],
-      "token_placement": "Adjacent to captured territories"
+      "token_placement": "Adjacent to captured territories",
+      "status": "EXISTS — EventsPanel"
     },
     "safaris": {
       "description": "Random fauna/dinosaur missions. Hex grid cell lights up (player-only). Track with radar + clues. Daily challenges.",
@@ -1038,7 +1044,8 @@
         "Capture 5 fungus",
         "Capture 20 rare dinosaurs"
       ],
-      "connects_to": "RadarWidget — dedicated safari mode with distance/direction"
+      "connects_to": "RadarWidget — dedicated safari mode with distance/direction",
+      "status": "EXISTS — DailyHuntPanel (renamed Safari)"
     },
     "auctions": {
       "description": "Rare++ edition unique tokens. eBay-style: auction + live chat + countdown timer.",
@@ -1048,7 +1055,8 @@
         "countdown_timer",
         "snipe_protection"
       ],
-      "currency": "HEX Coin"
+      "currency": "HEX Coin",
+      "status": "PORTED — AuctionPanel.tsx"
     }
   },
   "removed_this_session": {

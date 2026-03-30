@@ -86,7 +86,7 @@ export function HexodTopHUD() {
         </div>
       </div>
 
-      {/* Right segment — Crystal balance */}
+      {/* Right segment — HEX Balance */}
       <div
         className="glass-panel hud-segment"
         onClick={() => setActivePanel('crypto')}

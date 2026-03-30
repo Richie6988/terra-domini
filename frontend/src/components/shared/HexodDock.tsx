@@ -5,7 +5,7 @@
  */
 import { useStore } from '../../store'
 
-type PanelId = 'combat' | 'alliance' | 'events' | 'profile' | 'trade' | 'shop' | 'ladder' | 'meta' | 'crypto' | 'marketplace' | 'kingdom' | 'codex' | 'hunt' | 'tasks'
+type PanelId = 'combat' | 'alliance' | 'events' | 'profile' | 'trade' | 'shop' | 'ladder' | 'meta' | 'crypto' | 'marketplace' | 'kingdom' | 'codex' | 'hunt' | 'tasks' | 'auction'
 
 interface DockItem {
   panel: PanelId
@@ -20,6 +20,7 @@ const DOCK_ITEMS: DockItem[] = [
   { panel: 'kingdom',     icon: '👑', label: 'Kingdom',     color: '#cc8800' },
   { panel: 'hunt',        icon: '🎯', label: 'Safari',      color: '#f97316' },
   { panel: 'codex',       icon: '📖', label: 'Codex',       color: '#7950f2' },
+  { panel: 'auction',     icon: '🏷', label: 'Auction',     color: '#cc8800' },
   { panel: 'tasks',       icon: '📋', label: 'Tasks',       color: '#0099cc' },
   { panel: 'shop',        icon: '🛒', label: 'Shop',        color: '#fbbf24' },
   { panel: 'trade',       icon: '📊', label: 'Trade',       color: '#22c55e' },
