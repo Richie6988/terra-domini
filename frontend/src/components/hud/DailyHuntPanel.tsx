@@ -1,14 +1,15 @@
 /**
- * DailyHuntPanel — M09 Daily Hunt.
- * Core engagement loop: find a hidden token each day.
- * Hot/cold radar guides player to target location.
- * Reward: rare tokens + hex_reward + XP.
+ * DailyHuntPanel — Safari Mode.
+ * Random fauna/dinosaur missions on tokens not in codex.
+ * Hex grid cell lights up (player-only visible).
+ * Player tracks with radar + clues. Daily challenges.
  * 
  * Flow:
- *   1. Player opens Daily Hunt → gets target hint (category, biome, direction)
- *   2. Walks/navigates toward target → hot/cold indicator updates
+ *   1. Player opens Safari → gets target (fauna/dinosaur category, hint)
+ *   2. Walks/navigates toward target → radar hot/cold indicator
  *   3. When within 50m → "DEEP SCAN" available → reveals exact hex
- *   4. Click to collect → reward animation → token added to codex
+ *   4. Click to capture → reward animation → token added to codex
+ *   5. Daily challenges: "capture 5 fungus", "capture 20 rare dinosaurs"
  */
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -20,17 +21,27 @@ interface Props { onClose: () => void }
 
 type HuntPhase = 'briefing' | 'tracking' | 'scanning' | 'found' | 'collected'
 
-// Mock hunt data — will come from API
+// Mock safari data — will come from API
 function generateDailyHunt() {
   const targets = [
-    { id: 'volcano', name: 'Dormant Volcano', category: 'natural_disasters', rarity: 'rare', hex_reward: 250, hint: 'Near elevated terrain, south-west of your position' },
-    { id: 'monument', name: 'Ancient Monument', category: 'places_structures', rarity: 'epic', hex_reward: 500, hint: 'In an urban area, look for historical landmarks' },
-    { id: 'treasure', name: 'Hidden Treasure', category: 'economic_assets', rarity: 'legendary', hex_reward: 1000, hint: 'Coastal region, rumored to be near old port structures' },
-    { id: 'fossil', name: 'Prehistoric Fossil', category: 'life_organisms', rarity: 'rare', hex_reward: 200, hint: 'Mountainous terrain with exposed rock formations' },
-    { id: 'mystery', name: 'Classified Object', category: 'conflict_intrigue', rarity: 'epic', hex_reward: 750, hint: 'Restricted area, high security presence detected' },
+    { id: 'trex', name: 'Tyrannosaurus Rex', category: 'life_organisms', rarity: 'legendary', hex_reward: 1000, hint: 'Massive footprints detected near rocky terrain — approach with caution!' },
+    { id: 'raptor', name: 'Velociraptor Pack', category: 'life_organisms', rarity: 'epic', hex_reward: 500, hint: 'Pack activity detected south-east. They hunt in groups — stay sharp.' },
+    { id: 'fungus', name: 'Bioluminescent Fungus', category: 'life_organisms', rarity: 'rare', hex_reward: 150, hint: 'Glowing spores visible in shaded areas. Check forest zones.' },
+    { id: 'eagle', name: 'Giant Golden Eagle', category: 'life_organisms', rarity: 'epic', hex_reward: 400, hint: 'Spotted circling above mountainous terrain. Nest nearby.' },
+    { id: 'whale', name: 'Blue Whale Migration', category: 'life_organisms', rarity: 'legendary', hex_reward: 800, hint: 'Coastal hydrophone detected deep song patterns. Ocean zone.' },
+    { id: 'orchid', name: 'Ghost Orchid', category: 'life_organisms', rarity: 'rare', hex_reward: 200, hint: 'Rare bloom in humid forest. Visible only at dawn.' },
+    { id: 'stego', name: 'Stegosaurus', category: 'life_organisms', rarity: 'rare', hex_reward: 300, hint: 'Herbivore trails in grassland. Follow the broken vegetation.' },
+    { id: 'phoenix', name: 'Phoenix Egg', category: 'fantastic', rarity: 'mythic', hex_reward: 2000, hint: 'Thermal anomaly near volcanic area. Extremely rare spawn!' },
   ]
   return targets[Math.floor(Math.random() * targets.length)]
 }
+
+// Daily challenge examples
+const DAILY_CHALLENGES = [
+  { id: 'dc1', desc: 'Capture 5 Fungus species', progress: 2, total: 5, reward: 100, icon: '🍄' },
+  { id: 'dc2', desc: 'Capture 3 Rare Dinosaurs', progress: 1, total: 3, reward: 300, icon: '🦕' },
+  { id: 'dc3', desc: 'Track a target within 100m', progress: 0, total: 1, reward: 50, icon: '📡' },
+]
 
 const RARITY_COLORS: Record<string, string> = {
   common: '#94a3b8', uncommon: '#22c55e', rare: '#3b82f6',
@@ -128,7 +139,7 @@ export function DailyHuntPanel({ onClose }: Props) {
 
   if (alreadyDone && phase === 'briefing') {
     return (
-      <GlassPanel title="DAILY HUNT" onClose={onClose} accent="#f97316" width={380}>
+      <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316" width={380}>
         <div style={{
           textAlign: 'center', padding: 40,
         }}>
@@ -137,7 +148,7 @@ export function DailyHuntPanel({ onClose }: Props) {
             fontSize: 10, fontWeight: 900, color: '#00884a', letterSpacing: 3,
             fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8,
           }}>
-            HUNT COMPLETED TODAY
+            SAFARI COMPLETED TODAY
           </div>
           <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.45)', letterSpacing: 1 }}>
             Come back tomorrow for a new target
@@ -148,7 +159,7 @@ export function DailyHuntPanel({ onClose }: Props) {
   }
 
   return (
-    <GlassPanel title="DAILY HUNT" onClose={onClose} accent="#f97316" width={380}>
+    <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316" width={380}>
       <AnimatePresence mode="wait">
         {/* ── BRIEFING ── */}
         {phase === 'briefing' && (
@@ -212,7 +223,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 boxShadow: '0 4px 15px rgba(249,115,22,0.3)',
               }}
             >
-              🎯 START HUNT
+              🎯 START SAFARI
             </button>
           </motion.div>
         )}
@@ -380,7 +391,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 fontSize: 11, fontWeight: 900, letterSpacing: 3, color: '#00884a',
                 fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 16,
               }}>
-                HUNT COMPLETE!
+                SAFARI COMPLETE!
               </div>
 
               <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginBottom: 16 }}>
@@ -421,6 +432,55 @@ export function DailyHuntPanel({ onClose }: Props) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Daily Safari Challenges */}
+      <div style={{ marginTop: 14, borderTop: '1px solid rgba(0,60,100,0.1)', paddingTop: 12 }}>
+        <div style={{
+          fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)',
+          fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8,
+        }}>
+          📋 DAILY CHALLENGES
+        </div>
+        {DAILY_CHALLENGES.map(ch => {
+          const pct = Math.floor((ch.progress / ch.total) * 100)
+          const done = ch.progress >= ch.total
+          return (
+            <div key={ch.id} style={{
+              display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,
+              padding: '8px 10px', borderRadius: 8,
+              background: done ? 'rgba(0,136,74,0.05)' : 'rgba(255,255,255,0.4)',
+              border: `1px solid ${done ? 'rgba(0,136,74,0.2)' : 'rgba(0,60,100,0.08)'}`,
+              opacity: done ? 0.6 : 1,
+            }}>
+              <span style={{ fontSize: 14 }}>{ch.icon}</span>
+              <div style={{ flex: 1 }}>
+                <div style={{
+                  fontSize: 8, fontWeight: 700, color: done ? 'rgba(26,42,58,0.4)' : '#1a2a3a',
+                  fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 0.5,
+                  textDecoration: done ? 'line-through' : 'none',
+                }}>
+                  {ch.desc}
+                </div>
+                <div style={{
+                  height: 3, borderRadius: 2, background: 'rgba(0,60,100,0.06)',
+                  marginTop: 3, overflow: 'hidden', maxWidth: 150,
+                }}>
+                  <div style={{
+                    height: '100%', width: `${pct}%`, borderRadius: 2,
+                    background: done ? '#00884a' : '#f97316',
+                  }} />
+                </div>
+              </div>
+              <span style={{
+                fontSize: 7, fontWeight: 700, fontFamily: "'Share Tech Mono', monospace",
+                color: done ? '#00884a' : '#f97316',
+              }}>
+                {ch.progress}/{ch.total} · +{ch.reward}◆
+              </span>
+            </div>
+          )
+        })}
+      </div>
     </GlassPanel>
   )
 }

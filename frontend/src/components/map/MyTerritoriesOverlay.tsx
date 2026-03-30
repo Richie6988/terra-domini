@@ -81,7 +81,7 @@ export function MyTerritoriesOverlay({ onFlyTo }: Props) {
         title="Mes territoires"
         style={{
           position: 'fixed', left: 8, top: 110, zIndex: 920,
-          background: open ? 'rgba(0,255,135,0.25)' : 'rgba(4,4,12,0.92)',
+          background: open ? 'rgba(0,255,135,0.25)' : 'rgba(235,242,250,0.92)',
           border: `1px solid ${open ? 'rgba(0,255,135,0.5)' : 'rgba(255,255,255,0.1)'}`,
           borderRadius: 10, padding: '8px 10px', cursor: 'pointer',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
@@ -110,20 +110,20 @@ export function MyTerritoriesOverlay({ onFlyTo }: Props) {
               position: 'fixed', left: 68, top: 60, zIndex: 910,
               width: 310, maxHeight: 'calc(100vh - 120px)',
               background: 'linear-gradient(180deg, rgba(235,242,250,0.97) 0%, rgba(220,230,242,0.97) 100%)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              border: '1px solid rgba(0,60,100,0.12)',
               borderRadius: 14, display: 'flex', flexDirection: 'column',
-              boxShadow: '0 8px 40px rgba(0,0,0,0.7)',
+              boxShadow: '0 8px 30px rgba(0,0,0,0.15)',
               overflow: 'hidden',
             }}
           >
             {/* Header */}
             <div style={{
               padding: '12px 14px 8px', flexShrink: 0,
-              borderBottom: '1px solid rgba(255,255,255,0.06)',
+              borderBottom: '1px solid rgba(0,60,100,0.08)',
               background: 'rgba(0,255,135,0.04)',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <div style={{ fontSize: 13, fontWeight: 800, color: '#fff' }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: '#1a2a3a' }}>
                   Mes territoires
                   <span style={{ fontSize: 10, color: '#6B7280', marginLeft: 8 }}>
                     {totalCount} zones · +{Math.round(totalIncome)}/j
@@ -142,8 +142,8 @@ export function MyTerritoriesOverlay({ onFlyTo }: Props) {
                 autoFocus
                 style={{
                   width: '100%', padding: '7px 10px', background: 'rgba(255,255,255,0.06)',
-                  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 8,
-                  color: '#fff', fontSize: 12, boxSizing: 'border-box', marginBottom: 8,
+                  border: '1px solid rgba(0,60,100,0.12)', borderRadius: 8,
+                  color: '#1a2a3a', fontSize: 12, boxSizing: 'border-box', marginBottom: 8,
                 }}
               />
 
@@ -215,7 +215,7 @@ export function MyTerritoriesOverlay({ onFlyTo }: Props) {
                     {/* Info */}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{
-                        fontSize: 12, fontWeight: 700, color: '#fff',
+                        fontSize: 12, fontWeight: 700, color: '#1a2a3a',
                         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       }}>
                         {t.is_shiny && <span style={{ color: '#FCD34D', marginRight: 4 }}>★</span>}
