@@ -1,10 +1,10 @@
 {
   "_meta": {
     "format": "hexod_agent_weights_v2",
-    "version": 3,
+    "version": 4,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-30T17:00:00Z",
-    "session": 18,
+    "last_updated": "2026-03-30T18:00:00Z",
+    "session": 19,
     "total_patterns": 24,
     "total_weights": 87,
     "total_icons": 98,
@@ -13,7 +13,8 @@
     "theme_migration": "COMPLETE",
     "core_loop_completion": "65%",
     "cleanup_lesson": "ALWAYS delete old files when creating replacements. Double UI = #1 user-visible bug.",
-    "mandatory_rules": 3
+    "mandatory_rules": 3,
+    "specs_file": "llm/HEXOD_GAME_SPECS.md — single source of truth for all game mechanics"
   },
   "task_routing": {
     "_description": "Autonomy level per task type. 1.0=execute immediately, 0.0=always ask.",
@@ -1138,5 +1139,20 @@
       "Arc de Triomphe (epic)",
       "Sacré-Cœur (epic)"
     ]
+  },
+  "h3_fix": {
+    "issue": "Backend used h3 v3 API (h3_to_geo, h3_is_valid, geo_to_h3, k_ring, h3_distance) but h3 v4 is installed (cell_to_latlng, is_valid_cell, latlng_to_cell, grid_disk, grid_distance)",
+    "fix": "30+ API calls renamed across 8 backend files + h3_compat.py shim created",
+    "files_patched": [
+      "views.py",
+      "cluster_views.py",
+      "engine.py",
+      "territory_engine.py",
+      "kingdom_engine.py",
+      "economy/views.py",
+      "events/poi_views.py",
+      "events/create_world_events.py"
+    ],
+    "severity": "CRITICAL — all backend endpoints crashed without this fix"
   }
 }

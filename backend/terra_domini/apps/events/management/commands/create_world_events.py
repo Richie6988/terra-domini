@@ -204,7 +204,7 @@ class Command(BaseCommand):
 
             try:
                 import h3
-                h3_idx = h3.geo_to_h3(evt['lat'], evt['lon'], 10)
+                h3_idx = h3.latlng_to_cell(evt['lat'], evt['lon'], 10)
             except Exception:
                 h3_idx = ''
 

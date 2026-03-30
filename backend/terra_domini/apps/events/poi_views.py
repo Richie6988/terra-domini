@@ -164,7 +164,7 @@ class UnifiedPOIViewSet(viewsets.GenericViewSet):
             try:
                 # Use hex CENTROID — not raw POI lat/lon
                 # This ensures the pin sits on the hex territory, not beside it
-                geo = h3lib.h3_to_geo(hx)
+                geo = h3lib.cell_to_latlng(hx)
                 result.append({
                     'h3_index': hx,
                     'name': p['name'],

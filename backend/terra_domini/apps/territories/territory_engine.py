@@ -148,8 +148,8 @@ def seed_poi_territories():
     with transaction.atomic():
         for hx, p in hex_best.items():
             try:
-                geo    = h3.h3_to_geo(hx)          # (lat, lon)
-                pts    = h3.h3_to_geo_boundary(hx)  # list of (lat,lon)
+                geo    = h3.cell_to_latlng(hx)          # (lat, lon)
+                pts    = h3.cell_to_boundary(hx)  # list of (lat,lon)
                 biome  = _biome_from_category(p.get('category',''))
                 rarity = p.get('rarity','uncommon')
                 is_shiny = bool(p.get('is_shiny', False)) or (random.random() < 1/64)
@@ -228,8 +228,8 @@ def generate_territory(h3_index: str, lat: float, lon: float, poi_category: str 
 
     # Neighbor POI rarities for rarity roll
     try:
-        ring1 = [c for c in h3.k_ring(h3_index, 1) if c != h3_index]
-        ring2 = [c for c in h3.k_ring(h3_index, 2) if c not in ring1 and c != h3_index]
+        ring1 = [c for c in h3.grid_disk(h3_index, 1) if c != h3_index]
+        ring2 = [c for c in h3.grid_disk(h3_index, 2) if c not in ring1 and c != h3_index]
         near_pois = Territory.objects.filter(
             h3_index__in=ring1 + ring2, is_landmark=True
         ).values_list('rarity', flat=True)
@@ -252,7 +252,7 @@ def generate_territory(h3_index: str, lat: float, lon: float, poi_category: str 
     tdc_per_day = RARITY_INCOME.get(rarity, 10)
 
     try:
-        geo = h3.h3_to_geo(h3_index)
+        geo = h3.cell_to_latlng(h3_index)
         with transaction.atomic():
             t = Territory.objects.create(
                 h3_index       = h3_index,

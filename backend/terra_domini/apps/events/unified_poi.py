@@ -246,7 +246,7 @@ class UnifiedPOI(models.Model):
         if not self.h3_index and self.latitude and self.longitude:
             try:
                 import h3
-                self.h3_index = h3.geo_to_h3(self.latitude, self.longitude, 7)
+                self.h3_index = h3.latlng_to_cell(self.latitude, self.longitude, 7)
             except Exception:
                 pass
         super().save(*args, **kwargs)
