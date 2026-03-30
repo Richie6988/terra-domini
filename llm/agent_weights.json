@@ -1167,12 +1167,8 @@
       "alliance_invite",
       "attack_alert"
     ],
-    "providers": [
-      "Mailpit (dev, port 1025/8025)",
-      "SMTP (any)",
-      "Resend API",
-      "Console (fallback)"
-    ],
+    "dev": "Mailpit (localhost:1025 SMTP, localhost:8025 Web UI) or console fallback",
+    "prod": "Any SMTP provider via SMTP_HOST env var",
     "hooks": [
       "RegisterView → send_welcome_email",
       "claim endpoint → send_territory_claimed_email"
@@ -1187,11 +1183,10 @@
       "system",
       "emoji"
     ],
-    "frontend": "AuctionPanel WebSocket with fallback to mock",
+    "frontend": "AuctionPanel connects via WebSocket, falls back to mock if ws fails",
     "features": [
       "emoji bar (8 emojis)",
-      "connection indicator (green/yellow)",
-      "bid via WS",
+      "connection status indicator",
       "system join/leave messages"
     ]
   }

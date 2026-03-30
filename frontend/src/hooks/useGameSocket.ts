@@ -151,7 +151,8 @@ export function useGameSocket() {
     }
     // Always also fetch via REST API (reliable fallback for initial load)
     const { lat, lon, radius_km } = viewport
-    fetch(`/api/territories/map-view/?lat=${lat}&lon=${lon}&radius_km=${radius_km}&zoom=${zoom ?? 13}`, {
+    const currentZoom = useStore.getState().mapZoom ?? 13
+    fetch(`/api/territories/map-view/?lat=${lat}&lon=${lon}&radius_km=${radius_km}&zoom=${currentZoom}`, {
       headers: { Authorization: `Bearer ${useStore.getState().accessToken}` },
     })
       .then(r => r.json())
