@@ -8,7 +8,7 @@
     "total_patterns": 24,
     "total_weights": 87,
     "total_icons": 98,
-    "total_components": 54,
+    "total_components": 55,
     "total_commits": 23,
     "theme_migration": "COMPLETE",
     "core_loop_completion": "65%",
@@ -445,6 +445,15 @@
       "links": [],
       "dock_pos": 10,
       "dock_icon": "📋"
+    },
+    "tasks": {
+      "accent": "#0099cc",
+      "width": 400,
+      "links": [
+        "shop"
+      ],
+      "dock_pos": 5,
+      "dock_icon": "📋"
     }
   },
   "z_index_stack": {
@@ -832,7 +841,8 @@
         "player_only_visibility",
         "radar_tracking",
         "daily_challenges"
-      ]
+      ],
+      "dock_label": "Safari (renamed from Hunt)"
     },
     "tokens_placement": {
       "description": "Tokens won from Events/Safaris can be placed adjacently to already-captured territories. This creates strategic expansion."
@@ -890,6 +900,14 @@
     "token_3d": {
       "status": "INTEGRATED — SVG icons + biome image now rendered on canvas. Image source is procedural (will be replaced with real DB images when provided by Richard).",
       "priority": "DONE (pending real images)"
+    },
+    "task_center": {
+      "status": "PORTED — TaskCenter.tsx with 5 daily tasks, streak, referral, progress bar",
+      "priority": "DONE"
+    },
+    "codex": {
+      "status": "PARTIAL — basic grid exists, needs 9-tab structure from prototype (Overview, Favorites+Museum, Disasters, Places, Nature, Conflict, Culture, Science, Fantastic)",
+      "priority": "HIGH"
     }
   }
 }

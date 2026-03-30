@@ -5,7 +5,7 @@
  */
 import { useStore, useActiveBattles } from '../../store'
 
-type PanelId = 'combat' | 'alliance' | 'events' | 'profile' | 'trade' | 'shop' | 'ladder' | 'meta' | 'crypto' | 'marketplace' | 'kingdom' | 'codex' | 'hunt'
+type PanelId = 'combat' | 'alliance' | 'events' | 'profile' | 'trade' | 'shop' | 'ladder' | 'meta' | 'crypto' | 'marketplace' | 'kingdom' | 'codex' | 'hunt' | 'tasks'
 
 interface DockItem {
   panel: PanelId
@@ -18,8 +18,9 @@ const DOCK_ITEMS: DockItem[] = [
   { panel: 'combat',      icon: '⚔',  label: 'Military',    color: '#dc2626' },
   { panel: 'events',      icon: '📡', label: 'Events',      color: '#f97316' },
   { panel: 'kingdom',     icon: '👑', label: 'Kingdom',     color: '#cc8800' },
-  { panel: 'hunt',        icon: '🎯', label: 'Hunt',        color: '#f97316' },
+  { panel: 'hunt',        icon: '🎯', label: 'Safari',      color: '#f97316' },
   { panel: 'codex',       icon: '📖', label: 'Codex',       color: '#7950f2' },
+  { panel: 'tasks',       icon: '📋', label: 'Tasks',       color: '#0099cc' },
   { panel: 'shop',        icon: '🛒', label: 'Shop',        color: '#fbbf24' },
   { panel: 'trade',       icon: '📊', label: 'Trade',       color: '#22c55e' },
   { panel: 'marketplace', icon: '🏪', label: 'NFT',         color: '#cc8800' },
@@ -27,7 +28,6 @@ const DOCK_ITEMS: DockItem[] = [
   { panel: 'ladder',      icon: '🏆', label: 'Ladder',      color: '#8b5cf6' },
   { panel: 'profile',     icon: '👤', label: 'Profile',     color: '#0099cc' },
   { panel: 'crypto',      icon: '💎', label: 'Wallet',      color: '#a855f7' },
-  { panel: 'meta',        icon: '📋', label: 'Info',        color: '#64748b' },
 ]
 
 function DockButton({ item, isActive, badge, onClick }: {
