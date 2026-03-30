@@ -79,7 +79,7 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
         onClick={() => setOpen(!open)}
         style={{
           width: 36, height: 36, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: open ? 'rgba(255,184,0,0.2)' : 'rgba(0,0,0,0.82)',
+          background: open ? 'rgba(255,184,0,0.2)' : 'rgba(235,242,250,0.92)',
           border: `1px solid ${open ? 'rgba(255,184,0,0.5)' : 'rgba(255,255,255,0.12)'}`,
           cursor: 'pointer', color: open ? '#FFB800' : '#9CA3AF',
         }}

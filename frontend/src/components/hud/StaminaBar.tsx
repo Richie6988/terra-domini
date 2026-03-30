@@ -149,9 +149,9 @@ export function StaminaBar() {
             style={{
               position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
               marginTop: 8, zIndex: 9999, pointerEvents: 'none',
-              background: 'rgba(5,5,15,0.97)', border: '1px solid rgba(239,68,68,0.3)',
+              background: 'rgba(235,242,250,0.97)', border: '1px solid rgba(239,68,68,0.3)',
               borderRadius: 12, padding: '12px 14px', minWidth: 220,
-              boxShadow: '0 8px 32px rgba(0,0,0,0.8)',
+              boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
             }}>
             <div style={{ fontSize: 12, fontWeight: 700, color: '#EF4444', marginBottom: 8 }}>⚔️ Action Slots</div>
 

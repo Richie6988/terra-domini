@@ -66,7 +66,7 @@ export function NewsTicker() {
     <div style={{
       position: 'fixed', top: 0, left: 0, right: 0,
       height: 28,
-      background: 'linear-gradient(90deg, #0f172a, #1e293b, #0f172a)',
+      background: 'linear-gradient(90deg, rgba(235,242,250,0.97), rgba(220,230,242,0.97), rgba(235,242,250,0.97))',
       zIndex: 900,
       display: 'flex',
       alignItems: 'center',
@@ -84,7 +84,7 @@ export function NewsTicker() {
         display: 'flex',
         alignItems: 'center',
         background: TAG_COLORS[currentTag] || TAG_COLORS.update,
-        color: 'white',
+        color: '#1a2a3a',
         fontFamily: "'Orbitron', system-ui, sans-serif",
       }}>
         {currentTag.toUpperCase()}
@@ -102,7 +102,7 @@ export function NewsTicker() {
             padding: '0 40px',
             fontSize: 9,
             fontWeight: 500,
-            color: 'rgba(255,255,255,0.75)',
+            color: 'rgba(26,42,58,0.6)',
             letterSpacing: 1,
             display: 'flex',
             alignItems: 'center',
@@ -114,7 +114,7 @@ export function NewsTicker() {
               background: DOT_COLORS[item.type] || '#0099cc',
               flexShrink: 0,
             }} />
-            <strong style={{ color: 'white', fontWeight: 700 }}>{item.title}</strong>
+            <strong style={{ color: '#1a2a3a', fontWeight: 700 }}>{item.title}</strong>
             <span>{item.description}</span>
           </div>
         ))}
