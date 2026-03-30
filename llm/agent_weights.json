@@ -3,7 +3,7 @@
     "format": "hexod_agent_weights_v2",
     "version": 3,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-30T12:00:00Z",
+    "last_updated": "2026-03-30T13:00:00Z",
     "session": 17,
     "total_patterns": 24,
     "total_weights": 87,
@@ -906,8 +906,8 @@
       "priority": "DONE"
     },
     "codex": {
-      "status": "PARTIAL — basic grid exists, needs 9-tab structure from prototype (Overview, Favorites+Museum, Disasters, Places, Nature, Conflict, Culture, Science, Fantastic)",
-      "priority": "HIGH"
+      "status": "PORTED — 9 tabs from prototype: Overview (global progress + category grid), Favorites (top 5 + 3D Museum), Disasters, Places, Nature, Conflict, Culture, Science, Fantastic. Filters inside codex. 3D view + marketplace per token.",
+      "priority": "DONE"
     }
   }
 }

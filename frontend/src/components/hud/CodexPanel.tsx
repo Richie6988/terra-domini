@@ -1,8 +1,12 @@
 /**
- * CodexPanel — M14 Token Codex.
- * Grid display of all 48 token categories with collection progress.
- * Uses central SVG icon bank for consistent rendering.
- * Shows: owned count, total available, completion %, rarity breakdown.
+ * CodexPanel — Token Collection / Codex.
+ * Ported from main_prototype.html modal-codex (9 tabs).
+ * This IS the collection panel — filters are inside, not separate.
+ * 
+ * Tabs: Overview | ⭐ Favorites | 🔥 Disasters | 🏛 Places | 🌲 Nature |
+ *       ⚔ Conflict | 🎭 Culture | 🔬 Science | 🐉 Fantastic
+ * 
+ * Each token: 3D view + marketplace + rarity badge
  */
 import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -11,363 +15,376 @@ import { IconSVG } from '../shared/iconBank'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { Token3DViewer } from '../shared/Token3DViewer'
 import { CATEGORIES } from '../shared/radarIconData'
+import { useStore } from '../../store'
 
 interface Props { onClose: () => void }
+
+// Category tabs matching prototype structure
+const CODEX_TABS = [
+  { id: 'overview',  label: 'Overview',     icon: '📊' },
+  { id: 'favorites', label: '⭐ Favorites', icon: '⭐' },
+  { id: 'disaster',  label: '🔥 Disasters', icon: '🔥', color: '#dc2626' },
+  { id: 'places',    label: '🏛 Places',    icon: '🏛', color: '#3b82f6' },
+  { id: 'nature',    label: '🌲 Nature',    icon: '🌲', color: '#22c55e' },
+  { id: 'conflict',  label: '⚔ Conflict',   icon: '⚔', color: '#f97316' },
+  { id: 'culture',   label: '🎭 Culture',   icon: '🎭', color: '#ec4899' },
+  { id: 'science',   label: '🔬 Science',   icon: '🔬', color: '#0099cc' },
+  { id: 'fantastic', label: '🐉 Fantastic', icon: '🐉', color: '#8b5cf6' },
+]
+
+// Map icon bank categories to codex tabs
+const CAT_TAB_MAP: Record<string, string> = {
+  earthquake: 'disaster', volcano: 'disaster', tsunami: 'disaster', tornado: 'disaster',
+  wildfire: 'disaster', nuclear: 'disaster', avalanche: 'disaster',
+  city: 'places', monument: 'places', temple: 'places', castle: 'places', bridge: 'places',
+  forest: 'nature', mountain: 'nature', ocean: 'nature', lake: 'nature', desert: 'nature',
+  island: 'nature', river: 'nature', cave: 'nature',
+  battle: 'conflict', military: 'conflict', war: 'conflict', fort: 'conflict',
+  festival: 'culture', sport: 'culture', music: 'culture', food: 'culture', art: 'culture',
+  space: 'science', tech: 'science', lab: 'science', energy: 'science',
+  dragon: 'fantastic', mythic: 'fantastic', alien: 'fantastic', magic: 'fantastic',
+  dinosaur: 'fantastic', creature: 'fantastic',
+}
+
+// Mock collection data
+function getMockCollection() {
+  const coll: Record<string, { owned: number; total: number; rarity: string; shiny: boolean }> = {}
+  for (const cat of CATEGORIES) {
+    for (const icon of cat.icons) {
+      const total = 5 + Math.floor(Math.random() * 20)
+      const owned = Math.floor(Math.random() * total * 0.5)
+      const rarities = ['common','common','common','uncommon','uncommon','rare','epic','legendary','mythic']
+      coll[icon.id] = {
+        owned, total,
+        rarity: rarities[Math.floor(Math.random() * rarities.length)],
+        shiny: Math.random() < 0.05,
+      }
+    }
+  }
+  return coll
+}
 
 const RARITY_COLORS: Record<string, string> = {
   common: '#94a3b8', uncommon: '#22c55e', rare: '#3b82f6',
   epic: '#8b5cf6', legendary: '#f59e0b', mythic: '#ef4444',
 }
 
-const RARITY_ORDER = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
-
-// Mock collection data — will come from API later
-function getMockCollection(): Record<string, { owned: number; total: number; rarities: Record<string, number> }> {
-  const collection: Record<string, { owned: number; total: number; rarities: Record<string, number> }> = {}
-  for (const cat of CATEGORIES) {
-    for (const icon of cat.icons) {
-      const total = 5 + Math.floor(Math.random() * 15)
-      const owned = Math.floor(Math.random() * total * 0.6)
-      collection[icon.id] = {
-        owned, total,
-        rarities: {
-          common: Math.floor(owned * 0.5),
-          uncommon: Math.floor(owned * 0.25),
-          rare: Math.floor(owned * 0.15),
-          epic: Math.floor(owned * 0.07),
-          legendary: Math.floor(owned * 0.02),
-          mythic: Math.floor(owned * 0.01),
-        },
-      }
-    }
-  }
-  return collection
-}
-
 export function CodexPanel({ onClose }: Props) {
-  const [selectedCat, setSelectedCat] = useState<string | null>(null)
+  const [tab, setTab] = useState('overview')
   const [selectedToken, setSelectedToken] = useState<string | null>(null)
   const [show3D, setShow3D] = useState(false)
+  const [filter, setFilter] = useState('')
+  const setActivePanel = useStore(s => s.setActivePanel)
   const collection = useMemo(() => getMockCollection(), [])
 
-  // Category stats
-  const catStats = useMemo(() => {
-    return CATEGORIES.map(cat => {
-      let totalOwned = 0, totalAvailable = 0
-      for (const icon of cat.icons) {
-        const c = collection[icon.id]
-        if (c) { totalOwned += c.owned; totalAvailable += c.total }
-      }
-      return {
-        ...cat,
-        owned: totalOwned,
-        total: totalAvailable,
-        pct: totalAvailable > 0 ? Math.floor((totalOwned / totalAvailable) * 100) : 0,
-      }
-    })
-  }, [collection])
+  // All tokens flat list
+  const allTokens = useMemo(() =>
+    CATEGORIES.flatMap(cat => cat.icons.map(icon => ({
+      ...icon, catName: cat.name, catColor: cat.color, catId: cat.id,
+      codexTab: CAT_TAB_MAP[icon.id] || CAT_TAB_MAP[cat.id] || 'places',
+      ...collection[icon.id],
+    }))),
+  [collection])
 
-  const globalOwned = catStats.reduce((s, c) => s + c.owned, 0)
-  const globalTotal = catStats.reduce((s, c) => s + c.total, 0)
+  // Stats per codex tab
+  const tabStats = useMemo(() => {
+    const stats: Record<string, { owned: number; total: number }> = {}
+    for (const t of allTokens) {
+      if (!stats[t.codexTab]) stats[t.codexTab] = { owned: 0, total: 0 }
+      stats[t.codexTab].owned += t.owned
+      stats[t.codexTab].total += t.total
+    }
+    return stats
+  }, [allTokens])
+
+  const globalOwned = allTokens.reduce((s, t) => s + t.owned, 0)
+  const globalTotal = allTokens.reduce((s, t) => s + t.total, 0)
   const globalPct = globalTotal > 0 ? Math.floor((globalOwned / globalTotal) * 100) : 0
+  const shinyCount = allTokens.filter(t => t.shiny && t.owned > 0).length
 
-  const activeCat = selectedCat ? catStats.find(c => c.id === selectedCat) : null
+  // Tokens for current tab
+  const tabTokens = useMemo(() => {
+    let tokens = tab === 'overview' || tab === 'favorites'
+      ? allTokens
+      : allTokens.filter(t => t.codexTab === tab)
+    if (filter) tokens = tokens.filter(t => t.name.toLowerCase().includes(filter.toLowerCase()))
+    return tokens
+  }, [tab, allTokens, filter])
+
+  const selectedTokenData = selectedToken ? allTokens.find(t => t.id === selectedToken) : null
 
   return (
-    <GlassPanel title="CODEX" onClose={onClose} accent="#7950f2" width={440}>
-      {/* Global stats */}
+    <GlassPanel title="TOKEN CODEX" onClose={onClose} accent="#7950f2" width={460}>
+      {/* Tab row — scrollable */}
       <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '10px 14px', borderRadius: 10, marginBottom: 12,
-        background: 'linear-gradient(90deg, rgba(121,80,242,0.08), rgba(121,80,242,0.02))',
-        border: '1px solid rgba(121,80,242,0.15)',
+        display: 'flex', gap: 3, overflowX: 'auto', paddingBottom: 8, marginBottom: 10,
+        scrollbarWidth: 'none',
       }}>
-        <div>
-          <div style={{
-            fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)',
+        {CODEX_TABS.map(t => (
+          <button key={t.id} onClick={() => { setTab(t.id); setSelectedToken(null) }} style={{
+            padding: '6px 10px', borderRadius: 16, cursor: 'pointer', whiteSpace: 'nowrap',
+            fontSize: 7, fontWeight: tab === t.id ? 800 : 500, letterSpacing: 1,
+            background: tab === t.id ? (t.color || '#7950f2') + '15' : 'rgba(255,255,255,0.5)',
+            color: tab === t.id ? (t.color || '#7950f2') : 'rgba(26,42,58,0.45)',
+            border: `1px solid ${tab === t.id ? (t.color || '#7950f2') + '40' : 'rgba(0,60,100,0.1)'}`,
             fontFamily: "'Orbitron', system-ui, sans-serif",
-          }}>
-            COLLECTION PROGRESS
-          </div>
-          <div style={{
-            fontSize: 16, fontWeight: 900, color: '#7950f2',
+          }}>{t.label}</button>
+        ))}
+      </div>
+
+      {/* Search filter (inside codex per Richard's design) */}
+      <div style={{ marginBottom: 10 }}>
+        <input
+          value={filter} onChange={e => setFilter(e.target.value)}
+          placeholder="Filter tokens..."
+          style={{
+            width: '100%', padding: '8px 12px', borderRadius: 10, boxSizing: 'border-box',
+            background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)',
+            fontSize: 9, color: '#1a2a3a', outline: 'none',
             fontFamily: "'Share Tech Mono', monospace",
-          }}>
-            {globalOwned.toLocaleString()} / {globalTotal.toLocaleString()}
-          </div>
-        </div>
-        <div style={{
-          width: 50, height: 50, borderRadius: '50%',
-          background: `conic-gradient(#7950f2 ${globalPct}%, rgba(0,60,100,0.08) ${globalPct}%)`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <div style={{
-            width: 40, height: 40, borderRadius: '50%',
-            background: 'rgba(235,242,250,0.95)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 10, fontWeight: 900, color: '#7950f2',
-            fontFamily: "'Share Tech Mono', monospace",
-          }}>
-            {globalPct}%
-          </div>
-        </div>
+          }}
+        />
       </div>
 
       <AnimatePresence mode="wait">
-        {!selectedCat ? (
-          /* ── Category Grid ── */
-          <motion.div
-            key="grid"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <div style={{
-              fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)',
-              fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8,
-            }}>
-              {CATEGORIES.length} CATEGORIES · {catStats.reduce((s, c) => s + c.icons.length, 0)} TOKEN TYPES
+        {/* ═══ OVERVIEW TAB ═══ */}
+        {tab === 'overview' && (
+          <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            {/* Global progress */}
+            <div style={{ textAlign: 'center', marginBottom: 16 }}>
+              <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, marginBottom: 4, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                TOTAL COLLECTION PROGRESS
+              </div>
+              <div style={{ fontSize: 28, fontFamily: "'Share Tech Mono', monospace", color: '#7950f2', fontWeight: 700 }}>
+                {globalOwned} <span style={{ fontSize: 14, color: 'rgba(26,42,58,0.3)' }}>/ {globalTotal}</span>
+              </div>
+              <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,60,100,0.06)', maxWidth: 280, margin: '8px auto', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${globalPct}%`, borderRadius: 3, background: 'linear-gradient(90deg, #7950f2, #0099cc)' }} />
+              </div>
+              <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.4)' }}>{globalPct}% Complete · {shinyCount} Shiny Cards</div>
             </div>
 
-            <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8,
-            }}>
-              {catStats.map(cat => (
-                <motion.button
-                  key={cat.id}
-                  whileHover={{ y: -2, scale: 1.02 }}
-                  onClick={() => setSelectedCat(cat.id)}
-                  style={{
-                    padding: '10px 12px', borderRadius: 10,
-                    background: `linear-gradient(135deg, ${cat.color}08, transparent)`,
-                    border: `1.5px solid ${cat.color}20`,
-                    cursor: 'pointer', textAlign: 'left',
-                    transition: 'all 0.25s ease',
-                    display: 'flex', flexDirection: 'column', gap: 6,
-                  }}
-                >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <IconSVG id={cat.icons[0]?.id ?? 'mystery'} size={30} />
-                    <div style={{ flex: 1 }}>
-                      <div style={{
-                        fontSize: 7, fontWeight: 800, color: cat.color, letterSpacing: 1,
-                        fontFamily: "'Orbitron', system-ui, sans-serif",
-                        overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      }}>
-                        {cat.name.toUpperCase()}
-                      </div>
-                      <div style={{
-                        fontSize: 7, color: 'rgba(26,42,58,0.4)',
-                        fontFamily: "'Share Tech Mono', monospace",
-                      }}>
-                        {cat.icons.length} types · {cat.owned}/{cat.total}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Mini progress bar */}
-                  <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,60,100,0.06)', overflow: 'hidden' }}>
-                    <div style={{
-                      height: '100%', width: `${cat.pct}%`, borderRadius: 2,
-                      background: `linear-gradient(90deg, ${cat.color}, ${cat.color}88)`,
-                    }} />
-                  </div>
-                  <div style={{
-                    fontSize: 6, color: 'rgba(26,42,58,0.35)', textAlign: 'right',
-                    fontFamily: "'Share Tech Mono', monospace",
+            {/* Category breakdown grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
+              {CODEX_TABS.filter(t => t.color).map(ct => {
+                const st = tabStats[ct.id] || { owned: 0, total: 0 }
+                const pct = st.total > 0 ? Math.floor((st.owned / st.total) * 100) : 0
+                return (
+                  <button key={ct.id} onClick={() => setTab(ct.id)} style={{
+                    padding: '10px', borderRadius: 10, cursor: 'pointer', textAlign: 'center',
+                    background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.08)',
                   }}>
-                    {cat.pct}% COMPLETE
-                  </div>
-                </motion.button>
-              ))}
+                    <div style={{ fontSize: 18, marginBottom: 4 }}>{ct.icon}</div>
+                    <div style={{ fontSize: 8, fontWeight: 900, color: ct.color, letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                      {ct.label.replace(/[^\w\s]/g, '').trim().toUpperCase()}
+                    </div>
+                    <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 2, fontFamily: "'Share Tech Mono', monospace" }}>
+                      {st.owned}/{st.total}
+                    </div>
+                    <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,60,100,0.06)', marginTop: 4, overflow: 'hidden' }}>
+                      <div style={{ height: '100%', width: `${pct}%`, borderRadius: 2, background: ct.color }} />
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           </motion.div>
-        ) : (
-          /* ── Category Detail ── */
-          <motion.div
-            key="detail"
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0 }}
-          >
-            {/* Back button + category header */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <button
-                onClick={() => { setSelectedCat(null); setSelectedToken(null) }}
-                style={{
-                  padding: '6px 12px', borderRadius: 16, cursor: 'pointer',
-                  background: 'rgba(0,60,100,0.06)', border: '1px solid rgba(0,60,100,0.1)',
-                  color: 'rgba(26,42,58,0.45)', fontSize: 8,
-                  fontFamily: "'Orbitron', system-ui, sans-serif",
-                }}
-              >
-                ← BACK
-              </button>
-              <div style={{
-                fontSize: 9, fontWeight: 900, color: activeCat?.color, letterSpacing: 2,
-                fontFamily: "'Orbitron', system-ui, sans-serif",
-              }}>
-                {activeCat?.name.toUpperCase()}
+        )}
+
+        {/* ═══ FAVORITES TAB ═══ */}
+        {tab === 'favorites' && (
+          <motion.div key="favorites" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', marginBottom: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+              ⭐ YOUR TOP TOKENS
+            </div>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
+              {allTokens.filter(t => t.owned > 0).slice(0, 5).map((t, i) => (
+                <button key={t.id} onClick={() => { setSelectedToken(t.id); setShow3D(true) }} style={{
+                  width: 64, height: 88, borderRadius: 10, cursor: 'pointer',
+                  background: `linear-gradient(135deg, ${t.catColor}30, ${t.catColor}10)`,
+                  border: `2px solid ${t.catColor}50`,
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2,
+                  boxShadow: t.shiny ? `0 0 12px ${t.catColor}40` : 'none',
+                }}>
+                  <IconSVG id={t.id} size={32} />
+                  <div style={{ fontSize: 5, fontWeight: 700, color: t.catColor, letterSpacing: 0.5, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                    ★ #{i + 1}
+                  </div>
+                </button>
+              ))}
+            </div>
+
+            {/* 3D Museum placeholder */}
+            <div style={{
+              padding: 20, borderRadius: 12, textAlign: 'center',
+              background: 'linear-gradient(135deg, rgba(26,42,58,0.95), rgba(10,10,18,0.98))',
+              border: '1px solid rgba(255,255,255,0.08)',
+              position: 'relative', overflow: 'hidden', minHeight: 120,
+            }}>
+              <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                🏛 HEXOD MUSEUM — YOUR HALL OF FAME
               </div>
-              <div style={{
-                marginLeft: 'auto',
-                fontSize: 8, fontWeight: 700, color: '#7950f2',
-                fontFamily: "'Share Tech Mono', monospace",
-              }}>
-                {activeCat?.pct}%
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
+                {allTokens.filter(t => t.owned > 0).slice(0, 4).map(t => (
+                  <div key={t.id} style={{ textAlign: 'center' }}>
+                    <div style={{
+                      width: 44, height: 44, borderRadius: '50%', margin: '0 auto 4px',
+                      background: `linear-gradient(135deg, ${t.catColor}80, ${t.catColor}40)`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      boxShadow: `0 0 20px ${t.catColor}40`,
+                      border: '2px solid rgba(255,255,255,0.2)',
+                    }}>
+                      <IconSVG id={t.id} size={24} />
+                    </div>
+                    <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.5)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                      {t.name.slice(0, 8).toUpperCase()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.2)', marginTop: 8 }}>
+                🖱 CLICK TOKEN FOR 3D VIEW
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* ═══ CATEGORY TABS (disaster/places/nature/conflict/culture/science/fantastic) ═══ */}
+        {CODEX_TABS.filter(t => t.color).map(ct => tab === ct.id && (
+          <motion.div key={ct.id} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            {/* Category header with progress */}
+            <div style={{
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              marginBottom: 10, padding: '6px 10px', borderRadius: 8,
+              background: ct.color + '08', border: `1px solid ${ct.color}20`,
+            }}>
+              <div style={{ fontSize: 8, fontWeight: 700, color: ct.color, letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                {ct.icon} {ct.label.replace(/[^\w\s]/g, '').trim().toUpperCase()}
+              </div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: ct.color, fontFamily: "'Share Tech Mono', monospace" }}>
+                {tabStats[ct.id]?.owned || 0}/{tabStats[ct.id]?.total || 0}
               </div>
             </div>
 
-            {/* Token grid — 4 columns */}
-            <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8,
-            }}>
-              {activeCat?.icons.map(icon => {
-                const c = collection[icon.id]
-                const isOwned = c && c.owned > 0
-                const isSelected = selectedToken === icon.id
-
+            {/* Token grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+              {tabTokens.map(token => {
+                const isOwned = token.owned > 0
+                const isSelected = selectedToken === token.id
                 return (
-                  <motion.button
-                    key={icon.id}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setSelectedToken(isSelected ? null : icon.id)}
+                  <button
+                    key={token.id}
+                    onClick={() => setSelectedToken(isSelected ? null : token.id)}
                     style={{
                       padding: 6, borderRadius: 10, cursor: 'pointer',
-                      background: isSelected
-                        ? `${activeCat.color}15`
-                        : isOwned
-                          ? 'rgba(255,255,255,0.5)'
-                          : 'rgba(0,60,100,0.03)',
-                      border: `1.5px solid ${
-                        isSelected ? `${activeCat.color}40`
-                        : isOwned ? 'rgba(0,60,100,0.1)'
-                        : 'rgba(0,60,100,0.05)'
-                      }`,
-                      opacity: isOwned ? 1 : 0.35,
+                      background: isSelected ? ct.color + '15' : isOwned ? 'rgba(255,255,255,0.5)' : 'rgba(0,60,100,0.03)',
+                      border: `1.5px solid ${isSelected ? ct.color + '50' : isOwned ? 'rgba(0,60,100,0.1)' : 'rgba(0,60,100,0.05)'}`,
+                      opacity: isOwned ? 1 : 0.3,
                       filter: isOwned ? 'none' : 'grayscale(0.8)',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
+                      position: 'relative',
                     }}
                   >
-                    <IconSVG id={icon.id} size={36} />
-                    <div style={{
-                      fontSize: 5, fontWeight: 700, color: '#1a2a3a',
-                      fontFamily: "'Orbitron', system-ui, sans-serif",
-                      letterSpacing: 0.5,
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                      maxWidth: '100%',
-                    }}>
-                      {icon.name.toUpperCase()}
-                    </div>
-                    {c && (
-                      <div style={{
-                        fontSize: 6, color: 'rgba(26,42,58,0.4)',
-                        fontFamily: "'Share Tech Mono', monospace",
-                      }}>
-                        {c.owned}/{c.total}
-                      </div>
+                    {/* Shiny indicator */}
+                    {token.shiny && isOwned && (
+                      <div style={{ position: 'absolute', top: 2, right: 2, fontSize: 8 }}>✨</div>
                     )}
-                  </motion.button>
+                    <IconSVG id={token.id} size={32} />
+                    <div style={{
+                      fontSize: 5, fontWeight: 700, color: '#1a2a3a', letterSpacing: 0.3,
+                      fontFamily: "'Orbitron', system-ui, sans-serif",
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%',
+                    }}>
+                      {token.name.toUpperCase()}
+                    </div>
+                    {/* Rarity dot */}
+                    <div style={{
+                      width: 6, height: 6, borderRadius: '50%',
+                      background: RARITY_COLORS[token.rarity] || '#94a3b8',
+                    }} />
+                  </button>
                 )
               })}
             </div>
 
-            {/* Selected token detail */}
-            {selectedToken && collection[selectedToken] && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                style={{
-                  marginTop: 12, padding: 12, borderRadius: 10,
-                  background: `${activeCat?.color}06`,
-                  border: `1px solid ${activeCat?.color}15`,
-                }}
-              >
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <IconSVG id={selectedToken} size={44} />
-                  <div>
-                    <div style={{
-                      fontSize: 9, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1,
-                      fontFamily: "'Orbitron', system-ui, sans-serif",
-                    }}>
-                      {activeCat?.icons.find(i => i.id === selectedToken)?.name.toUpperCase()}
-                    </div>
-                    <div style={{
-                      fontSize: 8, color: 'rgba(26,42,58,0.45)',
-                      fontFamily: "'Share Tech Mono', monospace",
-                    }}>
-                      {collection[selectedToken].owned} / {collection[selectedToken].total} collected
-                    </div>
-                  </div>
-                </div>
-
-                {/* Rarity breakdown */}
-                <div style={{
-                  fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.3)',
-                  fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 6,
-                }}>
-                  RARITY BREAKDOWN
-                </div>
-                <div style={{ display: 'flex', gap: 4 }}>
-                  {RARITY_ORDER.map(r => {
-                    const count = collection[selectedToken].rarities[r] ?? 0
-                    return (
-                      <div key={r} style={{
-                        flex: 1, padding: '4px 2px', borderRadius: 6, textAlign: 'center',
-                        background: count > 0 ? `${RARITY_COLORS[r]}10` : 'rgba(0,60,100,0.03)',
-                        border: `1px solid ${count > 0 ? `${RARITY_COLORS[r]}20` : 'rgba(0,60,100,0.05)'}`,
-                      }}>
-                        <div style={{
-                          fontSize: 10, fontWeight: 900,
-                          color: count > 0 ? RARITY_COLORS[r] : 'rgba(26,42,58,0.15)',
-                          fontFamily: "'Share Tech Mono', monospace",
-                        }}>
-                          {count}
-                        </div>
-                        <div style={{
-                          fontSize: 5, color: 'rgba(26,42,58,0.3)',
-                          fontFamily: "'Orbitron', system-ui, sans-serif",
-                          letterSpacing: 0.5,
-                        }}>
-                          {r.slice(0, 3).toUpperCase()}
-                        </div>
-                      </div>
-                    )
-                  })}
-                </div>
-
-                {/* VIEW IN 3D button */}
-                <button
-                  onClick={() => setShow3D(true)}
-                  style={{
-                    width: '100%', marginTop: 10, padding: '10px', borderRadius: 20,
-                    border: 'none', cursor: 'pointer',
-                    background: 'linear-gradient(90deg, #D4AF37, #CD7F32)',
-                    color: '#fff', fontSize: 8, fontWeight: 900, letterSpacing: 3,
-                    fontFamily: "'Orbitron', system-ui, sans-serif",
-                    boxShadow: '0 4px 20px rgba(212,175,55,0.3)',
-                  }}
-                >
-                  ◆ VIEW IN 3D — VAULT PRESTIGE
-                </button>
-              </motion.div>
+            {tabTokens.length === 0 && (
+              <div style={{ textAlign: 'center', padding: 30, color: 'rgba(26,42,58,0.3)', fontSize: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                NO TOKENS FOUND
+              </div>
             )}
           </motion.div>
-        )}
+        ))}
       </AnimatePresence>
 
-      {/* Token 3D Viewer Modal */}
-      <Token3DViewer
-        visible={show3D}
-        onClose={() => setShow3D(false)}
-        tokenName={selectedToken ? activeCat?.icons.find(i => i.id === selectedToken)?.name.toUpperCase() ?? 'TERRITORY' : 'TERRITORY'}
-        category={activeCat?.name ?? 'UNKNOWN'}
-        catColor={activeCat?.color ?? '#39FF14'}
-        tier="GOLD"
-        serial={Math.floor(Math.random() * 999) + 1}
-        maxSupply={1000}
-      />
+      {/* Selected token detail */}
+      {selectedTokenData && (
+        <motion.div
+          initial={{ y: 10, opacity: 0 }} animate={{ y: 0, opacity: 1 }}
+          style={{
+            marginTop: 10, padding: '10px 12px', borderRadius: 10,
+            background: selectedTokenData.catColor + '06',
+            border: `1px solid ${selectedTokenData.catColor}20`,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+            <IconSVG id={selectedTokenData.id} size={40} />
+            <div style={{ flex: 1 }}>
+              <div style={{ fontSize: 9, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                {selectedTokenData.name.toUpperCase()}
+              </div>
+              <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
+                <span style={{
+                  padding: '1px 6px', borderRadius: 8, fontSize: 6, fontWeight: 700,
+                  background: RARITY_COLORS[selectedTokenData.rarity] + '15',
+                  color: RARITY_COLORS[selectedTokenData.rarity],
+                  border: `1px solid ${RARITY_COLORS[selectedTokenData.rarity]}30`,
+                }}>
+                  {selectedTokenData.rarity.toUpperCase()}
+                </span>
+                {selectedTokenData.shiny && <span style={{ fontSize: 6, color: '#cc8800' }}>✨ SHINY</span>}
+              </div>
+            </div>
+            <div style={{ fontSize: 10, fontWeight: 900, color: selectedTokenData.catColor, fontFamily: "'Share Tech Mono', monospace" }}>
+              {selectedTokenData.owned}/{selectedTokenData.total}
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button onClick={() => setShow3D(true)} style={{
+              flex: 1, padding: '8px', borderRadius: 10, cursor: 'pointer',
+              background: 'linear-gradient(90deg, #D4AF37, #CD7F32)',
+              border: 'none', color: '#fff', fontSize: 7, fontWeight: 900, letterSpacing: 2,
+              fontFamily: "'Orbitron', system-ui, sans-serif",
+            }}>
+              ◆ VIEW 3D
+            </button>
+            <button onClick={() => { onClose(); setTimeout(() => setActivePanel('marketplace'), 100) }} style={{
+              flex: 1, padding: '8px', borderRadius: 10, cursor: 'pointer',
+              background: 'rgba(0,153,204,0.08)', border: '1px solid rgba(0,153,204,0.3)',
+              color: '#0099cc', fontSize: 7, fontWeight: 700, letterSpacing: 1,
+              fontFamily: "'Orbitron', system-ui, sans-serif",
+            }}>
+              🏪 MARKETPLACE
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Token 3D Viewer */}
+      {selectedTokenData && (
+        <Token3DViewer
+          visible={show3D}
+          onClose={() => setShow3D(false)}
+          tokenName={selectedTokenData.name.toUpperCase()}
+          category={selectedTokenData.catName}
+          catColor={selectedTokenData.catColor}
+          iconId={selectedTokenData.id}
+          tier="GOLD"
+          serial={Math.floor(Math.random() * 999) + 1}
+          maxSupply={1000}
+        />
+      )}
     </GlassPanel>
   )
 }
