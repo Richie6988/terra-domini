@@ -134,7 +134,7 @@ export default function RegisterPage() {
             fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>
             🛡 BEGINNER PROTECTION 7 DAYS — NO ATTACKS WHILE YOU LEARN
             <br />
-            ◆ FIRST TERRITORY → 100 CRYSTAL BONUS
+            ◆ FIRST TERRITORY → 100 HEX BONUS
           </div>
 
           <button type="submit" disabled={loading} style={btnStyle}>

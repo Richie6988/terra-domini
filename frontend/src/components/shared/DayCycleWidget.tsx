@@ -20,7 +20,7 @@ export function DayCycleWidget() {
       return parseInt(localStorage.getItem('hx_day_count') ?? '1') || 1
     } catch { return 1 }
   })
-  const [lastCrystals, setLastCrystals] = useState(0)
+  const [lastHex, setLastHex] = useState(0)
   const [flash, setFlash] = useState(false)
   const intervalRef = useRef<number>(0)
   const { kingdoms, processDay } = useKingdomStore()
@@ -38,7 +38,7 @@ export function DayCycleWidget() {
       totalHex += result.hexGenerated
     }
 
-    setLastCrystals(totalHex)
+    setLastHex(totalHex)
     setDayCount(d => {
       const next = d + 1
       try { localStorage.setItem('hx_day_count', String(next)) } catch {}
@@ -112,7 +112,7 @@ export function DayCycleWidget() {
       </div>
 
       {/* Last HEX earned */}
-      {lastCrystals > 0 && (
+      {lastHex > 0 && (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 3,
           fontSize: 8, fontWeight: 900, color: flash ? '#7950f2' : 'rgba(26,42,58,0.4)',
@@ -120,7 +120,7 @@ export function DayCycleWidget() {
           transition: 'color 0.5s',
         }}>
           <CrystalIcon size="sm" />
-          +{lastCrystals.toLocaleString()}
+          +{lastHex.toLocaleString()}
         </div>
       )}
     </div>

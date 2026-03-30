@@ -35,7 +35,7 @@ export interface ResourceDef {
   icon: string
   color: string
   category: 'extraction' | 'processed' | 'info' | 'social' | 'currency'
-  /** Crystal conversion rate (units → HEX) */
+  /** HEX conversion rate (units → HEX) */
   hexRate: number
 }
 
@@ -65,7 +65,7 @@ export const RESOURCES: Record<ResourceId, ResourceDef> = {
   eau:          { id: 'eau',          name: 'Water',        icon: '💧', color: '#38bdf8', category: 'social', hexRate: 0.2 },
   stabilite:    { id: 'stabilite',    name: 'Stability',    icon: '⚖️', color: '#a3a3a3', category: 'social', hexRate: 1.0 },
   // Currency
-  cristaux:     { id: 'cristaux',     name: 'Crystals',     icon: '◆',  color: '#7950f2', category: 'currency', hexRate: 1.0 },
+  cristaux:     { id: 'cristaux',     name: 'HEX Coin',     icon: '◆',  color: '#7950f2', category: 'currency', hexRate: 1.0 },
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -134,7 +134,7 @@ export interface SkillNode {
   id: string
   name: string
   icon: string
-  /** Crystal cost to complete */
+  /** HEX cost to complete */
   cost: number
   /** What it does */
   effect: string
@@ -197,7 +197,7 @@ export const SKILL_BRANCHES: SkillBranch[] = [
       { id: 'eco1', name: 'Refinery Complex',         icon: '🏭', cost: 800,   effect: 'Processing chain output x1.5', description: 'Advanced refining capacity', prereqs: ['eco0'], tier: 1 },
       { id: 'eco2a', name: 'Biome Specialization',    icon: '🌍', cost: 2000,  effect: 'Primary resource x3 in 1 biome', description: 'Deep exploitation of home biome', prereqs: ['eco1'], tier: 2, isFork: true, forkGroup: 'eco_fork' },
       { id: 'eco2b', name: 'Diversified Empire',      icon: '🗺️', cost: 2000,  effect: '+25% all biomes, no penalty',    description: 'Balanced multi-biome strategy', prereqs: ['eco1'], tier: 2, isFork: true, forkGroup: 'eco_fork' },
-      { id: 'eco3', name: 'Central Bank',             icon: '🏦', cost: 4000,  effect: '5% daily interest on crystals', description: 'Sophisticated financial system', prereqs: ['eco2a', 'eco2b'], tier: 3 },
+      { id: 'eco3', name: 'Central Bank',             icon: '🏦', cost: 4000,  effect: '5% daily interest on HEX', description: 'Sophisticated financial system', prereqs: ['eco2a', 'eco2b'], tier: 3 },
       { id: 'eco4', name: 'Automation',                icon: '🤖', cost: 7000,  effect: 'Offline production 24h',        description: 'Autonomous factories', prereqs: ['eco3'], tier: 4 },
       { id: 'eco5', name: 'Advanced Capitalism',       icon: '💎', cost: 15000, effect: 'Ultimate: Resource conversion x3', description: 'Maximum efficiency', prereqs: ['eco4'], tier: 5, isUltimate: true },
     ],
@@ -267,24 +267,24 @@ export interface Kingdom {
   skillStates: Record<string, SkillState>
   /** Fork choices (permanent) */
   forkChoices: Record<string, string>
-  /** Crystal reservoir per branch */
+  /** HEX reservoir per branch */
   hexReservoirs: Record<BranchId, number>
   /** Resource allocation percentages (how much of each resource → HEX) */
   resourceAllocation: Record<ResourceId, number>
-  /** Branch allocation percentages (how crystals are split across branches) */
+  /** Branch allocation percentages (how HEX is split across branches) */
   branchAllocation: Record<BranchId, number>
   /** Daily production snapshot */
   dailyProduction: Partial<Record<ResourceId, number>>
-  /** Daily crystal income */
-  dailyCrystals: number
+  /** Daily HEX income */
+  dailyHex: number
   /** Created at */
   createdAt: string
 }
 
 export interface SkillState {
-  /** Crystals poured so far */
+  /** HEX poured so far */
   filled: number
-  /** Max crystals needed */
+  /** Max HEX needed */
   max: number
   /** Is completed? */
   completed: boolean
@@ -304,7 +304,7 @@ export interface ConquestCost {
   method: ConquestMethod
   /** Is territory adjacent to player's kingdom? */
   adjacent: boolean
-  /** Base crystal cost */
+  /** Base HEX cost */
   baseCost: number
   /** Influence requirement for rare POIs */
   influenceRequired: number
@@ -395,8 +395,8 @@ export function calculateKingdomProduction(
   return production
 }
 
-/** Calculate daily crystal income from resources + allocation */
-export function calculateDailyCrystals(
+/** Calculate daily HEX income from resources + allocation */
+export function calculateDailyHex(
   production: Partial<Record<ResourceId, number>>,
   allocation: Record<ResourceId, number>,
 ): number {

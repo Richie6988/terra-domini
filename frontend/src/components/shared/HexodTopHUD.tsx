@@ -95,7 +95,7 @@ export function HexodTopHUD() {
           animationDelay: '0.35s',
         }}
       >
-        {/* Crystal icon with drop-shadow */}
+        {/* HEX icon */}
         <div style={{
           filter: 'drop-shadow(0 2px 8px rgba(121,80,242,0.4))',
           flexShrink: 0,
@@ -108,10 +108,10 @@ export function HexodTopHUD() {
             fontSize: 8, color: 'var(--text-muted)',
             letterSpacing: 2, fontWeight: 500,
           }}>
-            Crystals
+            HEX
           </div>
           <div style={{
-            fontSize: 16, fontWeight: 900, color: 'var(--crystal)',
+            fontSize: 16, fontWeight: 900, color: '#7950f2',
             fontFamily: "'Share Tech Mono', monospace",
             letterSpacing: 1,
           }}>

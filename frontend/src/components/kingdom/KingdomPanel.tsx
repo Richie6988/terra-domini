@@ -14,7 +14,7 @@ import { useKingdomStore } from '../../store/kingdomStore'
 import { useStore } from '../../store'
 import {
   RESOURCES, BIOME_PRODUCTION, SKILL_BRANCHES,
-  calculateKingdomProduction, calculateDailyCrystals, getBranchProgress,
+  calculateKingdomProduction, calculateDailyHex, getBranchProgress,
   type BranchId, type ResourceId, type Kingdom,
 } from '../../types/kingdom.types'
 
@@ -197,11 +197,11 @@ function ResourcesTab({ kingdom, onAllocChange }: {
     resources: Object.values(RESOURCES).filter(r => r.category === cat && (production[r.id] ?? 0) > 0),
   })).filter(g => g.resources.length > 0)
 
-  const totalCrystals = calculateDailyCrystals(production, kingdom.resourceAllocation)
+  const totalHex = calculateDailyHex(production, kingdom.resourceAllocation)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* Crystal preview */}
+      {/* HEX preview */}
       <div style={{
         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
         padding: '10px 16px', borderRadius: 20,
@@ -213,7 +213,7 @@ function ResourcesTab({ kingdom, onAllocChange }: {
           fontSize: 14, fontWeight: 900, color: '#7950f2',
           fontFamily: "'Share Tech Mono', monospace",
         }}>
-          {totalCrystals.toLocaleString()}
+          {totalHex.toLocaleString()}
         </span>
         <span style={{
           fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 2,
@@ -403,7 +403,7 @@ export function KingdomPanel({ onClose }: Props) {
   const {
     kingdoms, activeKingdomId, setActiveKingdom,
     setResourceAllocation, setBranchAllocation,
-    pourCrystals, chooseFork, processDay,
+    pourHex, chooseFork, processDay,
   } = useKingdomStore()
 
   const kingdom = kingdoms.find(k => k.id === activeKingdomId) ?? kingdoms[0]
@@ -504,7 +504,7 @@ export function KingdomPanel({ onClose }: Props) {
           {tab === 'skills' && (
             <SkillTreeView
               kingdom={demoKingdom}
-              onPour={(skillId, amount) => pourCrystals(demoKingdom.id, skillId, amount)}
+              onPour={(skillId, amount) => pourHex(demoKingdom.id, skillId, amount)}
               onForkChoice={(skillId) => chooseFork(demoKingdom.id, skillId)}
               onBranchAllocChange={(branchId, pct) => setBranchAllocation(demoKingdom.id, branchId, pct)}
             />

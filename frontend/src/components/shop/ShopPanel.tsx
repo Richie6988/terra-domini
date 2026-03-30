@@ -170,7 +170,7 @@ export function ShopPanel({ onClose }: Props) {
               fontSize:7, color:'#7950f2', fontWeight:700, fontFamily:"'Share Tech Mono', monospace",
               display:'flex', alignItems:'center', gap:3,
             }}>
-              <CrystalIcon size="sm" />{activeKingdom.dailyCrystals}/d
+              <CrystalIcon size="sm" />{activeKingdom.dailyHex}/d
             </div>
           </div>
         )}

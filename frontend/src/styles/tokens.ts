@@ -27,8 +27,8 @@ export const COLOR = {
   stateActive: '#00884a',
   stateScanning: '#00ff55',
   stateAlert: '#dc2626',
-  // Crystal
-  crystal: '#7950f2',
+  // HEX Coin
+  hex: '#7950f2',
   // Borders
   borderSubtle: 'rgba(0, 60, 100, 0.15)',
   borderHover: 'rgba(0, 60, 100, 0.3)',

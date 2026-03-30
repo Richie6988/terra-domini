@@ -2,7 +2,7 @@
  * Kingdom Store — Zustand store for kingdom, skill tree, and resource management.
  * Separate from main store to keep concerns isolated.
  * 
- * Flow: Territories → Kingdom → Resources/day → Allocation % → Crystals/day → Branch split → Skill tree
+ * Flow: Territories → Kingdom → Resources/day → Allocation % → HEX/day → Branch split → Skill tree
  */
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
@@ -11,7 +11,7 @@ import type {
 } from '../types/kingdom.types'
 import {
   SKILL_BRANCHES, RESOURCES, BIOME_PRODUCTION, RARITY_MULTIPLIER,
-  calculateKingdomProduction, calculateDailyCrystals,
+  calculateKingdomProduction, calculateDailyHex,
 } from '../types/kingdom.types'
 
 // ── Default allocation: evenly split across branches ──
@@ -58,20 +58,20 @@ interface KingdomStore {
   addTerritoryToKingdom: (kingdomId: string, h3: string) => void
   removeTerritoryFromKingdom: (kingdomId: string, h3: string) => void
 
-  // Resource allocation (% of each resource → crystal conversion)
+  // Resource allocation (% of each resource → HEX conversion)
   setResourceAllocation: (kingdomId: string, resourceId: ResourceId, pct: number) => void
 
-  // Branch allocation (% of daily crystals → each branch)
+  // Branch allocation (% of daily HEX → each branch)
   setBranchAllocation: (kingdomId: string, branchId: BranchId, pct: number) => void
 
   // Skill tree
-  pourCrystals: (kingdomId: string, skillId: string, amount: number) => boolean
+  pourHex: (kingdomId: string, skillId: string, amount: number) => boolean
   chooseFork: (kingdomId: string, skillId: string) => void
 
   // Day progression
   processDay: (kingdomId: string, territories: { biome: string; rarity: string; isShiny?: boolean }[]) => {
     resourcesProduced: Partial<Record<ResourceId, number>>
-    crystalsGenerated: number
+    hexGenerated: number
     branchDistribution: Record<BranchId, number>
   }
 
@@ -100,7 +100,7 @@ export const useKingdomStore = create<KingdomStore>()(
           warZone: false,
           skillStates: initSkillStates(),
           forkChoices: {},
-          // Starter crystals — enough to unlock first skill in 2 branches
+          // Starter HEX — enough to unlock first skill in 2 branches
           hexReservoirs: { attack: 500, defense: 500, economy: 500, influence_branch: 300, tech: 300, extraction: 400 },
           resourceAllocation: defaultResourceAlloc(),
           branchAllocation: { ...DEFAULT_BRANCH_ALLOC },
@@ -162,8 +162,8 @@ export const useKingdomStore = create<KingdomStore>()(
         ),
       })),
 
-      // ── Skill tree: pour crystals ─────────────────────────────
-      pourCrystals: (kingdomId, skillId, amount) => {
+      // ── Skill tree: pour HEX ─────────────────────────────
+      pourHex: (kingdomId, skillId, amount) => {
         const kingdom = get().kingdoms.find(k => k.id === kingdomId)
         if (!kingdom) return false
 
@@ -264,21 +264,21 @@ export const useKingdomStore = create<KingdomStore>()(
       // ── Day progression ───────────────────────────────────────
       processDay: (kingdomId, territories) => {
         const kingdom = get().kingdoms.find(k => k.id === kingdomId)
-        if (!kingdom) return { resourcesProduced: {}, crystalsGenerated: 0, branchDistribution: { attack: 0, defense: 0, economy: 0, influence_branch: 0, tech: 0, extraction: 0 } }
+        if (!kingdom) return { resourcesProduced: {}, hexGenerated: 0, branchDistribution: { attack: 0, defense: 0, economy: 0, influence_branch: 0, tech: 0, extraction: 0 } }
 
         // 1. Calculate production from territories
         const production = calculateKingdomProduction(territories as any)
 
-        // 2. Calculate crystal income from allocation
-        const crystals = calculateDailyCrystals(production, kingdom.resourceAllocation)
+        // 2. Calculate HEX income from allocation
+        const hexIncome = calculateDailyHex(production, kingdom.resourceAllocation)
 
-        // 3. Distribute crystals across branches
+        // 3. Distribute HEX across branches
         const totalBranchPct = Object.values(kingdom.branchAllocation).reduce((a, b) => a + b, 0)
         const branchDistribution: Record<BranchId, number> = { attack: 0, defense: 0, economy: 0, influence_branch: 0, tech: 0, extraction: 0 }
         const newReservoirs = { ...kingdom.hexReservoirs }
 
         for (const [branchId, pct] of Object.entries(kingdom.branchAllocation)) {
-          const share = totalBranchPct > 0 ? Math.floor(crystals * (pct / totalBranchPct)) : 0
+          const share = totalBranchPct > 0 ? Math.floor(hexIncome * (pct / totalBranchPct)) : 0
           branchDistribution[branchId as BranchId] = share
           newReservoirs[branchId as BranchId] += share
         }
@@ -290,13 +290,13 @@ export const useKingdomStore = create<KingdomStore>()(
                 ...k,
                 hexReservoirs: newReservoirs,
                 dailyProduction: production,
-                dailyHex: crystals,
+                dailyHex: hexIncome,
               }
               : k
           ),
         }))
 
-        return { resourcesProduced: production, crystalsGenerated: crystals, branchDistribution }
+        return { resourcesProduced: production, hexGenerated: hexIncome, branchDistribution }
       },
 
       // ── Helpers ────────────────────────────────────────────────

@@ -8,7 +8,7 @@
     "total_patterns": 24,
     "total_weights": 87,
     "total_icons": 98,
-    "total_components": 51,
+    "total_components": 54,
     "total_commits": 23,
     "theme_migration": "COMPLETE",
     "core_loop_completion": "65%",
@@ -912,6 +912,10 @@
     "auctions": {
       "status": "PORTED — AuctionPanel with live bidding, chat, countdown, 3D view, snipe protection. Mock data.",
       "priority": "DONE"
+    },
+    "economy_rename": {
+      "status": "DONE",
+      "scope": "All files: types, store, UI text, comments, CSS tokens"
     }
   },
   "feedback_session_17": {
@@ -1016,7 +1020,7 @@
     ],
     "ui_rename": "crystals → HEX Coin in all user-facing text. Internal variables kept as-is.",
     "display": "HEX (◆ symbol), CrystalIcon SVG stays as visual",
-    "internal_rename": "DONE — crystalRate→hexRate, crystalReservoirs→hexReservoirs, dailyCrystals→dailyHex across kingdom.types, kingdomStore, KingdomPanel, SkillTreeView, DayCycleWidget, ConquestActions, BurnTracker, ShopPanel, HexodTopHUD"
+    "internal_rename": "DONE — zero crystal refs remaining in codebase (excluding CrystalIcon component name + crystalType gem names)"
   },
   "daily_modes": {
     "events": {
@@ -1066,7 +1070,8 @@
     "WarTicker": "git rm — war feed",
     "TerritoryPanel": "git rm — old territory detail",
     "MissionsDailyWidget": "git rm — only used by GameHUD",
-    "RadarFilterPanel_from_render": "Removed from App.tsx render — Codex replaces it"
+    "RadarFilterPanel_from_render": "Removed from App.tsx render — Codex replaces it",
+    "RadarFilterPanel": "Deleted — replaced by CodexPanel + RadarTrigger extracted to own file"
   },
   "radar_safari": {
     "small": "100×100px bottom-right, shows safari heat + distance",
