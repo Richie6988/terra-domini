@@ -12,7 +12,7 @@ import { FavoritePinsPanel } from './FavoritePins'
 import { MapOverlayLayer } from './MapOverlayLayer'
 import { HexCard } from './HexCard'
 import { AttackPanel } from '../hud/AttackPanel'
-import { injectGlowFilter, makeHexPolygon, injectHexAnimations, getVisibleHexes, makeGridHex } from './HexLayer'
+import { injectGlowFilter, makeHexPolygon, injectHexAnimations, getVisibleHexes, getHexBoundary } from './HexLayer'
 import { KingdomBorderLayer } from './KingdomBorderLayer'
 import { MyTerritoriesOverlay } from './MyTerritoriesOverlay'
 import { AttackAnimationLayer } from './AttackAnimationLayer'
@@ -314,7 +314,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     })
   }, [territories, showHex, player?.id])
 
-  // ── Draw H3 grid overlay (covers full viewport) ──
+  // ── Draw H3 grid overlay — ALWAYS res 8 (5M territories, never changes) ──
   useEffect(() => {
     const grid = gridRef.current
     const map = mapRef.current
@@ -323,32 +323,36 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     const drawGrid = () => {
       grid.clearLayers()
       const z = map.getZoom()
-      if (z < 10) return
+      if (z < 12) return // Too zoomed out to see individual hexes
 
-      // Resolution mapping: zoom → H3 resolution
-      // 5M territories globally = res 8 base
-      const res = z >= 17 ? 10 : z >= 15 ? 9 : z >= 13 ? 8 : z >= 11 ? 7 : 6
-
-      // Get full viewport bounds
+      // ALWAYS resolution 8 — territories are fixed geographic zones
       const b = map.getBounds()
-      const bounds = {
-        south: b.getSouth(),
-        west: b.getWest(),
-        north: b.getNorth(),
-        east: b.getEast(),
-      }
+      const hexes = getVisibleHexes({
+        south: b.getSouth(), west: b.getWest(),
+        north: b.getNorth(), east: b.getEast(),
+      }, 8)
 
-      const hexes = getVisibleHexes(bounds, res)
-
-      // Safety: cap at 2000 hexes to prevent browser freeze
-      if (hexes.length > 2000) return
+      if (hexes.length > 3000) return // Safety cap
 
       const ownedH3 = new Set(territories.map(t => t.h3_index))
 
+      // Visual weight adapts to zoom — territory boundaries stay fixed
+      const weight = z >= 16 ? 1.5 : z >= 14 ? 1 : 0.7
+      const opacity = z >= 15 ? 0.06 : z >= 13 ? 0.04 : 0.02
+      const strokeOpacity = z >= 15 ? 0.25 : z >= 13 ? 0.18 : 0.12
+
       for (const h3 of hexes) {
         if (ownedH3.has(h3)) continue
-        const poly = makeGridHex(h3, map)
-        if (poly) grid.addLayer(poly)
+        const pts = getHexBoundary(h3)
+        if (pts.length === 0) continue
+        const poly = L.polygon(pts as L.LatLngTuple[], {
+          fillColor: '#0099cc',
+          fillOpacity: opacity,
+          color: `rgba(0,153,204,${strokeOpacity})`,
+          weight,
+          interactive: false,
+        })
+        grid.addLayer(poly)
       }
     }
 

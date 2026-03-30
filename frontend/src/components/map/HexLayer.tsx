@@ -18,7 +18,7 @@ const RARITY_COLOR: Record<string, string> = {
 }
 
 /** Compute hex boundary from H3 index (client-side fallback) */
-function getHexBoundary(h3Index: string): [number, number][] {
+export function getHexBoundary(h3Index: string): [number, number][] {
   try {
     const boundary = h3.cellToBoundary(h3Index)
     // h3-js returns [lat, lng] pairs — Leaflet needs same format
