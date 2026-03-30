@@ -3,7 +3,7 @@
     "format": "hexod_agent_weights_v2",
     "version": 3,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-30T16:00:00Z",
+    "last_updated": "2026-03-30T17:00:00Z",
     "session": 18,
     "total_patterns": 24,
     "total_weights": 87,
@@ -918,7 +918,7 @@
       "scope": "All files: types, store, UI text, comments, CSS tokens"
     },
     "events": {
-      "status": "PORTED — 3 tabs: Live (register for tokens, hex cost), Upcoming (countdowns), My Results (tap to reveal rarity). Matches prototype modal-events.",
+      "status": "DEEP — 368 lines. 3 tabs: Live (5 events with registration, capacity bars, luck%), Upcoming (5 events with live countdowns), Results (won/lost/pending, serial#, HEX earned, placeable). Luck system + Potion de Chance link to shop.",
       "priority": "DONE"
     }
   },
