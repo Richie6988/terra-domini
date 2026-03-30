@@ -4,6 +4,7 @@
  * Territory info panel overlaid on the left.
  */
 import { useMemo, useState, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import { Token3DViewer } from '../shared/Token3DViewer'
 import { api } from '../../services/api'
 import { useStore, usePlayer } from '../../store'
@@ -51,6 +52,11 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
   territory:any; onClose:()=>void; onRequestClaim?:()=>void; isNewClaim?: boolean
 }) {
   const player=usePlayer()
+  const setActivePanel = useStore(s => s.setActivePanel)
+
+  // Close ALL other panels when Token3D opens
+  useState(() => { setActivePanel(null) })
+
   const isOwned=t.owner_id===player?.id
   const isEnemy=!!t.owner_id&&!isOwned
   const isFree=!t.owner_id
@@ -98,7 +104,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
     }
   }, [claiming, t, player, onClose])
 
-  return (
+  return createPortal(
     <Token3DViewer
       visible={true}
       onClose={onClose}
@@ -194,6 +200,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
           </div>
         </div>
       }
-    />
+    />,
+    document.body
   )
 }

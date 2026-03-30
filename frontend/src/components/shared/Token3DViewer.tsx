@@ -596,21 +596,20 @@ export function Token3DViewer({
         {/* Three.js canvas container */}
         <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
 
-        {/* Close button — prominent */}
+        {/* Close button — large, bright, impossible to miss */}
         <button
           onClick={onClose}
           style={{
-            position: 'absolute', top: 16, right: 16, zIndex: 10,
-            width: 48, height: 48, borderRadius: '50%',
-            background: 'rgba(255,255,255,0.1)', border: '2px solid rgba(255,255,255,0.25)',
-            color: '#fff', fontSize: 22, cursor: 'pointer',
-            backdropFilter: 'blur(12px)',
+            position: 'absolute', top: 20, right: 20, zIndex: 10,
+            width: 56, height: 56, borderRadius: '50%',
+            background: 'rgba(220,38,38,0.8)', border: '2px solid rgba(255,255,255,0.5)',
+            color: '#fff', fontSize: 26, fontWeight: 900, cursor: 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.5)',
+            boxShadow: '0 4px 24px rgba(220,38,38,0.4)',
             transition: 'all 0.2s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.transform = 'scale(1.1)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.1)'; e.currentTarget.style.transform = 'scale(1)' }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(220,38,38,1)'; e.currentTarget.style.transform = 'scale(1.15)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.8)'; e.currentTarget.style.transform = 'scale(1)' }}
         >
           ✕
         </button>
