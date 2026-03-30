@@ -49,7 +49,7 @@ const CAT_TAB_MAP: Record<string, string> = {
 // Mock collection data
 function getMockCollection() {
   const coll: Record<string, { owned: number; total: number; rarity: string; shiny: boolean }> = {}
-  for (const cat of CATEGORIES) {
+  for (const cat of Object.values(CATEGORIES)) {
     for (const icon of cat.icons) {
       const total = 5 + Math.floor(Math.random() * 20)
       const owned = Math.floor(Math.random() * total * 0.5)
@@ -79,7 +79,7 @@ export function CodexPanel({ onClose }: Props) {
 
   // All tokens flat list
   const allTokens = useMemo(() =>
-    CATEGORIES.flatMap(cat => cat.icons.map(icon => ({
+    Object.values(CATEGORIES).flatMap(cat => cat.icons.map(icon => ({
       ...icon, catName: cat.name, catColor: cat.color, catId: cat.id,
       codexTab: CAT_TAB_MAP[icon.id] || CAT_TAB_MAP[cat.id] || 'places',
       ...collection[icon.id],

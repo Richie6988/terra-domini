@@ -14,6 +14,24 @@ from terra_domini.health import health_check, robots_txt
 from terra_domini.apps.accounts.views import UpdateProfileView
 from terra_domini.apps.accounts.geoip_view import GeoIPView
 from terra_domini.frontend_view import FrontendAppView
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def news_ticker(request):
+    """GET /api/news/ticker/ — game news feed"""
+    return Response([
+        {'type': 'alert',   'title': '🌋 VOLCANIC ERUPTION', 'text': 'Mt. Hekla erupting — special event token available! Register now.'},
+        {'type': 'update',  'title': '⬡ SEASON 1 LIVE',      'text': 'Capture territories, build kingdoms, trade NFTs on Polygon.'},
+        {'type': 'event',   'title': '⚽ CHAMPIONS LEAGUE',    'text': 'Final event — 500 spots remaining. Register in Events panel.'},
+        {'type': 'market',  'title': '📈 HEX COIN +12%',      'text': '1 HEX = €0.00099 — trading volume up 340% this week.'},
+        {'type': 'alert',   'title': '🦖 SAFARI: T-REX SPOTTED', 'text': 'Legendary dinosaur detected near mountainous terrain. Track it!'},
+        {'type': 'update',  'title': '🏆 LEADERBOARD UPDATE', 'text': 'NEXUS_LORD takes #1 with 847 territories. Can you beat them?'},
+        {'type': 'event',   'title': '🚀 MARS SUPPLY DROP',   'text': 'SpaceX mission creates legendary token. 89/200 registered.'},
+        {'type': 'market',  'title': '💎 MYTHIC AUCTION',      'text': 'Crimson Dragon token — current bid 12,500 HEX. Ends in 2 hours.'},
+    ])
 
 # Mail
 from terra_domini.apps.mail.views import inbox as mail_inbox, mark_read as mail_mark_read
@@ -85,6 +103,7 @@ urlpatterns = [
     # ── System ──────────────────────────────────────────────────────────────
     path('health/',     health_check, name='health'),
     path('api/geoip/',   GeoIPView.as_view(), name='geoip'),
+    path('api/news/ticker/', news_ticker, name='news_ticker'),
     path('robots.txt',  robots_txt),
     path('admin/',      admin.site.urls),
 

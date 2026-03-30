@@ -33,21 +33,28 @@ export function GlassPanel({
         }}
       />
 
-      {/* Panel — centered 80% */}
+      {/* Panel — centered via flexbox (not transform, avoids Framer conflict) */}
       <motion.div
-        initial={{ opacity: 0, scale: 0.92, y: 20 }}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        exit={{ opacity: 0, scale: 0.95, y: 10 }}
+        initial={{ opacity: 0, scale: 0.92 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
         transition={{ type: 'spring', stiffness: 400, damping: 30 }}
         onClick={e => e.stopPropagation()}
         style={{
           position: 'fixed',
-          top: '50%', left: '50%',
-          transform: 'translate(-50%, -50%)',
+          inset: 0,
+          zIndex: 1001,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: 'none',
+        }}
+      >
+        <div style={{
           width: width || '80vw',
           maxWidth: 720,
           maxHeight: '80vh',
-          zIndex: 1001,
+          pointerEvents: 'auto',
           // Glassmorphism
           background: 'linear-gradient(180deg, rgba(235, 242, 250, 0.97) 0%, rgba(220, 230, 242, 0.97) 100%)',
           backdropFilter: 'blur(30px) saturate(1.2)',
@@ -56,10 +63,9 @@ export function GlassPanel({
           borderRadius: 16,
           boxShadow: '0 20px 60px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.8)',
           display: 'flex',
-          flexDirection: 'column',
+          flexDirection: 'column' as const,
           overflow: 'hidden',
-        }}
-      >
+        }}>
         {/* Header */}
         <div style={{
           padding: '14px 20px',
@@ -107,6 +113,7 @@ export function GlassPanel({
           color: '#1a2a3a',
         }}>
           {children}
+        </div>
         </div>
       </motion.div>
     </>

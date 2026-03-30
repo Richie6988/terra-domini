@@ -206,7 +206,7 @@ function GameScreen() {
 
       {/* Auto-tutorial for new players */}
       <Suspense fallback={null}>
-        {player && !player.tutorial_completed && (
+        {player && !(player as any).tutorial_completed && (
           <Tutorial onComplete={() => {
             Promise.resolve().then(() =>
               api.post('/progression/tutorial-complete/').catch(() => {})

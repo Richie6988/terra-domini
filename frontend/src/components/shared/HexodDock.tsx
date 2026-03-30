@@ -4,31 +4,31 @@
  * Matches prototype dock layout.
  */
 import { useStore } from '../../store'
+import { DockIcon } from './DockIcons'
 
 type PanelId = 'combat' | 'alliance' | 'events' | 'profile' | 'trade' | 'shop' | 'ladder' | 'meta' | 'crypto' | 'marketplace' | 'kingdom' | 'codex' | 'hunt' | 'tasks' | 'auction'
 
 interface DockItem {
   panel: PanelId
-  icon: string
   label: string
   color: string
 }
 
 const DOCK_ITEMS: DockItem[] = [
-  { panel: 'combat',      icon: '⚔',  label: 'Military',    color: '#dc2626' },
-  { panel: 'events',      icon: '📡', label: 'Events',      color: '#f97316' },
-  { panel: 'kingdom',     icon: '👑', label: 'Kingdom',     color: '#cc8800' },
-  { panel: 'hunt',        icon: '🎯', label: 'Safari',      color: '#f97316' },
-  { panel: 'codex',       icon: '📖', label: 'Codex',       color: '#7950f2' },
-  { panel: 'auction',     icon: '🏷', label: 'Auction',     color: '#cc8800' },
-  { panel: 'tasks',       icon: '📋', label: 'Tasks',       color: '#0099cc' },
-  { panel: 'shop',        icon: '🛒', label: 'Shop',        color: '#fbbf24' },
-  { panel: 'trade',       icon: '📊', label: 'Trade',       color: '#22c55e' },
-  { panel: 'marketplace', icon: '🏪', label: 'NFT',         color: '#cc8800' },
-  { panel: 'alliance',    icon: '🏰', label: 'Alliance',    color: '#3b82f6' },
-  { panel: 'ladder',      icon: '🏆', label: 'Ladder',      color: '#8b5cf6' },
-  { panel: 'profile',     icon: '👤', label: 'Profile',     color: '#0099cc' },
-  { panel: 'crypto',      icon: '💎', label: 'Wallet',      color: '#a855f7' },
+  { panel: 'combat',      label: 'Military',    color: '#dc2626' },
+  { panel: 'events',      label: 'Events',      color: '#f97316' },
+  { panel: 'kingdom',     label: 'Kingdom',     color: '#cc8800' },
+  { panel: 'hunt',        label: 'Safari',      color: '#f97316' },
+  { panel: 'codex',       label: 'Codex',       color: '#7950f2' },
+  { panel: 'auction',     label: 'Auction',     color: '#cc8800' },
+  { panel: 'tasks',       label: 'Tasks',       color: '#0099cc' },
+  { panel: 'shop',        label: 'Shop',        color: '#fbbf24' },
+  { panel: 'trade',       label: 'Trade',       color: '#22c55e' },
+  { panel: 'marketplace', label: 'NFT',         color: '#cc8800' },
+  { panel: 'alliance',    label: 'Alliance',    color: '#3b82f6' },
+  { panel: 'ladder',      label: 'Ladder',      color: '#8b5cf6' },
+  { panel: 'profile',     label: 'Profile',     color: '#0099cc' },
+  { panel: 'crypto',      label: 'Wallet',      color: '#a855f7' },
 ]
 
 function DockButton({ item, isActive, onClick }: {
@@ -60,9 +60,8 @@ function DockButton({ item, isActive, onClick }: {
       }}>
         <span style={{
           filter: isActive ? 'brightness(2)' : 'none',
-          fontSize: 15,
         }}>
-          {item.icon}
+          <DockIcon id={item.panel} color={isActive ? '#fff' : 'rgba(26,42,58,0.5)'} size={18} />
         </span>
       </div>
 

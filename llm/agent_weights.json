@@ -3,7 +3,7 @@
     "format": "hexod_agent_weights_v2",
     "version": 4,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-30T19:00:00Z",
+    "last_updated": "2026-03-30T20:00:00Z",
     "session": 19,
     "total_patterns": 24,
     "total_weights": 87,
@@ -1189,5 +1189,21 @@
       "connection status indicator",
       "system join/leave messages"
     ]
+  },
+  "hex_grid_v2": {
+    "method": "h3.polygonToCells(viewportBounds, resolution) — covers full screen",
+    "resolution_map": "z10→res6, z11→res7, z13→res8 (5M base), z15→res9, z17→res10",
+    "safety_cap": "2000 hexes max per render",
+    "replaces": "center+radiusKm circle approach that left edges uncovered"
+  },
+  "dock_icons": {
+    "type": "SVG vector (DockIcons.tsx)",
+    "style": "stroke-based, 24x24 viewBox, tactical aesthetic",
+    "count": 14,
+    "replaces": "emoji text characters"
+  },
+  "panel_centering": {
+    "method": "flexbox (display:flex, align-items:center, justify-content:center)",
+    "replaces": "transform:translate(-50%,-50%) which Framer Motion overrode"
   }
 }

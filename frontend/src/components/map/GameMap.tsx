@@ -314,7 +314,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     })
   }, [territories, showHex, player?.id])
 
-  // ── Draw H3 grid overlay (visible hex grid around viewport center) ──
+  // ── Draw H3 grid overlay (covers full viewport) ──
   useEffect(() => {
     const grid = gridRef.current
     const map = mapRef.current
@@ -323,15 +323,26 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     const drawGrid = () => {
       grid.clearLayers()
       const z = map.getZoom()
-      if (z < 10) return // Show grid from zoom 10+
+      if (z < 10) return
 
-      const center = map.getCenter()
-      // Resolution scales with zoom: z10-11→res6, z12-13→res7, z14→res8, z15→res9, z16+→res10
-      const res = z >= 16 ? 10 : z >= 15 ? 9 : z >= 14 ? 8 : z >= 12 ? 7 : 6
-      const radiusKm = z >= 16 ? 0.3 : z >= 15 ? 0.8 : z >= 14 ? 2.0 : z >= 12 ? 5.0 : 15.0
-      const hexes = getVisibleHexes(center.lat, center.lng, radiusKm, res)
+      // Resolution mapping: zoom → H3 resolution
+      // 5M territories globally = res 8 base
+      const res = z >= 17 ? 10 : z >= 15 ? 9 : z >= 13 ? 8 : z >= 11 ? 7 : 6
 
-      // Only draw hexes NOT already in territories (avoid double-rendering)
+      // Get full viewport bounds
+      const b = map.getBounds()
+      const bounds = {
+        south: b.getSouth(),
+        west: b.getWest(),
+        north: b.getNorth(),
+        east: b.getEast(),
+      }
+
+      const hexes = getVisibleHexes(bounds, res)
+
+      // Safety: cap at 2000 hexes to prevent browser freeze
+      if (hexes.length > 2000) return
+
       const ownedH3 = new Set(territories.map(t => t.h3_index))
 
       for (const h3 of hexes) {

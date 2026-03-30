@@ -28,14 +28,15 @@ function getHexBoundary(h3Index: string): [number, number][] {
   }
 }
 
-/** Generate grid of H3 cells visible in viewport */
-export function getVisibleHexes(lat: number, lng: number, radiusKm: number, resolution = 9): string[] {
+/** Generate grid of H3 cells covering the full viewport rectangle */
+export function getVisibleHexes(bounds: { south: number; west: number; north: number; east: number }, resolution: number): string[] {
   try {
-    // Get center cell
-    const center = h3.latLngToCell(lat, lng, resolution)
-    // Get ring of cells around center (k-ring)
-    const k = Math.min(Math.ceil(radiusKm / 0.2), 30) // ~200m per hex at res 9
-    return h3.gridDisk(center, k)
+    const { south, west, north, east } = bounds
+    // Create viewport polygon (closed ring)
+    const poly: [number, number][] = [
+      [south, west], [south, east], [north, east], [north, west]
+    ]
+    return h3.polygonToCells(poly, resolution)
   } catch {
     return []
   }
