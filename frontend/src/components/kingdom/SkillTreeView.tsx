@@ -1,6 +1,6 @@
 /**
  * SkillTreeView — HEXOD Kingdom Skill Tree.
- * 5 branches × 6 tiers, fork system at tier 2, crystal pour mechanic.
+ * 5 branches × 6 tiers, fork system at tier 2, HEX pour mechanic.
  * Premium glassmorphism + Orbitron typography + animated reservoirs.
  */
 import { useState, useCallback } from 'react'
@@ -41,7 +41,7 @@ function SkillNodeCard({
   const [hovering, setHovering] = useState(false)
   const pct = state.max > 0 ? (state.filled / state.max) * 100 : 100
   const color = BRANCH_COLORS[branch.id]
-  const reservoir = kingdom.crystalReservoirs[branch.id]
+  const reservoir = kingdom.hexReservoirs[branch.id]
 
   const statusClass = state.completed ? 'completed' : state.forkLocked ? 'locked' : state.available ? 'available' : 'locked'
 
@@ -192,7 +192,7 @@ function BranchColumn({
   onAllocChange: (branchId: BranchId, pct: number) => void
 }) {
   const color = BRANCH_COLORS[branch.id]
-  const reservoir = kingdom.crystalReservoirs[branch.id]
+  const reservoir = kingdom.hexReservoirs[branch.id]
   const alloc = kingdom.branchAllocation[branch.id] ?? 20
   const completed = branch.skills.filter(s => kingdom.skillStates[s.id]?.completed).length
   const total = branch.skills.length
@@ -351,13 +351,13 @@ function BranchColumn({
 // ── Main SkillTreeView ──
 export function SkillTreeView({ kingdom, onPour, onForkChoice, onBranchAllocChange }: Props) {
   const totalAlloc = Object.values(kingdom.branchAllocation).reduce((a, b) => a + b, 0)
-  const totalReservoir = Object.values(kingdom.crystalReservoirs).reduce((a, b) => a + b, 0)
+  const totalReservoir = Object.values(kingdom.hexReservoirs).reduce((a, b) => a + b, 0)
 
-  // Quick pour: distribute all reservoir crystals to cheapest available skill per branch
+  // Quick pour: distribute all reservoir HEX to cheapest available skill per branch
   const handleQuickPour = () => {
     let poured = 0
     for (const branch of SKILL_BRANCHES) {
-      const reservoir = kingdom.crystalReservoirs[branch.id]
+      const reservoir = kingdom.hexReservoirs[branch.id]
       if (reservoir <= 0) continue
 
       // Find cheapest available, non-completed, non-fork-locked skill
@@ -426,7 +426,7 @@ export function SkillTreeView({ kingdom, onPour, onForkChoice, onBranchAllocChan
           fontFamily: "'Share Tech Mono', monospace",
         }}>
           <CrystalIcon size="sm" />
-          {kingdom.dailyCrystals.toLocaleString()}/DAY
+          {kingdom.dailyHex.toLocaleString()}/DAY
         </div>
       </div>
 

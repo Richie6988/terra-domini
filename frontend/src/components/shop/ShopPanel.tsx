@@ -124,7 +124,7 @@ export function ShopPanel({ onClose }: Props) {
 
   const handleBuy = (itemName: string, itemCode: string, price: number) => {
     const bal = toNum(balance)
-    if (bal < price) { toast.error(`Not enough crystals (need ${price}, have ${Math.floor(bal)})`); return }
+    if (bal < price) { toast.error(`Not enough HEX (need ${price}, have ${Math.floor(bal)})`); return }
     api.post('/shop/purchase/', { item_code: itemCode, quantity: 1 })
       .then(res => {
         if (res.data?.booster) {
@@ -282,7 +282,7 @@ export function ShopPanel({ onClose }: Props) {
           </div>
         )}
 
-        {/* Buy crystals CTA */}
+        {/* Buy HEX CTA */}
         <div style={{ marginTop:16, padding:'14px 16px', borderRadius:8,
           background:'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.05))',
           border:'1px solid rgba(204,136,0,0.3)',

@@ -3,15 +3,15 @@
  * 
  * GAME LOOP:
  *   Territories → grouped into Kingdoms → Kingdoms produce Resources/day (based on biome+rarity)
- *   → Player allocates % of each resource to crystal conversion
- *   → Crystals/day distributed across 5 skill tree branches
+ *   → Player allocates % of each resource to HEX conversion
+ *   → HEX/day distributed across 5 skill tree branches
  *   → Deeper branch = better bonuses → stronger kingdom → conquer more
  * 
  * TERRITORY CONQUEST:
  *   - Adjacent to your kingdom: easy (lower cost, no influence req)
  *   - Far away: expensive (supply lines, logistics)
  *   - Rare POIs (Notre Dame, Pentagon...): require high influence level
- *   - Methods: ASSAULT (military), PURCHASE (crystals), INFILTRATION (spy+data)
+ *   - Methods: ASSAULT (military), PURCHASE (HEX), INFILTRATION (spy+data)
  */
 
 // ═══════════════════════════════════════════════════════════════
@@ -35,37 +35,37 @@ export interface ResourceDef {
   icon: string
   color: string
   category: 'extraction' | 'processed' | 'info' | 'social' | 'currency'
-  /** Crystal conversion rate (units → crystals) */
-  crystalRate: number
+  /** Crystal conversion rate (units → HEX) */
+  hexRate: number
 }
 
 export const RESOURCES: Record<ResourceId, ResourceDef> = {
   // Extraction
-  fer:          { id: 'fer',          name: 'Iron',         icon: '⛏️', color: '#94a3b8', category: 'extraction', crystalRate: 0.8 },
-  petrole:      { id: 'petrole',      name: 'Oil',          icon: '🛢️', color: '#ef4444', category: 'extraction', crystalRate: 2.5 },
-  gaz:          { id: 'gaz',          name: 'Gas',          icon: '💨', color: '#a78bfa', category: 'extraction', crystalRate: 2.0 },
-  uranium:      { id: 'uranium',      name: 'Uranium',      icon: '☢️', color: '#fbbf24', category: 'extraction', crystalRate: 8.0 },
-  charbon:      { id: 'charbon',      name: 'Coal',         icon: '⬛', color: '#475569', category: 'extraction', crystalRate: 0.5 },
-  silicium:     { id: 'silicium',     name: 'Silicon',      icon: '🔷', color: '#06b6d4', category: 'extraction', crystalRate: 3.0 },
-  terres_rares: { id: 'terres_rares', name: 'Rare Earth',   icon: '💎', color: '#8b5cf6', category: 'extraction', crystalRate: 6.0 },
-  lithium:      { id: 'lithium',      name: 'Lithium',      icon: '🔋', color: '#22d3ee', category: 'extraction', crystalRate: 4.0 },
-  cobalt:       { id: 'cobalt',       name: 'Cobalt',       icon: '🔵', color: '#3b82f6', category: 'extraction', crystalRate: 5.0 },
-  or:           { id: 'or',           name: 'Gold',         icon: '🪙', color: '#fbbf24', category: 'extraction', crystalRate: 10.0 },
-  aluminium:    { id: 'aluminium',    name: 'Aluminium',    icon: '🔩', color: '#d1d5db', category: 'extraction', crystalRate: 1.0 },
+  fer:          { id: 'fer',          name: 'Iron',         icon: '⛏️', color: '#94a3b8', category: 'extraction', hexRate: 0.8 },
+  petrole:      { id: 'petrole',      name: 'Oil',          icon: '🛢️', color: '#ef4444', category: 'extraction', hexRate: 2.5 },
+  gaz:          { id: 'gaz',          name: 'Gas',          icon: '💨', color: '#a78bfa', category: 'extraction', hexRate: 2.0 },
+  uranium:      { id: 'uranium',      name: 'Uranium',      icon: '☢️', color: '#fbbf24', category: 'extraction', hexRate: 8.0 },
+  charbon:      { id: 'charbon',      name: 'Coal',         icon: '⬛', color: '#475569', category: 'extraction', hexRate: 0.5 },
+  silicium:     { id: 'silicium',     name: 'Silicon',      icon: '🔷', color: '#06b6d4', category: 'extraction', hexRate: 3.0 },
+  terres_rares: { id: 'terres_rares', name: 'Rare Earth',   icon: '💎', color: '#8b5cf6', category: 'extraction', hexRate: 6.0 },
+  lithium:      { id: 'lithium',      name: 'Lithium',      icon: '🔋', color: '#22d3ee', category: 'extraction', hexRate: 4.0 },
+  cobalt:       { id: 'cobalt',       name: 'Cobalt',       icon: '🔵', color: '#3b82f6', category: 'extraction', hexRate: 5.0 },
+  or:           { id: 'or',           name: 'Gold',         icon: '🪙', color: '#fbbf24', category: 'extraction', hexRate: 10.0 },
+  aluminium:    { id: 'aluminium',    name: 'Aluminium',    icon: '🔩', color: '#d1d5db', category: 'extraction', hexRate: 1.0 },
   // Processed
-  acier:        { id: 'acier',        name: 'Steel',        icon: '🗡️', color: '#6b7280', category: 'processed', crystalRate: 2.0 },
-  composants:   { id: 'composants',   name: 'Components',   icon: '🔧', color: '#10b981', category: 'processed', crystalRate: 4.0 },
-  titanium:     { id: 'titanium',     name: 'Titanium',     icon: '⚙️', color: '#c4b5fd', category: 'processed', crystalRate: 6.0 },
+  acier:        { id: 'acier',        name: 'Steel',        icon: '🗡️', color: '#6b7280', category: 'processed', hexRate: 2.0 },
+  composants:   { id: 'composants',   name: 'Components',   icon: '🔧', color: '#10b981', category: 'processed', hexRate: 4.0 },
+  titanium:     { id: 'titanium',     name: 'Titanium',     icon: '⚙️', color: '#c4b5fd', category: 'processed', hexRate: 6.0 },
   // Info
-  donnees:      { id: 'donnees',      name: 'Data',         icon: '📊', color: '#0ea5e9', category: 'info', crystalRate: 1.5 },
-  influence:    { id: 'influence',     name: 'Influence',    icon: '🌐', color: '#059669', category: 'info', crystalRate: 3.0 },
+  donnees:      { id: 'donnees',      name: 'Data',         icon: '📊', color: '#0ea5e9', category: 'info', hexRate: 1.5 },
+  influence:    { id: 'influence',     name: 'Influence',    icon: '🌐', color: '#059669', category: 'info', hexRate: 3.0 },
   // Social
-  main_oeuvre:  { id: 'main_oeuvre',  name: 'Labor',        icon: '👷', color: '#f59e0b', category: 'social', crystalRate: 0.5 },
-  nourriture:   { id: 'nourriture',   name: 'Food',         icon: '🌾', color: '#84cc16', category: 'social', crystalRate: 0.3 },
-  eau:          { id: 'eau',          name: 'Water',        icon: '💧', color: '#38bdf8', category: 'social', crystalRate: 0.2 },
-  stabilite:    { id: 'stabilite',    name: 'Stability',    icon: '⚖️', color: '#a3a3a3', category: 'social', crystalRate: 1.0 },
+  main_oeuvre:  { id: 'main_oeuvre',  name: 'Labor',        icon: '👷', color: '#f59e0b', category: 'social', hexRate: 0.5 },
+  nourriture:   { id: 'nourriture',   name: 'Food',         icon: '🌾', color: '#84cc16', category: 'social', hexRate: 0.3 },
+  eau:          { id: 'eau',          name: 'Water',        icon: '💧', color: '#38bdf8', category: 'social', hexRate: 0.2 },
+  stabilite:    { id: 'stabilite',    name: 'Stability',    icon: '⚖️', color: '#a3a3a3', category: 'social', hexRate: 1.0 },
   // Currency
-  cristaux:     { id: 'cristaux',     name: 'Crystals',     icon: '◆',  color: '#7950f2', category: 'currency', crystalRate: 1.0 },
+  cristaux:     { id: 'cristaux',     name: 'Crystals',     icon: '◆',  color: '#7950f2', category: 'currency', hexRate: 1.0 },
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -268,8 +268,8 @@ export interface Kingdom {
   /** Fork choices (permanent) */
   forkChoices: Record<string, string>
   /** Crystal reservoir per branch */
-  crystalReservoirs: Record<BranchId, number>
-  /** Resource allocation percentages (how much of each resource → crystals) */
+  hexReservoirs: Record<BranchId, number>
+  /** Resource allocation percentages (how much of each resource → HEX) */
   resourceAllocation: Record<ResourceId, number>
   /** Branch allocation percentages (how crystals are split across branches) */
   branchAllocation: Record<BranchId, number>
@@ -403,7 +403,7 @@ export function calculateDailyCrystals(
   let total = 0
   for (const [resId, amount] of Object.entries(production)) {
     const pct = (allocation[resId as ResourceId] ?? 0) / 100
-    const rate = RESOURCES[resId as ResourceId]?.crystalRate ?? 0
+    const rate = RESOURCES[resId as ResourceId]?.hexRate ?? 0
     total += Math.floor(amount * pct * rate)
   }
   return total

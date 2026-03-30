@@ -26,7 +26,7 @@ export function DayCycleWidget() {
   const { kingdoms, processDay } = useKingdomStore()
 
   const processDayForAll = useCallback(() => {
-    let totalCrystals = 0
+    let totalHex = 0
     const biomes = ['urban', 'rural', 'forest', 'mountain', 'coastal', 'desert', 'industrial', 'tundra', 'landmark'] as const
 
     for (const kingdom of kingdoms) {
@@ -35,10 +35,10 @@ export function DayCycleWidget() {
         rarity: i === 0 ? 'rare' : i < 3 ? 'uncommon' : 'common',
       }))
       const result = processDay(kingdom.id, mockTerritories)
-      totalCrystals += result.crystalsGenerated
+      totalHex += result.hexGenerated
     }
 
-    setLastCrystals(totalCrystals)
+    setLastCrystals(totalHex)
     setDayCount(d => {
       const next = d + 1
       try { localStorage.setItem('hx_day_count', String(next)) } catch {}

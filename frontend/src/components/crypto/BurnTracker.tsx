@@ -170,7 +170,7 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
           BURN SOURCES
         </div>
         {[
-          { label: 'Crystal Conversion', rate: `${BURN_RATES.crystalConversion} HEX/crystal`, pct: 40 },
+          { label: 'HEX Conversion', rate: `${BURN_RATES.hexConversion} HEX/coin`, pct: 40 },
           { label: 'Territory Conquest', rate: `${BURN_RATES.conquestBurnPct * 100}% of cost`, pct: 25 },
           { label: 'Kingdom Maintenance', rate: `${BURN_RATES.maintenancePerTerritory} HEX/territory/day`, pct: 20 },
           { label: 'Marketplace Royalty', rate: `${BURN_RATES.marketplaceBurnPct * 100}% of 5% fee`, pct: 10 },

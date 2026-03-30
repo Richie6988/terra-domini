@@ -245,7 +245,7 @@ export function ConquestActions({ territory, onClaimed }: Props) {
   const isLandmark = territory.is_landmark ?? false
 
   const methods: { id: ConquestMethod; name: string; icon: string; color: string; desc: string }[] = [
-    { id: 'purchase', name: 'PURCHASE', icon: '💰', color: '#d97706', desc: isUnclaimed ? 'Claim with crystals. 100% success.' : 'Buy out the owner.' },
+    { id: 'purchase', name: 'PURCHASE', icon: '💰', color: '#d97706', desc: isUnclaimed ? 'Claim with HEX. 100% success.' : 'Buy out the owner.' },
     { id: 'assault', name: 'ASSAULT', icon: '⚔️', color: '#dc2626', desc: 'Military attack. Costs resources.' },
     { id: 'infiltration', name: 'INFILTRATE', icon: '🕵️', color: '#059669', desc: 'Covert takeover with spies & data.' },
   ]

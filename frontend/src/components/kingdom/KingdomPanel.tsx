@@ -68,7 +68,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
         {[
           { label: 'TERRITORIES', value: kingdom.territories.length, color: '#0099cc' },
           { label: 'SKILLS', value: `${totalSkills}/${maxSkills}`, color: '#7950f2' },
-          { label: 'HEX/DAY', value: kingdom.dailyCrystals.toLocaleString(), color: '#7950f2', icon: true },
+          { label: 'HEX/DAY', value: kingdom.dailyHex.toLocaleString(), color: '#7950f2', icon: true },
         ].map(stat => (
           <div key={stat.label} style={{
             padding: '10px 8px', borderRadius: 8, textAlign: 'center',
@@ -136,7 +136,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
         {kingdom.warZone && <span style={{ color: '#dc2626', marginLeft: 'auto' }}>🔥 WAR ZONE</span>}
       </div>
 
-      {/* Process Day — generate resources + crystals */}
+      {/* Process Day — generate resources + HEX */}
       <button
         onClick={onProcessDay}
         style={{
@@ -237,7 +237,7 @@ function ResourcesTab({ kingdom, onAllocChange }: {
             {group.resources.map(res => {
               const amount = production[res.id] ?? 0
               const alloc = kingdom.resourceAllocation[res.id] ?? 0
-              const crystalsFromThis = Math.floor(amount * (alloc / 100) * res.crystalRate)
+              const hexFromThis = Math.floor(amount * (alloc / 100) * res.hexRate)
 
               return (
                 <div key={res.id} style={{
@@ -285,7 +285,7 @@ function ResourcesTab({ kingdom, onAllocChange }: {
                       fontSize: 7, color: '#7950f2', minWidth: 40, textAlign: 'right',
                       fontFamily: "'Share Tech Mono', monospace",
                     }}>
-                      → {crystalsFromThis}◆
+                      → {hexFromThis}◆
                     </span>
                   </div>
                 </div>
@@ -330,7 +330,7 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
         },
         {
           icon: '💰', name: 'PURCHASE', color: '#d97706',
-          desc: 'Buy territory with crystals. Instant for adjacent. Requires influence for rare POIs.',
+          desc: 'Buy territory with HEX. Instant for adjacent. Requires influence for rare POIs.',
           stats: ['Cost: 500-10000 ◆', 'Duration: Instant-5min', 'Success: 100%'],
         },
         {
@@ -493,7 +493,7 @@ export function KingdomPanel({ onClose }: Props) {
               rarity: i === 0 ? 'rare' : i < 3 ? 'uncommon' : 'common',
             }))
             const result = processDay(demoKingdom.id, mockTerritories)
-            toast.success(`⏭ Day processed: +${result.crystalsGenerated.toLocaleString()} crystals generated`)
+            toast.success(`⏭ Day processed: +${result.hexGenerated.toLocaleString()} HEX generated`)
           }} />}
           {tab === 'resources' && (
             <ResourcesTab

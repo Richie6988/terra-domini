@@ -19,7 +19,7 @@ const DEFAULT_BRANCH_ALLOC: Record<BranchId, number> = {
   attack: 15, defense: 15, economy: 20, influence_branch: 15, tech: 15, extraction: 20,
 }
 
-// ── Default resource allocation: 50% to crystals ──
+// ── Default resource allocation: 50% to HEX ──
 function defaultResourceAlloc(): Record<ResourceId, number> {
   const alloc: Record<string, number> = {}
   for (const id of Object.keys(RESOURCES)) alloc[id] = 50
@@ -101,7 +101,7 @@ export const useKingdomStore = create<KingdomStore>()(
           skillStates: initSkillStates(),
           forkChoices: {},
           // Starter crystals — enough to unlock first skill in 2 branches
-          crystalReservoirs: { attack: 500, defense: 500, economy: 500, influence_branch: 300, tech: 300, extraction: 400 },
+          hexReservoirs: { attack: 500, defense: 500, economy: 500, influence_branch: 300, tech: 300, extraction: 400 },
           resourceAllocation: defaultResourceAlloc(),
           branchAllocation: { ...DEFAULT_BRANCH_ALLOC },
           // Starter production from capital territory
@@ -109,7 +109,7 @@ export const useKingdomStore = create<KingdomStore>()(
             fer: 10, petrole: 5, nourriture: 8, eau: 12,
             donnees: 6, influence: 3, main_oeuvre: 5, stabilite: 4,
           },
-          dailyCrystals: 150, // Initial estimate
+          dailyHex: 150, // Initial estimate
           createdAt: new Date().toISOString(),
         }
         set(s => ({ kingdoms: [...s.kingdoms, kingdom], activeKingdomId: kingdom.id }))
@@ -174,12 +174,12 @@ export const useKingdomStore = create<KingdomStore>()(
         const branch = SKILL_BRANCHES.find(b => b.skills.some(s => s.id === skillId))
         if (!branch) return false
 
-        const reservoir = kingdom.crystalReservoirs[branch.id]
+        const reservoir = kingdom.hexReservoirs[branch.id]
         const pourAmount = Math.min(amount, state.max - state.filled, reservoir)
         if (pourAmount <= 0) return false
 
         const newStates = { ...kingdom.skillStates }
-        const newReservoirs = { ...kingdom.crystalReservoirs }
+        const newReservoirs = { ...kingdom.hexReservoirs }
 
         newReservoirs[branch.id] -= pourAmount
         newStates[skillId] = {
@@ -222,7 +222,7 @@ export const useKingdomStore = create<KingdomStore>()(
         set(s => ({
           kingdoms: s.kingdoms.map(k =>
             k.id === kingdomId
-              ? { ...k, skillStates: newStates, crystalReservoirs: newReservoirs }
+              ? { ...k, skillStates: newStates, hexReservoirs: newReservoirs }
               : k
           ),
         }))
@@ -275,7 +275,7 @@ export const useKingdomStore = create<KingdomStore>()(
         // 3. Distribute crystals across branches
         const totalBranchPct = Object.values(kingdom.branchAllocation).reduce((a, b) => a + b, 0)
         const branchDistribution: Record<BranchId, number> = { attack: 0, defense: 0, economy: 0, influence_branch: 0, tech: 0, extraction: 0 }
-        const newReservoirs = { ...kingdom.crystalReservoirs }
+        const newReservoirs = { ...kingdom.hexReservoirs }
 
         for (const [branchId, pct] of Object.entries(kingdom.branchAllocation)) {
           const share = totalBranchPct > 0 ? Math.floor(crystals * (pct / totalBranchPct)) : 0
@@ -288,9 +288,9 @@ export const useKingdomStore = create<KingdomStore>()(
             k.id === kingdomId
               ? {
                 ...k,
-                crystalReservoirs: newReservoirs,
+                hexReservoirs: newReservoirs,
                 dailyProduction: production,
-                dailyCrystals: crystals,
+                dailyHex: crystals,
               }
               : k
           ),

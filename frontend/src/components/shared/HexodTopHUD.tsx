@@ -1,7 +1,7 @@
 /**
  * HexodTopHUD — Light tactical glassmorphism top bar.
  * Left: avatar + commander label + empire hex count
- * Right: crystal SVG icon + crystal balance
+ * Right: HEX Coin SVG icon + HEX balance
  * Matches main_prototype.html HUD exactly.
  */
 import { useStore } from '../../store'
@@ -17,7 +17,7 @@ export function HexodTopHUD() {
 
   if (!player) return null
 
-  const crystals = toNum(balance?.in_game ?? player.tdc_in_game)
+  const HEX = toNum(balance?.in_game ?? player.tdc_in_game)
   const hexCount = myTerritories?.size ?? player.stats?.territories_owned ?? 0
 
   return (
@@ -115,7 +115,7 @@ export function HexodTopHUD() {
             fontFamily: "'Share Tech Mono', monospace",
             letterSpacing: 1,
           }}>
-            {crystals.toLocaleString('en-US', { maximumFractionDigits: 0 })}
+            {HEX.toLocaleString('en-US', { maximumFractionDigits: 0 })}
           </div>
         </div>
       </div>

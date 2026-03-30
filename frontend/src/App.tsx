@@ -19,7 +19,7 @@ import { OnboardingHotspots } from './components/onboarding/OnboardingHotspots'
 import { NewsTicker } from './components/shared/NewsTicker'
 import { HexodTopHUD } from './components/shared/HexodTopHUD'
 import { HexodDock } from './components/shared/HexodDock'
-import { RadarTrigger, RadarFilterPanel } from './components/shared/RadarFilterPanel'
+import { RadarTrigger } from './components/shared/RadarFilterPanel'
 import { RadarWidget } from './components/shared/RadarWidget'
 import { SoundToggle } from './components/shared/SoundToggle'
 import { DayCycleWidget } from './components/shared/DayCycleWidget'
@@ -117,22 +117,20 @@ function GameScreen() {
       setWasLoggedIn(false)
     }
   }, [accessToken])
-  const [radarOpen, setRadarOpen] = useState(false)
-  const [radarActive, setRadarActive] = useState(false)
   const setActivePanel       = useStore((s) => s.setActivePanel)
 
-  // Keyboard: 'R' toggles radar panel
+  // Keyboard: 'R' toggles Codex (collection) panel
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'r' || e.key === 'R') {
         if (document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
-          setRadarOpen(v => !v)
+          setActivePanel(activePanel === 'codex' ? null : 'codex')
         }
       }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [])
+  }, [activePanel, setActivePanel])
 
   return (
     <div
@@ -160,15 +158,10 @@ function GameScreen() {
         <DayCycleWidget />
       </div>
 
-      {/* Radar trigger (left edge) + filter panel */}
+      {/* Collection trigger (left edge) → opens Codex */}
       <RadarTrigger
-        onClick={() => setRadarOpen(v => !v)}
-        scanning={radarActive}
-      />
-      <RadarFilterPanel
-        open={radarOpen}
-        onClose={() => setRadarOpen(false)}
-        onFilterChange={(ids) => setRadarActive(ids.size > 0)}
+        onClick={() => setActivePanel(activePanel === 'codex' ? null : 'codex')}
+        scanning={activePanel === 'codex'}
       />
 
       {/* Base map — full screen background, z-index isolated to prevent Leaflet bleeding */}

@@ -2,7 +2,7 @@
  * DailyHuntPanel — M09 Daily Hunt.
  * Core engagement loop: find a hidden token each day.
  * Hot/cold radar guides player to target location.
- * Reward: rare tokens + crystals + XP.
+ * Reward: rare tokens + hex_reward + XP.
  * 
  * Flow:
  *   1. Player opens Daily Hunt → gets target hint (category, biome, direction)
@@ -115,7 +115,7 @@ export function DailyHuntPanel({ onClose }: Props) {
   }, [phase])
 
   const handleCollect = useCallback(() => {
-    setReward({ hex_reward: hunt.crystals, xp: 50 })
+    setReward({ hex_reward: hunt.hex_reward, xp: 50 })
     setPhase('collected')
   }, [hunt])
 
@@ -190,7 +190,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               }}>
                 <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>REWARD</div>
                 <div style={{ fontSize: 14, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                  <CrystalIcon size="sm" /> {hunt.crystals}
+                  <CrystalIcon size="sm" /> {hunt.hex_reward}
                 </div>
               </div>
               <div style={{
@@ -391,7 +391,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 }}>
                   <CrystalIcon size="md" />
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", marginTop: 4 }}>
-                    +{reward.crystals}
+                    +{reward.hex_reward}
                   </div>
                   <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>HEX COIN</div>
                 </div>

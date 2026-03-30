@@ -75,7 +75,7 @@ const TERRITORY_NFT_ABI = [
 const GAME_ENGINE_ABI = [
   'function claimTerritory(bytes32 h3Index, bytes locationProof) returns (uint256 tokenId, uint256 hexMined)',
   'function purchaseTerritory(uint256 targetTokenId) payable',
-  'function upgradeSkill(uint256 kingdomId, bytes32 skillId, uint256 crystalAmount)',
+  'function upgradeSkill(uint256 kingdomId, bytes32 skillId, uint256 hexAmount)',
   'function getMinedTotal() view returns (uint256)',
   'function getClaimCooldown(address) view returns (uint256)',
 ]

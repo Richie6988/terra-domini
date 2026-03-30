@@ -3,12 +3,12 @@
     "format": "hexod_agent_weights_v2",
     "version": 3,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-30T15:00:00Z",
+    "last_updated": "2026-03-30T16:00:00Z",
     "session": 18,
     "total_patterns": 24,
     "total_weights": 87,
     "total_icons": 98,
-    "total_components": 57,
+    "total_components": 51,
     "total_commits": 23,
     "theme_migration": "COMPLETE",
     "core_loop_completion": "65%",
@@ -1015,7 +1015,8 @@
       "referrals"
     ],
     "ui_rename": "crystals → HEX Coin in all user-facing text. Internal variables kept as-is.",
-    "display": "HEX (◆ symbol), CrystalIcon SVG stays as visual"
+    "display": "HEX (◆ symbol), CrystalIcon SVG stays as visual",
+    "internal_rename": "DONE — crystalRate→hexRate, crystalReservoirs→hexReservoirs, dailyCrystals→dailyHex across kingdom.types, kingdomStore, KingdomPanel, SkillTreeView, DayCycleWidget, ConquestActions, BurnTracker, ShopPanel, HexodTopHUD"
   },
   "daily_modes": {
     "events": {
@@ -1061,9 +1062,11 @@
     }
   },
   "removed_this_session": {
-    "GameHUD": "Removed — notification bubble above dock",
-    "WarTicker": "Removed — war feed between dock and content",
-    "TerritoryPanel": "Removed — old territory panel (HexCard→Token3DViewer handles this)"
+    "GameHUD": "git rm — notification bubbles",
+    "WarTicker": "git rm — war feed",
+    "TerritoryPanel": "git rm — old territory detail",
+    "MissionsDailyWidget": "git rm — only used by GameHUD",
+    "RadarFilterPanel_from_render": "Removed from App.tsx render — Codex replaces it"
   },
   "radar_safari": {
     "small": "100×100px bottom-right, shows safari heat + distance",
@@ -1071,5 +1074,8 @@
     "safari_blip": "Pulsing gold ring, labeled SAFARI, distance in meters, HOT/WARM/COLD",
     "click": "Small → Expanded (AnimatePresence scale)",
     "close": "Click outside or ESC"
+  },
+  "codex_is_collection": {
+    "status": "DONE — RadarTrigger (left edge) + R key → opens Codex. RadarFilterPanel removed from App.tsx render. Codex IS the collection panel."
   }
 }
