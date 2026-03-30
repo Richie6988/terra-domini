@@ -219,7 +219,9 @@ export function Token3DViewer({
       if (!svgStr.includes('xmlns')) {
         svgStr = svgStr.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
       }
-      const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' })
+      // Encode properly to handle special characters
+      const encoded = new TextEncoder().encode(svgStr)
+      const blob = new Blob([encoded], { type: 'image/svg+xml' })
       const url = URL.createObjectURL(blob)
       iconImage.onload = () => {
         iconLoaded = true
@@ -352,24 +354,35 @@ export function Token3DViewer({
       fCtx.globalAlpha = 1
       fCtx.restore()
 
-      // SVG icon overlay — rendered from Image (handles all transforms)
+      // SVG icon overlay — prominent centered rendering
+      // First: dark hex frame (like original template)
+      fCtx.save()
+      fCtx.shadowBlur = s * 0.06; fCtx.shadowColor = catColor
+      fCtx.fillStyle = 'rgba(2,2,2,0.85)'
+      drawHex(fCtx, imageCx, imageCy, s * 0.14)
+      fCtx.fill()
+      fCtx.strokeStyle = tier.metal; fCtx.lineWidth = s * 0.005
+      fCtx.stroke()
+      // Inner accent ring
+      fCtx.strokeStyle = catColor; fCtx.lineWidth = s * 0.003; fCtx.globalAlpha = 0.6
+      drawHex(fCtx, imageCx, imageCy, s * 0.125)
+      fCtx.stroke(); fCtx.globalAlpha = 1
+      fCtx.restore()
+
+      // Then: icon image on top
       if (iconLoaded && iconImage.complete) {
-        const iconSize = s * 0.24
+        const iconSize = s * 0.20
         fCtx.save()
-        fCtx.shadowBlur = s * 0.06; fCtx.shadowColor = catColor
-        // Draw the icon from the pre-rendered Image
+        fCtx.shadowBlur = s * 0.04; fCtx.shadowColor = catColor
         fCtx.drawImage(iconImage,
           imageCx - iconSize / 2, imageCy - iconSize / 2,
           iconSize, iconSize)
         fCtx.restore()
-      } else if (iconSvgString) {
-        // Fallback: try manual SVG parsing
-        drawSVGIcon(fCtx, imageCx, imageCy, s * 0.22, iconSvgString, catColor)
       } else {
-        // Fallback: category initial letter
+        // Always show category letter as guaranteed visible fallback
         fCtx.save(); fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle'
-        fCtx.font = `900 ${s * 0.08}px Orbitron`; fCtx.fillStyle = '#fff'
-        fCtx.shadowBlur = 40; fCtx.shadowColor = catColor
+        fCtx.font = `900 ${s * 0.07}px Orbitron`; fCtx.fillStyle = catColor
+        fCtx.shadowBlur = 20; fCtx.shadowColor = catColor
         fCtx.fillText(category.charAt(0), imageCx, imageCy); fCtx.restore()
       }
 
