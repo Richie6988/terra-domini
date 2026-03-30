@@ -290,78 +290,143 @@ export function Token3DViewer({
       fCtx.font = `bold ${s * 0.032}px Orbitron`
       fCtx.fillText(category, c, s * 0.166)
 
-      // ── SECTION 2: Category icon row (small icons, matching original) ──
-      const iconRowY = s * 0.205
-      const iconSize = s * 0.032
-      if (iconImage.complete) {
-        // Draw the icon from pre-loaded Image (handles all SVG transforms)
-        fCtx.save()
-        fCtx.shadowBlur = iconSize * 0.4; fCtx.shadowColor = catColor
-        // Dark hex background
-        fCtx.fillStyle = 'rgba(2,2,2,0.95)'
-        drawHex(fCtx, c, iconRowY, iconSize / 2)
-        fCtx.fill()
-        fCtx.strokeStyle = tier.metal; fCtx.lineWidth = Math.max(2, iconSize * 0.04)
-        fCtx.stroke()
-        fCtx.restore()
-        // Icon image on top
-        fCtx.save()
-        fCtx.drawImage(iconImage, c - iconSize * 0.4, iconRowY - iconSize * 0.4, iconSize * 0.8, iconSize * 0.8)
+      // ── SECTION 2: Category icon (larger, with fallback) ──
+      const iconRowY = s * 0.21
+      const iconSz = s * 0.065
+      // Dark hex frame
+      fCtx.save()
+      fCtx.shadowBlur = iconSz * 0.5; fCtx.shadowColor = catColor
+      fCtx.fillStyle = 'rgba(2,2,2,0.95)'
+      drawHex(fCtx, c, iconRowY, iconSz * 0.6); fCtx.fill()
+      fCtx.strokeStyle = tier.metal; fCtx.lineWidth = 3; fCtx.stroke()
+      fCtx.restore()
+      // Icon image (from blob) or text fallback
+      if (iconImage.complete && iconImage.naturalWidth > 0) {
+        fCtx.drawImage(iconImage, c - iconSz * 0.45, iconRowY - iconSz * 0.45, iconSz * 0.9, iconSz * 0.9)
+      } else {
+        // Guaranteed visible: category first letter
+        fCtx.save(); fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle'
+        fCtx.font = `900 ${iconSz * 0.7}px Orbitron`; fCtx.fillStyle = catColor
+        fCtx.fillText(category.charAt(0), c, iconRowY)
         fCtx.restore()
       }
 
       // Biome
       fCtx.fillStyle = g; fCtx.font = `bold ${s * 0.032}px Orbitron`
-      fCtx.fillText(biome, c, s * 0.264)
+      fCtx.fillText(biome, c, s * 0.27)
 
-      // ── SECTION 3: Main image area (biome texture) ──
-      const imageY = s * 0.293, imageH = s * 0.342
+      // ── SECTION 3: Main image area — clean biome illustration ──
+      const imageY = s * 0.30, imageH = s * 0.33
       const imageCx = c, imageCy = imageY + imageH / 2
 
-      // Biome-based procedural satellite texture
-      const biomeColors: Record<string, [string, string, string]> = {
-        URBAN: ['#2d3748', '#4a5568', '#718096'],
-        RURAL: ['#276749', '#38a169', '#68d391'],
-        FOREST: ['#1a4731', '#22543d', '#2f855a'],
-        MOUNTAIN: ['#4a3728', '#6b4226', '#a0aec0'],
-        COASTAL: ['#2b6cb0', '#3182ce', '#ebf4ff'],
-        DESERT: ['#b7791f', '#d69e2e', '#fefcbf'],
-        TUNDRA: ['#a0aec0', '#cbd5e0', '#edf2f7'],
-        INDUSTRIAL: ['#4a5568', '#718096', '#a0aec0'],
-        LANDMARK: ['#553c9a', '#6b46c1', '#d6bcfa'],
-      }
-      const bColors = biomeColors[(biome || 'URBAN').toUpperCase()] || biomeColors.URBAN
-
+      // Biome-specific illustration (not noise!)
       fCtx.save()
-      fCtx.shadowBlur = s * 0.06; fCtx.shadowColor = catColor
-      // Base gradient
-      const bgGrad = fCtx.createLinearGradient(boxX, imageY, boxX + boxW, imageY + imageH)
-      bgGrad.addColorStop(0, bColors[0]); bgGrad.addColorStop(0.5, bColors[1]); bgGrad.addColorStop(1, bColors[2])
-      fCtx.fillStyle = bgGrad
-      fCtx.fillRect(boxX, imageY, boxW, imageH)
-      // Procedural noise texture (terrain-like)
-      fCtx.globalAlpha = 0.15
-      for (let i = 0; i < 600; i++) {
-        const nx = boxX + Math.random() * boxW
-        const ny = imageY + Math.random() * imageH
-        const nr = Math.random() * s * 0.02 + 1
-        fCtx.fillStyle = Math.random() > 0.5 ? bColors[2] : bColors[0]
-        fCtx.beginPath(); fCtx.arc(nx, ny, nr, 0, Math.PI * 2); fCtx.fill()
+      fCtx.beginPath()
+      fCtx.rect(boxX, imageY, boxW, imageH)
+      fCtx.clip()
+
+      // Sky gradient
+      const skyG = fCtx.createLinearGradient(boxX, imageY, boxX, imageY + imageH * 0.6)
+      const biomeKey = (biome || 'URBAN').toUpperCase()
+      if (biomeKey === 'URBAN' || biomeKey === 'INDUSTRIAL') {
+        skyG.addColorStop(0, '#1e293b'); skyG.addColorStop(1, '#334155')
+      } else if (biomeKey === 'FOREST' || biomeKey === 'RURAL') {
+        skyG.addColorStop(0, '#064e3b'); skyG.addColorStop(1, '#065f46')
+      } else if (biomeKey === 'COASTAL') {
+        skyG.addColorStop(0, '#0c4a6e'); skyG.addColorStop(1, '#0369a1')
+      } else if (biomeKey === 'MOUNTAIN' || biomeKey === 'TUNDRA') {
+        skyG.addColorStop(0, '#1e1b4b'); skyG.addColorStop(1, '#312e81')
+      } else if (biomeKey === 'DESERT') {
+        skyG.addColorStop(0, '#78350f'); skyG.addColorStop(1, '#92400e')
+      } else {
+        skyG.addColorStop(0, '#312e81'); skyG.addColorStop(1, '#4c1d95')
       }
-      fCtx.globalAlpha = 1
-      // Grid overlay (hex grid pattern)
-      fCtx.strokeStyle = catColor; fCtx.lineWidth = 0.5; fCtx.globalAlpha = 0.08
-      const gridStep = s * 0.04
-      for (let gx = boxX; gx < boxX + boxW; gx += gridStep) {
-        for (let gy = imageY; gy < imageY + imageH; gy += gridStep) {
-          drawHex(fCtx, gx + (Math.floor(gy / gridStep) % 2) * gridStep * 0.5, gy, gridStep * 0.45)
+      fCtx.fillStyle = skyG
+      fCtx.fillRect(boxX, imageY, boxW, imageH)
+
+      // Ground
+      const groundY = imageY + imageH * 0.6
+      const groundH = imageH * 0.4
+      const groundG = fCtx.createLinearGradient(boxX, groundY, boxX, imageY + imageH)
+      if (biomeKey === 'COASTAL') {
+        groundG.addColorStop(0, '#0284c7'); groundG.addColorStop(0.4, '#0ea5e9')
+        groundG.addColorStop(0.6, '#fde68a'); groundG.addColorStop(1, '#fbbf24')
+      } else if (biomeKey === 'DESERT') {
+        groundG.addColorStop(0, '#b45309'); groundG.addColorStop(1, '#d97706')
+      } else if (biomeKey === 'TUNDRA') {
+        groundG.addColorStop(0, '#cbd5e0'); groundG.addColorStop(1, '#e2e8f0')
+      } else {
+        groundG.addColorStop(0, '#166534'); groundG.addColorStop(1, '#14532d')
+      }
+      fCtx.fillStyle = groundG
+      fCtx.fillRect(boxX, groundY, boxW, groundH)
+
+      // Biome features
+      if (biomeKey === 'URBAN' || biomeKey === 'INDUSTRIAL' || biomeKey === 'LANDMARK') {
+        // Buildings
+        const bw = boxW * 0.08
+        const buildings = [0.15, 0.28, 0.42, 0.55, 0.7, 0.85]
+        buildings.forEach((pos, i) => {
+          const bh = imageH * (0.25 + (i % 3) * 0.15)
+          const bx = boxX + boxW * pos - bw / 2
+          const by = groundY - bh
+          fCtx.fillStyle = i % 2 === 0 ? '#1e293b' : '#0f172a'
+          fCtx.fillRect(bx, by, bw, bh)
+          // Windows
+          fCtx.fillStyle = '#fbbf24'
+          for (let wy = by + bh * 0.1; wy < groundY - 5; wy += bh * 0.2) {
+            fCtx.globalAlpha = 0.3 + Math.random() * 0.5
+            fCtx.fillRect(bx + 3, wy, bw * 0.3, bh * 0.08)
+            fCtx.fillRect(bx + bw * 0.55, wy, bw * 0.3, bh * 0.08)
+          }
+          fCtx.globalAlpha = 1
+        })
+      } else if (biomeKey === 'MOUNTAIN' || biomeKey === 'TUNDRA') {
+        // Mountains
+        const peaks = [[0.2, 0.55], [0.45, 0.4], [0.7, 0.5], [0.9, 0.6]]
+        peaks.forEach(([px, ph]) => {
+          const mx = boxX + boxW * px, mh = imageH * ph
+          fCtx.fillStyle = biomeKey === 'TUNDRA' ? '#94a3b8' : '#3b0764'
+          fCtx.beginPath(); fCtx.moveTo(mx - boxW * 0.15, groundY)
+          fCtx.lineTo(mx, groundY - mh); fCtx.lineTo(mx + boxW * 0.15, groundY); fCtx.fill()
+          // Snow cap
+          fCtx.fillStyle = 'white'; fCtx.globalAlpha = 0.8
+          fCtx.beginPath(); fCtx.moveTo(mx - boxW * 0.04, groundY - mh + mh * 0.15)
+          fCtx.lineTo(mx, groundY - mh); fCtx.lineTo(mx + boxW * 0.04, groundY - mh + mh * 0.15); fCtx.fill()
+          fCtx.globalAlpha = 1
+        })
+      } else if (biomeKey === 'FOREST' || biomeKey === 'RURAL') {
+        // Trees
+        for (let tx = boxX + 10; tx < boxX + boxW; tx += boxW * 0.12) {
+          const th = imageH * (0.15 + Math.random() * 0.2)
+          const ty = groundY - th
+          fCtx.fillStyle = '#052e16'
+          fCtx.beginPath(); fCtx.moveTo(tx - 12, groundY); fCtx.lineTo(tx, ty); fCtx.lineTo(tx + 12, groundY); fCtx.fill()
+          fCtx.fillStyle = '#422006'; fCtx.fillRect(tx - 2, groundY - 8, 4, 8)
+        }
+      } else if (biomeKey === 'COASTAL') {
+        // Waves
+        fCtx.strokeStyle = 'rgba(255,255,255,0.3)'; fCtx.lineWidth = 2
+        for (let wy = imageY + imageH * 0.3; wy < groundY; wy += 15) {
+          fCtx.beginPath()
+          fCtx.moveTo(boxX, wy)
+          for (let wx = boxX; wx < boxX + boxW; wx += 20) {
+            fCtx.quadraticCurveTo(wx + 10, wy - 5, wx + 20, wy)
+          }
           fCtx.stroke()
         }
       }
-      fCtx.globalAlpha = 1
-      fCtx.restore()
 
-      // Title bar (over the image, matching original Section 4)
+      // Atmospheric glow from catColor
+      fCtx.globalAlpha = 0.15
+      const atmoG = fCtx.createRadialGradient(imageCx, imageCy, 0, imageCx, imageCy, boxW * 0.5)
+      atmoG.addColorStop(0, catColor); atmoG.addColorStop(1, 'transparent')
+      fCtx.fillStyle = atmoG; fCtx.fillRect(boxX, imageY, boxW, imageH)
+      fCtx.globalAlpha = 1
+
+      fCtx.restore() // unclip
+
+      // Title bar (matching original Section 4)
       const titleY = imageY + imageH - s * 0.034
       fCtx.fillStyle = 'rgba(0,0,0,0.88)'
       fCtx.fillRect(boxX, titleY - s * 0.025, boxW, s * 0.05)

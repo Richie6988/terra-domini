@@ -314,7 +314,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     })
   }, [territories, showHex, player?.id])
 
-  // ── Draw H3 grid overlay — ALWAYS res 8 (5M territories, never changes) ──
+  // ── Draw H3 grid overlay — ALWAYS res 8, visible only when hexes are large ──
   useEffect(() => {
     const grid = gridRef.current
     const map = mapRef.current
@@ -323,23 +323,19 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     const drawGrid = () => {
       grid.clearLayers()
       const z = map.getZoom()
-      if (z < 12) return // Too zoomed out to see individual hexes
+      // Only show grid when individual hexes are large enough to see (zoom 14+)
+      // z14 = ~9 hexes on screen, z13 = ~36 (too small)
+      if (z < 14) return
 
-      // ALWAYS resolution 8 — territories are fixed geographic zones
       const b = map.getBounds()
       const hexes = getVisibleHexes({
         south: b.getSouth(), west: b.getWest(),
         north: b.getNorth(), east: b.getEast(),
       }, 8)
 
-      if (hexes.length > 3000) return // Safety cap
+      if (hexes.length > 500) return
 
       const ownedH3 = new Set(territories.map(t => t.h3_index))
-
-      // Visual weight adapts to zoom — territory boundaries stay fixed
-      const weight = z >= 16 ? 1.5 : z >= 14 ? 1 : 0.7
-      const opacity = z >= 15 ? 0.06 : z >= 13 ? 0.04 : 0.02
-      const strokeOpacity = z >= 15 ? 0.25 : z >= 13 ? 0.18 : 0.12
 
       for (const h3 of hexes) {
         if (ownedH3.has(h3)) continue
@@ -347,9 +343,9 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         if (pts.length === 0) continue
         const poly = L.polygon(pts as L.LatLngTuple[], {
           fillColor: '#0099cc',
-          fillOpacity: opacity,
-          color: `rgba(0,153,204,${strokeOpacity})`,
-          weight,
+          fillOpacity: 0.04,
+          color: 'rgba(0,153,204,0.2)',
+          weight: 1,
           interactive: false,
         })
         grid.addLayer(poly)
