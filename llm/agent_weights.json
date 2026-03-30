@@ -1082,5 +1082,38 @@
   },
   "codex_is_collection": {
     "status": "DONE — RadarTrigger (left edge) + R key → opens Codex. RadarFilterPanel removed from App.tsx render. Codex IS the collection panel."
+  },
+  "cleanup_done_session18": {
+    "orphans_deleted": [
+      "RadarFilterPanel.tsx (330 lines, replaced by Codex + RadarTrigger)"
+    ],
+    "already_deleted_prior": [
+      "GameHUD.tsx",
+      "WarTicker.tsx",
+      "MissionsDailyWidget.tsx",
+      "TerritoryPanel.tsx"
+    ],
+    "extracted": [
+      "RadarTrigger.tsx (from RadarFilterPanel.tsx)"
+    ],
+    "crystal_to_hex_rename": {
+      "functions": [
+        "calculateDailyCrystals→calculateDailyHex",
+        "pourCrystals→pourHex"
+      ],
+      "variables": [
+        "dailyCrystals→dailyHex",
+        "totalCrystals→totalHex",
+        "lastCrystals→lastHex",
+        "crystals→hexIncome"
+      ],
+      "display_text": [
+        "Crystals→HEX in HexodTopHUD, DayCycleWidget, KingdomPanel, DailyHuntPanel, BurnTracker, CombatPanel, SkillTreeView"
+      ],
+      "kept_as_is": [
+        "CrystalIcon (SVG component = HEX Coin visual)",
+        "crystalType (gem type per branch, not currency)"
+      ]
+    }
   }
 }
