@@ -3,11 +3,11 @@
     "format": "hexod_agent_weights_v2",
     "version": 4,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-31T01:00:00Z",
+    "last_updated": "2026-03-31T02:00:00Z",
     "session": 19,
     "total_patterns": 24,
     "total_weights": 87,
-    "total_icons": 98,
+    "total_icons": 153,
     "total_components": 54,
     "total_commits": 23,
     "theme_migration": "COMPLETE",
@@ -700,23 +700,17 @@
     "reason": "AnimatePresence exit must complete before new panel enters"
   },
   "icon_bank": {
-    "total": 98,
-    "category_icons": 48,
-    "resource_icons": 25,
-    "ui_icons": 5,
-    "misc_icons": 20,
-    "format": "SVG 256x256 viewBox, circle bg + centered symbol",
-    "naming": {
-      "category": "earthquake, city, volcano...",
-      "resource": "res_fer, res_petrole...",
-      "ui": "ui_combat, ui_kingdom..."
+    "total": 153,
+    "categories": {
+      "poi_icons": "~90 (earthquake, city, monument, etc.)",
+      "resource_icons": "20 (res_fer, res_petrole, etc.)",
+      "skill_tree_icons": "42 (atk0-5, def0-5, eco0-5, etc.)",
+      "ui_icons": "5 (ui_combat, ui_kingdom, etc.)",
+      "safari_targets": "11 (trex, raptor, fungus, eagle, whale, orchid, stego, phoenix, dinosaur, dragon, alien)",
+      "shop_ui": "11 (potion, shield_item, booster, luck, safari_radar, auction_gavel, hex_coin, event_ticket, daily_task, referral, streak)",
+      "biomes": "6 (urban, rural, coastal, tundra, industrial, landmark)"
     },
-    "helpers": [
-      "getIcon(id)",
-      "IconSVG({id,size})",
-      "getResourceIcon(resId)",
-      "ResourceIconSVG({resourceId,size})"
-    ]
+    "format": "256x256 viewBox with circle bg + g transform wrapper for POI icons, 24x24 for skill tree"
   },
   "shared_components": {
     "CrystalIcon": "SVG diamond #7950f2, sizes sm/md/lg/xl",
