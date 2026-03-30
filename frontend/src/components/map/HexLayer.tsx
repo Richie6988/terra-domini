@@ -47,10 +47,10 @@ export function makeGridHex(h3Index: string, map: L.Map): L.Polygon | null {
   if (pts.length === 0) return null
 
   return L.polygon(pts as L.LatLngTuple[], {
-    fillColor: '#fff',
-    fillOpacity: 0.02,
-    color: 'rgba(0,153,204,0.08)',
-    weight: 0.5,
+    fillColor: '#0099cc',
+    fillOpacity: 0.03,
+    color: 'rgba(0,153,204,0.18)',
+    weight: 1,
     interactive: false,
   })
 }

@@ -323,12 +323,12 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     const drawGrid = () => {
       grid.clearLayers()
       const z = map.getZoom()
-      if (z < 12) return // Show grid from zoom 12+
+      if (z < 10) return // Show grid from zoom 10+
 
       const center = map.getCenter()
-      // Resolution scales with zoom: z12-13→res7, z14→res8, z15→res9, z16+→res10
-      const res = z >= 16 ? 10 : z >= 15 ? 9 : z >= 14 ? 8 : 7
-      const radiusKm = z >= 16 ? 0.3 : z >= 15 ? 0.8 : z >= 14 ? 2.0 : 5.0
+      // Resolution scales with zoom: z10-11→res6, z12-13→res7, z14→res8, z15→res9, z16+→res10
+      const res = z >= 16 ? 10 : z >= 15 ? 9 : z >= 14 ? 8 : z >= 12 ? 7 : 6
+      const radiusKm = z >= 16 ? 0.3 : z >= 15 ? 0.8 : z >= 14 ? 2.0 : z >= 12 ? 5.0 : 15.0
       const hexes = getVisibleHexes(center.lat, center.lng, radiusKm, res)
 
       // Only draw hexes NOT already in territories (avoid double-rendering)
@@ -359,10 +359,9 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       {/* Global styles */}
       <style>{`
-        .td-tooltip{background:rgba(5,5,15,0.97)!important;border:1px solid rgba(255,255,255,0.15)!important;border-radius:10px!important;color:#fff!important;padding:8px 12px!important;box-shadow:0 4px 32px rgba(0,0,0,0.7)!important;}
+        .td-tooltip{background:rgba(235,242,250,0.97)!important;border:1px solid rgba(0,60,100,0.15)!important;border-radius:10px!important;color:#1a2a3a!important;padding:8px 12px!important;box-shadow:0 4px 20px rgba(0,0,0,0.15)!important;font-family:'Orbitron',system-ui,sans-serif!important;font-size:9px!important;letter-spacing:1px!important;}
         .td-tooltip::before{display:none!important;}
         .leaflet-container{cursor:crosshair;background:#e8eef5;}
-        /* Neon glow via CSS filter — works on SVG paths */
         .td-hex-own path{filter:drop-shadow(0 0 6px rgba(0,255,135,0.8))!important;}
         .td-hex-tower path{filter:drop-shadow(0 0 8px rgba(255,184,0,0.9))!important;animation:td-pulse 2s ease-in-out infinite;}
         .td-hex-enemy path{filter:drop-shadow(0 0 4px rgba(99,145,255,0.6))!important;}
@@ -378,20 +377,19 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         @keyframes hexPulseEpic{0%,100%{filter:drop-shadow(0 0 5px #8B5CF6aa);}50%{filter:drop-shadow(0 0 12px #8B5CF6ff);}}
       `}</style>
 
-      {/* Layer controls — top right */}
+      {/* Layer controls — top right, glassmorphism */}
       <div style={{ position:'absolute', top:70, right:12, zIndex:500, display:'flex', flexDirection:'column', gap:6 }}>
-        {/* Tile switcher */}
-        <div style={{ background:'rgba(0,0,0,0.88)', borderRadius:10, border:'1px solid rgba(255,255,255,0.1)', overflow:'hidden' }}>
+        <div style={{ background:'rgba(235,242,250,0.92)', backdropFilter:'blur(20px)', borderRadius:10, border:'1px solid rgba(0,60,100,0.12)', overflow:'hidden', boxShadow:'0 4px 16px rgba(0,0,0,0.08)' }}>
           {(Object.entries(TILES) as any[]).map(([key, cfg]) => (
             <button key={key} onClick={() => setTile(key)} style={{
               display:'block', width:'100%', padding:'8px 12px',
-              background: tile===key ? 'rgba(0,255,135,0.12)' : 'transparent',
-              border:'none', borderBottom:'1px solid rgba(255,255,255,0.05)',
-              color: tile===key ? '#00FF87' : '#9CA3AF', fontSize:11, cursor:'pointer', textAlign:'left',
+              background: tile===key ? 'rgba(0,153,204,0.1)' : 'transparent',
+              border:'none', borderBottom:'1px solid rgba(0,60,100,0.06)',
+              color: tile===key ? '#0099cc' : 'rgba(26,42,58,0.5)', fontSize:10, cursor:'pointer', textAlign:'left',
+              fontFamily:"'Orbitron',system-ui,sans-serif", fontWeight: tile===key ? 700 : 400, letterSpacing:1,
             }}>{cfg.label}</button>
           ))}
         </div>
-        {/* Toggle */}
         <ToggleBtn label="⬡ Zones" active={showHex} onClick={() => setShowHex(v=>!v)} />
       </div>
 
@@ -436,7 +434,7 @@ function MapBtn({ onClick, children }: { onClick: () => void; children: React.Re
   const [h, setH] = useState(false)
   return (
     <button onClick={onClick} onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
-      style={{ width:36, height:36, borderRadius:8, background: h ? 'rgba(0,255,135,0.15)' : 'rgba(0,0,0,0.88)', border:'1px solid rgba(255,255,255,0.12)', color:'#E5E7EB', fontSize:18, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.15s' }}>
+      style={{ width:36, height:36, borderRadius:8, background: h ? 'rgba(0,153,204,0.12)' : 'rgba(235,242,250,0.92)', backdropFilter:'blur(20px)', border:'1px solid rgba(0,60,100,0.12)', color:'#1a2a3a', fontSize:18, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.15s', boxShadow:'0 2px 8px rgba(0,0,0,0.06)' }}>
       {children}
     </button>
   )
@@ -444,9 +442,9 @@ function MapBtn({ onClick, children }: { onClick: () => void; children: React.Re
 
 function ToggleBtn({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
-    <button onClick={onClick} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 12px', gap:10, background:'rgba(0,0,0,0.88)', border:'1px solid rgba(255,255,255,0.1)', borderRadius:10, color: active ? '#fff' : '#4B5563', fontSize:11, cursor:'pointer', whiteSpace:'nowrap' }}>
+    <button onClick={onClick} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 12px', gap:10, background:'rgba(235,242,250,0.92)', backdropFilter:'blur(20px)', border:'1px solid rgba(0,60,100,0.12)', borderRadius:10, color: active ? '#1a2a3a' : 'rgba(26,42,58,0.4)', fontSize:10, cursor:'pointer', whiteSpace:'nowrap', fontFamily:"'Orbitron',system-ui,sans-serif", letterSpacing:1, boxShadow:'0 2px 8px rgba(0,0,0,0.06)' }}>
       <span>{label}</span>
-      <span style={{ width:28, height:16, borderRadius:8, background: active ? '#00FF87' : 'rgba(255,255,255,0.1)', display:'flex', alignItems:'center', padding:2, transition:'background 0.2s', flexShrink:0 }}>
+      <span style={{ width:28, height:16, borderRadius:8, background: active ? '#0099cc' : 'rgba(0,60,100,0.1)', display:'flex', alignItems:'center', padding:2, transition:'background 0.2s', flexShrink:0 }}>
         <span style={{ width:12, height:12, borderRadius:'50%', background:'#fff', transform: active ? 'translateX(12px)' : 'none', transition:'transform 0.2s' }} />
       </span>
     </button>

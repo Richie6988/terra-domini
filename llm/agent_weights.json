@@ -3,7 +3,7 @@
     "format": "hexod_agent_weights_v2",
     "version": 3,
     "description": "Complete cognitive architecture for HEXOD lead engineer agent. Exhaustive decision weights, pattern recognition, routing tables, design system, and project knowledge graph.",
-    "last_updated": "2026-03-30T17:00:00Z",
+    "last_updated": "2026-03-30T16:00:00Z",
     "session": 18,
     "total_patterns": 24,
     "total_weights": 87,
@@ -1119,5 +1119,24 @@
         "crystalType (gem type per branch, not currency)"
       ]
     }
+  },
+  "map_config": {
+    "default_center": [
+      48.8566,
+      2.3522
+    ],
+    "default_zoom": 13,
+    "tile": "light (Carto Voyager)",
+    "grid_visible_from": "zoom 10 (was 12)",
+    "grid_resolution": "z10-11→res6, z12-13→res7, z14→res8, z15→res9, z16+→res10",
+    "controls": "light glassmorphism (was dark)",
+    "tooltips": "light glassmorphism (was dark)",
+    "landmarks_seeded": [
+      "Notre-Dame (legendary,shiny)",
+      "Tour Eiffel (mythic,shiny)",
+      "Louvre (legendary)",
+      "Arc de Triomphe (epic)",
+      "Sacré-Cœur (epic)"
+    ]
   }
 }
