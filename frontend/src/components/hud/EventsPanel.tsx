@@ -1,195 +1,187 @@
 /**
- * EventsPanel — Control Tower Wars, World POI events, global leaderboard.
+ * EventsPanel — Daily Events Mode.
+ * News/sport/world events create special tokens.
+ * Register → luck skill impacts loot → tap to reveal result.
+ * 3 tabs: 🔴 Live | ⏳ Upcoming | 🎁 My Results
  */
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { motion } from 'framer-motion'
-import { api } from '../../services/api'
+import { motion, AnimatePresence } from 'framer-motion'
 import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
 
-function TimeUntil({ date }: { date: string }) {
-  const diff = new Date(date).getTime() - Date.now()
-  if (diff <= 0) return <span style={{ color: '#EF4444', fontSize: 12 }}>Active now</span>
-  const h = Math.floor(diff / 3600000)
-  const m = Math.floor((diff % 3600000) / 60000)
-  return <span style={{ color: '#F59E0B', fontSize: 12 }}>{h > 0 ? `${h}h ${m}m` : `${m}m`}</span>
-}
+interface Props { onClose: () => void }
+const TABS = [
+  { id: 'live', label: '🔴 Live' },
+  { id: 'upcoming', label: '⏳ Upcoming' },
+  { id: 'results', label: '🎁 My Results' },
+]
 
-function TowerCard({ tower, onRegister }: { tower: any; onRegister: (id: string) => void }) {
-  const statusColors: Record<string, string> = { scheduled: '#cc8800', active: '#dc2626', completed: '#00884a' }
-  const color = statusColors[tower.status] ?? 'rgba(26,42,58,0.45)'
-  return (
-    <div style={{ background: 'rgba(255,255,255,0.5)', border: `1px solid ${color}30`, borderRadius: 8, padding: '14px 16px', marginBottom: 10 }}>
-      <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-        <div style={{ fontSize: 28, lineHeight: 1 }}>🗼</div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: '#1a2a3a', marginBottom: 4, letterSpacing: 1 }}>{tower.territory_name}</div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 8, padding: '2px 8px', borderRadius: 20, background: `${color}12`, color, fontFamily: "'Share Tech Mono', monospace", letterSpacing: 1 }}>
-              {tower.status.toUpperCase()}
-            </span>
-            {tower.status === 'scheduled' && <TimeUntil date={tower.starts_at} />}
-            {tower.status === 'active' && <span style={{ fontSize: 9, color: '#dc2626' }}>ENDS <TimeUntil date={tower.ends_at} /></span>}
-            <span style={{ fontSize: 9, color: 'rgba(26,42,58,0.45)' }}>{tower.participant_count ?? 0} participants</span>
-          </div>
-          {tower.winner && (
-            <div style={{ fontSize: 9, color: '#cc8800', letterSpacing: 1 }}>🏆 WON BY [{tower.winner.tag}]</div>
-          )}
-          {(tower.status === 'scheduled' || tower.status === 'registration_open' || tower.status === 'pending') && !tower.my_alliance_registered && (
-            <button onClick={() => onRegister(tower.id)} style={{
-              marginTop: 6, padding: '6px 14px', background: 'rgba(0,136,74,0.08)', border: '1px solid rgba(0,136,74,0.2)',
-              borderRadius: 20, color: '#00884a', fontSize: 8, cursor: 'pointer', fontWeight: 700, letterSpacing: 1,
-              fontFamily: "'Orbitron', system-ui, sans-serif",
-            }}>
-              REGISTER ALLIANCE
-            </button>
-          )}
-          {tower.my_alliance_registered && (
-            <div style={{ fontSize: 9, color: '#00884a', marginTop: 6, letterSpacing: 1 }}>✓ ALLIANCE REGISTERED</div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
+const LIVE = [
+  { id:'e1', icon:'🌋', name:'VOLCANIC ERUPTION', loc:'ICELAND', reg:45, max:100, cost:50, color:'#dc2626', mine:false },
+  { id:'e2', icon:'⚽', name:'CHAMPIONS LEAGUE FINAL', loc:'LONDON', reg:312, max:500, cost:75, color:'#3b82f6', mine:true },
+]
+const UPCOMING = [
+  { id:'u1', icon:'🌊', name:'TSUNAMI WARNING', loc:'PACIFIC RIM', time:'02:45:12', color:'#f97316', soon:true },
+  { id:'u2', icon:'🚀', name:'SATELLITE LAUNCH', loc:'CAPE CANAVERAL', time:'08:12:00', color:'#0099cc', soon:false },
+  { id:'u3', icon:'⚽', name:'WORLD CUP QUALIFIER', loc:'PARIS', time:'2D 14:00', color:'#22c55e', soon:false },
+]
+const RESULTS = [
+  { id:'r1', icon:'⚡', name:'SOLAR STORM', rarity:'RARE', rc:'#a855f7', serial:47, status:'won' as const },
+  { id:'r2', icon:'🌪', name:'TORNADO OUTBREAK', rarity:'COMMON', rc:'#64748b', serial:12, status:'won' as const },
+  { id:'r3', icon:'🌋', name:'VOLCANIC ERUPTION', rarity:'', rc:'', serial:0, status:'pending' as const },
+]
 
-function POICard({ poi }: { poi: any }) {
-  const threatColors: Record<string, string> = { critical: '#dc2626', high: '#f97316', medium: '#cc8800', low: '#2563eb' }
-  const color = threatColors[poi.threat_level] ?? 'rgba(26,42,58,0.45)'
-  const effects = poi.effects?.resource_multipliers ?? {}
+export function EventsPanel({ onClose }: Props) {
+  const [tab, setTab] = useState('live')
+  const [revealed, setRevealed] = useState<Set<string>>(new Set())
+  const [regging, setRegging] = useState<string|null>(null)
+
+  const doRegister = (id: string, cost: number) => {
+    setRegging(id)
+    setTimeout(() => { toast.success(`Registered! -${cost} HEX · Good luck!`); setRegging(null) }, 800)
+  }
+  const doReveal = (id: string) => {
+    setRevealed(p => new Set(p).add(id))
+    const r = RESULTS.find(x => x.id === id)
+    if (r?.status === 'won') toast.success(`${r.rarity} TOKEN won! Added to Codex.`)
+  }
+
+  const OrbFont = "'Orbitron', system-ui, sans-serif"
 
   return (
-    <div style={{ background: 'rgba(255,255,255,0.5)', border: `1px solid ${color}30`, borderRadius: 8, padding: '14px 16px', marginBottom: 10 }}>
-      <div style={{ display: 'flex', gap: 10, marginBottom: 8 }}>
-        <span style={{ fontSize: 22 }}>{poi.icon_emoji ?? '🔥'}</span>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: '#1a2a3a', letterSpacing: 1 }}>{poi.name}</div>
-          <span style={{ fontSize: 8, padding: '2px 7px', borderRadius: 20, background: `${color}12`, color, fontFamily: "'Share Tech Mono', monospace", letterSpacing: 1 }}>
-            {poi.threat_level?.toUpperCase()}
-          </span>
-        </div>
-      </div>
-      <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.6)', lineHeight: 1.6, marginBottom: 8 }}>{poi.description?.slice(0, 120)}…</div>
-      {Object.keys(effects).length > 0 && (
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {Object.entries(effects).map(([k, v]: [string, any]) => (
-            <span key={k} style={{
-              fontSize: 8, padding: '2px 8px', borderRadius: 20,
-              background: v < 1 ? 'rgba(220,38,38,0.08)' : 'rgba(0,136,74,0.08)',
-              color: v < 1 ? '#dc2626' : '#00884a', fontFamily: "'Share Tech Mono', monospace", letterSpacing: 1,
-            }}>
-              {k} {v < 1 ? `−${Math.round((1 - v) * 100)}%` : `×${v}`}
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-function SectionLabel({ emoji, label, color }: { emoji: string; label: string; color: string }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 0 4px', marginTop: 4 }}>
-      <span style={{ fontSize: 14 }}>{emoji}</span>
-      <span style={{ fontSize: 9, fontWeight: 700, color, letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>{label}</span>
-    </div>
-  )
-}
-
-
-export function EventsPanel({ onClose }: { onClose: () => void }) {
-  const [tab, setTab] = useState<'towers' | 'world'>('towers')
-  const qc = useQueryClient()
-
-  const { data: towersData } = useQuery({
-    queryKey: ['control-towers'],
-    queryFn: () => api.get('/control-towers/').then(r => r.data?.results ?? r.data ?? []),
-    refetchInterval: 30000,
-  })
-
-  const { data: pois } = useQuery({
-    queryKey: ['world-pois'],
-    queryFn: () => api.get('/pois/?status=active').then(r => r.data?.results ?? r.data ?? []),
-    staleTime: 60000,
-  })
-
-  const registerMut = useMutation({
-    mutationFn: (id: string) => api.post(`/control-towers/${id}/register/`),
-    onSuccess: () => { toast.success(data?.data?.message || 'Registered for Tower War! ⚔️'); qc.invalidateQueries({ queryKey: ['control-towers'] }) },
-    onError: (e: any) => {
-      const msg = e.response?.data?.error || 'Registration failed'
-      if (msg.includes('alliance')) {
-        toast.error('⚔️ ' + msg + ' — or register solo below')
-      } else {
-        toast.error(msg)
-      }
-    },
-  })
-
-  const towers = Array.isArray(towersData) ? towersData : []
-  const active = towers.filter((t: any) => t.status === 'active')
-  const scheduled = towers.filter((t: any) => t.status === 'scheduled')
-  const completed = (towers ?? []).filter((t: any) => t.status === 'completed').slice(0, 5)
-
-  return (
-    <GlassPanel title="EVENTS" onClose={onClose} accent="#f97316">
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 14 }}>
-        {[{ id: 'towers', label: `TOWERS (${towers.length})` }, { id: 'world', label: `WORLD (${(pois as any[])?.length ?? 0})` }].map(t => (
-          <button key={t.id} onClick={() => setTab(t.id as any)} style={{
-            flex: 1, padding: '7px', borderRadius: 20, cursor: 'pointer',
-            fontSize: 8, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
-            background: tab === t.id ? 'rgba(249,115,22,0.12)' : 'rgba(255,255,255,0.5)',
-            color: tab === t.id ? '#f97316' : 'rgba(26,42,58,0.45)',
-            fontFamily: "'Orbitron', system-ui, sans-serif",
-            border: `1px solid ${tab === t.id ? 'rgba(249,115,22,0.3)' : 'rgba(0,60,100,0.1)'}`,
+    <GlassPanel title="ACTIVE EVENTS" onClose={onClose} accent="#f97316" width={440}>
+      <div style={{ display:'flex', gap:4, marginBottom:14 }}>
+        {TABS.map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{
+            flex:1, padding:'7px', borderRadius:20, cursor:'pointer',
+            fontSize:7, fontWeight:tab===t.id?700:500, letterSpacing:1,
+            background:tab===t.id?'rgba(249,115,22,0.1)':'rgba(255,255,255,0.5)',
+            color:tab===t.id?'#f97316':'rgba(26,42,58,0.45)',
+            fontFamily:OrbFont,
+            border:`1px solid ${tab===t.id?'rgba(249,115,22,0.3)':'rgba(0,60,100,0.1)'}`,
           }}>{t.label}</button>
         ))}
       </div>
 
-      {tab === 'towers' && (
-        <div>
-          {active.length > 0 && (
-            <>
-              <SectionLabel emoji="⚡" label="Active Now" color="#dc2626" />
-              {active.map((t: any) => <TowerCard key={t.id} tower={t} onRegister={id => registerMut.mutate(id)} />)}
-            </>
-          )}
-          {scheduled.length > 0 && (
-            <>
-              <SectionLabel emoji="⏰" label="Upcoming" color="#cc8800" />
-              {scheduled.map((t: any) => <TowerCard key={t.id} tower={t} onRegister={id => registerMut.mutate(id)} />)}
-            </>
-          )}
-          {completed.length > 0 && (
-            <>
-              <SectionLabel emoji="📜" label="Recent Results" color="rgba(26,42,58,0.45)" />
-              {completed.map((t: any) => <TowerCard key={t.id} tower={t} onRegister={() => {}} />)}
-            </>
-          )}
-          {towers.length === 0 && (
-            <div style={{ textAlign: 'center', padding: '40px 0' }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🗼</div>
-              <div style={{ fontSize: 10, color: '#1a2a3a', letterSpacing: 2 }}>NO TOWER EVENTS YET</div>
-              <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.45)', marginTop: 6 }}>Events are scheduled 3× daily</div>
+      <AnimatePresence mode="wait">
+        {tab === 'live' && (
+          <motion.div key="live" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+            {LIVE.map(ev => (
+              <div key={ev.id} style={{ padding:16, borderRadius:12, marginBottom:12,
+                background:`linear-gradient(135deg,${ev.color}08,rgba(0,0,0,0.02))`,
+                border:`1px solid ${ev.color}30`,
+              }}>
+                <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:10 }}>
+                  <div>
+                    <div style={{ fontSize:12, fontWeight:900, color:ev.color, letterSpacing:2, fontFamily:OrbFont }}>{ev.icon} {ev.name}</div>
+                    <div style={{ fontSize:8, color:'rgba(26,42,58,0.45)', marginTop:2 }}>{ev.loc} · {ev.reg}/{ev.max} REGISTERED</div>
+                  </div>
+                  <span style={{ background:ev.color, color:'#fff', padding:'4px 10px', fontSize:7, borderRadius:4, fontWeight:700, letterSpacing:1, fontFamily:OrbFont }}>LIVE</span>
+                </div>
+                <div style={{ fontSize:8, color:'rgba(26,42,58,0.5)', lineHeight:1.6, fontFamily:'system-ui', marginBottom:12 }}>
+                  Register to participate. One rare hexagonal token is at stake! After registration, come back later — you'll discover if you won and the rarity level as a surprise.
+                </div>
+                <div style={{ textAlign:'center', margin:'12px 0' }}>
+                  <div style={{ width:64, height:64, margin:'0 auto',
+                    clipPath:'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)',
+                    background:`linear-gradient(135deg,${ev.color},${ev.color}88)`,
+                    display:'flex', alignItems:'center', justifyContent:'center', fontSize:28,
+                    boxShadow:`0 0 25px ${ev.color}40`,
+                  }}>{ev.icon}</div>
+                  <div style={{ fontSize:9, fontWeight:900, color:ev.color, marginTop:8, letterSpacing:2, fontFamily:OrbFont }}>1 HEX TOKEN AT STAKE</div>
+                  <div style={{ fontSize:7, color:'rgba(26,42,58,0.4)', marginTop:2 }}>Rarity: ??? — Revealed after event closes</div>
+                </div>
+                <div style={{ display:'flex', gap:8 }}>
+                  {ev.mine ? (
+                    <div style={{ flex:1, padding:'10px', borderRadius:10, textAlign:'center',
+                      background:'rgba(0,136,74,0.08)', border:'1px solid rgba(0,136,74,0.2)',
+                      fontSize:8, fontWeight:700, color:'#00884a', letterSpacing:2, fontFamily:OrbFont,
+                    }}>✅ REGISTERED — WAITING</div>
+                  ) : (
+                    <button onClick={() => doRegister(ev.id, ev.cost)} disabled={regging===ev.id} style={{
+                      flex:1, padding:'10px', borderRadius:10, cursor:'pointer',
+                      background:ev.color, border:'none', color:'#fff',
+                      fontSize:8, fontWeight:900, letterSpacing:2, fontFamily:OrbFont,
+                      opacity:regging===ev.id?0.6:1,
+                    }}>{regging===ev.id?'⏳...':  `REGISTER (${ev.cost} HEX)`}</button>
+                  )}
+                  <button style={{ padding:'10px 16px', borderRadius:10, cursor:'pointer',
+                    background:'rgba(255,255,255,0.5)', border:'1px solid rgba(0,60,100,0.1)',
+                    fontSize:8, fontWeight:600, color:'rgba(26,42,58,0.5)', fontFamily:OrbFont,
+                  }}>RULES</button>
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        )}
+
+        {tab === 'upcoming' && (
+          <motion.div key="up" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+            {UPCOMING.map(ev => (
+              <div key={ev.id} style={{
+                display:'flex', justifyContent:'space-between', alignItems:'center',
+                padding:'14px 16px', borderRadius:10, marginBottom:8,
+                background:'rgba(255,255,255,0.5)', border:'1px solid rgba(0,60,100,0.1)',
+              }}>
+                <div>
+                  <div style={{ fontSize:10, fontWeight:900, color:ev.color, letterSpacing:1, fontFamily:OrbFont }}>{ev.icon} {ev.name}</div>
+                  <div style={{ fontSize:8, color:'rgba(26,42,58,0.4)', marginTop:2 }}>{ev.loc} · IN {ev.time}</div>
+                </div>
+                <span style={{
+                  padding:'4px 10px', borderRadius:4,
+                  background:ev.soon?`${ev.color}15`:'transparent',
+                  color:ev.soon?ev.color:'rgba(26,42,58,0.4)',
+                  fontSize:7, fontWeight:700, letterSpacing:1, fontFamily:OrbFont,
+                }}>{ev.soon?'SOON':'UPCOMING'}</span>
+              </div>
+            ))}
+          </motion.div>
+        )}
+
+        {tab === 'results' && (
+          <motion.div key="res" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}>
+            <div style={{ fontSize:8, fontWeight:700, letterSpacing:2, color:'rgba(26,42,58,0.35)', marginBottom:10, fontFamily:OrbFont }}>
+              🎁 TAP TO REVEAL YOUR TOKENS
             </div>
-          )}
-        </div>
-      )}
-      {tab === 'world' && (
-        <div>
-          {(pois as any[] ?? []).length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px 0' }}>
-              <div style={{ fontSize: 40, marginBottom: 12 }}>🌍</div>
-              <div style={{ fontSize: 10, color: '#1a2a3a', letterSpacing: 2 }}>NO ACTIVE WORLD EVENTS</div>
-              <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.45)', marginTop: 6 }}>World events reflect real geopolitical news</div>
-            </div>
-          ) : (
-            (pois as any[]).map((p: any) => <POICard key={p.id} poi={p} />)
-          )}
-        </div>
-      )}
+            {RESULTS.map(ev => {
+              const isRevealed = revealed.has(ev.id)
+              return (
+                <div key={ev.id} onClick={() => ev.status==='won'&&!isRevealed&&doReveal(ev.id)} style={{
+                  display:'flex', alignItems:'center', gap:12,
+                  padding:'14px 16px', borderRadius:10, marginBottom:8,
+                  background:ev.status==='pending'?'rgba(0,60,100,0.02)':'rgba(255,255,255,0.5)',
+                  border:`1px solid ${ev.status==='won'?'rgba(0,136,74,0.2)':'rgba(0,60,100,0.08)'}`,
+                  cursor:ev.status==='won'&&!isRevealed?'pointer':'default',
+                  opacity:ev.status==='pending'?0.5:1,
+                }}>
+                  {ev.status==='won'&&!isRevealed ? (
+                    <><div style={{flex:1}}>
+                      <div style={{fontSize:10,fontWeight:900,color:'#1a2a3a',letterSpacing:1,fontFamily:OrbFont}}>{ev.icon} {ev.name} — WON!</div>
+                      <div style={{fontSize:8,color:'rgba(26,42,58,0.4)',marginTop:2}}>Tap to reveal...</div>
+                    </div><div style={{fontSize:24}}>🎁</div></>
+                  ) : ev.status==='won'&&isRevealed ? (
+                    <><div style={{
+                      width:44,height:44,flexShrink:0,
+                      clipPath:'polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%)',
+                      background:`linear-gradient(135deg,${ev.rc},${ev.rc}88)`,
+                      display:'flex',alignItems:'center',justifyContent:'center',fontSize:22,
+                    }}>{ev.icon}</div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:10,fontWeight:900,color:ev.rc,letterSpacing:1,fontFamily:OrbFont}}>✨ {ev.rarity} TOKEN!</div>
+                      <div style={{fontSize:8,color:'rgba(26,42,58,0.4)',marginTop:2}}>{ev.name} #{String(ev.serial).padStart(3,'0')} — Added to Codex</div>
+                    </div></>
+                  ) : (
+                    <><div style={{flex:1}}>
+                      <div style={{fontSize:10,fontWeight:700,color:'rgba(26,42,58,0.4)',fontFamily:OrbFont}}>{ev.icon} {ev.name}</div>
+                      <div style={{fontSize:8,color:'rgba(26,42,58,0.3)',marginTop:2}}>Pending — event still active</div>
+                    </div><span style={{fontSize:7,color:'#cc8800',fontWeight:700,letterSpacing:1,fontFamily:OrbFont}}>⏳ PENDING</span></>
+                  )}
+                </div>
+              )
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </GlassPanel>
   )
 }
