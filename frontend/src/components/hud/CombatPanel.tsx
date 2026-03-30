@@ -1,354 +1,393 @@
 /**
- * CombatPanel — Military command center.
- * Train units with real training time progress bars.
- * New units: Spy, Engineer, Medic, Commander.
+ * CombatPanel — Military Command Center.
+ * 5-tab structure from main_prototype.html:
+ *   ⚔ Recruit — Purchase units (6 types, crystal cost)
+ *   🏋 Train — Training queue with progress bars
+ *   📍 Deploy — Assign units to kingdoms
+ *   🔥 War Room — Active battles, threats, distant warfare
+ *   📊 History — Battle log, stats
  */
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
 import { useKingdomStore } from '../../store/kingdomStore'
-import { getBranchProgress, SKILL_BRANCHES } from '../../types/kingdom.types'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
 
+// ── Unit types (from prototype) ──
 const UNITS = [
-  { key: 'infantry',   emoji: '⚔️',  name: 'Infantry',   cost: 50,  atk: 10, def: 8,  speed: 'Fast',   trainMins: 5,  desc: 'Basic ground troops. Fast to deploy.' },
-  { key: 'cavalry',    emoji: '🐎',  name: 'Cavalry',    cost: 120, atk: 25, def: 12, speed: 'V.Fast', trainMins: 10, desc: 'Mobile strike force. Bonus vs infantry.' },
-  { key: 'artillery',  emoji: '💣',  name: 'Artillery',  cost: 200, atk: 45, def: 5,  speed: 'Slow',   trainMins: 20, desc: 'Siege weapon. Destroys fortifications.' },
-  { key: 'spy',        emoji: '🕵️',  name: 'Spy',        cost: 150, atk: 15, def: 3,  speed: 'V.Fast', trainMins: 8,  desc: 'Reveals enemy positions. Intel bonus.' },
-  { key: 'engineer',   emoji: '🔧',  name: 'Engineer',   cost: 180, atk: 8,  def: 15, speed: 'Medium', trainMins: 8,  desc: 'Builds fortifications. Defense +20%.' },
-  { key: 'medic',      emoji: '🏥',  name: 'Medic',      cost: 100, atk: 2,  def: 5,  speed: 'Medium', trainMins: 5,  desc: 'Reduces casualties. Unit recovery.' },
-  { key: 'naval',      emoji: '⚓',  name: 'Naval',      cost: 300, atk: 35, def: 30, speed: 'Medium', trainMins: 15, desc: 'Controls coastal territories.' },
-  { key: 'commander',  emoji: '🎖️',  name: 'Commander',  cost: 500, atk: 60, def: 40, speed: 'Medium', trainMins: 60, desc: 'Boosts all units +25%. Rare.' },
+  { key: 'infantry',  icon: '⚔', name: 'INFANTRY',  cost: 5,   atk: 10, def: 8,  color: '#64748b', owned: 1240 },
+  { key: 'naval',     icon: '🚢', name: 'NAVAL',     cost: 15,  atk: 35, def: 30, color: '#3b82f6', owned: 480 },
+  { key: 'aerial',    icon: '✈',  name: 'AERIAL',    cost: 25,  atk: 45, def: 15, color: '#8b5cf6', owned: 320 },
+  { key: 'engineer',  icon: '🔧', name: 'ENGINEER',  cost: 20,  atk: 8,  def: 20, color: '#f59e0b', owned: 120 },
+  { key: 'medic',     icon: '+',  name: 'MEDIC',     cost: 30,  atk: 2,  def: 5,  color: '#10b981', owned: 85 },
+  { key: 'spy',       icon: '👁', name: 'SPY',       cost: 100, atk: 15, def: 3,  color: '#ec4899', owned: 24 },
 ]
 
-type TrainingOrder = {
-  unit_type: string; quantity: number; tdc_spent: number
-  train_seconds: number; ready_at: string; started_at: string
-}
+// ── Training queue items ──
+const TRAIN_QUEUE = [
+  { unit: 'infantry', batch: 50, done: 42, timeLeft: '02:14:30', active: true },
+  { unit: 'naval', batch: 10, done: 0, cost: '500 Wood + 200 Steel + 1000 Energy', active: false },
+  { unit: 'aerial', batch: 5, done: 0, cost: '300 Steel + 50 Uranium + 2000 Energy', active: false },
+  { unit: 'spy', batch: 1, done: 0, cost: '100 Steel + 20 Uranium + 5000 Energy', active: false },
+]
 
-function TrainingQueue({ orders, onComplete }: { orders: TrainingOrder[]; onComplete: () => void }) {
-  if (!orders.length) return null
-  return (
-    <div style={{ marginBottom: 16 }}>
-      <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>⏳ Training Queue</div>
-      {orders.map((o, i) => {
-        const unit = UNITS.find(u => u.key === o.unit_type)
-        const total = o.train_seconds * 1000
-        const elapsed = Date.now() - new Date(o.started_at).getTime()
-        const pct = Math.min(100, (elapsed / total) * 100)
-        const remaining = Math.max(0, Math.ceil((total - elapsed) / 1000))
-        const mins = Math.floor(remaining / 60), secs = remaining % 60
-        const done = pct >= 100
+// ── Mock battle history ──
+const BATTLE_HISTORY = [
+  { result: 'WIN',  enemy: 'DARK_OVERLORD', hex: '+12', time: '2h ago' },
+  { result: 'LOSS', enemy: 'NEXUS_LORD',    hex: '-3',  time: '5h ago' },
+  { result: 'WIN',  enemy: 'ICE_PHANTOM',   hex: '+8',  time: '1d ago' },
+  { result: 'WIN',  enemy: 'SAND_WRAITH',   hex: '+5',  time: '2d ago' },
+  { result: 'LOSS', enemy: 'EMPEROR_VEX',   hex: '-15', time: '3d ago' },
+]
 
-        return (
-          <div key={i} style={{ background: done ? 'rgba(0,136,74,0.08)' : 'rgba(255,255,255,0.03)', border: `1px solid ${done ? 'rgba(0,136,74,0.3)' : 'rgba(0,60,100,0.1)'}`, borderRadius: 10, padding: '10px 14px', marginBottom: 8 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <span style={{ fontSize: 13, color: '#1a2a3a' }}>{unit?.emoji} {o.quantity}× {unit?.name ?? o.unit_type}</span>
-              <span style={{ fontSize: 11, color: done ? '#00884a' : '#F59E0B', fontFamily: 'monospace' }}>
-                {done ? '✅ Ready!' : `${mins}m ${secs}s`}
-              </span>
-            </div>
-            <div style={{ height: 4, background: 'rgba(0,60,100,0.1)', borderRadius: 2, overflow: 'hidden' }}>
-              <motion.div animate={{ width: `${pct}%` }} transition={{ duration: 1 }}
-                style={{ height: '100%', background: done ? '#00884a' : 'linear-gradient(90deg, #F59E0B, #EF4444)', borderRadius: 2 }} />
-            </div>
-            {done && (
-              <button onClick={onComplete} style={{ marginTop: 8, width: '100%', padding: '6px', background: 'rgba(0,136,74,0.12)', border: '1px solid rgba(0,136,74,0.3)', borderRadius: 6, color: '#00884a', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}>
-                Collect Units
-              </button>
-            )}
-          </div>
-        )
-      })}
-    </div>
-  )
-}
+const TABS = [
+  { id: 'recruit', label: '⚔ RECRUIT' },
+  { id: 'train',   label: '🏋 TRAIN' },
+  { id: 'deploy',  label: '📍 DEPLOY' },
+  { id: 'warroom', label: '🔥 WAR ROOM' },
+  { id: 'history', label: '📊 HISTORY' },
+]
 
-const TABS = [{ id: 'active', label: '⚔️ Active' }, { id: 'train', label: '🪖 Train' }, { id: 'history', label: '📋 History' }]
-const STATUS_COLOR: Record<string, string> = { preparing: '#F59E0B', active: '#EF4444', resolving: '#8B5CF6', completed: '#10B981', cancelled: '#4B5563' }
-const RESULT_COLOR: Record<string, string> = { attacker: '#00884a', defender: '#EF4444', draw: '#F59E0B' }
+interface Props { onClose: () => void }
 
-export function CombatPanel({ onClose }: { onClose: () => void }) {
-  const [tab, setTab] = useState('train')
-  const [qty, setQty] = useState<Record<string, number>>({})
-  const [selected, setSel] = useState<string | null>(null)
-  const [trainingOrders, setTrainingOrders] = useState<TrainingOrder[]>([])
+export function CombatPanel({ onClose }: Props) {
+  const [tab, setTab] = useState('recruit')
+  const [recruitQty, setRecruitQty] = useState<Record<string, number>>({})
   const player = usePlayer()
-  const qc = useQueryClient()
   const setActivePanel = useStore(s => s.setActivePanel)
+  const kingdoms = useKingdomStore(s => s.kingdoms)
   const activeKingdom = useKingdomStore(s => s.getActiveKingdom())
-  const atkProgress = activeKingdom ? getBranchProgress(activeKingdom.skillStates, 'attack') : null
+
   const tdc = parseFloat(String(player?.tdc_in_game ?? 0))
 
-  const { data: battlesData } = useQuery({
-    queryKey: ['battles-active'],
-    queryFn: () => api.get('/battles/?ordering=-started_at&limit=10').then(r => r.data),
-    refetchInterval: 5000,
-  })
-  const { data: historyData } = useQuery({
-    queryKey: ['battles-history'],
-    queryFn: () => api.get('/battles/?ordering=-started_at&limit=30').then(r => r.data),
-    enabled: tab === 'history',
-  })
-
-  const totalCost = Object.entries(qty).reduce((sum, [k, n]) => {
-    const u = UNITS.find(u => u.key === k)
-    return sum + (u?.cost ?? 0) * n
-  }, 0)
-
-  const trainMut = useMutation({
-    mutationFn: async () => {
-      const entries = Object.entries(qty).filter(([, n]) => n > 0)
-      if (!entries.length) throw new Error('Select units to train')
-      const results = []
-      for (const [key, n] of entries) {
-        const res = await api.post('/shop/purchase/', { item_code: `unit_${key}`, quantity: n })
-        results.push(res.data)
-      }
-      return results
-    },
-    onSuccess: (results) => {
-      const now = new Date().toISOString()
-      const newOrders: TrainingOrder[] = results.map(r => ({
-        unit_type: r.unit_type,
-        quantity: r.quantity,
-        tdc_spent: r.tdc_spent,
-        train_seconds: r.train_seconds,
-        ready_at: r.ready_at,
-        started_at: now,
-      }))
-      setTrainingOrders(prev => [...prev, ...newOrders])
-      toast.success(`Training ${Object.entries(qty).filter(([,n])=>n>0).map(([k,n])=>`${n}× ${UNITS.find(u=>u.key===k)?.name}`).join(', ')}!`)
-      setQty({})
-      setSel(null)
-      qc.invalidateQueries({ queryKey: ['player'] })
-      qc.invalidateQueries({ queryKey: ['player-live'] })
-      setTab('train')
-    },
-    onError: (e: any) => toast.error(e.response?.data?.error || e.message || 'Training failed'),
-  })
-
-  const battles = Array.isArray(battlesData) ? battlesData : (battlesData?.results ?? [])
-  const history = Array.isArray(historyData) ? historyData : (historyData?.results ?? [])
-  const active = battles.filter((b: any) => b.status !== 'completed' && b.status !== 'cancelled')
-  const completed = battles.filter((b: any) => b.status === 'completed' || b.status === 'cancelled')
-
   return (
-    <GlassPanel title="MILITARY COMMAND" onClose={onClose} accent="#dc2626" width={390}>
+    <GlassPanel title="MILITARY COMMAND" onClose={onClose} accent="#dc2626" width={420}>
       {/* Kingdom attack branch status */}
-      {activeKingdom && atkProgress && (
+      {activeKingdom && (
         <div style={{
-          display:'flex', alignItems:'center', gap:8, marginBottom:10,
-          padding:'6px 10px', borderRadius:8,
-          background:'rgba(220,38,38,0.04)', border:'1px solid rgba(220,38,38,0.12)',
+          display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10,
+          padding: '6px 10px', borderRadius: 8,
+          background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.12)',
         }}>
-          <span style={{ fontSize:14 }}>⚔️</span>
-          <div style={{ flex:1 }}>
-            <div style={{ fontSize:6, fontWeight:700, color:'#dc2626', letterSpacing:2, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
-              ASSAULT TACTICS — {atkProgress.completed}/{atkProgress.total}
-            </div>
-            <div style={{
-              height:3, borderRadius:2, background:'rgba(0,60,100,0.06)', marginTop:3, overflow:'hidden',
-            }}>
-              <div style={{
-                height:'100%', width:`${(atkProgress.completed/atkProgress.total)*100}%`,
-                background:'linear-gradient(90deg, #dc2626, #ef4444)', borderRadius:2,
-              }} />
-            </div>
+          <span style={{ fontSize: 14 }}>⚔️</span>
+          <div style={{ flex: 1, fontSize: 7, fontWeight: 700, color: '#dc2626', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+            {activeKingdom.name.toUpperCase()} — MILITARY
           </div>
-          <div style={{
-            fontSize:8, fontWeight:900, color:'rgba(26,42,58,0.35)',
-            fontFamily:"'Share Tech Mono', monospace",
-          }}>
-            {Math.floor(activeKingdom.crystalReservoirs.attack)} ◆
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <CrystalIcon size="sm" />
+            <span style={{ fontSize: 10, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace" }}>{tdc.toFixed(0)}</span>
           </div>
         </div>
       )}
 
-      {/* Balance bar */}
-      <div style={{ display:'flex', alignItems:'center', gap:8, marginBottom:12,
-        padding:'8px 12px', background:'rgba(255,255,255,0.5)', borderRadius:8,
-        border:'1px solid rgba(0,60,100,0.1)' }}>
-        <CrystalIcon size="md" />
-        <span style={{ fontSize:13, fontWeight:900, color:'#7950f2', fontFamily:"'Share Tech Mono', monospace" }}>{tdc.toFixed(0)}</span>
-        {active.length > 0 && <span style={{ fontSize:8, color:'#dc2626', marginLeft:8, letterSpacing:1 }}>⚔ {active.length} ACTIVE</span>}
-        {trainingOrders.length > 0 && <span style={{ fontSize:8, color:'#cc8800', marginLeft:8, letterSpacing:1 }}>⏳ {trainingOrders.length} TRAINING</span>}
-      </div>
-
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap:4, marginBottom:14 }}>
+      {/* 5 Tabs */}
+      <div style={{ display: 'flex', gap: 3, marginBottom: 14, overflowX: 'auto' }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex: 1, padding: '7px', borderRadius: 20, cursor: 'pointer',
-            fontSize: 8, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
+            padding: '7px 8px', borderRadius: 20, cursor: 'pointer',
+            fontSize: 7, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
             background: tab === t.id ? 'rgba(220,38,38,0.1)' : 'rgba(255,255,255,0.5)',
             color: tab === t.id ? '#dc2626' : 'rgba(26,42,58,0.45)',
             fontFamily: "'Orbitron', system-ui, sans-serif",
             border: `1px solid ${tab === t.id ? 'rgba(220,38,38,0.3)' : 'rgba(0,60,100,0.1)'}`,
-          }}>{t.label}{t.id === 'train' && trainingOrders.length > 0 ? ` (${trainingOrders.length})` : ''}</button>
+            whiteSpace: 'nowrap',
+          }}>{t.label}</button>
         ))}
       </div>
 
-      <div>
-        {/* ACTIVE BATTLES */}
-        {tab === 'active' && (
-          <div style={{ padding: '12px 16px' }}>
-            {!active.length && (
-              <div style={{ textAlign: 'center', padding: '30px 20px' }}>
-                <div style={{ fontSize: 40, marginBottom: 10 }}>🕊️</div>
-                <div style={{ fontSize: 14, color: 'rgba(26,42,58,0.35)' }}>No active battles</div>
-              </div>
-            )}
-            {active.map((b: any) => (
-              <div key={b.id} style={{ background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.15)', borderRadius: 12, padding: '12px 14px', marginBottom: 10 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#1a2a3a' }}>⚔️ vs {b.defender_username}</div>
-                    <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>{b.territory_name} · {b.type_display ?? b.battle_type}</div>
-                  </div>
-                  <span style={{ fontSize: 10, fontWeight: 700, color: STATUS_COLOR[b.status] ?? '#fff', background: `${STATUS_COLOR[b.status] ?? '#fff'}15`, padding: '3px 8px', borderRadius: 10 }}>
-                    {b.status_display ?? b.status}
-                  </span>
-                </div>
-              </div>
-            ))}
-            {completed.slice(0, 3).map((b: any) => (
-              <div key={b.id} style={{ background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(0,60,100,0.08)', borderRadius: 10, padding: '10px 14px', marginBottom: 8 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <div style={{ fontSize: 12, color: 'rgba(26,42,58,0.6)' }}>vs {b.defender_username} · {b.territory_name}</div>
-                  {b.winner && <span style={{ fontSize: 11, fontWeight: 700, color: RESULT_COLOR[b.winner] ?? '#fff' }}>{b.winner === 'attacker' ? '🏆 W' : b.winner === 'defender' ? '❌ L' : '🤝 D'}</span>}
-                </div>
-              </div>
-            ))}
+      {/* ═══ RECRUIT TAB ═══ */}
+      {tab === 'recruit' && (
+        <div>
+          <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 10 }}>
+            PURCHASE UNITS (CRYSTALS REQUIRED)
           </div>
-        )}
-
-        {/* TRAIN UNITS */}
-        {tab === 'train' && (
-          <div style={{ padding: '12px 16px' }}>
-            <TrainingQueue orders={trainingOrders} onComplete={() => setTrainingOrders([])} />
-
-            <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginBottom: 12, lineHeight: 1.6 }}>
-              Select units to train. Each unit has a training timer before deployment.
-            </div>
-
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
             {UNITS.map(u => {
-              const q = qty[u.key] ?? 0
-              const isSelected = selected === u.key
+              const qty = recruitQty[u.key] || 0
               return (
-                <div key={u.key} onClick={() => setSel(isSelected ? null : u.key)}
-                  style={{ background: isSelected ? `rgba(239,68,68,0.08)` : 'rgba(255,255,255,0.02)', border: `1px solid ${isSelected ? 'rgba(239,68,68,0.3)' : 'rgba(0,60,100,0.08)'}`, borderRadius: 12, padding: '12px 14px', marginBottom: 8, cursor: 'pointer', transition: 'all 0.15s' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ fontSize: 26, width: 40, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.5)', borderRadius: 10, flexShrink: 0 }}>{u.emoji}</div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: 14, fontWeight: 700, color: '#1a2a3a' }}>{u.name}</span>
-                        <div style={{ textAlign: 'right' }}>
-                          <div style={{ fontSize: 12, color: '#cc8800', fontFamily: 'monospace' }}>{u.cost} 🪙</div>
-                          <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)' }}>⏱ {u.trainMins}m</div>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
-                        {[['ATK', u.atk, '#EF4444'], ['DEF', u.def, '#3B82F6'], ['SPD', u.speed, '#10B981']].map(([l, v, c]) => (
-                          <span key={String(l)} style={{ fontSize: 9, color: c as string, background: `${c}15`, padding: '2px 6px', borderRadius: 4 }}>{l} {v}</span>
-                        ))}
-                      </div>
-                    </div>
+                <div key={u.key} style={{
+                  padding: 12, borderRadius: 10, textAlign: 'center', cursor: 'pointer',
+                  background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)',
+                  transition: 'all 0.2s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.borderColor = u.color; e.currentTarget.style.transform = 'scale(1.03)' }}
+                onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,60,100,0.1)'; e.currentTarget.style.transform = 'scale(1)' }}
+                >
+                  <div style={{
+                    width: 40, height: 40, margin: '0 auto 6px',
+                    clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                    background: u.color, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 18, color: '#fff',
+                  }}>{u.icon}</div>
+                  <div style={{ fontSize: 8, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>{u.name}</div>
+                  <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.4)', marginTop: 3, fontFamily: "'Share Tech Mono', monospace" }}>
+                    {u.cost} <CrystalIcon size="sm" /> each
                   </div>
-
-                  <AnimatePresence>
-                    {isSelected && (
-                      <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
-                        <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginTop: 8, marginBottom: 10 }}>{u.desc}</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <button onClick={e => { e.stopPropagation(); setQty(p => ({ ...p, [u.key]: Math.max(0, (p[u.key] ?? 0) - 1) })) }}
-                            style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(0,60,100,0.1)', border: 'none', color: '#1a2a3a', cursor: 'pointer', fontSize: 16 }}>−</button>
-                          <input type="number" value={q} min={0} onClick={e => e.stopPropagation()}
-                            onChange={e => setQty(p => ({ ...p, [u.key]: Math.max(0, parseInt(e.target.value) || 0) }))}
-                            style={{ flex: 1, background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.12)', borderRadius: 8, padding: '8px', color: '#1a2a3a', fontSize: 16, fontFamily: 'monospace', textAlign: 'center', outline: 'none' }} />
-                          <button onClick={e => { e.stopPropagation(); setQty(p => ({ ...p, [u.key]: (p[u.key] ?? 0) + 1 })) }}
-                            style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', cursor: 'pointer', fontSize: 16 }}>+</button>
-                        </div>
-                        <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
-                          {[5, 10, 25, 50].map(n => (
-                            <button key={n} onClick={e => { e.stopPropagation(); setQty(p => ({ ...p, [u.key]: n })) }}
-                              style={{ flex: 1, padding: '5px', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)', borderRadius: 6, color: 'rgba(26,42,58,0.6)', cursor: 'pointer', fontSize: 11 }}>×{n}</button>
-                          ))}
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <div style={{ fontSize: 8, color: '#00884a', marginTop: 2, fontWeight: 700, fontFamily: "'Share Tech Mono', monospace" }}>
+                    {u.owned.toLocaleString()} owned
+                  </div>
+                  {/* Quantity selector */}
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginTop: 6 }}>
+                    <button onClick={e => { e.stopPropagation(); setRecruitQty(q => ({ ...q, [u.key]: Math.max(0, (q[u.key] || 0) - 10) })) }}
+                      style={{ width: 22, height: 22, borderRadius: 4, border: '1px solid rgba(0,60,100,0.1)', background: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 10, color: '#1a2a3a' }}>−</button>
+                    <span style={{ fontSize: 10, fontWeight: 900, minWidth: 24, textAlign: 'center', fontFamily: "'Share Tech Mono', monospace" }}>{qty}</span>
+                    <button onClick={e => { e.stopPropagation(); setRecruitQty(q => ({ ...q, [u.key]: (q[u.key] || 0) + 10 })) }}
+                      style={{ width: 22, height: 22, borderRadius: 4, border: '1px solid rgba(0,60,100,0.1)', background: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 10, color: '#1a2a3a' }}>+</button>
+                  </div>
+                  {qty > 0 && (
+                    <button onClick={() => { toast.success(`Recruited ${qty} ${u.name}`); setRecruitQty(q => ({ ...q, [u.key]: 0 })) }}
+                      style={{ marginTop: 4, padding: '4px 10px', borderRadius: 12, border: 'none', cursor: 'pointer', background: u.color, color: '#fff', fontSize: 7, fontWeight: 700, letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                      BUY {qty} — {qty * u.cost} ◆
+                    </button>
+                  )}
                 </div>
               )
             })}
-
-            {totalCost > 0 && (
-              <div style={{ position: 'sticky', bottom: 0, background: 'rgba(235,242,250,0.95)', paddingTop: 12, paddingBottom: 4, borderTop: '1px solid rgba(0,60,100,0.1)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                  <span style={{ fontSize: 12, color: 'rgba(26,42,58,0.6)' }}>
-                    {Object.entries(qty).filter(([,n])=>n>0).map(([k,n]) => `${n}× ${UNITS.find(u=>u.key===k)?.name}`).join(', ')}
-                  </span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: tdc >= totalCost ? '#00884a' : '#EF4444', fontFamily: 'monospace' }}>{totalCost} 🪙</span>
-                </div>
-                <button onClick={() => trainMut.mutate()} disabled={tdc < totalCost || trainMut.isPending}
-                  style={{ width: '100%', padding: '13px', background: tdc >= totalCost ? 'rgba(0,136,74,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${tdc >= totalCost ? 'rgba(0,136,74,0.4)' : 'rgba(0,60,100,0.1)'}`, borderRadius: 12, color: tdc >= totalCost ? '#00884a' : '#4B5563', fontSize: 14, fontWeight: 800, cursor: tdc >= totalCost ? 'pointer' : 'not-allowed' }}>
-                  {trainMut.isPending ? '⏳ Sending to barracks…' : `🪖 Train Units (−${totalCost} HEX Coin)`}
-                </button>
-              </div>
-            )}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* HISTORY */}
-        {tab === 'history' && (
-          <div style={{ padding: '12px 16px' }}>
-            {!history.length && <div style={{ textAlign: 'center', color: 'rgba(26,42,58,0.35)', padding: '30px 0', fontSize: 13 }}>No battles yet</div>}
-            {history.map((b: any) => (
-              <div key={b.id} style={{ padding: '10px 0', borderBottom: '1px solid rgba(0,60,100,0.08)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                  <div>
-                    <div style={{ fontSize: 13, color: '#1a2a3a', fontWeight: 500 }}>vs {b.defender_username}</div>
-                    <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>{b.territory_name} · {b.started_at ? new Date(b.started_at).toLocaleDateString() : ''}</div>
+      {/* ═══ TRAIN TAB ═══ */}
+      {tab === 'train' && (
+        <div>
+          <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 10 }}>
+            TRAINING QUEUE (RESOURCES REQUIRED)
+          </div>
+          {TRAIN_QUEUE.map((t, i) => {
+            const unit = UNITS.find(u => u.key === t.unit)
+            return (
+              <div key={i} style={{
+                padding: '10px 14px', marginBottom: 8, borderRadius: 8,
+                background: 'rgba(255,255,255,0.5)',
+                border: `1px solid ${t.active ? 'rgba(204,136,0,0.3)' : 'rgba(0,60,100,0.1)'}`,
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+              }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 9, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                    {unit?.icon} {unit?.name} BATCH ({t.batch})
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    {b.winner ? <span style={{ fontSize: 12, fontWeight: 700, color: RESULT_COLOR[b.winner] ?? '#fff' }}>{b.winner === 'attacker' ? '🏆 Win' : b.winner === 'defender' ? '❌ Loss' : '🤝 Draw'}</span>
-                      : <span style={{ fontSize: 11, color: STATUS_COLOR[b.status] ?? '#fff' }}>{b.status}</span>}
-                  </div>
+                  {t.active ? (
+                    <>
+                      <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>Training... {t.done}/{t.batch} complete</div>
+                      <div style={{ height: 4, borderRadius: 2, background: 'rgba(0,60,100,0.06)', marginTop: 4, width: 180, overflow: 'hidden' }}>
+                        <div style={{ height: '100%', width: `${(t.done / t.batch) * 100}%`, background: '#cc8800', borderRadius: 2 }} />
+                      </div>
+                    </>
+                  ) : (
+                    <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>Cost: {t.cost}</div>
+                  )}
                 </div>
+                {t.active ? (
+                  <div style={{ fontSize: 9, color: '#cc8800', fontWeight: 700, fontFamily: "'Share Tech Mono', monospace" }}>{t.timeLeft}</div>
+                ) : (
+                  <button onClick={() => toast.success(`Training started: ${t.batch} ${unit?.name}`)} style={{
+                    padding: '6px 14px', borderRadius: 16, border: '1px solid rgba(0,153,204,0.3)', background: 'rgba(0,153,204,0.08)',
+                    color: '#0099cc', fontSize: 8, fontWeight: 700, cursor: 'pointer', fontFamily: "'Orbitron', system-ui, sans-serif",
+                  }}>Train</button>
+                )}
+              </div>
+            )
+          })}
+        </div>
+      )}
+
+      {/* ═══ DEPLOY TAB ═══ */}
+      {tab === 'deploy' && (
+        <div>
+          <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 10 }}>
+            ASSIGN UNITS TO KINGDOMS
+          </div>
+          {kingdoms.length > 0 ? kingdoms.map(k => (
+            <div key={k.id} style={{
+              padding: '12px 14px', marginBottom: 8, borderRadius: 8,
+              background: 'rgba(255,255,255,0.5)', border: `1px solid ${k.id === activeKingdom?.id ? `${k.color}40` : 'rgba(0,60,100,0.1)'}`,
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                  {k.name.toUpperCase()}
+                </div>
+                <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.4)', marginTop: 2, fontFamily: "'Share Tech Mono', monospace" }}>
+                  {k.territories.length} territories • {Math.floor(Math.random() * 500 + 100)} troops
+                </div>
+              </div>
+              <button onClick={() => toast.success(`Managing troops for ${k.name}`)} style={{
+                padding: '6px 14px', borderRadius: 16, border: '1px solid rgba(0,153,204,0.3)', background: 'rgba(0,153,204,0.08)',
+                color: '#0099cc', fontSize: 8, fontWeight: 700, cursor: 'pointer', fontFamily: "'Orbitron', system-ui, sans-serif",
+              }}>Manage</button>
+            </div>
+          )) : (
+            <div style={{ textAlign: 'center', padding: 30, color: 'rgba(26,42,58,0.3)', fontSize: 8, fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 2 }}>
+              CREATE A KINGDOM FIRST
+            </div>
+          )}
+          {/* Unassigned reserves */}
+          <div style={{
+            marginTop: 8, padding: 10, borderRadius: 8,
+            background: 'rgba(0,60,100,0.03)', border: '1px solid rgba(0,60,100,0.08)',
+            fontSize: 8, color: 'rgba(26,42,58,0.4)',
+          }}>
+            <div style={{ fontWeight: 700, letterSpacing: 2, marginBottom: 4, fontFamily: "'Orbitron', system-ui, sans-serif" }}>UNASSIGNED RESERVES</div>
+            <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 8 }}>
+              {UNITS.map(u => `${Math.floor(u.owned * 0.1)} ${u.name}`).join(' • ')}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ═══ WAR ROOM TAB ═══ */}
+      {tab === 'warroom' && (
+        <div>
+          {/* Active wars */}
+          <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: '#dc2626', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8 }}>
+            🔴 ACTIVE WARS
+          </div>
+          <div style={{
+            padding: 14, marginBottom: 12, borderRadius: 8,
+            background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.2)',
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 900, color: '#dc2626', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>⚠ EASTERN SHORES UNDER ATTACK</div>
+                <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.4)', marginTop: 3 }}>Attacker: NEXUS_LORD (LVL 97) • 42,100 Power</div>
+              </div>
+              <span style={{
+                background: '#dc2626', color: '#fff', padding: '3px 8px', fontSize: 7, borderRadius: 4, fontWeight: 700,
+                fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
+                animation: 'pulse 1s infinite',
+              }}>ACTIVE</span>
+            </div>
+            {/* Battle progress bar */}
+            <div style={{ height: 6, borderRadius: 3, background: 'rgba(220,38,38,0.15)', marginTop: 8, overflow: 'hidden', position: 'relative' }}>
+              <div style={{ height: '100%', width: '62%', background: '#0099cc', borderRadius: 3 }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4, fontSize: 7, fontFamily: "'Share Tech Mono', monospace" }}>
+              <span style={{ color: '#0099cc', fontWeight: 700 }}>YOUR DEFENSE: 62%</span>
+              <span style={{ color: '#dc2626', fontWeight: 700 }}>ENEMY: 38%</span>
+            </div>
+            <button onClick={() => toast.success('Sending reinforcements!')} style={{
+              width: '100%', marginTop: 8, padding: '8px', borderRadius: 16, border: 'none', cursor: 'pointer',
+              background: '#dc2626', color: '#fff', fontSize: 8, fontWeight: 900, letterSpacing: 2,
+              fontFamily: "'Orbitron', system-ui, sans-serif",
+            }}>🚨 SEND REINFORCEMENTS</button>
+          </div>
+
+          {/* Nearby threats */}
+          <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8 }}>
+            📡 NEARBY THREATS
+          </div>
+          <div style={{
+            padding: '10px 12px', marginBottom: 6, borderRadius: 8,
+            background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(204,136,0,0.2)',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          }}>
+            <div>
+              <div style={{ fontSize: 9, fontWeight: 900, color: '#cc8800' }}>⚠ SUSPICIOUS ACTIVITY</div>
+              <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>IRON_DUKE amassing troops near border</div>
+            </div>
+            <span style={{ fontSize: 7, color: '#cc8800', fontWeight: 700, fontFamily: "'Orbitron', system-ui, sans-serif" }}>RECON</span>
+          </div>
+          <div style={{
+            padding: '10px 12px', marginBottom: 12, borderRadius: 8,
+            background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)',
+            display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+          }}>
+            <div>
+              <div style={{ fontSize: 9, fontWeight: 900 }}>STORM_BLADE</div>
+              <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>Moved 500 troops SE — likely targeting CRYSTAL_QUEEN</div>
+            </div>
+            <span style={{ fontSize: 7, color: 'rgba(26,42,58,0.35)', fontWeight: 700, fontFamily: "'Orbitron', system-ui, sans-serif" }}>INTEL</span>
+          </div>
+
+          {/* Suggested targets */}
+          <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8 }}>
+            ⚔ SUGGESTED TARGETS (NEAR YOUR LEVEL)
+          </div>
+          {[
+            { name: 'IRON_DUKE', lvl: 41, hex: 1980, power: 35200 },
+            { name: 'STORM_BLADE', lvl: 38, hex: 1850, power: 31400 },
+          ].map(t => (
+            <div key={t.name} style={{
+              padding: '10px 14px', marginBottom: 6, borderRadius: 8,
+              background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)',
+              display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+            }}>
+              <div>
+                <div style={{ fontSize: 10, fontWeight: 900, letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>{t.name}</div>
+                <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.4)', fontFamily: "'Share Tech Mono', monospace" }}>LVL {t.lvl} • {t.hex.toLocaleString()} HEX • {t.power.toLocaleString()} Power</div>
+              </div>
+              <button onClick={() => toast.success(`Battle initiated vs ${t.name}!`)} style={{
+                padding: '6px 14px', borderRadius: 16, border: 'none', cursor: 'pointer',
+                background: '#dc2626', color: '#fff', fontSize: 8, fontWeight: 700,
+                fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
+              }}>Attack</button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ═══ HISTORY TAB ═══ */}
+      {tab === 'history' && (
+        <div>
+          {/* Stats grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, marginBottom: 14 }}>
+            {[
+              { label: 'BATTLES', value: '18', color: '#1a2a3a' },
+              { label: 'VICTORIES', value: '12', color: '#00884a' },
+              { label: 'DEFEATS', value: '6', color: '#dc2626' },
+              { label: 'NET HEX', value: '+47', color: '#00884a' },
+            ].map(s => (
+              <div key={s.label} style={{
+                padding: '8px 6px', borderRadius: 8, textAlign: 'center',
+                background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.08)',
+              }}>
+                <div style={{ fontSize: 5, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 3 }}>{s.label}</div>
+                <div style={{ fontSize: 14, fontWeight: 900, color: s.color, fontFamily: "'Share Tech Mono', monospace" }}>{s.value}</div>
               </div>
             ))}
           </div>
-        )}
-      </div>
+
+          {/* Battle log */}
+          <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8 }}>
+            WAR HISTORY — LAST 30 DAYS
+          </div>
+          {BATTLE_HISTORY.map((b, i) => (
+            <div key={i} style={{
+              display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', marginBottom: 4,
+              background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.08)', borderRadius: 6,
+            }}>
+              <span style={{
+                padding: '2px 8px', borderRadius: 4, fontSize: 7, fontWeight: 900, letterSpacing: 1,
+                background: b.result === 'WIN' ? 'rgba(0,136,74,0.12)' : 'rgba(220,38,38,0.12)',
+                color: b.result === 'WIN' ? '#00884a' : '#dc2626',
+                fontFamily: "'Orbitron', system-ui, sans-serif",
+              }}>{b.result}</span>
+              <span style={{ flex: 1, fontSize: 9, fontWeight: 700, fontFamily: "'Orbitron', system-ui, sans-serif" }}>vs {b.enemy}</span>
+              <span style={{ fontSize: 9, color: b.hex.startsWith('+') ? '#00884a' : '#dc2626', fontWeight: 700, fontFamily: "'Share Tech Mono', monospace" }}>{b.hex} HEX</span>
+              <span style={{ fontSize: 7, color: 'rgba(26,42,58,0.3)' }}>{b.time}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Cross-panel CTAs */}
-      <div style={{ marginTop: 16, display:'flex', gap:8 }}>
-        <button
-          onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }}
-          style={{
-            flex:1, padding:'10px', borderRadius:20,
-            background:'rgba(251,191,36,0.06)', border:'1px solid rgba(251,191,36,0.2)',
-            color:'#cc8800', fontSize:7, fontWeight:700, letterSpacing:2,
-            cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
-          }}
-        >
-          🛒 MILITARY BOOSTS → SHOP
-        </button>
-        <button
-          onClick={() => { onClose(); setTimeout(() => setActivePanel('alliance'), 100) }}
-          style={{
-            flex:1, padding:'10px', borderRadius:20,
-            background:'rgba(59,130,246,0.06)', border:'1px solid rgba(59,130,246,0.2)',
-            color:'#3b82f6', fontSize:7, fontWeight:700, letterSpacing:2,
-            cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
-          }}
-        >
-          🏰 ALLIANCE DEFENSE →
-        </button>
+      <div style={{ marginTop: 14, display: 'flex', gap: 6 }}>
+        <button onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }} style={{
+          flex: 1, padding: '8px', borderRadius: 16, cursor: 'pointer',
+          background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)',
+          color: '#cc8800', fontSize: 7, fontWeight: 700, letterSpacing: 1,
+          fontFamily: "'Orbitron', system-ui, sans-serif",
+        }}>🛒 MILITARY SHOP</button>
+        <button onClick={() => { onClose(); setTimeout(() => setActivePanel('kingdom'), 100) }} style={{
+          flex: 1, padding: '8px', borderRadius: 16, cursor: 'pointer',
+          background: 'rgba(0,153,204,0.06)', border: '1px solid rgba(0,153,204,0.2)',
+          color: '#0099cc', fontSize: 7, fontWeight: 700, letterSpacing: 1,
+          fontFamily: "'Orbitron', system-ui, sans-serif",
+        }}>👑 KINGDOM</button>
       </div>
     </GlassPanel>
   )

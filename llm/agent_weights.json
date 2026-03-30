@@ -884,23 +884,8 @@
       "priority": "HIGH"
     },
     "military": {
-      "status": "NOT PORTED YET — next priority",
-      "prototype_tabs": [
-        "Recruit (6 unit types)",
-        "Train (queue+progress)",
-        "Deploy (kingdom assign)",
-        "War Room (active battles+defense bars)",
-        "History"
-      ],
-      "unit_types": [
-        "Infantry (5)",
-        "Naval (15)",
-        "Aerial (25)",
-        "Engineer (20)",
-        "Medic (30)",
-        "Spy (100)"
-      ],
-      "priority": "HIGH"
+      "status": "PORTED — 5 tabs from prototype: Recruit (6 unit grid with qty selector), Train (queue+progress bars), Deploy (kingdom assignment), War Room (active battles+threats+targets), History (stats+battle log)",
+      "priority": "DONE"
     },
     "token_3d": {
       "status": "INTEGRATED — SVG icons + biome image now rendered on canvas. Image source is procedural (will be replaced with real DB images when provided by Richard).",
