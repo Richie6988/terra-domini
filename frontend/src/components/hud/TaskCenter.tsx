@@ -90,7 +90,7 @@ export function TaskCenter({ onClose }: Props) {
   const refLink = 'hexod.io/ref/' + (localStorage.getItem('hx_username') || 'COMMANDER')
 
   return (
-    <GlassPanel title="TASK CENTER" onClose={onClose} accent="#0099cc" width={400}>
+    <GlassPanel title="TASK CENTER" onClose={onClose} accent="#0099cc">
       {/* Reset timer + streak */}
       <div style={{
         textAlign: 'center', fontSize: 8, color: 'rgba(26,42,58,0.45)',

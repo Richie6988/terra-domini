@@ -122,7 +122,7 @@ export function AttackPanel({ target, onClose }: Props) {
   const probColor = winProb >= 0.65 ? '#00884a' : winProb >= 0.4 ? '#F59E0B' : '#EF4444'
 
   return (
-    <GlassPanel title="⚔ ATTACK" onClose={onClose} accent="#dc2626" width={390}>
+    <GlassPanel title="⚔ ATTACK" onClose={onClose} accent="#dc2626">
       {/* Target info */}
       <div style={{ marginBottom: 12 }}>
         <div style={{ fontSize: 11, color: '#1a2a3a', fontWeight: 700, letterSpacing: 1 }}>{target.place_name || 'ENEMY ZONE'}</div>

@@ -259,7 +259,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
 
   return (
     <>
-      <GlassPanel title="WALLET" onClose={onClose} accent="#a855f7" width={400}>
+      <GlassPanel title="WALLET" onClose={onClose} accent="#a855f7">
         <div style={{ padding: '0 0 8px', borderBottom: '1px solid rgba(0,60,100,0.1)', marginBottom: 12 }}>
           <PriceTicker prices={prices} />
         </div>

@@ -54,7 +54,7 @@ export function LadderPanel({ onClose }: Props) {
   const myRank: number | null = data?.my_rank || null
 
   return (
-    <GlassPanel title="LADDER" onClose={onClose} accent="#8b5cf6" width={Math.min(420, window.innerWidth - 8)}>
+    <GlassPanel title="LADDER" onClose={onClose} accent="#8b5cf6">
       {/* Stats bar */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12,
         padding:'8px 12px', background:'rgba(255,255,255,0.5)', borderRadius:8,

@@ -43,7 +43,7 @@ export function MetaDashboard({ onClose }: Props) {
   const topPlayers = leaderboard?.top_players || []
 
   return (
-    <GlassPanel title="WORLD META" onClose={onClose} accent="#64748b" width={Math.min(440, window.innerWidth - 8)}>
+    <GlassPanel title="WORLD META" onClose={onClose} accent="#64748b">
       {/* Stats bar */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12,
         padding:'8px 12px', background:'rgba(255,255,255,0.5)', borderRadius:8,

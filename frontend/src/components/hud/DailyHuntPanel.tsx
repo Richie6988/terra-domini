@@ -139,7 +139,7 @@ export function DailyHuntPanel({ onClose }: Props) {
 
   if (alreadyDone && phase === 'briefing') {
     return (
-      <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316" width={380}>
+      <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316">
         <div style={{
           textAlign: 'center', padding: 40,
         }}>
@@ -159,7 +159,7 @@ export function DailyHuntPanel({ onClose }: Props) {
   }
 
   return (
-    <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316" width={380}>
+    <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316">
       <AnimatePresence mode="wait">
         {/* ── BRIEFING ── */}
         {phase === 'briefing' && (

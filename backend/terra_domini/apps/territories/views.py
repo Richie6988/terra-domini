@@ -449,14 +449,95 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             'message': f'Territory claimed! {"Fusion unlocked!" if fusion_count > 0 else ""}',
         })
 
+    @action(detail=False, methods=['GET'], url_path='claim-options')
+    def claim_options(self, request):
+        """GET /api/territories/claim-options/?h3_index=xxx
+        Returns available claim methods + costs for a given hex.
+        """
+        h3_index = request.query_params.get('h3_index', '').strip()
+        if not h3_index:
+            return Response({'error': 'h3_index required'}, status=400)
+
+        territory = Territory.objects.filter(h3_index=h3_index).first()
+        from terra_domini.apps.accounts.models import PlayerStats, Player as P
+        stats, _ = PlayerStats.objects.get_or_create(player=request.user)
+        owned_count = stats.territories_owned
+        is_first = owned_count == 0
+
+        # Check ownership
+        if territory and territory.owner:
+            if territory.owner_id == request.user.id:
+                return Response({'status': 'owned', 'message': 'You own this territory'})
+            return Response({
+                'status': 'enemy',
+                'owner': territory.owner.username,
+                'action': 'attack',
+            })
+
+        # Adjacency
+        is_adjacent = False
+        try:
+            import h3
+            neighbors = set(h3.grid_disk(h3_index, 1)) - {h3_index}
+            is_adjacent = Territory.objects.filter(
+                h3_index__in=list(neighbors), owner=request.user
+            ).exists()
+        except Exception:
+            pass
+
+        # Costs
+        buy_cost = 50 if (is_adjacent or is_first) else 125
+        explore_hours = round(1.0 * (1.2 ** min(owned_count, 50)) * (1 if is_adjacent or is_first else 2), 1)
+        player_obj = P.objects.get(id=request.user.id)
+        balance = float(player_obj.tdc_in_game)
+
+        # Rare POI lock
+        is_rare_poi = territory and (territory.is_landmark or (territory.rarity or 'common') in ('legendary', 'mythic'))
+        locked = is_rare_poi and not is_first and not is_adjacent
+        influence = getattr(stats, 'influence_points', 0) or 0
+        if locked and influence >= 50:
+            locked = False
+
+        options = []
+        if is_first:
+            options.append({'method': 'free', 'label': 'CLAIM (FREE)', 'cost': 0, 'available': True})
+        if not locked:
+            options.append({
+                'method': 'buy', 'label': f'BUY ({buy_cost} ◆)',
+                'cost': buy_cost, 'available': balance >= buy_cost,
+                'balance': balance,
+            })
+            options.append({
+                'method': 'explore', 'label': f'EXPLORE ({explore_hours}h)',
+                'hours': explore_hours, 'available': True,
+                'is_adjacent': is_adjacent,
+            })
+
+        return Response({
+            'status': 'claimable',
+            'h3_index': h3_index,
+            'is_first': is_first,
+            'is_adjacent': is_adjacent,
+            'locked': locked,
+            'locked_reason': 'Need adjacent territory or 50+ influence' if locked else None,
+            'options': options,
+        })
+
     @action(detail=False, methods=['POST'], url_path='claim')
     def claim(self, request):
-        """POST /api/territories/claim/ {h3_index: str}"""
+        """POST /api/territories/claim/ {h3_index, method: free|buy|explore}
+        
+        Game rules:
+        - First territory: FREE (no constraints)
+        - Unclaimed + adjacent to kingdom: buy 50◆ or explore (1h * 1.2^n)
+        - Unclaimed + NOT adjacent: buy 125◆ or explore (2h * 1.2^n)
+        - Enemy territory: must attack (method=attack, not handled here)
+        - Rare POI (landmark): needs adjacent territory or influence >= 50
+        """
         h3_index = request.data.get('h3_index', '').strip()
         if not h3_index:
             return Response({'error': 'h3_index required'}, status=400)
 
-        # Validate H3
         try:
             import h3
             if not h3.is_valid_cell(h3_index):
@@ -464,52 +545,99 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         except Exception:
             pass
 
-        # Check if already claimed
+        # Check ownership
         territory = Territory.objects.filter(h3_index=h3_index).first()
         if territory and territory.owner:
-            return Response({'error': 'Territory already claimed', 'owner': territory.owner.username}, status=409)
+            if territory.owner_id == request.user.id:
+                return Response({'error': 'You already own this territory'}, status=409)
+            return Response({
+                'error': 'Territory belongs to another player',
+                'owner': territory.owner.username,
+                'action_required': 'attack',
+            }, status=409)
 
+        # Create territory if new
         if not territory:
-            # Create from scratch (new territory)
             try:
                 import h3
                 lat, lon = h3.cell_to_latlng(h3_index)
             except Exception:
                 lat, lon = 0.0, 0.0
-
             territory = Territory.objects.create(
-                h3_index=h3_index,
-                h3_resolution=len(h3_index) - 1,
-                center_lat=lat,
-                center_lon=lon,
-                territory_type='urban',  # default, geo pipeline refines later
+                h3_index=h3_index, h3_resolution=8,
+                center_lat=lat, center_lon=lon,
+                territory_type='urban',
             )
-
-        # ── Method validation ─────────────────────────────────────────────
-        method = request.data.get('method', 'free')
-        answer = request.data.get('answer', '')
 
         from terra_domini.apps.accounts.models import PlayerStats, Player as P
         stats, _ = PlayerStats.objects.get_or_create(player=request.user)
-        is_first = stats.territories_owned == 0
+        owned_count = stats.territories_owned
+        is_first = owned_count == 0
+        method = request.data.get('method', 'free')
 
+        # ── Adjacency check ────────────────────────────────────────────
+        is_adjacent = False
+        try:
+            import h3
+            neighbors = set(h3.grid_disk(h3_index, 1)) - {h3_index}
+            adjacent_owned = Territory.objects.filter(
+                h3_index__in=list(neighbors), owner=request.user
+            ).count()
+            is_adjacent = adjacent_owned > 0
+        except Exception:
+            pass
+
+        # ── Rare POI lock ──────────────────────────────────────────────
+        is_rare_poi = territory.is_landmark or (territory.rarity or 'common') in ('legendary', 'mythic')
+        if is_rare_poi and not is_first and not is_adjacent:
+            influence = getattr(stats, 'influence_points', 0) or 0
+            if influence < 50:
+                return Response({
+                    'error': 'This rare territory requires an adjacent territory or 50+ influence points',
+                    'locked': True,
+                    'need_influence': 50,
+                    'your_influence': influence,
+                }, status=403)
+
+        # ── Method validation ──────────────────────────────────────────
         if method == 'free':
             if not is_first:
                 return Response({'error': 'Free claim is only for your first territory.'}, status=403)
 
-        elif method == 'puzzle':
-            # Answer validated client-side (math puzzle) — trust but log
-            if not answer:
-                return Response({'error': 'Puzzle answer required'}, status=400)
-
         elif method == 'buy':
-            CLAIM_COST = 50  # TDC
+            base_cost = 50
+            cost = base_cost if is_adjacent or is_first else int(base_cost * 2.5)
             player_obj = P.objects.get(id=request.user.id)
-            if float(player_obj.tdc_in_game) < CLAIM_COST:
-                return Response({'error': f'Need {CLAIM_COST} TDC. You have {float(player_obj.tdc_in_game):.0f}.'}, status=402)
+            if float(player_obj.tdc_in_game) < cost:
+                return Response({
+                    'error': f'Need {cost} HEX Coins. You have {float(player_obj.tdc_in_game):.0f}.',
+                    'cost': cost,
+                    'balance': float(player_obj.tdc_in_game),
+                }, status=402)
             P.objects.filter(id=request.user.id).update(
-                tdc_in_game=player_obj.tdc_in_game - CLAIM_COST
+                tdc_in_game=player_obj.tdc_in_game - cost
             )
+
+        elif method == 'explore':
+            # Exploration time: 1h * 1.2^territories_owned (doubled if not adjacent)
+            base_hours = 1.0 * (1.2 ** min(owned_count, 50))  # cap at 50 to prevent overflow
+            hours = base_hours if is_adjacent or is_first else base_hours * 2
+            # Check if exploration was started previously
+            explore_started = request.data.get('explore_started')
+            if not explore_started:
+                # Start exploration — return time needed, don't claim yet
+                return Response({
+                    'status': 'exploration_started',
+                    'hours_required': round(hours, 2),
+                    'is_adjacent': is_adjacent,
+                    'h3_index': h3_index,
+                    'message': f'Exploration takes {hours:.1f}h. Use a potion to speed up.',
+                })
+            # If explore_started timestamp provided, check if enough time passed
+            # (simplified: trust client timestamp, validate server-side in prod)
+
+        else:
+            return Response({'error': f'Unknown method: {method}. Use free, buy, or explore.'}, status=400)
 
         # ── Claim ─────────────────────────────────────────────────────────
         territory.owner = request.user

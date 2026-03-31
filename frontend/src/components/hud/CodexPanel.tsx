@@ -114,7 +114,7 @@ export function CodexPanel({ onClose }: Props) {
   const selectedTokenData = selectedToken ? allTokens.find(t => t.id === selectedToken) : null
 
   return (
-    <GlassPanel title="TOKEN CODEX" onClose={onClose} accent="#7950f2" width={460}>
+    <GlassPanel title="TOKEN CODEX" onClose={onClose} accent="#7950f2">
       {/* Tab row — scrollable */}
       <div style={{
         display: 'flex', gap: 3, overflowX: 'auto', paddingBottom: 8, marginBottom: 10,

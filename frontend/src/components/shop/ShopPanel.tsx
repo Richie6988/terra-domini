@@ -143,7 +143,7 @@ export function ShopPanel({ onClose }: Props) {
 
   return (
     <>
-      <GlassPanel title="SHOP" onClose={onClose} accent="#cc8800" width={Math.min(420, window.innerWidth - 8)}>
+      <GlassPanel title="SHOP" onClose={onClose} accent="#cc8800">
         {/* Kingdom active bonuses banner */}
         {activeKingdom && (
           <div style={{

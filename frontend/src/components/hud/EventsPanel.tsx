@@ -115,7 +115,7 @@ export function EventsPanel({ onClose }: Props) {
   const s = { fontFamily: "'Orbitron', system-ui, sans-serif" } as const
 
   return (
-    <GlassPanel title="EVENTS" onClose={onClose} accent="#f97316" width={480}>
+    <GlassPanel title="EVENTS" onClose={onClose} accent="#f97316">
       {/* Luck stat bar */}
       <div style={{
         display: 'flex', alignItems: 'center', gap: 12, padding: '8px 14px',

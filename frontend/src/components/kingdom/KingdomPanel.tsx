@@ -413,7 +413,7 @@ export function KingdomPanel({ onClose }: Props) {
 
   if (!demoKingdom) {
     return (
-      <GlassPanel title="KINGDOMS" onClose={onClose} accent="#cc8800" width={420}>
+      <GlassPanel title="KINGDOMS" onClose={onClose} accent="#cc8800">
         <div style={{
           textAlign: 'center', padding: 40, color: 'rgba(26,42,58,0.35)',
           fontSize: 8, letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif",

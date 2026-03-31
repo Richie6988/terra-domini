@@ -195,7 +195,7 @@ export function AuctionPanel({ onClose }: Props) {
   }, [])
 
   return (
-    <GlassPanel title="AUCTIONS" onClose={onClose} accent="#cc8800" width="85vw">
+    <GlassPanel title="AUCTIONS" onClose={onClose} accent="#cc8800">
       {!selected ? (
         /* ═══ AUCTION LIST ═══ */
         <div>

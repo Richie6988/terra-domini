@@ -51,9 +51,9 @@ export function GlassPanel({
         }}
       >
         <div style={{
-          width: width || '90vw',
-          maxWidth: 900,
-          maxHeight: '90vh',
+          width: width || '92vw',
+          maxWidth: 960,
+          maxHeight: '92vh',
           pointerEvents: 'auto',
           background: 'linear-gradient(180deg, rgba(235, 242, 250, 0.97) 0%, rgba(220, 230, 242, 0.97) 100%)',
           backdropFilter: 'blur(30px) saturate(1.2)',

@@ -81,22 +81,37 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
   const biome  = t.territory_type || t.biome || 'rural'
   const serieNum = t.token_id ? (parseInt(String(t.token_id)) % cfg.serieMax) + 1 : undefined
 
-  // Claim territory via API
+  // Claim options from backend
+  const [claimOpts, setClaimOpts] = useState<any>(null)
   const [claiming, setClaiming] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
-  const handleClaim = useCallback(async () => {
+
+  // Fetch claim options when card opens
+  useState(() => {
+    if (t.h3_index && player && isFree) {
+      api.get(`/territories/claim-options/?h3_index=${t.h3_index}`).then(r => {
+        setClaimOpts(r.data)
+      }).catch(() => {})
+    }
+  })
+
+  const handleClaim = useCallback(async (method: string) => {
     if (claiming || !t.h3_index) return
     setClaiming(true)
     try {
       const res = await api.post('/territories/claim/', {
         h3_index: t.h3_index,
+        method,
         lat: t.center_lat ?? t.lat,
         lon: t.center_lon ?? t.lon,
       })
-      // Update store with new ownership
+      if (res.data.status === 'exploration_started') {
+        toast.success(`🔍 Exploration started! ${res.data.hours_required}h remaining`)
+        setClaiming(false)
+        return
+      }
       const owned = { ...t, owner_id: player?.id, owner_username: player?.username }
       useStore.getState().setTerritories([owned as any])
-      // Trigger celebration!
       setCelebrating(true)
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.response?.data?.detail || 'Claim failed'
@@ -172,32 +187,53 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
             <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.4)', letterSpacing: 1 }}>HEX/DAY</div>
           </div>
 
-          {/* Action button */}
-          <div style={{ flexShrink: 0 }}>
-            {isFree && player && (
-              <button onClick={handleClaim} disabled={claiming} style={{
-                padding: '10px 20px', borderRadius: 12, border: 'none', cursor: claiming ? 'wait' : 'pointer',
-                background: claiming ? 'rgba(0,60,100,0.1)' : `linear-gradient(135deg, ${cfg.c}dd, ${cfg.c})`,
-                color: ['legendary','mythic','epic'].includes(rarity) ? '#000' : '#fff',
-                fontSize: 10, fontWeight: 900, letterSpacing: 2,
-                boxShadow: claiming ? 'none' : `0 4px 16px ${cfg.c}44`,
-                opacity: claiming ? 0.6 : 1,
-              }}>
-                {claiming ? '⏳ CLAIMING...' : '🏴 CLAIM'}
+          {/* Action buttons — based on claim options */}
+          <div style={{ flexShrink: 0, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+            {isFree && player && claimOpts?.locked && (
+              <div style={{
+                padding: '8px 14px', borderRadius: 10,
+                background: 'rgba(100,100,100,0.1)', border: '1px solid rgba(100,100,100,0.2)',
+                color: '#9CA3AF', fontSize: 8, fontWeight: 700, letterSpacing: 1,
+              }}>🔒 LOCKED</div>
+            )}
+            {isFree && player && !claimOpts?.locked && claimOpts?.options?.map((opt: any) => (
+              <button key={opt.method} onClick={() => handleClaim(opt.method)} disabled={claiming || !opt.available}
+                style={{
+                  padding: '8px 14px', borderRadius: 10, border: 'none', cursor: claiming ? 'wait' : opt.available ? 'pointer' : 'not-allowed',
+                  background: opt.method === 'free'
+                    ? `linear-gradient(135deg, ${cfg.c}dd, ${cfg.c})`
+                    : opt.method === 'buy'
+                    ? 'linear-gradient(135deg, rgba(204,136,0,0.8), rgba(204,136,0,0.6))'
+                    : 'linear-gradient(135deg, rgba(0,153,204,0.6), rgba(0,153,204,0.4))',
+                  color: '#fff', fontSize: 8, fontWeight: 900, letterSpacing: 1,
+                  opacity: (claiming || !opt.available) ? 0.4 : 1,
+                  fontFamily: "'Orbitron', sans-serif",
+                }}>
+                {claiming ? '⏳...' : opt.method === 'free' ? '🏴 FREE' : opt.method === 'buy' ? `💰 ${opt.cost}◆` : `🔍 ${opt.hours}h`}
               </button>
+            ))}
+            {isFree && player && !claimOpts && (
+              <button onClick={() => handleClaim('free')} disabled={claiming} style={{
+                padding: '8px 14px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                background: `linear-gradient(135deg, ${cfg.c}dd, ${cfg.c})`,
+                color: '#fff', fontSize: 8, fontWeight: 900, letterSpacing: 1,
+                fontFamily: "'Orbitron', sans-serif",
+              }}>🏴 CLAIM</button>
             )}
             {isEnemy && (
               <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('combat'), 100) }} style={{
-                padding: '10px 20px', borderRadius: 12, cursor: 'pointer',
+                padding: '8px 14px', borderRadius: 10, cursor: 'pointer',
                 border: '1px solid rgba(220,38,38,0.3)', background: 'rgba(220,38,38,0.08)',
-                color: '#dc2626', fontSize: 10, fontWeight: 900, letterSpacing: 2,
+                color: '#dc2626', fontSize: 8, fontWeight: 900, letterSpacing: 1,
+                fontFamily: "'Orbitron', sans-serif",
               }}>⚔️ ATTACK</button>
             )}
             {isOwned && (
               <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('kingdom'), 100) }} style={{
-                padding: '10px 20px', borderRadius: 12, cursor: 'pointer',
+                padding: '8px 14px', borderRadius: 10, cursor: 'pointer',
                 border: '1px solid rgba(0,153,204,0.3)', background: 'rgba(0,153,204,0.08)',
-                color: '#0099cc', fontSize: 10, fontWeight: 900, letterSpacing: 2,
+                color: '#0099cc', fontSize: 8, fontWeight: 900, letterSpacing: 1,
+                fontFamily: "'Orbitron', sans-serif",
               }}>👑 KINGDOM</button>
             )}
           </div>

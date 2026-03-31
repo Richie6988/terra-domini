@@ -65,7 +65,7 @@ export function CombatPanel({ onClose }: Props) {
   const tdc = parseFloat(String(player?.tdc_in_game ?? 0))
 
   return (
-    <GlassPanel title="MILITARY COMMAND" onClose={onClose} accent="#dc2626" width={420}>
+    <GlassPanel title="MILITARY COMMAND" onClose={onClose} accent="#dc2626">
       {/* Kingdom attack branch status */}
       {activeKingdom && (
         <div style={{

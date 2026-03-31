@@ -143,7 +143,7 @@ export function Token3DViewer({
     renderer.setSize(el.clientWidth, el.clientHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.6
+    renderer.toneMappingExposure = 2.2
     renderer.outputEncoding = THREE.sRGBEncoding
     el.appendChild(renderer.domElement)
     renderer.domElement.style.cursor = 'grab'
@@ -185,12 +185,13 @@ export function Token3DViewer({
     // Materials — EXACT match to Richard's original
     const fMat = new THREE.MeshPhysicalMaterial({
       map: fTex,
-      roughness: 0.02,           // Ultra smooth (original: 0.02)
-      metalness: 0.88,           // Very metallic (original: 0.88)
+      roughness: 0.02,
+      metalness: 0.88,
       clearcoat: 1.0,
-      clearcoatRoughness: 0.01,  // Mirror-like clear coat
+      clearcoatRoughness: 0.01,
       reflectivity: 1.0,
-      envMapIntensity: 10,       // Extremely reflective
+      envMapIntensity: 10,
+      emissive: new THREE.Color(catColor), emissiveIntensity: 0.12,
     })
     const bMat = new THREE.MeshPhysicalMaterial({
       map: bTex, clearcoat: 1, roughness: 0.01, metalness: 0.9,
@@ -429,7 +430,7 @@ export function Token3DViewer({
 
       // Film grain (3000 particles like original)
       fCtx.save(); fCtx.globalAlpha = 0.02
-      for (let i = 0; i < 3000; i++) {
+      for (let i = 0; i < 800; i++) {
         fCtx.fillStyle = Math.random() > 0.5 ? '#fff' : '#000'
         fCtx.fillRect(Math.random() * s, Math.random() * s, 2, 2)
       }

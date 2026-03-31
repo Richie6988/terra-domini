@@ -391,7 +391,7 @@ export function MarketplacePanel({ onClose }: { onClose: () => void }) {
   const setActivePanel = useStore(s => s.setActivePanel)
 
   return (
-    <GlassPanel title="MARKETPLACE" onClose={onClose} accent="#cc8800" width={400}>
+    <GlassPanel title="MARKETPLACE" onClose={onClose} accent="#cc8800">
       {/* Balance */}
       {player && (
         <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:12,
