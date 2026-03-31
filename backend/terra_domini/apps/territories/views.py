@@ -619,22 +619,53 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             )
 
         elif method == 'explore':
-            # Exploration time: 1h * 1.2^territories_owned (doubled if not adjacent)
-            base_hours = 1.0 * (1.2 ** min(owned_count, 50))  # cap at 50 to prevent overflow
+            base_hours = 1.0 * (1.2 ** min(owned_count, 50))
             hours = base_hours if is_adjacent or is_first else base_hours * 2
-            # Check if exploration was started previously
-            explore_started = request.data.get('explore_started')
-            if not explore_started:
-                # Start exploration — return time needed, don't claim yet
+            
+            # Check if already exploring this hex
+            from terra_domini.apps.territories.models import PendingClaim
+            existing = PendingClaim.objects.filter(
+                player=request.user, h3_index=h3_index, status='in_progress'
+            ).first()
+            
+            if existing:
+                # Check if exploration is complete
+                if existing.progress >= 1.0:
+                    existing.status = 'completed'
+                    existing.completed_at = timezone.now()
+                    existing.save()
+                    # Fall through to claim below
+                else:
+                    return Response({
+                        'status': 'in_progress',
+                        'claim_id': existing.id,
+                        'progress': round(existing.progress, 4),
+                        'eta_seconds': int(existing.eta_seconds),
+                        'hours_required': existing.hours_required,
+                        'started_at': existing.started_at.isoformat(),
+                        'h3_index': h3_index,
+                    })
+            else:
+                # Start new exploration
+                claim = PendingClaim.objects.create(
+                    player=request.user,
+                    h3_index=h3_index,
+                    territory=territory,
+                    method='explore',
+                    hours_required=round(hours, 2),
+                    is_adjacent=is_adjacent,
+                    territory_name=territory.poi_name or territory.place_name or h3_index[:12],
+                )
                 return Response({
                     'status': 'exploration_started',
+                    'claim_id': claim.id,
                     'hours_required': round(hours, 2),
+                    'eta_seconds': int(hours * 3600),
                     'is_adjacent': is_adjacent,
                     'h3_index': h3_index,
-                    'message': f'Exploration takes {hours:.1f}h. Use a potion to speed up.',
+                    'started_at': claim.started_at.isoformat(),
+                    'message': f'Exploration started! {hours:.1f}h remaining.',
                 })
-            # If explore_started timestamp provided, check if enough time passed
-            # (simplified: trust client timestamp, validate server-side in prod)
 
         else:
             return Response({'error': f'Unknown method: {method}. Use free, buy, or explore.'}, status=400)
@@ -767,6 +798,40 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             return Response({'territory': data})
         except Exception as e:
             return Response({'error': str(e)}, status=500)
+
+    @action(detail=False, methods=['GET'], url_path='pending-claims')
+    def pending_claims(self, request):
+        """GET /api/territories/pending-claims/ — list player's ongoing claims"""
+        from terra_domini.apps.territories.models import PendingClaim
+        claims = PendingClaim.objects.filter(player=request.user, status='in_progress')
+        data = []
+        for c in claims:
+            data.append({
+                'id': c.id,
+                'h3_index': c.h3_index,
+                'method': c.method,
+                'status': c.status,
+                'progress': round(c.progress, 4),
+                'eta_seconds': int(c.eta_seconds),
+                'hours_required': c.hours_required,
+                'started_at': c.started_at.isoformat(),
+                'is_adjacent': c.is_adjacent,
+                'territory_name': c.territory_name,
+            })
+        return Response(data)
+
+    @action(detail=False, methods=['POST'], url_path='cancel-claim')
+    def cancel_claim(self, request):
+        """POST /api/territories/cancel-claim/ {claim_id}"""
+        from terra_domini.apps.territories.models import PendingClaim
+        claim_id = request.data.get('claim_id')
+        try:
+            claim = PendingClaim.objects.get(id=claim_id, player=request.user, status='in_progress')
+            claim.status = 'cancelled'
+            claim.save()
+            return Response({'status': 'cancelled'})
+        except PendingClaim.DoesNotExist:
+            return Response({'error': 'Claim not found'}, status=404)
 
     @action(detail=False, methods=['POST'], url_path='shield')
     def activate_shield(self, request):

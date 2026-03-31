@@ -501,3 +501,59 @@ class KingdomSkill(models.Model):
 
     def __str__(self):
         return f"{self.player.username}@{self.cluster_id[:8]}: {self.skill.name}"
+
+
+class PendingClaim(models.Model):
+    """Tracks ongoing territory claims (exploration, battles)."""
+    METHOD_CHOICES = [
+        ('explore', 'Exploration'),
+        ('attack', 'Military Attack'),
+        ('buy', 'Purchase'),
+    ]
+    STATUS_CHOICES = [
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+        ('failed', 'Failed'),
+    ]
+
+    player        = models.ForeignKey('accounts.Player', on_delete=models.CASCADE, related_name='pending_claims')
+    h3_index      = models.CharField(max_length=24)
+    territory     = models.ForeignKey(Territory, on_delete=models.SET_NULL, null=True, blank=True)
+    method        = models.CharField(max_length=12, choices=METHOD_CHOICES)
+    status        = models.CharField(max_length=12, choices=STATUS_CHOICES, default='in_progress')
+    started_at    = models.DateTimeField(auto_now_add=True)
+    hours_required = models.FloatField(default=1.0)
+    completed_at  = models.DateTimeField(null=True, blank=True)
+    is_adjacent   = models.BooleanField(default=False)
+    territory_name = models.CharField(max_length=120, blank=True)
+
+    class Meta:
+        db_table = 'pending_claim'
+        ordering = ['-started_at']
+        indexes = [
+            models.Index(fields=['player', 'status']),
+            models.Index(fields=['h3_index', 'status']),
+        ]
+
+    @property
+    def progress(self):
+        """0.0 to 1.0"""
+        from django.utils import timezone
+        if self.status != 'in_progress':
+            return 1.0
+        elapsed = (timezone.now() - self.started_at).total_seconds() / 3600
+        return min(1.0, elapsed / max(self.hours_required, 0.01))
+
+    @property
+    def eta_seconds(self):
+        """Seconds remaining"""
+        from django.utils import timezone
+        if self.status != 'in_progress':
+            return 0
+        elapsed = (timezone.now() - self.started_at).total_seconds()
+        total = self.hours_required * 3600
+        return max(0, total - elapsed)
+
+    def __str__(self):
+        return f"{self.player.username} → {self.h3_index[:12]} ({self.method}, {self.progress:.0%})"

@@ -1,809 +1,224 @@
 /**
- * ProfilePanel — Hexod GDD Section 4
- * Point d'entrée unique haut-gauche: profil, inventaire, stats, historique
- * Complet, production-ready.
+ * ProfilePanel — Empire Overview + Commander Profile + Kingdoms.
+ * This is the MAIN player dashboard. Shows total empire, all kingdoms,
+ * customization options, and aggregate stats.
  */
-import { useState, useRef } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { motion, AnimatePresence } from 'framer-motion'
-import { LogOut, Copy, Camera, ChevronRight, TrendingUp, Shield, Zap, Globe, FlaskConical } from 'lucide-react'
-import { api } from '../../services/api'
-import { SkeletonList } from '../ui/Utils'
-import { CampaignWidget } from './CampaignWidget'
-import { ResourceBadge } from '../ui/ResourceTooltip'
+import { useState } from 'react'
+import { usePlayer, useStore } from '../../store'
+import { useKingdomStore } from '../../store/kingdomStore'
 import { GlassPanel } from '../shared/GlassPanel'
-import { useStore, usePlayer } from '../../store'
+import { CrystalIcon } from '../shared/CrystalIcon'
+import { api } from '../../services/api'
 import toast from 'react-hot-toast'
 
-/* ── constants ─────────────────────────────────────────────── */
-const toNum = (v: unknown) => parseFloat(String(v ?? 0)) || 0
+interface Props { onClose: () => void }
+type Tab = 'empire' | 'kingdoms' | 'commander' | 'stats'
 
-const SPEC = {
-  military:   { label:'⚔️ Militaire',    color:'#EF4444', desc:'Expansion rapide + résistance' },
-  economic:   { label:'💰 Économique',   color:'#F59E0B', desc:'Domination financière' },
-  diplomatic: { label:'🤝 Diplomatique', color:'#3B82F6', desc:'Contrôle sans guerre' },
-  scientific: { label:'🔬 Scientifique', color:'#8B5CF6', desc:'Avantage systémique global' },
-}
-
-const RARITY_C: Record<string,string> = {
-  common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
-  epic:'#8B5CF6', legendary:'#F59E0B', mythic:'#EC4899',
-}
-
-const TABS = [
-  { id:'overview',    label:'Vue d\'ensemble', icon:'📊' },
-  { id:'territories', label:'Territoires',     icon:'🗺️' },
-  { id:'resources',   label:'Ressources',      icon:'📦' },
-  { id:'skills',      label:'Compétences',     icon:'🔬' },
-  { id:'missions',    label:'Missions',        icon:'🎯' },
-  { id:'campaigns',   label:'Campagnes',       icon:'🗺️' },
-  { id:'settings',    label:'Paramètres',      icon:'⚙️' },
+const TABS: { id: Tab; label: string; icon: string }[] = [
+  { id: 'empire',    label: 'EMPIRE',    icon: '🏛' },
+  { id: 'kingdoms',  label: 'KINGDOMS',  icon: '👑' },
+  { id: 'commander', label: 'COMMANDER', icon: '⚙' },
+  { id: 'stats',     label: 'STATS',     icon: '📊' },
 ]
 
-/* ── ProfilePanel ──────────────────────────────────────────── */
-export function ProfilePanel({ onClose }: { onClose: () => void }) {
-  const [tab, setTab] = useState('overview')
-  const player = usePlayer()
-  const logout = useStore(s => s.logout)
+const AVATARS = ['🦅','🐉','🦁','🐺','🦊','🦉','🐍','🦈','🦌','🏴‍☠️','⚔','🛡','👑','💎','🔥','⚡']
 
-  if (!player) return null
-
-  const spec = SPEC[player.spec_path as keyof typeof SPEC] || SPEC.military
-
+function Stat({ label, value, color = '#0099cc' }: { label: string; value: string | number; color?: string }) {
   return (
-    <GlassPanel title="PROFILE" onClose={onClose} accent={spec.color}
-      width={typeof window !== 'undefined' && window.innerWidth < 480 ? window.innerWidth - 16 : 400}>
-      {/* ── Commander hero ── */}
-      <div style={{
-        padding: '20px 20px 16px', flexShrink: 0,
-        background: `linear-gradient(135deg, ${spec.color}14 0%, transparent 60%)`,
-        borderBottom: '1px solid rgba(0,60,100,0.08)',
-      }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, marginBottom: 14 }}>
-          {/* Avatar */}
-          <div style={{
-            width: 60, height: 60, borderRadius: 14, flexShrink: 0,
-            background: `linear-gradient(135deg, ${spec.color}66, ${spec.color}33)`,
-            border: `2px solid ${spec.color}66`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 22, fontWeight: 900, color: '#1a2a3a', letterSpacing: '-1px',
-          }}>
-            {player.avatar_emoji || player.username?.slice(0,2)?.toUpperCase()}
-          </div>
-
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 18, fontWeight: 900, color: '#1a2a3a', lineHeight: 1.2 }}>
-              {player.display_name || player.username}
-            </div>
-            <div style={{ fontSize: 11, color: spec.color, fontWeight: 700, marginTop: 2 }}>
-              {spec.label}
-            </div>
-            <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', marginTop: 1 }}>
-              Rang {player.commander_rank} · {player.email}
-            </div>
-          </div>
-
-          <button onClick={() => { logout(); onClose() }} style={{
-            background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)',
-            borderRadius: 8, padding: '6px 10px', color: '#EF4444',
-            cursor: 'pointer', fontSize: 11, display: 'flex', alignItems: 'center', gap: 4,
-            flexShrink: 0,
-          }}>
-            <LogOut size={12} /> Déconnexion
-          </button>
-        </div>
-
-        {/* XP bar */}
-        <div style={{ marginBottom: 12 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5, fontSize: 10, color: 'rgba(26,42,58,0.45)' }}>
-            <span>XP Commandant</span>
-            <span style={{ color: spec.color }}>{player.commander_xp ?? 0} XP</span>
-          </div>
-          <div style={{ height: 5, background: 'rgba(255,255,255,0.5)', borderRadius: 3, overflow: 'hidden' }}>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${Math.min(100, ((player.commander_xp ?? 0) % 1000) / 10)}%` }}
-              transition={{ duration: 1, ease: 'easeOut' }}
-              style={{ height: '100%', background: `linear-gradient(90deg, ${spec.color}cc, ${spec.color})`, borderRadius: 3 }}
-            />
-          </div>
-          <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.25)', marginTop: 3 }}>
-            {1000 - ((player.commander_xp ?? 0) % 1000)} XP jusqu'au rang {(player.commander_rank ?? 1) + 1}
-          </div>
-        </div>
-
-        {/* KPI row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
-          {[
-            { label: 'Cristaux', value: toNum(player.tdc_in_game).toFixed(0), icon: '💠', color: spec.color },
-            { label: 'Zones', value: player.stats?.territories_owned ?? 0, icon: '🗺️', color: '#3B82F6' },
-            { label: 'Victoires', value: player.stats?.battles_won ?? 0, icon: '⚔️', color: '#EF4444' },
-            { label: 'Score', value: player.stats?.season_score ?? 0, icon: '🏆', color: '#F59E0B' },
-          ].map(k => (
-            <div key={k.label} style={{
-              background: 'rgba(255,255,255,0.5)', borderRadius: 8, padding: '8px 6px', textAlign: 'center',
-              border: '1px solid rgba(0,60,100,0.08)',
-            }}>
-              <div style={{ fontSize: 14 }}>{k.icon}</div>
-              <div style={{ fontSize: 13, fontWeight: 800, color: k.color, fontFamily: 'monospace', lineHeight: 1.2 }}>
-                {String(k.value).length > 6 ? String(k.value).slice(0,5)+'…' : k.value}
-              </div>
-              <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.35)', marginTop: 1 }}>{k.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* ── Tab nav ── */}
-      <div style={{
-        display: 'flex', overflowX: 'auto', flexShrink: 0,
-        borderBottom: '1px solid rgba(0,60,100,0.08)',
-        background: 'rgba(0,0,0,0.3)',
-      }}>
-        {TABS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex: '0 0 auto', padding: '9px 12px', border: 'none', cursor: 'pointer',
-            background: tab === t.id ? `${spec.color}14` : 'transparent',
-            borderBottom: `2px solid ${tab === t.id ? spec.color : 'transparent'}`,
-            color: tab === t.id ? spec.color : '#4B5563',
-            fontSize: 10, fontWeight: tab === t.id ? 700 : 400, whiteSpace: 'nowrap',
-            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-          }}>
-            <span style={{ fontSize: 14 }}>{t.icon}</span>
-            <span>{t.label}</span>
-          </button>
-        ))}
-      </div>
-
-      {/* ── Tab content ── */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-        <AnimatePresence mode="wait">
-          <motion.div key={tab}
-            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }} transition={{ duration: 0.15 }}
-            style={{ padding: '16px 18px', paddingBottom: 80 }}
-          >
-            {tab === 'overview'    && <OverviewTab player={player} spec={spec} />}
-            {tab === 'territories' && <TerritoriesTab player={player} onClose={onClose} />}
-            {tab === 'resources'   && <ResourcesTab />}
-            {tab === 'skills'      && <SkillsTab spec={spec} />}
-            {tab === 'missions'    && <MissionsTab />}
-            {tab === 'campaigns'   && <CampaignWidget />}
-            {tab === 'settings'    && <SettingsTab player={player} spec={spec} />}
-          </motion.div>
-        </AnimatePresence>
-      </div>
-    </GlassPanel>
-  )
-}
-
-/* ── Overview Tab ──────────────────────────────────────────── */
-function OverviewTab({ player, spec }: any) {
-  const { data: live } = useQuery({
-    queryKey: ['player-live'],
-    queryFn: () => api.get('/players/me/').then(r => r.data),
-    refetchInterval: 30000,
-  })
-  const p = live ? { ...player, stats: { ...(player.stats||{}), ...(live.stats||{}) } } : player
-  const stats = p.stats || {}
-
-  const POWER_LAYERS = [
-    { label: 'Physique', icon: '⚔️', items: [
-      { k: 'territories_owned', label: 'Territoires', color: '#3B82F6' },
-      { k: 'battles_won', label: 'Batailles gagnées', color: '#EF4444' },
-      { k: 'total_attack_power', label: 'Puissance attaque', color: '#EF4444' },
-    ]},
-    { label: 'Économique', icon: '💰', items: [
-      { k: 'tdc_earned_total', label: 'HEX Coin gagnés total', color: '#F59E0B' },
-      { k: 'income_per_tick', label: 'Revenus / tick', color: '#F59E0B' },
-      { k: 'cluster_count', label: 'Clusters actifs', color: '#10B981' },
-    ]},
-    { label: 'Informationnel', icon: '🌐', items: [
-      { k: 'influence_score', label: 'Score d\'influence', color: '#8B5CF6' },
-      { k: 'season_score', label: 'Score saison', color: '#EC4899' },
-      { k: 'alliance_rank', label: 'Rang alliance', color: 'rgba(26,42,58,0.45)' },
-    ]},
-  ]
-
-  return (
-    <div>
-      {/* Wallet */}
-      {p.wallet_address && (
-        <div style={{
-          padding: '10px 14px', marginBottom: 14,
-          background: 'rgba(139,92,246,0.08)', borderRadius: 10,
-          border: '1px solid rgba(139,92,246,0.2)',
-          display: 'flex', alignItems: 'center', gap: 10,
-        }}>
-          <span style={{ fontSize: 18 }}>💎</span>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: 10, color: '#8B5CF6', fontWeight: 700, marginBottom: 2 }}>Polygon Wallet</div>
-            <div style={{ fontSize: 10, color: '#C4B5FD', fontFamily: 'monospace',
-              overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {p.wallet_address}
-            </div>
-          </div>
-          <button onClick={() => { navigator.clipboard.writeText(p.wallet_address); toast.success('Copié!') }}
-            style={{ background: 'none', border: 'none', color: '#8B5CF6', cursor: 'pointer' }}>
-            <Copy size={14} />
-          </button>
-        </div>
-      )}
-
-      {/* 3 power layers */}
-      {POWER_LAYERS.map(layer => (
-        <div key={layer.label} style={{ marginBottom: 14 }}>
-          <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', letterSpacing: '0.08em',
-            textTransform: 'uppercase', marginBottom: 7, display: 'flex', gap: 6, alignItems: 'center' }}>
-            <span>{layer.icon}</span> Couche {layer.label}
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-            {layer.items.map(item => (
-              <div key={item.k} style={{
-                background: 'rgba(255,255,255,0.5)', borderRadius: 9, padding: '10px 12px',
-                border: '1px solid rgba(0,60,100,0.08)',
-              }}>
-                <div style={{ fontSize: 14, fontWeight: 800, color: item.color, fontFamily: 'monospace' }}>
-                  {toNum(stats[item.k] ?? p[item.k] ?? 0).toFixed(0)}
-                </div>
-                <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>{item.label}</div>
-              </div>
-            ))}
-          </div>
-        </div>
-      ))}
+    <div style={{ padding: '12px 10px', borderRadius: 12, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.08)', textAlign: 'center' }}>
+      <div style={{ fontSize: 18, fontWeight: 900, color, fontFamily: "'Share Tech Mono', monospace" }}>{value}</div>
+      <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.45)', letterSpacing: 2, marginTop: 3, fontFamily: "'Orbitron', sans-serif" }}>{label}</div>
     </div>
   )
 }
 
-/* ── Territories Tab ───────────────────────────────────────── */
-function TerritoriesTab({ player, onClose }: any) {
-  const [filter, setFilter] = useState<string>('all')
-  const { data, isLoading } = useQuery({
-    queryKey: ['my-territories'],
-    queryFn: () => api.get('/territories-geo/mine/').then(r => r.data),
-    staleTime: 30000,
-  })
+export function ProfilePanel({ onClose }: Props) {
+  const [tab, setTab] = useState<Tab>('empire')
+  const player = usePlayer()
+  const { kingdoms } = useKingdomStore()
+  const [editName, setEditName] = useState(false)
+  const [newName, setNewName] = useState(player?.display_name || player?.username || '')
+  const [avatar, setAvatar] = useState((player as any)?.avatar_url || '🦅')
 
-  const all: any[] = data?.territories || []
-  const rarities = [...new Set(all.map(t => t.rarity || 'common'))]
+  const totalTerr = kingdoms.reduce((s, k) => s + k.territories.length, 0)
+  const totalIncome = kingdoms.reduce((s, k) => s + (k.dailyHex || 0), 0)
 
-  const filtered = filter === 'all' ? all
-    : filter === 'poi' ? all.filter(t => t.is_landmark || t.poi_name)
-    : all.filter(t => (t.rarity || 'common') === filter)
-
-  const totalIncome = all.reduce((s, t) => s + (toNum(t.resource_credits) || 10), 0)
-  const poiCount    = all.filter(t => t.is_landmark || t.poi_name).length
-  const avgRarity   = all.length > 0
-    ? Object.entries({common:0,uncommon:1,rare:2,epic:3,legendary:4,mythic:5})
-        .find(([k]) => k === (all.sort((a,b) =>
-          ({mythic:5,legendary:4,epic:3,rare:2,uncommon:1,common:0}[b.rarity]||0) -
-          ({mythic:5,legendary:4,epic:3,rare:2,uncommon:1,common:0}[a.rarity]||0))[0]?.rarity))?.[0] || 'common'
-    : 'common'
-
-  const teleport = (t: any) => {
-    window.dispatchEvent(new CustomEvent('terra:flyto', {
-      detail: { lat: t.center_lat, lon: t.center_lon, zoom: 15 }
-    }))
-    onClose()
+  const handleSaveName = async () => {
+    try {
+      await api.patch('/players/me/', { display_name: newName })
+      useStore.getState().updatePlayer({ display_name: newName } as any)
+      toast.success('Name updated!'); setEditName(false)
+    } catch { toast.error('Failed') }
   }
 
-  return (
-    <div>
-      {/* KPIs */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 6, marginBottom: 14 }}>
-        <KPI label="Territoires" value={all.length} icon="🗺️" color="#3B82F6" />
-        <KPI label="Revenus/jour" value={`+${Math.round(totalIncome)}`} icon="💰" color="#F59E0B" />
-        <KPI label="POI" value={poiCount} icon="📍" color="#EC4899" />
-      </div>
+  const handleAvatar = async (a: string) => {
+    setAvatar(a)
+    try { await api.patch('/players/me/', { avatar_url: a }); useStore.getState().updatePlayer({ avatar_url: a } as any) } catch {}
+  }
 
-      {/* Filter */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 12, overflowX: 'auto', paddingBottom: 2 }}>
-        {['all', 'poi', ...rarities].map(f => (
-          <button key={f} onClick={() => setFilter(f)} style={{
-            padding: '5px 10px', borderRadius: 20, fontSize: 10, cursor: 'pointer', flexShrink: 0,
-            background: filter === f ? `${RARITY_C[f] || '#3B82F6'}22` : 'rgba(255,255,255,0.04)',
-            border: `1px solid ${filter === f ? (RARITY_C[f] || '#3B82F6') + '55' : 'rgba(0,60,100,0.1)'}`,
-            color: filter === f ? (RARITY_C[f] || '#3B82F6') : '#6B7280', fontWeight: filter === f ? 700 : 400,
+  const SKILL_COLORS: Record<string, string> = { attack:'#dc2626', defense:'#3b82f6', economy:'#cc8800', influence:'#22c55e', technology:'#8b5cf6', extraction:'#f59e0b' }
+
+  return (
+    <GlassPanel title="EMPIRE" onClose={onClose} accent="#0099cc">
+      {/* Tabs */}
+      <div style={{ display: 'flex', gap: 2, marginBottom: 16 }}>
+        {TABS.map(t => (
+          <button key={t.id} onClick={() => setTab(t.id)} style={{
+            flex: 1, padding: '10px 6px', border: 'none', cursor: 'pointer',
+            background: tab === t.id ? 'rgba(0,153,204,0.1)' : 'transparent',
+            borderBottom: tab === t.id ? '2px solid #0099cc' : '2px solid transparent',
+            color: tab === t.id ? '#0099cc' : 'rgba(26,42,58,0.4)',
+            fontSize: 8, fontWeight: 700, letterSpacing: 2, fontFamily: "'Orbitron', sans-serif",
+            borderRadius: '8px 8px 0 0', transition: 'all 0.2s',
           }}>
-            {f === 'all' ? `Tous (${all.length})` : f === 'poi' ? `📍 POI (${poiCount})` : `${f} (${all.filter(t => (t.rarity||'common')===f).length})`}
+            <span style={{ fontSize: 14, display: 'block', marginBottom: 2 }}>{t.icon}</span>{t.label}
           </button>
         ))}
       </div>
 
-      {isLoading && <LoadingState />}
-      {!isLoading && filtered.length === 0 && <EmptyState icon="🗺️" msg="Aucun territoire" sub="Réclamez votre premier hex sur la carte" />}
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        {filtered.map(t => (
-          <TerritoryCard key={t.h3_index} territory={t} onClick={() => teleport(t)} />
-        ))}
-      </div>
-    </div>
-  )
-}
-
-function TerritoryCard({ territory: t, onClick }: any) {
-  const rarity  = t.rarity || 'common'
-  const rc      = RARITY_C[rarity] || '#9CA3AF'
-  const name    = t.custom_name || t.poi_name || t.place_name || t.h3_index?.slice(0,10)+'…'
-  const hasPOI  = !!(t.poi_name || t.is_landmark)
-  const income  = toNum(t.resource_credits) || 10
-
-  return (
-    <motion.button
-      whileHover={{ scale: 1.01 }} whileTap={{ scale: 0.99 }}
-      onClick={onClick}
-      style={{
-        width: '100%', textAlign: 'left', padding: '10px 12px',
-        background: 'rgba(255,255,255,0.5)', borderRadius: 10, cursor: 'pointer',
-        border: `1px solid ${rc}22`, display: 'flex', alignItems: 'center', gap: 10,
-        borderLeft: `3px solid ${t.border_color || rc}`,
-      }}
-    >
-      <span style={{ fontSize: 22, flexShrink: 0 }}>{t.custom_emoji || t.poi_emoji || '🏴'}</span>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 13, fontWeight: 700, color: '#1a2a3a',
-          overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
-        <div style={{ display: 'flex', gap: 6, marginTop: 3, flexWrap: 'wrap' }}>
-          <Chip color={rc}>{rarity}</Chip>
-          {hasPOI && <Chip color="#EC4899">📍 POI</Chip>}
-          <Chip color="#6B7280">{t.territory_type || 'standard'}</Chip>
-          {t.is_shiny && <Chip color="#FCD34D">✨ Shiny</Chip>}
-        </div>
-      </div>
-      <div style={{ textAlign: 'right', flexShrink: 0 }}>
-        <div style={{ fontSize: 12, color: '#F59E0B', fontFamily: 'monospace', fontWeight: 700 }}>+{Math.round(income)}</div>
-        <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.25)' }}>HEX Coin/jour</div>
-        <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.25)', marginTop: 2 }}>📍</div>
-      </div>
-    </motion.button>
-  )
-}
-
-/* ── Resources Tab ─────────────────────────────────────────── */
-const RESOURCES = [
-  { key:'res_fer',         label:'Fer',           icon:'🪨', cat:'physique', color:'rgba(26,42,58,0.45)' },
-  { key:'res_cuivre',      label:'Cuivre',        icon:'🟠', cat:'physique', color:'rgba(26,42,58,0.45)' },
-  { key:'res_aluminium',   label:'Aluminium',     icon:'⬜', cat:'physique', color:'rgba(26,42,58,0.45)' },
-  { key:'res_acier',       label:'Acier',         icon:'⚙️', cat:'physique', color:'rgba(26,42,58,0.45)' },
-  { key:'res_titanium',    label:'Titanium',      icon:'🔷', cat:'physique', color:'rgba(26,42,58,0.45)' },
-  { key:'res_petrole',     label:'Pétrole',       icon:'🛢️', cat:'energie',  color:'#F59E0B' },
-  { key:'res_gaz',         label:'Gaz naturel',   icon:'💨', cat:'energie',  color:'#F59E0B' },
-  { key:'res_charbon',     label:'Charbon',       icon:'⬛', cat:'energie',  color:'#F59E0B' },
-  { key:'res_uranium',     label:'Uranium',       icon:'☢️', cat:'energie',  color:'#10B981' },
-  { key:'res_silicium',    label:'Silicium',      icon:'💠', cat:'tech',     color:'#8B5CF6' },
-  { key:'res_terres_rares',label:'Terres rares',  icon:'💎', cat:'tech',     color:'#8B5CF6' },
-  { key:'res_composants',  label:'Composants',    icon:'🔌', cat:'tech',     color:'#8B5CF6' },
-  { key:'res_donnees',     label:'Données',       icon:'📊', cat:'info',     color:'#3B82F6' },
-  { key:'res_main_oeuvre', label:'Main-d\'œuvre', icon:'👷', cat:'info',     color:'#3B82F6' },
-  { key:'res_nourriture',  label:'Nourriture',    icon:'🌾', cat:'vital',    color:'#10B981' },
-  { key:'res_eau',         label:'Eau',           icon:'💧', cat:'vital',    color:'#10B981' },
-  { key:'res_influence',   label:'Influence',     icon:'🌐', cat:'info',     color:'#3B82F6' },
-  { key:'res_stabilite',   label:'Stabilité',     icon:'⚖️', cat:'vital',    color:'#10B981' },
-  { key:'res_hex_HEX Coin',label:'HEX Coin',  icon:'💠', cat:'hex',      color:'#EC4899' },
-]
-
-const CAT_CONFIG: Record<string, { label:string; color:string }> = {
-  physique: { label:'⚙️ Physique',       color:'rgba(26,42,58,0.45)' },
-  energie:  { label:'⚡ Énergie',         color:'#F59E0B' },
-  tech:     { label:'🔬 Technologie',     color:'#8B5CF6' },
-  info:     { label:'📡 Informationnel',  color:'#3B82F6' },
-  vital:    { label:'🌱 Vital',           color:'#10B981' },
-  hex:      { label:'💠 HEX Coin',    color:'#EC4899' },
-}
-
-function ResourcesTab() {
-  const { data, isLoading } = useQuery({
-    queryKey: ['my-territories-resources'],
-    queryFn: async () => {
-      const r = await api.get('/territories-geo/mine/')
-      const territories = r.data.territories || []
-      const totals: Record<string,number> = {}
-      RESOURCES.forEach(res => { totals[res.key] = 0 })
-      territories.forEach((t: any) => {
-        RESOURCES.forEach(res => {
-          totals[res.key] += toNum(t[res.key] || 0)
-        })
-      })
-      return { totals, territory_count: territories.length }
-    },
-    staleTime: 60000,
-  })
-
-  const byCategory: Record<string, typeof RESOURCES> = {}
-  RESOURCES.forEach(r => { byCategory[r.cat] = [...(byCategory[r.cat]||[]), r] })
-
-  if (isLoading) return <LoadingState />
-  const totals = data?.totals || {}
-
-  return (
-    <div>
-      <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', marginBottom: 14, lineHeight: 1.5 }}>
-        Production cumulée de vos {data?.territory_count || 0} territoires.
-        Les ressources alimentent l'arbre de compétences et les constructions.
-      </div>
-
-      {Object.entries(byCategory).map(([cat, resources]) => {
-        const cc = CAT_CONFIG[cat]
-        return (
-          <div key={cat} style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 9, color: cc.color, fontWeight: 700,
-              letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: 7 }}>
-              {cc.label}
+      {/* ═══ EMPIRE ═══ */}
+      {tab === 'empire' && (<div>
+        {/* Commander card */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 14, borderRadius: 14, background: 'linear-gradient(135deg, rgba(0,153,204,0.04), rgba(121,80,242,0.04))', border: '1px solid rgba(0,60,100,0.08)', marginBottom: 16 }}>
+          <div style={{ width: 52, height: 52, borderRadius: 14, background: 'linear-gradient(135deg, #0099cc18, #7950f218)', border: '2px solid rgba(0,153,204,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26 }}>{avatar}</div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 15, fontWeight: 900, color: '#1a2a3a', fontFamily: "'Orbitron', sans-serif", letterSpacing: 3 }}>{player?.display_name || player?.username || 'COMMANDER'}</div>
+            <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginTop: 3 }}>LEVEL {(player as any)?.level || 1} · SEASON 1</div>
+          </div>
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+              <CrystalIcon size="sm" />
+              <span style={{ fontSize: 17, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono'" }}>{((player as any)?.tdc_in_game || 100).toLocaleString()}</span>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 5 }}>
-              {resources.map(res => {
-                const val = totals[res.key] || 0
-                const max = Math.max(...resources.map(r => totals[r.key]||0)) || 1
+            <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.25)', letterSpacing: 1, marginTop: 2 }}>HEX COINS</div>
+          </div>
+        </div>
+
+        {/* Stats grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 18 }}>
+          <Stat label="TERRITORIES" value={totalTerr} />
+          <Stat label="KINGDOMS" value={kingdoms.length} color="#cc8800" />
+          <Stat label="INCOME/DAY" value={`${totalIncome}◆`} color="#22c55e" />
+          <Stat label="POWER" value={kingdoms.reduce((s, k) => s + (k.militaryPower || 0), 0)} color="#dc2626" />
+        </div>
+
+        {/* Kingdoms */}
+        <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', sans-serif" }}>YOUR KINGDOMS</div>
+        {kingdoms.length === 0 ? (
+          <div style={{ padding: 28, textAlign: 'center', borderRadius: 14, background: 'rgba(0,60,100,0.02)', border: '1px dashed rgba(0,60,100,0.1)' }}>
+            <div style={{ fontSize: 28, marginBottom: 10 }}>🏰</div>
+            <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', fontWeight: 600 }}>No kingdoms yet — claim your first territory!</div>
+          </div>
+        ) : kingdoms.map(k => (
+          <div key={k.id} onClick={() => setTab('kingdoms')} style={{ padding: 14, borderRadius: 12, marginBottom: 8, cursor: 'pointer', background: `linear-gradient(135deg, ${k.color}08, rgba(255,255,255,0.3))`, border: `1px solid ${k.color}25`, transition: 'all 0.15s' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <span style={{ fontSize: 12, fontWeight: 900, color: '#1a2a3a', fontFamily: "'Orbitron', sans-serif", letterSpacing: 2 }}>{k.name}</span>
+              <span style={{ padding: '2px 8px', borderRadius: 8, background: `${k.color}12`, color: k.color, fontSize: 8, fontWeight: 700 }}>{k.territories.length} HEX</span>
+            </div>
+            <div style={{ display: 'flex', gap: 3 }}>
+              {Object.entries(k.skills || {}).slice(0, 6).map(([skill, lvl]: [string, any]) => (
+                <div key={skill} style={{ flex: 1, height: 3, borderRadius: 2, background: 'rgba(0,60,100,0.05)', overflow: 'hidden' }}>
+                  <div style={{ width: `${Math.min((lvl || 0) * 14, 100)}%`, height: '100%', borderRadius: 2, background: SKILL_COLORS[skill] || '#999' }} />
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>)}
+
+      {/* ═══ KINGDOMS ═══ */}
+      {tab === 'kingdoms' && (<div>
+        <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 10, fontFamily: "'Orbitron', sans-serif" }}>KINGDOM MANAGEMENT</div>
+        {kingdoms.map(k => (
+          <div key={k.id} style={{ padding: 16, borderRadius: 14, marginBottom: 12, background: 'rgba(255,255,255,0.3)', border: `1px solid ${k.color}20` }}>
+            <div style={{ fontSize: 14, fontWeight: 900, color: '#1a2a3a', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif", marginBottom: 12 }}>{k.name}</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
+              {(['attack','defense','economy','influence','technology','extraction'] as const).map(skill => {
+                const lvl = k.skills?.[skill] || 0
                 return (
-                  <div key={res.key} style={{
-                    background: val > 0 ? `${res.color}0d` : 'rgba(255,255,255,0.02)',
-                    borderRadius: 8, padding: '8px 10px',
-                    border: `1px solid ${val > 0 ? res.color + '22' : 'rgba(255,255,255,0.04)'}`,
-                  }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 5 }}>
-                      <ResourceBadge resource={res.key} showValue={false} />
-                      <span style={{ fontSize: 10, color: val > 0 ? '#E5E7EB' : '#4B5563', fontWeight: 600 }}>
-                        {res.label}
-                      </span>
+                  <div key={skill} style={{ padding: '6px 8px', borderRadius: 8, background: `${SKILL_COLORS[skill]}06`, border: `1px solid ${SKILL_COLORS[skill]}12` }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: 7, color: SKILL_COLORS[skill], fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>{skill}</span>
+                      <span style={{ fontSize: 10, fontWeight: 900, color: SKILL_COLORS[skill], fontFamily: "'Share Tech Mono'" }}>Lv.{lvl}</span>
                     </div>
-                    <div style={{ height: 3, background: 'rgba(255,255,255,0.5)', borderRadius: 2, marginBottom: 4 }}>
-                      <div style={{ height: '100%', width: `${(val/max)*100}%`,
-                        background: res.color, borderRadius: 2, transition: 'width 0.5s' }} />
-                    </div>
-                    <div style={{ fontSize: 11, fontWeight: 800, color: val > 0 ? res.color : '#374151',
-                      fontFamily: 'monospace' }}>
-                      {res.key === 'res_hex_HEX Coin' ? val.toFixed(2) : Math.round(val)}
-                      <span style={{ fontSize: 8, color: 'rgba(26,42,58,0.35)', fontWeight: 400 }}>/jour</span>
+                    <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,0,0,0.04)', marginTop: 4 }}>
+                      <div style={{ width: `${Math.min(lvl * 14, 100)}%`, height: '100%', borderRadius: 2, background: SKILL_COLORS[skill] }} />
                     </div>
                   </div>
                 )
               })}
             </div>
           </div>
-        )
-      })}
-    </div>
-  )
-}
+        ))}
+        {kingdoms.length === 0 && <div style={{ padding: 28, textAlign: 'center', color: 'rgba(26,42,58,0.4)', fontSize: 11 }}>Claim territories to create your first kingdom.</div>}
+      </div>)}
 
-/* ── Skills Tab ────────────────────────────────────────────── */
-const BRANCH_CONFIG = {
-  attack:    { label:'⚔️ Attaque',      color:'#EF4444' },
-  defense:   { label:'🛡️ Défense',      color:'#3B82F6' },
-  economy:   { label:'💰 Économie',     color:'#F59E0B' },
-  influence: { label:'🌐 Rayonnement',  color:'#10B981' },
-  tech:      { label:'🔬 Technologies', color:'#8B5CF6' },
-}
-
-function SkillsTab({ spec }: any) {
-  const [branch, setBranch] = useState('attack')
-  const qc = useQueryClient()
-
-  const { data } = useQuery({
-    queryKey: ['skill-tree'],
-    queryFn: () => api.get('/progression/skills/').then(r => r.data),
-  })
-
-  const unlock = useMutation({
-    mutationFn: (id: number) => api.post(`/progression/skills/${id}/unlock/`),
-    onSuccess: () => { toast.success('Compétence débloquée!'); qc.invalidateQueries({ queryKey: ['skill-tree'] }) },
-    onError: (e: any) => toast.error(e?.response?.data?.error || 'Ressources insuffisantes'),
-  })
-
-  const tree: Record<string, any[]> = data?.tree || {}
-  const cfg = BRANCH_CONFIG[branch as keyof typeof BRANCH_CONFIG]
-  const skills = tree[branch] || []
-  const unlockedCount = data?.unlocked_count || 0
-  const totalSkills = Object.values(tree).reduce((s, v) => s + v.length, 0)
-
-  return (
-    <div>
-      {/* Progress */}
-      <div style={{ marginBottom: 14, padding: '10px 14px', background: 'rgba(255,255,255,0.5)', borderRadius: 10 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: 'rgba(26,42,58,0.45)', marginBottom: 5 }}>
-          <span>Compétences débloquées</span>
-          <span style={{ color: spec.color, fontWeight: 700 }}>{unlockedCount} / {totalSkills}</span>
+      {/* ═══ COMMANDER ═══ */}
+      {tab === 'commander' && (<div>
+        <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', sans-serif" }}>COMMANDER NAME</div>
+        <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
+          <input value={newName} onChange={e => setNewName(e.target.value)} disabled={!editName} maxLength={32} style={{
+            flex: 1, padding: '10px 14px', borderRadius: 10, background: editName ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.3)',
+            border: editName ? '1px solid rgba(0,153,204,0.3)' : '1px solid rgba(0,60,100,0.08)', color: '#1a2a3a', fontSize: 13, fontWeight: 700, outline: 'none', fontFamily: "'Orbitron', sans-serif", letterSpacing: 2,
+          }} />
+          {editName
+            ? <button onClick={handleSaveName} style={{ padding: '10px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #0099cc, #0077aa)', color: '#fff', fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>SAVE</button>
+            : <button onClick={() => setEditName(true)} style={{ padding: '10px 16px', borderRadius: 10, cursor: 'pointer', border: '1px solid rgba(0,60,100,0.12)', background: 'rgba(255,255,255,0.5)', color: 'rgba(26,42,58,0.5)', fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>EDIT</button>
+          }
         </div>
-        <div style={{ height: 4, background: 'rgba(255,255,255,0.5)', borderRadius: 2 }}>
-          <div style={{ height: '100%', width: `${totalSkills ? (unlockedCount/totalSkills)*100 : 0}%`,
-            background: spec.color, borderRadius: 2, transition: 'width 0.5s' }} />
-        </div>
-      </div>
 
-      {/* Branch tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 14, overflowX: 'auto' }}>
-        {Object.entries(BRANCH_CONFIG).map(([id, bc]) => {
-          const branchSkills = tree[id] || []
-          const branchUnlocked = branchSkills.filter((s: any) => s.unlocked).length
-          return (
-            <button key={id} onClick={() => setBranch(id)} style={{
-              padding: '6px 10px', borderRadius: 8, cursor: 'pointer', flexShrink: 0,
-              background: branch === id ? `${bc.color}22` : 'rgba(255,255,255,0.04)',
-              border: `1px solid ${branch === id ? bc.color + '55' : 'rgba(0,60,100,0.08)'}`,
-              color: branch === id ? bc.color : '#4B5563', fontSize: 10, fontWeight: branch === id ? 700 : 400,
-            }}>
-              {bc.label.split(' ')[0]}<br/>
-              <span style={{ fontSize: 8 }}>{branchUnlocked}/{branchSkills.length}</span>
-            </button>
-          )
-        })}
-      </div>
-
-      {/* Skill nodes */}
-      <div style={{ fontSize: 10, color: cfg.color, fontWeight: 700, letterSpacing: '0.1em',
-        textTransform: 'uppercase', marginBottom: 10 }}>{cfg.label}</div>
-
-      {skills.length === 0 && <LoadingState />}
-      {skills.map((s: any, i: number) => (
-        <SkillRow key={s.id} skill={s} color={cfg.color} index={i}
-          onUnlock={() => unlock.mutate(s.id)} />
-      ))}
-    </div>
-  )
-}
-
-function SkillRow({ skill: s, color, index, onUnlock }: any) {
-  const [open, setOpen] = useState(false)
-  return (
-    <div style={{
-      marginBottom: 6, borderRadius: 10, overflow: 'hidden',
-      background: s.unlocked ? `${color}0e` : 'rgba(255,255,255,0.03)',
-      border: `1px solid ${s.unlocked ? color + '33' : 'rgba(0,60,100,0.08)'}`,
-    }}>
-      <div onClick={() => setOpen(!open)} style={{ padding: '11px 13px', display: 'flex', gap: 10,
-        alignItems: 'center', cursor: 'pointer' }}>
-        <div style={{ width: 36, height: 36, borderRadius: 9, flexShrink: 0,
-          background: s.unlocked ? `${color}22` : 'rgba(0,60,100,0.08)',
-          border: `1px solid ${s.unlocked ? color+'44' : 'rgba(0,60,100,0.1)'}`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
-          {s.icon}
-        </div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: s.unlocked ? '#fff' : '#9CA3AF' }}>{s.name}</div>
-          <div style={{ fontSize: 10, color: s.unlocked ? color : '#6B7280', marginTop: 1 }}>{s.effect}</div>
-        </div>
-        <span style={{ fontSize: s.unlocked ? 16 : 12, color: s.unlocked ? color : '#374151' }}>
-          {s.unlocked ? '✅' : open ? '🔓' : '🔒'}
-        </span>
-      </div>
-
-      <AnimatePresence>
-        {open && (
-          <motion.div initial={{ height: 0 }} animate={{ height: 'auto' }} exit={{ height: 0 }} style={{ overflow: 'hidden' }}>
-            <div style={{ padding: '0 13px 12px' }}>
-              <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>
-                Ressources requises
-              </div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, marginBottom: 10 }}>
-                {s.cost_json.map((c: string) => (
-                  <span key={c} style={{ fontSize: 10, padding: '3px 8px', borderRadius: 5,
-                    background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.09)',
-                    color: 'rgba(26,42,58,0.6)' }}>{c}</span>
-                ))}
-              </div>
-              {!s.unlocked && (
-                <button onClick={e => { e.stopPropagation(); onUnlock() }} style={{
-                  width: '100%', padding: '9px', border: 'none', borderRadius: 8, cursor: 'pointer',
-                  background: `linear-gradient(135deg, ${color}cc, ${color})`,
-                  color: '#000', fontSize: 12, fontWeight: 800,
-                }}>Débloquer</button>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-}
-
-/* ── Missions Tab ──────────────────────────────────────────── */
-function MissionsTab() {
-  const qc = useQueryClient()
-  const { data } = useQuery({
-    queryKey: ['daily-missions'],
-    queryFn: () => api.get('/progression/daily-missions/').then(r => r.data),
-    staleTime: 30000,
-  })
-
-  const claim = useMutation({
-    mutationFn: (id: number) => api.post(`/progression/${id}/claim-mission/`),
-    onSuccess: () => { toast.success('Récompense réclamée!'); qc.invalidateQueries({ queryKey: ['daily-missions'] }) },
-  })
-
-  const missions: any[] = data?.missions || []
-  const completed = missions.filter(m => m.completed && !m.claimed).length
-  const totalReward = missions.reduce((s, m) => s + (!m.claimed ? m.reward_tdc : 0), 0)
-
-  return (
-    <div>
-      {data?.all_complete && (
-        <div style={{ textAlign: 'center', padding: '14px', background: 'rgba(16,185,129,0.08)',
-          border: '1px solid rgba(16,185,129,0.2)', borderRadius: 10, marginBottom: 16 }}>
-          <div style={{ fontSize: 24, marginBottom: 4 }}>🎉</div>
-          <div style={{ fontSize: 13, color: '#10B981', fontWeight: 700 }}>Toutes les missions complétées!</div>
-          <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>Revenez demain pour de nouvelles missions</div>
-        </div>
-      )}
-
-      {completed > 0 && (
-        <div style={{ padding: '10px 14px', background: 'rgba(245,158,11,0.08)',
-          border: '1px solid rgba(245,158,11,0.2)', borderRadius: 10, marginBottom: 14,
-          display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ fontSize: 12, color: '#F59E0B' }}>
-            {completed} récompense{completed > 1 ? 's' : ''} disponible{completed > 1 ? 's' : ''}
-          </span>
-          <span style={{ fontSize: 11, color: '#FCD34D', fontWeight: 700 }}>+{totalReward} HEX Coin</span>
-        </div>
-      )}
-
-      {missions.length === 0 ? <LoadingState /> : missions.map((m: any) => (
-        <MissionRow key={m.id} mission={m} onClaim={() => claim.mutate(m.id)} />
-      ))}
-    </div>
-  )
-}
-
-function MissionRow({ mission: m, onClaim }: any) {
-  const pct = Math.min(100, (m.current_count / m.target_count) * 100)
-  return (
-    <div style={{
-      padding: '12px 13px', marginBottom: 8, borderRadius: 10, opacity: m.is_claimed ? 0.45 : 1,
-      background: m.completed ? 'rgba(16,185,129,0.07)' : 'rgba(255,255,255,0.03)',
-      border: `1px solid ${m.completed ? 'rgba(16,185,129,0.25)' : 'rgba(0,60,100,0.08)'}`,
-    }}>
-      <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-        <span style={{ fontSize: 22, flexShrink: 0 }}>{m.icon ?? '🎯'}</span>
-        <div style={{ flex: 1 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
-            <span style={{ fontSize: 12, color: '#1a2a3a', fontWeight: 600 }}>{m.title}</span>
-            <span style={{ fontSize: 11, color: '#F59E0B', fontFamily: 'monospace', fontWeight: 700 }}>+{m.reward_tdc} HEX Coin</span>
-          </div>
-          <div style={{ height: 4, background: 'rgba(0,60,100,0.1)', borderRadius: 2, marginBottom: 4 }}>
-            <motion.div
-              initial={{ width: 0 }}
-              animate={{ width: `${pct}%` }}
-              transition={{ duration: 0.8, ease: 'easeOut' }}
-              style={{ height: '100%', background: m.completed ? '#10B981' : '#3B82F6', borderRadius: 2 }}
-            />
-          </div>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <span style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)' }}>{m.current_count}/{m.target_count}</span>
-            {m.completed && !m.is_claimed && (
-              <button onClick={onClaim} style={{ fontSize: 10, padding: '3px 10px',
-                background: 'rgba(16,185,129,0.2)', border: '1px solid rgba(16,185,129,0.4)',
-                borderRadius: 5, color: '#10B981', cursor: 'pointer', fontWeight: 700 }}>
-                Réclamer
-              </button>
-            )}
-            {m.is_claimed && <span style={{ fontSize: 10, color: '#10B981' }}>✓ Réclamée</span>}
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-/* ── Settings Tab ──────────────────────────────────────────── */
-function SettingsTab({ player, spec }: any) {
-  const qc = useQueryClient()
-  const [username, setUsername] = useState(player.display_name || player.username || '')
-  const [emoji, setEmoji] = useState(player.avatar_emoji || '🎖️')
-  const [path, setPath] = useState(player.spec_path || 'military')
-  const [saving, setSaving] = useState(false)
-
-  const EMOJIS = ['🎖️','⚔️','🛡️','👑','🔬','💰','🌐','🏴','🎯','🔥','❄️','⚡','💎','🧠','🤝']
-  const PATHS: [string, string, string][] = [
-    ['military',   '⚔️ Militaire',    'Attaque +15%, défense +10%'],
-    ['economic',   '💰 Économique',   'Revenus +20%, HEX Coin +15%'],
-    ['diplomatic', '🤝 Diplomatique', 'Influence +25%, coûts attaque -10%'],
-    ['scientific', '🔬 Scientifique', 'Recherche x2, déblocages accélérés'],
-  ]
-
-  const save = async () => {
-    setSaving(true)
-    try {
-      await api.patch('/players/update-profile/', {
-        display_name: username, avatar_emoji: emoji, spec_path: path,
-      })
-      toast.success('Profil mis à jour!')
-      qc.invalidateQueries({ queryKey: ['player'] })
-      qc.invalidateQueries({ queryKey: ['player-live'] })
-    } catch (e: any) { toast.error(e?.response?.data?.error || 'Erreur') }
-    finally { setSaving(false) }
-  }
-
-  return (
-    <div>
-      {/* Display name */}
-      <Section label="Nom d'affichage">
-        <input value={username} onChange={e => setUsername(e.target.value)} placeholder="Votre nom…"
-          style={{ width: '100%', padding: '10px 12px', background: 'rgba(255,255,255,0.5)',
-            border: '1px solid rgba(255,255,255,0.12)', borderRadius: 9, color: '#1a2a3a',
-            fontSize: 14, boxSizing: 'border-box' }} />
-      </Section>
-
-      {/* Avatar emoji */}
-      <Section label="Avatar">
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-          {EMOJIS.map(e => (
-            <button key={e} onClick={() => setEmoji(e)} style={{
-              width: 40, height: 40, fontSize: 20, borderRadius: 9, cursor: 'pointer',
-              background: emoji === e ? `${spec.color}22` : 'rgba(0,60,100,0.08)',
-              border: `2px solid ${emoji === e ? spec.color : 'transparent'}`,
-            }}>{e}</button>
+        <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', sans-serif" }}>AVATAR</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 6, marginBottom: 18 }}>
+          {AVATARS.map(a => (
+            <button key={a} onClick={() => handleAvatar(a)} style={{
+              aspectRatio: '1', borderRadius: 12, border: avatar === a ? '2px solid #0099cc' : '1px solid rgba(0,60,100,0.06)', cursor: 'pointer',
+              background: avatar === a ? 'linear-gradient(135deg, #0099cc18, #7950f218)' : 'rgba(255,255,255,0.3)',
+              fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: avatar === a ? '0 0 10px rgba(0,153,204,0.2)' : 'none', transition: 'all 0.15s',
+            }}>{a}</button>
           ))}
         </div>
-      </Section>
 
-      {/* Spec path */}
-      <Section label="Voie stratégique">
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-          {PATHS.map(([id, label, desc]) => {
-            const pathColor = id === 'military' ? '#EF4444' : id === 'economic' ? '#F59E0B'
-              : id === 'diplomatic' ? '#3B82F6' : '#8B5CF6'
-            return (
-              <button key={id} onClick={() => setPath(id)} style={{
-                padding: '10px 12px', borderRadius: 9, cursor: 'pointer', textAlign: 'left',
-                background: path === id ? `${pathColor}14` : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${path === id ? pathColor + '55' : 'rgba(0,60,100,0.08)'}`,
-              }}>
-                <div style={{ fontSize: 12, fontWeight: 700, color: path === id ? pathColor : '#9CA3AF' }}>{label}</div>
-                <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>{desc}</div>
-              </button>
-            )
-          })}
+        <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', sans-serif" }}>ACCOUNT</div>
+        <div style={{ padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.3)', border: '1px solid rgba(0,60,100,0.06)', fontSize: 11, color: 'rgba(26,42,58,0.5)', lineHeight: 2 }}>
+          Email: <strong style={{ color: '#1a2a3a' }}>{player?.email}</strong><br/>
+          Username: <strong style={{ color: '#1a2a3a' }}>{player?.username}</strong><br/>
+          Joined: <strong style={{ color: '#1a2a3a' }}>{player?.date_joined ? new Date(player.date_joined).toLocaleDateString() : '—'}</strong>
         </div>
-      </Section>
+      </div>)}
 
-      <button onClick={save} disabled={saving} style={{
-        width: '100%', padding: '13px', border: 'none', borderRadius: 10, cursor: 'pointer',
-        background: saving ? 'rgba(0,60,100,0.12)' : `linear-gradient(135deg, ${spec.color}cc, ${spec.color})`,
-        color: '#000', fontSize: 14, fontWeight: 900,
-      }}>{saving ? 'Sauvegarde…' : '💾 Sauvegarder'}</button>
-    </div>
-  )
-}
-
-/* ── Helpers ───────────────────────────────────────────────── */
-function Section({ label, children }: any) {
-  return (
-    <div style={{ marginBottom: 18 }}>
-      <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase', marginBottom: 8 }}>
-        {label}
-      </div>
-      {children}
-    </div>
-  )
-}
-function Chip({ children, color }: any) {
-  return (
-    <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4,
-      background: `${color}18`, color, border: `1px solid ${color}33`, fontWeight: 600 }}>
-      {children}
-    </span>
-  )
-}
-function KPI({ label, value, icon, color }: any) {
-  return (
-    <div style={{ background: 'rgba(255,255,255,0.5)', borderRadius: 9, padding: '10px 8px', textAlign: 'center',
-      border: '1px solid rgba(0,60,100,0.08)' }}>
-      <div style={{ fontSize: 14 }}>{icon}</div>
-      <div style={{ fontSize: 14, fontWeight: 800, color, fontFamily: 'monospace' }}>{value}</div>
-      <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.35)', marginTop: 1 }}>{label}</div>
-    </div>
-  )
-}
-function LoadingState() {
-  return <SkeletonList count={4} />
-}
-function EmptyState({ icon, msg, sub }: any) {
-  return (
-    <div style={{ textAlign: 'center', padding: '40px 20px', color: 'rgba(26,42,58,0.35)' }}>
-      <div style={{ fontSize: 36, marginBottom: 10 }}>{icon}</div>
-      <div style={{ fontSize: 14, color: 'rgba(26,42,58,0.45)', fontWeight: 600 }}>{msg}</div>
-      <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.25)', marginTop: 4 }}>{sub}</div>
-    </div>
+      {/* ═══ STATS ═══ */}
+      {tab === 'stats' && (<div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
+          <Stat label="TERRITORIES" value={totalTerr} />
+          <Stat label="KINGDOMS" value={kingdoms.length} color="#cc8800" />
+          <Stat label="INCOME/DAY" value={`${totalIncome}◆`} color="#22c55e" />
+          <Stat label="BATTLES WON" value={(player as any)?.battles_won || 0} color="#dc2626" />
+          <Stat label="BATTLES LOST" value={(player as any)?.battles_lost || 0} color="#64748b" />
+          <Stat label="INFLUENCE" value={(player as any)?.influence_points || 0} color="#8b5cf6" />
+          <Stat label="SAFARIS" value={(player as any)?.safaris_completed || 0} color="#f97316" />
+          <Stat label="EVENTS WON" value={(player as any)?.events_won || 0} color="#3b82f6" />
+          <Stat label="STREAK" value={(player as any)?.login_streak || 0} color="#cc8800" />
+        </div>
+        <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', sans-serif" }}>ACHIEVEMENTS</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
+          {[
+            { icon: '🏴', label: 'First Claim', done: totalTerr > 0 },
+            { icon: '👑', label: 'Kingdom', done: kingdoms.length > 0 },
+            { icon: '⚔', label: 'First Battle', done: ((player as any)?.battles_won || 0) > 0 },
+            { icon: '🦖', label: 'Safari', done: ((player as any)?.safaris_completed || 0) > 0 },
+            { icon: '💰', label: '1000 HEX', done: ((player as any)?.tdc_in_game || 0) >= 1000 },
+            { icon: '🏛', label: '10 Territories', done: totalTerr >= 10 },
+            { icon: '🤝', label: 'Alliance', done: !!(player as any)?.alliance_id },
+            { icon: '🔥', label: '7-Day Streak', done: ((player as any)?.login_streak || 0) >= 7 },
+          ].map(a => (
+            <div key={a.label} style={{ padding: '10px 6px', borderRadius: 10, textAlign: 'center', background: a.done ? 'rgba(34,197,94,0.04)' : 'rgba(0,0,0,0.01)', border: a.done ? '1px solid rgba(34,197,94,0.15)' : '1px solid rgba(0,60,100,0.04)', opacity: a.done ? 1 : 0.35 }}>
+              <div style={{ fontSize: 20, marginBottom: 3 }}>{a.icon}</div>
+              <div style={{ fontSize: 6, color: a.done ? '#22c55e' : 'rgba(26,42,58,0.3)', fontWeight: 700, letterSpacing: 1 }}>{a.label}</div>
+            </div>
+          ))}
+        </div>
+      </div>)}
+    </GlassPanel>
   )
 }

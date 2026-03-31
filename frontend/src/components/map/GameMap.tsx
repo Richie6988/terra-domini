@@ -407,7 +407,6 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
             }}>{cfg.label}</button>
           ))}
         </div>
-        <ToggleBtn label="⬡ Zones" active={showHex} onClick={() => setShowHex(v=>!v)} />
       </div>
 
       {/* Zoom — bottom right */}

@@ -143,7 +143,7 @@ export function Token3DViewer({
     renderer.setSize(el.clientWidth, el.clientHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 2.2
+    renderer.toneMappingExposure = 1.8
     renderer.outputEncoding = THREE.sRGBEncoding
     el.appendChild(renderer.domElement)
     renderer.domElement.style.cursor = 'grab'
@@ -191,7 +191,7 @@ export function Token3DViewer({
       clearcoatRoughness: 0.01,
       reflectivity: 1.0,
       envMapIntensity: 10,
-      emissive: new THREE.Color(catColor), emissiveIntensity: 0.12,
+      emissive: new THREE.Color(catColor), emissiveIntensity: 0.04,
     })
     const bMat = new THREE.MeshPhysicalMaterial({
       map: bTex, clearcoat: 1, roughness: 0.01, metalness: 0.9,
@@ -215,24 +215,40 @@ export function Token3DViewer({
     card.rotation.y = -Math.PI
     card.scale.set(0, 0, 0)
 
-    // ═══ SVG ICON — blob + onload redraw (guaranteed render) ═══
-    const iconSvgString = iconId ? getIcon(iconId) : ''
-    const iconImage = new Image()
-    if (iconSvgString) {
-      let svgStr = iconSvgString
-      if (!svgStr.includes('xmlns')) {
-        svgStr = svgStr.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
+    // ═══ SVG ICON — pre-render to offscreen canvas (GUARANTEED to work) ═══
+    const iconCanvas = document.createElement('canvas')
+    iconCanvas.width = 256; iconCanvas.height = 256
+    const iconCtx = iconCanvas.getContext('2d')!
+    let iconReady = false
+
+    if (iconId) {
+      const rawSvg = getIcon(iconId)
+      if (rawSvg) {
+        let svgStr = rawSvg
+        if (!svgStr.includes('xmlns')) svgStr = svgStr.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"')
+        if (!svgStr.includes('width=')) svgStr = svgStr.replace('viewBox=', 'width="256" height="256" viewBox=')
+
+        const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' })
+        const url = URL.createObjectURL(blob)
+        const tmpImg = new Image()
+        tmpImg.onload = () => {
+          iconCtx.drawImage(tmpImg, 0, 0, 256, 256)
+          URL.revokeObjectURL(url)
+          iconReady = true
+          // Trigger redraw so icon appears
+          try { drawFront?.() } catch {}
+        }
+        tmpImg.onerror = () => {
+          URL.revokeObjectURL(url)
+          // Fallback: draw category letter on offscreen canvas
+          iconCtx.fillStyle = catColor
+          iconCtx.font = '900 120px Orbitron'
+          iconCtx.textAlign = 'center'; iconCtx.textBaseline = 'middle'
+          iconCtx.fillText(category.charAt(0), 128, 128)
+          iconReady = true
+        }
+        tmpImg.src = url
       }
-      if (!svgStr.includes('width=')) {
-        svgStr = svgStr.replace('viewBox=', 'width="256" height="256" viewBox=')
-      }
-      const blob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' })
-      const url = URL.createObjectURL(blob)
-      iconImage.onload = () => {
-        URL.revokeObjectURL(url)
-        try { drawFront?.() } catch {} // Redraw with icon ready
-      }
-      iconImage.src = url
     }
 
     // ═══ REAL IMAGE — Unsplash based on biome ═══
@@ -329,9 +345,9 @@ export function Token3DViewer({
       fCtx.globalAlpha = 1
       fCtx.restore()
       // Icon from bank — check .complete only (naturalWidth unreliable for data: SVGs)
-      if (iconImage.complete && iconImage.src) {
+      if (iconReady) {
         fCtx.save()
-        fCtx.drawImage(iconImage, c - iconSz * 0.38, iconRowY - iconSz * 0.38, iconSz * 0.76, iconSz * 0.76)
+        fCtx.drawImage(iconCanvas, c - iconSz * 0.38, iconRowY - iconSz * 0.38, iconSz * 0.76, iconSz * 0.76)
         fCtx.restore()
       } else {
         fCtx.save(); fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle'

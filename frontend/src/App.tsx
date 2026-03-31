@@ -187,6 +187,27 @@ function GameScreen() {
       {/* Sound toggle — bottom-left */}
       <SoundToggle />
 
+      {/* Daily Challenges — floating button, top-left */}
+      <button
+        onClick={() => setActivePanel(activePanel === 'tasks' ? null : 'tasks')}
+        style={{
+          position: 'fixed', top: 80, left: 12, zIndex: 900,
+          width: 48, height: 48, borderRadius: 14,
+          background: activePanel === 'tasks'
+            ? 'linear-gradient(135deg, #cc8800, #f59e0b)'
+            : 'rgba(235,242,250,0.92)',
+          backdropFilter: 'blur(20px)',
+          border: activePanel === 'tasks' ? '2px solid #fbbf24' : '1px solid rgba(0,60,100,0.12)',
+          boxShadow: activePanel === 'tasks' ? '0 0 16px rgba(204,136,0,0.4)' : '0 4px 16px rgba(0,0,0,0.08)',
+          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 20, color: activePanel === 'tasks' ? '#fff' : '#cc8800',
+          transition: 'all 0.2s',
+        }}
+        title="Daily Challenges"
+      >
+        🎯
+      </button>
+
       {/* Side panels — triggered by HexodDock */}
       <AnimatePresence>
         {activePanel === 'combat'      && <CombatPanel     onClose={() => setActivePanel(null)} />}
