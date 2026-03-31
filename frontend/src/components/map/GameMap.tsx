@@ -14,6 +14,7 @@ import { HexCard } from './HexCard'
 import { AttackPanel } from '../hud/AttackPanel'
 import { injectGlowFilter, makeHexPolygon, injectHexAnimations, getVisibleHexes, getHexBoundary } from './HexLayer'
 import { KingdomBorderLayer } from './KingdomBorderLayer'
+import { KingdomDetailOverlay } from '../kingdom/KingdomDetailOverlay'
 import { MyTerritoriesOverlay } from './MyTerritoriesOverlay'
 import { AttackAnimationLayer } from './AttackAnimationLayer'
 import { BuildingsOverlayLayer } from './BuildingsOverlayLayer'
@@ -80,6 +81,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const selectedLayerRef = useRef<L.LayerGroup | null>(null)
   const [selectedHexLatLon, setSelectedHexLatLon] = useState<[number,number]|null>(null)
   const [attackTarget,setAttackTarget]= useState<TerritoryLight | null>(null)
+  const [selectedKingdom, setSelectedKingdom] = useState<any | null>(null)
 
   const territories   = Object.values(useStore(s => s.territories))
   const player        = useStore(s => s.player)
@@ -438,11 +440,41 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         {attackTarget && <AttackPanel target={attackTarget} onClose={() => setAttackTarget(null)} />}
       </AnimatePresence>
 
-      <KingdomBorderLayer map={mapRef.current} zoom={zoom} />
+      <KingdomBorderLayer map={mapRef.current} zoom={zoom} onKingdomClick={setSelectedKingdom} />
       <AttackAnimationLayer map={mapRef.current} />
       <BuildingsOverlayLayer map={mapRef.current} zoom={zoom} playerId={player?.id} />
       <TutorialArrow map={mapRef.current} />
       <MyTerritoriesOverlay onFlyTo={(lat, lon, z) => mapRef.current?.flyTo([lat, lon], z ?? 15, { duration: 1.2 })} />
+
+      {/* Kingdom detail overlay */}
+      {selectedKingdom && (() => {
+        const tStore = useStore.getState().territories
+        return (
+          <KingdomDetailOverlay
+            kingdom={{
+              ...selectedKingdom,
+              territories: (selectedKingdom.h3_indexes || []).map((h: string, i: number) => {
+                const t = tStore[h] as any
+                return {
+                  h3_index: h,
+                  name: t?.poi_name || t?.place_name || h.slice(0, 12),
+                  rarity: t?.rarity || 'common',
+                  biome: t?.territory_type || 'rural',
+                  income_per_day: Math.round((t?.resource_credits || 10) * 288),
+                  defense_points: t?.defense_points || 100,
+                  is_capital: i === 0,
+                  has_shield: !!t?.shield_expires_at,
+                  poi_category: t?.poi_category,
+                }
+              }),
+              total_defense: (selectedKingdom.h3_indexes || []).reduce((s: number, h: string) => s + ((tStore[h] as any)?.defense_points || 100), 0),
+              total_attack: (selectedKingdom.h3_indexes || []).length * 50,
+            }}
+            isOwn={selectedKingdom.isOwn ?? selectedKingdom.is_main}
+            onClose={() => setSelectedKingdom(null)}
+          />
+        )
+      })()}
     </div>
   )
 }

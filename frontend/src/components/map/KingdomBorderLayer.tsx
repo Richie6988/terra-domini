@@ -28,6 +28,7 @@ interface Kingdom {
 interface Props {
   map: L.Map | null
   zoom: number
+  onKingdomClick?: (kingdom: Kingdom & { isOwn: boolean }) => void
 }
 
 const TIER_COLOR = [
@@ -103,7 +104,7 @@ function buildOuterBorder(h3Indexes: string[]): [number, number][][] {
   return chains
 }
 
-export function KingdomBorderLayer({ map, zoom }: Props) {
+export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
   const player = usePlayer()
   const _layerFromHook = useLeafletLayer(map)
   const layerRef = useRef<L.LayerGroup | null>(null)
@@ -130,16 +131,26 @@ export function KingdomBorderLayer({ map, zoom }: Props) {
       const isMain = k.is_main
 
       if (zoom >= 10 && k.h3_indexes?.length) {
-        // Fill: draw all hexes as one group with light fill
+        // Fill: draw all hexes — clickable
         k.h3_indexes.forEach(hx => {
           try {
             const pts = cellToBoundary(hx) as [number, number][]
-            layer.addLayer(L.polygon(pts as L.LatLngTuple[], {
+            const poly = L.polygon(pts as L.LatLngTuple[], {
               fillColor: color,
               fillOpacity: isMain ? 0.06 : 0.03,
               color: 'transparent', weight: 0,
-              interactive: false,
-            }))
+              interactive: true,
+            })
+            poly.on('click', () => {
+              if (onKingdomClick) {
+                const isOwn = !!player && k.h3_indexes.some((h: string) => {
+                  const t = (window as any).__HEXOD_TERRITORIES__?.[h]
+                  return t?.owner_id === player.id
+                })
+                onKingdomClick({ ...k, isOwn } as any)
+              }
+            })
+            layer.addLayer(poly)
           } catch (_) {}
         })
 
@@ -196,6 +207,12 @@ export function KingdomBorderLayer({ map, zoom }: Props) {
           icon, zIndexOffset: isMain ? 800 : 600, interactive: true,
         })
 
+        marker.on('click', () => {
+          if (onKingdomClick) {
+            onKingdomClick({ ...k, isOwn: isMain } as any)
+          }
+        })
+
         marker.bindTooltip(
           `<div style="font-size:12px">
             <strong style="color:${color}">${isMain ? '👑 Main Kingdom' : `🏰 Kingdom (${k.size})`}</strong><br/>
@@ -210,7 +227,7 @@ export function KingdomBorderLayer({ map, zoom }: Props) {
     })
 
     return () => { layer.clearLayers() }
-  }, [map, data, zoom])
+  }, [map, data, zoom, onKingdomClick, player])
 
   useEffect(() => () => { layerRef.current?.remove() }, [])
 
