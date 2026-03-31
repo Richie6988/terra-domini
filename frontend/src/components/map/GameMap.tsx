@@ -138,9 +138,10 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     
     map.on('mousemove', (e: L.LeafletMouseEvent) => {
       try {
-        const zoom = map.getZoom()
-        const res = zoom <= 11 ? 6 : zoom <= 14 ? 7 : 8
-        const hx = latLngToCell(e.latlng.lat, e.latlng.lng, res)
+        // No hover below zoom 12 — hexes not visible
+        if (map.getZoom() < 12) { hoverLayer.clearLayers(); hoverPoly = null; return }
+        // ALWAYS res 8 — territories never change size
+        const hx = latLngToCell(e.latlng.lat, e.latlng.lng, 8)
         if ((hoverPoly as any)?._hxId === hx) return
 
         hoverLayer.clearLayers()

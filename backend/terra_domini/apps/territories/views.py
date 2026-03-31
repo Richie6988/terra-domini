@@ -61,14 +61,13 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         except (TypeError, ValueError):
             return Response({'error': 'Invalid params'}, status=400)
 
-        if zoom <= 11:   res = 6
-        elif zoom <= 14: res = 7
-        else:            res = 8
+        # ALWAYS resolution 8 — territories are fixed geographic zones
+        res = 8
 
         try:
             import h3 as h3lib
-            center_h3 = h3lib.latlng_to_cell(lat, lon, res)
-            k = max(3, min(int(radius_km / {6:10, 7:4, 8:1.2}.get(res, 4)), 12))
+            center_h3 = h3lib.latlng_to_cell(lat, lon, 8)
+            k = max(3, min(int(radius_km / 1.2), 15))
             hex_ids = list(h3lib.grid_disk(center_h3, k))
         except Exception as e:
             return Response([], status=200)
@@ -153,7 +152,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             raw = raw_terrs.get(hx, {})    # Raw DB data (rarity, resources, etc.)
             poi = poi_index.get(hx, {})    # UnifiedPOI data
             result.append({
-                'h3_index': hx, 'h3': hx, 'h3_resolution': res,
+                'h3_index': hx, 'h3': hx, 'h3_resolution': 8,
                 'owner_id': str(t.owner_id) if t and t.owner_id else None,
                 'owner_username': t.owner.username if t and t.owner_id else None,
                 'owner_kingdom_id': kingdom_map.get(hx, {}).get('cluster_id') if t and t.owner_id and hx in kingdom_map else None,
