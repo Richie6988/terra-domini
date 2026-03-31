@@ -1231,5 +1231,16 @@
     "algorithm": "buildOuterBorder: for each hex check 6 neighbors via gridDisk, keep edges where neighbor NOT in cluster, merge into polyline chains",
     "rendering": "2+ territories: fill all hexes (light) + outer border only (thick polyline). 1 territory: dashed individual hex.",
     "badge": "tier icon + count at centroid, tooltip with stats"
+  },
+  "kingdom_detail_overlay": {
+    "trigger": "Click kingdom badge on map OR click inside kingdom fill area",
+    "z_index": 1800,
+    "own_kingdom_tabs": [
+      "overview (stats, rarity, claims, shields)",
+      "territories (full list)",
+      "army (6 unit types + recruit)"
+    ],
+    "enemy_kingdom": "Intelligence levels 0-3 (spy missions), 4 actions (attack, spy, diplomacy, buy offer)",
+    "wiring": "KingdomBorderLayer.onKingdomClick → GameMap.selectedKingdom → KingdomDetailOverlay via portal"
   }
 }
