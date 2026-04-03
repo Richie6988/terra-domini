@@ -3,6 +3,7 @@
  * 3 tabs: Commander (edit profile), Achievements (badges), Preferences (settings).
  */
 import { useState, useCallback } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { MiniIcon, StatusDot } from '../shared/MiniIcons'
 import { usePlayer, useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
@@ -61,45 +62,40 @@ function CommanderTab() {
   )
 }
 
-const BADGES = [
-  { id:'terr5',cat:'TERRITORY',name:'Settler',target:5,icon:'S1',reward:10},{ id:'terr10',cat:'TERRITORY',name:'Colonist',target:10,icon:'S2',reward:25},
-  { id:'terr50',cat:'TERRITORY',name:'Governor',target:50,icon:'S3',reward:100},{ id:'terr100',cat:'TERRITORY',name:'Emperor',target:100,icon:'S4',reward:500},
-  { id:'war5',cat:'MILITARY',name:'First Blood',target:5,icon:'W1',reward:25},{ id:'war10',cat:'MILITARY',name:'Warlord',target:10,icon:'W2',reward:50},
-  { id:'war50',cat:'MILITARY',name:'Conqueror',target:50,icon:'W3',reward:200},
-  { id:'rare5',cat:'COLLECTION',name:'Rare Hunter',target:5,icon:'C1',reward:50},{ id:'rare10',cat:'COLLECTION',name:'Gem Collector',target:10,icon:'C1',reward:150},
-  { id:'legend5',cat:'COLLECTION',name:'Legend Seeker',target:5,icon:'C2',reward:200},{ id:'mythic1',cat:'COLLECTION',name:'Mythic Finder',target:1,icon:'C3',reward:500},
-  { id:'saf5',cat:'SAFARI',name:'Tracker',target:5,icon:'H1',reward:30},{ id:'saf10',cat:'SAFARI',name:'Beast Hunter',target:10,icon:'H2',reward:80},
-  { id:'saf25',cat:'SAFARI',name:'Safari Master',target:25,icon:'H3',reward:250},
-  { id:'cont3',cat:'EXPLORATION',name:'World Traveler',target:3,icon:'E1',reward:100},{ id:'cont6',cat:'EXPLORATION',name:'Globe Trotter',target:6,icon:'E2',reward:500},
-  { id:'king3',cat:'KINGDOM',name:'Kingdom Builder',target:3,icon:'K1',reward:150},{ id:'king5',cat:'KINGDOM',name:'Empire Architect',target:5,icon:'K2',reward:400},
-  { id:'ally1',cat:'SOCIAL',name:'Team Player',target:1,icon:'A1',reward:25},{ id:'trade10',cat:'SOCIAL',name:'Merchant',target:10,icon:'A2',reward:100},
-]
-const CC: Record<string,string> = { TERRITORY:'#0099cc',MILITARY:'#dc2626',COLLECTION:'#8b5cf6',SAFARI:'#22c55e',EXPLORATION:'#f59e0b',KINGDOM:'#cc8800',SOCIAL:'#3b82f6' }
+const CC: Record<string,string> = { territory:'#0099cc',combat:'#dc2626',economy:'#8b5cf6',social:'#22c55e',exploration:'#f59e0b',streak:'#cc8800',tdc:'#3b82f6',secret:'#475569' }
 
 function AchievementsTab() {
-  const player = usePlayer()
-  const s = (player as any)?.stats || {}
   const [cf, setCf] = useState('ALL')
-  const getP = (id: string) => { const m: Record<string,number> = { terr5:s.territories_owned||0,terr10:s.territories_owned||0,terr50:s.territories_owned||0,terr100:s.territories_owned||0,war5:s.territories_captured||0,war10:s.territories_captured||0,war50:s.territories_captured||0 }; return m[id]||0 }
-  const cats = ['ALL',...new Set(BADGES.map(b=>b.cat))]
-  const filtered = cf==='ALL' ? BADGES : BADGES.filter(b=>b.cat===cf)
-  const unlocked = BADGES.filter(b=>getP(b.id)>=b.target).length
+  const { data: achData, isLoading } = useQuery({
+    queryKey: ['achievements'],
+    queryFn: () => api.get('/progression/achievements/').then(r => r.data).catch(() => null),
+    staleTime: 60000,
+  })
+
+  const achievements = achData?.achievements || []
+  const cats = ['ALL', ...new Set(achievements.map((a: any) => a.category?.toUpperCase()))]
+  const filtered = cf === 'ALL' ? achievements : achievements.filter((a: any) => a.category?.toUpperCase() === cf)
+  const unlocked = achData?.unlocked_count || 0
+  const total = achData?.total_count || achievements.length
+
+  if (isLoading) return <div style={{ textAlign: 'center', padding: 30, color: 'rgba(26,42,58,0.3)', fontSize: 9 }}>Loading achievements...</div>
+  if (!achievements.length) return <div style={{ textAlign: 'center', padding: 30, color: 'rgba(26,42,58,0.3)', fontSize: 9 }}>No achievements yet. Seed with: python manage.py seed_achievements</div>
+
   return (
     <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
-      <div style={{ ...sBox, textAlign:'center' }}><div style={{ fontSize:24,fontWeight:900,color:'#cc8800',fontFamily:"'Share Tech Mono',monospace" }}>{unlocked}/{BADGES.length}</div><div style={lbl}>BADGES UNLOCKED</div></div>
-      <div style={{ display:'flex',gap:4,flexWrap:'wrap' }}>{cats.map(c=>(
-        <button key={c} onClick={()=>setCf(c)} style={{ padding:'4px 10px',borderRadius:8,cursor:'pointer',fontSize:7,fontWeight:700,letterSpacing:1,fontFamily:"'Orbitron',sans-serif",background:cf===c?`${CC[c]||'#0099cc'}15`:'rgba(0,60,100,0.03)',border:`1px solid ${cf===c?`${CC[c]||'#0099cc'}30`:'rgba(0,60,100,0.06)'}`,color:cf===c?(CC[c]||'#0099cc'):'rgba(26,42,58,0.4)' }}>{c}</button>
+      <div style={{ ...sBox, textAlign:'center' }}><div style={{ fontSize:24,fontWeight:900,color:'#cc8800',fontFamily:"'Share Tech Mono',monospace" }}>{unlocked}/{total}</div><div style={lbl}>BADGES UNLOCKED</div></div>
+      <div style={{ display:'flex',gap:4,flexWrap:'wrap' }}>{cats.map((c: string)=>(
+        <button key={c} onClick={()=>setCf(c)} style={{ padding:'4px 10px',borderRadius:8,cursor:'pointer',fontSize:7,fontWeight:700,letterSpacing:1,fontFamily:"'Orbitron',sans-serif",background:cf===c?`${CC[c.toLowerCase()]||'#0099cc'}15`:'rgba(0,60,100,0.03)',border:`1px solid ${cf===c?`${CC[c.toLowerCase()]||'#0099cc'}30`:'rgba(0,60,100,0.06)'}`,color:cf===c?(CC[c.toLowerCase()]||'#0099cc'):'rgba(26,42,58,0.4)' }}>{c}</button>
       ))}</div>
-      {filtered.map(b => { const p=getP(b.id),pct=Math.min(1,p/b.target),done=pct>=1; return (
-        <div key={b.id} style={{ display:'flex',gap:10,padding:'10px 12px',borderRadius:10,background:done?'rgba(204,136,0,0.04)':'rgba(255,255,255,0.4)',border:`1px solid ${done?'rgba(204,136,0,0.15)':'rgba(0,60,100,0.06)'}`,opacity:done?1:0.7 }}>
+      {filtered.map((b: any) => { const done = b.unlocked; const catCol = CC[b.category] || '#6b7280'; return (
+        <div key={b.id} style={{ display:'flex',gap:10,padding:'10px 12px',borderRadius:10,background:done?'rgba(204,136,0,0.04)':'rgba(255,255,255,0.4)',border:`1px solid ${done?'rgba(204,136,0,0.15)':'rgba(0,60,100,0.06)'}`,opacity:done?1:0.6 }}>
           <span style={{ fontSize:22,filter:done?'':'grayscale(1)' }}>{b.icon}</span>
           <div style={{ flex:1 }}>
             <div style={{ fontSize:10,fontWeight:700,color:'#1a2a3a' }}>{b.name}</div>
-            <div style={{ fontSize:7,color:CC[b.cat]||'#6b7280',fontWeight:600,letterSpacing:1 }}>{b.cat}</div>
-            <div style={{ height:4,borderRadius:2,background:'rgba(0,60,100,0.06)',marginTop:4,overflow:'hidden' }}><div style={{ width:`${pct*100}%`,height:'100%',borderRadius:2,background:done?'#cc8800':(CC[b.cat]||'#0099cc'),transition:'width 0.3s' }}/></div>
-            <div style={{ fontSize:7,color:'rgba(26,42,58,0.3)',marginTop:2 }}>{p}/{b.target}</div>
+            <div style={{ fontSize:7,color:catCol,fontWeight:600,letterSpacing:1 }}>{b.category?.toUpperCase()}</div>
+            <div style={{ fontSize:8,color:'rgba(26,42,58,0.4)',marginTop:2 }}>{b.description}</div>
           </div>
-          <div style={{ textAlign:'right',flexShrink:0 }}><div style={{ display:'flex',alignItems:'center',gap:2 }}><CrystalIcon size="sm" /><span style={{ fontSize:11,fontWeight:900,color:done?'#cc8800':'rgba(26,42,58,0.25)',fontFamily:"'Share Tech Mono',monospace" }}>{b.reward}</span></div>{done&&<div style={{ fontSize:7,color:'#22c55e',fontWeight:700,marginTop:2 }}>✓ CLAIMED</div>}</div>
+          <div style={{ textAlign:'right',flexShrink:0 }}><div style={{ display:'flex',alignItems:'center',gap:2 }}><CrystalIcon size="sm" /><span style={{ fontSize:11,fontWeight:900,color:done?'#cc8800':'rgba(26,42,58,0.25)',fontFamily:"'Share Tech Mono',monospace" }}>{b.reward_tdc}</span></div>{done&&<div style={{ fontSize:7,color:'#22c55e',fontWeight:700,marginTop:2 }}>✓ UNLOCKED</div>}</div>
         </div>
       )})}
     </div>

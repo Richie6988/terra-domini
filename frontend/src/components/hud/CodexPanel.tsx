@@ -46,22 +46,42 @@ const CAT_TAB_MAP: Record<string, string> = {
   dinosaur: 'fantastic', creature: 'fantastic',
 }
 
-// Mock collection data
-function getMockCollection() {
-  const coll: Record<string, { owned: number; total: number; rarity: string; shiny: boolean }> = {}
-  for (const cat of Object.values(CATEGORIES)) {
-    for (const icon of cat.icons) {
-      const total = 5 + Math.floor(Math.random() * 20)
-      const owned = Math.floor(Math.random() * total * 0.5)
-      const rarities = ['common','common','common','uncommon','uncommon','rare','epic','legendary','mythic']
-      coll[icon.id] = {
-        owned, total,
-        rarity: rarities[Math.floor(Math.random() * rarities.length)],
-        shiny: Math.random() < 0.05,
+// Real collection from owned territories + store
+function useRealCollection() {
+  const territories = useStore(s => s.territories)
+  const myTerritories = useStore(s => s.myTerritories)
+
+  return useMemo(() => {
+    const coll: Record<string, { owned: number; total: number; rarity: string; shiny: boolean }> = {}
+
+    // Initialize all icons from categories
+    for (const cat of Object.values(CATEGORIES)) {
+      for (const icon of cat.icons) {
+        coll[icon.id] = { owned: 0, total: 5 + Math.floor(icon.id.charCodeAt(0) % 15), rarity: 'common', shiny: false }
       }
     }
-  }
-  return coll
+
+    // Count real owned territories by category
+    const owned = myTerritories ? Array.from(myTerritories) : Object.values(territories).filter((t: any) => t.owner_id)
+    for (const t of owned) {
+      const ta = t as any
+      const cat = ta.poi_category || ta.territory_type || 'urban'
+      // Find matching icon
+      for (const [, catData] of Object.entries(CATEGORIES)) {
+        for (const icon of (catData as any).icons) {
+          if (icon.id === cat || icon.id.includes(cat) || cat.includes(icon.id)) {
+            coll[icon.id] = {
+              ...coll[icon.id],
+              owned: (coll[icon.id]?.owned || 0) + 1,
+              rarity: ta.rarity || 'common',
+              shiny: ta.is_shiny || false,
+            }
+          }
+        }
+      }
+    }
+    return coll
+  }, [territories, myTerritories])
 }
 
 const RARITY_COLORS: Record<string, string> = {
@@ -75,7 +95,7 @@ export function CodexPanel({ onClose }: Props) {
   const [show3D, setShow3D] = useState(false)
   const [filter, setFilter] = useState('')
   const setActivePanel = useStore(s => s.setActivePanel)
-  const collection = useMemo(() => getMockCollection(), [])
+  const collection = useRealCollection()
 
   // All tokens flat list
   const allTokens = useMemo(() =>

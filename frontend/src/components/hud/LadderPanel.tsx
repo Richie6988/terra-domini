@@ -33,21 +33,28 @@ function Medal({ rank }: { rank: number }) {
   )
 }
 
-// Mock leaderboard data
-const MOCK_PLAYERS = Array.from({ length: 20 }, (_, i) => ({
-  rank: i + 1,
-  username: ['WarLord_X', 'NexusKing', 'ShadowEmp', 'IronViper', 'CrystalQ', 'StormHex', 'NovaArch', 'BlazeTier',
-    'DarkPion', 'HexMaster', 'TerraGod', 'PolygonK', 'ChainLord', 'MintKing', 'GeoStrat', 'HexHunt',
-    'EmpireX', 'ZoneCtrl', 'MapDom', 'GridForce'][i],
-  territories: Math.max(1, 200 - i * 9 + Math.floor(Math.random() * 5)),
-  kingdoms: Math.max(1, Math.floor((200 - i * 9) / 15)),
-  hex_per_day: Math.max(10, 5000 - i * 230 + Math.floor(Math.random() * 100)),
-  isYou: i === 7,
-}))
+// Real leaderboard from backend
 
 export function LadderPanel({ onClose }: Props) {
   const [tab, setTab] = useState<Tab>('global')
   const player = usePlayer()
+
+  // Fetch real leaderboard from backend
+  const { data: lbData, isLoading } = useQuery({
+    queryKey: ['leaderboard', tab],
+    queryFn: () => api.get(`/leaderboard/${tab}/`).then(r => r.data).catch(() => null),
+    staleTime: 30000,
+  })
+
+  const entries = (lbData?.entries || []).map((e: any, i: number) => ({
+    rank: e.rank || i + 1,
+    username: e.username || e.display_name,
+    territories: e.territories || 0,
+    hex_per_day: e.hex_per_day || e.score || 0,
+    isYou: e.id === String(player?.id),
+    avatar_emoji: e.avatar_emoji || '🎖️',
+  }))
+  const meRank = lbData?.me_rank
 
   return (
     <GlassPanel title="LADDER" onClose={onClose} accent="#8b5cf6">
@@ -78,7 +85,9 @@ export function LadderPanel({ onClose }: Props) {
 
       {/* Player rows */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {MOCK_PLAYERS.map(p => (
+        {isLoading && <div style={{ textAlign: 'center', padding: 30, color: 'rgba(26,42,58,0.3)', fontSize: 9 }}>Loading rankings...</div>}
+        {!isLoading && entries.length === 0 && <div style={{ textAlign: 'center', padding: 30, color: 'rgba(26,42,58,0.3)', fontSize: 9 }}>No players ranked yet. Claim territories to appear!</div>}
+        {entries.map((p: any) => (
           <div key={p.rank} style={{
             display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10,
             background: p.isYou ? 'rgba(139,92,246,0.06)' : 'rgba(255,255,255,0.3)',
