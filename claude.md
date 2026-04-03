@@ -348,7 +348,7 @@ HEXToken.sol · TerritoryNFT.sol · GameEngine.sol · KingdomRegistry.sol · Sta
 - [x] **Password eye toggle + real-time validation** (show/hide + match indicator)
 - [x] **Login contrast** (all labels brightened for dark background)
 - [x] **Geolocation on register** (initial_lat/lon saved from IP)
-- [x] **Tutorial non-blocking** (hint bar at top during claim step, map fully accessible)
+- [x] **Tutorial non-blocking** (floating pill at bottom during claim step, map fully accessible, skip button)
 - [x] Map with H3 grid (always res 8, zoom 14+)
 - [x] Territory click → Token3DViewer (single click, portal, fullscreen)
 - [x] Claim mechanics (free / buy / explore with timer)

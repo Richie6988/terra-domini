@@ -205,9 +205,9 @@ export default function LoginPage() {
           }}>
             <Typewriter texts={[
               'OWN THE WORLD · HEX BY HEX',
-              '5 MILLION TERRITORIES · YOUR EMPIRE',
               'CAPTURE · BUILD · TRADE · CONQUER',
               'REAL MAP · REAL STRATEGY · REAL STAKES',
+              'POLYGON · ERC-721 · PLAY TO EARN',
             ]} />
           </div>
         </motion.div>

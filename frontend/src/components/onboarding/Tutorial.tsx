@@ -390,16 +390,37 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
           background: claimWaiting ? 'transparent' : 'rgba(5,5,8,0.92)',
           backdropFilter: claimWaiting ? 'none' : 'blur(8px)',
           display: 'flex',
-          alignItems: claimWaiting ? 'flex-start' : 'flex-end',
+          alignItems: claimWaiting ? 'flex-end' : 'flex-end',
           justifyContent: 'center',
-          padding: claimWaiting ? '16px 16px 0' : '0 16px 32px',
+          padding: '0 16px 32px',
         }}
       >
-        {/* Click-through overlay — allows map interaction */}
+        {/* Claim waiting: NO overlay at all — just a small floating pill at bottom */}
         {claimWaiting && (
-          <div
-            style={{ position: 'absolute', inset: 0, background: 'rgba(0,255,135,0.04)', pointerEvents: 'none' }}
-          />
+          <motion.div
+            initial={{ y: 40, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            style={{
+              position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
+              zIndex: 10001, pointerEvents: 'auto',
+              padding: '12px 24px', borderRadius: 40,
+              background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(12px)',
+              border: '1px solid rgba(0,255,135,0.3)',
+              boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+              display: 'flex', alignItems: 'center', gap: 12,
+            }}
+          >
+            <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
+              style={{ fontSize: 18 }}>👆</motion.span>
+            <span style={{ fontSize: 11, color: '#fff', fontFamily: "'Orbitron', sans-serif", letterSpacing: 1 }}>
+              TAP ANY ZONE TO CLAIM — IT'S FREE!
+            </span>
+            <button onClick={onComplete} style={{
+              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
+              borderRadius: 8, padding: '4px 10px', color: 'rgba(255,255,255,0.5)',
+              fontSize: 8, cursor: 'pointer', fontFamily: "'Orbitron', sans-serif",
+            }}>SKIP</button>
+          </motion.div>
         )}
 
         <motion.div
@@ -409,14 +430,15 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
           exit={{ y: 60, opacity: 0 }}
           transition={{ type: 'spring', stiffness: 400, damping: 35 }}
           style={{
-            width: claimWaiting ? 'auto' : '100%',
-            maxWidth: claimWaiting ? 360 : 480,
-            background: claimWaiting ? 'rgba(0,0,0,0.7)' : 'rgba(10,10,20,0.99)',
-            pointerEvents: claimWaiting ? 'none' : 'auto',
+            display: claimWaiting ? 'none' : undefined,
+            width: '100%',
+            maxWidth: 480,
+            background: 'rgba(10,10,20,0.99)',
+            pointerEvents: 'auto',
             border: '1px solid rgba(0,255,135,0.25)',
-            borderRadius: claimWaiting ? 40 : 16,
+            borderRadius: 16,
             overflow: 'hidden',
-            boxShadow: claimWaiting ? '0 4px 20px rgba(0,0,0,0.3)' : '0 -4px 40px rgba(0,255,135,0.1)',
+            boxShadow: '0 -4px 40px rgba(0,255,135,0.1)',
           }}
         >
           {!claimWaiting && <div style={{ height: 3, background: 'rgba(255,255,255,0.06)' }}>
@@ -463,21 +485,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
               </div>
             )}
 
-            {/* Claim waiting indicator */}
-            {claimWaiting && (
-              <motion.div
-                animate={{ opacity: [0.5, 1, 0.5] }}
-                transition={{ duration: 1.5, repeat: Infinity }}
-                style={{
-                  marginBottom: 16, padding: '10px',
-                  background: 'rgba(0,255,135,0.08)',
-                  border: '1px solid rgba(0,255,135,0.2)',
-                  borderRadius: 8, fontSize: 13, color: '#0099cc', textAlign: 'center',
-                }}
-              >
-                👆 Tap any zone on the map to claim your first territory — it's FREE!
-              </motion.div>
-            )}
+            {/* Claim waiting — handled by floating pill above */}
 
             {/* Action button */}
             {!claimWaiting && (

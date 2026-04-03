@@ -9,15 +9,15 @@
 | # | Question | Answer | Impact |
 |---|----------|--------|--------|
 | 1 | Globe view ambition | **Full Three.js sphere** — no workarounds, as sophisticated as possible | Sprint E, XL effort confirmed |
-| 2 | Special POI display | **Thousands of POIs**, category color border + POI image as hex background. Viewport-only for perf. Must handle zoom-out gracefully. | Sprint B, L effort |
-| 3 | Bottom bar | **10 buttons confirmed**: EMPIRE / ALLIANCE / CODEX / MARKETPLACE / LADDER / EVENTS / SAFARI / AUCTIONS / SHOP / INFO. Custom quality SVG assets. | Sprint C |
-| 4 | Empire structure | **1 player = 1 empire = N kingdoms = N×M territories** | Rename KingdomPanel → EmpirePanel |
+| ✅2 | Special POI display | **Thousands of POIs**, category color border + POI image as hex background. Viewport-only for perf. Must handle zoom-out gracefully. | Sprint B, L effort |
+| ✅3 | Bottom bar | **10 buttons confirmed**: EMPIRE / ALLIANCE / CODEX / MARKETPLACE / LADDER / EVENTS / SAFARI / AUCTIONS / SHOP / INFO. Custom quality SVG assets. | Sprint C |
+| ✅4 | Empire structure | **1 player = 1 empire = N kingdoms = N×M territories** | Rename KingdomPanel → EmpirePanel |
 | 5 | Alliance | **Max members: TBD (follow best practices ~50?)**. WebSocket chat YES. Alliance = global (empires across planet). No shared map border. | Sprint D |
-| 6 | Shiny cards | **Rainbow animated border + glitter/sparkle filter on front face** (Pokémon holographic style) | Sprint B |
+| ✅6 | Shiny cards | **Rainbow animated border + glitter/sparkle filter on front face** (Pokémon holographic style) | Sprint B |
 | 7 | Boosters | **10 items per booster**. Gacha random rarity. Ritual reveal: commons first → bonuses → rare last. Non-tokens = same items as shop (potions, shields, boosters). | Sprint E |
-| 8 | Bot players | **Real gameplay bots** — claim territories, build kingdoms, attack. Essential for community launch. | Sprint E, XL |
-| 9 | Pin locations | **No max limit**. Server-side. Single pin icon on map → place new OR open dropdown of saved locations for quick teleport. | Sprint B |
-| 10 | Preferences | Sound, map colors, notifications + creative game-related settings. Be creative. | Sprint C |
+| ✅8 | Bot players | **Real gameplay bots** — claim territories, build kingdoms, attack. Essential for community launch. | Sprint E, XL |
+| ✅9 | Pin locations | **No max limit**. Server-side. Single pin icon on map → place new OR open dropdown of saved locations for quick teleport. | Sprint B |
+| ✅10 | Preferences | Sound, map colors, notifications + creative game-related settings. Be creative. | Sprint C |
 | 11 | Challenges | **Based on game mechanics**: kingdom size (5/10/50/100), wars won, token categories owned (insects 5/10, rare 5/10...), continents visited. Dozens possible from existing categories. | Sprint D |
 | 12 | Safari cooldown | **New shop bonus idea**: "1h continuous safari" potion. Otherwise cooldown between captures. | Sprint D + Shop |
 | 13 | Contact form | **Follow best practices** — in-game form is fine for now. | Sprint E |
@@ -43,7 +43,7 @@
 | 8 | Register | Password eye + validation | Improve | S | `pages/RegisterPage.tsx` | None | Add `type={showPw ? 'text' : 'password'}` toggle + real-time match indicator |
 | 9 | Register | Email verification | Create | M | `accounts/views.py` RegisterView, `email_service.py`, new `VerifyEmailPage.tsx` | SMTP working (#6) | Token in URL, verify endpoint, block login until verified |
 | 10 | Register | Detect geolocation | Create | S | `accounts/views.py` RegisterView, `accounts/geoip_view.py` (exists) | None | Already have `/api/geoip/` endpoint. Save to player model on register. Frontend reads it. |
-| 55 | Tutorial | Fix flow | Improve | M | `components/onboarding/Tutorial.tsx` | Claim working | Tutorial popup must not block map. At step "claim first territory", close tutorial overlay but keep hint arrow. |
+| ✅55 | Tutorial | Fix flow | Improve | M | `components/onboarding/Tutorial.tsx` | Claim working | Tutorial popup must not block map. At step "claim first territory", close tutorial overlay but keep hint arrow. |
 
 ### SPRINT B — Map & Territory Core (P0-P1, ~40h)
 
