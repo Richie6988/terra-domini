@@ -128,11 +128,8 @@ function CryptoNewsfeed() {
 import { StakingPanel } from './StakingPanel'
 
 const TABS = [
-  { id: 'wallet',     label: 'WALLET'     },
-  { id: 'tokenomics', label: 'TOKENOMICS' },
-  { id: 'staking',    label: 'STAKING'    },
-  { id: 'burn',       label: 'BURN'       },
-  { id: 'history',    label: 'HISTORY'    },
+  { id: 'wallet',  label: '💰 BALANCE'  },
+  { id: 'details', label: '📊 DETAILS'  },
 ]
 
 const TX_COLORS: Record<string, string> = {
@@ -249,7 +246,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
 
   const { data: wallet } = useQuery({ queryKey: ['wallet'], queryFn: () => api.get('/wallet/me/').then(r => r.data), refetchInterval: 30000 })
   const { data: prices = {} } = useQuery({ queryKey: ['prices'], queryFn: () => api.get('/wallet/prices/').then(r => r.data), refetchInterval: 60000 })
-  const { data: txHistory = [] } = useQuery({ queryKey: ['wallet-tx'], queryFn: () => api.get('/wallet/transactions/').then(r => r.data ?? []), enabled: tab === 'history' })
+  const { data: txHistory = [] } = useQuery({ queryKey: ['wallet-tx'], queryFn: () => api.get('/wallet/transactions/').then(r => r.data ?? []), enabled: tab === 'details' })
 
   const withdrawMut = useMutation({
     mutationFn: () => api.post('/wallet/withdraw/', { amount_tdi: parseFloat(wAmt), wallet_address: wAddr }),
@@ -279,21 +276,35 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
         </div>
 
         <div>
-          {tab === 'wallet' && <WalletCard wallet={wallet} onConvert={() => setShowConvert(true)} onWithdraw={() => setShowWithdraw(true)} />}
+          {tab === 'wallet' && <>
+            <WalletCard wallet={wallet} onConvert={() => setShowConvert(true)} onWithdraw={() => setShowWithdraw(true)} />
 
-          {tab === 'tokenomics' && <TokenomicsTab />}
+            {/* How it works — explanation for non-crypto users */}
+            <div style={{ marginTop: 14, padding: 14, borderRadius: 12, background: 'rgba(0,153,204,0.04)', border: '1px solid rgba(0,153,204,0.1)' }}>
+              <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>HOW IT WORKS</div>
+              <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.55)', lineHeight: 1.8 }}>
+                <strong style={{ color: '#7950f2' }}>HEX Coins (◆)</strong> are your in-game currency. Earn them by owning territories, completing challenges, and winning events.
+                They can be converted to <strong style={{ color: '#cc8800' }}>HEX Crypto</strong> tokens on the Polygon blockchain — real cryptocurrency you own.
+                Staking your HEX gives you bonus resource production in your kingdoms.
+              </div>
+            </div>
 
-          {tab === 'staking' && <StakingPanel onClose={() => setTab('wallet')} embedded />}
-          {tab === 'burn' && <BurnTracker />}
+            {/* Staking summary */}
+            <div style={{ marginTop: 14 }}>
+              <StakingPanel onClose={() => setTab('wallet')} embedded />
+            </div>
+          </>}
 
-          {tab === 'history' && (
-            <div>
-              {!(txHistory as any[]).length && <div style={{ textAlign: 'center', color: 'rgba(26,42,58,0.35)', padding: '30px 0', fontSize: 8, fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 2 }}>NO TRANSACTIONS YET</div>}
+          {tab === 'details' && <>
+            <TokenomicsTab />
+            <div style={{ marginTop: 14 }}><BurnTracker /></div>
+            <div style={{ marginTop: 14 }}>
+              <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>TRANSACTION HISTORY</div>
+              {!(txHistory as any[]).length && <div style={{ textAlign: 'center', color: 'rgba(26,42,58,0.35)', padding: '20px 0', fontSize: 8, fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 2 }}>NO TRANSACTIONS YET</div>}
               {(txHistory as any[]).map((tx: any, i: number) => (
                 <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid rgba(0,60,100,0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.6)', fontWeight: 500, fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>{tx.type?.replace(/_/g, ' ').toUpperCase()}</div>
-                    <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>{tx.note}</div>
                     <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.25)', marginTop: 1 }}>{new Date(tx.date).toLocaleDateString()}</div>
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 900, fontFamily: "'Share Tech Mono', monospace", color: TX_COLORS[tx.type] ?? '#1a2a3a' }}>
@@ -302,7 +313,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
                 </div>
               ))}
             </div>
-          )}
+          </>}
 
         {/* ── Cross-panel CTAs ── */}
         <div style={{ marginTop: 16, display:'flex', gap:8, flexDirection:'column' }}>
