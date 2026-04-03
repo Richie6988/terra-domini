@@ -473,3 +473,57 @@ class UpdateProfileView(APIView):
         player.save(update_fields=['display_name','avatar_emoji','spec_path','bio'])
         return Response({'ok': True, 'display_name': player.display_name,
                         'avatar_emoji': player.avatar_emoji, 'spec_path': player.spec_path})
+
+
+class FavoritePinsView(APIView):
+    """GET/POST /api/players/pins/ — List or create favorite pins."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from terra_domini.apps.accounts.models import FavoritePin
+        pins = FavoritePin.objects.filter(player=request.user)
+        return Response([{
+            'id': p.id, 'name': p.name, 'emoji': p.emoji,
+            'lat': p.lat, 'lon': p.lon, 'zoom': p.zoom,
+        } for p in pins])
+
+    def post(self, request):
+        from terra_domini.apps.accounts.models import FavoritePin
+        data = request.data
+        pin = FavoritePin.objects.create(
+            player=request.user,
+            name=data.get('name', '📍 Saved Location')[:120],
+            emoji=data.get('emoji', '📍')[:4],
+            lat=float(data.get('lat', 0)),
+            lon=float(data.get('lon', 0)),
+            zoom=int(data.get('zoom', 15)),
+        )
+        return Response({
+            'id': pin.id, 'name': pin.name, 'emoji': pin.emoji,
+            'lat': pin.lat, 'lon': pin.lon, 'zoom': pin.zoom,
+        }, status=201)
+
+
+class FavoritePinDetailView(APIView):
+    """PATCH/DELETE /api/players/pins/<id>/ — Update or delete a pin."""
+    permission_classes = [IsAuthenticated]
+
+    def patch(self, request, pk):
+        from terra_domini.apps.accounts.models import FavoritePin
+        try:
+            pin = FavoritePin.objects.get(pk=pk, player=request.user)
+        except FavoritePin.DoesNotExist:
+            return Response({'error': 'Pin not found'}, status=404)
+        if 'name' in request.data:
+            pin.name = str(request.data['name'])[:120]
+        if 'emoji' in request.data:
+            pin.emoji = str(request.data['emoji'])[:4]
+        pin.save()
+        return Response({'ok': True, 'id': pin.id, 'name': pin.name, 'emoji': pin.emoji})
+
+    def delete(self, request, pk):
+        from terra_domini.apps.accounts.models import FavoritePin
+        deleted, _ = FavoritePin.objects.filter(pk=pk, player=request.user).delete()
+        if not deleted:
+            return Response({'error': 'Pin not found'}, status=404)
+        return Response({'ok': True})

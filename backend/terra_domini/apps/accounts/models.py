@@ -288,3 +288,21 @@ class PlayerDevice(models.Model):
     class Meta:
         db_table = 'player_devices'
         unique_together = ['player', 'fingerprint']
+
+
+class FavoritePin(models.Model):
+    """Player-saved map locations for quick teleport."""
+    player    = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='pins')
+    name      = models.CharField(max_length=120, default='📍 Saved Location')
+    emoji     = models.CharField(max_length=4, default='📍')
+    lat       = models.FloatField()
+    lon       = models.FloatField()
+    zoom      = models.IntegerField(default=15)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'favorite_pins'
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.player.username}: {self.name} ({self.lat:.4f}, {self.lon:.4f})"

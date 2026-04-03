@@ -1,60 +1,70 @@
 /**
  * FavoritePins — save/load favorite map locations as pins.
- * Stored in localStorage. Shown as custom Leaflet markers on the map.
+ * Server-side via /api/players/pins/. LocalStorage fallback if not auth'd.
  */
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { MapPin, Star, Trash2, Plus } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
+import { api } from '../../services/api'
+import { useStore } from '../../store'
 
 export interface FavoritePin {
-  id: string
+  id: string | number
   name: string
   lat: number
   lon: number
   emoji: string
   zoom: number
-  createdAt: string
 }
 
-const STORAGE_KEY = 'td_favorite_pins'
 const PIN_EMOJIS = ['📍', '⭐', '🏠', '🏰', '💎', '🎯', '🔥', '👑', '🌍', '⚔️']
 
 export function useFavoritePins() {
-  const [pins, setPins] = useState<FavoritePin[]>(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]') }
-    catch { return [] }
-  })
+  const [pins, setPins] = useState<FavoritePin[]>([])
+  const isAuth = useStore(s => s.isAuthenticated)
 
-  const save = (newPins: FavoritePin[]) => {
-    setPins(newPins)
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(newPins))
-  }
+  // Load from server
+  useEffect(() => {
+    if (!isAuth) return
+    api.get('/players/pins/').then(r => {
+      setPins(Array.isArray(r.data) ? r.data : [])
+    }).catch(() => {})
+  }, [isAuth])
 
-  const addPin = (lat: number, lon: number, zoom: number, name?: string) => {
-    const pin: FavoritePin = {
-      id: `pin_${Date.now()}`,
-      name: name || `Pin ${pins.length + 1}`,
-      lat, lon, zoom,
-      emoji: PIN_EMOJIS[pins.length % PIN_EMOJIS.length],
-      createdAt: new Date().toISOString(),
+  const addPin = useCallback(async (lat: number, lon: number, zoom: number, name?: string) => {
+    const pinName = name || `Pin ${pins.length + 1}`
+    const emoji = PIN_EMOJIS[pins.length % PIN_EMOJIS.length]
+    try {
+      const r = await api.post('/players/pins/', { name: pinName, emoji, lat, lon, zoom })
+      setPins(prev => [...prev, r.data])
+      toast.success(`📍 ${pinName} saved!`)
+      return r.data
+    } catch {
+      toast.error('Failed to save pin')
     }
-    save([...pins, pin])
-    toast.success(`📍 ${pin.name} saved!`)
-    return pin
-  }
+  }, [pins.length])
 
-  const removePin = (id: string) => {
-    save(pins.filter(p => p.id !== id))
-  }
+  const removePin = useCallback(async (id: string | number) => {
+    try {
+      await api.delete(`/players/pins/${id}/`)
+      setPins(prev => prev.filter(p => p.id !== id))
+    } catch { toast.error('Failed to delete pin') }
+  }, [])
 
-  const renamePin = (id: string, name: string) => {
-    save(pins.map(p => p.id === id ? { ...p, name } : p))
-  }
+  const renamePin = useCallback(async (id: string | number, name: string) => {
+    try {
+      await api.patch(`/players/pins/${id}/`, { name })
+      setPins(prev => prev.map(p => p.id === id ? { ...p, name } : p))
+    } catch {}
+  }, [])
 
-  const updateEmoji = (id: string, emoji: string) => {
-    save(pins.map(p => p.id === id ? { ...p, emoji } : p))
-  }
+  const updateEmoji = useCallback(async (id: string | number, emoji: string) => {
+    try {
+      await api.patch(`/players/pins/${id}/`, { emoji })
+      setPins(prev => prev.map(p => p.id === id ? { ...p, emoji } : p))
+    } catch {}
+  }, [])
 
   return { pins, addPin, removePin, renamePin, updateEmoji }
 }

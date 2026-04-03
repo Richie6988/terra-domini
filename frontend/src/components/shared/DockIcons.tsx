@@ -12,8 +12,12 @@ export function DockIcon({ id, color = 'currentColor', size = 20 }: { id: string
       return <svg viewBox="0 0 24 24" style={s}><path {...p} d="M5 12l4-8 2 4h2l2-4 4 8"/><path {...p} d="M7 16h10"/><path {...p} d="M9 20h6"/><circle {...p} cx="12" cy="6" r="2" fill={color} opacity="0.3"/></svg>
     case 'events':
       return <svg viewBox="0 0 24 24" style={s}><circle {...p} cx="12" cy="12" r="3"/><path {...p} d="M12 2v4M12 18v4M2 12h4M18 12h4"/><path {...p} d="M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" opacity="0.5"/></svg>
+    case 'empire':
+      return <svg viewBox="0 0 24 24" style={s}><path {...p} d="M12 2l-9 6v8l9 6 9-6V8L12 2z"/><path {...p} d="M12 8l-5 3v5l5 3 5-3v-5L12 8z" fill={color} opacity="0.15"/><circle {...p} cx="12" cy="12" r="2" fill={color} opacity="0.4"/></svg>
     case 'kingdom':
       return <svg viewBox="0 0 24 24" style={s}><path {...p} d="M3 18h18l-2-8-4 3-3-5-3 5-4-3z"/><path {...p} d="M5 18v2h14v-2"/><circle {...p} cx="12" cy="6" r="1.5" fill={color} opacity="0.4"/></svg>
+    case 'info':
+      return <svg viewBox="0 0 24 24" style={s}><circle {...p} cx="12" cy="12" r="9"/><path {...p} d="M12 16v-4"/><circle {...p} cx="12" cy="8" r="0.5" fill={color}/></svg>
     case 'hunt':
       return <svg viewBox="0 0 24 24" style={s}><circle {...p} cx="12" cy="12" r="9"/><circle {...p} cx="12" cy="12" r="5"/><circle {...p} cx="12" cy="12" r="1" fill={color}/><path {...p} d="M12 2v4M12 18v4M2 12h4M18 12h4"/></svg>
     case 'codex':

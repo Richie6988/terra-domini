@@ -81,18 +81,18 @@ export function HexodTopHUD() {
             fontFamily: "'Share Tech Mono', monospace",
             letterSpacing: 1,
           }}>
-            EMPIRE: {hexCount} HEX
+            ⬡ {hexCount} TERRITORIES
           </div>
         </div>
       </div>
 
-      {/* Right segment — HEX Balance */}
+      {/* Right segment — HEX Balance (display only, no panel) */}
       <div
         className="glass-panel hud-segment"
-        onClick={() => setActivePanel('crypto')}
         style={{
           pointerEvents: 'auto',
           animationDelay: '0.35s',
+          cursor: 'default',
         }}
       >
         {/* HEX icon */}

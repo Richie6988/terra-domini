@@ -6,7 +6,7 @@
 import { useStore } from '../../store'
 import { DockIcon } from './DockIcons'
 
-type PanelId = 'combat' | 'alliance' | 'events' | 'profile' | 'trade' | 'shop' | 'ladder' | 'meta' | 'crypto' | 'marketplace' | 'kingdom' | 'codex' | 'hunt' | 'tasks' | 'auction'
+type PanelId = 'empire' | 'alliance' | 'codex' | 'marketplace' | 'ladder' | 'events' | 'hunt' | 'auction' | 'shop' | 'info' | 'combat' | 'trade' | 'profile' | 'crypto' | 'kingdom' | 'meta' | 'tasks'
 
 interface DockItem {
   panel: PanelId
@@ -15,19 +15,16 @@ interface DockItem {
 }
 
 const DOCK_ITEMS: DockItem[] = [
-  { panel: 'combat',      label: 'Military',    color: '#dc2626' },
-  { panel: 'events',      label: 'Events',      color: '#f97316' },
-  { panel: 'kingdom',     label: 'Kingdom',     color: '#cc8800' },
-  { panel: 'hunt',        label: 'Safari',      color: '#f97316' },
-  { panel: 'codex',       label: 'Codex',       color: '#7950f2' },
-  { panel: 'auction',     label: 'Auction',     color: '#cc8800' },
-  { panel: 'shop',        label: 'Shop',        color: '#fbbf24' },
-  { panel: 'trade',       label: 'Trade',       color: '#22c55e' },
-  { panel: 'marketplace', label: 'NFT',         color: '#cc8800' },
+  { panel: 'empire',      label: 'Empire',      color: '#cc8800' },
   { panel: 'alliance',    label: 'Alliance',    color: '#3b82f6' },
+  { panel: 'codex',       label: 'Codex',       color: '#7950f2' },
+  { panel: 'marketplace', label: 'Market',      color: '#cc8800' },
   { panel: 'ladder',      label: 'Ladder',      color: '#8b5cf6' },
-  { panel: 'profile',     label: 'Profile',     color: '#0099cc' },
-  { panel: 'crypto',      label: 'Wallet',      color: '#a855f7' },
+  { panel: 'events',      label: 'Events',      color: '#f97316' },
+  { panel: 'hunt',        label: 'Safari',      color: '#22c55e' },
+  { panel: 'auction',     label: 'Auction',     color: '#f59e0b' },
+  { panel: 'shop',        label: 'Shop',        color: '#fbbf24' },
+  { panel: 'info',        label: 'Info',        color: '#64748b' },
 ]
 
 function DockButton({ item, isActive, onClick }: {

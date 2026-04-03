@@ -47,6 +47,7 @@ from terra_domini.apps.accounts.views import (
 from terra_domini.apps.territories.views import TerritoryViewSet
 from terra_domini.apps.accounts.views import UpdateProfileView
 from terra_domini.apps.accounts.views import PlayerViewSet
+from terra_domini.apps.accounts.views import FavoritePinsView, FavoritePinDetailView
 from terra_domini.apps.social.views import TradeViewSet
 from terra_domini.apps.blockchain.wallet_views import WalletViewSet
 from terra_domini.apps.blockchain.solana_views import (
@@ -143,6 +144,8 @@ urlpatterns = [
 
     # ── Progression ──────────────────────────────────────────────────────────
     path('api/players/update-profile/', UpdateProfileView.as_view(), name='update-profile'),
+    path('api/players/pins/', FavoritePinsView.as_view(), name='player-pins'),
+    path('api/players/pins/<int:pk>/', FavoritePinDetailView.as_view(), name='player-pin-detail'),
     path('api/progression/skills/', SkillTreeView.as_view(), name='skill-tree'),
     path('api/progression/skills/<int:pk>/unlock/', SkillUnlockView.as_view(), name='skill-unlock'),
     path('api/progression/tutorial-complete/', TutorialCompleteView.as_view(), name='tutorial_complete'),

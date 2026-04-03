@@ -34,6 +34,7 @@ import { CryptoPanel } from './components/crypto/CryptoPanel'
 import { ShopPanel } from './components/shop/ShopPanel'
 import { LadderPanel } from './components/hud/LadderPanel'
 import { MetaDashboard } from './components/hud/MetaDashboard'
+import { InfoPanel } from './components/hud/InfoPanel'
 import { MarketplacePanel } from './components/crypto/MarketplacePanel'
 import { KingdomPanel } from './components/kingdom/KingdomPanel'
 import { CodexPanel } from './components/hud/CodexPanel'
@@ -224,6 +225,8 @@ function GameScreen() {
         {activePanel === 'tasks'       && <TaskCenter       onClose={() => setActivePanel(null)} />}
         {activePanel === 'auction'     && <AuctionPanel     onClose={() => setActivePanel(null)} />}
         {activePanel === 'kingdom'     && <KingdomPanel     onClose={() => setActivePanel(null)} />}
+        {activePanel === 'empire'      && <KingdomPanel     onClose={() => setActivePanel(null)} />}
+        {activePanel === 'info'        && <InfoPanel        onClose={() => setActivePanel(null)} />}
         {activePanel === 'codex'       && <CodexPanel       onClose={() => setActivePanel(null)} />}
         {activePanel === 'hunt'        && <DailyHuntPanel   onClose={() => setActivePanel(null)} />}
       </AnimatePresence>
