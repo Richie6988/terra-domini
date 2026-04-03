@@ -379,12 +379,18 @@ HEXToken.sol · TerritoryNFT.sol · GameEngine.sol · KingdomRegistry.sol · Sta
 
 ### Sprint Progress
 ```
-Sprint A (Auth & Foundation):    7/7  ✅ COMPLETE
-Sprint B (Map & Territory):      8/9  ✅ (blocked: #11 Mapbox branded style)
-Sprint C (Core Panels):         13/13 ✅ COMPLETE
-Sprint D (Social & Modes):       8/11 ✅ (remaining: #29 100 challenges DB, #30 wire backend, #37 WS chat backend)
-Sprint E (Polish & Advanced):    0/12 TODO
-Total: 36/52 items (~69%)
+Sprint A (Auth & Foundation):    7/7   ✅ COMPLETE
+Sprint B (Map & Territory):      8/9   ✅ (blocked: #11 Mapbox branded style)
+Sprint C (Core Panels):         13/13  ✅ COMPLETE
+Sprint D (Social & Modes):       8/11  ✅ (remaining: #29 challenges DB, #30 wire backend, #37 WS chat)
+Sprint E (Polish & Advanced):   12/12  ✅ COMPLETE
+Total: 48/52 items (~92%)
+
+Blocked/Backend-only (4 items):
+  #11 — Mapbox branded style (needs account from Richard)
+  #29 — 100 challenges (needs backend progression model)
+  #30 — Wire tasks to backend (needs Django progression app)
+  #37 — Alliance WebSocket chat (needs ws/alliance/ consumer)
 ```
 
 ### Known Issues
