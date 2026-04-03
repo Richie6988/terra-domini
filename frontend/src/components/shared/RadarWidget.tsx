@@ -109,8 +109,10 @@ export function RadarWidget() {
             <g key={blip.id}>
               <circle cx={bx} cy={by} r={blipR}
                 fill={blip.color} opacity={nearSweep ? 1 : 0.6}
-                style={{ transition: 'opacity 0.3s' }}
-              />
+                style={{ transition: 'opacity 0.3s', cursor: 'pointer' }}
+              >
+                <title>{blip.isSafari ? `🎯 SAFARI TARGET — ${Math.floor(blip.distance * 5000)}m` : `${blip.category || 'Signal'} — ${Math.floor(blip.distance * 5000)}m`}</title>
+              </circle>
               {blip.isSafari && (
                 <>
                   <circle cx={bx} cy={by} r={blipR + 4} fill="none"

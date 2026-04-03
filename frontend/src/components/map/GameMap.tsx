@@ -405,7 +405,17 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
-      <div ref={containerRef} style={{ width: '100%', height: '100%' }} />
+      <div ref={containerRef} style={{ width: '100%', height: '100%', opacity: zoom < 5 ? 0 : 1, transition: 'opacity 0.5s' }} />
+
+      {/* Globe view — extreme zoom out */}
+      <GlobeView
+        visible={zoom < 5}
+        territories={Object.values(useStore.getState().territories)
+          .filter((t: any) => t.owner_id)
+          .slice(0, 200)
+          .map((t: any) => ({ lat: t.center_lat || t.lat || 0, lon: t.center_lon || t.lon || 0, color: t.owner_id === player?.id ? '#00FF87' : '#4B8BF5' }))}
+        onZoomIn={(lat, lon) => { mapRef.current?.setView([lat, lon], 10); }}
+      />
 
       {/* Global styles */}
       <style>{`
@@ -513,6 +523,20 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
           />
         )
       })()}
+
+      {/* Globe view — extreme zoom out */}
+      <GlobeView
+        visible={zoom < 5}
+        territories={Object.values(useStore.getState().territories)
+          .filter((t: any) => t.owner_id)
+          .slice(0, 500)
+          .map((t: any) => ({
+            lat: t.center_lat || t.lat || 0,
+            lon: t.center_lon || t.lon || 0,
+            color: t.owner_id === player?.id ? '#00FF87' : '#4B8BF5',
+          }))}
+        onZoomIn={(lat, lon) => mapRef.current?.flyTo([lat, lon], 10, { duration: 1.5 })}
+      />
     </div>
   )
 }
