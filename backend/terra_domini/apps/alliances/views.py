@@ -121,6 +121,22 @@ class AllianceViewSet(viewsets.GenericViewSet):
         ).order_by('-war_score')[:20]
         return Response(AllianceSerializer(alliances, many=True).data)
 
+    @action(detail=True, methods=['GET'], url_path='chat-history')
+    def chat_history(self, request, pk=None):
+        """GET /api/alliances/{id}/chat-history/ — last 50 messages."""
+        from terra_domini.apps.alliances.models import AllianceChatMessage
+        messages = AllianceChatMessage.objects.filter(
+            alliance_id=pk
+        ).select_related('player').order_by('-created_at')[:50]
+        return Response([{
+            'id': m.id,
+            'user': m.player.username,
+            'type': m.message_type,
+            'text': m.text,
+            'time': m.created_at.strftime('%H:%M'),
+            'date': m.created_at.isoformat(),
+        } for m in reversed(messages)])
+
     @action(detail=True, methods=['POST'], url_path='promote')
     def promote_member(self, request, pk=None):
         """Promote a member to officer (leader only)."""

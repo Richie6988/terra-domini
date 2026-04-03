@@ -28,13 +28,20 @@ interface GameMapProps {
   onTerritoryClick: (h3: string) => void
 }
 
-const TILES = {
+const TILES: Record<string, { label: string; url: string; maxZoom: number; overlay?: string; filter?: string }> = {
+  hexod: {
+    label: '⬡ HEXOD',
+    url: 'https://{s}.basemaps.cartocdn.com/dark_matter_nolabels/{z}/{x}/{y}{r}.png',
+    maxZoom: 19,
+    overlay: 'https://{s}.basemaps.cartocdn.com/dark_matter_only_labels/{z}/{x}/{y}{r}.png',
+    filter: 'hue-rotate(190deg) saturate(1.8) brightness(1.15) contrast(1.1)',
+  },
   light: {
     label: '🗺️ Light',
     url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
     maxZoom: 19,
   },
-  dark:      {
+  dark: {
     label: '🌑 Dark',
     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     maxZoom: 19,
@@ -67,7 +74,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const vpTimer      = useRef<ReturnType<typeof setTimeout>>()
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const [tile,        setTile]        = useState<keyof typeof TILES>('light')
+  const [tile,        setTile]        = useState<keyof typeof TILES>('hexod')
   const [poiCatFilter, setPoiCatFilter] = useState<string[]>(['all'])
   const [poiRarFilter, setPoiRarFilter] = useState<string[]>(['all'])
   const [showOverlay,  setShowOverlay]  = useState(true)
@@ -99,9 +106,12 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     })
     const tileCfg = TILES[tile as keyof typeof TILES]
     tileRef.current = L.tileLayer(tileCfg.url, { maxZoom: tileCfg.maxZoom ?? 19 }).addTo(map)
-    if ((tileCfg as any).overlay) {
-      overlayRef.current = L.tileLayer((tileCfg as any).overlay, { maxZoom: 19, opacity: 0.8 }).addTo(map)
+    if (tileCfg.overlay) {
+      overlayRef.current = L.tileLayer(tileCfg.overlay, { maxZoom: 19, opacity: 0.8 }).addTo(map)
     }
+    // Apply branded CSS filter to tile pane
+    const tilePane = map.getPane('tilePane')
+    if (tilePane && tileCfg.filter) tilePane.style.filter = tileCfg.filter
     hexRef.current  = L.layerGroup().addTo(map)
     gridRef.current = L.layerGroup().addTo(map)
     mapRef.current  = map
@@ -274,9 +284,12 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     tileRef.current = L.tileLayer(cfg.url, { maxZoom: cfg.maxZoom ?? 19 }).addTo(map)
     overlayRef.current?.remove()
     overlayRef.current = null
-    if ((cfg as any).overlay) {
-      overlayRef.current = L.tileLayer((cfg as any).overlay, { maxZoom: 19, opacity: 0.8 }).addTo(map)
+    if (cfg.overlay) {
+      overlayRef.current = L.tileLayer(cfg.overlay, { maxZoom: 19, opacity: 0.8 }).addTo(map)
     }
+    // Apply/remove branded CSS filter
+    const tilePane = map.getPane('tilePane')
+    if (tilePane) tilePane.style.filter = cfg.filter || ''
   }, [tile])
 
   // ── Draw hexes ────────────────────────────────────────────────────────────

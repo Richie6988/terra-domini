@@ -133,3 +133,22 @@ class AllianceOperation(models.Model):
 
     class Meta:
         db_table = 'alliance_operations'
+
+
+class AllianceChatMessage(models.Model):
+    """Persistent alliance chat messages for history."""
+    MSG_TYPES = [
+        ('chat', 'Chat'), ('help', 'Help Request'),
+        ('attack_plan', 'Attack Plan'), ('system', 'System'),
+    ]
+
+    alliance = models.ForeignKey(Alliance, on_delete=models.CASCADE, related_name='chat_messages')
+    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    message_type = models.CharField(max_length=20, choices=MSG_TYPES, default='chat')
+    text = models.TextField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'alliance_chat_messages'
+        ordering = ['-created_at']
+        indexes = [models.Index(fields=['alliance', '-created_at'])]

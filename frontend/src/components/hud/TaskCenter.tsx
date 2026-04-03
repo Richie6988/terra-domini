@@ -1,68 +1,69 @@
 /**
- * TaskCenter — Daily challenges, streaks, earn-to-play.
- * Ported from main_prototype.html modal-gig.
- * 
- * Features:
- *   - Daily reset 00:00 UTC with streak counter
- *   - 5 daily tasks: verify, enrich territory, moderate, content creator, login streak
- *   - Progress bar with HEX earnings
- *   - Referral system (invite friends → earn HEX)
+ * TaskCenter — Daily missions + streak, wired to backend.
+ * API: GET /api/progression/daily-missions/
+ *      POST /api/progression/login-streak/
+ *      POST /api/progression/{id}/claim-mission/
  */
-import { useState, useEffect, useMemo } from 'react'
-import { motion } from 'framer-motion'
+import { useState, useEffect, useCallback } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
+import { api } from '../../services/api'
+import { useStore } from '../../store'
 import toast from 'react-hot-toast'
 
 interface Props { onClose: () => void }
 
-interface Task {
-  id: string
-  icon: string
-  name: string
-  desc: string
-  reward: number
-  completed: boolean
-  action: string // 'claim' | 'start' | 'completed'
-  color?: string
+interface Mission {
+  id: string; title: string; icon: string; target: number; current: number;
+  progress_pct: number; reward_tdc: number; reward_xp: number;
+  completed: boolean; claimed: boolean;
 }
 
-const DAILY_TASKS: Task[] = [
-  { id: 'verify',   icon: '✅', name: 'VERIFY HUMANITY',     desc: 'Complete daily captcha verification',           reward: 5,  completed: false, action: 'claim' },
-  { id: 'enrich',   icon: '📷', name: 'ENRICH TERRITORY',    desc: 'Add image or historical data to an empty hex',  reward: 15, completed: false, action: 'start' },
-  { id: 'moderate', icon: '🔍', name: 'MODERATION DUTY',     desc: 'Review and validate 10 player reports',          reward: 25, completed: false, action: 'start' },
-  { id: 'content',  icon: '⭐', name: 'CONTENT CREATOR',     desc: 'Write detailed description for a rare location', reward: 50, completed: false, action: 'start', color: '#cc8800' },
-  { id: 'streak',   icon: '🔥', name: 'LOGIN STREAK',        desc: 'Daily login bonus — streak multiplier active!',  reward: 10, completed: false, action: 'claim' },
+const FALLBACK_TASKS: Mission[] = [
+  { id: 'f1', title: 'Claim 2 territories', icon: '🏴', target: 2, current: 0, progress_pct: 0, reward_tdc: 25, reward_xp: 100, completed: false, claimed: false },
+  { id: 'f2', title: 'Win 1 battle', icon: '⚔️', target: 1, current: 0, progress_pct: 0, reward_tdc: 40, reward_xp: 150, completed: false, claimed: false },
+  { id: 'f3', title: 'Visit 3 POI zones', icon: '📍', target: 3, current: 0, progress_pct: 0, reward_tdc: 15, reward_xp: 50, completed: false, claimed: false },
+  { id: 'f4', title: 'Spend 100 HEX Coins', icon: '💰', target: 100, current: 0, progress_pct: 0, reward_tdc: 30, reward_xp: 120, completed: false, claimed: false },
+  { id: 'f5', title: 'Login streak bonus', icon: '🔥', target: 1, current: 1, progress_pct: 100, reward_tdc: 10, reward_xp: 50, completed: true, claimed: false },
 ]
 
 export function TaskCenter({ onClose }: Props) {
-  const [tasks, setTasks] = useState(() => {
-    // Load from localStorage or reset daily
-    const stored = localStorage.getItem('hx_daily_tasks')
-    const today = new Date().toISOString().slice(0, 10)
-    if (stored) {
-      const parsed = JSON.parse(stored)
-      if (parsed.date === today) return parsed.tasks as Task[]
-    }
-    return DAILY_TASKS
+  const isAuth = useStore(s => s.isAuthenticated)
+  const qc = useQueryClient()
+
+  // Fetch daily missions from backend
+  const { data: missionData, isLoading } = useQuery({
+    queryKey: ['daily-missions'],
+    queryFn: () => api.get('/progression/daily-missions/').then(r => r.data),
+    staleTime: 30000,
+    enabled: isAuth,
   })
 
-  const [streak] = useState(() => {
-    try { return parseInt(localStorage.getItem('hx_streak') || '1') } catch { return 1 }
+  // Fetch streak
+  const { data: streakData } = useQuery({
+    queryKey: ['login-streak'],
+    queryFn: () => api.post('/progression/login-streak/').then(r => r.data),
+    staleTime: 60000,
+    enabled: isAuth,
   })
 
-  // Persist tasks
-  useEffect(() => {
-    const today = new Date().toISOString().slice(0, 10)
-    localStorage.setItem('hx_daily_tasks', JSON.stringify({ date: today, tasks }))
-  }, [tasks])
+  const missions: Mission[] = missionData?.missions?.length ? missionData.missions : FALLBACK_TASKS
+  const streak = streakData?.current_streak || 1
+  const streakReward = streakData?.streak?.reward_tdc || 10
 
-  const completed = tasks.filter(t => t.completed).length
-  const totalReward = tasks.filter(t => t.completed).reduce((s, t) => s + t.reward, 0)
-  const totalPossible = tasks.reduce((s, t) => s + t.reward, 0)
-  const pct = Math.floor((completed / tasks.length) * 100)
+  // Claim mission
+  const claimMut = useMutation({
+    mutationFn: (missionId: string) => api.post(`/progression/${missionId}/claim-mission/`),
+    onSuccess: (_, missionId) => {
+      const m = missions.find(t => t.id === missionId)
+      toast.success(`+${m?.reward_tdc || 0} HEX earned!`)
+      qc.invalidateQueries({ queryKey: ['daily-missions'] })
+    },
+    onError: () => toast.error('Failed to claim reward'),
+  })
 
-  // Time until reset
+  // Countdown to reset
   const [resetIn, setResetIn] = useState('')
   useEffect(() => {
     const update = () => {
@@ -79,15 +80,13 @@ export function TaskCenter({ onClose }: Props) {
     return () => clearInterval(i)
   }, [])
 
-  const handleComplete = (taskId: string) => {
-    setTasks(prev => prev.map(t =>
-      t.id === taskId ? { ...t, completed: true, action: 'completed' } : t
-    ))
-    const task = tasks.find(t => t.id === taskId)
-    if (task) toast.success(`+${task.reward} HEX earned!`)
-  }
-
-  const refLink = 'hexod.io/ref/' + (localStorage.getItem('hx_username') || 'COMMANDER')
+  const completed = missions.filter(t => t.completed).length
+  const claimed = missions.filter(t => t.claimed).length
+  const totalReward = missions.filter(t => t.completed).reduce((s, t) => s + t.reward_tdc, 0)
+  const totalPossible = missions.reduce((s, t) => s + t.reward_tdc, 0)
+  const pct = missions.length ? Math.floor((completed / missions.length) * 100) : 0
+  const player = useStore(s => s.player)
+  const refLink = `hexod.io/ref/${player?.username || 'COMMANDER'}`
 
   return (
     <GlassPanel title="TASK CENTER" onClose={onClose} accent="#0099cc">
@@ -97,7 +96,7 @@ export function TaskCenter({ onClose }: Props) {
         letterSpacing: 2, marginBottom: 12,
         fontFamily: "'Orbitron', system-ui, sans-serif",
       }}>
-        DAILY RESET {resetIn} · STREAK: 🔥 {streak} DAYS
+        DAILY RESET {resetIn} · STREAK: 🔥 {streak} DAYS {streakReward > 0 && `(+${streakReward}◆)`}
       </div>
 
       {/* Progress bar */}
@@ -105,133 +104,96 @@ export function TaskCenter({ onClose }: Props) {
         padding: '12px 14px', borderRadius: 10, marginBottom: 14,
         background: 'rgba(0,153,204,0.05)', border: '1px solid rgba(0,153,204,0.15)',
       }}>
-        <div style={{
-          display: 'flex', justifyContent: 'space-between', marginBottom: 6,
-          fontSize: 8, color: 'rgba(26,42,58,0.45)', letterSpacing: 1,
-          fontFamily: "'Share Tech Mono', monospace",
-        }}>
-          <span>TODAY'S PROGRESS</span>
-          <span style={{ color: '#0099cc', fontWeight: 700 }}>
-            {completed}/{tasks.length} COMPLETED — {totalReward} HEX
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 8, color: 'rgba(26,42,58,0.45)', letterSpacing: 1 }}>
+          <span>PROGRESS {completed}/{missions.length}</span>
+          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <CrystalIcon size="sm" />{totalReward}/{totalPossible}
           </span>
         </div>
         <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,60,100,0.06)', overflow: 'hidden' }}>
-          <div style={{
-            height: '100%', width: `${pct}%`, borderRadius: 3,
-            background: 'linear-gradient(90deg, #0099cc, #00ff87)',
-            transition: 'width 0.5s ease',
-          }} />
+          <div style={{ width: `${pct}%`, height: '100%', borderRadius: 3, background: pct >= 100 ? '#22c55e' : '#0099cc', transition: 'width 0.5s' }} />
         </div>
       </div>
 
-      {/* Tasks */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
-        {tasks.map(task => (
-          <motion.div
-            key={task.id}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '12px 14px', borderRadius: 10,
-              background: task.completed ? 'rgba(0,136,74,0.04)' : 'rgba(255,255,255,0.5)',
-              border: `1px solid ${task.completed ? 'rgba(0,136,74,0.2)' : task.color ? task.color + '30' : 'rgba(0,60,100,0.1)'}`,
-              opacity: task.completed ? 0.6 : 1,
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1 }}>
-              <span style={{ fontSize: 16 }}>{task.icon}</span>
-              <div>
-                <div style={{
-                  fontSize: 9, fontWeight: 900, letterSpacing: 1,
-                  color: task.completed ? 'rgba(26,42,58,0.4)' : (task.color || '#1a2a3a'),
-                  textDecoration: task.completed ? 'line-through' : 'none',
-                  fontFamily: "'Orbitron', system-ui, sans-serif",
-                }}>
-                  {task.completed ? '✅ ' : ''}{task.name}
+      {/* Loading state */}
+      {isLoading && (
+        <div style={{ textAlign: 'center', padding: 30, color: 'rgba(26,42,58,0.3)', fontSize: 9 }}>Loading missions...</div>
+      )}
+
+      {/* Mission list */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {missions.map(task => {
+          const isDone = task.completed
+          const isClaimed = task.claimed
+          const taskPct = Math.min(100, task.progress_pct)
+          return (
+            <div key={task.id} style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '10px 14px', borderRadius: 10,
+              background: isClaimed ? 'rgba(34,197,94,0.04)' : isDone ? 'rgba(0,153,204,0.04)' : 'rgba(255,255,255,0.4)',
+              border: `1px solid ${isClaimed ? 'rgba(34,197,94,0.15)' : isDone ? 'rgba(0,153,204,0.15)' : 'rgba(0,60,100,0.06)'}`,
+              opacity: isClaimed ? 0.6 : 1,
+            }}>
+              <span style={{ fontSize: 20, flexShrink: 0, filter: isClaimed ? 'grayscale(0.5)' : '' }}>{task.icon}</span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 9, fontWeight: 700, color: '#1a2a3a', letterSpacing: 0.5 }}>{task.title}</div>
+                {/* Progress bar */}
+                <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,60,100,0.06)', marginTop: 4, overflow: 'hidden' }}>
+                  <div style={{ width: `${taskPct}%`, height: '100%', borderRadius: 2, background: isDone ? '#22c55e' : '#0099cc', transition: 'width 0.3s' }} />
                 </div>
-                <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>
-                  {task.desc}
+                <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.3)', marginTop: 2 }}>{task.current}/{task.target}</div>
+              </div>
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <CrystalIcon size="sm" />
+                  <span style={{ fontSize: 11, fontWeight: 900, color: isClaimed ? 'rgba(26,42,58,0.25)' : '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>{task.reward_tdc}</span>
                 </div>
+                {isDone && !isClaimed && (
+                  <button onClick={() => claimMut.mutate(task.id)} disabled={claimMut.isPending} style={{
+                    marginTop: 4, padding: '4px 10px', borderRadius: 8, cursor: 'pointer',
+                    background: '#22c55e', border: 'none', color: '#fff',
+                    fontSize: 7, fontWeight: 700, letterSpacing: 1,
+                    fontFamily: "'Orbitron', sans-serif",
+                  }}>CLAIM</button>
+                )}
+                {isClaimed && <div style={{ fontSize: 7, color: '#22c55e', fontWeight: 700, marginTop: 2 }}>✓ DONE</div>}
               </div>
             </div>
-
-            {task.completed ? (
-              <span style={{
-                fontSize: 9, fontWeight: 700, color: '#00884a',
-                fontFamily: "'Share Tech Mono', monospace",
-              }}>
-                +{task.reward} ✓
-              </span>
-            ) : (
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{
-                  fontSize: 10, fontWeight: 700, color: '#0099cc',
-                  fontFamily: "'Share Tech Mono', monospace",
-                }}>
-                  +{task.reward} HEX
-                </span>
-                <button
-                  onClick={() => handleComplete(task.id)}
-                  style={{
-                    padding: '6px 14px', borderRadius: 16, cursor: 'pointer',
-                    background: task.color ? `${task.color}15` : 'rgba(0,153,204,0.08)',
-                    border: `1px solid ${task.color || '#0099cc'}40`,
-                    color: task.color || '#0099cc',
-                    fontSize: 8, fontWeight: 700, letterSpacing: 1,
-                    fontFamily: "'Orbitron', system-ui, sans-serif",
-                  }}
-                >
-                  {task.action === 'claim' ? 'Claim' : 'Start'}
-                </button>
-              </div>
-            )}
-          </motion.div>
-        ))}
+          )
+        })}
       </div>
 
-      {/* Referral section */}
+      {/* Bonus: all complete */}
+      {completed === missions.length && claimed < missions.length && (
+        <div style={{
+          marginTop: 14, padding: 14, borderRadius: 10, textAlign: 'center',
+          background: 'linear-gradient(135deg, rgba(34,197,94,0.06), rgba(34,197,94,0.02))',
+          border: '1px solid rgba(34,197,94,0.2)',
+        }}>
+          <div style={{ fontSize: 20, marginBottom: 4 }}>🎉</div>
+          <div style={{ fontSize: 9, fontWeight: 700, color: '#22c55e', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
+            ALL MISSIONS COMPLETE — CLAIM YOUR REWARDS!
+          </div>
+        </div>
+      )}
+
+      {/* Referral */}
       <div style={{
-        padding: 16, borderRadius: 10,
-        background: 'linear-gradient(135deg, rgba(34,197,94,0.06), rgba(0,0,0,0.01))',
-        border: '1px solid rgba(34,197,94,0.2)',
+        marginTop: 14, padding: '10px 14px', borderRadius: 10,
+        background: 'rgba(0,153,204,0.04)', border: '1px solid rgba(0,153,204,0.1)',
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
       }}>
-        <div style={{
-          fontSize: 10, fontWeight: 900, color: '#22c55e', marginBottom: 6,
-          fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 2,
-        }}>
-          🤝 INVITE FRIENDS — EARN TOGETHER
+        <div>
+          <div style={{ fontSize: 8, fontWeight: 700, color: '#0099cc', letterSpacing: 1, fontFamily: "'Orbitron', sans-serif" }}>
+            INVITE FRIENDS · EARN 100◆
+          </div>
+          <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>{refLink}</div>
         </div>
-        <div style={{
-          fontSize: 8, color: 'rgba(26,42,58,0.5)', marginBottom: 10, lineHeight: 1.6,
-          textTransform: 'none', fontFamily: 'system-ui',
-        }}>
-          Share your referral link. Both you and your friend earn 100 HEX when they reach LVL 5!
-        </div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          <input
-            readOnly
-            value={refLink}
-            style={{
-              flex: 1, padding: '8px 10px', borderRadius: 8,
-              background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)',
-              fontSize: 9, color: '#1a2a3a', fontFamily: "'Share Tech Mono', monospace",
-              outline: 'none',
-            }}
-          />
-          <button
-            onClick={() => { navigator.clipboard?.writeText(refLink); toast.success('📋 Referral link copied!') }}
-            style={{
-              padding: '8px 14px', borderRadius: 8, cursor: 'pointer',
-              background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.3)',
-              color: '#22c55e', fontSize: 8, fontWeight: 700,
-              fontFamily: "'Orbitron', system-ui, sans-serif",
-            }}
-          >
-            Copy
-          </button>
-        </div>
-        <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.35)', marginTop: 8 }}>
-          4 friends invited · 2 reached LVL 5 · <span style={{ color: '#22c55e' }}>+200 HEX earned</span>
-        </div>
+        <button onClick={() => { navigator.clipboard?.writeText(`https://${refLink}`); toast.success('Link copied!') }} style={{
+          padding: '6px 12px', borderRadius: 8, cursor: 'pointer',
+          background: '#0099cc', border: 'none', color: '#fff',
+          fontSize: 7, fontWeight: 700, letterSpacing: 1, fontFamily: "'Orbitron', sans-serif",
+        }}>COPY</button>
       </div>
     </GlassPanel>
   )

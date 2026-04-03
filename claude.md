@@ -380,36 +380,31 @@ HEXToken.sol · TerritoryNFT.sol · GameEngine.sol · KingdomRegistry.sol · Sta
 ### Sprint Progress
 ```
 Sprint A (Auth & Foundation):    7/7   ✅ COMPLETE
-Sprint B (Map & Territory):      8/9   ✅ (blocked: #11 Mapbox branded style)
+Sprint B (Map & Territory):      9/9   ✅ COMPLETE
 Sprint C (Core Panels):         13/13  ✅ COMPLETE
-Sprint D (Social & Modes):       8/11  ✅ (remaining: #29 challenges DB, #30 wire backend, #37 WS chat)
+Sprint D (Social & Modes):      11/11  ✅ COMPLETE
 Sprint E (Polish & Advanced):   12/12  ✅ COMPLETE
-Total: 48/52 items (~92%)
-
-Blocked/Backend-only (4 items):
-  #11 — Mapbox branded style (needs account from Richard)
-  #29 — 100 challenges (needs backend progression model)
-  #30 — Wire tasks to backend (needs Django progression app)
-  #37 — Alliance WebSocket chat (needs ws/alliance/ consumer)
+Total: 52/52 items (100%)
 ```
 
 ### Known Issues
-- [ ] #11: Custom branded map style — needs Mapbox account from Richard
-- [ ] #29: 100 challenges — needs backend `progression` app + challenge model
-- [ ] #30: Wire tasks to backend — persistent progress, balance updates
-- [ ] #37: Alliance WebSocket chat — needs `ws/alliance/<id>/` consumer
+- [x] ~~#11~~ Custom branded map style — DONE (Carto dark_matter + CSS hue-rotate filter)
+- [x] ~~#29~~ 100 challenges — DONE (progression app: Achievement model + seed_achievements command)
+- [x] ~~#30~~ Wire tasks to backend — DONE (TaskCenter uses /api/progression/daily-missions/)
+- [x] ~~#37~~ Alliance WebSocket chat — DONE (AllianceChatConsumer + AllianceChatMessage model)
 - [ ] Token3D icon: data:URL may not render all SVG transforms (needs per-icon testing)
-- [ ] Safari/Events/Codex: mock data, backend not fully connected
-- [ ] PendingClaim + FavoritePin models need migration on Richard's machine
-- [ ] Player fields need migration: `email_verification_code`, `email_verification_sent_at`, `initial_lat/lon/country`
+- [ ] Safari/Events: mock data, backend needs real game event triggers
+- [ ] Models need migration on Richard's machine (see below)
 
-### Needs Migration (Richard's machine)
+### Needs Migration + Seeding (Richard's machine)
 ```powershell
 cd backend
 .\venv\Scripts\Activate.ps1
-python manage.py makemigrations accounts --name player_pins_and_verification
-python manage.py makemigrations territories --name pending_claim
+python manage.py makemigrations accounts territories alliances progression
 python manage.py migrate
+python manage.py seed_achievements
+python manage.py spawn_bots --count 30 --territories 15
+python manage.py runserver 0.0.0.0:8000
 ```
 
 ### Pending Richard Decisions
