@@ -188,15 +188,15 @@ export function ShopPanel({ onClose }: Props) {
           </div>
         </div>
 
-        {/* Category tabs — from prototype */}
-        <div style={{ display:'flex', gap:4, overflowX:'auto', paddingBottom:8, marginBottom:12 }}>
+        {/* Category quick-nav — scrolls to section */}
+        <div style={{ display:'flex', gap:4, overflowX:'auto', paddingBottom:8, marginBottom:12, position:'sticky', top:0, zIndex:1, background:'rgba(235,242,250,0.95)', backdropFilter:'blur(8px)' }}>
           {CATS.map(c => (
-            <button key={c.id} onClick={() => setCat(c.id)} style={{
+            <button key={c.id} onClick={() => document.getElementById(`shop-${c.id}`)?.scrollIntoView({ behavior:'smooth', block:'start' })} style={{
               padding:'6px 10px', borderRadius:20, cursor:'pointer', whiteSpace:'nowrap',
-              fontSize:7, fontWeight: cat===c.id ? 700 : 500, letterSpacing:1,
-              background: cat===c.id ? `${c.color}15` : 'rgba(255,255,255,0.5)',
-              border:`1px solid ${cat===c.id ? `${c.color}40` : 'rgba(0,60,100,0.1)'}`,
-              color: cat===c.id ? c.color : 'rgba(26,42,58,0.45)', flexShrink:0,
+              fontSize:7, fontWeight:500, letterSpacing:1,
+              background:'rgba(255,255,255,0.5)',
+              border:`1px solid rgba(0,60,100,0.1)`,
+              color:c.color, flexShrink:0,
               fontFamily:"'Orbitron', system-ui, sans-serif",
             }}>
               {c.label}
@@ -217,36 +217,35 @@ export function ShopPanel({ onClose }: Props) {
           </div>
         )}
 
-        {/* ═══ BOOSTERS TAB ═══ */}
-        {cat === 'boosters' && (
-          <div>
-            <div style={{ fontSize:8, fontWeight:700, letterSpacing:2, color:'rgba(26,42,58,0.4)', marginBottom:10, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
-              🎁 BOOSTER PACKS — 10 ITEMS EACH
-            </div>
-            <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:12 }}>
-              {BOOSTERS.map(b => (
-                <button key={b.id} onClick={() => handleBuy(b.name, b.code, b.price)} style={{
-                  padding:14, borderRadius:10, cursor:'pointer', textAlign:'center',
-                  background:`linear-gradient(135deg, ${b.color}12, ${b.color}05)`,
-                  border:`2px solid ${b.color}40`,
-                  transition:'all 0.25s ease',
-                }}>
-                  <div style={{ fontSize:28, marginBottom:6 }}>{b.icon}</div>
-                  <div style={{ fontSize:9, fontWeight:900, color:b.color, marginBottom:4, fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1 }}>{b.name}</div>
-                  <div style={{ fontSize:7, color:'rgba(26,42,58,0.45)', lineHeight:1.6, textTransform:'none', fontFamily:'system-ui', marginBottom:8, whiteSpace:'pre-line' }}>{b.desc}</div>
-                  <div style={{ fontSize:14, fontWeight:900, color:b.color, fontFamily:"'Share Tech Mono', monospace" }}>{b.price} ◆</div>
-                </button>
-              ))}
-            </div>
-            <div style={{ fontSize:7, color:'rgba(26,42,58,0.35)', textAlign:'center', fontFamily:'system-ui', textTransform:'none' }}>
-              Territories are assigned to random unclaimed hexes near your empire. Tokens are added to your Codex.
-            </div>
+        {/* ═══ BOOSTERS SECTION ═══ */}
+        <div id="shop-boosters" style={{ marginBottom:20 }}>
+          <div style={{ fontSize:8, fontWeight:700, letterSpacing:2, color:'#cc8800', marginBottom:10, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
+            🎁 BOOSTER PACKS — 10 ITEMS EACH
           </div>
-        )}
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:8 }}>
+            {BOOSTERS.map(b => (
+              <button key={b.id} onClick={() => handleBuy(b.name, b.code, b.price)} style={{
+                padding:14, borderRadius:10, cursor:'pointer', textAlign:'center',
+                background:`linear-gradient(135deg, ${b.color}12, ${b.color}05)`,
+                border:`2px solid ${b.color}40`, transition:'all 0.25s ease',
+              }}>
+                <div style={{ fontSize:28, marginBottom:6 }}>{b.icon}</div>
+                <div style={{ fontSize:9, fontWeight:900, color:b.color, marginBottom:4, fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1 }}>{b.name}</div>
+                <div style={{ fontSize:7, color:'rgba(26,42,58,0.45)', lineHeight:1.6, fontFamily:'system-ui', marginBottom:8, whiteSpace:'pre-line' }}>{b.desc}</div>
+                <div style={{ fontSize:14, fontWeight:900, color:b.color, fontFamily:"'Share Tech Mono', monospace" }}>{b.price} ◆</div>
+              </button>
+            ))}
+          </div>
+        </div>
 
-        {/* ═══ ITEM TABS (attack/defense/resources/chance/influence/customize) ═══ */}
-        {cat !== 'boosters' && SHOP_ITEMS[cat] && (
-          <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
+        {/* ═══ ALL ITEM CATEGORIES — one-pager ═══ */}
+        {CATS.filter(c => c.id !== 'boosters').map(c => (
+          SHOP_ITEMS[c.id] && (
+            <div key={c.id} id={`shop-${c.id}`} style={{ marginBottom:20 }}>
+              <div style={{ fontSize:8, fontWeight:700, letterSpacing:2, color:c.color, marginBottom:10, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
+                {c.label.toUpperCase()}
+              </div>
+              <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             {SHOP_ITEMS[cat].map(item => (
               <div key={item.id} style={{
                 display:'flex', justifyContent:'space-between', alignItems:'center',
@@ -280,7 +279,9 @@ export function ShopPanel({ onClose }: Props) {
               </div>
             ))}
           </div>
-        )}
+            </div>
+          )
+        ))}
 
         {/* Buy HEX CTA */}
         <div style={{ marginTop:16, padding:'14px 16px', borderRadius:8,
