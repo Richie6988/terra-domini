@@ -90,6 +90,7 @@ const AdminPanel   = lazy(() => import('./pages/AdminPanel'))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
 const ResetPasswordPage  = lazy(() => import('./pages/ResetPasswordPage'))
 const VerifyEmailPage    = lazy(() => import('./pages/VerifyEmailPage'))
+const TermsPage          = lazy(() => import('./pages/TermsPage'))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -279,7 +280,7 @@ export default function App() {
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
             <Route path="/verify-email" element={<VerifyEmailPage />} />
-            <Route path="/verify-email" element={<VerifyEmailPage />} />
+            <Route path="/terms" element={<TermsPage />} />
             <Route path="/reset-password/:uid/:token" element={<ResetPasswordPage />} />
             <Route path="/gm"       element={<AdminPanel />} />
             <Route path="/" element={

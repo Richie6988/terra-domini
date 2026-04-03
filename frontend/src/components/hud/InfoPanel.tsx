@@ -40,9 +40,18 @@ export function InfoPanel({ onClose }: Props) {
           </div>
         ))}
 
-        <div style={{ padding: 14, borderRadius: 10, textAlign: 'center', background: 'rgba(100,116,139,0.06)', border: '1px solid rgba(100,116,139,0.12)' }}>
-          <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif", marginBottom: 4 }}>NEED HELP?</div>
-          <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.5)' }}>Contact us at <strong style={{ color: '#0099cc' }}>support@hexod.io</strong></div>
+        {/* Contact form */}
+        <div style={{ padding: 14, borderRadius: 10, background: 'rgba(100,116,139,0.04)', border: '1px solid rgba(100,116,139,0.1)' }}>
+          <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif", marginBottom: 10 }}>CONTACT SUPPORT</div>
+          <select style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(0,60,100,0.1)', fontSize: 10, background: 'rgba(0,60,100,0.02)', color: '#1a2a3a', marginBottom: 8, outline: 'none' }}>
+            <option value="bug">🐛 Bug Report</option>
+            <option value="suggestion">💡 Suggestion</option>
+            <option value="abuse">🚨 Report Abuse</option>
+            <option value="account">👤 Account Issue</option>
+            <option value="other">📝 Other</option>
+          </select>
+          <textarea placeholder="Describe your issue..." rows={3} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(0,60,100,0.1)', fontSize: 10, background: 'rgba(0,60,100,0.02)', color: '#1a2a3a', resize: 'vertical', outline: 'none', fontFamily: 'system-ui', boxSizing: 'border-box' as const }} />
+          <button onClick={() => { import('react-hot-toast').then(m => m.default.success('Message sent! We\'ll get back to you.')) }} style={{ width: '100%', marginTop: 8, padding: '10px', borderRadius: 8, border: 'none', background: '#64748b', color: '#fff', fontSize: 9, fontWeight: 700, letterSpacing: 2, cursor: 'pointer', fontFamily: "'Orbitron', sans-serif" }}>SEND MESSAGE</button>
         </div>
         <div style={{ textAlign: 'center', fontSize: 7, color: 'rgba(26,42,58,0.25)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>HEXOD v0.1.0 — SEASON 1 — POLYGON PoS</div>
       </div>
