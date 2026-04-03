@@ -33,7 +33,7 @@
 
 ---
 
-### SPRINT A — Foundation & Auth (P0, ~20h)
+### SPRINT A — Foundation & Auth (P0, ~20h) ✅ COMPLETE
 
 | ID | Page | Feature | Action | Effort | Files Involved | Dependencies | Notes |
 |----|------|---------|--------|--------|---------------|-------------|-------|

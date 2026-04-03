@@ -343,7 +343,12 @@ HEXToken.sol · TerritoryNFT.sol · GameEngine.sol · KingdomRegistry.sol · Sta
 ## 11. CURRENT STATUS & KNOWN ISSUES
 
 ### What Works
-- [x] Login / Register / Forgot Password (full email flow)
+- [x] Login / Register / Forgot Password / **Email Verification** (full email flow with 6-digit code)
+- [x] **Right-click prevention** (global contextmenu handler)
+- [x] **Password eye toggle + real-time validation** (show/hide + match indicator)
+- [x] **Login contrast** (all labels brightened for dark background)
+- [x] **Geolocation on register** (initial_lat/lon saved from IP)
+- [x] **Tutorial non-blocking** (hint bar at top during claim step, map fully accessible)
 - [x] Map with H3 grid (always res 8, zoom 14+)
 - [x] Territory click → Token3DViewer (single click, portal, fullscreen)
 - [x] Claim mechanics (free / buy / explore with timer)
@@ -363,6 +368,7 @@ HEXToken.sol · TerritoryNFT.sol · GameEngine.sol · KingdomRegistry.sol · Sta
 - [ ] Safari/Events: mock data, backend not connected
 - [ ] Codex: collection data is mock (Math.random)
 - [ ] PendingClaim model needs migration on Richard's machine
+- [ ] Player model new fields need migration: `email_verification_code`, `email_verification_sent_at`, `initial_lat`, `initial_lon`, `initial_country`
 - [ ] Some panels still have `color: '#fff'` dark theme remnants in buttons
 
 ### Pending Richard Decisions

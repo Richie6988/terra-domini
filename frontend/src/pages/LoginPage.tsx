@@ -134,32 +134,6 @@ function Typewriter({ texts }: { texts: string[] }) {
   return <span>{texts[textIndex].slice(0, charIndex)}<span style={{ opacity: 0.6, animation: 'blink 1s step-end infinite' }}>|</span></span>
 }
 
-// ── Animated stat counter ──
-function AnimStat({ target, label, suffix = '' }: { target: number; label: string; suffix?: string }) {
-  const [value, setValue] = useState(0)
-  useEffect(() => {
-    const dur = 2000, start = performance.now()
-    const tick = (now: number) => {
-      const p = Math.min((now - start) / dur, 1)
-      setValue(Math.floor((1 - Math.pow(1 - p, 3)) * target))
-      if (p < 1) requestAnimationFrame(tick)
-    }
-    const t = setTimeout(() => requestAnimationFrame(tick), 800)
-    return () => clearTimeout(t)
-  }, [target])
-
-  return (
-    <div style={{ textAlign: 'center' }}>
-      <div style={{ fontSize: 22, fontWeight: 900, color: '#0099cc', fontFamily: "'Orbitron', monospace", letterSpacing: 2 }}>
-        {value.toLocaleString()}{suffix}
-      </div>
-      <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.3)', letterSpacing: 3, marginTop: 4, fontFamily: "'Orbitron', sans-serif" }}>
-        {label}
-      </div>
-    </div>
-  )
-}
-
 // ── Main ──
 export default function LoginPage() {
   const navigate = useNavigate()
@@ -176,7 +150,13 @@ export default function LoginPage() {
       setAuth(data.player, data.access, data.refresh)
       navigate('/')
     } catch (e: any) {
-      toast.error(e?.response?.data?.detail ?? 'Login failed')
+      const data = e?.response?.data
+      if (data?.requires_verification) {
+        toast.error('Email not verified — check your inbox')
+        navigate('/verify-email', { state: { email: data.email || email } })
+      } else {
+        toast.error(data?.error || data?.detail || 'Login failed')
+      }
     } finally { setLoading(false) }
   }, [email, password, setAuth, navigate])
 
@@ -220,7 +200,7 @@ export default function LoginPage() {
           }}>HEXOD</div>
 
           <div style={{
-            fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: 6, marginTop: 8,
+            fontSize: 10, color: 'rgba(180,210,240,0.65)', letterSpacing: 6, marginTop: 8,
             fontFamily: "'Orbitron', sans-serif", height: 16,
           }}>
             <Typewriter texts={[
@@ -230,17 +210,6 @@ export default function LoginPage() {
               'REAL MAP · REAL STRATEGY · REAL STAKES',
             ]} />
           </div>
-        </motion.div>
-
-        {/* Stats */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.5, duration: 1 }}
-          style={{
-            display: 'flex', gap: 40, marginBottom: 36, padding: '14px 40px', borderRadius: 30,
-            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(0,153,204,0.1)',
-          }}>
-          <AnimStat target={4842201} label="TERRITORIES" />
-          <AnimStat target={195} label="COUNTRIES" />
-          <AnimStat target={0} label="PLAYERS" suffix="+" />
         </motion.div>
 
         {/* Login card */}
@@ -253,14 +222,14 @@ export default function LoginPage() {
             boxShadow: '0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(0,153,204,0.1)',
           }}>
           <form onSubmit={handleSubmit}>
-            <label style={{ display: 'block', fontSize: 8, color: 'rgba(0,200,255,0.4)', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 8, color: 'rgba(100,210,255,0.75)', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", marginBottom: 6 }}>
               COMMANDER EMAIL
             </label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="commander@hexod.io" style={inputSt}
               onFocus={e => e.target.style.borderColor = 'rgba(0,153,204,0.4)'}
               onBlur={e => e.target.style.borderColor = 'rgba(0,153,204,0.15)'} />
 
-            <label style={{ display: 'block', fontSize: 8, color: 'rgba(0,200,255,0.4)', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", marginBottom: 6, marginTop: 18 }}>
+            <label style={{ display: 'block', fontSize: 8, color: 'rgba(100,210,255,0.75)', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", marginBottom: 6, marginTop: 18 }}>
               ACCESS CODE
             </label>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••••" style={inputSt}
@@ -282,13 +251,13 @@ export default function LoginPage() {
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, fontSize: 8, fontFamily: "'Orbitron', sans-serif" }}>
             <Link to="/register" style={{ color: 'rgba(0,200,255,0.5)', textDecoration: 'none', letterSpacing: 2 }}>NEW COMMANDER</Link>
-            <Link to="/forgot-password" style={{ color: 'rgba(255,255,255,0.3)', textDecoration: 'none', letterSpacing: 1, fontSize: 7 }}>FORGOT PASSWORD?</Link>
+            <Link to="/forgot-password" style={{ color: 'rgba(180,210,240,0.6)', textDecoration: 'none', letterSpacing: 1, fontSize: 7 }}>FORGOT PASSWORD?</Link>
           </div>
         </motion.div>
 
         {/* Footer */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}
-          style={{ marginTop: 36, fontSize: 7, color: 'rgba(255,255,255,0.15)', letterSpacing: 4, fontFamily: "'Orbitron', sans-serif" }}>
+          style={{ marginTop: 36, fontSize: 7, color: 'rgba(150,190,220,0.4)', letterSpacing: 4, fontFamily: "'Orbitron', sans-serif" }}>
           HEXOD v0.1 · SEASON 1 · POLYGON POS · MADE IN FRANCE 🇫🇷
         </motion.div>
       </div>

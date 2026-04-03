@@ -31,6 +31,10 @@ TEMPLATES = {
         'subject': 'Welcome to HEXOD — Your Empire Begins! ⬡',
         'template': 'emails/welcome.html',
     },
+    'verify_email': {
+        'subject': '⬡ HEXOD — Verify Your Email',
+        'template': 'emails/verify_email.html',
+    },
     'password_reset': {
         'subject': 'Reset Your HEXOD Password',
         'template': 'emails/password_reset.html',
@@ -58,6 +62,10 @@ TEMPLATES = {
     'attack_alert': {
         'subject': '⚔️ Your Territory is Under Attack!',
         'template': 'emails/attack_alert.html',
+    },
+    'verify_email': {
+        'subject': '⬡ HEXOD — Verify Your Email',
+        'template': 'emails/verify_email.html',
     },
 }
 
@@ -133,4 +141,17 @@ def send_auction_outbid_email(user, auction_name, current_bid):
     return send_hexod_email(user, 'auction_outbid', {
         'token_name': auction_name,
         'current_bid': current_bid,
+    })
+
+
+def generate_verification_code():
+    """Generate a 6-digit numeric code."""
+    import random
+    return f'{random.randint(100000, 999999)}'
+
+
+def send_verification_email(user, code: str):
+    """Send email verification code after registration."""
+    return send_hexod_email(user, 'verify_email', {
+        'code': code,
     })

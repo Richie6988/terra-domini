@@ -57,6 +57,12 @@ export default function RegisterPage() {
   const setAuth = useStore((s) => s.setAuth)
   const [form, setForm] = useState({ email: '', username: '', display_name: '', password: '', confirm: '' })
   const [loading, setLoading] = useState(false)
+  const [showPw, setShowPw] = useState(false)
+  const [showConfirm, setShowConfirm] = useState(false)
+
+  const pwMatch = form.password && form.confirm && form.password === form.confirm
+  const pwMismatch = form.confirm.length > 0 && form.password !== form.confirm
+  const pwTooShort = form.password.length > 0 && form.password.length < 10
 
   const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(p => ({ ...p, [k]: e.target.value }))
@@ -68,23 +74,14 @@ export default function RegisterPage() {
 
     setLoading(true)
     try {
-      const data = await authApi.register({
+      await authApi.register({
         email: form.email, username: form.username,
         password: form.password, display_name: form.display_name || form.username,
       })
-      setAuth(data.player, data.access, data.refresh)
-      // Auto-apply referral code if present in URL
-      if (refCode) {
-        try {
-          await authApi.post?.('/social/join-referral/', { ref_code: refCode })
-        } catch (_) {}
-        toast.success(`Bienvenue sur Hexod, ${data.player.username} ! +50 💎 offerts par votre parrain 🎁`)
-      } else {
-        toast.success(`Bienvenue sur Hexod, ${data.player.username} ! 🌍`)
-      }
-      navigate('/')
+      toast.success('Account created — check your email for verification code!')
+      navigate('/verify-email', { state: { email: form.email.toLowerCase().trim() } })
     } catch (e: any) {
-      toast.error(e?.response?.data?.error ?? 'Inscription échouée')
+      toast.error(e?.response?.data?.error ?? 'Registration failed')
     } finally { setLoading(false) }
   }
 
@@ -112,8 +109,6 @@ export default function RegisterPage() {
             { key: 'email', label: 'EMAIL', type: 'email', placeholder: 'commander@example.com' },
             { key: 'username', label: 'USERNAME (3-32 CHARS)', type: 'text', placeholder: 'IronGeneral42' },
             { key: 'display_name', label: 'DISPLAY NAME (OPTIONAL)', type: 'text', placeholder: 'Iron General' },
-            { key: 'password', label: 'PASSWORD (MIN 10 CHARS)', type: 'password', placeholder: '••••••••••••' },
-            { key: 'confirm', label: 'CONFIRM PASSWORD', type: 'password', placeholder: '••••••••••••' },
           ].map(f => (
             <div key={f.key}>
               <label style={labelStyle}>{f.label}</label>
@@ -128,6 +123,62 @@ export default function RegisterPage() {
             </div>
           ))}
 
+          {/* Password with eye toggle */}
+          <div>
+            <label style={labelStyle}>
+              PASSWORD (MIN 10 CHARS)
+              {pwTooShort && <span style={{ color: '#f59e0b', marginLeft: 8, fontSize: 7, fontFamily: 'system-ui' }}>⚠ too short</span>}
+              {form.password.length >= 10 && <span style={{ color: '#22c55e', marginLeft: 8, fontSize: 7, fontFamily: 'system-ui' }}>✓</span>}
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPw ? 'text' : 'password'}
+                value={form.password}
+                onChange={set('password')}
+                placeholder="••••••••••••"
+                required
+                minLength={10}
+                style={inputStyle}
+              />
+              <button type="button" onClick={() => setShowPw(v => !v)} style={{
+                position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                background: 'none', border: 'none', cursor: 'pointer', fontSize: 14,
+                color: 'rgba(26,42,58,0.4)', padding: 4,
+              }}>
+                {showPw ? '🙈' : '👁'}
+              </button>
+            </div>
+          </div>
+
+          {/* Confirm password with eye toggle + match indicator */}
+          <div>
+            <label style={labelStyle}>
+              CONFIRM PASSWORD
+              {pwMatch && <span style={{ color: '#22c55e', marginLeft: 8, fontSize: 7, fontFamily: 'system-ui' }}>✓ match</span>}
+              {pwMismatch && <span style={{ color: '#dc2626', marginLeft: 8, fontSize: 7, fontFamily: 'system-ui' }}>✗ mismatch</span>}
+            </label>
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showConfirm ? 'text' : 'password'}
+                value={form.confirm}
+                onChange={set('confirm')}
+                placeholder="••••••••••••"
+                required
+                minLength={10}
+                style={{
+                  ...inputStyle,
+                  borderColor: pwMatch ? 'rgba(34,197,94,0.4)' : pwMismatch ? 'rgba(220,38,38,0.4)' : inputStyle.borderColor,
+                }}
+              />
+              <button type="button" onClick={() => setShowConfirm(v => !v)} style={{
+                position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                background: 'none', border: 'none', cursor: 'pointer', fontSize: 14,
+                color: 'rgba(26,42,58,0.4)', padding: 4,
+              }}>
+                {showConfirm ? '🙈' : '👁'}
+              </button>
+            </div>
+          </div>
           <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(0,153,204,0.06)',
             border: '1px solid rgba(0,153,204,0.12)', borderRadius: 8,
             fontSize: 8, color: 'rgba(26,42,58,0.6)', lineHeight: 1.8,

@@ -58,24 +58,41 @@ class RegisterView(generics.CreateAPIView):
         player.beginner_protection_until = timezone.now() + timedelta(
             days=getattr(settings, 'GAME', {}).get('BEGINNER_PROTECTION_DAYS', 7)
         )
-        player.save(update_fields=['beginner_protection_until'])
 
-        # Issue tokens
-        refresh = RefreshToken.for_user(player)
-        logger.info(f"New player registered: {player.username}")
-
-        # Send welcome email (async-safe, won't block if SMTP fails)
+        # #10: Detect geolocation from IP
         try:
-            from terra_domini.apps.accounts.email_service import send_welcome_email
-            send_welcome_email(player)
-        except Exception as e:
-            logger.warning(f"Welcome email failed for {player.username}: {e}")
+            from terra_domini.apps.accounts.geoip_view import get_geoip_data
+            geo = get_geoip_data(request)
+            if geo.get('lat') and geo.get('lon'):
+                player.initial_lat = geo['lat']
+                player.initial_lon = geo['lon']
+                player.initial_country = geo.get('country', '')
+        except Exception:
+            pass
 
+        # #9: Generate email verification code
+        from terra_domini.apps.accounts.email_service import generate_verification_code, send_verification_email
+        code = generate_verification_code()
+        player.email_verification_code = code
+        player.email_verification_sent_at = timezone.now()
+        player.email_verified = False
+
+        player.save()
+
+        # Send verification email
+        try:
+            send_verification_email(player, code)
+        except Exception as e:
+            logger.warning(f"Verification email failed for {player.username}: {e}")
+
+        logger.info(f"New player registered: {player.username} (verification pending)")
+
+        # Return pending status — don't auto-login until verified
         return Response({
-            'message': 'Account created',
-            'access': str(refresh.access_token),
-            'refresh': str(refresh),
-            'player': PlayerProfileSerializer(player).data,
+            'message': 'Account created — check your email for verification code',
+            'status': 'pending_verification',
+            'email': email,
+            'username': username,
         }, status=201)
 
 
@@ -84,6 +101,20 @@ class LoginView(TokenObtainPairView):
     permission_classes = [AllowAny]
 
     def post(self, request, *args, **kwargs):
+        # Check email verification before allowing login
+        email = request.data.get('email', '').lower().strip()
+        if email:
+            try:
+                player = Player.objects.get(email=email)
+                if not player.email_verified:
+                    return Response({
+                        'error': 'Email not verified',
+                        'requires_verification': True,
+                        'email': email,
+                    }, status=403)
+            except Player.DoesNotExist:
+                pass  # Let SimpleJWT handle the error
+
         response = super().post(request, *args, **kwargs)
         if response.status_code == 200:
             # Find player and attach profile
@@ -199,6 +230,82 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings as django_settings
+
+
+class VerifyEmailView(APIView):
+    """POST /api/auth/verify-email/ {email, code}"""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email', '').lower().strip()
+        code = request.data.get('code', '').strip()
+
+        if not email or not code:
+            return Response({'error': 'Email and code required'}, status=400)
+
+        try:
+            player = Player.objects.get(email=email)
+        except Player.DoesNotExist:
+            return Response({'error': 'Account not found'}, status=404)
+
+        if player.email_verified:
+            return Response({'error': 'Email already verified'}, status=400)
+
+        # Check code expiry (24h)
+        if player.email_verification_sent_at:
+            from datetime import timedelta
+            if timezone.now() - player.email_verification_sent_at > timedelta(hours=24):
+                return Response({'error': 'Code expired — request a new one'}, status=410)
+
+        if player.email_verification_code != code:
+            return Response({'error': 'Invalid code'}, status=400)
+
+        # Verify and issue tokens
+        player.email_verified = True
+        player.email_verification_code = ''
+        player.save(update_fields=['email_verified', 'email_verification_code'])
+
+        refresh = RefreshToken.for_user(player)
+        logger.info(f"Email verified: {player.username}")
+
+        # Send welcome email now that they're verified
+        try:
+            from terra_domini.apps.accounts.email_service import send_welcome_email
+            send_welcome_email(player)
+        except Exception:
+            pass
+
+        return Response({
+            'message': 'Email verified!',
+            'access': str(refresh.access_token),
+            'refresh': str(refresh),
+            'player': PlayerProfileSerializer(player).data,
+        })
+
+
+class ResendVerificationView(APIView):
+    """POST /api/auth/resend-verification/ {email}"""
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        email = request.data.get('email', '').lower().strip()
+        try:
+            player = Player.objects.get(email=email, email_verified=False)
+        except Player.DoesNotExist:
+            return Response({'message': 'If this email exists, a new code was sent.'})
+
+        from terra_domini.apps.accounts.email_service import generate_verification_code, send_verification_email
+        code = generate_verification_code()
+        player.email_verification_code = code
+        player.email_verification_sent_at = timezone.now()
+        player.save(update_fields=['email_verification_code', 'email_verification_sent_at'])
+
+        try:
+            send_verification_email(player, code)
+        except Exception as e:
+            logger.warning(f"Resend verification failed: {e}")
+
+        return Response({'message': 'If this email exists, a new code was sent.'})
 
 
 class PasswordResetRequestView(APIView):

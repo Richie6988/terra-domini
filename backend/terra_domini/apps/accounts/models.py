@@ -38,6 +38,13 @@ class Player(AbstractBaseUser, PermissionsMixin):
     is_staff = models.BooleanField(default=False)
     date_joined = models.DateTimeField(default=timezone.now)
     email_verified = models.BooleanField(default=False)
+    email_verification_code = models.CharField(max_length=6, blank=True, default='')
+    email_verification_sent_at = models.DateTimeField(null=True, blank=True)
+
+    # ─── Initial geolocation (from GeoIP on registration) ───────────────────
+    initial_lat = models.FloatField(null=True, blank=True)
+    initial_lon = models.FloatField(null=True, blank=True)
+    initial_country = models.CharField(max_length=64, blank=True, default='')
 
     # ─── Game progression ─────────────────────────────────────────────────────
     class CommanderRank(models.IntegerChoices):

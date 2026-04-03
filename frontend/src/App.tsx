@@ -87,6 +87,7 @@ const RegisterPage = lazy(() => import('./pages/RegisterPage'))
 const AdminPanel   = lazy(() => import('./pages/AdminPanel'))
 const ForgotPasswordPage = lazy(() => import('./pages/ForgotPasswordPage'))
 const ResetPasswordPage  = lazy(() => import('./pages/ResetPasswordPage'))
+const VerifyEmailPage    = lazy(() => import('./pages/VerifyEmailPage'))
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -253,6 +254,7 @@ export default function App() {
     <QueryClientProvider client={queryClient}>
       <WalletProvider>
       <BrowserRouter>
+        <div onContextMenu={e => e.preventDefault()} style={{ minHeight: '100vh' }}>
         <Suspense fallback={
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -270,6 +272,7 @@ export default function App() {
             <Route path="/login"    element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            <Route path="/verify-email" element={<VerifyEmailPage />} />
             <Route path="/reset-password/:uid/:token" element={<ResetPasswordPage />} />
             <Route path="/gm"       element={<AdminPanel />} />
             <Route path="/" element={
@@ -280,6 +283,7 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </Suspense>
+        </div>
       </BrowserRouter>
       </WalletProvider>
 

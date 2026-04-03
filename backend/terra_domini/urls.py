@@ -42,6 +42,7 @@ from terra_domini.apps.accounts.views import (
     RegisterView, LoginView, RefreshView,
     PlayerProfileView, LeaderboardView, PlayerSearchView, WalletLinkView,
     PasswordResetRequestView, PasswordResetConfirmView,
+    VerifyEmailView, ResendVerificationView,
 )
 from terra_domini.apps.territories.views import TerritoryViewSet
 from terra_domini.apps.accounts.views import UpdateProfileView
@@ -115,6 +116,8 @@ urlpatterns = [
     path('api/auth/register/', RegisterView.as_view(),    name='register'),
     path('api/auth/login/',    LoginView.as_view(),       name='login'),
     path('api/auth/refresh/',  RefreshView.as_view(),     name='token_refresh'),
+    path('api/auth/verify-email/', VerifyEmailView.as_view(), name='verify_email'),
+    path('api/auth/resend-verification/', ResendVerificationView.as_view(), name='resend_verification'),
     path('api/auth/password-reset/', PasswordResetRequestView.as_view(), name='password_reset'),
     path('api/auth/password-reset-confirm/', PasswordResetConfirmView.as_view(), name='password_reset_confirm'),
 

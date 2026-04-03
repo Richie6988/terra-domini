@@ -389,8 +389,10 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
           pointerEvents: claimWaiting ? 'none' : 'auto',
           background: claimWaiting ? 'transparent' : 'rgba(5,5,8,0.92)',
           backdropFilter: claimWaiting ? 'none' : 'blur(8px)',
-          display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
-          padding: '0 16px 32px',
+          display: 'flex',
+          alignItems: claimWaiting ? 'flex-start' : 'flex-end',
+          justifyContent: 'center',
+          padding: claimWaiting ? '16px 16px 0' : '0 16px 32px',
         }}
       >
         {/* Click-through overlay — allows map interaction */}
@@ -408,13 +410,13 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
           transition={{ type: 'spring', stiffness: 400, damping: 35 }}
           style={{
             width: claimWaiting ? 'auto' : '100%',
-            maxWidth: claimWaiting ? 320 : 480,
-            background: claimWaiting ? 'rgba(0,0,0,0.75)' : 'rgba(10,10,20,0.99)',
-            pointerEvents: 'auto',
+            maxWidth: claimWaiting ? 360 : 480,
+            background: claimWaiting ? 'rgba(0,0,0,0.7)' : 'rgba(10,10,20,0.99)',
+            pointerEvents: claimWaiting ? 'none' : 'auto',
             border: '1px solid rgba(0,255,135,0.25)',
             borderRadius: claimWaiting ? 40 : 16,
             overflow: 'hidden',
-            boxShadow: '0 -4px 40px rgba(0,255,135,0.1)',
+            boxShadow: claimWaiting ? '0 4px 20px rgba(0,0,0,0.3)' : '0 -4px 40px rgba(0,255,135,0.1)',
           }}
         >
           {!claimWaiting && <div style={{ height: 3, background: 'rgba(255,255,255,0.06)' }}>
@@ -473,7 +475,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
                   borderRadius: 8, fontSize: 13, color: '#0099cc', textAlign: 'center',
                 }}
               >
-                👆 Tap any grey zone on the map → then tap "Claim Zone"
+                👆 Tap any zone on the map to claim your first territory — it's FREE!
               </motion.div>
             )}
 
