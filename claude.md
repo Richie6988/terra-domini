@@ -10,6 +10,8 @@
 
 **RULE 2 — BRAIN FIRST.** Read this file at the START of every task. Update it in the SAME commit as code changes. No exceptions.
 
+**RULE 4 — ZERO EMOJI.** Never use emoji characters anywhere in the UI. All icons must be original SVG designs (inline `<svg>` or DockIcon component). Use colored dots, SVG shapes, or text for indicators. *— Richard, 2026-04-03*
+
 **RULE 3 — RICHARD'S WORK = STANDARD.** When Richard creates something (3D viewer, prototype, icon bank), it IS the quality standard. Never replace with an inferior alternative. Always integrate as primary experience.
 
 ---

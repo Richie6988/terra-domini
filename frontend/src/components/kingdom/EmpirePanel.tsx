@@ -4,6 +4,7 @@
  * Opened from dock "Empire" button.
  */
 import { useState, useMemo } from 'react'
+import { MiniIcon } from '../shared/MiniIcons'
 import { useQuery } from '@tanstack/react-query'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
@@ -15,9 +16,9 @@ interface Props { onClose: () => void }
 type Tab = 'kingdoms' | 'military' | 'stats'
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'kingdoms', label: '👑 KINGDOMS' },
-  { id: 'military', label: '⚔ MILITARY' },
-  { id: 'stats', label: '📊 STATS' },
+  { id: 'kingdoms', label: 'KINGDOMS' },
+  { id: 'military', label: 'MILITARY' },
+  { id: 'stats', label: 'STATS' },
 ]
 
 const sBox: React.CSSProperties = { padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.06)' }
@@ -35,7 +36,7 @@ const TIER_COLORS = ['#4B5563', '#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EC
 function KingdomsTab({ kingdoms, onTeleport }: { kingdoms: Kingdom[]; onTeleport: (lat: number, lon: number) => void }) {
   if (!kingdoms.length) return (
     <div style={{ textAlign: 'center', padding: 40, color: 'rgba(26,42,58,0.3)' }}>
-      <div style={{ fontSize: 40, marginBottom: 12 }}>🏴</div>
+      <div style={{ fontSize: 40, marginBottom: 12 }}>--</div>
       <div style={{ fontSize: 11, fontWeight: 600 }}>No kingdoms yet</div>
       <div style={{ fontSize: 9, marginTop: 4 }}>Claim 2+ adjacent territories to form a kingdom</div>
     </div>
@@ -60,7 +61,7 @@ function KingdomsTab({ kingdoms, onTeleport }: { kingdoms: Kingdom[]; onTeleport
               background: `linear-gradient(135deg, ${col}, ${col}88)`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 20, boxShadow: `0 2px 10px ${col}25`, flexShrink: 0,
-            }}>{k.is_main ? '👑' : '🏰'}</div>
+            }}>{k.is_main ? 'M' : 'K'}</div>
 
             {/* Info */}
             <div style={{ flex: 1 }}>
@@ -94,12 +95,12 @@ function KingdomsTab({ kingdoms, onTeleport }: { kingdoms: Kingdom[]; onTeleport
 
 // ═══ MILITARY TAB ═══
 const UNITS = [
-  { name: 'Infantry', icon: '🗡', cost: 5, atk: 10, def: 8, color: '#dc2626' },
-  { name: 'Naval', icon: '⚓', cost: 15, atk: 35, def: 30, color: '#0099cc' },
-  { name: 'Aerial', icon: '✈️', cost: 25, atk: 45, def: 15, color: '#8b5cf6' },
-  { name: 'Engineer', icon: '🔧', cost: 20, atk: 8, def: 20, color: '#cc8800' },
-  { name: 'Medic', icon: '🏥', cost: 30, atk: 2, def: 5, color: '#22c55e' },
-  { name: 'Spy', icon: '🕵️', cost: 100, atk: 15, def: 3, color: '#475569' },
+  { name: 'Infantry', icon: 'INF', cost: 5, atk: 10, def: 8, color: '#dc2626' },
+  { name: 'Naval', icon: 'NAV', cost: 15, atk: 35, def: 30, color: '#0099cc' },
+  { name: 'Aerial', icon: 'AIR', cost: 25, atk: 45, def: 15, color: '#8b5cf6' },
+  { name: 'Engineer', icon: 'ENG', cost: 20, atk: 8, def: 20, color: '#cc8800' },
+  { name: 'Medic', icon: 'MED', cost: 30, atk: 2, def: 5, color: '#22c55e' },
+  { name: 'Spy', icon: 'SPY', cost: 100, atk: 15, def: 3, color: '#475569' },
 ]
 
 function MilitaryTab() {
@@ -182,10 +183,10 @@ function StatsTab({ kingdoms }: { kingdoms: Kingdom[] }) {
         <div style={lbl}>RESOURCE PRODUCTION</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
           {[
-            { name: 'Iron', icon: '⛏', val: 120 }, { name: 'Oil', icon: '🛢', val: 85 },
-            { name: 'Food', icon: '🌾', val: 200 }, { name: 'Energy', icon: '⚡', val: 95 },
-            { name: 'Water', icon: '💧', val: 180 }, { name: 'Gold', icon: '🪙', val: 30 },
-            { name: 'Data', icon: '📡', val: 45 }, { name: 'Influence', icon: '🎭', val: 60 },
+            { name: 'Iron', icon: 'IRN', val: 120 }, { name: 'Oil', icon: 'OIL', val: 85 },
+            { name: 'Food', icon: 'FOD', val: 200 }, { name: 'Energy', icon: 'NRG', val: 95 },
+            { name: 'Water', icon: 'H2O', val: 180 }, { name: 'Gold', icon: 'AU', val: 30 },
+            { name: 'Data', icon: 'DAT', val: 45 }, { name: 'Influence', icon: 'INF', val: 60 },
           ].map(r => (
             <div key={r.name} style={{ textAlign: 'center', padding: '6px 4px', borderRadius: 8, background: 'rgba(0,60,100,0.02)' }}>
               <div style={{ fontSize: 16 }}>{r.icon}</div>

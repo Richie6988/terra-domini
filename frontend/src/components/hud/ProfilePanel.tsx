@@ -3,6 +3,7 @@
  * 3 tabs: Commander (edit profile), Achievements (badges), Preferences (settings).
  */
 import { useState, useCallback } from 'react'
+import { MiniIcon, StatusDot } from '../shared/MiniIcons'
 import { usePlayer, useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
@@ -13,11 +14,11 @@ interface Props { onClose: () => void }
 type Tab = 'commander' | 'achievements' | 'preferences'
 
 const TABS: { id: Tab; label: string }[] = [
-  { id: 'commander', label: '⚙ COMMANDER' },
-  { id: 'achievements', label: '🏅 ACHIEVEMENTS' },
-  { id: 'preferences', label: '🎨 PREFERENCES' },
+  { id: 'commander', label: 'COMMANDER' },
+  { id: 'achievements', label: 'ACHIEVEMENTS' },
+  { id: 'preferences', label: 'PREFERENCES' },
 ]
-const AVATARS = ['🦅','🐉','🦁','🐺','🦊','🦉','🐍','🦈','🦌','🏴‍☠️','⚔️','🛡','👑','💎','🔥','⚡']
+const AVATARS = ['A','B','C','D','E','F','G','H','J','K','L','M','N','P','R','S']
 const sBox: React.CSSProperties = { padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.06)' }
 const lbl: React.CSSProperties = { fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 6 }
 const inputSt: React.CSSProperties = { width: '100%', padding: '8px 12px', borderRadius: 8, fontSize: 11, background: 'rgba(0,60,100,0.03)', border: '1px solid rgba(0,60,100,0.1)', color: '#1a2a3a', outline: 'none', boxSizing: 'border-box' as const }
@@ -47,7 +48,7 @@ function CommanderTab() {
         </div>
       </div>
       <div style={sBox}><div style={lbl}>DISPLAY NAME</div><input value={name} onChange={e => setName(e.target.value)} maxLength={50} style={inputSt} /></div>
-      <div style={sBox}><div style={lbl}>EMAIL</div><div style={{ fontSize: 11, color: 'rgba(26,42,58,0.6)', fontFamily: "'Share Tech Mono', monospace" }}>{player.email} {(player as any).email_verified ? '✅' : '⚠️'}</div></div>
+      <div style={sBox}><div style={lbl}>EMAIL</div><div style={{ fontSize: 11, color: 'rgba(26,42,58,0.6)', fontFamily: "'Share Tech Mono', monospace" }}>{player.email} {(player as any).email_verified ? '[V]' : '[!]'}</div></div>
       <div style={sBox}><div style={lbl}>AVATAR</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{AVATARS.map(a => (
         <button key={a} onClick={() => setAvatar(a)} style={{ width: 36, height: 36, borderRadius: 8, cursor: 'pointer', fontSize: 18, background: avatar === a ? 'rgba(0,153,204,0.12)' : 'rgba(0,60,100,0.03)', border: `2px solid ${avatar === a ? '#0099cc' : 'rgba(0,60,100,0.06)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{a}</button>
       ))}</div></div>
@@ -61,17 +62,17 @@ function CommanderTab() {
 }
 
 const BADGES = [
-  { id:'terr5',cat:'TERRITORY',name:'Settler',target:5,icon:'🏠',reward:10},{ id:'terr10',cat:'TERRITORY',name:'Colonist',target:10,icon:'🏘',reward:25},
-  { id:'terr50',cat:'TERRITORY',name:'Governor',target:50,icon:'🏛',reward:100},{ id:'terr100',cat:'TERRITORY',name:'Emperor',target:100,icon:'👑',reward:500},
-  { id:'war5',cat:'MILITARY',name:'First Blood',target:5,icon:'⚔️',reward:25},{ id:'war10',cat:'MILITARY',name:'Warlord',target:10,icon:'🗡',reward:50},
-  { id:'war50',cat:'MILITARY',name:'Conqueror',target:50,icon:'🏴',reward:200},
-  { id:'rare5',cat:'COLLECTION',name:'Rare Hunter',target:5,icon:'💎',reward:50},{ id:'rare10',cat:'COLLECTION',name:'Gem Collector',target:10,icon:'💎',reward:150},
-  { id:'legend5',cat:'COLLECTION',name:'Legend Seeker',target:5,icon:'🌟',reward:200},{ id:'mythic1',cat:'COLLECTION',name:'Mythic Finder',target:1,icon:'🔥',reward:500},
-  { id:'saf5',cat:'SAFARI',name:'Tracker',target:5,icon:'🎯',reward:30},{ id:'saf10',cat:'SAFARI',name:'Beast Hunter',target:10,icon:'🐉',reward:80},
-  { id:'saf25',cat:'SAFARI',name:'Safari Master',target:25,icon:'🦖',reward:250},
-  { id:'cont3',cat:'EXPLORATION',name:'World Traveler',target:3,icon:'🌍',reward:100},{ id:'cont6',cat:'EXPLORATION',name:'Globe Trotter',target:6,icon:'✈️',reward:500},
-  { id:'king3',cat:'KINGDOM',name:'Kingdom Builder',target:3,icon:'🏰',reward:150},{ id:'king5',cat:'KINGDOM',name:'Empire Architect',target:5,icon:'🏯',reward:400},
-  { id:'ally1',cat:'SOCIAL',name:'Team Player',target:1,icon:'🤝',reward:25},{ id:'trade10',cat:'SOCIAL',name:'Merchant',target:10,icon:'💰',reward:100},
+  { id:'terr5',cat:'TERRITORY',name:'Settler',target:5,icon:'S1',reward:10},{ id:'terr10',cat:'TERRITORY',name:'Colonist',target:10,icon:'S2',reward:25},
+  { id:'terr50',cat:'TERRITORY',name:'Governor',target:50,icon:'S3',reward:100},{ id:'terr100',cat:'TERRITORY',name:'Emperor',target:100,icon:'S4',reward:500},
+  { id:'war5',cat:'MILITARY',name:'First Blood',target:5,icon:'W1',reward:25},{ id:'war10',cat:'MILITARY',name:'Warlord',target:10,icon:'W2',reward:50},
+  { id:'war50',cat:'MILITARY',name:'Conqueror',target:50,icon:'W3',reward:200},
+  { id:'rare5',cat:'COLLECTION',name:'Rare Hunter',target:5,icon:'C1',reward:50},{ id:'rare10',cat:'COLLECTION',name:'Gem Collector',target:10,icon:'C1',reward:150},
+  { id:'legend5',cat:'COLLECTION',name:'Legend Seeker',target:5,icon:'C2',reward:200},{ id:'mythic1',cat:'COLLECTION',name:'Mythic Finder',target:1,icon:'C3',reward:500},
+  { id:'saf5',cat:'SAFARI',name:'Tracker',target:5,icon:'H1',reward:30},{ id:'saf10',cat:'SAFARI',name:'Beast Hunter',target:10,icon:'H2',reward:80},
+  { id:'saf25',cat:'SAFARI',name:'Safari Master',target:25,icon:'H3',reward:250},
+  { id:'cont3',cat:'EXPLORATION',name:'World Traveler',target:3,icon:'E1',reward:100},{ id:'cont6',cat:'EXPLORATION',name:'Globe Trotter',target:6,icon:'E2',reward:500},
+  { id:'king3',cat:'KINGDOM',name:'Kingdom Builder',target:3,icon:'K1',reward:150},{ id:'king5',cat:'KINGDOM',name:'Empire Architect',target:5,icon:'K2',reward:400},
+  { id:'ally1',cat:'SOCIAL',name:'Team Player',target:1,icon:'A1',reward:25},{ id:'trade10',cat:'SOCIAL',name:'Merchant',target:10,icon:'A2',reward:100},
 ]
 const CC: Record<string,string> = { TERRITORY:'#0099cc',MILITARY:'#dc2626',COLLECTION:'#8b5cf6',SAFARI:'#22c55e',EXPLORATION:'#f59e0b',KINGDOM:'#cc8800',SOCIAL:'#3b82f6' }
 
