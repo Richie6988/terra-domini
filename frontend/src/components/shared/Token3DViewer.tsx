@@ -43,7 +43,7 @@ export interface Token3DProps {
   tokenName?: string
   category?: string
   catColor?: string
-  iconId?: string  // Icon bank ID — renders actual SVG on the canvas
+  iconId?: string
   tier?: keyof typeof TIERS
   serial?: number
   maxSupply?: number
@@ -52,7 +52,7 @@ export interface Token3DProps {
   power?: number
   rarity?: number
   description?: string
-  /** Custom info panel content — replaces the default VAULT PRESTIGE panel */
+  isShiny?: boolean
   infoPanel?: React.ReactNode
 }
 
@@ -70,6 +70,7 @@ export function Token3DViewer({
   power = 87,
   rarity = 94,
   description,
+  isShiny = false,
   infoPanel,
 }: Token3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -143,7 +144,7 @@ export function Token3DViewer({
     renderer.setSize(el.clientWidth, el.clientHeight)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.8
+    renderer.toneMappingExposure = 2.5
     renderer.outputEncoding = THREE.sRGBEncoding
     el.appendChild(renderer.domElement)
     renderer.domElement.style.cursor = 'grab'
@@ -191,11 +192,11 @@ export function Token3DViewer({
       clearcoatRoughness: 0.01,
       reflectivity: 1.0,
       envMapIntensity: 10,
-      emissive: new THREE.Color(catColor), emissiveIntensity: 0.04,
+      emissive: new THREE.Color(catColor), emissiveIntensity: 0.15,
     })
     const bMat = new THREE.MeshPhysicalMaterial({
       map: bTex, clearcoat: 1, roughness: 0.01, metalness: 0.9,
-      emissive: new THREE.Color(tier.metal), emissiveIntensity: 0.08,
+      emissive: new THREE.Color(tier.metal), emissiveIntensity: 0.12,
       clearcoatRoughness: 0.01, reflectivity: 1.0,
     })
     const sMat = new THREE.MeshPhysicalMaterial({
@@ -452,9 +453,76 @@ export function Token3DViewer({
       }
       fCtx.globalAlpha = 1; fCtx.restore()
 
-      // Outer hex border
-      fCtx.strokeStyle = tier.metal; fCtx.lineWidth = s * 0.022
-      drawHex(fCtx, c, c, s * 0.492); fCtx.stroke()
+      // ── SHINY CARD EFFECTS ──────────────────────────────────────
+      if (isShiny) {
+        // 1. Rainbow animated outer border (replaces tier.metal border)
+        const rainbowColors = ['#FF0000', '#FF8800', '#FFFF00', '#00FF44', '#0088FF', '#8800FF', '#FF00FF']
+        const borderW = s * 0.026
+        fCtx.save()
+        fCtx.lineWidth = borderW
+        const segments = 6
+        for (let i = 0; i < segments; i++) {
+          const colorIdx = (i + Math.floor(state.frameCount / 8)) % rainbowColors.length
+          fCtx.strokeStyle = rainbowColors[colorIdx]
+          fCtx.beginPath()
+          const angleStart = (Math.PI / 3) * i - Math.PI / 6
+          const angleEnd = angleStart + Math.PI / 3
+          const r = s * 0.492
+          fCtx.moveTo(c + r * Math.cos(angleStart), c + r * Math.sin(angleStart))
+          fCtx.lineTo(c + r * Math.cos(angleEnd), c + r * Math.sin(angleEnd))
+          fCtx.stroke()
+        }
+        // Outer glow
+        fCtx.shadowColor = rainbowColors[Math.floor(state.frameCount / 6) % rainbowColors.length]
+        fCtx.shadowBlur = s * 0.04
+        fCtx.strokeStyle = 'rgba(255,255,255,0.15)'
+        fCtx.lineWidth = borderW * 0.5
+        drawHex(fCtx, c, c, s * 0.492); fCtx.stroke()
+        fCtx.shadowBlur = 0
+        fCtx.restore()
+
+        // 2. Glitter / sparkle overlay (Pokémon holographic)
+        fCtx.save()
+        const sparkleCount = 60
+        for (let i = 0; i < sparkleCount; i++) {
+          // Deterministic positions with animated alpha
+          const seed = i * 7919
+          const sx = ((seed * 13) % s)
+          const sy = ((seed * 17) % s)
+          const phase = (state.frameCount * 0.05 + i * 0.7) % (Math.PI * 2)
+          const alpha = Math.max(0, Math.sin(phase)) * 0.7
+          if (alpha < 0.1) continue
+          // Check if inside hex bounds (rough check)
+          const dx = sx - c, dy = sy - c
+          if (Math.sqrt(dx * dx + dy * dy) > s * 0.48) continue
+          const sparkleSize = 2 + Math.sin(phase * 2) * 2
+          const hue = (i * 51 + state.frameCount * 3) % 360
+          fCtx.globalAlpha = alpha
+          fCtx.fillStyle = `hsl(${hue}, 100%, 80%)`
+          fCtx.beginPath()
+          // 4-point star sparkle
+          fCtx.moveTo(sx, sy - sparkleSize)
+          fCtx.lineTo(sx + sparkleSize * 0.3, sy)
+          fCtx.lineTo(sx, sy + sparkleSize)
+          fCtx.lineTo(sx - sparkleSize * 0.3, sy)
+          fCtx.closePath()
+          fCtx.fill()
+          // Cross sparkle
+          fCtx.beginPath()
+          fCtx.moveTo(sx - sparkleSize, sy)
+          fCtx.lineTo(sx, sy + sparkleSize * 0.3)
+          fCtx.lineTo(sx + sparkleSize, sy)
+          fCtx.lineTo(sx, sy - sparkleSize * 0.3)
+          fCtx.closePath()
+          fCtx.fill()
+        }
+        fCtx.globalAlpha = 1
+        fCtx.restore()
+      } else {
+        // Normal outer hex border (non-shiny)
+        fCtx.strokeStyle = tier.metal; fCtx.lineWidth = s * 0.022
+        drawHex(fCtx, c, c, s * 0.492); fCtx.stroke()
+      }
 
       fMat.map!.needsUpdate = true
     }
@@ -595,9 +663,10 @@ export function Token3DViewer({
 
       controls.update()
 
-      // Shimmer update every 4th frame (matching original)
+      // Shimmer update — shiny cards redraw every 2 frames, normal every 4
       state.frameCount++
-      if (state.frameCount % 4 === 0) {
+      const redrawRate = isShiny ? 2 : 4
+      if (state.frameCount % redrawRate === 0) {
         state.shineOffset += 25
         if (state.shineOffset > 3500) state.shineOffset = -1500
         state.holoAngle += 0.03

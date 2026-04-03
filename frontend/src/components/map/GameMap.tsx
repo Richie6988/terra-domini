@@ -67,7 +67,6 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   const [tile,        setTile]        = useState<keyof typeof TILES>('light')
-  const [showHex,     setShowHex]     = useState(true)
   const [poiCatFilter, setPoiCatFilter] = useState<string[]>(['all'])
   const [poiRarFilter, setPoiRarFilter] = useState<string[]>(['all'])
   const [showOverlay,  setShowOverlay]  = useState(true)
@@ -140,29 +139,27 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     
     map.on('mousemove', (e: L.LeafletMouseEvent) => {
       try {
-        // No hover below zoom 12 — hexes not visible
-        if (map.getZoom() < 12) { hoverLayer.clearLayers(); hoverPoly = null; return }
-        // ALWAYS res 8 — territories never change size
+        // ALWAYS res 8, show at ALL zoom levels — hex + 1 ring around cursor
         const hx = latLngToCell(e.latlng.lat, e.latlng.lng, 8)
         if ((hoverPoly as any)?._hxId === hx) return
 
         hoverLayer.clearLayers()
 
-        // Faint neighbors — lets player see the hex grid
-        gridDisk(hx, 2).forEach((n: string) => {
+        // 1-ring neighbors — subtle grid preview
+        gridDisk(hx, 1).forEach((n: string) => {
           if (n === hx) return
           const nb = cellToBoundary(n).map((p: number[]) => [p[0], p[1]])
           const nt = useStore.getState().territories[n]
           const isOwned = !!nt?.owner_id
           hoverLayer.addLayer(L.polygon(nb as L.LatLngTuple[], {
-            fillColor: isOwned ? '#00FF87' : '#ffffff',
-            fillOpacity: isOwned ? 0.08 : 0.02,
-            color: isOwned ? '#00FF87' : '#ffffff',
-            weight: 0.5, opacity: isOwned ? 0.4 : 0.15,
+            fillColor: isOwned ? '#00FF87' : '#0099cc',
+            fillOpacity: isOwned ? 0.08 : 0.03,
+            color: isOwned ? '#00FF87' : '#0099cc',
+            weight: 0.8, opacity: isOwned ? 0.4 : 0.2,
           }))
         })
 
-        // Main hex under cursor
+        // Main hex under cursor — bright highlight
         const owned = useStore.getState().territories[hx]
         const col = owned?.owner_id ? '#EF4444' : '#00FF87'
         const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
@@ -285,9 +282,17 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   useEffect(() => {
     const layer = hexRef.current; if (!layer) return
     layer.clearLayers()
-    if (!showHex) return
-
-    // Draw owned + POI hexes (is_landmark OR poi_name)
+    // Draw owned + POI hexes — always visible
+    const POI_CAT_COLORS: Record<string, string> = {
+      volcano:'#dc2626', earthquake:'#f97316', tsunami:'#0ea5e9', nuclear:'#a855f7',
+      monument:'#f59e0b', city:'#6366f1', temple:'#ec4899', bridge:'#14b8a6',
+      mountain:'#22c55e', ocean:'#0284c7', forest:'#16a34a', lake:'#06b6d4',
+      battle:'#ef4444', military:'#b91c1c', war:'#991b1b',
+      sport:'#3b82f6', music:'#d946ef', food:'#f97316', festival:'#f43f5e',
+      space:'#8b5cf6', lab:'#6366f1', energy:'#eab308',
+      dragon:'#dc2626', dinosaur:'#84cc16', alien:'#a3e635', mythic_creature:'#e879f9',
+      oil:'#1e293b', mine:'#78716c', gas:'#94a3b8', uranium:'#facc15',
+    }
     territories.filter(t => t.owner_id || (t as any).is_landmark || (t as any).poi_name).forEach(t => {
       const poly = makeHexPolygon({
         territory: t, playerId: player?.id,
@@ -314,8 +319,32 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         }
       })
       if (poly) layer.addLayer(poly)
+
+      // POI icon marker at hex center — visible on map for special territories
+      const ta = t as any
+      if ((ta.poi_name || ta.is_landmark) && (ta.center_lat || ta.lat)) {
+        const catCol = POI_CAT_COLORS[ta.poi_category] || '#6366f1'
+        const poiLabel = (ta.poi_category || '').slice(0, 3).toUpperCase()
+        const icon = L.divIcon({
+          html: `<div style="
+            width:20px;height:20px;border-radius:50%;
+            background:${catCol};border:2px solid #fff;
+            display:flex;align-items:center;justify-content:center;
+            font-size:6px;font-weight:900;color:#fff;
+            font-family:'Orbitron',sans-serif;letter-spacing:0.5px;
+            box-shadow:0 1px 6px ${catCol}66;
+          ">${poiLabel}</div>`,
+          className: '',
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+        })
+        const marker = L.marker([ta.center_lat || ta.lat, ta.center_lon || ta.lon], {
+          icon, zIndexOffset: 400, interactive: false,
+        })
+        layer.addLayer(marker)
+      }
     })
-  }, [territories, showHex, player?.id])
+  }, [territories, player?.id])
 
   // ── Draw H3 grid overlay — ALWAYS res 8, visible only when hexes are large ──
   useEffect(() => {
@@ -412,13 +441,21 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         </div>
       </div>
 
-      {/* Zoom — bottom right */}
-      <div style={{ position:'absolute', bottom:90, right:12, zIndex:500, display:'flex', flexDirection:'column', gap:4 }}>
-        <MapBtn onClick={() => doZoom(1)}>+</MapBtn>
-        <div style={{ textAlign:'center', fontSize:9, color:'#4B5563', fontFamily:'monospace' }}>z{zoom}</div>
-        <MapBtn onClick={() => doZoom(-1)}>−</MapBtn>
-        <div style={{ height:4 }} />
-        <MapBtn onClick={() => navigator.geolocation?.getCurrentPosition(p => mapRef.current?.setView([p.coords.latitude, p.coords.longitude], 15))}>📍</MapBtn>
+      {/* Zoom slider — right side, below tile picker */}
+      <div style={{ position:'absolute', bottom:90, right:12, zIndex:500, display:'flex', flexDirection:'column', alignItems:'center', gap:4,
+        background:'rgba(235,242,250,0.92)', backdropFilter:'blur(20px)', borderRadius:10, border:'1px solid rgba(0,60,100,0.12)',
+        padding:'8px 6px', boxShadow:'0 4px 16px rgba(0,0,0,0.08)' }}>
+        <span style={{ fontSize:8, fontWeight:700, color:'#0099cc', fontFamily:'monospace' }}>+</span>
+        <input type="range" min={3} max={19} step={1} value={zoom}
+          onChange={e => mapRef.current?.setZoom(Number(e.target.value))}
+          style={{
+            writingMode:'vertical-lr' as any, direction:'rtl',
+            width:20, height:120, cursor:'pointer',
+            accentColor:'#0099cc',
+          }}
+        />
+        <span style={{ fontSize:8, fontWeight:700, color:'#6b7280', fontFamily:'monospace' }}>−</span>
+        <div style={{ fontSize:8, color:'#9ca3af', fontFamily:'monospace', marginTop:2 }}>z{zoom}</div>
       </div>
 
       {/* Favorite pins — bottom left */}
@@ -485,17 +522,6 @@ function MapBtn({ onClick, children }: { onClick: () => void; children: React.Re
     <button onClick={onClick} onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
       style={{ width:36, height:36, borderRadius:8, background: h ? 'rgba(0,153,204,0.12)' : 'rgba(235,242,250,0.92)', backdropFilter:'blur(20px)', border:'1px solid rgba(0,60,100,0.12)', color:'#1a2a3a', fontSize:18, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.15s', boxShadow:'0 2px 8px rgba(0,0,0,0.06)' }}>
       {children}
-    </button>
-  )
-}
-
-function ToggleBtn({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
-  return (
-    <button onClick={onClick} style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'8px 12px', gap:10, background:'rgba(235,242,250,0.92)', backdropFilter:'blur(20px)', border:'1px solid rgba(0,60,100,0.12)', borderRadius:10, color: active ? '#1a2a3a' : 'rgba(26,42,58,0.4)', fontSize:10, cursor:'pointer', whiteSpace:'nowrap', fontFamily:"'Orbitron',system-ui,sans-serif", letterSpacing:1, boxShadow:'0 2px 8px rgba(0,0,0,0.06)' }}>
-      <span>{label}</span>
-      <span style={{ width:28, height:16, borderRadius:8, background: active ? '#0099cc' : 'rgba(0,60,100,0.1)', display:'flex', alignItems:'center', padding:2, transition:'background 0.2s', flexShrink:0 }}>
-        <span style={{ width:12, height:12, borderRadius:'50%', background:'#fff', transform: active ? 'translateX(12px)' : 'none', transition:'transform 0.2s' }} />
-      </span>
     </button>
   )
 }
