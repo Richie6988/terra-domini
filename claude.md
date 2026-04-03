@@ -355,7 +355,9 @@ HEXToken.sol · TerritoryNFT.sol · GameEngine.sol · KingdomRegistry.sol · Sta
 - [x] Kingdom border rendering (merged outer border)
 - [x] Kingdom detail overlay (own: 3 tabs, enemy: spy+attack)
 - [x] 153 SVG icons (POI, safari, shop, biomes, skill tree)
-- [x] 13-button dock with SVG icons
+- [x] **10-button dock** (EMPIRE/ALLIANCE/CODEX/MARKETPLACE/LADDER/EVENTS/SAFARI/AUCTIONS/SHOP/INFO)
+- [x] **Server-side favorite pins** (CRUD API, unlimited, teleport dropdown)
+- [x] **InfoPanel** (game rules, 7 rule cards, contact, version)
 - [x] Auction WebSocket chat (bid/chat/emoji)
 - [x] Email system (8 templates, Mailpit dev)
 - [x] Claim progress bars with live countdown
