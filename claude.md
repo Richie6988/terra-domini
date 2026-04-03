@@ -363,6 +363,14 @@ HEXToken.sol · TerritoryNFT.sol · GameEngine.sol · KingdomRegistry.sol · Sta
 - [x] Auction WebSocket chat (bid/chat/emoji)
 - [x] Email system (8 templates, Mailpit dev)
 - [x] Claim progress bars with live countdown
+- [x] **Notification system** — useNotifications hook, red badges on dock, 8 event types
+- [x] **EmpirePanel** — Kingdoms list / Military / Stats (3 tabs)
+- [x] **ProfilePanel** — Commander / Achievements (20 badges) / Preferences (3 tabs)
+- [x] **10-button dock** — EMPIRE/ALLIANCE/CODEX/MARKETPLACE/LADDER/EVENTS/SAFARI/AUCTIONS/SHOP/INFO
+- [x] **Wallet simplified** — 2 tabs: Balance+explanation / Details+history
+- [x] **InfoPanel** — Game rules + contact
+- [x] **FavoritePins** — Server-side API, light glassmorphism theme
+- [x] **Tasks floating badge** — Pulse animation on map
 
 ### Known Issues
 - [ ] Token3D icon: data:URL may not render all SVG transforms (needs testing per icon)
