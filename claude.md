@@ -371,17 +371,40 @@ HEXToken.sol · TerritoryNFT.sol · GameEngine.sol · KingdomRegistry.sol · Sta
 - [x] **InfoPanel** — Game rules + contact
 - [x] **FavoritePins** — Server-side API, light glassmorphism theme
 - [x] **Tasks floating badge** — Pulse animation on map
+- [x] **Alliance enhanced** — Bonuses, chat UI (placeholder), quick actions (help/trade/attack), create/search/join/leave
+- [x] **POI markers on map** — 30+ category→color, DivIcon at hex centers
+- [x] **Zoom slider** — Vertical range, no +/- buttons
+- [x] **Hover at all zooms** — Hex + 1 ring follows cursor everywhere
+- [x] **Shiny cards** — Rainbow border + sparkle glitter on Token3D
+
+### Sprint Progress
+```
+Sprint A (Auth & Foundation):    7/7  ✅ COMPLETE
+Sprint B (Map & Territory):      8/9  ✅ (blocked: #11 Mapbox branded style)
+Sprint C (Core Panels):         13/13 ✅ COMPLETE
+Sprint D (Social & Modes):       8/11 ✅ (remaining: #29 100 challenges DB, #30 wire backend, #37 WS chat backend)
+Sprint E (Polish & Advanced):    0/12 TODO
+Total: 36/52 items (~69%)
+```
 
 ### Known Issues
-- [ ] Token3D icon: data:URL may not render all SVG transforms (needs testing per icon)
-- [ ] Token3D image: Unsplash requires internet, generic per biome not per territory
-- [ ] TypeScript: ~25 non-critical type warnings (Zustand persist, implicit any)
-- [ ] AlliancePanel: missing MiniTag, StatBox, Empty helper components
-- [ ] Safari/Events: mock data, backend not connected
-- [ ] Codex: collection data is mock (Math.random)
-- [ ] PendingClaim model needs migration on Richard's machine
-- [ ] Player model new fields need migration: `email_verification_code`, `email_verification_sent_at`, `initial_lat`, `initial_lon`, `initial_country`
-- [ ] Some panels still have `color: '#fff'` dark theme remnants in buttons
+- [ ] #11: Custom branded map style — needs Mapbox account from Richard
+- [ ] #29: 100 challenges — needs backend `progression` app + challenge model
+- [ ] #30: Wire tasks to backend — persistent progress, balance updates
+- [ ] #37: Alliance WebSocket chat — needs `ws/alliance/<id>/` consumer
+- [ ] Token3D icon: data:URL may not render all SVG transforms (needs per-icon testing)
+- [ ] Safari/Events/Codex: mock data, backend not fully connected
+- [ ] PendingClaim + FavoritePin models need migration on Richard's machine
+- [ ] Player fields need migration: `email_verification_code`, `email_verification_sent_at`, `initial_lat/lon/country`
+
+### Needs Migration (Richard's machine)
+```powershell
+cd backend
+.\venv\Scripts\Activate.ps1
+python manage.py makemigrations accounts --name player_pins_and_verification
+python manage.py makemigrations territories --name pending_claim
+python manage.py migrate
+```
 
 ### Pending Richard Decisions
 - [x] ~~Globe view~~ → Full Three.js sphere, maximum quality (2026-04-03)
