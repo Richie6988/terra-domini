@@ -86,16 +86,17 @@ Django serves compiled frontend from `frontend/dist/`. Agent MUST build frontend
 - **Biomes (9):** Urban, Rural, Forest, Mountain, Coastal, Desert, Tundra, Industrial, Landmark
 - **Shiny:** 1/64 chance — sparkle effect, higher value
 
-### 3.3 Kingdom System
-- **Formation:** 2+ connected territories = Kingdom (auto-detected via adjacency)
-- **Border rendering:** `buildOuterBorder()` — only outer edges drawn (no internal hex borders)
+### 3.3 Empire → Kingdom → Territory Hierarchy
+- **Empire:** 1 per player. Contains all kingdoms. Panel = EmpirePanel (3 tabs: kingdoms list, military, stats).
+- **Kingdom:** Group of connected territories (auto-detected). Merged outer border on map.
+- **Territory:** Single H3 res-8 hex. Can be free, owned, or enemy.
 - **Skill Tree:** 6 branches × 7 tiers (Attack/Defense/Economy/Influence/Technology/Extraction)
 - **Resources:** 20 types across 5 categories (extraction, processed, info, social, currency)
 - **Kingdom Detail Overlay:** click badge or fill area → portal at z-1800
 
 ### 3.4 Three Daily Modes
 1. **Events (📡):** News/sport events → special tokens. Luck skill. Potion de Chance.
-2. **Safaris (🎯):** Track fauna/dinosaur via radar. HOT/WARM/COLD. Capture → Codex + HEX reward.
+2. **Safaris (🎯):** Track fauna/dinosaur via radar. HOT/WARM/COLD. Capture → Codex + HEX reward. **One target at a time.** Cooldown between captures (or buy "1h Continuous Safari" potion in shop).
 3. **Auctions (🏪):** eBay-style bidding. Live WebSocket chat. Snipe protection (+30s). 3D preview.
 
 ### 3.5 Military (6 unit types)
@@ -259,6 +260,13 @@ settings/dev.py                  — SMTP config (Mailpit/Resend/console fallbac
 | Panel size 92vw/960px | Small hardcoded widths (380-480px) cut off content (especially Shop) | 2026-03-31 |
 | Single click → Token3D | Was 2 clicks because hover used wrong resolution, first click didn't match | 2026-03-31 |
 | Flexbox panel centering | transform:translate(-50%,-50%) was overridden by Framer Motion | 2026-03-30 |
+| Empire > Kingdom > Territory | 1 player = 1 empire = N kingdoms = N×M territories | 2026-04-03 |
+| Bottom dock: 10 buttons | EMPIRE/ALLIANCE/CODEX/MARKETPLACE/LADDER/EVENTS/SAFARI/AUCTIONS/SHOP/INFO | 2026-04-03 |
+| Shiny = rainbow + glitter | Animated rainbow border + Pokémon holographic sparkle overlay on Token3D | 2026-04-03 |
+| Boosters: 10 items, gacha | Ritual reveal: commons→bonuses→rare last. Non-tokens = shop items. | 2026-04-03 |
+| Bots play for real | Claim, build kingdoms, attack. Essential for community bootstrap. | 2026-04-03 |
+| Special POI on map | Thousands. Category color border + POI image bg. Viewport-only. | 2026-04-03 |
+| Safari cooldown + potion | Cooldown between captures. "1h Continuous Safari" = new shop item. | 2026-04-03 |
 
 ---
 
@@ -358,10 +366,21 @@ HEXToken.sol · TerritoryNFT.sol · GameEngine.sol · KingdomRegistry.sol · Sta
 - [ ] Some panels still have `color: '#fff'` dark theme remnants in buttons
 
 ### Pending Richard Decisions
+- [x] ~~Globe view~~ → Full Three.js sphere, maximum quality (2026-04-03)
+- [x] ~~Special territories~~ → Thousands of POIs, viewport-only, category color + POI image bg (2026-04-03)
+- [x] ~~Bottom bar~~ → 10 buttons: EMPIRE/ALLIANCE/CODEX/MARKETPLACE/LADDER/EVENTS/SAFARI/AUCTIONS/SHOP/INFO (2026-04-03)
+- [x] ~~Empire structure~~ → 1 player = 1 empire = N kingdoms = N×M territories (2026-04-03)
+- [x] ~~Alliance~~ → ~50 members, WebSocket chat, global (no shared borders) (2026-04-03)
+- [x] ~~Shiny~~ → Rainbow animated border + Pokémon-style glitter overlay (2026-04-03)
+- [x] ~~Boosters~~ → 10 items, gacha, ritual reveal (common→bonus→rare), non-tokens = shop items (2026-04-03)
+- [x] ~~Bots~~ → Real gameplay (claim, build, attack). Essential for launch. (2026-04-03)
+- [x] ~~Pins~~ → No limit, server-side, pin icon + dropdown for teleport (2026-04-03)
+- [x] ~~Safari~~ → Cooldown between captures + new shop bonus "1h continuous safari" (2026-04-03)
 - [ ] Territory image database (replace generic Unsplash per biome)
-- [ ] Daily tasks: where to surface (removed from dock, needs bonus popup design)
-- [ ] Token3D: icon bank SVG rendering verification per category
 - [ ] Production deployment strategy (hosting, domain, SSL)
+
+### Project Dashboard
+Full sprint plan in `DASHBOARD.md` (55 items, 5 sprints, ~210h).
 
 ---
 

@@ -4,24 +4,23 @@
 
 ---
 
-## QUESTIONS FOR RICHARD (need answers before sprint 1)
+## RICHARD'S DECISIONS (2026-04-03) — All questions answered
 
-### Critical Questions
-1. **#12 Globe view** — What THREE.js globe library? OrbitControls on a sphere + Leaflet tiles projected? Or a simpler CSS 3D sphere with flat map texture? This is a large feature.
-2. **#17 Special territories** — Backend already has `poi_category` field. Should the map show ALL POI hexes permanently (could be thousands), or only ones within X km of the player? What categories get which border color?
-3. **#31 Bottom bar final order** — You list: EMPIRE / ALLIANCE / CODEX / MARKETPLACE / LADDER / EVENTS / SAFARI / AUCTIONS / SHOP / INFO. That's 10 buttons (was 13). Confirm this is final? "EMPIRE" replaces "Kingdom"?
-4. **#32 Empire vs Kingdom** — Current code has KingdomPanel. You now say "Empire_Panel" with 3 tabs (kingdoms list, military, stats). Is Empire = the player's collection of all kingdoms? One empire per player?
-5. **#34-37 Alliance** — How many members max per alliance? Is there an alliance chat (WebSocket)? Alliance territory = shared border rendering?
-6. **#47 Shiny cards** — 1/64 probability already in specs. What's the visual? Sparkle particle overlay on Token3D? Rainbow holographic edge? Both?
-7. **#48 Booster opening** — How many items per booster? Is it a gacha system (random rarity)? Standard = 5 items, Rare = 3 items + guaranteed rare? What are the non-token items (HEX coins, potions, shields)?
-8. **#51 Bot players** — Automated territory claiming + fake kingdoms? Or just cosmetic names on the leaderboard? Do bots attack real players?
-
-### Clarification Questions
-9. **#15 Pin locations** — Max pins per player? Custom icon/color per pin? Is this stored server-side or localStorage?
-10. **#23 Preferences tab** — What sound settings? We have SoundToggle. Add volume slider? Music vs SFX separation?
-11. **#29 Challenges** — You say 100 challenges. Can you list ~20 examples beyond the 5 daily tasks? Are there "seasonal" challenges that rotate?
-12. **#41 Safari** — One target at a time (confirmed). When captured, how long before next target spawns? Immediately? After cooldown?
-13. **#44 Contact form** — In-game only? Or also email? Zendesk/Crisp integration, or custom?
+| # | Question | Answer | Impact |
+|---|----------|--------|--------|
+| 1 | Globe view ambition | **Full Three.js sphere** — no workarounds, as sophisticated as possible | Sprint E, XL effort confirmed |
+| 2 | Special POI display | **Thousands of POIs**, category color border + POI image as hex background. Viewport-only for perf. Must handle zoom-out gracefully. | Sprint B, L effort |
+| 3 | Bottom bar | **10 buttons confirmed**: EMPIRE / ALLIANCE / CODEX / MARKETPLACE / LADDER / EVENTS / SAFARI / AUCTIONS / SHOP / INFO. Custom quality SVG assets. | Sprint C |
+| 4 | Empire structure | **1 player = 1 empire = N kingdoms = N×M territories** | Rename KingdomPanel → EmpirePanel |
+| 5 | Alliance | **Max members: TBD (follow best practices ~50?)**. WebSocket chat YES. Alliance = global (empires across planet). No shared map border. | Sprint D |
+| 6 | Shiny cards | **Rainbow animated border + glitter/sparkle filter on front face** (Pokémon holographic style) | Sprint B |
+| 7 | Boosters | **10 items per booster**. Gacha random rarity. Ritual reveal: commons first → bonuses → rare last. Non-tokens = same items as shop (potions, shields, boosters). | Sprint E |
+| 8 | Bot players | **Real gameplay bots** — claim territories, build kingdoms, attack. Essential for community launch. | Sprint E, XL |
+| 9 | Pin locations | **No max limit**. Server-side. Single pin icon on map → place new OR open dropdown of saved locations for quick teleport. | Sprint B |
+| 10 | Preferences | Sound, map colors, notifications + creative game-related settings. Be creative. | Sprint C |
+| 11 | Challenges | **Based on game mechanics**: kingdom size (5/10/50/100), wars won, token categories owned (insects 5/10, rare 5/10...), continents visited. Dozens possible from existing categories. | Sprint D |
+| 12 | Safari cooldown | **New shop bonus idea**: "1h continuous safari" potion. Otherwise cooldown between captures. | Sprint D + Shop |
+| 13 | Contact form | **Follow best practices** — in-game form is fine for now. | Sprint E |
 
 ---
 
