@@ -1,224 +1,144 @@
 /**
- * ProfilePanel — Empire Overview + Commander Profile + Kingdoms.
- * This is the MAIN player dashboard. Shows total empire, all kingdoms,
- * customization options, and aggregate stats.
+ * ProfilePanel — Player profile management.
+ * 3 tabs: Commander (edit profile), Achievements (badges), Preferences (settings).
  */
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { usePlayer, useStore } from '../../store'
-import { useKingdomStore } from '../../store/kingdomStore'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
 
 interface Props { onClose: () => void }
-type Tab = 'empire' | 'kingdoms' | 'commander' | 'stats'
+type Tab = 'commander' | 'achievements' | 'preferences'
 
-const TABS: { id: Tab; label: string; icon: string }[] = [
-  { id: 'empire',    label: 'EMPIRE',    icon: '🏛' },
-  { id: 'kingdoms',  label: 'KINGDOMS',  icon: '👑' },
-  { id: 'commander', label: 'COMMANDER', icon: '⚙' },
-  { id: 'stats',     label: 'STATS',     icon: '📊' },
+const TABS: { id: Tab; label: string }[] = [
+  { id: 'commander', label: '⚙ COMMANDER' },
+  { id: 'achievements', label: '🏅 ACHIEVEMENTS' },
+  { id: 'preferences', label: '🎨 PREFERENCES' },
 ]
+const AVATARS = ['🦅','🐉','🦁','🐺','🦊','🦉','🐍','🦈','🦌','🏴‍☠️','⚔️','🛡','👑','💎','🔥','⚡']
+const sBox: React.CSSProperties = { padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.06)' }
+const lbl: React.CSSProperties = { fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 6 }
+const inputSt: React.CSSProperties = { width: '100%', padding: '8px 12px', borderRadius: 8, fontSize: 11, background: 'rgba(0,60,100,0.03)', border: '1px solid rgba(0,60,100,0.1)', color: '#1a2a3a', outline: 'none', boxSizing: 'border-box' as const }
 
-const AVATARS = ['🦅','🐉','🦁','🐺','🦊','🦉','🐍','🦈','🦌','🏴‍☠️','⚔','🛡','👑','💎','🔥','⚡']
-
-function Stat({ label, value, color = '#0099cc' }: { label: string; value: string | number; color?: string }) {
+function CommanderTab() {
+  const player = usePlayer()
+  const [name, setName] = useState(player?.display_name || '')
+  const [avatar, setAvatar] = useState((player as any)?.avatar_emoji || '🦅')
+  const [saving, setSaving] = useState(false)
+  const save = useCallback(async () => {
+    setSaving(true)
+    try { await api.patch('/players/update-profile/', { display_name: name, avatar_emoji: avatar }); toast.success('Profile updated!') }
+    catch { toast.error('Failed to save') }
+    setSaving(false)
+  }, [name, avatar])
+  if (!player) return null
   return (
-    <div style={{ padding: '12px 10px', borderRadius: 12, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.08)', textAlign: 'center' }}>
-      <div style={{ fontSize: 18, fontWeight: 900, color, fontFamily: "'Share Tech Mono', monospace" }}>{value}</div>
-      <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.45)', letterSpacing: 2, marginTop: 3, fontFamily: "'Orbitron', sans-serif" }}>{label}</div>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <div style={{ ...sBox, display: 'flex', gap: 14, alignItems: 'center' }}>
+        <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #0099cc, #cc8800)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, border: '3px solid rgba(255,255,255,0.8)', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>{avatar}</div>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: 14, fontWeight: 900, color: '#1a2a3a' }}>{player.display_name || player.username}</div>
+          <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.4)' }}>@{player.username}</div>
+          <div style={{ fontSize: 9, color: '#0099cc', fontFamily: "'Share Tech Mono', monospace", marginTop: 2 }}>
+            ⬡ {(player as any).stats?.territories_owned || 0} territories
+          </div>
+        </div>
+      </div>
+      <div style={sBox}><div style={lbl}>DISPLAY NAME</div><input value={name} onChange={e => setName(e.target.value)} maxLength={50} style={inputSt} /></div>
+      <div style={sBox}><div style={lbl}>EMAIL</div><div style={{ fontSize: 11, color: 'rgba(26,42,58,0.6)', fontFamily: "'Share Tech Mono', monospace" }}>{player.email} {(player as any).email_verified ? '✅' : '⚠️'}</div></div>
+      <div style={sBox}><div style={lbl}>AVATAR</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{AVATARS.map(a => (
+        <button key={a} onClick={() => setAvatar(a)} style={{ width: 36, height: 36, borderRadius: 8, cursor: 'pointer', fontSize: 18, background: avatar === a ? 'rgba(0,153,204,0.12)' : 'rgba(0,60,100,0.03)', border: `2px solid ${avatar === a ? '#0099cc' : 'rgba(0,60,100,0.06)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{a}</button>
+      ))}</div></div>
+      <button onClick={save} disabled={saving} style={{ padding: '12px 20px', borderRadius: 10, cursor: 'pointer', border: 'none', background: 'linear-gradient(135deg, #0099cc, #0088bb)', color: '#fff', fontSize: 10, fontWeight: 900, letterSpacing: 2, fontFamily: "'Orbitron', sans-serif", opacity: saving ? 0.6 : 1 }}>{saving ? 'SAVING...' : 'SAVE CHANGES'}</button>
+      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+        <button onClick={() => { useStore.getState().logout(); window.location.href = '/login' }} style={{ flex: 1, padding: 10, borderRadius: 8, cursor: 'pointer', background: 'rgba(0,60,100,0.04)', border: '1px solid rgba(0,60,100,0.1)', color: 'rgba(26,42,58,0.5)', fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>LOGOUT</button>
+        <button onClick={() => toast.error('Account deletion coming soon')} style={{ padding: '10px 16px', borderRadius: 8, cursor: 'pointer', background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.15)', color: '#dc2626', fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>DELETE ACCOUNT</button>
+      </div>
+    </div>
+  )
+}
+
+const BADGES = [
+  { id:'terr5',cat:'TERRITORY',name:'Settler',target:5,icon:'🏠',reward:10},{ id:'terr10',cat:'TERRITORY',name:'Colonist',target:10,icon:'🏘',reward:25},
+  { id:'terr50',cat:'TERRITORY',name:'Governor',target:50,icon:'🏛',reward:100},{ id:'terr100',cat:'TERRITORY',name:'Emperor',target:100,icon:'👑',reward:500},
+  { id:'war5',cat:'MILITARY',name:'First Blood',target:5,icon:'⚔️',reward:25},{ id:'war10',cat:'MILITARY',name:'Warlord',target:10,icon:'🗡',reward:50},
+  { id:'war50',cat:'MILITARY',name:'Conqueror',target:50,icon:'🏴',reward:200},
+  { id:'rare5',cat:'COLLECTION',name:'Rare Hunter',target:5,icon:'💎',reward:50},{ id:'rare10',cat:'COLLECTION',name:'Gem Collector',target:10,icon:'💎',reward:150},
+  { id:'legend5',cat:'COLLECTION',name:'Legend Seeker',target:5,icon:'🌟',reward:200},{ id:'mythic1',cat:'COLLECTION',name:'Mythic Finder',target:1,icon:'🔥',reward:500},
+  { id:'saf5',cat:'SAFARI',name:'Tracker',target:5,icon:'🎯',reward:30},{ id:'saf10',cat:'SAFARI',name:'Beast Hunter',target:10,icon:'🐉',reward:80},
+  { id:'saf25',cat:'SAFARI',name:'Safari Master',target:25,icon:'🦖',reward:250},
+  { id:'cont3',cat:'EXPLORATION',name:'World Traveler',target:3,icon:'🌍',reward:100},{ id:'cont6',cat:'EXPLORATION',name:'Globe Trotter',target:6,icon:'✈️',reward:500},
+  { id:'king3',cat:'KINGDOM',name:'Kingdom Builder',target:3,icon:'🏰',reward:150},{ id:'king5',cat:'KINGDOM',name:'Empire Architect',target:5,icon:'🏯',reward:400},
+  { id:'ally1',cat:'SOCIAL',name:'Team Player',target:1,icon:'🤝',reward:25},{ id:'trade10',cat:'SOCIAL',name:'Merchant',target:10,icon:'💰',reward:100},
+]
+const CC: Record<string,string> = { TERRITORY:'#0099cc',MILITARY:'#dc2626',COLLECTION:'#8b5cf6',SAFARI:'#22c55e',EXPLORATION:'#f59e0b',KINGDOM:'#cc8800',SOCIAL:'#3b82f6' }
+
+function AchievementsTab() {
+  const player = usePlayer()
+  const s = (player as any)?.stats || {}
+  const [cf, setCf] = useState('ALL')
+  const getP = (id: string) => { const m: Record<string,number> = { terr5:s.territories_owned||0,terr10:s.territories_owned||0,terr50:s.territories_owned||0,terr100:s.territories_owned||0,war5:s.territories_captured||0,war10:s.territories_captured||0,war50:s.territories_captured||0 }; return m[id]||0 }
+  const cats = ['ALL',...new Set(BADGES.map(b=>b.cat))]
+  const filtered = cf==='ALL' ? BADGES : BADGES.filter(b=>b.cat===cf)
+  const unlocked = BADGES.filter(b=>getP(b.id)>=b.target).length
+  return (
+    <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
+      <div style={{ ...sBox, textAlign:'center' }}><div style={{ fontSize:24,fontWeight:900,color:'#cc8800',fontFamily:"'Share Tech Mono',monospace" }}>{unlocked}/{BADGES.length}</div><div style={lbl}>BADGES UNLOCKED</div></div>
+      <div style={{ display:'flex',gap:4,flexWrap:'wrap' }}>{cats.map(c=>(
+        <button key={c} onClick={()=>setCf(c)} style={{ padding:'4px 10px',borderRadius:8,cursor:'pointer',fontSize:7,fontWeight:700,letterSpacing:1,fontFamily:"'Orbitron',sans-serif",background:cf===c?`${CC[c]||'#0099cc'}15`:'rgba(0,60,100,0.03)',border:`1px solid ${cf===c?`${CC[c]||'#0099cc'}30`:'rgba(0,60,100,0.06)'}`,color:cf===c?(CC[c]||'#0099cc'):'rgba(26,42,58,0.4)' }}>{c}</button>
+      ))}</div>
+      {filtered.map(b => { const p=getP(b.id),pct=Math.min(1,p/b.target),done=pct>=1; return (
+        <div key={b.id} style={{ display:'flex',gap:10,padding:'10px 12px',borderRadius:10,background:done?'rgba(204,136,0,0.04)':'rgba(255,255,255,0.4)',border:`1px solid ${done?'rgba(204,136,0,0.15)':'rgba(0,60,100,0.06)'}`,opacity:done?1:0.7 }}>
+          <span style={{ fontSize:22,filter:done?'':'grayscale(1)' }}>{b.icon}</span>
+          <div style={{ flex:1 }}>
+            <div style={{ fontSize:10,fontWeight:700,color:'#1a2a3a' }}>{b.name}</div>
+            <div style={{ fontSize:7,color:CC[b.cat]||'#6b7280',fontWeight:600,letterSpacing:1 }}>{b.cat}</div>
+            <div style={{ height:4,borderRadius:2,background:'rgba(0,60,100,0.06)',marginTop:4,overflow:'hidden' }}><div style={{ width:`${pct*100}%`,height:'100%',borderRadius:2,background:done?'#cc8800':(CC[b.cat]||'#0099cc'),transition:'width 0.3s' }}/></div>
+            <div style={{ fontSize:7,color:'rgba(26,42,58,0.3)',marginTop:2 }}>{p}/{b.target}</div>
+          </div>
+          <div style={{ textAlign:'right',flexShrink:0 }}><div style={{ display:'flex',alignItems:'center',gap:2 }}><CrystalIcon size="sm" /><span style={{ fontSize:11,fontWeight:900,color:done?'#cc8800':'rgba(26,42,58,0.25)',fontFamily:"'Share Tech Mono',monospace" }}>{b.reward}</span></div>{done&&<div style={{ fontSize:7,color:'#22c55e',fontWeight:700,marginTop:2 }}>✓ CLAIMED</div>}</div>
+        </div>
+      )})}
+    </div>
+  )
+}
+
+function PreferencesTab() {
+  const [sound,setSound]=useState(true),[music,setMusic]=useState(true),[sfx,setSfx]=useState(true),[notifs,setNotifs]=useState(true),[mapTheme,setMapTheme]=useState('light'),[lang,setLang]=useState('en')
+  const Tog=({l,v,f}:{l:string,v:boolean,f:(b:boolean)=>void})=>(
+    <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0' }}>
+      <span style={{ fontSize:10,color:'#1a2a3a',fontWeight:600 }}>{l}</span>
+      <button onClick={()=>f(!v)} style={{ width:40,height:22,borderRadius:11,cursor:'pointer',border:'none',background:v?'#0099cc':'rgba(0,60,100,0.1)',padding:2,display:'flex',alignItems:'center',transition:'background 0.2s' }}>
+        <div style={{ width:18,height:18,borderRadius:'50%',background:'#fff',transform:v?'translateX(18px)':'translateX(0)',transition:'transform 0.2s',boxShadow:'0 1px 4px rgba(0,0,0,0.15)' }}/>
+      </button>
+    </div>
+  )
+  return (
+    <div style={{ display:'flex',flexDirection:'column',gap:14 }}>
+      <div style={sBox}><div style={lbl}>SOUND</div><Tog l="Master sound" v={sound} f={setSound}/><Tog l="Music" v={music} f={setMusic}/><Tog l="Sound effects" v={sfx} f={setSfx}/></div>
+      <div style={sBox}><div style={lbl}>MAP THEME</div><div style={{ display:'flex',gap:6 }}>{[{id:'light',n:'LIGHT'},{id:'satellite',n:'SAT'},{id:'topo',n:'TOPO'}].map(t=>(
+        <button key={t.id} onClick={()=>setMapTheme(t.id)} style={{ flex:1,padding:'10px 8px',borderRadius:8,cursor:'pointer',fontSize:7,fontWeight:700,letterSpacing:1,fontFamily:"'Orbitron',sans-serif",background:mapTheme===t.id?'rgba(0,153,204,0.1)':'rgba(0,60,100,0.03)',border:`2px solid ${mapTheme===t.id?'#0099cc':'rgba(0,60,100,0.06)'}`,color:mapTheme===t.id?'#0099cc':'rgba(26,42,58,0.4)' }}>{t.n}</button>
+      ))}</div></div>
+      <div style={sBox}><div style={lbl}>NOTIFICATIONS</div><Tog l="Push notifications" v={notifs} f={setNotifs}/></div>
+      <div style={sBox}><div style={lbl}>LANGUAGE</div><select value={lang} onChange={e=>setLang(e.target.value)} style={{ ...inputSt, cursor:'pointer' }}><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select></div>
     </div>
   )
 }
 
 export function ProfilePanel({ onClose }: Props) {
-  const [tab, setTab] = useState<Tab>('empire')
-  const player = usePlayer()
-  const { kingdoms } = useKingdomStore()
-  const [editName, setEditName] = useState(false)
-  const [newName, setNewName] = useState(player?.display_name || player?.username || '')
-  const [avatar, setAvatar] = useState((player as any)?.avatar_url || '🦅')
-
-  const totalTerr = kingdoms.reduce((s, k) => s + k.territories.length, 0)
-  const totalIncome = kingdoms.reduce((s, k) => s + (k.dailyHex || 0), 0)
-
-  const handleSaveName = async () => {
-    try {
-      await api.patch('/players/me/', { display_name: newName })
-      useStore.getState().updatePlayer({ display_name: newName } as any)
-      toast.success('Name updated!'); setEditName(false)
-    } catch { toast.error('Failed') }
-  }
-
-  const handleAvatar = async (a: string) => {
-    setAvatar(a)
-    try { await api.patch('/players/me/', { avatar_url: a }); useStore.getState().updatePlayer({ avatar_url: a } as any) } catch {}
-  }
-
-  const SKILL_COLORS: Record<string, string> = { attack:'#dc2626', defense:'#3b82f6', economy:'#cc8800', influence:'#22c55e', technology:'#8b5cf6', extraction:'#f59e0b' }
-
+  const [tab, setTab] = useState<Tab>('commander')
   return (
-    <GlassPanel title="EMPIRE" onClose={onClose} accent="#0099cc">
-      {/* Tabs */}
-      <div style={{ display: 'flex', gap: 2, marginBottom: 16 }}>
-        {TABS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex: 1, padding: '10px 6px', border: 'none', cursor: 'pointer',
-            background: tab === t.id ? 'rgba(0,153,204,0.1)' : 'transparent',
-            borderBottom: tab === t.id ? '2px solid #0099cc' : '2px solid transparent',
-            color: tab === t.id ? '#0099cc' : 'rgba(26,42,58,0.4)',
-            fontSize: 8, fontWeight: 700, letterSpacing: 2, fontFamily: "'Orbitron', sans-serif",
-            borderRadius: '8px 8px 0 0', transition: 'all 0.2s',
-          }}>
-            <span style={{ fontSize: 14, display: 'block', marginBottom: 2 }}>{t.icon}</span>{t.label}
-          </button>
+    <GlassPanel title="PROFILE" onClose={onClose} accent="#0099cc">
+      <div style={{ display:'flex',gap:0,borderBottom:'1px solid rgba(0,60,100,0.08)',marginBottom:14 }}>
+        {TABS.map(t=>(
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{ flex:1,padding:'10px 8px',border:'none',cursor:'pointer',background:tab===t.id?'rgba(0,153,204,0.08)':'transparent',borderBottom:tab===t.id?'2px solid #0099cc':'2px solid transparent',color:tab===t.id?'#0099cc':'rgba(26,42,58,0.4)',fontSize:8,fontWeight:700,letterSpacing:1,fontFamily:"'Orbitron',sans-serif" }}>{t.label}</button>
         ))}
       </div>
-
-      {/* ═══ EMPIRE ═══ */}
-      {tab === 'empire' && (<div>
-        {/* Commander card */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 14, borderRadius: 14, background: 'linear-gradient(135deg, rgba(0,153,204,0.04), rgba(121,80,242,0.04))', border: '1px solid rgba(0,60,100,0.08)', marginBottom: 16 }}>
-          <div style={{ width: 52, height: 52, borderRadius: 14, background: 'linear-gradient(135deg, #0099cc18, #7950f218)', border: '2px solid rgba(0,153,204,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26 }}>{avatar}</div>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 15, fontWeight: 900, color: '#1a2a3a', fontFamily: "'Orbitron', sans-serif", letterSpacing: 3 }}>{player?.display_name || player?.username || 'COMMANDER'}</div>
-            <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginTop: 3 }}>LEVEL {(player as any)?.level || 1} · SEASON 1</div>
-          </div>
-          <div style={{ textAlign: 'right' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
-              <CrystalIcon size="sm" />
-              <span style={{ fontSize: 17, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono'" }}>{((player as any)?.tdc_in_game || 100).toLocaleString()}</span>
-            </div>
-            <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.25)', letterSpacing: 1, marginTop: 2 }}>HEX COINS</div>
-          </div>
-        </div>
-
-        {/* Stats grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, marginBottom: 18 }}>
-          <Stat label="TERRITORIES" value={totalTerr} />
-          <Stat label="KINGDOMS" value={kingdoms.length} color="#cc8800" />
-          <Stat label="INCOME/DAY" value={`${totalIncome}◆`} color="#22c55e" />
-          <Stat label="POWER" value={kingdoms.reduce((s, k) => s + (k.militaryPower || 0), 0)} color="#dc2626" />
-        </div>
-
-        {/* Kingdoms */}
-        <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', sans-serif" }}>YOUR KINGDOMS</div>
-        {kingdoms.length === 0 ? (
-          <div style={{ padding: 28, textAlign: 'center', borderRadius: 14, background: 'rgba(0,60,100,0.02)', border: '1px dashed rgba(0,60,100,0.1)' }}>
-            <div style={{ fontSize: 28, marginBottom: 10 }}>🏰</div>
-            <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', fontWeight: 600 }}>No kingdoms yet — claim your first territory!</div>
-          </div>
-        ) : kingdoms.map(k => (
-          <div key={k.id} onClick={() => setTab('kingdoms')} style={{ padding: 14, borderRadius: 12, marginBottom: 8, cursor: 'pointer', background: `linear-gradient(135deg, ${k.color}08, rgba(255,255,255,0.3))`, border: `1px solid ${k.color}25`, transition: 'all 0.15s' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <span style={{ fontSize: 12, fontWeight: 900, color: '#1a2a3a', fontFamily: "'Orbitron', sans-serif", letterSpacing: 2 }}>{k.name}</span>
-              <span style={{ padding: '2px 8px', borderRadius: 8, background: `${k.color}12`, color: k.color, fontSize: 8, fontWeight: 700 }}>{k.territories.length} HEX</span>
-            </div>
-            <div style={{ display: 'flex', gap: 3 }}>
-              {Object.entries(k.skills || {}).slice(0, 6).map(([skill, lvl]: [string, any]) => (
-                <div key={skill} style={{ flex: 1, height: 3, borderRadius: 2, background: 'rgba(0,60,100,0.05)', overflow: 'hidden' }}>
-                  <div style={{ width: `${Math.min((lvl || 0) * 14, 100)}%`, height: '100%', borderRadius: 2, background: SKILL_COLORS[skill] || '#999' }} />
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
-      </div>)}
-
-      {/* ═══ KINGDOMS ═══ */}
-      {tab === 'kingdoms' && (<div>
-        <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 10, fontFamily: "'Orbitron', sans-serif" }}>KINGDOM MANAGEMENT</div>
-        {kingdoms.map(k => (
-          <div key={k.id} style={{ padding: 16, borderRadius: 14, marginBottom: 12, background: 'rgba(255,255,255,0.3)', border: `1px solid ${k.color}20` }}>
-            <div style={{ fontSize: 14, fontWeight: 900, color: '#1a2a3a', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif", marginBottom: 12 }}>{k.name}</div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-              {(['attack','defense','economy','influence','technology','extraction'] as const).map(skill => {
-                const lvl = k.skills?.[skill] || 0
-                return (
-                  <div key={skill} style={{ padding: '6px 8px', borderRadius: 8, background: `${SKILL_COLORS[skill]}06`, border: `1px solid ${SKILL_COLORS[skill]}12` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: 7, color: SKILL_COLORS[skill], fontWeight: 700, textTransform: 'uppercase', letterSpacing: 1 }}>{skill}</span>
-                      <span style={{ fontSize: 10, fontWeight: 900, color: SKILL_COLORS[skill], fontFamily: "'Share Tech Mono'" }}>Lv.{lvl}</span>
-                    </div>
-                    <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,0,0,0.04)', marginTop: 4 }}>
-                      <div style={{ width: `${Math.min(lvl * 14, 100)}%`, height: '100%', borderRadius: 2, background: SKILL_COLORS[skill] }} />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        ))}
-        {kingdoms.length === 0 && <div style={{ padding: 28, textAlign: 'center', color: 'rgba(26,42,58,0.4)', fontSize: 11 }}>Claim territories to create your first kingdom.</div>}
-      </div>)}
-
-      {/* ═══ COMMANDER ═══ */}
-      {tab === 'commander' && (<div>
-        <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', sans-serif" }}>COMMANDER NAME</div>
-        <div style={{ display: 'flex', gap: 8, marginBottom: 18 }}>
-          <input value={newName} onChange={e => setNewName(e.target.value)} disabled={!editName} maxLength={32} style={{
-            flex: 1, padding: '10px 14px', borderRadius: 10, background: editName ? 'rgba(255,255,255,0.6)' : 'rgba(255,255,255,0.3)',
-            border: editName ? '1px solid rgba(0,153,204,0.3)' : '1px solid rgba(0,60,100,0.08)', color: '#1a2a3a', fontSize: 13, fontWeight: 700, outline: 'none', fontFamily: "'Orbitron', sans-serif", letterSpacing: 2,
-          }} />
-          {editName
-            ? <button onClick={handleSaveName} style={{ padding: '10px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #0099cc, #0077aa)', color: '#fff', fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>SAVE</button>
-            : <button onClick={() => setEditName(true)} style={{ padding: '10px 16px', borderRadius: 10, cursor: 'pointer', border: '1px solid rgba(0,60,100,0.12)', background: 'rgba(255,255,255,0.5)', color: 'rgba(26,42,58,0.5)', fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>EDIT</button>
-          }
-        </div>
-
-        <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', sans-serif" }}>AVATAR</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gap: 6, marginBottom: 18 }}>
-          {AVATARS.map(a => (
-            <button key={a} onClick={() => handleAvatar(a)} style={{
-              aspectRatio: '1', borderRadius: 12, border: avatar === a ? '2px solid #0099cc' : '1px solid rgba(0,60,100,0.06)', cursor: 'pointer',
-              background: avatar === a ? 'linear-gradient(135deg, #0099cc18, #7950f218)' : 'rgba(255,255,255,0.3)',
-              fontSize: 22, display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: avatar === a ? '0 0 10px rgba(0,153,204,0.2)' : 'none', transition: 'all 0.15s',
-            }}>{a}</button>
-          ))}
-        </div>
-
-        <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', sans-serif" }}>ACCOUNT</div>
-        <div style={{ padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.3)', border: '1px solid rgba(0,60,100,0.06)', fontSize: 11, color: 'rgba(26,42,58,0.5)', lineHeight: 2 }}>
-          Email: <strong style={{ color: '#1a2a3a' }}>{player?.email}</strong><br/>
-          Username: <strong style={{ color: '#1a2a3a' }}>{player?.username}</strong><br/>
-          Joined: <strong style={{ color: '#1a2a3a' }}>{player?.date_joined ? new Date(player.date_joined).toLocaleDateString() : '—'}</strong>
-        </div>
-      </div>)}
-
-      {/* ═══ STATS ═══ */}
-      {tab === 'stats' && (<div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 16 }}>
-          <Stat label="TERRITORIES" value={totalTerr} />
-          <Stat label="KINGDOMS" value={kingdoms.length} color="#cc8800" />
-          <Stat label="INCOME/DAY" value={`${totalIncome}◆`} color="#22c55e" />
-          <Stat label="BATTLES WON" value={(player as any)?.battles_won || 0} color="#dc2626" />
-          <Stat label="BATTLES LOST" value={(player as any)?.battles_lost || 0} color="#64748b" />
-          <Stat label="INFLUENCE" value={(player as any)?.influence_points || 0} color="#8b5cf6" />
-          <Stat label="SAFARIS" value={(player as any)?.safaris_completed || 0} color="#f97316" />
-          <Stat label="EVENTS WON" value={(player as any)?.events_won || 0} color="#3b82f6" />
-          <Stat label="STREAK" value={(player as any)?.login_streak || 0} color="#cc8800" />
-        </div>
-        <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', sans-serif" }}>ACHIEVEMENTS</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8 }}>
-          {[
-            { icon: '🏴', label: 'First Claim', done: totalTerr > 0 },
-            { icon: '👑', label: 'Kingdom', done: kingdoms.length > 0 },
-            { icon: '⚔', label: 'First Battle', done: ((player as any)?.battles_won || 0) > 0 },
-            { icon: '🦖', label: 'Safari', done: ((player as any)?.safaris_completed || 0) > 0 },
-            { icon: '💰', label: '1000 HEX', done: ((player as any)?.tdc_in_game || 0) >= 1000 },
-            { icon: '🏛', label: '10 Territories', done: totalTerr >= 10 },
-            { icon: '🤝', label: 'Alliance', done: !!(player as any)?.alliance_id },
-            { icon: '🔥', label: '7-Day Streak', done: ((player as any)?.login_streak || 0) >= 7 },
-          ].map(a => (
-            <div key={a.label} style={{ padding: '10px 6px', borderRadius: 10, textAlign: 'center', background: a.done ? 'rgba(34,197,94,0.04)' : 'rgba(0,0,0,0.01)', border: a.done ? '1px solid rgba(34,197,94,0.15)' : '1px solid rgba(0,60,100,0.04)', opacity: a.done ? 1 : 0.35 }}>
-              <div style={{ fontSize: 20, marginBottom: 3 }}>{a.icon}</div>
-              <div style={{ fontSize: 6, color: a.done ? '#22c55e' : 'rgba(26,42,58,0.3)', fontWeight: 700, letterSpacing: 1 }}>{a.label}</div>
-            </div>
-          ))}
-        </div>
-      </div>)}
+      {tab==='commander'&&<CommanderTab/>}
+      {tab==='achievements'&&<AchievementsTab/>}
+      {tab==='preferences'&&<PreferencesTab/>}
     </GlassPanel>
   )
 }
