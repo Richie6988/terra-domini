@@ -64,6 +64,14 @@ export function CombatPanel({ onClose }: Props) {
 
   const tdc = parseFloat(String(player?.tdc_in_game ?? 0))
 
+  // Load battle history from backend, fallback to showcase data
+  const { data: historyData } = useQuery({
+    queryKey: ['battle-history'],
+    queryFn: () => api.get('/combat/history/').then(r => r.data?.battles || r.data || []).catch(() => []),
+    staleTime: 30000,
+  })
+  const battleHistory = (historyData && historyData.length > 0) ? historyData : BATTLE_HISTORY
+
   return (
     <GlassPanel title="MILITARY COMMAND" onClose={onClose} accent="#dc2626">
       {/* Kingdom attack branch status */}
@@ -139,7 +147,15 @@ export function CombatPanel({ onClose }: Props) {
                       style={{ width: 22, height: 22, borderRadius: 4, border: '1px solid rgba(0,60,100,0.1)', background: 'rgba(255,255,255,0.5)', cursor: 'pointer', fontSize: 10, color: '#1a2a3a' }}>+</button>
                   </div>
                   {qty > 0 && (
-                    <button onClick={() => { toast.success(`Recruited ${qty} ${u.name}`); setRecruitQty(q => ({ ...q, [u.key]: 0 })) }}
+                    <button onClick={async () => {
+                      try {
+                        await api.post('/combat/recruit/', { unit_type: u.key, quantity: qty })
+                        toast.success(`Recruited ${qty} ${u.name}`)
+                      } catch (e: any) {
+                        toast.error(e?.response?.data?.error || `Recruitment failed — ${qty * u.cost}◆ needed`)
+                      }
+                      setRecruitQty(q => ({ ...q, [u.key]: 0 }))
+                    }}
                       style={{ marginTop: 4, padding: '4px 10px', borderRadius: 12, border: 'none', cursor: 'pointer', background: u.color, color: '#fff', fontSize: 7, fontWeight: 700, letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                       BUY {qty} — {qty * u.cost} ◆
                     </button>
@@ -355,7 +371,7 @@ export function CombatPanel({ onClose }: Props) {
           <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8 }}>
             WAR HISTORY — LAST 30 DAYS
           </div>
-          {BATTLE_HISTORY.map((b, i) => (
+          {battleHistory.map((b: any, i: number) => (
             <div key={i} style={{
               display: 'flex', alignItems: 'center', gap: 8, padding: '10px 12px', marginBottom: 4,
               background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.08)', borderRadius: 6,

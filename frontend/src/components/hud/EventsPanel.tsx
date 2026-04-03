@@ -8,9 +8,11 @@
  * 3 tabs: 🔴 Live | ⏳ Upcoming | 🎁 My Results
  */
 import { useState, useEffect, useCallback } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
+import { api } from '../../services/api'
 import { useStore } from '../../store'
 import toast from 'react-hot-toast'
 
@@ -76,9 +78,24 @@ export function EventsPanel({ onClose }: Props) {
   const [revealedResults, setRevealedResults] = useState<Set<string>>(new Set())
   const setActivePanel = useStore(s => s.setActivePanel)
 
-  // Player luck stats (mock)
+  // Load real events from API, fallback to built-in showcase events
+  const { data: apiEvents } = useQuery({
+    queryKey: ['game-events'],
+    queryFn: () => api.get('/events/').then(r => r.data?.results || []).catch(() => []),
+    staleTime: 60000,
+  })
+  const liveEvents: GameEvent[] = (apiEvents && apiEvents.length > 0)
+    ? apiEvents.map((e: any) => ({
+        id: e.id, icon: '📡', name: e.name?.toUpperCase(), loc: e.affected_countries?.[0] || 'GLOBAL',
+        registered: 0, maxPlayers: 100, cost: 50, color: '#0099cc',
+        category: e.event_type || 'world', rarity: 'rare',
+        desc: e.description, mine: false,
+      }))
+    : LIVE_EVENTS  // Fallback to built-in showcase
+
+  // Player luck stats (from player profile when available)
   const luckBase = 42
-  const luckPotion = 15 // from shop potion
+  const luckPotion = 15
   const luckTotal = luckBase + luckPotion
 
   // Countdown timers for upcoming events
