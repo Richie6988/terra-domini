@@ -121,16 +121,22 @@ eBay-style bidding for **rare++ unique edition** tokens.
 
 ### 4.1 H3 Hex Grid
 - Resolution 8 (default) — ~461m edge length
-- Resolution scales with zoom: z10→res6, z12→res7, z14→res8, z15→res9, z16→res10
+- Resolution 8 ALWAYS — territories are fixed geographic zones, never change with zoom
+- Grid visible from zoom 14+ only. Hidden during zoom transitions.
 - Real-world coordinates via H3 library
 
 ### 4.2 Territory Capture
 | Method | Condition | Cost |
 |--------|-----------|------|
 | Free claim | First territory only | 0 ◆ |
-| Purchase | Adjacent to owned territory | 50 ◆ |
+| Buy (adjacent) | Adjacent to owned territory | 50 ◆ |
+| Buy (distant) | Not adjacent | 125 ◆ |
+| Explore (adjacent) | Adjacent, time-gated | 1h × 1.2^n (n = territories owned) |
+| Explore (distant) | Not adjacent, time-gated | 2h × 1.2^n |
 | Attack | Enemy territory, requires army | Army units |
 | Event/Safari placement | Adjacent to owned, from won tokens | 0 ◆ |
+
+Rare POI territories (Legendary/Mythic) are LOCKED unless player has adjacent territory or 50+ influence points.
 
 ### 4.3 Territory Properties
 - **Rarity:** Common → Uncommon → Rare → Epic → Legendary → Mythic
@@ -270,7 +276,7 @@ Richard's holographic 3D token viewer is THE primary territory interaction.
 - Shadow: `0 20px 60px rgba(0,0,0,0.2)`
 
 ### 10.2 Panel System
-- Centered on screen, 80% width, max 720px
+- Centered on screen via flexbox, 92vw width, max 960px
 - Backdrop blur click-to-close + ✕ button
 - One panel open at a time
 - Spring animation (scale-in from 0.92)
@@ -289,7 +295,7 @@ Token3DViewer  : z-index 2000 (fullscreen)
 ### 10.4 Map
 - Default: Paris (48.8566, 2.3522), zoom 13
 - Tiles: Carto Voyager (light, default)
-- Hex grid: visible from zoom 10, blue tint, resolution adapts
+- Hex grid: visible from zoom 14+, always resolution 8, blue tint
 - Controls: light glassmorphism (no dark elements)
 
 ---
