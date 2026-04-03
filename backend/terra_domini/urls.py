@@ -44,7 +44,7 @@ from terra_domini.apps.accounts.views import (
     PasswordResetRequestView, PasswordResetConfirmView,
     VerifyEmailView, ResendVerificationView,
 )
-from terra_domini.apps.territories.views import TerritoryViewSet
+from terra_domini.apps.territories.views import TerritoryViewSet, SafariViewSet
 from terra_domini.apps.accounts.views import UpdateProfileView
 from terra_domini.apps.accounts.views import PlayerViewSet
 from terra_domini.apps.accounts.views import FavoritePinsView, FavoritePinDetailView
@@ -80,6 +80,7 @@ from terra_domini.apps.social.models_and_views import MyReferralView
 # ─── Router ───────────────────────────────────────────────────────────────────
 router = DefaultRouter()
 router.register(r'territories', TerritoryViewSet, basename='territory')
+router.register(r'safari', SafariViewSet, basename='safari')
 router.register(r'battles',     BattleViewSet,    basename='battle')
 router.register(r'shop',        ShopViewSet,      basename='shop')
 router.register(r'alliances',   AllianceViewSet,  basename='alliance')

@@ -12,10 +12,13 @@
  *   5. Daily challenges: "capture 5 fungus", "capture 20 rare dinosaurs"
  */
 import { useState, useEffect, useCallback, useRef } from 'react'
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { IconSVG } from '../shared/iconBank'
+import { api } from '../../services/api'
+import toast from 'react-hot-toast'
 
 interface Props { onClose: () => void }
 
@@ -90,11 +93,63 @@ function HotColdBar({ distance }: { distance: number }) {
 
 export function DailyHuntPanel({ onClose }: Props) {
   const [phase, setPhase] = useState<HuntPhase>('briefing')
-  const [hunt] = useState(generateDailyHunt)
-  const [distance, setDistance] = useState(850) // Mock distance in meters
+  const [distance, setDistance] = useState(850)
   const [scanProgress, setScanProgress] = useState(0)
   const [reward, setReward] = useState<{ hex_reward: number; xp: number } | null>(null)
   const scanTimer = useRef<number>(0)
+  const qc = useQueryClient()
+
+  // Load active target from API, fallback to mock
+  const { data: safariData } = useQuery({
+    queryKey: ['safari-active'],
+    queryFn: () => api.get('/safari/active/').then(r => r.data).catch(() => null),
+    staleTime: 10000,
+  })
+  const apiTarget = safariData?.target
+  const hunt = apiTarget || generateDailyHunt()
+
+  // Spawn new target
+  const spawnMut = useMutation({
+    mutationFn: () => {
+      return new Promise<any>((resolve) => {
+        navigator.geolocation?.getCurrentPosition(
+          pos => api.post('/safari/spawn/', { lat: pos.coords.latitude, lon: pos.coords.longitude }).then(r => resolve(r.data)),
+          () => api.post('/safari/spawn/', { lat: 48.8566, lon: 2.3522 }).then(r => resolve(r.data))
+        )
+        // Timeout fallback
+        setTimeout(() => api.post('/safari/spawn/', { lat: 48.8566, lon: 2.3522 }).then(r => resolve(r.data)), 3000)
+      })
+    },
+    onSuccess: (data) => {
+      toast.success(data?.message || 'New creature spawned!')
+      qc.invalidateQueries({ queryKey: ['safari-active'] })
+    },
+    onError: (e: any) => toast.error(e?.response?.data?.error || 'Spawn failed'),
+  })
+
+  // Capture target
+  const captureMut = useMutation({
+    mutationFn: () => {
+      return new Promise<any>((resolve, reject) => {
+        navigator.geolocation?.getCurrentPosition(
+          pos => api.post('/safari/capture/', { lat: pos.coords.latitude, lon: pos.coords.longitude }).then(r => resolve(r.data)).catch(reject),
+          () => api.post('/safari/capture/', { lat: 48.8566, lon: 2.3522 }).then(r => resolve(r.data)).catch(reject)
+        )
+        setTimeout(() => api.post('/safari/capture/', { lat: 48.8566, lon: 2.3522 }).then(r => resolve(r.data)).catch(reject), 3000)
+      })
+    },
+    onSuccess: (data) => {
+      setReward({ hex_reward: data.hex_earned, xp: 50 })
+      setPhase('collected')
+      toast.success(data.message || `Captured! +${data.hex_earned} HEX`)
+      qc.invalidateQueries({ queryKey: ['safari-active'] })
+    },
+    onError: () => {
+      // Fallback: accept mock capture
+      setReward({ hex_reward: hunt.hex_reward, xp: 50 })
+      setPhase('collected')
+    },
+  })
 
   // Simulate distance decreasing (in production: real GPS)
   useEffect(() => {
@@ -126,11 +181,13 @@ export function DailyHuntPanel({ onClose }: Props) {
   }, [phase])
 
   const handleCollect = useCallback(() => {
-    setReward({ hex_reward: hunt.hex_reward, xp: 50 })
-    setPhase('collected')
-  }, [hunt])
+    captureMut.mutate()
+  }, [captureMut])
 
-  const handleStartHunt = () => setPhase('tracking')
+  const handleStartHunt = () => {
+    if (!apiTarget) spawnMut.mutate()
+    setPhase('tracking')
+  }
 
   // Check if hunt already done today
   const today = new Date().toDateString()

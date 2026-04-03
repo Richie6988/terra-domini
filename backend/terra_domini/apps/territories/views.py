@@ -1143,3 +1143,154 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                         'tip': 'Débloquez "Soft power" pour forcer la capitulation diplomatique.',
                     }
                 })
+
+
+# ═══ SAFARI ENDPOINTS ═══════════════════════════════════════════════════════
+
+from rest_framework.views import APIView
+from terra_domini.apps.territories.models import SafariTarget, SafariCapture
+import math
+
+class SafariViewSet(viewsets.GenericViewSet):
+    permission_classes = [IsAuthenticated]
+
+    @action(detail=False, methods=['GET'], url_path='active')
+    def active_target(self, request):
+        """GET /api/safari/active/ — current active target."""
+        target = SafariTarget.objects.filter(
+            player=request.user, status='active'
+        ).first()
+        if not target:
+            return Response({'target': None, 'message': 'No active hunt. Spawn a new target!'})
+        return Response({'target': {
+            'id': str(target.id),
+            'creature_id': target.creature_id,
+            'creature_name': target.creature_name,
+            'rarity': target.rarity,
+            'hex_reward': target.hex_reward,
+            'hint': target.hint,
+            'assigned_at': target.assigned_at.isoformat(),
+        }})
+
+    @action(detail=False, methods=['POST'], url_path='spawn')
+    def spawn_target(self, request):
+        """POST /api/safari/spawn/ {lat, lon} — spawn new creature near player."""
+        # Check cooldown: 1 active target at a time
+        active = SafariTarget.objects.filter(player=request.user, status='active').count()
+        if active > 0:
+            return Response({'error': 'You already have an active target. Capture or abandon it first.'}, status=400)
+
+        lat = float(request.data.get('lat', 48.8566))
+        lon = float(request.data.get('lon', 2.3522))
+
+        target = SafariTarget.spawn_for_player(request.user, base_lat=lat, base_lon=lon)
+        return Response({
+            'target': {
+                'id': str(target.id),
+                'creature_id': target.creature_id,
+                'creature_name': target.creature_name,
+                'rarity': target.rarity,
+                'hex_reward': target.hex_reward,
+                'hint': target.hint,
+            },
+            'message': f'{target.creature_name} detected! Follow the radar.'
+        })
+
+    @action(detail=False, methods=['POST'], url_path='track')
+    def track_target(self, request):
+        """POST /api/safari/track/ {lat, lon} — get distance to target (hot/cold)."""
+        target = SafariTarget.objects.filter(player=request.user, status='active').first()
+        if not target:
+            return Response({'error': 'No active target'}, status=404)
+
+        lat = float(request.data.get('lat', 0))
+        lon = float(request.data.get('lon', 0))
+
+        # Haversine distance in meters
+        R = 6371000
+        dlat = math.radians(target.target_lat - lat)
+        dlon = math.radians(target.target_lon - lon)
+        a = math.sin(dlat/2)**2 + math.cos(math.radians(lat)) * math.cos(math.radians(target.target_lat)) * math.sin(dlon/2)**2
+        distance = R * 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+
+        heat = 'HOT' if distance < 200 else 'WARM' if distance < 800 else 'COLD'
+        capturable = distance < 100
+
+        return Response({
+            'distance_m': round(distance),
+            'heat': heat,
+            'capturable': capturable,
+            'hint': target.hint,
+            'direction': 'N' if target.target_lat > lat else 'S',
+        })
+
+    @action(detail=False, methods=['POST'], url_path='capture')
+    def capture_target(self, request):
+        """POST /api/safari/capture/ {lat, lon} — attempt capture (must be within 100m)."""
+        target = SafariTarget.objects.filter(player=request.user, status='active').first()
+        if not target:
+            return Response({'error': 'No active target'}, status=404)
+
+        lat = float(request.data.get('lat', 0))
+        lon = float(request.data.get('lon', 0))
+
+        # Distance check
+        R = 6371000
+        dlat = math.radians(target.target_lat - lat)
+        dlon = math.radians(target.target_lon - lon)
+        a = math.sin(dlat/2)**2 + math.cos(math.radians(lat)) * math.cos(math.radians(target.target_lat)) * math.sin(dlon/2)**2
+        distance = R * 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
+
+        if distance > 150:
+            return Response({'error': f'Too far! {round(distance)}m away. Get within 100m.', 'distance': round(distance)}, status=400)
+
+        # Capture!
+        from django.utils import timezone
+        from django.db.models import F
+        target.status = 'captured'
+        target.captured_at = timezone.now()
+        target.distance_at_capture = distance
+        target.save()
+
+        # Record capture
+        SafariCapture.objects.create(
+            player=request.user,
+            creature_id=target.creature_id,
+            creature_name=target.creature_name,
+            rarity=target.rarity,
+            hex_earned=target.hex_reward,
+            capture_lat=lat, capture_lon=lon,
+        )
+
+        # Award HEX
+        from terra_domini.apps.accounts.models import Player
+        Player.objects.filter(id=request.user.id).update(tdc_in_game=F('tdc_in_game') + target.hex_reward)
+
+        return Response({
+            'success': True,
+            'creature': target.creature_name,
+            'rarity': target.rarity,
+            'hex_earned': target.hex_reward,
+            'distance': round(distance),
+            'message': f'Captured {target.creature_name}! +{target.hex_reward} HEX',
+        })
+
+    @action(detail=False, methods=['POST'], url_path='abandon')
+    def abandon_target(self, request):
+        """POST /api/safari/abandon/ — give up on current target."""
+        updated = SafariTarget.objects.filter(
+            player=request.user, status='active'
+        ).update(status='expired')
+        return Response({'abandoned': updated > 0})
+
+    @action(detail=False, methods=['GET'], url_path='captures')
+    def my_captures(self, request):
+        """GET /api/safari/captures/ — capture history."""
+        captures = SafariCapture.objects.filter(player=request.user)[:50]
+        return Response([{
+            'creature_id': c.creature_id,
+            'creature_name': c.creature_name,
+            'rarity': c.rarity,
+            'hex_earned': c.hex_earned,
+            'captured_at': c.captured_at.isoformat(),
+        } for c in captures])

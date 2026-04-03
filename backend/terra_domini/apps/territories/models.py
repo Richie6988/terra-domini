@@ -557,3 +557,94 @@ class PendingClaim(models.Model):
 
     def __str__(self):
         return f"{self.player.username} → {self.h3_index[:12]} ({self.method}, {self.progress:.0%})"
+
+
+class SafariTarget(models.Model):
+    """Active safari hunt target assigned to a player."""
+    CREATURES = [
+        ('trex', 'Tyrannosaurus Rex', 'legendary', 1000),
+        ('raptor', 'Velociraptor Pack', 'epic', 500),
+        ('mammoth', 'Woolly Mammoth', 'epic', 400),
+        ('eagle', 'Giant Golden Eagle', 'rare', 200),
+        ('whale', 'Blue Whale Migration', 'legendary', 800),
+        ('fungus', 'Bioluminescent Fungus', 'rare', 150),
+        ('phoenix', 'Phoenix Egg', 'mythic', 2000),
+        ('dragon', 'Storm Dragon', 'mythic', 2500),
+        ('wolf', 'Ghost Wolf Alpha', 'epic', 350),
+        ('kraken', 'Deep Sea Kraken', 'legendary', 1200),
+        ('unicorn', 'Crystal Unicorn', 'mythic', 1800),
+        ('serpent', 'Ancient Sea Serpent', 'legendary', 900),
+        ('bear', 'Arctic Dire Bear', 'rare', 250),
+        ('beetle', 'Titan Scarab Beetle', 'uncommon', 100),
+        ('coral', 'Living Coral Colony', 'uncommon', 80),
+        ('frog', 'Poison Dart Frog', 'common', 50),
+        ('butterfly', 'Aurora Butterfly Swarm', 'rare', 175),
+        ('spider', 'Crystal Cave Spider', 'epic', 450),
+    ]
+
+    player = models.ForeignKey('accounts.Player', on_delete=models.CASCADE, related_name='safari_targets')
+    creature_id = models.CharField(max_length=30)
+    creature_name = models.CharField(max_length=100)
+    rarity = models.CharField(max_length=20, default='common')
+    hex_reward = models.IntegerField(default=100)
+    target_lat = models.FloatField()
+    target_lon = models.FloatField()
+    target_h3 = models.CharField(max_length=24, blank=True)
+    hint = models.TextField(blank=True)
+    status = models.CharField(max_length=12, default='active', choices=[
+        ('active', 'Active'), ('captured', 'Captured'), ('expired', 'Expired'),
+    ])
+    assigned_at = models.DateTimeField(auto_now_add=True)
+    captured_at = models.DateTimeField(null=True, blank=True)
+    distance_at_capture = models.FloatField(null=True, blank=True)
+
+    class Meta:
+        db_table = 'safari_targets'
+        ordering = ['-assigned_at']
+
+    @classmethod
+    def spawn_for_player(cls, player, base_lat=None, base_lon=None):
+        """Assign a random creature near the player's location."""
+        import random, h3
+        creature = random.choice(cls.CREATURES)
+        cid, cname, rarity, reward = creature
+
+        # Spawn 200m-2km from player
+        lat = (base_lat or 48.8566) + random.uniform(-0.015, 0.015)
+        lon = (base_lon or 2.3522) + random.uniform(-0.015, 0.015)
+        h3_index = h3.latlng_to_cell(lat, lon, 8)
+
+        hints = [
+            f'Traces detected heading {random.choice(["north", "south", "east", "west"])}.',
+            f'A {cname} was spotted near water sources.',
+            f'Thermal signature detected — creature is {random.choice(["resting", "moving", "hunting"])}.',
+            f'Biome analysis suggests {random.choice(["forest", "mountain", "coastal", "urban"])} habitat.',
+        ]
+
+        return cls.objects.create(
+            player=player,
+            creature_id=cid,
+            creature_name=cname,
+            rarity=rarity,
+            hex_reward=reward,
+            target_lat=lat,
+            target_lon=lon,
+            target_h3=h3_index,
+            hint=random.choice(hints),
+        )
+
+
+class SafariCapture(models.Model):
+    """Record of a captured safari creature — goes into Codex."""
+    player = models.ForeignKey('accounts.Player', on_delete=models.CASCADE, related_name='safari_captures')
+    creature_id = models.CharField(max_length=30)
+    creature_name = models.CharField(max_length=100)
+    rarity = models.CharField(max_length=20)
+    hex_earned = models.IntegerField(default=0)
+    captured_at = models.DateTimeField(auto_now_add=True)
+    capture_lat = models.FloatField(null=True)
+    capture_lon = models.FloatField(null=True)
+
+    class Meta:
+        db_table = 'safari_captures'
+        ordering = ['-captured_at']

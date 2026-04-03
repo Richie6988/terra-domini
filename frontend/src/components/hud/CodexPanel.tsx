@@ -16,6 +16,8 @@ import { CrystalIcon } from '../shared/CrystalIcon'
 import { Token3DViewer } from '../shared/Token3DViewer'
 import { CATEGORIES } from '../shared/radarIconData'
 import { useStore } from '../../store'
+import { api } from '../../services/api'
+import toast from 'react-hot-toast'
 
 interface Props { onClose: () => void }
 
@@ -379,13 +381,28 @@ export function CodexPanel({ onClose }: Props) {
             }}>
               ◆ VIEW 3D
             </button>
+            <button onClick={async () => {
+              const price = prompt('Set price in HEX Coins:')
+              if (!price || isNaN(Number(price))) return
+              try {
+                await api.post('/marketplace/list/', { token_id: selectedTokenData.id, price_hex_coin: Number(price) })
+                toast.success(`Listed for ${price} HEX!`)
+              } catch (e: any) { toast.error(e?.response?.data?.error || 'Listing failed') }
+            }} style={{
+              flex: 1, padding: '8px', borderRadius: 10, cursor: 'pointer',
+              background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)',
+              color: '#22c55e', fontSize: 7, fontWeight: 700, letterSpacing: 1,
+              fontFamily: "'Orbitron', system-ui, sans-serif",
+            }}>
+              💰 SELL
+            </button>
             <button onClick={() => { onClose(); setTimeout(() => setActivePanel('marketplace'), 100) }} style={{
               flex: 1, padding: '8px', borderRadius: 10, cursor: 'pointer',
               background: 'rgba(0,153,204,0.08)', border: '1px solid rgba(0,153,204,0.3)',
               color: '#0099cc', fontSize: 7, fontWeight: 700, letterSpacing: 1,
               fontFamily: "'Orbitron', system-ui, sans-serif",
             }}>
-              🏪 MARKETPLACE
+              🏪 MARKET
             </button>
           </div>
         </motion.div>
