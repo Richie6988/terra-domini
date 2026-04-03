@@ -5,6 +5,7 @@
  */
 import { useStore } from '../../store'
 import { DockIcon } from './DockIcons'
+import { NotificationBadge, useNotifications } from '../../hooks/useNotifications'
 
 type PanelId = 'empire' | 'alliance' | 'codex' | 'marketplace' | 'ladder' | 'events' | 'hunt' | 'auction' | 'shop' | 'info' | 'combat' | 'trade' | 'profile' | 'crypto' | 'kingdom' | 'meta' | 'tasks'
 
@@ -27,8 +28,8 @@ const DOCK_ITEMS: DockItem[] = [
   { panel: 'info',        label: 'Info',        color: '#64748b' },
 ]
 
-function DockButton({ item, isActive, onClick }: {
-  item: DockItem; isActive: boolean; onClick: () => void
+function DockButton({ item, isActive, onClick, badge }: {
+  item: DockItem; isActive: boolean; onClick: () => void; badge?: number
 }) {
   return (
     <button
@@ -43,8 +44,10 @@ function DockButton({ item, isActive, onClick }: {
         borderTop: isActive ? `2px solid ${item.color}` : '2px solid transparent',
         cursor: 'pointer',
         transition: 'all 0.25s ease',
+        position: 'relative',
       }}
     >
+      <NotificationBadge count={badge} />
       {/* Hex-shaped icon container */}
       <div style={{
         width: 36, height: 36,
@@ -78,8 +81,10 @@ function DockButton({ item, isActive, onClick }: {
 export function HexodDock() {
   const activePanel = useStore(s => s.activePanel)
   const setActivePanel = useStore(s => s.setActivePanel)
+  const { badgeCounts, markRead } = useNotifications()
 
   const handleClick = (panel: PanelId) => {
+    if (badgeCounts[panel]) markRead(panel)
     setActivePanel(activePanel === panel ? null : panel)
   }
 
@@ -112,6 +117,7 @@ export function HexodDock() {
             item={item}
             isActive={activePanel === item.panel}
             onClick={() => handleClick(item.panel)}
+            badge={badgeCounts[item.panel]}
           />
         ))}
       </div>

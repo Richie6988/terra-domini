@@ -190,7 +190,7 @@ function GameScreen() {
       {/* Sound toggle — bottom-left */}
       <SoundToggle />
 
-      {/* Daily Challenges — floating button, top-left */}
+      {/* Daily Challenges — floating button with pulse */}
       <button
         onClick={() => setActivePanel(activePanel === 'tasks' ? null : 'tasks')}
         style={{
@@ -205,11 +205,13 @@ function GameScreen() {
           cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 20, color: activePanel === 'tasks' ? '#fff' : '#cc8800',
           transition: 'all 0.2s',
+          animation: activePanel !== 'tasks' ? 'taskPulse 3s ease-in-out infinite' : 'none',
         }}
         title="Daily Challenges"
       >
         🎯
       </button>
+      <style>{`@keyframes taskPulse { 0%,100% { box-shadow: 0 4px 16px rgba(0,0,0,0.08); } 50% { box-shadow: 0 4px 16px rgba(204,136,0,0.3), 0 0 24px rgba(204,136,0,0.15); } }`}</style>
 
       {/* Side panels — triggered by HexodDock */}
       <AnimatePresence>
