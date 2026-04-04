@@ -5,6 +5,7 @@
  */
 import { useMemo, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
+import { useQueryClient } from '@tanstack/react-query'
 import { Token3DViewer } from '../shared/Token3DViewer'
 import { ClaimCelebration } from '../shared/ClaimCelebration'
 import { api } from '../../services/api'
@@ -54,6 +55,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
 }) {
   const player=usePlayer()
   const setActivePanel = useStore(s => s.setActivePanel)
+  const qc = useQueryClient()
 
   // Close ALL other panels when Token3D opens
   useState(() => { setActivePanel(null) })
@@ -112,6 +114,8 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
       }
       const owned = { ...t, owner_id: player?.id, owner_username: player?.username }
       useStore.getState().setTerritories([owned as any])
+      qc.invalidateQueries({ queryKey: ['player'] })
+      qc.invalidateQueries({ queryKey: ['wallet'] })
       setCelebrating(true)
     } catch (err: any) {
       const msg = err?.response?.data?.error || err?.response?.data?.detail || 'Claim failed'

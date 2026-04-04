@@ -1,7 +1,7 @@
 /**
  * AlliancePanel — alliance management, diplomacy, members.
  */
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Users, Shield, Sword, TrendingUp, Crown } from 'lucide-react'
 import { motion } from 'framer-motion'
@@ -9,6 +9,7 @@ import toast from 'react-hot-toast'
 import { allianceApi } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
+import { useAllianceChat } from '../../hooks/useAllianceChat'
 import type { Alliance, AllianceMember } from '../../types'
 
 const textInput: React.CSSProperties = {
@@ -79,6 +80,9 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
   const player = usePlayer()
   const qc = useQueryClient()
   const alliance = player?.alliance
+  const { messages: chatMessages, connected: chatConnected, sendMessage } = useAllianceChat(alliance?.id)
+  const [chatInput, setChatInput] = useState('')
+  const chatEndRef = useRef<HTMLDivElement>(null)
 
   const [tab, setTab] = useState<'overview' | 'members' | 'diplomacy' | 'create' | 'search' | 'trade'>('overview')
   const [createForm, setCreateForm] = useState({ tag: '', name: '', description: '', banner_color: '#10B981' })
@@ -185,25 +189,40 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
               </div>
             </div>
 
-            {/* Alliance chat (placeholder — needs WebSocket backend) */}
+            {/* Alliance chat — real WebSocket */}
             <div style={{ padding: 12, borderRadius: 10, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.06)', marginBottom: 14 }}>
-              <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>ALLIANCE CHAT</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', sans-serif" }}>ALLIANCE CHAT</div>
+                <div style={{ width: 6, height: 6, borderRadius: '50%', background: chatConnected ? '#22c55e' : '#dc2626' }} title={chatConnected ? 'Connected' : 'Disconnected'} />
+              </div>
               <div style={{ maxHeight: 150, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
-                {[
-                  { user: 'Commander', msg: 'Anyone online for a raid?', time: '2m' },
-                  { user: 'StormHex', msg: 'I can deploy 15 infantry', time: '1m' },
-                  { user: 'NexusKing', msg: 'Target: sector 8f2 — enemy kingdom weakened', time: '30s' },
-                ].map((m, i) => (
-                  <div key={i} style={{ padding: '4px 8px', borderRadius: 6, background: 'rgba(0,60,100,0.03)', fontSize: 9 }}>
-                    <span style={{ fontWeight: 700, color: '#8b5cf6' }}>{m.user}</span>
-                    <span style={{ color: 'rgba(26,42,58,0.6)', marginLeft: 6 }}>{m.msg}</span>
-                    <span style={{ color: 'rgba(26,42,58,0.2)', fontSize: 7, marginLeft: 4 }}>{m.time}</span>
+                {chatMessages.length === 0 && (
+                  <div style={{ padding: 10, fontSize: 8, color: 'rgba(26,42,58,0.3)', textAlign: 'center' }}>No messages yet. Say hello!</div>
+                )}
+                {chatMessages.map((m, i) => (
+                  <div key={i} style={{ padding: '4px 8px', borderRadius: 6, background: m.type === 'system' ? 'rgba(139,92,246,0.04)' : 'rgba(0,60,100,0.03)', fontSize: 9 }}>
+                    {m.type === 'system' ? (
+                      <span style={{ color: 'rgba(26,42,58,0.35)', fontStyle: 'italic' }}>{m.text}</span>
+                    ) : (
+                      <>
+                        <span style={{ fontWeight: 700, color: m.role === 'leader' ? '#cc8800' : '#8b5cf6' }}>{m.user}</span>
+                        <span style={{ color: 'rgba(26,42,58,0.6)', marginLeft: 6 }}>{m.text || m.emoji}</span>
+                        <span style={{ color: 'rgba(26,42,58,0.2)', fontSize: 7, marginLeft: 4 }}>{m.time}</span>
+                      </>
+                    )}
                   </div>
                 ))}
+                <div ref={chatEndRef} />
               </div>
               <div style={{ display: 'flex', gap: 6 }}>
-                <input placeholder="Type a message..." style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(0,60,100,0.1)', fontSize: 10, background: 'rgba(0,60,100,0.02)', outline: 'none', color: '#1a2a3a' }} />
-                <button style={{ padding: '6px 12px', borderRadius: 6, background: '#8b5cf6', border: 'none', color: '#fff', fontSize: 8, fontWeight: 700, cursor: 'pointer' }}>SEND</button>
+                <input value={chatInput} onChange={e => setChatInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === 'Enter' && chatInput.trim()) { sendMessage(chatInput.trim()); setChatInput('') } }}
+                  placeholder={chatConnected ? 'Type a message...' : 'Connecting...'}
+                  disabled={!chatConnected}
+                  style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(0,60,100,0.1)', fontSize: 10, background: 'rgba(0,60,100,0.02)', outline: 'none', color: '#1a2a3a' }} />
+                <button onClick={() => { if (chatInput.trim()) { sendMessage(chatInput.trim()); setChatInput('') } }}
+                  disabled={!chatConnected || !chatInput.trim()}
+                  style={{ padding: '6px 12px', borderRadius: 6, background: chatConnected ? '#8b5cf6' : '#94a3b8', border: 'none', color: '#fff', fontSize: 8, fontWeight: 700, cursor: 'pointer' }}>SEND</button>
               </div>
             </div>
 
