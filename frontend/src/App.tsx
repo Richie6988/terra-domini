@@ -22,6 +22,8 @@ import { HexodDock } from './components/shared/HexodDock'
 import { RadarTrigger } from './components/shared/RadarTrigger'
 import { RadarWidget } from './components/shared/RadarWidget'
 import { SoundToggle } from './components/shared/SoundToggle'
+import { ClaimProgressBar } from './components/shared/ClaimProgressBar'
+import { usePendingClaims } from './hooks/usePendingClaims'
 import { DayCycleWidget } from './components/shared/DayCycleWidget'
 
 // ─── Panel Components ───────────────────────────────────────
@@ -124,6 +126,7 @@ function GameScreen() {
     }
   }, [accessToken])
   const setActivePanel       = useStore((s) => s.setActivePanel)
+  const { claims, completeClaim } = usePendingClaims()
 
   // Keyboard: 'R' toggles Codex (collection) panel
   useEffect(() => {
@@ -190,6 +193,18 @@ function GameScreen() {
 
       {/* Sound toggle — bottom-left */}
       <SoundToggle />
+
+      {/* Pending territory claims — floating progress bars */}
+      {claims.length > 0 && (
+        <div style={{
+          position: 'fixed', top: 80, right: 12, zIndex: 900,
+          display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 220,
+        }}>
+          {claims.slice(0, 3).map(c => (
+            <ClaimProgressBar key={c.id} claim={c} compact onComplete={() => completeClaim(c.id)} />
+          ))}
+        </div>
+      )}
 
       {/* Daily Challenges — floating button with pulse */}
       <button
