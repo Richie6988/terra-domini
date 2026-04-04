@@ -387,6 +387,37 @@ Sprint E (Polish & Advanced):   12/12  ✅ COMPLETE
 Total: 52/52 items (100%)
 ```
 
+### Audit Phase 1 — Make It Real (8/8 COMPLETE)
+```
+IMP-01 ✅ Codex wired to real owned territories (replaced getMockCollection)
+IMP-02 ✅ Combat recruit wired to POST /api/combat/recruit/ + history fallback
+IMP-03 ✅ Leaderboard wired (removed MOCK_PLAYERS → real API)
+IMP-04 ✅ Events wired to GET /api/events/ with built-in showcase fallback
+IMP-05 ✅ Safari engine — SafariTarget model + 6 endpoints + DailyHuntPanel wired
+IMP-06 ✅ Marketplace sell — inline price input in Codex + POST /api/marketplace/list/
+IMP-07 ✅ seed_missions command — 20 mission templates (easy/medium/hard)
+IMP-08 ✅ Achievements wired (removed hardcoded BADGES → /api/progression/achievements/)
+```
+
+### Audit Phase 2 — Make It Solid (6/8 done)
+```
+IMP-09 ✅ WebSocket live territory updates (already worked via useGameSocket)
+IMP-10 ✅ Pending claim progress bars rendered in App.tsx (floating, top-right)
+IMP-11 ✅ Alliance chat WebSocket frontend (useAllianceChat hook + real messages)
+IMP-12 ⏳ Sound engine (not started)
+IMP-13 ⏳ Smart Token3D opening (not started — Token3D still opens for empty hexes)
+IMP-14 ⏳ Empire real resources (not started)
+IMP-15 ⏳ i18n full pass (not started)
+IMP-16 ✅ Balance sync after claim (invalidateQueries on player+wallet)
+```
+
+### Code Quality
+```
+TypeScript errors: 0 (was 58 — all fixed)
+Backend syntax errors: 0
+Vite build: passes clean
+```
+
 ### Known Issues
 - [x] ~~#11~~ Custom branded map style — DONE (Carto dark_matter + CSS hue-rotate filter)
 - [x] ~~#29~~ 100 challenges — DONE (progression app: Achievement model + seed_achievements command)
