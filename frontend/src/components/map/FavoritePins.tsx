@@ -145,7 +145,7 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
                         style={{ background: 'rgba(0,60,100,0.04)', border: '1px solid rgba(0,60,100,0.12)', borderRadius: 4, padding: '2px 6px', color: '#1a2a3a', fontSize: 12, width: '100%', outline: 'none' }}
                       />
                     ) : (
-                      <div onDoubleClick={() => { setEditingId(pin.id); setEditName(pin.name) }}
+                      <div onDoubleClick={() => { setEditingId(String(pin.id)); setEditName(pin.name) }}
                         style={{ fontSize: 12, color: '#1a2a3a', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                         title="Double-click to rename">
                         {pin.name}

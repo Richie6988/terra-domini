@@ -219,3 +219,38 @@ class BattleViewSet(viewsets.GenericViewSet):
         } for b in battles]
 
         return Response({'history': data})
+
+
+    @action(detail=False, methods=['POST'], url_path='recruit')
+    def recruit(self, request):
+        """POST /api/combat/recruit/ {unit_type, quantity}"""
+        unit_type = request.data.get('unit_type', '')
+        quantity = int(request.data.get('quantity', 0))
+
+        UNIT_COSTS = {
+            'infantry': 5, 'naval': 15, 'aerial': 25,
+            'engineer': 20, 'medic': 30, 'spy': 100,
+        }
+
+        if unit_type not in UNIT_COSTS:
+            return Response({'error': f'Unknown unit type: {unit_type}'}, status=400)
+        if quantity <= 0 or quantity > 500:
+            return Response({'error': 'Quantity must be 1-500'}, status=400)
+
+        cost = UNIT_COSTS[unit_type] * quantity
+        player = request.user
+
+        if float(player.tdc_in_game) < cost:
+            return Response({'error': f'Not enough HEX. Need {cost}, have {player.tdc_in_game}'}, status=400)
+
+        from django.db.models import F
+        from terra_domini.apps.accounts.models import Player
+        Player.objects.filter(id=player.id).update(tdc_in_game=F('tdc_in_game') - cost)
+
+        # TODO: Track units in a PlayerArmy model. For now, just deduct cost.
+        return Response({
+            'recruited': quantity,
+            'unit_type': unit_type,
+            'cost': cost,
+            'message': f'Recruited {quantity} {unit_type} for {cost} HEX',
+        })

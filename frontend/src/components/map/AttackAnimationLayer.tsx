@@ -236,7 +236,7 @@ export function triggerAttackAnimation(
   duration: number,
   result?: 'victory' | 'defeat'
 ) {
-  window.dispatchEvent(new CustomEvent<AttackAnimationLayer>('hexod:attack', {
+  window.dispatchEvent(new CustomEvent('hexod:attack', {
     detail: { sourceH3, targetH3, duration, result } as any,
   }))
 }

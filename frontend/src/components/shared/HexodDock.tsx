@@ -107,7 +107,7 @@ export function HexodDock() {
         overflowX: 'auto',
         scrollbarWidth: 'none',
         pointerEvents: 'auto',
-        WebkitOverflowScrolling: 'touch' as unknown as string,
+        WebkitOverflowScrolling: 'touch' as any,
         borderBottom: 'none',
         boxShadow: '0 -4px 30px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
       }}>

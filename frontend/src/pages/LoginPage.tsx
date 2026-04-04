@@ -18,6 +18,7 @@ function HexBackground() {
     const canvas = canvasRef.current
     if (!canvas) return
     const ctx = canvas.getContext('2d')!
+    const cv = canvas // non-null alias for closures
     let animId = 0
     let time = 0
 
@@ -52,7 +53,7 @@ function HexBackground() {
     function animate() {
       animId = requestAnimationFrame(animate)
       time += 0.005
-      const W = canvas.width, H = canvas.height
+      const W = canvas!.width, H = canvas!.height
 
       const bg = ctx.createRadialGradient(W * 0.3, H * 0.4, 0, W * 0.5, H * 0.5, W * 0.8)
       bg.addColorStop(0, '#0a1628'); bg.addColorStop(0.5, '#060e1a'); bg.addColorStop(1, '#020408')

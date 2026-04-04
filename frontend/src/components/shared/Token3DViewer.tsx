@@ -145,7 +145,7 @@ export function Token3DViewer({
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.toneMapping = THREE.ACESFilmicToneMapping
     renderer.toneMappingExposure = 2.5
-    renderer.outputEncoding = THREE.sRGBEncoding
+    renderer.outputColorSpace = THREE.SRGBColorSpace
     el.appendChild(renderer.domElement)
     renderer.domElement.style.cursor = 'grab'
 

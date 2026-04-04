@@ -71,7 +71,7 @@ export function MapOverlayLayer({ map }: Props) {
   })
 
   useEffect(() => {
-    if (!map || !map._loaded) return
+    if (!map || !(map as any)._loaded) return
     if (!layerRef.current) {
       layerRef.current = L.layerGroup().addTo(map)
       linesRef.current = L.layerGroup().addTo(map)
@@ -85,7 +85,7 @@ export function MapOverlayLayer({ map }: Props) {
   useEffect(() => {
     const layer = layerRef.current
     const lines = linesRef.current
-    if (!layer || !lines || !map || !map._loaded) return
+    if (!layer || !lines || !map || !(map as any)._loaded) return
 
     layer.clearLayers()
     lines.clearLayers()

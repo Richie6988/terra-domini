@@ -62,7 +62,7 @@ interface TDCState {
 
 interface UIState {
   sidebarOpen: boolean
-  activePanel: 'territory' | 'combat' | 'alliance' | 'shop' | 'profile' | 'events' | 'trade' | 'crypto' | 'ladder' | 'meta' | 'marketplace' | 'kingdom' | 'codex' | 'hunt' | 'tasks' | 'auction' | null
+  activePanel: 'territory' | 'combat' | 'alliance' | 'shop' | 'profile' | 'events' | 'trade' | 'crypto' | 'ladder' | 'meta' | 'marketplace' | 'kingdom' | 'codex' | 'hunt' | 'tasks' | 'auction' | 'empire' | 'info' | null
   notifications: GameNotification[]
   wsConnected: boolean
   isMobile: boolean
@@ -79,8 +79,8 @@ interface UIState {
 type Store = AuthState & GameState & TDCState & UIState
 
 export const useStore = create<Store>()(
-  persist(
-    (set, get) => ({
+  persist<Store>(
+    (set: (fn: Partial<Store> | ((state: Store) => Partial<Store>)) => void, get: () => Store) => ({
       // ── Auth ────────────────────────────────────────────────────────────
       player: null,
       accessToken: null,
@@ -200,20 +200,19 @@ export const useStore = create<Store>()(
     }),
     {
       name: 'hexod-store',
-      // @ts-ignore — Zustand persist storage type mismatch (works at runtime)
+      // @ts-ignore — Zustand persist storage adapter
       storage: {
-        getItem: (name: string) => {
-          try { return localStorage.getItem(name) } catch { return null }
+        getItem: (name: string): any => {
+          try { return JSON.parse(localStorage.getItem(name) || 'null') } catch { return null }
         },
-        setItem: (name: string, value: string) => {
-          try { localStorage.setItem(name, value) } catch {}
+        setItem: (name: string, value: any) => {
+          try { localStorage.setItem(name, JSON.stringify(value)) } catch {}
         },
         removeItem: (name: string) => {
           try { localStorage.removeItem(name) } catch {}
         },
       },
-      // @ts-ignore
-      partialize: (state: any) => ({
+      partialize: (state: Store) => ({
         // Only persist auth + preferences
         player: state.player,
         accessToken: state.accessToken,
@@ -221,7 +220,7 @@ export const useStore = create<Store>()(
         isAuthenticated: state.isAuthenticated,
         mapCenter: state.mapCenter,
         mapZoom: state.mapZoom,
-      }),
+      }) as any,
     }
   )
 )

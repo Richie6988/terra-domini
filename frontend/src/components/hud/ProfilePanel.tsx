@@ -73,7 +73,7 @@ function AchievementsTab() {
   })
 
   const achievements = achData?.achievements || []
-  const cats = ['ALL', ...new Set(achievements.map((a: any) => a.category?.toUpperCase()))]
+  const cats: string[] = ['ALL', ...Array.from(new Set<string>(achievements.map((a: any) => String(a.category || '').toUpperCase()).filter(Boolean) as string[]))]
   const filtered = cf === 'ALL' ? achievements : achievements.filter((a: any) => a.category?.toUpperCase() === cf)
   const unlocked = achData?.unlocked_count || 0
   const total = achData?.total_count || achievements.length

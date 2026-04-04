@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 
 interface Blip {
   id: string; angle: number; distance: number; color: string
-  label?: string; isSafari?: boolean
+  label?: string; isSafari?: boolean; category?: string
 }
 
 const CAT_COLORS: Record<string, string> = {
@@ -23,10 +23,11 @@ const CAT_COLORS: Record<string, string> = {
 
 function generateMockBlips(): Blip[] {
   const cats = Object.keys(CAT_COLORS)
-  const blips = Array.from({ length: 6 }, (_, i) => ({
+  const blips: Blip[] = Array.from({ length: 6 }, (_, i) => ({
     id: `blip-${i}`, angle: (Math.PI * 2 * i) / 6 + Math.random() * 0.5,
     distance: 0.25 + Math.random() * 0.6,
     color: CAT_COLORS[cats[i % cats.length]],
+    category: cats[i % cats.length],
   }))
   // Safari target blip
   blips.push({

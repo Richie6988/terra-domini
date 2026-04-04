@@ -27,7 +27,7 @@ export default function AdminPanel() {
   const qc = useQueryClient()
 
   // Rediriger si pas admin
-  if (player && !player.is_staff && !player.is_superuser) {
+  if (player && !(player as any).is_staff && !(player as any).is_superuser) {
     return (
       <div style={{ position:'fixed', inset:0, background:'#080810',
         display:'flex', alignItems:'center', justifyContent:'center',

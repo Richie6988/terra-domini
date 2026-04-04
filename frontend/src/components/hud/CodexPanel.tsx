@@ -96,6 +96,8 @@ export function CodexPanel({ onClose }: Props) {
   const [selectedToken, setSelectedToken] = useState<string | null>(null)
   const [show3D, setShow3D] = useState(false)
   const [filter, setFilter] = useState('')
+  const [sellMode, setSellMode] = useState(false)
+  const [sellPrice, setSellPrice] = useState('')
   const setActivePanel = useStore(s => s.setActivePanel)
   const collection = useRealCollection()
 
@@ -381,20 +383,13 @@ export function CodexPanel({ onClose }: Props) {
             }}>
               ◆ VIEW 3D
             </button>
-            <button onClick={async () => {
-              const price = prompt('Set price in HEX Coins:')
-              if (!price || isNaN(Number(price))) return
-              try {
-                await api.post('/marketplace/list/', { token_id: selectedTokenData.id, price_hex_coin: Number(price) })
-                toast.success(`Listed for ${price} HEX!`)
-              } catch (e: any) { toast.error(e?.response?.data?.error || 'Listing failed') }
-            }} style={{
+            <button onClick={() => setSellMode(!sellMode)} style={{
               flex: 1, padding: '8px', borderRadius: 10, cursor: 'pointer',
-              background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)',
-              color: '#22c55e', fontSize: 7, fontWeight: 700, letterSpacing: 1,
+              background: sellMode ? '#22c55e' : 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)',
+              color: sellMode ? '#fff' : '#22c55e', fontSize: 7, fontWeight: 700, letterSpacing: 1,
               fontFamily: "'Orbitron', system-ui, sans-serif",
             }}>
-              💰 SELL
+              💰 {sellMode ? 'CANCEL' : 'SELL'}
             </button>
             <button onClick={() => { onClose(); setTimeout(() => setActivePanel('marketplace'), 100) }} style={{
               flex: 1, padding: '8px', borderRadius: 10, cursor: 'pointer',
@@ -405,6 +400,29 @@ export function CodexPanel({ onClose }: Props) {
               🏪 MARKET
             </button>
           </div>
+
+          {/* Sell price input */}
+          {sellMode && (
+            <div style={{ display: 'flex', gap: 6, marginTop: 8 }}>
+              <input type="number" value={sellPrice} onChange={e => setSellPrice(e.target.value)}
+                placeholder="Price in HEX" min="1" style={{
+                  flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(34,197,94,0.3)',
+                  fontSize: 10, background: 'rgba(34,197,94,0.04)', outline: 'none', color: '#1a2a3a',
+                }} />
+              <button onClick={async () => {
+                if (!sellPrice || isNaN(Number(sellPrice)) || Number(sellPrice) <= 0) { toast.error('Enter a valid price'); return }
+                try {
+                  await api.post('/marketplace/list/', { token_id: selectedTokenData.id, price_hex_coin: Number(sellPrice) })
+                  toast.success(`Listed for ${sellPrice} HEX!`)
+                  setSellMode(false); setSellPrice('')
+                } catch (e: any) { toast.error(e?.response?.data?.error || 'Listing failed') }
+              }} style={{
+                padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                background: '#22c55e', color: '#fff', fontSize: 8, fontWeight: 700,
+                fontFamily: "'Orbitron', sans-serif", letterSpacing: 1,
+              }}>LIST</button>
+            </div>
+          )}
         </motion.div>
       )}
 

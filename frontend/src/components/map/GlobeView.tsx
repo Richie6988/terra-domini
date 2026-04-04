@@ -143,7 +143,7 @@ export function GlobeView({ visible, territories = [], onZoomIn }: Props) {
     })
 
     // Animate
-    let animId: number
+    let animId: number = 0
     const animate = () => {
       animId = requestAnimationFrame(animate)
       earth.rotation.y += 0.001

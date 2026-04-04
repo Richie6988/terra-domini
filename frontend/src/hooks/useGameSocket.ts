@@ -55,10 +55,11 @@ export function useGameSocket() {
         break
       case 'balance_update':
         if (typeof msg.tdc_delta === 'number') s.updateInGameBalance(msg.tdc_delta)
-        if (msg.balance) s.setBalance(msg.balance)
+        if (msg.new_balance) s.setBalance(msg.new_balance as any)
         break
       case 'notification':
-        s.addNotification(msg)
+        if ('notification' in msg) s.addNotification((msg as any).notification)
+        else s.addNotification(msg as any)
         break
       case 'pong':
       case 'connected':

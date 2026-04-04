@@ -236,7 +236,7 @@ export function ConquestActions({ territory, onClaimed }: Props) {
   const { kingdoms, addTerritoryToKingdom } = useKingdomStore()
 
   const isUnclaimed = !territory.owner_id
-  const isEnemy = territory.owner_id && territory.owner_id !== player?.id
+  const isEnemy = territory.owner_id && String(territory.owner_id) !== String(player?.id)
 
   // Check if territory is adjacent to any of player's kingdoms
   // Simplified: for now always treat as non-adjacent (real impl needs H3 neighbors)
