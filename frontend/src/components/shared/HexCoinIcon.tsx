@@ -1,7 +1,6 @@
 /**
- * HexCoinIcon — HEX Coin (◆) currency icon.
- * The ONLY currency icon used in the app.
- * Based on Richard's hex_coin SVG from icon bank.
+ * HexCoinIcon — HEX Coin currency icon.
+ * Gold/amber hexagonal design. The ONLY currency icon in HEXOD.
  */
 const sizes = { sm: 12, md: 16, lg: 22, xl: 28 } as const
 
@@ -20,12 +19,19 @@ export function HexCoinIcon({ size = 'md', className }: HexCoinIconProps) {
       className={className}
       style={{ display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }}
     >
-      <path d="M128 30L60 70V186L128 226L196 186V70Z" fill="#6d28d9" />
-      <path d="M128 30L60 70V186L128 226" fill="#7c3aed" />
-      <path d="M128 55L80 82V174L128 201L176 174V82Z" fill="none" stroke="#c4b5fd" strokeWidth="3" />
-      <path d="M128 90L100 128L128 166L156 128Z" fill="#e9d5ff" opacity="0.85" />
-      <path d="M128 90L100 128L128 166" fill="#ddd6fe" opacity="0.95" />
-      <text x="128" y="142" textAnchor="middle" fill="#4c1d95" fontSize="42" fontWeight="900" fontFamily="monospace">◆</text>
+      {/* Outer hex — dark gold */}
+      <path d="M128 20L50 65V191L128 236L206 191V65Z" fill="#b8860b" />
+      {/* Inner hex — bright gold */}
+      <path d="M128 20L50 65V191L128 236" fill="#cc9900" />
+      <path d="M128 45L72 78V178L128 211L184 178V78Z" fill="#daa520" />
+      <path d="M128 45L72 78V178L128 211" fill="#e6b422" />
+      {/* Center diamond */}
+      <path d="M128 85L98 128L128 171L158 128Z" fill="#fff8dc" opacity="0.9" />
+      <path d="M128 85L98 128L128 171" fill="#ffefd5" opacity="0.95" />
+      {/* Inner hex outline */}
+      <path d="M128 60L85 85V171L128 196L171 171V85Z" fill="none" stroke="#ffd700" strokeWidth="2" opacity="0.6" />
+      {/* H letter */}
+      <text x="128" y="140" textAnchor="middle" fill="#8B6914" fontSize="38" fontWeight="900" fontFamily="Orbitron, monospace">H</text>
     </svg>
   )
 }

@@ -97,7 +97,7 @@ export function HexodTopHUD() {
       >
         {/* HEX icon */}
         <div style={{
-          filter: 'drop-shadow(0 2px 8px rgba(121,80,242,0.4))',
+          filter: 'drop-shadow(0 2px 8px rgba(204,136,0,0.4))',
           flexShrink: 0,
         }}>
           <CrystalIcon size="xl" />
@@ -111,7 +111,7 @@ export function HexodTopHUD() {
             HEX
           </div>
           <div style={{
-            fontSize: 16, fontWeight: 900, color: '#7950f2',
+            fontSize: 16, fontWeight: 900, color: '#cc8800',
             fontFamily: "'Share Tech Mono', monospace",
             letterSpacing: 1,
           }}>
