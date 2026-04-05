@@ -216,17 +216,23 @@ export const SKILL_ICONS: Record<string, string> = {
 
 // ── Helpers ──────────────────────────────────────────────────
 
-/** Get SVG string by icon ID */
+/** Get SVG string by icon ID — searches both ICON_BANK and SKILL_ICONS */
 export function getIcon(id: string): string {
-  return ICON_BANK[id] ?? ICON_BANK.mystery
+  return ICON_BANK[id] ?? SKILL_ICONS[id] ?? ICON_BANK[id?.toLowerCase()] ?? SKILL_ICONS[id?.toLowerCase()] ?? ICON_BANK.mystery
 }
 
 /** Total icons in bank */
 export const ICON_COUNT = Object.keys(ICON_BANK).length
 
 /** React component for rendering an icon from the bank */
+let _iconUid = 0
 export function IconSVG({ id, size = 38, className }: { id: string; size?: number; className?: string }) {
-  const svg = getIcon(id)
+  const uid = ++_iconUid
+  let svg = getIcon(id)
+  // Make all internal IDs unique to prevent gradient conflicts across instances
+  svg = svg.replace(/id="([^"]+)"/g, (_, gid) => `id="${gid}_${uid}"`)
+  svg = svg.replace(/url\(#([^)]+)\)/g, (_, gid) => `url(#${gid}_${uid})`)
+  svg = svg.replace(/href="#([^"]+)"/g, (_, gid) => `href="#${gid}_${uid}"`)
   return (
     <div
       className={className}

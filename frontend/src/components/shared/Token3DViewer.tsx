@@ -434,7 +434,7 @@ export function Token3DViewer({
       fCtx.clip()
       fCtx.textAlign = 'center'; fCtx.fillStyle = '#d0d0d0'
       fCtx.font = `italic ${s * 0.025}px Georgia`
-      const descText = description || `Ce jeton certifie la propriété souveraine du territoire HEXOD identifié. Données géospatiales cryptées via protocole Vault Alpha. Rareté garantie par Tier ${tier.id}.`
+      const descText = description || `This token certifies sovereign ownership of the identified HEXOD territory. Geospatial data encrypted via Vault Alpha protocol. Rarity guaranteed by Tier ${tier.id}.`
       wrapTextCentered(fCtx, descText, c, descY + s * 0.06, boxW - s * 0.08, s * 0.028)
       fCtx.restore()
 
