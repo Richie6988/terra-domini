@@ -20,6 +20,7 @@ class PlayerManager(BaseUserManager):
     def create_superuser(self, email, username, password, **extra):
         extra.setdefault('is_staff', True)
         extra.setdefault('is_superuser', True)
+        extra.setdefault('email_verified', True)
         return self.create_user(email, username, password, **extra)
 
 

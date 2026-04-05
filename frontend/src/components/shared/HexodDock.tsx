@@ -6,6 +6,7 @@
 import { useStore } from '../../store'
 import { DockIcon } from './DockIcons'
 import { NotificationBadge, useNotifications } from '../../hooks/useNotifications'
+import { playSound } from '../../hooks/useSound'
 
 type PanelId = 'empire' | 'alliance' | 'codex' | 'marketplace' | 'ladder' | 'events' | 'hunt' | 'auction' | 'shop' | 'info' | 'combat' | 'trade' | 'profile' | 'crypto' | 'kingdom' | 'meta' | 'tasks'
 
@@ -84,6 +85,7 @@ export function HexodDock() {
   const { badgeCounts, markRead } = useNotifications()
 
   const handleClick = (panel: PanelId) => {
+    playSound(activePanel === panel ? 'close' : 'open')
     if (badgeCounts[panel]) markRead(panel)
     setActivePanel(activePanel === panel ? null : panel)
   }

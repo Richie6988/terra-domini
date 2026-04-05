@@ -178,16 +178,27 @@ function StatsTab({ kingdoms }: { kingdoms: Kingdom[] }) {
         ))}
       </div>
 
-      {/* Resource production (placeholder) */}
+      {/* Resource production — computed from territories */}
       <div style={sBox}>
         <div style={lbl}>RESOURCE PRODUCTION</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
-          {[
-            { name: 'Iron', icon: 'IRN', val: 120 }, { name: 'Oil', icon: 'OIL', val: 85 },
-            { name: 'Food', icon: 'FOD', val: 200 }, { name: 'Energy', icon: 'NRG', val: 95 },
-            { name: 'Water', icon: 'H2O', val: 180 }, { name: 'Gold', icon: 'AU', val: 30 },
-            { name: 'Data', icon: 'DAT', val: 45 }, { name: 'Influence', icon: 'INF', val: 60 },
-          ].map(r => (
+          {(() => {
+            const ts = Object.values(useStore.getState().territories).filter((t: any) => t.owner_id === player?.id)
+            const count = ts.length || 1
+            // Resource rates scale with territory count + biome mix
+            const biomes: Record<string, number> = {}
+            ts.forEach((t: any) => { const b = t.territory_type || 'rural'; biomes[b] = (biomes[b] || 0) + 1 })
+            return [
+              { name: 'Iron', icon: '⛏', val: Math.floor((biomes['mountain'] || 0) * 40 + count * 5) },
+              { name: 'Oil', icon: '🛢', val: Math.floor((biomes['industrial'] || 0) * 35 + count * 3) },
+              { name: 'Food', icon: '🌾', val: Math.floor((biomes['rural'] || 0) * 50 + count * 8) },
+              { name: 'Energy', icon: '⚡', val: Math.floor((biomes['urban'] || 0) * 30 + count * 4) },
+              { name: 'Water', icon: '💧', val: Math.floor((biomes['coastal'] || 0) * 45 + count * 6) },
+              { name: 'Gold', icon: '🪙', val: Math.floor((biomes['landmark'] || 0) * 25 + count * 2) },
+              { name: 'Data', icon: '📡', val: Math.floor((biomes['urban'] || 0) * 15 + count * 2) },
+              { name: 'Influence', icon: '🎭', val: Math.floor(count * 3 + (biomes['landmark'] || 0) * 20) },
+            ]
+          })().map(r => (
             <div key={r.name} style={{ textAlign: 'center', padding: '6px 4px', borderRadius: 8, background: 'rgba(0,60,100,0.02)' }}>
               <div style={{ fontSize: 16 }}>{r.icon}</div>
               <div style={{ fontSize: 9, fontWeight: 700, color: '#1a2a3a', fontFamily: "'Share Tech Mono', monospace" }}>{r.val}</div>

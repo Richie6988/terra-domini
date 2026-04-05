@@ -56,7 +56,7 @@ function HexBackground() {
       const W = canvas!.width, H = canvas!.height
 
       const bg = ctx.createRadialGradient(W * 0.3, H * 0.4, 0, W * 0.5, H * 0.5, W * 0.8)
-      bg.addColorStop(0, '#0a1628'); bg.addColorStop(0.5, '#060e1a'); bg.addColorStop(1, '#020408')
+      bg.addColorStop(0, '#0f1f35'); bg.addColorStop(0.5, '#0a1628'); bg.addColorStop(1, '#050c18')
       ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H)
 
       const cols = Math.ceil(W / (hexW * 0.75)) + 2
@@ -162,9 +162,9 @@ export default function LoginPage() {
   }, [email, password, setAuth, navigate])
 
   const inputSt: React.CSSProperties = {
-    width: '100%', padding: '12px 14px', boxSizing: 'border-box',
-    background: 'rgba(0,153,204,0.06)', border: '1px solid rgba(0,153,204,0.15)',
-    borderRadius: 10, color: '#e0f0ff', fontSize: 13, outline: 'none',
+    width: '100%', padding: '14px 16px', boxSizing: 'border-box',
+    background: 'rgba(0,153,204,0.08)', border: '1px solid rgba(0,153,204,0.2)',
+    borderRadius: 10, color: '#e0f0ff', fontSize: 15, outline: 'none',
     fontFamily: "'Share Tech Mono', monospace",
   }
 
@@ -217,31 +217,31 @@ export default function LoginPage() {
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
           style={{
-            width: 380, padding: '36px 32px',
-            background: 'rgba(10, 18, 32, 0.85)', backdropFilter: 'blur(30px) saturate(1.4)',
-            border: '1px solid rgba(0,153,204,0.15)', borderRadius: 16,
-            boxShadow: '0 30px 80px rgba(0,0,0,0.6), inset 0 1px 0 rgba(0,153,204,0.1)',
+            width: 400, padding: '40px 36px',
+            background: 'rgba(15, 25, 45, 0.75)', backdropFilter: 'blur(30px) saturate(1.4)',
+            border: '1px solid rgba(0,153,204,0.2)', borderRadius: 16,
+            boxShadow: '0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(0,153,204,0.15)',
           }}>
           <form onSubmit={handleSubmit}>
-            <label style={{ display: 'block', fontSize: 8, color: 'rgba(100,210,255,0.75)', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", marginBottom: 6 }}>
+            <label style={{ display: 'block', fontSize: 10, color: 'rgba(100,210,255,0.85)', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>
               COMMANDER EMAIL
             </label>
             <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="commander@hexod.io" style={inputSt}
               onFocus={e => e.target.style.borderColor = 'rgba(0,153,204,0.4)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(0,153,204,0.15)'} />
+              onBlur={e => e.target.style.borderColor = 'rgba(0,153,204,0.2)'} />
 
-            <label style={{ display: 'block', fontSize: 8, color: 'rgba(100,210,255,0.75)', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", marginBottom: 6, marginTop: 18 }}>
+            <label style={{ display: 'block', fontSize: 10, color: 'rgba(100,210,255,0.85)', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", marginBottom: 8, marginTop: 20 }}>
               ACCESS CODE
             </label>
             <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••••" style={inputSt}
               onFocus={e => e.target.style.borderColor = 'rgba(0,153,204,0.4)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(0,153,204,0.15)'} />
+              onBlur={e => e.target.style.borderColor = 'rgba(0,153,204,0.2)'} />
 
             <button type="submit" disabled={loading} style={{
-              width: '100%', padding: 15, marginTop: 26, border: 'none', borderRadius: 12,
+              width: '100%', padding: 16, marginTop: 28, border: 'none', borderRadius: 12,
               cursor: loading ? 'wait' : 'pointer',
               background: loading ? 'rgba(0,153,204,0.2)' : 'linear-gradient(135deg, #0099cc, #0077aa)',
-              color: '#fff', fontSize: 11, fontWeight: 900, letterSpacing: 4,
+              color: '#fff', fontSize: 13, fontWeight: 900, letterSpacing: 4,
               fontFamily: "'Orbitron', sans-serif",
               boxShadow: loading ? 'none' : '0 6px 24px rgba(0,153,204,0.3)',
               transition: 'all 0.3s',
@@ -250,15 +250,15 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 20, fontSize: 8, fontFamily: "'Orbitron', sans-serif" }}>
-            <Link to="/register" style={{ color: 'rgba(0,200,255,0.5)', textDecoration: 'none', letterSpacing: 2 }}>NEW COMMANDER</Link>
-            <Link to="/forgot-password" style={{ color: 'rgba(180,210,240,0.6)', textDecoration: 'none', letterSpacing: 1, fontSize: 7 }}>FORGOT PASSWORD?</Link>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, fontSize: 10, fontFamily: "'Orbitron', sans-serif" }}>
+            <Link to="/register" style={{ color: 'rgba(0,200,255,0.7)', textDecoration: 'none', letterSpacing: 2 }}>NEW COMMANDER</Link>
+            <Link to="/forgot-password" style={{ color: 'rgba(180,210,240,0.6)', textDecoration: 'none', letterSpacing: 1, fontSize: 9 }}>FORGOT PASSWORD?</Link>
           </div>
         </motion.div>
 
         {/* Footer */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}
-          style={{ marginTop: 36, fontSize: 7, color: 'rgba(150,190,220,0.4)', letterSpacing: 4, fontFamily: "'Orbitron', sans-serif" }}>
+          style={{ marginTop: 40, fontSize: 9, color: 'rgba(150,190,220,0.6)', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", textAlign: 'center' }}>
           HEXOD v0.1 · SEASON 1 · POLYGON POS · MADE IN FRANCE 🇫🇷
         </motion.div>
       </div>
