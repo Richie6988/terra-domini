@@ -1,11 +1,9 @@
 /**
- * HexodTopHUD — Light tactical glassmorphism top bar.
- * Left: avatar + commander label + empire hex count
- * Right: HEX Coin SVG icon + HEX balance
- * Matches main_prototype.html HUD exactly.
+ * HexodTopHUD — Top bar: player identity (left) + HEX balance (right).
+ * Uses SVG icons from Richard's icon bank. NO EMOJIS.
  */
 import { useStore } from '../../store'
-import { CrystalIcon } from '../shared/CrystalIcon'
+import { IconSVG } from './iconBank'
 
 const toNum = (v: unknown): number => parseFloat(String(v ?? 0)) || 0
 
@@ -23,95 +21,57 @@ export function HexodTopHUD() {
   return (
     <div style={{
       position: 'fixed',
-      top: 28, // below news ticker
+      top: 28,
       left: 0, right: 0,
       height: 70,
       display: 'flex',
       justifyContent: 'space-between',
       alignItems: 'center',
-      padding: '0 24px',
+      padding: '0 16px',
       zIndex: 900,
       pointerEvents: 'none',
     }}>
-      {/* Left segment — Player identity */}
+      {/* Left — Player identity */}
       <div
         className="glass-panel hud-segment"
         onClick={() => setActivePanel('profile')}
-        style={{
-          pointerEvents: 'auto',
-          animationDelay: '0.2s',
-        }}
+        style={{ pointerEvents: 'auto', animationDelay: '0.2s', gap: 10, padding: '10px 16px', minWidth: 180 }}
       >
-        {/* Avatar frame */}
         <div style={{
-          width: 44, height: 44, borderRadius: '50%',
-          background: `linear-gradient(135deg, var(--hud-cyan), var(--hud-amber))`,
+          width: 40, height: 40, borderRadius: '50%',
+          background: `linear-gradient(135deg, ${(player as any).avatar_color || '#0099cc'}, ${(player as any).avatar_color || '#0099cc'}cc)`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontWeight: 900, color: 'white', fontSize: 14,
-          border: '2px solid rgba(255,255,255,0.9)',
-          boxShadow: '0 2px 10px rgba(0,0,0,0.2)',
-          position: 'relative', overflow: 'hidden', flexShrink: 0,
+          fontSize: 20, border: '2px solid rgba(255,255,255,0.9)',
+          boxShadow: '0 2px 10px rgba(0,0,0,0.15)', flexShrink: 0,
         }}>
-          {player.username?.slice(0, 3)?.toUpperCase() ?? '???'}
-          {/* Shimmer effect */}
-          <div style={{
-            position: 'absolute', top: '-50%', left: '-50%',
-            width: '200%', height: '200%',
-            background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.3) 50%, transparent 70%)',
-            animation: 'shimmer 3s infinite',
-            pointerEvents: 'none',
-          }} />
+          {(player as any).avatar_emoji || player.username?.slice(0, 2)?.toUpperCase()}
         </div>
-        {/* Info stack */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{
-            fontSize: 8, color: 'var(--text-muted)',
-            letterSpacing: 2, fontWeight: 500,
-          }}>
-            Commander
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: 1 }}>
+            {player.display_name || player.username}
           </div>
-          <div style={{
-            fontSize: 13, fontWeight: 700, color: 'var(--text-primary)',
-            letterSpacing: 1,
-          }}>
-            {player.username}
-          </div>
-          <div style={{
-            fontSize: 9, color: 'var(--hud-cyan)',
-            fontFamily: "'Share Tech Mono', monospace",
-            letterSpacing: 1,
-          }}>
-            ⬡ {hexCount} TERRITORIES
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 9, color: 'var(--hud-cyan)', fontFamily: "'Share Tech Mono', monospace" }}>
+            <IconSVG id="ui_kingdom" size={12} />
+            <span>{hexCount} TERRITORIES</span>
           </div>
         </div>
       </div>
 
-      {/* Right segment — HEX Balance (display only, no panel) */}
+      {/* Right — HEX Balance */}
       <div
         className="glass-panel hud-segment"
-        style={{
-          pointerEvents: 'auto',
-          animationDelay: '0.35s',
-          cursor: 'default',
-        }}
+        onClick={() => setActivePanel('crypto')}
+        style={{ pointerEvents: 'auto', animationDelay: '0.35s', cursor: 'pointer', gap: 10, padding: '10px 16px', minWidth: 140 }}
       >
-        {/* HEX icon */}
-        <div style={{
-          filter: 'drop-shadow(0 2px 8px rgba(204,136,0,0.4))',
-          flexShrink: 0,
-        }}>
-          <CrystalIcon size="xl" />
+        <div style={{ flexShrink: 0, filter: 'drop-shadow(0 2px 6px rgba(204,136,0,0.4))' }}>
+          <IconSVG id="hex_coin" size={32} />
         </div>
-        {/* Balance */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-          <div style={{
-            fontSize: 8, color: 'var(--text-muted)',
-            letterSpacing: 2, fontWeight: 500,
-          }}>
-            HEX
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <div style={{ fontSize: 8, color: 'var(--text-muted)', letterSpacing: 2, fontWeight: 700 }}>
+            HEX COINS
           </div>
           <div style={{
-            fontSize: 16, fontWeight: 900, color: '#cc8800',
+            fontSize: 18, fontWeight: 900, color: '#cc8800',
             fontFamily: "'Share Tech Mono', monospace",
             letterSpacing: 1,
           }}>
