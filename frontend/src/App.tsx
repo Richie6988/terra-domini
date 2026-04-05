@@ -139,17 +139,19 @@ function GameScreen() {
       ))
   }, [])
 
-  // Prevent scroll/pinch zoom on all non-map UI elements
+  // Prevent browser zoom (Ctrl+wheel) everywhere except map. Allow normal scroll in panels.
   useEffect(() => {
     const handler = (e: WheelEvent) => {
-      const target = e.target as HTMLElement
-      // Allow zoom only inside the Leaflet map container
-      if (!target.closest('.leaflet-container')) {
-        e.preventDefault()
-        e.stopPropagation()
+      // Only block Ctrl+wheel (browser zoom gesture) outside the map
+      if (e.ctrlKey || e.metaKey) {
+        const target = e.target as HTMLElement
+        if (!target.closest('.leaflet-container')) {
+          e.preventDefault()
+        }
       }
     }
     const touchHandler = (e: TouchEvent) => {
+      // Block pinch-zoom (2+ fingers) outside map
       if (e.touches.length > 1) {
         const target = e.target as HTMLElement
         if (!target.closest('.leaflet-container')) {
@@ -157,10 +159,10 @@ function GameScreen() {
         }
       }
     }
-    window.addEventListener('wheel', handler, { passive: false, capture: true })
+    window.addEventListener('wheel', handler, { passive: false })
     window.addEventListener('touchmove', touchHandler, { passive: false })
     return () => {
-      window.removeEventListener('wheel', handler, true)
+      window.removeEventListener('wheel', handler)
       window.removeEventListener('touchmove', touchHandler)
     }
   }, [])

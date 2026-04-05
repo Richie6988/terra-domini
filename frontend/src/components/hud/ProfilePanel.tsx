@@ -36,6 +36,8 @@ function CommanderTab() {
     setSaving(true)
     try {
       await api.patch('/players/update-profile/', { display_name: name, avatar_emoji: avatar, avatar_color: avatarBg, email })
+      // Update store so HUD reflects changes immediately
+      useStore.getState().updatePlayer({ display_name: name, avatar_emoji: avatar, avatar_color: avatarBg, email } as any)
       toast.success('Profile updated!')
     } catch { toast.error('Failed to save') }
     setSaving(false)
