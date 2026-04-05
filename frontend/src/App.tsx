@@ -23,6 +23,7 @@ import { RadarWidget } from './components/shared/RadarWidget'
 import { ClaimProgressBar } from './components/shared/ClaimProgressBar'
 import { usePendingClaims } from './hooks/usePendingClaims'
 import { DayCycleWidget } from './components/shared/DayCycleWidget'
+import { LoadingGlobe } from './components/shared/LoadingGlobe'
 
 // ─── Panel Components ───────────────────────────────────────
 import { CombatPanel } from './components/hud/CombatPanel'
@@ -125,6 +126,43 @@ function GameScreen() {
   }, [accessToken])
   const setActivePanel       = useStore((s) => s.setActivePanel)
   const { claims, completeClaim } = usePendingClaims()
+  const [mapLoaded, setMapLoaded] = useState(false)
+  const [playerCoords, setPlayerCoords] = useState<[number, number]>([48.8566, 2.3522])
+
+  // Get player location for loading globe
+  useEffect(() => {
+    fetch('/api/geoip/').then(r => r.json())
+      .then(d => { if (d.lat && d.lon) setPlayerCoords([d.lat, d.lon]) })
+      .catch(() => navigator.geolocation?.getCurrentPosition(
+        p => setPlayerCoords([p.coords.latitude, p.coords.longitude]), () => {}
+      ))
+  }, [])
+
+  // Prevent scroll/pinch zoom on all non-map UI elements
+  useEffect(() => {
+    const handler = (e: WheelEvent) => {
+      const target = e.target as HTMLElement
+      // Allow zoom only inside the Leaflet map container
+      if (!target.closest('.leaflet-container')) {
+        e.preventDefault()
+        e.stopPropagation()
+      }
+    }
+    const touchHandler = (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        const target = e.target as HTMLElement
+        if (!target.closest('.leaflet-container')) {
+          e.preventDefault()
+        }
+      }
+    }
+    window.addEventListener('wheel', handler, { passive: false, capture: true })
+    window.addEventListener('touchmove', touchHandler, { passive: false })
+    return () => {
+      window.removeEventListener('wheel', handler, true)
+      window.removeEventListener('touchmove', touchHandler)
+    }
+  }, [])
 
   // Keyboard: 'R' toggles Codex (collection) panel
   useEffect(() => {
@@ -149,6 +187,15 @@ function GameScreen() {
       }}
     >
       {/* ═══ HEXOD SHELL ═══ */}
+
+      {/* 3D Globe loading animation — dives into player location */}
+      {!mapLoaded && (
+        <LoadingGlobe
+          playerLat={playerCoords[0]}
+          playerLon={playerCoords[1]}
+          onComplete={() => setMapLoaded(true)}
+        />
+      )}
 
       {/* News ticker — 28px fixed top */}
       <ErrorBoundary label="NewsTicker">

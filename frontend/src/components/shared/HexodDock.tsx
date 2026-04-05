@@ -100,7 +100,7 @@ export function HexodDock() {
       paddingBottom: 'max(8px, env(safe-area-inset-bottom))',
       pointerEvents: 'none',
     }}>
-      <div className="glass-panel" style={{
+      <div className="glass-panel" onWheel={e => e.stopPropagation()} style={{
         display: 'flex',
         gap: 0,
         borderRadius: '16px 16px 0 0',

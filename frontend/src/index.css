@@ -392,3 +392,17 @@ img { pointer-events: none; -webkit-user-drag: none; }
   color: rgba(26,42,58,0.4);
   margin-top: 4px;
 }
+
+/* ═══ ZOOM PREVENTION — only map should zoom ═══ */
+.glass-panel,
+.hud-segment,
+.auth-card,
+.auth-card-light {
+  touch-action: pan-y;
+  overscroll-behavior: contain;
+}
+
+/* Prevent pinch zoom on the entire page (map handles its own) */
+html {
+  touch-action: manipulation;
+}

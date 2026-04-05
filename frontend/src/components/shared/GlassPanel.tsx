@@ -50,7 +50,7 @@ export function GlassPanel({
           pointerEvents: 'none',
         }}
       >
-        <div style={{
+        <div onWheel={e => e.stopPropagation()} style={{
           width: width || '92vw',
           maxWidth: 960,
           maxHeight: '92vh',
