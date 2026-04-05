@@ -119,7 +119,7 @@ function ExplorerTab() {
   const buyMut = useMutation({
     mutationFn: (listing_id: string) => api.post('/marketplace/buy/', { listing_id }),
     onSuccess: (res) => {
-      toast.success(res.data.message || 'Territoire acquis !')
+      toast.success(res.data.message || 'Territory acquired!')
       qc.invalidateQueries({ queryKey: ['marketplace-listings'] })
       qc.invalidateQueries({ queryKey: ['player'] })
     },

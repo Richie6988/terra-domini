@@ -132,7 +132,7 @@ export default function AdminPanel() {
                 { label:'En ligne',        value: stats.online_now || 0,        icon:'🟢', color:'#10B981' },
                 { label:'Actifs 1h',       value: stats.active_1h || 0,         icon:'⚡', color:'#F59E0B' },
                 { label:'Nouveaux/24h',    value: stats.new_today || 0,         icon:'🆕', color:'#8B5CF6' },
-                { label:'Territoires',     value: stats.total_territories || 921, icon:'🗺️', color:'#10B981' },
+                { label:'Territories',     value: stats.total_territories || 921, icon:'🗺️', color:'#10B981' },
                 { label:'Revendiqués',     value: stats.claimed_territories || 0, icon:'🏴', color:'#0099cc' },
                 { label:'Batailles actives',value: stats.active_battles || 0,   icon:'⚔️', color:'#EF4444' },
                 { label:'TDC en jeu',      value: Math.round(toNum(stats.tdc_in_game)).toLocaleString(), icon:'💎', color:'#F59E0B' },
@@ -392,7 +392,7 @@ function EconomyTab() {
             ['HEX total en circulation', data?.tdc_in_circulation?.toLocaleString() || '—'],
             ['TDC dépensé (shop)', data?.tdc_spent_shop?.toLocaleString() || '—'],
             ['HEX Coin gagné (24h)', data?.tdc_earned_24h?.toLocaleString() || '—'],
-            ['Territoires claimed', data?.claimed_count || '—'],
+            ['Territories claimed', data?.claimed_count || '—'],
           ].map(([l,v]) => (
             <div key={l as string} style={{ display:'flex', justifyContent:'space-between',
               padding:'6px 0', borderBottom:'1px solid rgba(255,255,255,0.04)' }}>

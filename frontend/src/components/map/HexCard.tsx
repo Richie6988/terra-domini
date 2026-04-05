@@ -74,11 +74,11 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
 
   const facts=useMemo(()=>{
     const r=[]
-    if(t.poi_visitors) r.push(`${(t.poi_visitors/1e6).toFixed(1)}M visiteurs / an`)
-    if(t.poi_geo_score) r.push(`Score géopolitique : ${t.poi_geo_score}/100`)
+    if(t.poi_visitors) r.push(`${(t.poi_visitors/1e6).toFixed(1)}M visitors / year`)
+    if(t.poi_geo_score) r.push(`Geopolitical score: ${t.poi_geo_score}/100`)
     if(t.poi_fun_fact) r.push(t.poi_fun_fact.slice(0,90))
     if(t.poi_description&&r.length<3) r.push(t.poi_description.slice(0,90))
-    while(r.length<3) r.push('Territoire unique · Hexod Saison 1')
+    while(r.length<3) r.push('Unique territory · Hexod Season 1')
     return r.slice(0,3)
   },[t])
 

@@ -297,7 +297,7 @@ function CardReveal({ card, index, revealed, flipped }: {
             overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap',
             lineHeight:1.3,
           }}>
-            {card.poi_name || card.h3_index?.slice(0,12) || 'Territoire'}
+            {card.poi_name || card.h3_index?.slice(0,12) || 'Territory'}
           </div>
 
           {/* Rarity badge */}

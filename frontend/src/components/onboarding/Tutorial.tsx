@@ -223,7 +223,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 0,
     emoji: '⬡',
-    title: 'Bienvenue sur Hexod !',
+    title: 'Welcome to Hexod!',
     body: 'La carte du monde réel est ton plateau de jeu. Revendique des zones, construis ton empire, gagne des HEX Coin.',
     action: "C'est parti →",
     requiresGPS: true,
