@@ -399,16 +399,37 @@ IMP-07 ✅ seed_missions command — 20 mission templates (easy/medium/hard)
 IMP-08 ✅ Achievements wired (removed hardcoded BADGES → /api/progression/achievements/)
 ```
 
-### Audit Phase 2 — Make It Solid (6/8 done)
+### Audit Phase 2 — Make It Solid (8/8 COMPLETE)
 ```
-IMP-09 ✅ WebSocket live territory updates (already worked via useGameSocket)
-IMP-10 ✅ Pending claim progress bars rendered in App.tsx (floating, top-right)
-IMP-11 ✅ Alliance chat WebSocket frontend (useAllianceChat hook + real messages)
-IMP-12 ⏳ Sound engine (not started)
-IMP-13 ⏳ Smart Token3D opening (not started — Token3D still opens for empty hexes)
-IMP-14 ⏳ Empire real resources (not started)
-IMP-15 ⏳ i18n full pass (not started)
-IMP-16 ✅ Balance sync after claim (invalidateQueries on player+wallet)
+IMP-09 ✅ WebSocket live territory updates (useGameSocket)
+IMP-10 ✅ Pending claim progress bars (floating, top-right)
+IMP-11 ✅ Alliance chat WebSocket (useAllianceChat hook + real messages)
+IMP-12 ✅ Sound engine (Web Audio API, 10 procedural sounds, wired to dock+claim)
+IMP-13 ✅ REVERTED — Token3DViewer shows for ALL territories (Richard's decision)
+IMP-14 ✅ Empire real resources (computed from territory biomes)
+IMP-15 ✅ i18n pass — all 10 French strings → English
+IMP-16 ✅ Balance sync after claim (invalidateQueries)
+```
+
+### Richard Feedback Fixes
+```
+✅ Login 403 → CSRF middleware removed (JWT-only)
+✅ Admin auto-verified → verify_admin command + create_superuser default
+✅ Font sizes centralized → 30 CSS variables in index.css
+✅ All 5 auth pages consistent → same design tokens
+✅ /api/notifications/ 404 → NotificationsView created
+✅ /api/offline-summary/ 500 → Rewrote with ORM + try/catch
+✅ .map() crash (white screen) → SHOP_ITEMS[cat] → SHOP_ITEMS[c.id]
+✅ Map blank on load → invalidateSize() after mount
+✅ Zoom extremely laggy → CSS filter REMOVED from tiles
+✅ Radar/slider overlap → Zoom merged into tile picker panel (top-right)
+✅ Map styles → only 4: Dark/Light/Satellite/Topo
+✅ Sound button removed from left
+✅ Codex artefact button removed from left
+✅ Task button redesigned → pill "🎯 MISSIONS"
+✅ GlobeView removed (bad transition)
+✅ Token3DViewer restored for ALL territories
+✅ All French strings → English
 ```
 
 ### Code Quality
