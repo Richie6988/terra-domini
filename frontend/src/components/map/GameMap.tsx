@@ -427,7 +427,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       `}</style>
 
       {/* Map controls — top right: tile picker + zoom slider */}
-      <div style={{ position:'absolute', top:70, right:12, zIndex:500, display:'flex', flexDirection:'column', gap:0,
+      <div style={{ position:'absolute', top:'50%', right:12, transform:'translateY(-50%)', zIndex:500, display:'flex', flexDirection:'column', gap:0,
         background:'rgba(235,242,250,0.92)', backdropFilter:'blur(20px)', borderRadius:10, border:'1px solid rgba(0,60,100,0.12)',
         overflow:'hidden', boxShadow:'0 4px 16px rgba(0,0,0,0.08)' }}>
         {/* Tile style buttons */}
