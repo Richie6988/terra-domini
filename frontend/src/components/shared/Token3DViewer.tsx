@@ -277,251 +277,227 @@ export function Token3DViewer({
     }
     sceneRef.current = state
 
-    // ═══ DRAW FRONT FACE ═══
+    // ═══ DRAW FRONT FACE — EXACT PORT OF GOLD STANDARD ═══
     function drawFront() {
       const boxW = s * 0.71, boxX = (s - boxW) / 2
 
-      // ═══ Base — slightly brighter than pure black ═══
+      // Deep black background for max contrast
       fCtx.fillStyle = '#020202'
       fCtx.fillRect(0, 0, s, s)
 
-
-
-      // ═══ HOLOGRAPHIC RAINBOW OVERLAY ═══
+      // ═══ HOLOGRAPHIC RAINBOW OVERLAY (the $1000 effect) ═══
       fCtx.save()
-      const holoR = s * 0.4
-      const holoG = fCtx.createLinearGradient(
-        c + Math.cos(state.holoAngle) * holoR, c + Math.sin(state.holoAngle) * holoR,
-        c - Math.cos(state.holoAngle) * holoR, c - Math.sin(state.holoAngle) * holoR,
+      const holoRadius = s * 0.4
+      const holoGradient = fCtx.createLinearGradient(
+        c + Math.cos(state.holoAngle) * holoRadius,
+        c + Math.sin(state.holoAngle) * holoRadius,
+        c - Math.cos(state.holoAngle) * holoRadius,
+        c - Math.sin(state.holoAngle) * holoRadius,
       )
-      holoG.addColorStop(0, 'rgba(255,0,128,0.15)')
-      holoG.addColorStop(0.2, 'rgba(255,128,0,0.12)')
-      holoG.addColorStop(0.4, 'rgba(255,255,0,0.15)')
-      holoG.addColorStop(0.6, 'rgba(0,255,128,0.12)')
-      holoG.addColorStop(0.8, 'rgba(0,128,255,0.15)')
-      holoG.addColorStop(1, 'rgba(128,0,255,0.12)')
-      fCtx.fillStyle = holoG
-      drawHex(fCtx, c, c, s * 0.49); fCtx.fill()
+      holoGradient.addColorStop(0, 'rgba(255,0,128,0.15)')
+      holoGradient.addColorStop(0.2, 'rgba(255,128,0,0.12)')
+      holoGradient.addColorStop(0.4, 'rgba(255,255,0,0.15)')
+      holoGradient.addColorStop(0.6, 'rgba(0,255,128,0.12)')
+      holoGradient.addColorStop(0.8, 'rgba(0,128,255,0.15)')
+      holoGradient.addColorStop(1, 'rgba(128,0,255,0.12)')
+      fCtx.fillStyle = holoGradient
+      drawHex(fCtx, c, c, s * 0.49)
+      fCtx.fill()
       fCtx.restore()
 
-      // ═══ Metallic shimmer gradient ═══
-      const shineW = s * 0.5
-      const g = fCtx.createLinearGradient(state.shineOffset * 2, 0, state.shineOffset * 2 + shineW, 0)
+      // Metallic shimmer gradient for text
+      const shineWidth = s * 0.5
+      const g = fCtx.createLinearGradient(state.shineOffset * 2, 0, state.shineOffset * 2 + shineWidth, 0)
       g.addColorStop(0, tier.metal)
-      g.addColorStop(0.4, '#ffffff'); g.addColorStop(0.5, '#ffffff'); g.addColorStop(0.6, '#ffffff')
+      g.addColorStop(0.4, '#ffffff')
+      g.addColorStop(0.5, '#ffffff')
+      g.addColorStop(0.6, '#ffffff')
       g.addColorStop(1, tier.metal)
 
       // ═══ RARITY BADGE (top-right) ═══
-      const badgeX = boxX + boxW - s * 0.06, badgeY = s * 0.14, badgeSize = s * 0.042
-      fCtx.save(); fCtx.shadowBlur = 50; fCtx.shadowColor = tier.metal
-      fCtx.fillStyle = tier.carbon; drawHex(fCtx, badgeX, badgeY, badgeSize); fCtx.fill()
-      fCtx.strokeStyle = tier.metal; fCtx.lineWidth = 5; fCtx.stroke()
+      const badgeX = boxX + boxW - s * 0.06
+      const badgeY = s * 0.14
+      const badgeSize = s * 0.042
+      fCtx.save()
+      fCtx.shadowBlur = 50
+      fCtx.shadowColor = tier.metal
+      fCtx.fillStyle = tier.carbon
+      drawHex(fCtx, badgeX, badgeY, badgeSize)
+      fCtx.fill()
+      fCtx.strokeStyle = tier.metal
+      fCtx.lineWidth = 5
+      fCtx.stroke()
       fCtx.fillStyle = tier.metal
-      fCtx.font = `900 ${s * 0.03}px Orbitron`; fCtx.textAlign = 'center'
+      fCtx.font = `900 ${s * 0.03}px Orbitron`
+      fCtx.textAlign = 'center'
       fCtx.fillText(tier.id[0], badgeX, badgeY + s * 0.01)
       fCtx.restore()
 
-      // ═══ SECTION 1: CATEGORY — higher up for better spacing ═══
-      fCtx.textAlign = 'center'; fCtx.fillStyle = g
+      // ═══ SECTION 1: CATEGORY ═══
+      fCtx.textAlign = 'center'
+      fCtx.fillStyle = g
       fCtx.font = `bold ${s * 0.032}px Orbitron`
       fCtx.fillText(category, c, s * 0.166)
 
-      // ═══ SECTION 2: ICON ROW — larger, centered ═══
+      // ═══ SECTION 2: ICON ROW (hex frames with glow) ═══
       const iconRowY = s * 0.205
-      const iconSz = s * 0.08
+      const iconSize = s * 0.032
+      const lineW = Math.max(2, iconSize * 0.04)
+
+      // Draw icon hex frame with glow (matching gold standard drawSVGIcon)
       fCtx.save()
-      fCtx.shadowBlur = iconSz * 0.5; fCtx.shadowColor = catColor
-      fCtx.fillStyle = 'rgba(2,2,2,0.95)'
-      drawHex(fCtx, c, iconRowY, iconSz * 0.55); fCtx.fill()
-      fCtx.strokeStyle = tier.metal; fCtx.lineWidth = Math.max(2, iconSz * 0.04); fCtx.stroke()
+      fCtx.translate(c, iconRowY)
+      fCtx.shadowBlur = iconSize * 0.4
+      fCtx.shadowColor = catColor
+      fCtx.fillStyle = 'rgba(2, 2, 2, 0.95)'
+      drawHex(fCtx, 0, 0, iconSize / 2)
+      fCtx.fill()
+      fCtx.strokeStyle = tier.metal
+      fCtx.lineWidth = lineW
+      fCtx.stroke()
       fCtx.beginPath()
-      drawHex(fCtx, c, iconRowY, iconSz * 0.45)
-      fCtx.strokeStyle = catColor; fCtx.globalAlpha = 0.5; fCtx.lineWidth = Math.max(1, iconSz * 0.025); fCtx.stroke()
+      drawHex(fCtx, 0, 0, (iconSize / 2) - iconSize * 0.08)
+      fCtx.strokeStyle = catColor
+      fCtx.globalAlpha = 0.5
+      fCtx.lineWidth = lineW * 0.6
+      fCtx.stroke()
       fCtx.globalAlpha = 1
       fCtx.restore()
-      // Icon from bank — check .complete only (naturalWidth unreliable for data: SVGs)
+
+      // Render icon content inside hex
       if (iconReady) {
-        fCtx.save()
-        fCtx.drawImage(iconCanvas, c - iconSz * 0.38, iconRowY - iconSz * 0.38, iconSz * 0.76, iconSz * 0.76)
-        fCtx.restore()
-      } else {
-        fCtx.save(); fCtx.textAlign = 'center'; fCtx.textBaseline = 'middle'
-        fCtx.font = `900 ${iconSz * 0.5}px Orbitron`; fCtx.fillStyle = catColor
-        fCtx.shadowBlur = 20; fCtx.shadowColor = catColor
-        fCtx.fillText(category.charAt(0), c, iconRowY); fCtx.restore()
+        const drawSize = iconSize * 0.6
+        fCtx.drawImage(iconCanvas, c - drawSize / 2, iconRowY - drawSize / 2, drawSize, drawSize)
       }
 
-      // ═══ SECTION 2bis: BIOME — more space below icon ═══
-      fCtx.textAlign = 'center'; fCtx.fillStyle = g
+      // ═══ SECTION 2bis: BIOME ═══
+      fCtx.textAlign = 'center'
+      fCtx.fillStyle = g
       fCtx.font = `bold ${s * 0.032}px Orbitron`
       fCtx.fillText(biome, c, s * 0.264)
 
-      // ═══ SECTION 3: IMAGE ═══
-      const imageY = s * 0.293, imageH = s * 0.342
+      // ═══ SECTION 3: IMAGE + TITLE OVERLAY ═══
+      const imageY = s * 0.293
+      const imageH = s * 0.342
 
       fCtx.save()
-      fCtx.shadowBlur = s * 0.05; fCtx.shadowColor = catColor
+      fCtx.shadowBlur = s * 0.05
+      fCtx.shadowColor = catColor
       if (cardImg.complete && cardImg.src) {
         fCtx.drawImage(cardImg, boxX, imageY, boxW, imageH)
-      } else {
-        const fbG = fCtx.createRadialGradient(c, imageY + imageH * 0.4, 0, c, imageY + imageH * 0.5, boxW * 0.6)
-        fbG.addColorStop(0, catColor + '55'); fbG.addColorStop(0.5, catColor + '20'); fbG.addColorStop(1, '#080810')
-        fCtx.fillStyle = fbG; fCtx.fillRect(boxX, imageY, boxW, imageH)
-        fCtx.globalAlpha = 0.1
-        const shimG = fCtx.createLinearGradient(state.shineOffset, imageY, state.shineOffset + s * 0.3, imageY + imageH)
-        shimG.addColorStop(0, 'transparent'); shimG.addColorStop(0.5, catColor); shimG.addColorStop(1, 'transparent')
-        fCtx.fillStyle = shimG; fCtx.fillRect(boxX, imageY, boxW, imageH)
-        fCtx.globalAlpha = 1
       }
       fCtx.restore()
 
-      // Title bar with gradient fades
+      // Title bar
       const titleY = imageY + imageH - s * 0.034
-      const titleBarH = s * 0.05, fadeW = s * 0.025
+      const titleBarH = s * 0.05
+      const fadeW = s * 0.025
       fCtx.save()
       fCtx.fillStyle = 'rgba(0,0,0,0.88)'
       fCtx.fillRect(boxX, titleY - titleBarH * 0.55, boxW, titleBarH)
-      const titleFadeL = fCtx.createLinearGradient(boxX - fadeW, 0, boxX, 0)
-      titleFadeL.addColorStop(0, 'rgba(0,0,0,0)'); titleFadeL.addColorStop(1, 'rgba(0,0,0,0.88)')
-      fCtx.fillStyle = titleFadeL; fCtx.fillRect(boxX - fadeW, titleY - titleBarH * 0.55, fadeW, titleBarH)
-      const titleFadeR = fCtx.createLinearGradient(boxX + boxW, 0, boxX + boxW + fadeW, 0)
-      titleFadeR.addColorStop(0, 'rgba(0,0,0,0.88)'); titleFadeR.addColorStop(1, 'rgba(0,0,0,0)')
-      fCtx.fillStyle = titleFadeR; fCtx.fillRect(boxX + boxW, titleY - titleBarH * 0.55, fadeW, titleBarH)
+      let titleFadeL = fCtx.createLinearGradient(boxX - fadeW, 0, boxX, 0)
+      titleFadeL.addColorStop(0, 'rgba(0,0,0,0)')
+      titleFadeL.addColorStop(1, 'rgba(0,0,0,0.88)')
+      fCtx.fillStyle = titleFadeL
+      fCtx.fillRect(boxX - fadeW, titleY - titleBarH * 0.55, fadeW, titleBarH)
+      let titleFadeR = fCtx.createLinearGradient(boxX + boxW, 0, boxX + boxW + fadeW, 0)
+      titleFadeR.addColorStop(0, 'rgba(0,0,0,0.88)')
+      titleFadeR.addColorStop(1, 'rgba(0,0,0,0)')
+      fCtx.fillStyle = titleFadeR
+      fCtx.fillRect(boxX + boxW, titleY - titleBarH * 0.55, fadeW, titleBarH)
       fCtx.restore()
 
       // Title text
-      fCtx.save(); fCtx.textAlign = 'center'
+      fCtx.save()
+      fCtx.textAlign = 'center'
       fCtx.font = `900 ${s * 0.047}px Orbitron`
-      fCtx.strokeStyle = 'rgba(0,0,0,0.9)'; fCtx.lineWidth = s * 0.003
+      fCtx.strokeStyle = 'rgba(0,0,0,0.9)'
+      fCtx.lineWidth = s * 0.003
       fCtx.strokeText(tokenName, c, titleY + s * 0.008)
-      fCtx.fillStyle = g; fCtx.shadowBlur = 40; fCtx.shadowColor = catColor
+      fCtx.fillStyle = g
+      fCtx.shadowBlur = 40
+      fCtx.shadowColor = catColor
       fCtx.fillText(tokenName, c, titleY + s * 0.008)
       fCtx.restore()
 
       // ═══ SECTION 4: SIDE TEXT ═══
       fCtx.font = `900 ${s * 0.026}px Orbitron`
       fCtx.save()
-      fCtx.translate(boxX - s * 0.035, imageY + imageH / 2); fCtx.rotate(-Math.PI / 2)
-      fCtx.fillStyle = g; fCtx.shadowBlur = 25; fCtx.shadowColor = tier.metal
-      fCtx.fillText(tier.id, 0, 0); fCtx.restore()
-      fCtx.save()
-      fCtx.translate(boxX + boxW + s * 0.035, imageY + imageH / 2); fCtx.rotate(Math.PI / 2)
-      fCtx.fillStyle = g; fCtx.shadowBlur = 25; fCtx.shadowColor = tier.metal
-      fCtx.fillText(`${serial}/${maxSupply}`, 0, 0); fCtx.restore()
-
-      // ═══ SECTION 5: DESCRIPTION — clipped to box ═══
-      const descY = imageY + imageH + s * 0.02, descH = s * 0.352
-      fCtx.save()
-      fCtx.shadowBlur = 40; fCtx.shadowColor = catColor
-      fCtx.fillStyle = 'rgba(5,5,5,0.98)'; fCtx.fillRect(boxX, descY, boxW, descH)
+      fCtx.translate(boxX - s * 0.035, imageY + imageH / 2)
+      fCtx.rotate(-Math.PI / 2)
+      fCtx.fillStyle = g
+      fCtx.shadowBlur = 25
+      fCtx.shadowColor = tier.metal
+      fCtx.fillText(tier.id, 0, 0)
       fCtx.restore()
-      fCtx.strokeStyle = g; fCtx.lineWidth = 4
-      fCtx.strokeRect(boxX + s * 0.008, descY + s * 0.008, boxW - s * 0.016, descH - s * 0.016)
-      fCtx.strokeStyle = catColor; fCtx.globalAlpha = 0.35; fCtx.lineWidth = 2
+      fCtx.save()
+      fCtx.translate(boxX + boxW + s * 0.035, imageY + imageH / 2)
+      fCtx.rotate(Math.PI / 2)
+      fCtx.fillStyle = g
+      fCtx.shadowBlur = 25
+      fCtx.shadowColor = tier.metal
+      fCtx.fillText(`${serial}/${maxSupply}`, 0, 0)
+      fCtx.restore()
+
+      // ═══ SECTION 5: DESCRIPTION BOX ═══
+      const descY = imageY + imageH + s * 0.02
+      const descH = s * 0.352
+      fCtx.save()
+      fCtx.shadowBlur = 40
+      fCtx.shadowColor = catColor
+      fCtx.fillStyle = 'rgba(5,5,5,0.98)'
+      fCtx.fillRect(boxX, descY, boxW, descH)
+      fCtx.restore()
+      fCtx.strokeStyle = g
+      fCtx.lineWidth = 4
       fCtx.strokeRect(boxX + s * 0.01, descY + s * 0.01, boxW - s * 0.02, descH - s * 0.02)
+      fCtx.strokeStyle = catColor
+      fCtx.globalAlpha = 0.35
+      fCtx.lineWidth = 2
+      fCtx.strokeRect(boxX + s * 0.012, descY + s * 0.012, boxW - s * 0.024, descH - s * 0.024)
       fCtx.globalAlpha = 1
 
-      // Description text — clipped to box, smaller font
+      // Description text
       fCtx.save()
       fCtx.beginPath()
       fCtx.rect(boxX + s * 0.02, descY + s * 0.02, boxW - s * 0.04, descH - s * 0.04)
       fCtx.clip()
-      fCtx.textAlign = 'center'; fCtx.fillStyle = '#e0e0e0'
-      fCtx.font = `italic ${Math.round(s * 0.02)}px Georgia`
+      fCtx.textAlign = 'center'
+      fCtx.fillStyle = '#e0e0e0'
+      fCtx.font = `italic 42px Georgia`
       const descText = description || `This token certifies sovereign ownership of the identified HEXOD territory. Geospatial data encrypted via Vault Alpha protocol. Rarity guaranteed by Tier ${tier.id}.`
       wrapTextCentered(fCtx, descText, c, descY + s * 0.08, boxW - s * 0.1, s * 0.03)
       fCtx.restore()
 
       // ═══ SECTION 6: VIGNETTE + FILM GRAIN + OUTER BORDER ═══
-      // Vignette
       fCtx.save()
       const vig = fCtx.createRadialGradient(c, c, s * 0.25, c, c, s * 0.55)
-      vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(0,0,0,0.45)')
-      fCtx.fillStyle = vig; fCtx.fillRect(0, 0, s, s); fCtx.restore()
+      vig.addColorStop(0, 'rgba(0,0,0,0)')
+      vig.addColorStop(1, 'rgba(0,0,0,0.45)')
+      fCtx.fillStyle = vig
+      fCtx.fillRect(0, 0, s, s)
+      fCtx.restore()
 
-      // Film grain (3000 particles like original)
-      fCtx.save(); fCtx.globalAlpha = 0.02
+      // Film grain
+      fCtx.save()
+      fCtx.globalAlpha = 0.02
       for (let i = 0; i < 3000; i++) {
         fCtx.fillStyle = Math.random() > 0.5 ? '#fff' : '#000'
         fCtx.fillRect(Math.random() * s, Math.random() * s, 2, 2)
       }
-      fCtx.globalAlpha = 1; fCtx.restore()
+      fCtx.globalAlpha = 1
+      fCtx.restore()
 
-      // ── SHINY CARD EFFECTS ──────────────────────────────────────
-      if (isShiny) {
-        // 1. Rainbow animated outer border (replaces tier.metal border)
-        const rainbowColors = ['#FF0000', '#FF8800', '#FFFF00', '#00FF44', '#0088FF', '#8800FF', '#FF00FF']
-        const borderW = s * 0.026
-        fCtx.save()
-        fCtx.lineWidth = borderW
-        const segments = 6
-        for (let i = 0; i < segments; i++) {
-          const colorIdx = (i + Math.floor(state.frameCount / 8)) % rainbowColors.length
-          fCtx.strokeStyle = rainbowColors[colorIdx]
-          fCtx.beginPath()
-          const angleStart = (Math.PI / 3) * i - Math.PI / 6
-          const angleEnd = angleStart + Math.PI / 3
-          const r = s * 0.492
-          fCtx.moveTo(c + r * Math.cos(angleStart), c + r * Math.sin(angleStart))
-          fCtx.lineTo(c + r * Math.cos(angleEnd), c + r * Math.sin(angleEnd))
-          fCtx.stroke()
-        }
-        // Outer glow
-        fCtx.shadowColor = rainbowColors[Math.floor(state.frameCount / 6) % rainbowColors.length]
-        fCtx.shadowBlur = s * 0.04
-        fCtx.strokeStyle = 'rgba(255,255,255,0.15)'
-        fCtx.lineWidth = borderW * 0.5
-        drawHex(fCtx, c, c, s * 0.492); fCtx.stroke()
-        fCtx.shadowBlur = 0
-        fCtx.restore()
-
-        // 2. Glitter / sparkle overlay (Pokémon holographic)
-        fCtx.save()
-        const sparkleCount = 60
-        for (let i = 0; i < sparkleCount; i++) {
-          // Deterministic positions with animated alpha
-          const seed = i * 7919
-          const sx = ((seed * 13) % s)
-          const sy = ((seed * 17) % s)
-          const phase = (state.frameCount * 0.05 + i * 0.7) % (Math.PI * 2)
-          const alpha = Math.max(0, Math.sin(phase)) * 0.7
-          if (alpha < 0.1) continue
-          // Check if inside hex bounds (rough check)
-          const dx = sx - c, dy = sy - c
-          if (Math.sqrt(dx * dx + dy * dy) > s * 0.48) continue
-          const sparkleSize = 2 + Math.sin(phase * 2) * 2
-          const hue = (i * 51 + state.frameCount * 3) % 360
-          fCtx.globalAlpha = alpha
-          fCtx.fillStyle = `hsl(${hue}, 100%, 80%)`
-          fCtx.beginPath()
-          // 4-point star sparkle
-          fCtx.moveTo(sx, sy - sparkleSize)
-          fCtx.lineTo(sx + sparkleSize * 0.3, sy)
-          fCtx.lineTo(sx, sy + sparkleSize)
-          fCtx.lineTo(sx - sparkleSize * 0.3, sy)
-          fCtx.closePath()
-          fCtx.fill()
-          // Cross sparkle
-          fCtx.beginPath()
-          fCtx.moveTo(sx - sparkleSize, sy)
-          fCtx.lineTo(sx, sy + sparkleSize * 0.3)
-          fCtx.lineTo(sx + sparkleSize, sy)
-          fCtx.lineTo(sx, sy - sparkleSize * 0.3)
-          fCtx.closePath()
-          fCtx.fill()
-        }
-        fCtx.globalAlpha = 1
-        fCtx.restore()
-      } else {
-        // Normal outer hex border (non-shiny)
-        fCtx.strokeStyle = tier.metal; fCtx.lineWidth = s * 0.022
-        drawHex(fCtx, c, c, s * 0.492); fCtx.stroke()
-      }
+      // Outer hex border
+      fCtx.strokeStyle = tier.metal
+      fCtx.lineWidth = s * 0.022
+      drawHex(fCtx, c, c, s * 0.492)
+      fCtx.stroke()
 
       fMat.map!.needsUpdate = true
     }
 
-    // ═══ DRAW BACK FACE ═══
+    // ═══ DRAW BACK FACE ═══    // ═══ DRAW BACK FACE ═══
     function drawBack() {
       const metalColor = tier.metal
       const coreRadius = s * 0.22
