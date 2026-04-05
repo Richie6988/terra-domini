@@ -11,7 +11,7 @@ import { api } from '../services/api'
 const inputSt: React.CSSProperties = {
   width: '100%', padding: '12px 14px', boxSizing: 'border-box',
   background: 'rgba(0,153,204,0.06)', border: '1px solid rgba(0,153,204,0.15)',
-  borderRadius: 10, color: '#e0f0ff', fontSize: 13, outline: 'none',
+  borderRadius: 10, outline: 'none', color: '#e0f0ff', fontSize: 15,
   fontFamily: "'Share Tech Mono', monospace",
 }
 
@@ -57,7 +57,7 @@ export default function ForgotPasswordPage() {
           <div style={{ fontSize: 24, fontWeight: 900, color: '#fff', letterSpacing: 6, marginBottom: 8 }}>
             HEX<span style={{ color: '#0099cc' }}>O</span>D
           </div>
-          <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)', letterSpacing: 3 }}>
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: 3 }}>
             PASSWORD RECOVERY
           </div>
         </div>
@@ -73,13 +73,13 @@ export default function ForgotPasswordPage() {
               If <strong style={{ color: '#0099cc' }}>{email}</strong> is registered, 
               you'll receive a password reset link. Check your spam folder too.
             </p>
-            <p style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', marginTop: 16, fontFamily: 'system-ui' }}>
+            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 16, fontFamily: 'system-ui' }}>
               Link expires in 24 hours.
             </p>
             <Link to="/login" style={{
-              display: 'inline-block', marginTop: 20, padding: '10px 24px',
+              display: 'inline-block', marginTop: 20, padding: '14px 28px',
               background: 'rgba(0,153,204,0.15)', border: '1px solid rgba(0,153,204,0.3)',
-              borderRadius: 10, color: '#0099cc', fontSize: 9, fontWeight: 700,
+              borderRadius: 10, outline: 'none', color: '#0099cc', fontSize: 11, fontWeight: 700,
               letterSpacing: 2, textDecoration: 'none',
             }}>
               ◆ BACK TO LOGIN
@@ -88,7 +88,7 @@ export default function ForgotPasswordPage() {
         ) : (
           /* Form */
           <form onSubmit={handleSubmit}>
-            <label style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, display: 'block', marginBottom: 6 }}>
+            <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, display: 'block', marginBottom: 6 }}>
               EMAIL ADDRESS
             </label>
             <input
@@ -110,7 +110,7 @@ export default function ForgotPasswordPage() {
           </form>
         )}
 
-        <div style={{ textAlign: 'center', marginTop: 20, fontSize: 8 }}>
+        <div style={{ textAlign: 'center', marginTop: 20, fontSize: 10 }}>
           <Link to="/login" style={{ color: 'rgba(0,200,255,0.5)', textDecoration: 'none', letterSpacing: 2 }}>
             ← BACK TO LOGIN
           </Link>

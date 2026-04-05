@@ -167,7 +167,7 @@ export default function VerifyEmailPage() {
           </button>
         </div>
 
-        <div style={{ marginTop: 16, fontSize: 8 }}>
+        <div style={{ marginTop: 16, fontSize: 10 }}>
           <Link to="/login" style={{ color: 'rgba(100,210,255,0.5)', textDecoration: 'none', letterSpacing: 2 }}>
             ← BACK TO LOGIN
           </Link>

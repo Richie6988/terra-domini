@@ -161,12 +161,7 @@ export default function LoginPage() {
     } finally { setLoading(false) }
   }, [email, password, setAuth, navigate])
 
-  const inputSt: React.CSSProperties = {
-    width: '100%', padding: '14px 16px', boxSizing: 'border-box',
-    background: 'rgba(0,153,204,0.08)', border: '1px solid rgba(0,153,204,0.2)',
-    borderRadius: 10, color: '#e0f0ff', fontSize: 15, outline: 'none',
-    fontFamily: "'Share Tech Mono', monospace",
-  }
+  const inputSt: React.CSSProperties = {} // Now using .auth-input class
 
   return (
     <div style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
@@ -216,49 +211,32 @@ export default function LoginPage() {
         {/* Login card */}
         <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.3, duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
-          style={{
-            width: 400, padding: '40px 36px',
-            background: 'rgba(15, 25, 45, 0.75)', backdropFilter: 'blur(30px) saturate(1.4)',
-            border: '1px solid rgba(0,153,204,0.2)', borderRadius: 16,
-            boxShadow: '0 30px 80px rgba(0,0,0,0.5), inset 0 1px 0 rgba(0,153,204,0.15)',
-          }}>
+          style={{}} className="auth-card">
           <form onSubmit={handleSubmit}>
-            <label style={{ display: 'block', fontSize: 10, color: 'rgba(100,210,255,0.85)', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>
+            <label className="auth-label">
               COMMANDER EMAIL
             </label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="commander@hexod.io" style={inputSt}
-              onFocus={e => e.target.style.borderColor = 'rgba(0,153,204,0.4)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(0,153,204,0.2)'} />
+            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="commander@hexod.io" className="auth-input" />
 
-            <label style={{ display: 'block', fontSize: 10, color: 'rgba(100,210,255,0.85)', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", marginBottom: 8, marginTop: 20 }}>
+            <label className="auth-label auth-spacer">
               ACCESS CODE
             </label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••••" style={inputSt}
-              onFocus={e => e.target.style.borderColor = 'rgba(0,153,204,0.4)'}
-              onBlur={e => e.target.style.borderColor = 'rgba(0,153,204,0.2)'} />
+            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••••" className="auth-input" />
 
-            <button type="submit" disabled={loading} style={{
-              width: '100%', padding: 16, marginTop: 28, border: 'none', borderRadius: 12,
-              cursor: loading ? 'wait' : 'pointer',
-              background: loading ? 'rgba(0,153,204,0.2)' : 'linear-gradient(135deg, #0099cc, #0077aa)',
-              color: '#fff', fontSize: 13, fontWeight: 900, letterSpacing: 4,
-              fontFamily: "'Orbitron', sans-serif",
-              boxShadow: loading ? 'none' : '0 6px 24px rgba(0,153,204,0.3)',
-              transition: 'all 0.3s',
-            }}>
+            <button type="submit" disabled={loading} className="auth-btn">
               {loading ? '◆ CONNECTING...' : '◆ ENTER THE WORLD'}
             </button>
           </form>
 
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 24, fontSize: 10, fontFamily: "'Orbitron', sans-serif" }}>
-            <Link to="/register" style={{ color: 'rgba(0,200,255,0.7)', textDecoration: 'none', letterSpacing: 2 }}>NEW COMMANDER</Link>
-            <Link to="/forgot-password" style={{ color: 'rgba(180,210,240,0.6)', textDecoration: 'none', letterSpacing: 1, fontSize: 9 }}>FORGOT PASSWORD?</Link>
+          <div className="auth-links">
+            <Link to="/register" style={{ color: 'var(--auth-link-color)' }}>NEW COMMANDER</Link>
+            <Link to="/forgot-password" style={{ color: 'var(--auth-muted-color)', fontSize: 'var(--fs-auth-hint)' }}>FORGOT PASSWORD?</Link>
           </div>
         </motion.div>
 
         {/* Footer */}
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}
-          style={{ marginTop: 40, fontSize: 9, color: 'rgba(150,190,220,0.6)', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", textAlign: 'center' }}>
+          className="auth-footer">
           HEXOD v0.1 · SEASON 1 · POLYGON POS · MADE IN FRANCE 🇫🇷
         </motion.div>
       </div>
