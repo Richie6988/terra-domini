@@ -192,11 +192,10 @@ export function Token3DViewer({
       clearcoatRoughness: 0.01,
       reflectivity: 1.0,
       envMapIntensity: 10,
-      emissive: new THREE.Color(catColor), emissiveIntensity: 0.15,
     })
     const bMat = new THREE.MeshPhysicalMaterial({
       map: bTex, clearcoat: 1, roughness: 0.01, metalness: 0.9,
-      emissive: new THREE.Color(tier.metal), emissiveIntensity: 0.12,
+      emissive: new THREE.Color(tier.metal), emissiveIntensity: 0.08,
       clearcoatRoughness: 0.01, reflectivity: 1.0,
     })
     const sMat = new THREE.MeshPhysicalMaterial({
@@ -283,15 +282,10 @@ export function Token3DViewer({
       const boxW = s * 0.71, boxX = (s - boxW) / 2
 
       // ═══ Base — slightly brighter than pure black ═══
-      fCtx.fillStyle = '#080810'
+      fCtx.fillStyle = '#020202'
       fCtx.fillRect(0, 0, s, s)
 
-      // Subtle catColor ambient glow (prevents "too dark" feel)
-      fCtx.save()
-      const ambG = fCtx.createRadialGradient(c, c, 0, c, c, s * 0.5)
-      ambG.addColorStop(0, catColor + '18'); ambG.addColorStop(1, 'transparent')
-      fCtx.fillStyle = ambG; fCtx.fillRect(0, 0, s, s)
-      fCtx.restore()
+
 
       // ═══ HOLOGRAPHIC RAINBOW OVERLAY ═══
       fCtx.save()
@@ -300,12 +294,12 @@ export function Token3DViewer({
         c + Math.cos(state.holoAngle) * holoR, c + Math.sin(state.holoAngle) * holoR,
         c - Math.cos(state.holoAngle) * holoR, c - Math.sin(state.holoAngle) * holoR,
       )
-      holoG.addColorStop(0, 'rgba(255,0,128,0.18)')
-      holoG.addColorStop(0.2, 'rgba(255,128,0,0.14)')
-      holoG.addColorStop(0.4, 'rgba(255,255,0,0.18)')
-      holoG.addColorStop(0.6, 'rgba(0,255,128,0.14)')
-      holoG.addColorStop(0.8, 'rgba(0,128,255,0.18)')
-      holoG.addColorStop(1, 'rgba(128,0,255,0.14)')
+      holoG.addColorStop(0, 'rgba(255,0,128,0.15)')
+      holoG.addColorStop(0.2, 'rgba(255,128,0,0.12)')
+      holoG.addColorStop(0.4, 'rgba(255,255,0,0.15)')
+      holoG.addColorStop(0.6, 'rgba(0,255,128,0.12)')
+      holoG.addColorStop(0.8, 'rgba(0,128,255,0.15)')
+      holoG.addColorStop(1, 'rgba(128,0,255,0.12)')
       fCtx.fillStyle = holoG
       drawHex(fCtx, c, c, s * 0.49); fCtx.fill()
       fCtx.restore()
@@ -318,7 +312,7 @@ export function Token3DViewer({
       g.addColorStop(1, tier.metal)
 
       // ═══ RARITY BADGE (top-right) ═══
-      const badgeX = boxX + boxW - s * 0.06, badgeY = s * 0.125, badgeSize = s * 0.042
+      const badgeX = boxX + boxW - s * 0.06, badgeY = s * 0.14, badgeSize = s * 0.042
       fCtx.save(); fCtx.shadowBlur = 50; fCtx.shadowColor = tier.metal
       fCtx.fillStyle = tier.carbon; drawHex(fCtx, badgeX, badgeY, badgeSize); fCtx.fill()
       fCtx.strokeStyle = tier.metal; fCtx.lineWidth = 5; fCtx.stroke()
@@ -329,11 +323,11 @@ export function Token3DViewer({
 
       // ═══ SECTION 1: CATEGORY — higher up for better spacing ═══
       fCtx.textAlign = 'center'; fCtx.fillStyle = g
-      fCtx.font = `bold ${s * 0.028}px Orbitron`
-      fCtx.fillText(category, c, s * 0.14)
+      fCtx.font = `bold ${s * 0.032}px Orbitron`
+      fCtx.fillText(category, c, s * 0.166)
 
       // ═══ SECTION 2: ICON ROW — larger, centered ═══
-      const iconRowY = s * 0.195
+      const iconRowY = s * 0.205
       const iconSz = s * 0.08
       fCtx.save()
       fCtx.shadowBlur = iconSz * 0.5; fCtx.shadowColor = catColor
@@ -359,11 +353,11 @@ export function Token3DViewer({
 
       // ═══ SECTION 2bis: BIOME — more space below icon ═══
       fCtx.textAlign = 'center'; fCtx.fillStyle = g
-      fCtx.font = `bold ${s * 0.026}px Orbitron`
-      fCtx.fillText(biome, c, s * 0.258)
+      fCtx.font = `bold ${s * 0.032}px Orbitron`
+      fCtx.fillText(biome, c, s * 0.264)
 
       // ═══ SECTION 3: IMAGE ═══
-      const imageY = s * 0.285, imageH = s * 0.34
+      const imageY = s * 0.293, imageH = s * 0.342
 
       fCtx.save()
       fCtx.shadowBlur = s * 0.05; fCtx.shadowColor = catColor
@@ -397,7 +391,7 @@ export function Token3DViewer({
 
       // Title text
       fCtx.save(); fCtx.textAlign = 'center'
-      fCtx.font = `900 ${s * 0.042}px Orbitron`
+      fCtx.font = `900 ${s * 0.047}px Orbitron`
       fCtx.strokeStyle = 'rgba(0,0,0,0.9)'; fCtx.lineWidth = s * 0.003
       fCtx.strokeText(tokenName, c, titleY + s * 0.008)
       fCtx.fillStyle = g; fCtx.shadowBlur = 40; fCtx.shadowColor = catColor
@@ -405,7 +399,7 @@ export function Token3DViewer({
       fCtx.restore()
 
       // ═══ SECTION 4: SIDE TEXT ═══
-      fCtx.font = `900 ${s * 0.022}px Orbitron`
+      fCtx.font = `900 ${s * 0.026}px Orbitron`
       fCtx.save()
       fCtx.translate(boxX - s * 0.035, imageY + imageH / 2); fCtx.rotate(-Math.PI / 2)
       fCtx.fillStyle = g; fCtx.shadowBlur = 25; fCtx.shadowColor = tier.metal
@@ -416,14 +410,14 @@ export function Token3DViewer({
       fCtx.fillText(`${serial}/${maxSupply}`, 0, 0); fCtx.restore()
 
       // ═══ SECTION 5: DESCRIPTION — clipped to box ═══
-      const descY = imageY + imageH + s * 0.015, descH = s * 0.30
+      const descY = imageY + imageH + s * 0.02, descH = s * 0.352
       fCtx.save()
-      fCtx.shadowBlur = 30; fCtx.shadowColor = catColor
-      fCtx.fillStyle = 'rgba(8,8,16,0.95)'; fCtx.fillRect(boxX, descY, boxW, descH)
+      fCtx.shadowBlur = 40; fCtx.shadowColor = catColor
+      fCtx.fillStyle = 'rgba(5,5,5,0.98)'; fCtx.fillRect(boxX, descY, boxW, descH)
       fCtx.restore()
-      fCtx.strokeStyle = g; fCtx.lineWidth = 3
+      fCtx.strokeStyle = g; fCtx.lineWidth = 4
       fCtx.strokeRect(boxX + s * 0.008, descY + s * 0.008, boxW - s * 0.016, descH - s * 0.016)
-      fCtx.strokeStyle = catColor; fCtx.globalAlpha = 0.35; fCtx.lineWidth = 1.5
+      fCtx.strokeStyle = catColor; fCtx.globalAlpha = 0.35; fCtx.lineWidth = 2
       fCtx.strokeRect(boxX + s * 0.01, descY + s * 0.01, boxW - s * 0.02, descH - s * 0.02)
       fCtx.globalAlpha = 1
 
@@ -432,10 +426,10 @@ export function Token3DViewer({
       fCtx.beginPath()
       fCtx.rect(boxX + s * 0.02, descY + s * 0.02, boxW - s * 0.04, descH - s * 0.04)
       fCtx.clip()
-      fCtx.textAlign = 'center'; fCtx.fillStyle = '#d0d0d0'
-      fCtx.font = `italic ${s * 0.025}px Georgia`
+      fCtx.textAlign = 'center'; fCtx.fillStyle = '#e0e0e0'
+      fCtx.font = `italic 42px Georgia`
       const descText = description || `This token certifies sovereign ownership of the identified HEXOD territory. Geospatial data encrypted via Vault Alpha protocol. Rarity guaranteed by Tier ${tier.id}.`
-      wrapTextCentered(fCtx, descText, c, descY + s * 0.06, boxW - s * 0.08, s * 0.028)
+      wrapTextCentered(fCtx, descText, c, descY + s * 0.08, boxW - s * 0.1, s * 0.03)
       fCtx.restore()
 
       // ═══ SECTION 6: VIGNETTE + FILM GRAIN + OUTER BORDER ═══
@@ -447,7 +441,7 @@ export function Token3DViewer({
 
       // Film grain (3000 particles like original)
       fCtx.save(); fCtx.globalAlpha = 0.02
-      for (let i = 0; i < 800; i++) {
+      for (let i = 0; i < 3000; i++) {
         fCtx.fillStyle = Math.random() > 0.5 ? '#fff' : '#000'
         fCtx.fillRect(Math.random() * s, Math.random() * s, 2, 2)
       }
