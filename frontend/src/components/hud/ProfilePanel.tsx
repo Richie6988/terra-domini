@@ -19,7 +19,8 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'achievements', label: 'ACHIEVEMENTS' },
   { id: 'preferences', label: 'PREFERENCES' },
 ]
-const AVATARS = ['A','B','C','D','E','F','G','H','J','K','L','M','N','P','R','S']
+const AVATARS = ['🦅','🐉','🦁','🐺','🦊','🐻','🦇','🦈','🐍','🦎','🦂','🐙','🦑','🦀','🐝','🦋','🐎','🦌','🐘','🦏','🦬','🐊','🦖','🐋']
+const AVATAR_COLORS = ['#0099cc','#cc8800','#dc2626','#22c55e','#8b5cf6','#f59e0b','#ec4899','#3b82f6','#6366f1','#14b8a6','#f97316','#64748b']
 const sBox: React.CSSProperties = { padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.06)' }
 const lbl: React.CSSProperties = { fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 6 }
 const inputSt: React.CSSProperties = { width: '100%', padding: '8px 12px', borderRadius: 8, fontSize: 11, background: 'rgba(0,60,100,0.03)', border: '1px solid rgba(0,60,100,0.1)', color: '#1a2a3a', outline: 'none', boxSizing: 'border-box' as const }
@@ -28,35 +29,113 @@ function CommanderTab() {
   const player = usePlayer()
   const [name, setName] = useState(player?.display_name || '')
   const [avatar, setAvatar] = useState((player as any)?.avatar_emoji || '🦅')
+  const [avatarBg, setAvatarBg] = useState((player as any)?.avatar_color || '#0099cc')
+  const [email, setEmail] = useState(player?.email || '')
   const [saving, setSaving] = useState(false)
   const save = useCallback(async () => {
     setSaving(true)
-    try { await api.patch('/players/update-profile/', { display_name: name, avatar_emoji: avatar }); toast.success('Profile updated!') }
-    catch { toast.error('Failed to save') }
+    try {
+      await api.patch('/players/update-profile/', { display_name: name, avatar_emoji: avatar, avatar_color: avatarBg, email })
+      toast.success('Profile updated!')
+    } catch { toast.error('Failed to save') }
     setSaving(false)
-  }, [name, avatar])
+  }, [name, avatar, avatarBg, email])
   if (!player) return null
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <div style={{ ...sBox, display: 'flex', gap: 14, alignItems: 'center' }}>
-        <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'linear-gradient(135deg, #0099cc, #cc8800)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28, border: '3px solid rgba(255,255,255,0.8)', boxShadow: '0 4px 16px rgba(0,0,0,0.15)' }}>{avatar}</div>
+      {/* Avatar preview */}
+      <div style={{ ...sBox, display: 'flex', gap: 16, alignItems: 'center' }}>
+        <div style={{
+          width: 64, height: 64, borderRadius: '50%',
+          background: `linear-gradient(135deg, ${avatarBg}, ${avatarBg}cc)`,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 32, border: '3px solid rgba(255,255,255,0.9)',
+          boxShadow: `0 4px 20px ${avatarBg}40, inset 0 -2px 6px rgba(0,0,0,0.1)`,
+        }}>{avatar}</div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 14, fontWeight: 900, color: '#1a2a3a' }}>{player.display_name || player.username}</div>
-          <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.4)' }}>@{player.username}</div>
-          <div style={{ fontSize: 9, color: '#0099cc', fontFamily: "'Share Tech Mono', monospace", marginTop: 2 }}>
-            ⬡ {(player as any).stats?.territories_owned || 0} territories
+          <div style={{ fontSize: 16, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1 }}>{player.display_name || player.username}</div>
+          <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>@{player.username}</div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 6 }}>
+            <span style={{ fontSize: 9, color: '#0099cc', fontFamily: "'Share Tech Mono', monospace" }}>
+              ⬡ {(player as any).stats?.territories_owned || 0} territories
+            </span>
+            <span style={{ fontSize: 9, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>
+              ◆ {parseFloat(String((player as any).tdc_in_game || 0)).toFixed(0)} HEX
+            </span>
           </div>
         </div>
       </div>
-      <div style={sBox}><div style={lbl}>DISPLAY NAME</div><input value={name} onChange={e => setName(e.target.value)} maxLength={50} style={inputSt} /></div>
-      <div style={sBox}><div style={lbl}>EMAIL</div><div style={{ fontSize: 11, color: 'rgba(26,42,58,0.6)', fontFamily: "'Share Tech Mono', monospace" }}>{player.email} {(player as any).email_verified ? '[V]' : '[!]'}</div></div>
-      <div style={sBox}><div style={lbl}>AVATAR</div><div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>{AVATARS.map(a => (
-        <button key={a} onClick={() => setAvatar(a)} style={{ width: 36, height: 36, borderRadius: 8, cursor: 'pointer', fontSize: 18, background: avatar === a ? 'rgba(0,153,204,0.12)' : 'rgba(0,60,100,0.03)', border: `2px solid ${avatar === a ? '#0099cc' : 'rgba(0,60,100,0.06)'}`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{a}</button>
-      ))}</div></div>
-      <button onClick={save} disabled={saving} style={{ padding: '12px 20px', borderRadius: 10, cursor: 'pointer', border: 'none', background: 'linear-gradient(135deg, #0099cc, #0088bb)', color: '#fff', fontSize: 10, fontWeight: 900, letterSpacing: 2, fontFamily: "'Orbitron', sans-serif", opacity: saving ? 0.6 : 1 }}>{saving ? 'SAVING...' : 'SAVE CHANGES'}</button>
-      <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
-        <button onClick={() => { useStore.getState().logout(); window.location.href = '/login' }} style={{ flex: 1, padding: 10, borderRadius: 8, cursor: 'pointer', background: 'rgba(0,60,100,0.04)', border: '1px solid rgba(0,60,100,0.1)', color: 'rgba(26,42,58,0.5)', fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>LOGOUT</button>
-        <button onClick={() => toast.error('Account deletion coming soon')} style={{ padding: '10px 16px', borderRadius: 8, cursor: 'pointer', background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.15)', color: '#dc2626', fontSize: 9, fontWeight: 700, letterSpacing: 1 }}>DELETE ACCOUNT</button>
+
+      {/* Display name */}
+      <div style={sBox}>
+        <div style={lbl}>DISPLAY NAME</div>
+        <input value={name} onChange={e => setName(e.target.value)} maxLength={50} style={inputSt} />
+      </div>
+
+      {/* Email (editable) */}
+      <div style={sBox}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={lbl}>EMAIL</div>
+          <span style={{ fontSize: 8, color: (player as any).email_verified ? '#22c55e' : '#f59e0b', fontWeight: 700 }}>
+            {(player as any).email_verified ? '✓ VERIFIED' : '⚠ NOT VERIFIED'}
+          </span>
+        </div>
+        <input type="email" value={email} onChange={e => setEmail(e.target.value)} style={inputSt} />
+      </div>
+
+      {/* Avatar picker — visual icons */}
+      <div style={sBox}>
+        <div style={lbl}>AVATAR</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {AVATARS.map(a => (
+            <button key={a} onClick={() => setAvatar(a)} style={{
+              width: 42, height: 42, borderRadius: 10, cursor: 'pointer', fontSize: 22,
+              background: avatar === a ? `linear-gradient(135deg, ${avatarBg}20, ${avatarBg}10)` : 'rgba(0,60,100,0.03)',
+              border: avatar === a ? `2px solid ${avatarBg}` : '2px solid rgba(0,60,100,0.06)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              transform: avatar === a ? 'scale(1.1)' : 'scale(1)',
+              transition: 'all 0.15s',
+            }}>{a}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Avatar background color */}
+      <div style={sBox}>
+        <div style={lbl}>AVATAR COLOR</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {AVATAR_COLORS.map(c => (
+            <button key={c} onClick={() => setAvatarBg(c)} style={{
+              width: 28, height: 28, borderRadius: '50%', cursor: 'pointer',
+              background: c, border: avatarBg === c ? '3px solid #1a2a3a' : '2px solid rgba(255,255,255,0.8)',
+              boxShadow: avatarBg === c ? `0 0 12px ${c}60` : `0 2px 6px ${c}30`,
+              transform: avatarBg === c ? 'scale(1.15)' : 'scale(1)',
+              transition: 'all 0.15s',
+            }} />
+          ))}
+        </div>
+      </div>
+
+      {/* Save */}
+      <button onClick={save} disabled={saving} style={{
+        padding: '14px 20px', borderRadius: 10, cursor: 'pointer', border: 'none',
+        background: 'linear-gradient(135deg, #0099cc, #0088bb)', color: '#fff',
+        fontSize: 11, fontWeight: 900, letterSpacing: 2, fontFamily: "'Orbitron', sans-serif",
+        opacity: saving ? 0.6 : 1, boxShadow: '0 4px 16px rgba(0,153,204,0.3)',
+      }}>{saving ? 'SAVING...' : 'SAVE CHANGES'}</button>
+
+      {/* Logout + Delete */}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <button onClick={() => { useStore.getState().logout(); window.location.href = '/login' }} style={{
+          flex: 1, padding: 10, borderRadius: 8, cursor: 'pointer',
+          background: 'rgba(0,60,100,0.04)', border: '1px solid rgba(0,60,100,0.1)',
+          color: 'rgba(26,42,58,0.5)', fontSize: 9, fontWeight: 700, letterSpacing: 1,
+        }}>LOGOUT</button>
+        <button onClick={() => toast.error('Account deletion coming soon')} style={{
+          padding: '10px 16px', borderRadius: 8, cursor: 'pointer',
+          background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.15)',
+          color: '#dc2626', fontSize: 9, fontWeight: 700, letterSpacing: 1,
+        }}>DELETE ACCOUNT</button>
       </div>
     </div>
   )

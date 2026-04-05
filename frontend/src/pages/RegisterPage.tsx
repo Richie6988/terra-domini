@@ -19,21 +19,22 @@ const bgStyle: React.CSSProperties = {
   backgroundImage: 'radial-gradient(ellipse at 30% 40%, rgba(0,153,204,0.08) 0%, transparent 60%), radial-gradient(ellipse at 70% 70%, rgba(204,136,0,0.06) 0%, transparent 60%)',
 }
 const cardStyle: React.CSSProperties = {
-  width: 420, maxWidth: '95vw', padding: '40px 36px',
+  width: 420, maxWidth: '95vw', padding: '28px 32px',
   background: 'linear-gradient(180deg, rgba(235,242,250,0.95) 0%, rgba(220,230,242,0.95) 100%)',
   backdropFilter: 'blur(30px) saturate(1.2)',
   border: '1px solid rgba(0,60,100,0.15)',
   borderRadius: 16, position: 'relative', zIndex: 1,
   boxShadow: '0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.8)',
+  maxHeight: '90vh', overflowY: 'auto',
 }
 const labelStyle: React.CSSProperties = {
   display: 'block', fontSize: 'var(--fs-auth-label)', color: 'rgba(26,42,58,0.55)',
-  marginBottom: 8, marginTop: 16,
+  marginBottom: 6, marginTop: 12,
   fontFamily: "var(--font-heading)",
   letterSpacing: 2, fontWeight: 700,
 }
 const inputStyle: React.CSSProperties = {
-  width: '100%', padding: '14px 16px',
+  width: '100%', padding: '12px 14px',
   background: 'rgba(255,255,255,0.6)',
   border: '1px solid rgba(0,60,100,0.12)', borderRadius: 10,
   color: '#1a2a3a', fontSize: 'var(--fs-auth-input)' as any, boxSizing: 'border-box',
@@ -41,7 +42,7 @@ const inputStyle: React.CSSProperties = {
   textTransform: 'none', letterSpacing: 0, outline: 'none',
 }
 const btnStyle: React.CSSProperties = {
-  width: '100%', padding: 16, marginTop: 24,
+  width: '100%', padding: 14, marginTop: 20,
   background: 'linear-gradient(135deg, #0099cc, #0077aa)', border: 'none', borderRadius: 12,
   color: '#fff', fontSize: 'var(--fs-auth-button)' as any, fontWeight: 900, cursor: 'pointer',
   fontFamily: "var(--font-heading)",
