@@ -282,7 +282,7 @@ export function Token3DViewer({
       const boxW = s * 0.71, boxX = (s - boxW) / 2
 
       // ═══ Base — slightly brighter than pure black ═══
-      fCtx.fillStyle = '#020202'
+      fCtx.fillStyle = '#060608'
       fCtx.fillRect(0, 0, s, s)
 
 
@@ -294,12 +294,12 @@ export function Token3DViewer({
         c + Math.cos(state.holoAngle) * holoR, c + Math.sin(state.holoAngle) * holoR,
         c - Math.cos(state.holoAngle) * holoR, c - Math.sin(state.holoAngle) * holoR,
       )
-      holoG.addColorStop(0, 'rgba(255,0,128,0.15)')
-      holoG.addColorStop(0.2, 'rgba(255,128,0,0.12)')
-      holoG.addColorStop(0.4, 'rgba(255,255,0,0.15)')
-      holoG.addColorStop(0.6, 'rgba(0,255,128,0.12)')
-      holoG.addColorStop(0.8, 'rgba(0,128,255,0.15)')
-      holoG.addColorStop(1, 'rgba(128,0,255,0.12)')
+      holoG.addColorStop(0, 'rgba(255,0,128,0.20)')
+      holoG.addColorStop(0.2, 'rgba(255,128,0,0.16)')
+      holoG.addColorStop(0.4, 'rgba(255,255,0,0.20)')
+      holoG.addColorStop(0.6, 'rgba(0,255,128,0.16)')
+      holoG.addColorStop(0.8, 'rgba(0,128,255,0.20)')
+      holoG.addColorStop(1, 'rgba(128,0,255,0.16)')
       fCtx.fillStyle = holoG
       drawHex(fCtx, c, c, s * 0.49); fCtx.fill()
       fCtx.restore()
@@ -324,10 +324,10 @@ export function Token3DViewer({
       // ═══ SECTION 1: CATEGORY — higher up for better spacing ═══
       fCtx.textAlign = 'center'; fCtx.fillStyle = g
       fCtx.font = `bold ${s * 0.032}px Orbitron`
-      fCtx.fillText(category, c, s * 0.166)
+      fCtx.fillText(category, c, s * 0.155)
 
       // ═══ SECTION 2: ICON ROW — larger, centered ═══
-      const iconRowY = s * 0.205
+      const iconRowY = s * 0.20
       const iconSz = s * 0.08
       fCtx.save()
       fCtx.shadowBlur = iconSz * 0.5; fCtx.shadowColor = catColor
@@ -354,7 +354,7 @@ export function Token3DViewer({
       // ═══ SECTION 2bis: BIOME — more space below icon ═══
       fCtx.textAlign = 'center'; fCtx.fillStyle = g
       fCtx.font = `bold ${s * 0.032}px Orbitron`
-      fCtx.fillText(biome, c, s * 0.264)
+      fCtx.fillText(biome, c, s * 0.255)
 
       // ═══ SECTION 3: IMAGE ═══
       const imageY = s * 0.293, imageH = s * 0.342
@@ -436,12 +436,12 @@ export function Token3DViewer({
       // Vignette
       fCtx.save()
       const vig = fCtx.createRadialGradient(c, c, s * 0.25, c, c, s * 0.55)
-      vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(0,0,0,0.45)')
+      vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(0,0,0,0.25)')
       fCtx.fillStyle = vig; fCtx.fillRect(0, 0, s, s); fCtx.restore()
 
       // Film grain (3000 particles like original)
       fCtx.save(); fCtx.globalAlpha = 0.02
-      for (let i = 0; i < 3000; i++) {
+      for (let i = 0; i < 1500; i++) {
         fCtx.fillStyle = Math.random() > 0.5 ? '#fff' : '#000'
         fCtx.fillRect(Math.random() * s, Math.random() * s, 2, 2)
       }
@@ -659,7 +659,7 @@ export function Token3DViewer({
 
       // Shimmer update — shiny cards redraw every 2 frames, normal every 4
       state.frameCount++
-      const redrawRate = isShiny ? 2 : 4
+      const redrawRate = isShiny ? 3 : 6
       if (state.frameCount % redrawRate === 0) {
         state.shineOffset += 25
         if (state.shineOffset > 3500) state.shineOffset = -1500
