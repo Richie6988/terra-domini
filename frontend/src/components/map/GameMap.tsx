@@ -15,7 +15,6 @@ import { AttackPanel } from '../hud/AttackPanel'
 import { injectGlowFilter, makeHexPolygon, injectHexAnimations, getVisibleHexes, getHexBoundary } from './HexLayer'
 import { KingdomBorderLayer } from './KingdomBorderLayer'
 import { KingdomDetailOverlay } from '../kingdom/KingdomDetailOverlay'
-import { GlobeView } from './GlobeView'
 import { MyTerritoriesOverlay } from './MyTerritoriesOverlay'
 import { AttackAnimationLayer } from './AttackAnimationLayer'
 import { BuildingsOverlayLayer } from './BuildingsOverlayLayer'
@@ -28,40 +27,27 @@ interface GameMapProps {
   onTerritoryClick: (h3: string) => void
 }
 
-const TILES: Record<string, { label: string; url: string; maxZoom: number; overlay?: string; filter?: string }> = {
-  hexod: {
-    label: '⬡ HEXOD',
-    url: 'https://{s}.basemaps.cartocdn.com/dark_matter_nolabels/{z}/{x}/{y}{r}.png',
-    maxZoom: 19,
-    overlay: 'https://{s}.basemaps.cartocdn.com/dark_matter_only_labels/{z}/{x}/{y}{r}.png',
-    filter: 'hue-rotate(190deg) saturate(1.4) brightness(1.1)',
-  },
-  light: {
-    label: '🗺️ Light',
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    maxZoom: 19,
-  },
+const TILES: Record<string, { label: string; url: string; maxZoom: number; overlay?: string }> = {
   dark: {
-    label: '🌑 Dark',
+    label: 'Dark',
     url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
     maxZoom: 19,
   },
+  light: {
+    label: 'Light',
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    maxZoom: 19,
+  },
   satellite: {
-    label: '🛰️ Satellite',
+    label: 'Satellite',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     maxZoom: 18,
     overlay: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
   },
   topo: {
-    label: '🗺️ Topo',
+    label: 'Topo',
     url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
     maxZoom: 17,
-  },
-  terrain: {
-    label: '🏔️ Terrain',
-    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}',
-    maxZoom: 13,
-    overlay: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
   },
 }
 
@@ -74,7 +60,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const vpTimer      = useRef<ReturnType<typeof setTimeout>>()
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const [tile,        setTile]        = useState<keyof typeof TILES>('hexod')
+  const [tile,        setTile]        = useState<keyof typeof TILES>('dark')
   const [poiCatFilter, setPoiCatFilter] = useState<string[]>(['all'])
   const [poiRarFilter, setPoiRarFilter] = useState<string[]>(['all'])
   const [showOverlay,  setShowOverlay]  = useState(true)
@@ -109,9 +95,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     if (tileCfg.overlay) {
       overlayRef.current = L.tileLayer(tileCfg.overlay, { maxZoom: 19, opacity: 0.8 }).addTo(map)
     }
-    // Apply branded CSS filter to tile pane
-    const tilePane = map.getPane('tilePane')
-    if (tilePane && tileCfg.filter) tilePane.style.filter = tileCfg.filter
+
     hexRef.current  = L.layerGroup().addTo(map)
     gridRef.current = L.layerGroup().addTo(map)
     mapRef.current  = map
@@ -290,9 +274,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     if (cfg.overlay) {
       overlayRef.current = L.tileLayer(cfg.overlay, { maxZoom: 19, opacity: 0.8 }).addTo(map)
     }
-    // Apply/remove branded CSS filter
-    const tilePane = map.getPane('tilePane')
-    if (tilePane) tilePane.style.filter = cfg.filter || ''
+
   }, [tile])
 
   // ── Draw hexes ────────────────────────────────────────────────────────────
@@ -421,17 +403,9 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
-      <div ref={containerRef} style={{ width: '100%', height: '100%', opacity: zoom < 5 ? 0 : 1, transition: 'opacity 0.5s' }} />
+      <div ref={containerRef} style={{ width: '100%', height: '100%',  }} />
 
-      {/* Globe view — extreme zoom out */}
-      <GlobeView
-        visible={zoom < 5}
-        territories={Object.values(useStore.getState().territories)
-          .filter((t: any) => t.owner_id)
-          .slice(0, 200)
-          .map((t: any) => ({ lat: t.center_lat || t.lat || 0, lon: t.center_lon || t.lon || 0, color: t.owner_id === player?.id ? '#00FF87' : '#4B8BF5' }))}
-        onZoomIn={(lat, lon) => { mapRef.current?.setView([lat, lon], 10); }}
-      />
+
 
       {/* Global styles */}
       <style>{`
@@ -453,36 +427,32 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         @keyframes hexPulseEpic{0%,100%{filter:drop-shadow(0 0 5px #8B5CF6aa);}50%{filter:drop-shadow(0 0 12px #8B5CF6ff);}}
       `}</style>
 
-      {/* Layer controls — top right, glassmorphism */}
-      <div style={{ position:'absolute', top:70, right:12, zIndex:500, display:'flex', flexDirection:'column', gap:6 }}>
-        <div style={{ background:'rgba(235,242,250,0.92)', backdropFilter:'blur(20px)', borderRadius:10, border:'1px solid rgba(0,60,100,0.12)', overflow:'hidden', boxShadow:'0 4px 16px rgba(0,0,0,0.08)' }}>
-          {(Object.entries(TILES) as any[]).map(([key, cfg]) => (
-            <button key={key} onClick={() => setTile(key)} style={{
-              display:'block', width:'100%', padding:'8px 12px',
-              background: tile===key ? 'rgba(0,153,204,0.1)' : 'transparent',
-              border:'none', borderBottom:'1px solid rgba(0,60,100,0.06)',
-              color: tile===key ? '#0099cc' : 'rgba(26,42,58,0.5)', fontSize:10, cursor:'pointer', textAlign:'left',
-              fontFamily:"'Orbitron',system-ui,sans-serif", fontWeight: tile===key ? 700 : 400, letterSpacing:1,
-            }}>{cfg.label}</button>
-          ))}
-        </div>
-      </div>
-
-      {/* Zoom slider — right side, below tile picker */}
-      <div style={{ position:'absolute', bottom:90, right:12, zIndex:500, display:'flex', flexDirection:'column', alignItems:'center', gap:4,
+      {/* Map controls — top right: tile picker + zoom slider */}
+      <div style={{ position:'absolute', top:70, right:12, zIndex:500, display:'flex', flexDirection:'column', gap:0,
         background:'rgba(235,242,250,0.92)', backdropFilter:'blur(20px)', borderRadius:10, border:'1px solid rgba(0,60,100,0.12)',
-        padding:'8px 6px', boxShadow:'0 4px 16px rgba(0,0,0,0.08)' }}>
-        <span style={{ fontSize:8, fontWeight:700, color:'#0099cc', fontFamily:'monospace' }}>+</span>
-        <input type="range" min={3} max={19} step={1} value={zoom}
-          onChange={e => mapRef.current?.setZoom(Number(e.target.value))}
-          style={{
-            writingMode:'vertical-lr' as any, direction:'rtl',
-            width:20, height:120, cursor:'pointer',
-            accentColor:'#0099cc',
-          }}
-        />
-        <span style={{ fontSize:8, fontWeight:700, color:'#6b7280', fontFamily:'monospace' }}>−</span>
-        <div style={{ fontSize:8, color:'#9ca3af', fontFamily:'monospace', marginTop:2 }}>z{zoom}</div>
+        overflow:'hidden', boxShadow:'0 4px 16px rgba(0,0,0,0.08)' }}>
+        {/* Tile style buttons */}
+        {(Object.entries(TILES) as any[]).map(([key, cfg]) => (
+          <button key={key} onClick={() => setTile(key)} style={{
+            display:'block', width:'100%', padding:'8px 14px',
+            background: tile===key ? 'rgba(0,153,204,0.1)' : 'transparent',
+            border:'none', borderBottom:'1px solid rgba(0,60,100,0.06)',
+            color: tile===key ? '#0099cc' : 'rgba(26,42,58,0.5)', fontSize:10, cursor:'pointer', textAlign:'left',
+            fontFamily:"'Orbitron',system-ui,sans-serif", fontWeight: tile===key ? 700 : 400, letterSpacing:1,
+          }}>{cfg.label}</button>
+        ))}
+        {/* Zoom slider */}
+        <div style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 10px', borderTop:'1px solid rgba(0,60,100,0.08)' }}>
+          <span style={{ fontSize:9, fontWeight:700, color:'#6b7280', fontFamily:'monospace', cursor:'pointer' }}
+            onClick={() => mapRef.current?.setZoom(zoom - 1)}>−</span>
+          <input type="range" min={3} max={19} step={1} value={zoom}
+            onChange={e => mapRef.current?.setZoom(Number(e.target.value))}
+            style={{ flex:1, height:4, cursor:'pointer', accentColor:'#0099cc' }}
+          />
+          <span style={{ fontSize:9, fontWeight:700, color:'#0099cc', fontFamily:'monospace', cursor:'pointer' }}
+            onClick={() => mapRef.current?.setZoom(zoom + 1)}>+</span>
+          <span style={{ fontSize:8, color:'#9ca3ab', fontFamily:'monospace', minWidth:18, textAlign:'right' }}>{zoom}</span>
+        </div>
       </div>
 
       {/* Favorite pins — bottom left */}
@@ -540,19 +510,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         )
       })()}
 
-      {/* Globe view — extreme zoom out */}
-      <GlobeView
-        visible={zoom < 5}
-        territories={Object.values(useStore.getState().territories)
-          .filter((t: any) => t.owner_id)
-          .slice(0, 500)
-          .map((t: any) => ({
-            lat: t.center_lat || t.lat || 0,
-            lon: t.center_lon || t.lon || 0,
-            color: t.owner_id === player?.id ? '#00FF87' : '#4B8BF5',
-          }))}
-        onZoomIn={(lat, lon) => mapRef.current?.flyTo([lat, lon], 10, { duration: 1.5 })}
-      />
+
     </div>
   )
 }

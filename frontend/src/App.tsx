@@ -19,9 +19,7 @@ import { OnboardingHotspots } from './components/onboarding/OnboardingHotspots'
 import { NewsTicker } from './components/shared/NewsTicker'
 import { HexodTopHUD } from './components/shared/HexodTopHUD'
 import { HexodDock } from './components/shared/HexodDock'
-import { RadarTrigger } from './components/shared/RadarTrigger'
 import { RadarWidget } from './components/shared/RadarWidget'
-import { SoundToggle } from './components/shared/SoundToggle'
 import { ClaimProgressBar } from './components/shared/ClaimProgressBar'
 import { usePendingClaims } from './hooks/usePendingClaims'
 import { DayCycleWidget } from './components/shared/DayCycleWidget'
@@ -167,12 +165,6 @@ function GameScreen() {
         <DayCycleWidget />
       </div>
 
-      {/* Collection trigger (left edge) → opens Codex */}
-      <RadarTrigger
-        onClick={() => setActivePanel(activePanel === 'codex' ? null : 'codex')}
-        scanning={activePanel === 'codex'}
-      />
-
       {/* Base map — full screen background, z-index isolated to prevent Leaflet bleeding */}
       <div style={{ position: 'absolute', inset: 0, zIndex: 1 }}>
         <ErrorBoundary label="GameMap">
@@ -188,11 +180,8 @@ function GameScreen() {
         <HexodDock />
       </ErrorBoundary>
 
-      {/* Radar widget — SVG bottom-right */}
+      {/* Radar widget — bottom-right */}
       <RadarWidget />
-
-      {/* Sound toggle — bottom-left */}
-      <SoundToggle />
 
       {/* Pending territory claims — floating progress bars */}
       {claims.length > 0 && (
@@ -206,26 +195,28 @@ function GameScreen() {
         </div>
       )}
 
-      {/* Daily Challenges — floating button with pulse */}
+      {/* Daily Missions — gamified floating button */}
       <button
         onClick={() => setActivePanel(activePanel === 'tasks' ? null : 'tasks')}
         style={{
           position: 'fixed', top: 80, left: 12, zIndex: 900,
-          width: 48, height: 48, borderRadius: 14,
+          padding: '8px 14px', borderRadius: 20,
           background: activePanel === 'tasks'
             ? 'linear-gradient(135deg, #cc8800, #f59e0b)'
-            : 'rgba(235,242,250,0.92)',
+            : 'linear-gradient(135deg, rgba(235,242,250,0.95), rgba(220,230,242,0.9))',
           backdropFilter: 'blur(20px)',
           border: activePanel === 'tasks' ? '2px solid #fbbf24' : '1px solid rgba(0,60,100,0.12)',
           boxShadow: activePanel === 'tasks' ? '0 0 16px rgba(204,136,0,0.4)' : '0 4px 16px rgba(0,0,0,0.08)',
-          cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 20, color: activePanel === 'tasks' ? '#fff' : '#cc8800',
+          cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+          color: activePanel === 'tasks' ? '#fff' : '#cc8800',
           transition: 'all 0.2s',
           animation: activePanel !== 'tasks' ? 'taskPulse 3s ease-in-out infinite' : 'none',
+          fontFamily: "'Orbitron', sans-serif",
         }}
-        title="Daily Challenges"
+        title="Daily Missions"
       >
-        🎯
+        <span style={{ fontSize: 18 }}>🎯</span>
+        <span style={{ fontSize: 9, fontWeight: 900, letterSpacing: 2 }}>MISSIONS</span>
       </button>
       <style>{`@keyframes taskPulse { 0%,100% { box-shadow: 0 4px 16px rgba(0,0,0,0.08); } 50% { box-shadow: 0 4px 16px rgba(204,136,0,0.3), 0 0 24px rgba(204,136,0,0.15); } }`}</style>
 
