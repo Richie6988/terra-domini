@@ -135,7 +135,7 @@ export function MetaDashboard({ onClose }: Props) {
                         {[
                           ['Joueurs actifs', meta.global_stats.active_players?.toLocaleString()],
                           ['Territories claimed', meta.global_stats.owned_count?.toLocaleString()],
-                          ['Batailles (24h)',  meta.global_stats.battles_24h?.toLocaleString()],
+                          ['Battles (24h)',  meta.global_stats.battles_24h?.toLocaleString()],
                           ['HEX émis (24h)',   meta.global_stats.hex_emitted_24h?.toLocaleString()],
                         ].map(([label, value]) => (
                           <div key={label as string} style={{
@@ -247,7 +247,7 @@ export function MetaDashboard({ onClose }: Props) {
                     </div>
                   ))}
                   {!(meta?.contested_zones?.length) && (
-                    <EmptyState msg="Aucune zone fortement contestée ces dernières 24h." />
+                    <EmptyState msg="No heavily contested zones in the last 24h." />
                   )}
                 </Section>
               )}

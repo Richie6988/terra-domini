@@ -174,7 +174,7 @@ export function MyTerritoriesOverlay({ onFlyTo }: Props) {
               {!isLoading && territories.length === 0 && (
                 <div style={{ padding: '24px', textAlign: 'center', color: '#374151' }}>
                   <div style={{ fontSize: 24, marginBottom: 6 }}>🗺️</div>
-                  <div style={{ fontSize: 12 }}>Aucun territoire</div>
+                  <div style={{ fontSize: 12 }}>No territories</div>
                   <div style={{ fontSize: 10, color: '#4B5563', marginTop: 4 }}>
                     Cliquez sur un hex pour revendiquer
                   </div>

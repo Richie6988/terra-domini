@@ -139,7 +139,7 @@ export function showTutorialHotspots() {
       x: 34, y: 60,
       r: 28,
       label: '📍 Filtres POI',
-      tip: 'Filtre les zones spéciales par type ou rareté.',
+      tip: 'Filter special zones by type or rarity.',
       tipDir: 'right',
     },
     {

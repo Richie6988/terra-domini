@@ -4,7 +4,7 @@
  * Tabs:
  *   🏪 Explorer  — toutes les annonces actives (filtres rareté/biome/prix)
  *   💎 Mes NFTs  — mes territoires mintés, mettre en vente
- *   📋 Mes ventes— mes annonces actives + historique vendu
+ *   📋 My Sales— mes annonces actives + historique vendu
  *
  * CDC §3.5 :
  *   - Royalties 5% → trésorerie Hexod
@@ -18,6 +18,7 @@ import { api } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
+import { TokenHexPreview } from '../shared/TokenHexPreview'
 import toast from 'react-hot-toast'
 
 const RARITY_C: Record<string, string> = {
@@ -52,40 +53,37 @@ function ListingCard({ listing, onBuy, isMine }: { listing: any; onBuy?: () => v
   return (
     <div style={{
       background: 'rgba(255,255,255,0.5)', borderRadius: 12, padding: '12px 14px',
-      border: `1px solid ${rc}22`, borderLeft: `3px solid ${rc}`,
-      display: 'flex', flexDirection: 'column', gap: 8,
+      border: `1px solid ${rc}22`,
+      display: 'flex', gap: 12, alignItems: 'center',
     }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <div>
-          <div style={{ fontSize: 13, fontWeight: 700, color: '#1a2a3a', marginBottom: 4 }}>{name}</div>
-          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-            <RarityBadge rarity={listing.rarity} shiny={listing.is_shiny} />
-            <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4,
-              background: 'rgba(255,255,255,0.5)', color: 'rgba(26,42,58,0.45)' }}>{listing.biome}</span>
-            {listing.nft_version > 1 && (
-              <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4,
-                background: 'rgba(139,92,246,0.12)', color: '#A78BFA' }}>v{listing.nft_version}</span>
-            )}
-          </div>
+      {/* Hex token preview */}
+      <TokenHexPreview
+        iconId={listing.poi_category || listing.biome || 'city'}
+        rarity={listing.rarity}
+        catColor={rc}
+        size={52}
+        shiny={listing.is_shiny}
+      />
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#1a2a3a', marginBottom: 4, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
+        <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+          <RarityBadge rarity={listing.rarity} shiny={listing.is_shiny} />
+          <span style={{ fontSize: 9, padding: '2px 6px', borderRadius: 4,
+            background: 'rgba(255,255,255,0.5)', color: 'rgba(26,42,58,0.45)' }}>{listing.biome}</span>
         </div>
-        <div style={{ textAlign: 'right' }}>
-          <PriceTag price={listing.price_hex_coin} />
-          <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>HEX Coin</div>
+        <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', marginTop: 4 }}>
+          By {listing.seller_username}
+          {listing.status === 'sold' && <span style={{ color: '#10B981', marginLeft: 6 }}>✓ Sold</span>}
         </div>
       </div>
-
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <span style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)' }}>
-          Par {listing.seller_username}
-          {listing.status === 'sold' && <span style={{ color: '#10B981', marginLeft: 6 }}>✓ Vendu</span>}
-        </span>
+      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+        <PriceTag price={listing.price_hex_coin} />
+        <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.3)', marginTop: 2 }}>HEX</div>
         {onBuy && !isMine && listing.status === 'active' && (
           <button onClick={onBuy} style={{
-            padding: '7px 14px', borderRadius: 8, cursor: 'pointer', fontSize: 11, fontWeight: 700,
+            marginTop: 6, padding: '6px 12px', borderRadius: 8, cursor: 'pointer', fontSize: 10, fontWeight: 700,
             background: `${rc}18`, border: `1px solid ${rc}44`, color: rc,
-          }}>
-            Acheter
-          </button>
+          }}>Buy</button>
         )}
       </div>
     </div>
@@ -135,7 +133,7 @@ function ExplorerTab() {
         <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
           {[
             { label: 'Annonces', value: stats.active_listings, color: '#3B82F6' },
-            { label: 'Vendus', value: stats.total_sold, color: '#10B981' },
+            { label: 'Sold', value: stats.total_sold, color: '#10B981' },
             { label: 'Volume', value: `${(stats.total_volume_hex_coin||0).toLocaleString()} 💎`, color: '#F59E0B' },
             { label: 'Prix moy.', value: `${stats.avg_list_price||0} 💎`, color: '#8B5CF6' },
           ].map(s => (
@@ -178,7 +176,7 @@ function ExplorerTab() {
 
       {isLoading && <Spinner />}
       {!isLoading && listings.length === 0 && (
-        <Empty icon="🏪" msg="Aucune annonce" sub="Soyez le premier à vendre un territoire" />
+        <Empty icon="🏪" msg="No listings yet" sub="Be the first to list a territory" />
       )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {listings.map(l => (
@@ -219,7 +217,7 @@ function MyNFTsTab() {
     <div>
       {isLoading && <Spinner />}
       {!isLoading && territories.length === 0 && (
-        <Empty icon="🗺️" msg="Aucun territoire" sub="Réclamez votre premier hex" />
+        <Empty icon="🗺️" msg="No territories" sub="Claim your first hex" />
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -265,7 +263,7 @@ function MyNFTsTab() {
                     exit={{ height: 0, opacity: 0 }} style={{ overflow: 'hidden' }}>
                     <div style={{ paddingTop: 6 }}>
                       <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', marginBottom: 6 }}>
-                        Prix de vente (HEX Coin) · vous recevrez <span style={{ color: '#10B981', fontWeight: 700 }}>
+                        Listing price (HEX) · you receive <span style={{ color: '#10B981', fontWeight: 700 }}>
                           {(listingPrice * 0.95).toFixed(0)} HEX Coin
                         </span> (95% après royalties 5%)
                       </div>
@@ -344,7 +342,7 @@ function MySalesTab() {
       {active.length > 0 && (
         <div style={{ marginBottom: 16 }}>
           <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
-            En vente ({active.length})
+            For sale ({active.length})
           </div>
           {active.map(l => (
             <div key={l.id} style={{ marginBottom: 8 }}>
@@ -354,25 +352,25 @@ function MySalesTab() {
                 background: 'rgba(239,68,68,0.08)', border: '1px solid rgba(239,68,68,0.2)',
                 color: '#F87171', fontSize: 10,
               }}>
-                Retirer l'annonce
+                Delist
               </button>
             </div>
           ))}
         </div>
       )}
 
-      {/* Vendus */}
+      {/* Sold */}
       {sold.length > 0 && (
         <div>
           <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
-            Vendus ({sold.length})
+            Sold ({sold.length})
           </div>
           {sold.map(l => <ListingCard key={l.id} listing={l} isMine />)}
         </div>
       )}
 
       {active.length === 0 && sold.length === 0 && (
-        <Empty icon="📋" msg="Aucune vente" sub="Listez un territoire depuis l'onglet Mes NFTs" />
+        <Empty icon="📋" msg="No sales yet" sub="List a territory from My NFTs tab" />
       )}
     </div>
   )
@@ -382,7 +380,7 @@ function MySalesTab() {
 const TABS = [
   { id: 'explore', label: '🏪 Explorer' },
   { id: 'my-nfts', label: '💎 Mes NFTs' },
-  { id: 'my-sales', label: '📋 Mes ventes' },
+  { id: 'my-sales', label: '📋 My Sales' },
 ]
 
 export function MarketplacePanel({ onClose }: { onClose: () => void }) {

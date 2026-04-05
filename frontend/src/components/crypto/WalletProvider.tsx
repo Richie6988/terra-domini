@@ -91,7 +91,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const connect = useCallback(async (preferred?: 'phantom' | 'solflare' | 'backpack') => {
     const provider = getProvider(preferred)
     if (!provider) {
-      toast.error('Aucun wallet Solana détecté. Installez Phantom, Solflare ou Backpack.')
+      toast.error('No Solana wallet detected. Install Phantom, Solflare or Backpack.')
       window.open('https://phantom.app', '_blank')
       return
     }

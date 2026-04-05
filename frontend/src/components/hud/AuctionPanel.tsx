@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { IconSVG } from '../shared/iconBank'
+import { TokenHexPreview } from '../shared/TokenHexPreview'
 import { Token3DViewer } from '../shared/Token3DViewer'
 import toast from 'react-hot-toast'
 
@@ -220,7 +221,7 @@ export function AuctionPanel({ onClose }: Props) {
                   textAlign: 'left', width: '100%',
                 }}
               >
-                <IconSVG id={a.tokenIcon} size={44} />
+                <TokenHexPreview iconId={a.tokenIcon} rarity={a.rarity || 'rare'} catColor={a.catColor || '#cc8800'} size={44} />
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{
@@ -276,7 +277,7 @@ export function AuctionPanel({ onClose }: Props) {
               border: `1.5px solid ${RARITY_COLORS[selected.rarity]}30`,
               cursor: 'pointer',
             }} onClick={() => setShow3D(true)}>
-              <IconSVG id={selected.tokenIcon} size={64} />
+              <TokenHexPreview iconId={selected.tokenIcon} rarity={selected.rarity || 'rare'} catColor={selected.catColor || '#cc8800'} size={64} />
               <div style={{ fontSize: 8, fontWeight: 900, color: '#1a2a3a', marginTop: 6, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                 {selected.tokenName}
               </div>

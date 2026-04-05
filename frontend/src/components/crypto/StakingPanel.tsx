@@ -274,7 +274,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
             {/* Positions */}
             {(stakingData?.positions || []).length === 0 ? (
               <div style={{ textAlign: 'center', padding: '32px 0', color: 'rgba(26,42,58,0.25)', fontSize: 12 }}>
-                Aucune position active.{'\n'}Stakez des HEX pour commencer à gagner.
+                No active positions. Stake HEX to start earning.
               </div>
             ) : (
               (stakingData.positions || []).map((pos: any, i: number) => {

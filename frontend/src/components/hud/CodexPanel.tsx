@@ -14,6 +14,7 @@ import { GlassPanel } from '../shared/GlassPanel'
 import { IconSVG } from '../shared/iconBank'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { Token3DViewer } from '../shared/Token3DViewer'
+import { TokenHexPreview } from '../shared/TokenHexPreview'
 import { CATEGORIES } from '../shared/radarIconData'
 import { useStore } from '../../store'
 import { api } from '../../services/api'
@@ -291,42 +292,34 @@ export function CodexPanel({ onClose }: Props) {
             </div>
 
             {/* Token grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, justifyItems: 'center' }}>
               {tabTokens.map(token => {
                 const isOwned = token.owned > 0
                 const isSelected = selectedToken === token.id
                 return (
-                  <button
-                    key={token.id}
-                    onClick={() => setSelectedToken(isSelected ? null : token.id)}
-                    style={{
-                      padding: 6, borderRadius: 10, cursor: 'pointer',
-                      background: isSelected ? ct.color + '15' : isOwned ? 'rgba(255,255,255,0.5)' : 'rgba(0,60,100,0.03)',
-                      border: `1.5px solid ${isSelected ? ct.color + '50' : isOwned ? 'rgba(0,60,100,0.1)' : 'rgba(0,60,100,0.05)'}`,
-                      opacity: isOwned ? 1 : 0.3,
-                      filter: isOwned ? 'none' : 'grayscale(0.8)',
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2,
-                      position: 'relative',
-                    }}
-                  >
-                    {/* Shiny indicator */}
-                    {token.shiny && isOwned && (
-                      <div style={{ position: 'absolute', top: 2, right: 2, fontSize: 8 }}>✨</div>
-                    )}
-                    <IconSVG id={token.id} size={32} />
+                  <div key={token.id} style={{
+                    opacity: isOwned ? 1 : 0.25,
+                    filter: isOwned ? 'none' : 'grayscale(0.8)',
+                    border: isSelected ? `2px solid ${ct.color}` : '2px solid transparent',
+                    borderRadius: 10, padding: 2,
+                  }}>
+                    <TokenHexPreview
+                      iconId={token.id}
+                      rarity={token.rarity}
+                      catColor={ct.color}
+                      size={56}
+                      shiny={token.shiny && isOwned}
+                      onClick={() => setSelectedToken(isSelected ? null : token.id)}
+                    />
                     <div style={{
-                      fontSize: 5, fontWeight: 700, color: '#1a2a3a', letterSpacing: 0.3,
+                      fontSize: 6, fontWeight: 700, color: '#1a2a3a', letterSpacing: 0.3,
                       fontFamily: "'Orbitron', system-ui, sans-serif",
-                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%',
+                      overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                      textAlign: 'center', maxWidth: 60, margin: '2px auto 0',
                     }}>
                       {token.name.toUpperCase()}
                     </div>
-                    {/* Rarity dot */}
-                    <div style={{
-                      width: 6, height: 6, borderRadius: '50%',
-                      background: RARITY_COLORS[token.rarity] || '#94a3b8',
-                    }} />
-                  </button>
+                  </div>
                 )
               })}
             </div>
