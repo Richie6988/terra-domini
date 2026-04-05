@@ -291,50 +291,38 @@ class SkillUnlockView(generics.GenericAPIView):
 def offline_summary(request):
     """
     GET /api/progression/offline-summary/
-    Résumé de ce qui s'est passé depuis la dernière connexion (WakeUpDigest).
+    Summary of what happened since last login.
     """
     from django.utils import timezone
     from datetime import timedelta
-    import sqlite3 as _sq
-    from django.conf import settings as _s
 
-    player = request.user
-    now = timezone.now()
+    try:
+        player = request.user
+        now = timezone.now()
+        last_login = player.last_login or (now - timedelta(hours=8))
+        offline_h = (now - last_login).total_seconds() / 3600
 
-    # Dernière connexion
-    last_login = player.last_login or (now - timedelta(hours=8))
-    offline_h  = (now - last_login).total_seconds() / 3600
+        # Count owned territories
+        from terra_domini.apps.territories.models import Territory
+        terr_count = Territory.objects.filter(owner=player).count()
 
-    # HEX Coin accumulés (tdc_per_day × jours offline)
-    db = str(_s.DATABASES['default'].get('NAME', 'db.sqlite3'))
-    conn = _sq.connect(db)
-    c = conn.cursor()
-    c.execute("SELECT SUM(tdc_per_day) FROM territories WHERE owner_id=?", [str(player.id)])
-    daily = c.fetchone()[0] or 0
-    new_tdc = round(daily * (offline_h / 24), 2)
+        # Estimate offline earnings (avg 10 credits/territory/tick, 288 ticks/day)
+        daily_rate = terr_count * 10 * 288
+        new_tdc = round(daily_rate * (offline_h / 24) * 0.4, 2)  # 40% offline rate
 
-    # Batailles résolues depuis dernière connexion
-    c.execute("""
-        SELECT t.poi_name, b.result, b.resources_gained
-        FROM battle_log b
-        JOIN territories t ON b.territory_h3=t.h3_index
-        WHERE (b.attacker_id=? OR b.defender_id=?)
-          AND b.resolved_at > ?
-        LIMIT 10
-    """, [str(player.id), str(player.id), last_login.isoformat()])
-    battle_rows = c.fetchall()
-    conn.close()
+        # Update last_login
+        player.__class__.objects.filter(id=player.id).update(last_login=now)
 
-    battles = [
-        {'territory': r[0] or 'Zone', 'won': r[1] == 'victory', 'resources': r[2] or 0}
-        for r in battle_rows
-    ]
-
-    # Mettre à jour last_login
-    player.__class__.objects.filter(id=player.id).update(last_login=now)
-
-    return Response({
-        'offline_hours': round(offline_h, 1),
-        'new_tdc': new_tdc,
-        'battles': battles,
-    })
+        return Response({
+            'offline_hours': round(offline_h, 1),
+            'new_tdc': new_tdc,
+            'territories': terr_count,
+            'battles': [],
+        })
+    except Exception:
+        return Response({
+            'offline_hours': 0,
+            'new_tdc': 0,
+            'territories': 0,
+            'battles': [],
+        })

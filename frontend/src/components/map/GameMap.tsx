@@ -34,7 +34,7 @@ const TILES: Record<string, { label: string; url: string; maxZoom: number; overl
     url: 'https://{s}.basemaps.cartocdn.com/dark_matter_nolabels/{z}/{x}/{y}{r}.png',
     maxZoom: 19,
     overlay: 'https://{s}.basemaps.cartocdn.com/dark_matter_only_labels/{z}/{x}/{y}{r}.png',
-    filter: 'hue-rotate(190deg) saturate(1.8) brightness(1.15) contrast(1.1)',
+    filter: 'hue-rotate(190deg) saturate(1.4) brightness(1.1)',
   },
   light: {
     label: '🗺️ Light',
@@ -115,6 +115,9 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     hexRef.current  = L.layerGroup().addTo(map)
     gridRef.current = L.layerGroup().addTo(map)
     mapRef.current  = map
+
+    // Force Leaflet to recalculate container size (React mount timing issue)
+    setTimeout(() => map.invalidateSize(), 200)
 
     const onMove = () => {
       clearTimeout(vpTimer.current)

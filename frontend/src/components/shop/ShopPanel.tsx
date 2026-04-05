@@ -246,7 +246,7 @@ export function ShopPanel({ onClose }: Props) {
                 {c.label.toUpperCase()}
               </div>
               <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-            {SHOP_ITEMS[cat].map(item => (
+            {SHOP_ITEMS[c.id].map(item => (
               <div key={item.id} style={{
                 display:'flex', justifyContent:'space-between', alignItems:'center',
                 padding:'12px 14px', borderRadius:8,
@@ -267,7 +267,7 @@ export function ShopPanel({ onClose }: Props) {
                   </div>
                   <button onClick={() => handleBuy(item.name, item.code, item.price)} style={{
                     padding:'6px 14px', borderRadius:16, cursor:'pointer',
-                    background: toNum(balance) >= item.price ? (CATS.find(c=>c.id===cat)?.color || '#0099cc') : 'rgba(0,60,100,0.08)',
+                    background: toNum(balance) >= item.price ? (c.color || '#0099cc') : 'rgba(0,60,100,0.08)',
                     color: toNum(balance) >= item.price ? '#fff' : 'rgba(26,42,58,0.3)',
                     border:'none', fontSize:8, fontWeight:700, letterSpacing:1,
                     fontFamily:"'Orbitron', system-ui, sans-serif",

@@ -527,3 +527,15 @@ class FavoritePinDetailView(APIView):
         if not deleted:
             return Response({'error': 'Pin not found'}, status=404)
         return Response({'ok': True})
+
+
+class NotificationsView(APIView):
+    """GET /api/notifications/ — player notifications (placeholder until full system)."""
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response([])
+
+    def post(self, request):
+        """POST /api/notifications/mark-read/ — mark notifications as read."""
+        return Response({'ok': True})

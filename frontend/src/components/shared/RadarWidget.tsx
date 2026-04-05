@@ -150,7 +150,7 @@ export function RadarWidget() {
       <div
         onClick={() => setExpanded(true)}
         style={{
-          position: 'fixed', bottom: 80, right: 16, zIndex: 900,
+          position: 'fixed', bottom: 220, right: 16, zIndex: 900,
           cursor: 'pointer', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))',
         }}
         title="CLICK TO EXPAND RADAR"
