@@ -102,9 +102,11 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     // Force Leaflet to recalculate container size (React mount timing issue)
     setTimeout(() => map.invalidateSize(), 200)
 
-    let isZoomingMap = false
+    // Global zoom state — shared with all layers (hex/grid/POI draws skip when true)
+    ;(map as any)._isZooming = false
+
     const onMove = () => {
-      if (isZoomingMap) return // skip during zoom animation
+      if ((map as any)._isZooming) return
       clearTimeout(vpTimer.current)
       vpTimer.current = setTimeout(() => {
         try {
@@ -119,8 +121,22 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       }, 500)
     }
     map.on('moveend', onMove)
-    map.on('zoomstart', () => { isZoomingMap = true; clearTimeout(vpTimer.current) })
-    map.on('zoomend', () => { isZoomingMap = false; onMove() })
+    map.on('zoomstart', () => {
+      ;(map as any)._isZooming = true
+      clearTimeout(vpTimer.current)
+      // Hide heavy layers during zoom for smooth animation
+      if (hexRef.current) hexRef.current.clearLayers()
+      if (gridRef.current) gridRef.current.clearLayers()
+    })
+    map.on('zoomend', () => {
+      ;(map as any)._isZooming = false
+      // Delay recalc slightly so zoom animation fully settles
+      setTimeout(() => {
+        onMove()
+        // Trigger redraw by firing a custom event
+        map.fire('td:stabilized')
+      }, 150)
+    })
 
     // Teleport listener — fired from ProfilePanel territory click
     const onFlyTo = (e: Event) => {
@@ -281,6 +297,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   // ── Draw hexes ────────────────────────────────────────────────────────────
   useEffect(() => {
     const layer = hexRef.current; if (!layer) return
+    const map = mapRef.current
+    if (map && (map as any)._isZooming) return // skip during zoom
     layer.clearLayers()
     // Draw owned + POI hexes — always visible
     const POI_CAT_COLORS: Record<string, string> = {
