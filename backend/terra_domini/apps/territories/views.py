@@ -57,7 +57,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             lat       = float(request.query_params.get('lat', 48.8566))
             lon       = float(request.query_params.get('lon', 2.3522))
             radius_km = min(float(request.query_params.get('radius_km', 10)), 100)
-            zoom      = int(request.query_params.get('zoom', 13))
+            # Accept float zoom (e.g. "4.5") and round to int
+            zoom      = int(float(request.query_params.get('zoom', 13)))
         except (TypeError, ValueError):
             return Response({'error': 'Invalid params'}, status=400)
 
