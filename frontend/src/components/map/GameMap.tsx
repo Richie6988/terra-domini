@@ -88,6 +88,14 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     const map = L.map(containerRef.current, {
       center: [48.8566, 2.3522], zoom: (typeof window !== 'undefined' && window.innerWidth < 480) ? 14 : 13,
       zoomControl: false, attributionControl: false,
+      zoomAnimation: true,
+      fadeAnimation: true,
+      markerZoomAnimation: true,
+      zoomSnap: 0.5,
+      zoomDelta: 0.5,
+      wheelPxPerZoomLevel: 120,
+      wheelDebounceTime: 20,
+      preferCanvas: true, // Canvas renderer = GPU accelerated, much faster than SVG for many polygons
     })
     const tileCfg = TILES[tile as keyof typeof TILES]
     tileRef.current = L.tileLayer(tileCfg.url, { maxZoom: tileCfg.maxZoom ?? 19 }).addTo(map)
@@ -102,7 +110,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     // Force Leaflet to recalculate container size (React mount timing issue)
     setTimeout(() => map.invalidateSize(), 200)
 
-    // Global zoom state — shared with all layers (hex/grid/POI draws skip when true)
+    // Viewport API call — throttled, skipped during zoom animation
     ;(map as any)._isZooming = false
 
     const onMove = () => {
@@ -118,24 +126,18 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
           storeSetCenter([c.lat, c.lng], z)
           onViewportChange(c.lat, c.lng, r)
         } catch (_) {}
-      }, 500)
+      }, 400)
     }
     map.on('moveend', onMove)
+    // Only block the viewport API during zoom — DO NOT touch any layers.
+    // Leaflet scales SVG layers natively via CSS transform during zoom (it's free).
     map.on('zoomstart', () => {
       ;(map as any)._isZooming = true
       clearTimeout(vpTimer.current)
-      // Hide heavy layers during zoom for smooth animation
-      if (hexRef.current) hexRef.current.clearLayers()
-      if (gridRef.current) gridRef.current.clearLayers()
     })
     map.on('zoomend', () => {
       ;(map as any)._isZooming = false
-      // Delay recalc slightly so zoom animation fully settles
-      setTimeout(() => {
-        onMove()
-        // Trigger redraw by firing a custom event
-        map.fire('td:stabilized')
-      }, 150)
+      onMove()
     })
 
     // Teleport listener — fired from ProfilePanel territory click
@@ -298,7 +300,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   useEffect(() => {
     const layer = hexRef.current; if (!layer) return
     const map = mapRef.current
-    if (map && (map as any)._isZooming) return // skip during zoom
+    // Don't clear during zoom — Leaflet scales layers via CSS transform, no re-render needed
+    if (map && (map as any)._isZooming) return
     layer.clearLayers()
     // Draw owned + POI hexes — always visible
     const POI_CAT_COLORS: Record<string, string> = {
@@ -364,20 +367,20 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     })
   }, [territories, player?.id])
 
-  // ── Draw H3 grid overlay — debounced, only at high zoom ──
+  // ── Draw H3 grid overlay — don't clear during zoom, let Leaflet scale it ──
   useEffect(() => {
     const grid = gridRef.current
     const map = mapRef.current
     if (!grid || !map) return
 
-    let isZooming = false
     let drawTimer: ReturnType<typeof setTimeout> | null = null
 
     const drawGrid = () => {
+      // Don't clear if map is mid-zoom — wait for zoomend
+      if ((map as any)._isZooming) return
       grid.clearLayers()
-      if (isZooming) return
       const z = map.getZoom()
-      if (z < 15) return // Higher threshold — was 14, reduces hex count
+      if (z < 14) return // show grid from zoom 14 upward
 
       const b = map.getBounds()
       const hexes = getVisibleHexes({
@@ -385,7 +388,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         north: b.getNorth(), east: b.getEast(),
       }, 8)
 
-      if (hexes.length > 300) return // Lower cap — was 500
+      if (hexes.length > 500) return
 
       const ownedH3 = new Set(territories.map(t => t.h3_index))
 
@@ -406,21 +409,17 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
     const debouncedDraw = () => {
       if (drawTimer) clearTimeout(drawTimer)
-      drawTimer = setTimeout(drawGrid, 400)
+      drawTimer = setTimeout(drawGrid, 200)
     }
 
-    const onZoomStart = () => { isZooming = true; grid.clearLayers() }
-    const onZoomEnd = () => { isZooming = false; debouncedDraw() }
-
     debouncedDraw()
+    // Both moveend and zoomend trigger a redraw — zoomend fires after zoom animation completes
     map.on('moveend', debouncedDraw)
-    map.on('zoomstart', onZoomStart)
-    map.on('zoomend', onZoomEnd)
+    map.on('zoomend', debouncedDraw)
     return () => {
       if (drawTimer) clearTimeout(drawTimer)
       map.off('moveend', debouncedDraw)
-      map.off('zoomstart', onZoomStart)
-      map.off('zoomend', onZoomEnd)
+      map.off('zoomend', debouncedDraw)
     }
   }, [territories])
 
