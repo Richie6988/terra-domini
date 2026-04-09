@@ -102,7 +102,9 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     // Force Leaflet to recalculate container size (React mount timing issue)
     setTimeout(() => map.invalidateSize(), 200)
 
+    let isZoomingMap = false
     const onMove = () => {
+      if (isZoomingMap) return // skip during zoom animation
       clearTimeout(vpTimer.current)
       vpTimer.current = setTimeout(() => {
         try {
@@ -113,12 +115,12 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
           setZoom(z); setCenter([c.lat, c.lng])
           storeSetCenter([c.lat, c.lng], z)
           onViewportChange(c.lat, c.lng, r)
-        } catch (_) {
-          // Map not ready yet — will retry on next move event
-        }
-      }, 300)
+        } catch (_) {}
+      }, 500)
     }
-    map.on('moveend zoomend', onMove)
+    map.on('moveend', onMove)
+    map.on('zoomstart', () => { isZoomingMap = true; clearTimeout(vpTimer.current) })
+    map.on('zoomend', () => { isZoomingMap = false; onMove() })
 
     // Teleport listener — fired from ProfilePanel territory click
     const onFlyTo = (e: Event) => {
@@ -344,19 +346,20 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     })
   }, [territories, player?.id])
 
-  // ── Draw H3 grid overlay — ALWAYS res 8, visible only when hexes are large ──
+  // ── Draw H3 grid overlay — debounced, only at high zoom ──
   useEffect(() => {
     const grid = gridRef.current
     const map = mapRef.current
     if (!grid || !map) return
 
     let isZooming = false
+    let drawTimer: ReturnType<typeof setTimeout> | null = null
 
     const drawGrid = () => {
       grid.clearLayers()
-      if (isZooming) return // Never draw during zoom transition
+      if (isZooming) return
       const z = map.getZoom()
-      if (z < 14) return
+      if (z < 15) return // Higher threshold — was 14, reduces hex count
 
       const b = map.getBounds()
       const hexes = getVisibleHexes({
@@ -364,7 +367,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         north: b.getNorth(), east: b.getEast(),
       }, 8)
 
-      if (hexes.length > 500) return
+      if (hexes.length > 300) return // Lower cap — was 500
 
       const ownedH3 = new Set(territories.map(t => t.h3_index))
 
@@ -383,15 +386,21 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       }
     }
 
-    const onZoomStart = () => { isZooming = true; grid.clearLayers() }
-    const onZoomEnd = () => { isZooming = false; drawGrid() }
+    const debouncedDraw = () => {
+      if (drawTimer) clearTimeout(drawTimer)
+      drawTimer = setTimeout(drawGrid, 400)
+    }
 
-    drawGrid()
-    map.on('moveend', drawGrid)
+    const onZoomStart = () => { isZooming = true; grid.clearLayers() }
+    const onZoomEnd = () => { isZooming = false; debouncedDraw() }
+
+    debouncedDraw()
+    map.on('moveend', debouncedDraw)
     map.on('zoomstart', onZoomStart)
     map.on('zoomend', onZoomEnd)
     return () => {
-      map.off('moveend', drawGrid)
+      if (drawTimer) clearTimeout(drawTimer)
+      map.off('moveend', debouncedDraw)
       map.off('zoomstart', onZoomStart)
       map.off('zoomend', onZoomEnd)
     }
