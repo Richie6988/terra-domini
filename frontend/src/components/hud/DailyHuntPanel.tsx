@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { IconSVG } from '../shared/iconBank'
+import { TokenFace2D } from '../shared/TokenFace2D'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
 
@@ -401,9 +402,19 @@ export function DailyHuntPanel({ onClose }: Props) {
               <motion.div
                 animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
                 transition={{ duration: 0.5 }}
-                style={{ marginBottom: 12 }}
+                style={{ marginBottom: 12, display: 'flex', justifyContent: 'center' }}
               >
-                <IconSVG id={hunt.id} size={72} />
+                <TokenFace2D
+                  tier={hunt.rarity === 'mythic' ? 'EMERALD' : hunt.rarity === 'legendary' ? 'GOLD' : hunt.rarity === 'epic' ? 'SILVER' : 'BRONZE'}
+                  category={hunt.category.toUpperCase().replace(/_/g, ' ')}
+                  catColor={RARITY_COLORS[hunt.rarity]}
+                  biome="SAFARI"
+                  tokenName={hunt.name.toUpperCase()}
+                  iconId={hunt.id}
+                  serial={Math.floor(Math.random() * 900) + 100}
+                  maxSupply={1000}
+                  size={200}
+                />
               </motion.div>
 
               <div style={{
