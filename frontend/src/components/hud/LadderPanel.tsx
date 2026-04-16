@@ -60,24 +60,24 @@ export function LadderPanel({ onClose }: Props) {
   return (
     <GlassPanel title="LADDER" onClose={onClose} accent="#8b5cf6">
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid rgba(0,60,100,0.08)', marginBottom: 14 }}>
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: 14 }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             flex: 1, padding: '10px 8px', border: 'none', cursor: 'pointer',
             background: tab === t.id ? 'rgba(139,92,246,0.08)' : 'transparent',
             borderBottom: tab === t.id ? '2px solid #8b5cf6' : '2px solid transparent',
-            color: tab === t.id ? '#8b5cf6' : 'rgba(26,42,58,0.4)',
+            color: tab === t.id ? '#8b5cf6' : 'rgba(255,255,255,0.4)',
             fontSize: 8, fontWeight: 700, letterSpacing: 1, fontFamily: "'Orbitron', sans-serif",
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
           }}>
-            <MiniIcon id={t.icon} size={12} color={tab === t.id ? '#8b5cf6' : 'rgba(26,42,58,0.3)'} />
+            <MiniIcon id={t.icon} size={12} color={tab === t.id ? '#8b5cf6' : 'rgba(255,255,255,0.25)'} />
             {t.label}
           </button>
         ))}
       </div>
 
       {/* Column headers */}
-      <div style={{ display: 'flex', padding: '0 12px 8px', gap: 8, fontSize: 6, fontWeight: 700, color: 'rgba(26,42,58,0.3)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
+      <div style={{ display: 'flex', padding: '0 12px 8px', gap: 8, fontSize: 6, fontWeight: 700, color: 'rgba(255,255,255,0.25)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
         <span style={{ width: 28 }}>#</span>
         <span style={{ flex: 1 }}>PLAYER</span>
         <span style={{ width: 50, textAlign: 'right' }}>TERR</span>
@@ -86,8 +86,8 @@ export function LadderPanel({ onClose }: Props) {
 
       {/* Player rows */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {isLoading && <div style={{ textAlign: 'center', padding: 30, color: 'rgba(26,42,58,0.3)', fontSize: 9 }}>Loading rankings...</div>}
-        {!isLoading && entries.length === 0 && <div style={{ textAlign: 'center', padding: 30, color: 'rgba(26,42,58,0.3)', fontSize: 9 }}>No players ranked yet. Claim territories to appear!</div>}
+        {isLoading && <div style={{ textAlign: 'center', padding: 30, color: 'rgba(255,255,255,0.25)', fontSize: 9 }}>Loading rankings...</div>}
+        {!isLoading && entries.length === 0 && <div style={{ textAlign: 'center', padding: 30, color: 'rgba(255,255,255,0.25)', fontSize: 9 }}>No players ranked yet. Claim territories to appear!</div>}
         {entries.map((p: any) => (
           <div key={p.rank} style={{
             display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10,
@@ -97,7 +97,7 @@ export function LadderPanel({ onClose }: Props) {
             {/* Rank */}
             <div style={{ width: 28, flexShrink: 0 }}>
               {p.rank <= 3 ? <Medal rank={p.rank} /> : (
-                <span style={{ fontSize: 11, fontWeight: 900, color: 'rgba(26,42,58,0.3)', fontFamily: "'Share Tech Mono', monospace" }}>{p.rank}</span>
+                <span style={{ fontSize: 11, fontWeight: 900, color: 'rgba(255,255,255,0.25)', fontFamily: "'Share Tech Mono', monospace" }}>{p.rank}</span>
               )}
             </div>
 
@@ -106,7 +106,7 @@ export function LadderPanel({ onClose }: Props) {
               width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
               background: p.isYou ? 'linear-gradient(135deg, #8b5cf6, #6d28d9)' : `linear-gradient(135deg, hsl(${p.rank * 18}, 50%, 60%), hsl(${p.rank * 18 + 30}, 50%, 50%))`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 10, fontWeight: 900, color: '#fff', border: '2px solid rgba(255,255,255,0.8)',
+              fontSize: 10, fontWeight: 900, color: '#fff', border: '2px solid rgba(255,255,255,0.08)',
             }}>{p.username.slice(0, 2).toUpperCase()}</div>
 
             {/* Name */}
@@ -117,7 +117,7 @@ export function LadderPanel({ onClose }: Props) {
               }}>
                 {p.username} {p.isYou && <span style={{ fontSize: 7, color: '#8b5cf6', fontWeight: 700 }}>(YOU)</span>}
               </div>
-              <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.3)' }}>{p.kingdoms} kingdoms</div>
+              <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)' }}>{p.kingdoms} kingdoms</div>
             </div>
 
             {/* Territories */}

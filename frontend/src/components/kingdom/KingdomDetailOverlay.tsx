@@ -66,14 +66,14 @@ const RC: Record<string, string> = {
 // ═══ STYLES ═══
 const sectionBox: React.CSSProperties = {
   padding: 14, borderRadius: 12,
-  background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.08)',
+  background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.06)',
 }
 const statCard = (color: string): React.CSSProperties => ({
   padding: '10px 8px', borderRadius: 10, textAlign: 'center',
   background: `${color}08`, border: `1px solid ${color}20`,
 })
 const label: React.CSSProperties = {
-  fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)',
+  fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)',
   fontFamily: "'Orbitron', sans-serif", marginBottom: 2,
 }
 const val = (c: string): React.CSSProperties => ({
@@ -172,7 +172,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
         <div key={t.h3_index} style={{
           display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
           borderRadius: 10, background: t.is_capital ? 'rgba(204,136,0,0.06)' : 'rgba(255,255,255,0.4)',
-          border: `1px solid ${t.is_capital ? 'rgba(204,136,0,0.2)' : 'rgba(0,60,100,0.06)'}`,
+          border: `1px solid ${t.is_capital ? 'rgba(204,136,0,0.2)' : 'rgba(255,255,255,0.05)'}`,
         }}>
           {/* Capital badge */}
           {t.is_capital && <span style={{ fontSize: 14 }}><EmojiIcon emoji="👑" /></span>}
@@ -180,7 +180,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
           {/* Name + rarity */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
-              fontSize: 10, fontWeight: 700, color: '#1a2a3a',
+              fontSize: 10, fontWeight: 700, color: '#e2e8f0',
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
               {t.name || t.h3_index.slice(0, 12)}
@@ -192,7 +192,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
               }}>{t.rarity?.toUpperCase()}</span>
               <span style={{
                 padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 600,
-                background: 'rgba(0,60,100,0.04)', color: 'rgba(26,42,58,0.4)',
+                background: 'rgba(0,60,100,0.04)', color: 'rgba(255,255,255,0.4)',
               }}>{t.biome?.toUpperCase()}</span>
               {t.poi_category && <span style={{
                 padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 600,
@@ -206,13 +206,13 @@ function OwnTerritories({ k }: { k: KingdomData }) {
             <div style={{ fontSize: 11, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>
               +{t.income_per_day}
             </div>
-            <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)' }}>HEX/DAY</div>
+            <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)' }}>HEX/DAY</div>
           </div>
 
           {/* Defense */}
           <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 36 }}>
             <div style={{ fontSize: 9, fontWeight: 700, color: '#3b82f6' }}>{t.defense_points}</div>
-            <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)' }}>DEF</div>
+            <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)' }}>DEF</div>
           </div>
 
           {/* Shield */}
@@ -254,8 +254,8 @@ function OwnArmy({ k }: { k: KingdomData }) {
         }}>
           <span style={{ fontSize: 18 }}><EmojiIcon emoji={u.icon} size={16} /></span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#1a2a3a' }}>{u.name}</div>
-            <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)' }}>ATK {u.atk} · DEF {u.def}</div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: '#e2e8f0' }}>{u.name}</div>
+            <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)' }}>ATK {u.atk} · DEF {u.def}</div>
           </div>
           <div style={{ fontSize: 14, fontWeight: 900, color: u.color, fontFamily: "'Share Tech Mono', monospace" }}>
             ×{u.count}
@@ -295,11 +295,11 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
             padding: '2px 8px', borderRadius: 6, fontSize: 7, fontWeight: 900,
             background: 'rgba(220,38,38,0.12)', color: '#dc2626', letterSpacing: 2,
           }}>ENEMY</span>
-          <span style={{ fontSize: 11, fontWeight: 700, color: '#1a2a3a' }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: '#e2e8f0' }}>
             {k.owner_username}
           </span>
         </div>
-        <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.5)' }}>
+        <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.45)' }}>
           Tier {k.tier} · {k.size} territories
         </div>
       </div>
@@ -324,17 +324,17 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
       <div style={sectionBox}>
         <div style={{ ...label, marginBottom: 8 }}>INTELLIGENCE (LEVEL {spyLevel})</div>
         {spyLevel === 0 && (
-          <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.4)', fontStyle: 'italic', textAlign: 'center', padding: 16 }}>
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', textAlign: 'center', padding: 16 }}>
             <EmojiIcon emoji="🕵" /> Send a spy mission to reveal enemy resources, army composition, and weaknesses.
           </div>
         )}
         {spyLevel >= 1 && (
-          <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.6)' }}>
+          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.04)' }}>
             Defense: ~{k.total_defense} points · Shield active on {Math.floor(k.size * 0.3)} territories
           </div>
         )}
         {spyLevel >= 2 && (
-          <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.6)', marginTop: 4 }}>
+          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.04)', marginTop: 4 }}>
             Resources: ~{Math.round(k.tdc_per_24h)} HEX/day income
           </div>
         )}
@@ -393,12 +393,12 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
               padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 700,
               background: `${RC[t.rarity] || '#999'}15`, color: RC[t.rarity] || '#999',
             }}>{t.rarity?.toUpperCase()}</span>
-            <span style={{ fontSize: 9, color: '#1a2a3a', flex: 1 }}>{t.name || t.h3_index.slice(0, 12)}</span>
+            <span style={{ fontSize: 9, color: '#e2e8f0', flex: 1 }}>{t.name || t.h3_index.slice(0, 12)}</span>
             <span style={{ fontSize: 8, color: '#3b82f6', fontWeight: 700 }}>DEF {t.defense_points}</span>
           </div>
         ))}
         {k.size > 5 && (
-          <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.3)', textAlign: 'center', marginTop: 6 }}>
+          <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', textAlign: 'center', marginTop: 6 }}>
             +{k.size - 5} more {spyLevel < 1 ? '(send spy to reveal)' : ''}
           </div>
         )}
@@ -414,7 +414,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
 const OWN_TABS = [
   { id: 'overview', label: '📊 OVERVIEW' },
   { id: 'territories', label: '🗺 TERRITORIES' },
-  { id: 'army', label: '⚔ ARMY' },
+  { id: 'army', label: 'ARMY', iconId: 'swords' },
 ]
 
 export function KingdomDetailOverlay({ kingdom: k, isOwn, onClose }: Props) {
@@ -437,7 +437,7 @@ export function KingdomDetailOverlay({ kingdom: k, isOwn, onClose }: Props) {
           onClick={e => e.stopPropagation()}
           style={{
             width: '94vw', maxWidth: 800, maxHeight: '92vh',
-            background: 'linear-gradient(180deg, rgba(235,242,250,0.97), rgba(220,230,242,0.97))',
+            background: 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(10,22,40,0.95))',
             backdropFilter: 'blur(30px)',
             border: `2px solid ${isOwn ? (k.color || '#0099cc') : '#dc2626'}30`,
             borderRadius: 16,
@@ -466,12 +466,12 @@ export function KingdomDetailOverlay({ kingdom: k, isOwn, onClose }: Props) {
               </div>
               <div>
                 <div style={{
-                  fontSize: 13, fontWeight: 900, letterSpacing: 2, color: '#1a2a3a',
+                  fontSize: 13, fontWeight: 900, letterSpacing: 2, color: '#e2e8f0',
                   fontFamily: "'Orbitron', sans-serif",
                 }}>
                   {k.name?.toUpperCase() || (isOwn ? 'MY KINGDOM' : `${k.owner_username}'S KINGDOM`)}
                 </div>
-                <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.4)', letterSpacing: 1 }}>
+                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)', letterSpacing: 1 }}>
                   TIER {k.tier} · {k.size} TERRITORIES
                   {!isOwn && ` · OWNER: ${k.owner_username}`}
                 </div>
@@ -479,17 +479,17 @@ export function KingdomDetailOverlay({ kingdom: k, isOwn, onClose }: Props) {
             </div>
             {/* Close */}
             <button onClick={onClose} style={{
-              background: 'rgba(0,60,100,0.08)', border: '1px solid rgba(0,60,100,0.12)',
+              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
               borderRadius: 8, width: 36, height: 36, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'rgba(26,42,58,0.5)', fontSize: 18,
+              color: 'rgba(255,255,255,0.45)', fontSize: 18,
             }}>✕</button>
           </div>
 
           {/* Tabs (own only) */}
           {isOwn && (
             <div style={{
-              display: 'flex', gap: 0, borderBottom: '1px solid rgba(0,60,100,0.08)',
+              display: 'flex', gap: 0, borderBottom: '1px solid rgba(255,255,255,0.06)',
               flexShrink: 0,
             }}>
               {OWN_TABS.map(t => (
@@ -497,7 +497,7 @@ export function KingdomDetailOverlay({ kingdom: k, isOwn, onClose }: Props) {
                   flex: 1, padding: '10px 8px', border: 'none', cursor: 'pointer',
                   background: tab === t.id ? `${k.color || '#0099cc'}10` : 'transparent',
                   borderBottom: tab === t.id ? `2px solid ${k.color || '#0099cc'}` : '2px solid transparent',
-                  color: tab === t.id ? k.color || '#0099cc' : 'rgba(26,42,58,0.4)',
+                  color: tab === t.id ? k.color || '#0099cc' : 'rgba(255,255,255,0.4)',
                   fontSize: 8, fontWeight: 700, letterSpacing: 1,
                   fontFamily: "'Orbitron', sans-serif",
                 }}>

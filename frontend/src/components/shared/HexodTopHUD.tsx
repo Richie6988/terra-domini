@@ -43,7 +43,7 @@ export function HexodTopHUD() {
           width: 40, height: 40, borderRadius: '50%',
           background: `linear-gradient(135deg, ${(player as any).avatar_color || '#0099cc'}, ${(player as any).avatar_color || '#0099cc'}cc)`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 20, border: '2px solid rgba(255,255,255,0.9)',
+          fontSize: 20, border: '2px solid rgba(255,255,255,0.08)',
           boxShadow: '0 2px 10px rgba(0,0,0,0.15)', flexShrink: 0,
         }}>
           {/* Avatar: icon ID if set, else initials */}

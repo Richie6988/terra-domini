@@ -78,8 +78,8 @@ export function DayCycleWidget() {
       padding: '4px 10px', borderRadius: 20,
       background: flash
         ? 'linear-gradient(90deg, rgba(121,80,242,0.15), rgba(121,80,242,0.05))'
-        : 'rgba(255,255,255,0.5)',
-      border: `1px solid ${flash ? 'rgba(121,80,242,0.3)' : 'rgba(0,60,100,0.1)'}`,
+        : 'rgba(255,255,255,0.04)',
+      border: `1px solid ${flash ? 'rgba(121,80,242,0.3)' : 'rgba(255,255,255,0.08)'}`,
       transition: 'all 0.5s ease',
     }}>
       {/* Day counter */}
@@ -92,7 +92,7 @@ export function DayCycleWidget() {
 
       {/* Timer progress ring */}
       <svg width={22} height={22} viewBox="0 0 22 22">
-        <circle cx="11" cy="11" r="9" fill="none" stroke="rgba(0,60,100,0.08)" strokeWidth="2" />
+        <circle cx="11" cy="11" r="9" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="2" />
         <circle
           cx="11" cy="11" r="9" fill="none" stroke="#0099cc" strokeWidth="2"
           strokeDasharray={`${2 * Math.PI * 9}`}
@@ -115,7 +115,7 @@ export function DayCycleWidget() {
       {lastHex > 0 && (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 3,
-          fontSize: 8, fontWeight: 900, color: flash ? '#7950f2' : 'rgba(26,42,58,0.4)',
+          fontSize: 8, fontWeight: 900, color: flash ? '#7950f2' : 'rgba(255,255,255,0.4)',
           fontFamily: "'Share Tech Mono', monospace",
           transition: 'color 0.5s',
         }}>

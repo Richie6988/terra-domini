@@ -137,7 +137,7 @@ export function StaminaBar() {
         {/* Next ready label */}
         {slots_used > 0 && (
           <span style={{ fontSize: 9, color: '#F59E0B', fontFamily: 'monospace', marginLeft: 4, whiteSpace: 'nowrap' }}>
-            {localSeconds > 0 ? `+1 in ${fmt(localSeconds)}` : '⚔️ ready'}
+            {localSeconds > 0 ? `+1 in ${fmt(localSeconds)}` : 'READY'}
           </span>
         )}
       </div>
@@ -150,7 +150,7 @@ export function StaminaBar() {
             style={{
               position: 'absolute', top: '100%', left: '50%', transform: 'translateX(-50%)',
               marginTop: 8, zIndex: 9999, pointerEvents: 'none',
-              background: 'rgba(235,242,250,0.97)', border: '1px solid rgba(239,68,68,0.3)',
+              background: 'rgba(13,27,42,0.97)', border: '1px solid rgba(239,68,68,0.3)',
               borderRadius: 12, padding: '12px 14px', minWidth: 220,
               boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
             }}>
@@ -158,7 +158,7 @@ export function StaminaBar() {
 
             {/* Slots breakdown */}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: 11, color: 'rgba(26,42,58,0.6)' }}>Available</span>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.04)' }}>Available</span>
               <span style={{ fontSize: 11, fontWeight: 700, color: slots_available > 0 ? '#00884a' : '#EF4444' }}>
                 {slots_available} / {slots_max}
               </span>
@@ -168,12 +168,12 @@ export function StaminaBar() {
             {slots_used > 0 && (
               <div style={{ marginBottom: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)' }}>Next slot in</span>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>Next slot in</span>
                   <span style={{ fontSize: 10, color: '#F59E0B', fontFamily: 'monospace', fontWeight: 700 }}>
                     {fmt(localSeconds)}
                   </span>
                 </div>
-                <div style={{ height: 4, background: 'rgba(0,60,100,0.1)', borderRadius: 2, overflow: 'hidden' }}>
+                <div style={{ height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' }}>
                   <motion.div
                     animate={{ width: `${localProgress}%` }}
                     style={{ height: '100%', background: 'linear-gradient(90deg, #F59E0B, #EF4444)', borderRadius: 2 }}
@@ -184,7 +184,7 @@ export function StaminaBar() {
 
             {/* Regen time */}
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8, marginTop: 4 }}>
-              <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', lineHeight: 1.7 }}>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', lineHeight: 1.7 }}>
                 ⏱ Regen: {fmt(stamina.regen_seconds_per_slot)} per slot
                 {stamina.regen_bonus_pct > 0 && (
                   <span style={{ color: '#00884a' }}> (+{stamina.regen_bonus_pct}% bonus)</span>
@@ -199,7 +199,7 @@ export function StaminaBar() {
 
             {/* How to get more */}
             <div style={{ marginTop: 8, padding: '6px 10px', background: 'rgba(239,68,68,0.06)', borderRadius: 8 }}>
-              <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.45)', lineHeight: 1.6 }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6 }}>
                 <EmojiIcon emoji="🎯" /> Win clicker daily → faster regen<br />
                 <EmojiIcon emoji="🏆" /> Control Towers → extra slots<br />
                 <EmojiIcon emoji="💎" /> HEX staking → attack power bonus

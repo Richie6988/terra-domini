@@ -54,12 +54,12 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
           <EmojiIcon emoji="🏰" />
         </div>
         <div style={{
-          fontSize: 12, fontWeight: 900, color: '#1a2a3a', letterSpacing: 3,
+          fontSize: 12, fontWeight: 900, color: '#e2e8f0', letterSpacing: 3,
           fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 4,
         }}>
           {kingdom.name.toUpperCase()}
         </div>
-        <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.45)', letterSpacing: 1 }}>
+        <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)', letterSpacing: 1 }}>
           {kingdom.territories.length} TERRITORIES · CAPITAL: {kingdom.capitalHex.slice(0, 8)}…
         </div>
       </div>
@@ -73,9 +73,9 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
         ].map(stat => (
           <div key={stat.label} style={{
             padding: '10px 8px', borderRadius: 8, textAlign: 'center',
-            background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.08)',
+            background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.06)',
           }}>
-            <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, marginBottom: 4, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+            <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, marginBottom: 4, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
               {stat.label}
             </div>
             <div style={{
@@ -92,7 +92,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
 
       {/* Branch progress bars */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+        <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>
           BRANCH PROGRESS
         </div>
         {SKILL_BRANCHES.map(branch => {
@@ -104,7 +104,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
               <div style={{ flex: 1 }}>
                 <div style={{
                   height: 6, borderRadius: 3, overflow: 'hidden',
-                  background: 'rgba(0,60,100,0.06)',
+                  background: 'rgba(255,255,255,0.05)',
                 }}>
                   <div style={{
                     height: '100%', borderRadius: 3, width: `${pct}%`,
@@ -130,7 +130,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
         background: kingdom.shieldActive ? 'rgba(0,136,74,0.08)' : 'rgba(220,38,38,0.05)',
         border: `1px solid ${kingdom.shieldActive ? 'rgba(0,136,74,0.2)' : 'rgba(220,38,38,0.1)'}`,
         display: 'flex', alignItems: 'center', gap: 8,
-        fontSize: 8, color: kingdom.shieldActive ? '#00884a' : 'rgba(26,42,58,0.4)',
+        fontSize: 8, color: kingdom.shieldActive ? '#00884a' : 'rgba(255,255,255,0.4)',
         fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
       }}>
         {kingdom.shieldActive ? '🛡 SHIELD ACTIVE' : '⚠ SHIELD INACTIVE'}
@@ -160,7 +160,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
           border: '1px solid rgba(0,153,204,0.1)',
         }}>
           <div style={{
-            fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)',
+            fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)',
             fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 6,
           }}>
             LAST DAY PRODUCTION
@@ -169,8 +169,8 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
             {Object.entries(kingdom.dailyProduction).filter(([, v]) => (v as number) > 0).map(([res, amount]) => (
               <div key={res} style={{
                 padding: '3px 8px', borderRadius: 12,
-                background: 'rgba(255,255,255,0.5)',
-                fontSize: 7, fontWeight: 700, color: '#1a2a3a',
+                background: 'rgba(255,255,255,0.04)',
+                fontSize: 7, fontWeight: 700, color: '#e2e8f0',
                 fontFamily: "'Share Tech Mono', monospace",
               }}>
                 {res}: +{(amount as number).toLocaleString()}
@@ -217,7 +217,7 @@ function ResourcesTab({ kingdom, onAllocChange }: {
           {totalHex.toLocaleString()}
         </span>
         <span style={{
-          fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 2,
+          fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2,
           fontFamily: "'Orbitron', system-ui, sans-serif",
         }}>
           HEX/DAY
@@ -229,7 +229,7 @@ function ResourcesTab({ kingdom, onAllocChange }: {
         <div key={group.category}>
           <div style={{
             fontSize: 7, fontWeight: 700, letterSpacing: 2,
-            color: 'rgba(26,42,58,0.35)', marginBottom: 6,
+            color: 'rgba(255,255,255,0.3)', marginBottom: 6,
             fontFamily: "'Orbitron', system-ui, sans-serif",
           }}>
             {group.label}
@@ -244,13 +244,13 @@ function ResourcesTab({ kingdom, onAllocChange }: {
                 <div key={res.id} style={{
                   padding: '8px 10px', borderRadius: 8,
                   background: 'rgba(255,255,255,0.4)',
-                  border: '1px solid rgba(0,60,100,0.08)',
+                  border: '1px solid rgba(255,255,255,0.06)',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
                     <ResourceIconSVG resourceId={res.id} size={28} />
                     <div style={{ flex: 1 }}>
                       <div style={{
-                        fontSize: 8, fontWeight: 800, color: '#1a2a3a', letterSpacing: 1,
+                        fontSize: 8, fontWeight: 800, color: '#e2e8f0', letterSpacing: 1,
                         fontFamily: "'Orbitron', system-ui, sans-serif",
                       }}>
                         {res.name.toUpperCase()}
@@ -272,7 +272,7 @@ function ResourcesTab({ kingdom, onAllocChange }: {
                       onChange={e => onAllocChange(res.id, parseInt(e.target.value))}
                       style={{
                         flex: 1, height: 4, appearance: 'none', borderRadius: 2,
-                        background: 'rgba(0,60,100,0.08)', outline: 'none', cursor: 'pointer',
+                        background: 'rgba(255,255,255,0.06)', outline: 'none', cursor: 'pointer',
                         accentColor: res.color,
                       }}
                     />
@@ -299,7 +299,7 @@ function ResourcesTab({ kingdom, onAllocChange }: {
       {/* No production state */}
       {grouped.length === 0 && (
         <div style={{
-          textAlign: 'center', padding: 40, color: 'rgba(26,42,58,0.35)',
+          textAlign: 'center', padding: 40, color: 'rgba(255,255,255,0.3)',
           fontSize: 8, letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif",
         }}>
           NO TERRITORIES PRODUCING YET
@@ -317,7 +317,7 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{
         fontSize: 7, fontWeight: 700, letterSpacing: 2,
-        color: 'rgba(26,42,58,0.35)', marginBottom: 4,
+        color: 'rgba(255,255,255,0.3)', marginBottom: 4,
         fontFamily: "'Orbitron', system-ui, sans-serif",
       }}>
         EXPANSION METHODS
@@ -362,7 +362,7 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
               <div key={stat} style={{
                 flex: 1, padding: '4px 6px', borderRadius: 6,
                 background: 'rgba(255,255,255,0.4)',
-                fontSize: 6, color: 'rgba(26,42,58,0.5)', textAlign: 'center',
+                fontSize: 6, color: 'rgba(255,255,255,0.45)', textAlign: 'center',
                 fontFamily: "'Share Tech Mono', monospace", letterSpacing: 0.5,
               }}>
                 {stat}
@@ -416,7 +416,7 @@ export function KingdomPanel({ onClose }: Props) {
     return (
       <GlassPanel title="KINGDOMS" onClose={onClose} accent="#cc8800">
         <div style={{
-          textAlign: 'center', padding: 40, color: 'rgba(26,42,58,0.35)',
+          textAlign: 'center', padding: 40, color: 'rgba(255,255,255,0.3)',
           fontSize: 8, letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif",
         }}>
           NO KINGDOMS YET
@@ -446,8 +446,8 @@ export function KingdomPanel({ onClose }: Props) {
                 fontSize: 7, fontWeight: k.id === activeKingdomId ? 800 : 500,
                 letterSpacing: 1,
                 background: k.id === activeKingdomId ? `${k.color}15` : 'rgba(255,255,255,0.4)',
-                color: k.id === activeKingdomId ? k.color : 'rgba(26,42,58,0.45)',
-                border: `1px solid ${k.id === activeKingdomId ? `${k.color}30` : 'rgba(0,60,100,0.08)'}`,
+                color: k.id === activeKingdomId ? k.color : 'rgba(255,255,255,0.35)',
+                border: `1px solid ${k.id === activeKingdomId ? `${k.color}30` : 'rgba(255,255,255,0.06)'}`,
                 fontFamily: "'Orbitron', system-ui, sans-serif",
                 whiteSpace: 'nowrap',
               }}
@@ -467,10 +467,10 @@ export function KingdomPanel({ onClose }: Props) {
             style={{
               flex: 1, padding: '7px 4px', borderRadius: 20, cursor: 'pointer',
               fontSize: 7, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
-              background: tab === t.id ? `rgba(204,136,0,0.1)` : 'rgba(255,255,255,0.5)',
-              color: tab === t.id ? '#cc8800' : 'rgba(26,42,58,0.45)',
+              background: tab === t.id ? `rgba(204,136,0,0.1)` : 'rgba(255,255,255,0.04)',
+              color: tab === t.id ? '#cc8800' : 'rgba(255,255,255,0.35)',
               fontFamily: "'Orbitron', system-ui, sans-serif",
-              border: `1px solid ${tab === t.id ? 'rgba(204,136,0,0.3)' : 'rgba(0,60,100,0.1)'}`,
+              border: `1px solid ${tab === t.id ? 'rgba(204,136,0,0.3)' : 'rgba(255,255,255,0.08)'}`,
             }}
           >
             {t.label}

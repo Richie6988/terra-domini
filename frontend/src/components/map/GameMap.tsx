@@ -456,7 +456,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       {/* Global styles */}
       <style>{`
-        .td-tooltip{background:rgba(235,242,250,0.97)!important;border:1px solid rgba(0,60,100,0.15)!important;border-radius:10px!important;color:#1a2a3a!important;padding:8px 12px!important;box-shadow:0 4px 20px rgba(0,0,0,0.15)!important;font-family:'Orbitron',system-ui,sans-serif!important;font-size:9px!important;letter-spacing:1px!important;}
+        .td-tooltip{background:rgba(13,27,42,0.95)!important;border:1px solid rgba(255,255,255,0.12)!important;border-radius:10px!important;color:#1a2a3a!important;padding:8px 12px!important;box-shadow:0 4px 20px rgba(0,0,0,0.15)!important;font-family:'Orbitron',system-ui,sans-serif!important;font-size:9px!important;letter-spacing:1px!important;}
         .td-tooltip::before{display:none!important;}
         .leaflet-container{cursor:crosshair;background:#e8eef5;}
         .td-hex-own path{filter:drop-shadow(0 0 6px rgba(0,255,135,0.8))!important;}
@@ -476,20 +476,20 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       {/* Map controls — top right: tile picker + zoom slider */}
       <div style={{ position:'absolute', top:'50%', right:12, transform:'translateY(-50%)', zIndex:500, display:'flex', flexDirection:'column', gap:0,
-        background:'rgba(235,242,250,0.92)', backdropFilter:'blur(20px)', borderRadius:10, border:'1px solid rgba(0,60,100,0.12)',
+        background:'rgba(13,27,42,0.92)', backdropFilter:'blur(20px)', borderRadius:10, border:'1px solid rgba(255,255,255,0.1)',
         overflow:'hidden', boxShadow:'0 4px 16px rgba(0,0,0,0.08)' }}>
         {/* Tile style buttons */}
         {(Object.entries(TILES) as any[]).map(([key, cfg]) => (
           <button key={key} onClick={() => setTile(key)} style={{
             display:'block', width:'100%', padding:'8px 14px',
             background: tile===key ? 'rgba(0,153,204,0.1)' : 'transparent',
-            border:'none', borderBottom:'1px solid rgba(0,60,100,0.06)',
-            color: tile===key ? '#0099cc' : 'rgba(26,42,58,0.5)', fontSize:10, cursor:'pointer', textAlign:'left',
+            border:'none', borderBottom:'1px solid rgba(255,255,255,0.05)',
+            color: tile===key ? '#0099cc' : 'rgba(255,255,255,0.45)', fontSize:10, cursor:'pointer', textAlign:'left',
             fontFamily:"'Orbitron',system-ui,sans-serif", fontWeight: tile===key ? 700 : 400, letterSpacing:1,
           }}>{cfg.label}</button>
         ))}
         {/* Zoom slider */}
-        <div style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 10px', borderTop:'1px solid rgba(0,60,100,0.08)' }}>
+        <div style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 10px', borderTop:'1px solid rgba(255,255,255,0.06)' }}>
           <span style={{ fontSize:9, fontWeight:700, color:'#6b7280', fontFamily:'monospace', cursor:'pointer' }}
             onClick={() => mapRef.current?.setZoom(zoom - 1)}>−</span>
           <input type="range" min={3} max={19} step={1} value={zoom}
@@ -565,7 +565,7 @@ function MapBtn({ onClick, children }: { onClick: () => void; children: React.Re
   const [h, setH] = useState(false)
   return (
     <button onClick={onClick} onMouseEnter={() => setH(true)} onMouseLeave={() => setH(false)}
-      style={{ width:36, height:36, borderRadius:8, background: h ? 'rgba(0,153,204,0.12)' : 'rgba(235,242,250,0.92)', backdropFilter:'blur(20px)', border:'1px solid rgba(0,60,100,0.12)', color:'#1a2a3a', fontSize:18, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.15s', boxShadow:'0 2px 8px rgba(0,0,0,0.06)' }}>
+      style={{ width:36, height:36, borderRadius:8, background: h ? 'rgba(0,153,204,0.12)' : 'rgba(13,27,42,0.92)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,0.1)', color:'#e2e8f0', fontSize:18, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.15s', boxShadow:'0 2px 8px rgba(0,0,0,0.06)' }}>
       {children}
     </button>
   )

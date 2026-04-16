@@ -179,9 +179,9 @@ export function CodexPanel({ onClose }: Props) {
           <button key={t.id} onClick={() => { setTab(t.id); setSelectedToken(null) }} style={{
             padding: '6px 10px', borderRadius: 16, cursor: 'pointer', whiteSpace: 'nowrap',
             fontSize: 7, fontWeight: tab === t.id ? 800 : 500, letterSpacing: 1,
-            background: tab === t.id ? (t.color || '#7950f2') + '15' : 'rgba(255,255,255,0.5)',
-            color: tab === t.id ? (t.color || '#7950f2') : 'rgba(26,42,58,0.45)',
-            border: `1px solid ${tab === t.id ? (t.color || '#7950f2') + '40' : 'rgba(0,60,100,0.1)'}`,
+            background: tab === t.id ? (t.color || '#7950f2') + '15' : 'rgba(255,255,255,0.04)',
+            color: tab === t.id ? (t.color || '#7950f2') : 'rgba(255,255,255,0.35)',
+            border: `1px solid ${tab === t.id ? (t.color || '#7950f2') + '40' : 'rgba(255,255,255,0.08)'}`,
             fontFamily: "'Orbitron', system-ui, sans-serif",
             display: 'flex', alignItems: 'center', gap: 4,
           }}>
@@ -198,8 +198,8 @@ export function CodexPanel({ onClose }: Props) {
           placeholder="Filter tokens..."
           style={{
             width: '100%', padding: '8px 12px', borderRadius: 10, boxSizing: 'border-box',
-            background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)',
-            fontSize: 9, color: '#1a2a3a', outline: 'none',
+            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+            fontSize: 9, color: '#e2e8f0', outline: 'none',
             fontFamily: "'Share Tech Mono', monospace",
           }}
         />
@@ -211,16 +211,16 @@ export function CodexPanel({ onClose }: Props) {
           <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             {/* Global progress */}
             <div style={{ textAlign: 'center', marginBottom: 16 }}>
-              <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, marginBottom: 4, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+              <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, marginBottom: 4, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                 TOTAL COLLECTION PROGRESS
               </div>
               <div style={{ fontSize: 28, fontFamily: "'Share Tech Mono', monospace", color: '#7950f2', fontWeight: 700 }}>
-                {globalOwned} <span style={{ fontSize: 14, color: 'rgba(26,42,58,0.3)' }}>/ {globalTotal}</span>
+                {globalOwned} <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.25)' }}>/ {globalTotal}</span>
               </div>
-              <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,60,100,0.06)', maxWidth: 280, margin: '8px auto', overflow: 'hidden' }}>
+              <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.05)', maxWidth: 280, margin: '8px auto', overflow: 'hidden' }}>
                 <div style={{ height: '100%', width: `${globalPct}%`, borderRadius: 3, background: 'linear-gradient(90deg, #7950f2, #0099cc)' }} />
               </div>
-              <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.4)' }}>{globalPct}% Complete · {shinyCount} Shiny Cards</div>
+              <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)' }}>{globalPct}% Complete · {shinyCount} Shiny Cards</div>
             </div>
 
             {/* Category breakdown grid */}
@@ -231,16 +231,16 @@ export function CodexPanel({ onClose }: Props) {
                 return (
                   <button key={ct.id} onClick={() => setTab(ct.id)} style={{
                     padding: '10px', borderRadius: 10, cursor: 'pointer', textAlign: 'center',
-                    background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.08)',
+                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
                   }}>
                     <div style={{ fontSize: 18, marginBottom: 4 }}><IconSVG id={ct.iconId} size={24} /></div>
                     <div style={{ fontSize: 8, fontWeight: 900, color: ct.color, letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                       {ct.label.toUpperCase()}
                     </div>
-                    <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 2, fontFamily: "'Share Tech Mono', monospace" }}>
+                    <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2, fontFamily: "'Share Tech Mono', monospace" }}>
                       {st.owned}/{st.total}
                     </div>
-                    <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,60,100,0.06)', marginTop: 4, overflow: 'hidden' }}>
+                    <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.05)', marginTop: 4, overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${pct}%`, borderRadius: 2, background: ct.color }} />
                     </div>
                   </button>
@@ -253,7 +253,7 @@ export function CodexPanel({ onClose }: Props) {
         {/* ═══ FAVORITES TAB ═══ */}
         {tab === 'favorites' && (
           <motion.div key="favorites" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', marginBottom: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+            <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', marginBottom: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
               <IconSVG id="medal" size={12} /> YOUR TOP TOKENS
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
@@ -295,7 +295,7 @@ export function CodexPanel({ onClose }: Props) {
                     }}>
                       <IconSVG id={t.id} size={24} />
                     </div>
-                    <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.5)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                    <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.04)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                       {t.name.slice(0, 8).toUpperCase()}
                     </div>
                   </div>
@@ -346,7 +346,7 @@ export function CodexPanel({ onClose }: Props) {
                       onClick={() => setSelectedToken(isSelected ? null : token.id)}
                     />
                     <div style={{
-                      fontSize: 6, fontWeight: 700, color: '#1a2a3a', letterSpacing: 0.3,
+                      fontSize: 6, fontWeight: 700, color: '#e2e8f0', letterSpacing: 0.3,
                       fontFamily: "'Orbitron', system-ui, sans-serif",
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       textAlign: 'center', maxWidth: 60, margin: '2px auto 0',
@@ -359,7 +359,7 @@ export function CodexPanel({ onClose }: Props) {
             </div>
 
             {tabTokens.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 30, color: 'rgba(26,42,58,0.3)', fontSize: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+              <div style={{ textAlign: 'center', padding: 30, color: 'rgba(255,255,255,0.25)', fontSize: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                 NO TOKENS FOUND
               </div>
             )}
@@ -380,7 +380,7 @@ export function CodexPanel({ onClose }: Props) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
             <IconSVG id={selectedTokenData.id} size={40} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 9, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+              <div style={{ fontSize: 9, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                 {selectedTokenData.name.toUpperCase()}
               </div>
               <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
@@ -434,7 +434,7 @@ export function CodexPanel({ onClose }: Props) {
               <input type="number" value={sellPrice} onChange={e => setSellPrice(e.target.value)}
                 placeholder="Price in HEX" min="1" style={{
                   flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(34,197,94,0.3)',
-                  fontSize: 10, background: 'rgba(34,197,94,0.04)', outline: 'none', color: '#1a2a3a',
+                  fontSize: 10, background: 'rgba(34,197,94,0.04)', outline: 'none', color: '#e2e8f0',
                 }} />
               <button onClick={async () => {
                 if (!sellPrice || isNaN(Number(sellPrice)) || Number(sellPrice) <= 0) { toast.error('Enter a valid price'); return }

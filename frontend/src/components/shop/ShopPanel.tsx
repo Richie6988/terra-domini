@@ -176,7 +176,7 @@ export function ShopPanel({ onClose }: Props) {
               <div style={{ fontSize:7, fontWeight:800, color:activeKingdom.color, letterSpacing:2, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
                 {activeKingdom.name.toUpperCase()}
               </div>
-              <div style={{ fontSize:6, color:'rgba(26,42,58,0.4)', letterSpacing:1 }}>
+              <div style={{ fontSize:6, color:'rgba(255,255,255,0.4)', letterSpacing:1 }}>
                 BOOSTS APPLY TO THIS KINGDOM
               </div>
             </div>
@@ -191,9 +191,9 @@ export function ShopPanel({ onClose }: Props) {
 
         {/* Balance display */}
         <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12,
-          padding:'8px 12px', background:'rgba(255,255,255,0.5)', borderRadius:8,
-          border:'1px solid rgba(0,60,100,0.1)' }}>
-          <span style={{ fontSize:9, color:'rgba(26,42,58,0.45)', letterSpacing:2, fontWeight:500 }}>BALANCE</span>
+          padding:'8px 12px', background:'rgba(255,255,255,0.04)', borderRadius:8,
+          border:'1px solid rgba(255,255,255,0.08)' }}>
+          <span style={{ fontSize:9, color:'rgba(255,255,255,0.35)', letterSpacing:2, fontWeight:500 }}>BALANCE</span>
           <div style={{ display:'flex', alignItems:'center', gap:6 }}>
             <CrystalIcon size="lg" />
             <span style={{ fontSize:16, fontWeight:900, color:'#7950f2', fontFamily:"'Share Tech Mono', monospace" }}>
@@ -203,13 +203,13 @@ export function ShopPanel({ onClose }: Props) {
         </div>
 
         {/* Category quick-nav — scrolls to section */}
-        <div style={{ display:'flex', gap:4, overflowX:'auto', paddingBottom:8, marginBottom:12, position:'sticky', top:0, zIndex:1, background:'rgba(235,242,250,0.95)', backdropFilter:'blur(8px)' }}>
+        <div style={{ display:'flex', gap:4, overflowX:'auto', paddingBottom:8, marginBottom:12, position:'sticky', top:0, zIndex:1, background:'rgba(13,27,42,0.95)', backdropFilter:'blur(8px)' }}>
           {CATS.map(c => (
             <button key={c.id} onClick={() => document.getElementById(`shop-${c.id}`)?.scrollIntoView({ behavior:'smooth', block:'start' })} style={{
               padding:'6px 10px', borderRadius:20, cursor:'pointer', whiteSpace:'nowrap',
               fontSize:7, fontWeight:500, letterSpacing:1,
-              background:'rgba(255,255,255,0.5)',
-              border:`1px solid rgba(0,60,100,0.1)`,
+              background:'rgba(255,255,255,0.04)',
+              border:`1px solid rgba(255,255,255,0.08)`,
               color:c.color, flexShrink:0,
               fontFamily:"'Orbitron', system-ui, sans-serif",
             display:'flex', alignItems:'center', gap:3,
@@ -224,7 +224,7 @@ export function ShopPanel({ onClose }: Props) {
         {activeBoosts.length > 0 && (
           <div style={{ padding:'8px 10px', marginBottom:12, borderRadius:6,
             background:'rgba(0,136,74,0.06)', border:'1px solid rgba(0,136,74,0.15)' }}>
-            <div style={{ fontSize:7, color:'rgba(26,42,58,0.45)', letterSpacing:2, marginBottom:6, fontWeight:700, fontFamily:"'Orbitron', system-ui, sans-serif" }}>ACTIVE BOOSTS</div>
+            <div style={{ fontSize:7, color:'rgba(255,255,255,0.35)', letterSpacing:2, marginBottom:6, fontWeight:700, fontFamily:"'Orbitron', system-ui, sans-serif" }}>ACTIVE BOOSTS</div>
             <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
               {activeBoosts.slice(0,5).map((b:any) => (
                 <ActiveBoostBadge key={b.id} boost={b} />
@@ -247,7 +247,7 @@ export function ShopPanel({ onClose }: Props) {
               }}>
                 <div style={{ fontSize:28, marginBottom:6 }}><EmojiIcon emoji={b.icon} size={16} /></div>
                 <div style={{ fontSize:9, fontWeight:900, color:b.color, marginBottom:4, fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1 }}>{b.name}</div>
-                <div style={{ fontSize:7, color:'rgba(26,42,58,0.45)', lineHeight:1.6, fontFamily:'system-ui', marginBottom:8, whiteSpace:'pre-line' }}>{b.desc}</div>
+                <div style={{ fontSize:7, color:'rgba(255,255,255,0.35)', lineHeight:1.6, fontFamily:'system-ui', marginBottom:8, whiteSpace:'pre-line' }}>{b.desc}</div>
                 <div style={{ fontSize:14, fontWeight:900, color:b.color, fontFamily:"'Share Tech Mono', monospace" }}>{b.price} ◆</div>
               </button>
             ))}
@@ -266,14 +266,14 @@ export function ShopPanel({ onClose }: Props) {
               <div key={item.id} style={{
                 display:'flex', justifyContent:'space-between', alignItems:'center',
                 padding:'12px 14px', borderRadius:8,
-                background:'rgba(255,255,255,0.5)', border:'1px solid rgba(0,60,100,0.1)',
+                background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
                 transition:'all 0.25s ease',
               }}>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:9, fontWeight:900, color:'#1a2a3a', letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
+                  <div style={{ fontSize:9, fontWeight:900, color:'#e2e8f0', letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
                     <EmojiIcon emoji={item.icon} size={16} /> {item.name}
                   </div>
-                  <div style={{ fontSize:8, color:'rgba(26,42,58,0.45)', marginTop:3, lineHeight:1.4, textTransform:'none', fontFamily:'system-ui' }}>
+                  <div style={{ fontSize:8, color:'rgba(255,255,255,0.35)', marginTop:3, lineHeight:1.4, textTransform:'none', fontFamily:'system-ui' }}>
                     {item.desc}
                   </div>
                 </div>
@@ -283,8 +283,8 @@ export function ShopPanel({ onClose }: Props) {
                   </div>
                   <button onClick={() => handleBuy(item.name, item.code, item.price)} style={{
                     padding:'6px 14px', borderRadius:16, cursor:'pointer',
-                    background: toNum(balance) >= item.price ? (c.color || '#0099cc') : 'rgba(0,60,100,0.08)',
-                    color: toNum(balance) >= item.price ? '#fff' : 'rgba(26,42,58,0.3)',
+                    background: toNum(balance) >= item.price ? (c.color || '#0099cc') : 'rgba(255,255,255,0.06)',
+                    color: toNum(balance) >= item.price ? '#fff' : 'rgba(255,255,255,0.25)',
                     border:'none', fontSize:8, fontWeight:700, letterSpacing:1,
                     fontFamily:"'Orbitron', system-ui, sans-serif",
                     opacity: toNum(balance) >= item.price ? 1 : 0.5,
@@ -309,7 +309,7 @@ export function ShopPanel({ onClose }: Props) {
             <div style={{ fontSize:9, fontWeight:900, color:'#cc8800', fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1, display:'flex', alignItems:'center', gap:6 }}>
               <CrystalIcon size="sm" /> BUY CRYSTALS WITH HEX
             </div>
-            <div style={{ fontSize:7, color:'rgba(26,42,58,0.4)', marginTop:2, textTransform:'none', fontFamily:'system-ui' }}>
+            <div style={{ fontSize:7, color:'rgba(255,255,255,0.4)', marginTop:2, textTransform:'none', fontFamily:'system-ui' }}>
               In-game currency — earned from bonuses or purchased with HEX crypto
             </div>
           </div>
@@ -355,7 +355,7 @@ function ActiveBoostBadge({ boost }: { boost: any }) {
       letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif",
     }}>
       {label}
-      {mins != null && <span style={{ color:'rgba(26,42,58,0.35)', marginLeft:2 }}>· {mins < 60 ? `${mins}min` : `${Math.ceil(mins/60)}h`}</span>}
+      {mins != null && <span style={{ color:'rgba(255,255,255,0.3)', marginLeft:2 }}>· {mins < 60 ? `${mins}min` : `${Math.ceil(mins/60)}h`}</span>}
     </div>
   )
 }

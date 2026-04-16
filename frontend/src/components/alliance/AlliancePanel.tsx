@@ -14,11 +14,11 @@ import type { Alliance, AllianceMember } from '../../types'
 import { EmojiIcon } from '../shared/emojiIcons'
 
 const textInput: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.5)',
-  border: '1px solid rgba(0,60,100,0.12)',
+  background: 'rgba(255,255,255,0.04)',
+  border: '1px solid rgba(255,255,255,0.1)',
   borderRadius: 8,
   padding: '9px 12px',
-  color: '#1a2a3a',
+  color: '#e2e8f0',
   fontSize: 13,
   outline: 'none',
   width: '100%',
@@ -39,18 +39,18 @@ function MiniTag({ color, children }: { color: string; children: React.ReactNode
 }
 function StatBox({ label, value, icon }: { label: string; value: string | number; icon?: React.ReactNode }) {
   return (
-    <div style={{ padding: '10px 8px', borderRadius: 10, background: 'rgba(0,60,100,0.04)', border: '1px solid rgba(0,60,100,0.08)', textAlign: 'center' }}>
+    <div style={{ padding: '10px 8px', borderRadius: 10, background: 'rgba(0,60,100,0.04)', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, color: '#8B5CF6', marginBottom: 4 }}>{icon}<span style={{ fontSize: 16, fontWeight: 900 }}>{value}</span></div>
-      <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 1, textTransform: 'uppercase' as const }}>{label}</div>
+      <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase' as const }}>{label}</div>
     </div>
   )
 }
 function Empty({ text }: { text: string }) {
-  return <div style={{ padding: 40, textAlign: 'center', color: 'rgba(26,42,58,0.3)', fontSize: 12 }}>{text}</div>
+  return <div style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,0.25)', fontSize: 12 }}>{text}</div>
 }
 const primaryBtn: React.CSSProperties = { padding: '10px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #8B5CF6, #7C3AED)', color: '#fff', fontSize: 11, fontWeight: 700, letterSpacing: 1 }
 const dangerBtn: React.CSSProperties = { padding: '10px 16px', borderRadius: 10, border: '1px solid rgba(220,38,38,0.3)', cursor: 'pointer', background: 'rgba(220,38,38,0.08)', color: '#dc2626', fontSize: 11, fontWeight: 700, letterSpacing: 1 }
-const labelStyle: React.CSSProperties = { fontSize: 8, color: 'rgba(26,42,58,0.4)', letterSpacing: 1, marginBottom: 6, textTransform: 'uppercase' as const }
+const labelStyle: React.CSSProperties = { fontSize: 8, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, marginBottom: 6, textTransform: 'uppercase' as const }
 
 
 function AlliancePanelTabBar({ tabs, active, onChange }: { tabs: string[]; active: string; onChange: (t: string) => void }) {
@@ -71,7 +71,7 @@ function AlliancePanelTabBar({ tabs, active, onChange }: { tabs: string[]; activ
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '12px 0 6px', fontWeight: 500 }}>
+    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '12px 0 6px', fontWeight: 500 }}>
       {children}
     </div>
   )
@@ -151,10 +151,10 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                 width: 52, height: 52, borderRadius: 12,
                 background: alliance.banner_color ?? '#10B981',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 20, fontWeight: 700, color: '#1a2a3a',
+                fontSize: 20, fontWeight: 700, color: '#e2e8f0',
               }}>[{alliance.tag}]</div>
               <div>
-                <div style={{ fontSize: 17, fontWeight: 500, color: '#1a2a3a' }}>{alliance.name}</div>
+                <div style={{ fontSize: 17, fontWeight: 500, color: '#e2e8f0' }}>{alliance.name}</div>
                 <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
                   <MiniTag color={TIER_COLORS[alliance.tier] ?? '#6B7280'}>{alliance.tier}</MiniTag>
                   <MiniTag color="#6B7280">{player?.alliance?.role ?? 'member'}</MiniTag>
@@ -172,7 +172,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
 
             {/* Alliance bonuses */}
             <div style={{ padding: 12, borderRadius: 10, background: 'rgba(139,92,246,0.04)', border: '1px solid rgba(139,92,246,0.12)', marginBottom: 14 }}>
-              <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>ALLIANCE BONUSES</div>
+              <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>ALLIANCE BONUSES</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {[
                   { label: '+10% DEF', icon: '🛡', active: true },
@@ -182,32 +182,32 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                 ].map(b => (
                   <span key={b.label} style={{
                     padding: '4px 8px', borderRadius: 6, fontSize: 8, fontWeight: 600,
-                    background: b.active ? 'rgba(139,92,246,0.08)' : 'rgba(0,60,100,0.03)',
+                    background: b.active ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.03)',
                     color: b.active ? '#8b5cf6' : 'rgba(26,42,58,0.25)',
-                    border: `1px solid ${b.active ? 'rgba(139,92,246,0.2)' : 'rgba(0,60,100,0.06)'}`,
+                    border: `1px solid ${b.active ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.05)'}`,
                   }}><EmojiIcon emoji={b.icon} size={16} /> {b.label}</span>
                 ))}
               </div>
             </div>
 
             {/* Alliance chat — real WebSocket */}
-            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.06)', marginBottom: 14 }}>
+            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.05)', marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', sans-serif" }}>ALLIANCE CHAT</div>
+                <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif" }}>ALLIANCE CHAT</div>
                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: chatConnected ? '#22c55e' : '#dc2626' }} title={chatConnected ? 'Connected' : 'Disconnected'} />
               </div>
               <div style={{ maxHeight: 150, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
                 {chatMessages.length === 0 && (
-                  <div style={{ padding: 10, fontSize: 8, color: 'rgba(26,42,58,0.3)', textAlign: 'center' }}>No messages yet. Say hello!</div>
+                  <div style={{ padding: 10, fontSize: 8, color: 'rgba(255,255,255,0.25)', textAlign: 'center' }}>No messages yet. Say hello!</div>
                 )}
                 {chatMessages.map((m, i) => (
-                  <div key={i} style={{ padding: '4px 8px', borderRadius: 6, background: m.type === 'system' ? 'rgba(139,92,246,0.04)' : 'rgba(0,60,100,0.03)', fontSize: 9 }}>
+                  <div key={i} style={{ padding: '4px 8px', borderRadius: 6, background: m.type === 'system' ? 'rgba(139,92,246,0.04)' : 'rgba(255,255,255,0.03)', fontSize: 9 }}>
                     {m.type === 'system' ? (
-                      <span style={{ color: 'rgba(26,42,58,0.35)', fontStyle: 'italic' }}>{m.text}</span>
+                      <span style={{ color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' }}>{m.text}</span>
                     ) : (
                       <>
                         <span style={{ fontWeight: 700, color: m.role === 'leader' ? '#cc8800' : '#8b5cf6' }}>{m.user}</span>
-                        <span style={{ color: 'rgba(26,42,58,0.6)', marginLeft: 6 }}>{m.text || m.emoji}</span>
+                        <span style={{ color: 'rgba(255,255,255,0.04)', marginLeft: 6 }}>{m.text || m.emoji}</span>
                         <span style={{ color: 'rgba(26,42,58,0.2)', fontSize: 7, marginLeft: 4 }}>{m.time}</span>
                       </>
                     )}
@@ -220,7 +220,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                   onKeyDown={e => { if (e.key === 'Enter' && chatInput.trim()) { sendMessage(chatInput.trim()); setChatInput('') } }}
                   placeholder={chatConnected ? 'Type a message...' : 'Connecting...'}
                   disabled={!chatConnected}
-                  style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(0,60,100,0.1)', fontSize: 10, background: 'rgba(0,60,100,0.02)', outline: 'none', color: '#1a2a3a' }} />
+                  style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.08)', fontSize: 10, background: 'rgba(0,60,100,0.02)', outline: 'none', color: '#e2e8f0' }} />
                 <button onClick={() => { if (chatInput.trim()) { sendMessage(chatInput.trim()); setChatInput('') } }}
                   disabled={!chatConnected || !chatInput.trim()}
                   style={{ padding: '6px 12px', borderRadius: 6, background: chatConnected ? '#8b5cf6' : '#94a3b8', border: 'none', color: '#fff', fontSize: 8, fontWeight: 700, cursor: 'pointer' }}>SEND</button>
@@ -263,12 +263,12 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
               }}>
                 <span style={{ fontSize: 18, width: 28 }}>{ROLE_ICONS[m.role] ?? '<EmojiIcon emoji="⚔" />'}</span>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, color: '#1a2a3a', fontWeight: 500 }}>{m.username}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)' }}>
+                  <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>{m.username}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
                     Rank {m.commander_rank} • {m.territories_owned} territories
                   </div>
                 </div>
-                <span style={{ fontSize: 11, color: 'rgba(26,42,58,0.35)', textTransform: 'capitalize' }}>{m.role}</span>
+                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textTransform: 'capitalize' }}>{m.role}</span>
               </div>
             ))}
             {members.length === 0 && <Empty text="No members data" />}
@@ -291,7 +291,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                   cursor: 'pointer',
                   background: proposeState === s ? '#4B5563' : 'rgba(255,255,255,0.04)',
                   color: s === 'war' ? '#EF4444' : s === 'alliance' ? '#10B981' : '#E5E7EB',
-                  borderColor: proposeState === s ? '#6B7280' : 'rgba(0,60,100,0.1)',
+                  borderColor: proposeState === s ? '#6B7280' : 'rgba(255,255,255,0.08)',
                 }}>
                   {s === 'war' ? '⚔️' : s === 'alliance' ? '🤝' : s === 'nap' ? '🕊️' : s === 'trade' ? '💰' : '⏸️'} {s}
                 </button>
@@ -348,17 +348,17 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
             />
             {(searchResults as Alliance[] ?? []).map((a: Alliance) => (
               <div key={a.id} style={{
-                padding: '12px', background: 'rgba(255,255,255,0.5)',
+                padding: '12px', background: 'rgba(255,255,255,0.04)',
                 borderRadius: 10, marginBottom: 8,
-                border: '1px solid rgba(0,60,100,0.1)',
+                border: '1px solid rgba(255,255,255,0.08)',
                 display: 'flex', alignItems: 'center', gap: 10,
               }}>
-                <div style={{ width: 40, height: 40, borderRadius: 8, background: '#8B5CF6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#1a2a3a' }}>
+                <div style={{ width: 40, height: 40, borderRadius: 8, background: '#8B5CF6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#e2e8f0' }}>
                   [{a.tag}]
                 </div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: '#1a2a3a' }}>{a.name}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)' }}>{a.member_count} members • {a.tier}</div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: '#e2e8f0' }}>{a.name}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{a.member_count} members • {a.tier}</div>
                 </div>
                 {a.is_recruiting && (
                   <button onClick={() => joinMut.mutate(a.id)} style={{ ...primaryBtn, width: 'auto', padding: '6px 14px', fontSize: 12, marginTop: 0 }}>
@@ -373,7 +373,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
         {/* ── TRADE ─────────────────────────────────────────────────── */}
         {tab === 'trade' && (
           <div style={{
-            textAlign: 'center', padding: '40px 20px', color: 'rgba(26,42,58,0.35)',
+            textAlign: 'center', padding: '40px 20px', color: 'rgba(255,255,255,0.3)',
             fontSize: 8, letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif",
           }}>
             ALLIANCE TRADE

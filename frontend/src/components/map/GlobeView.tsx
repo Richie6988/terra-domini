@@ -195,7 +195,7 @@ export function GlobeView({ visible, territories = [], onZoomIn }: Props) {
         padding: '8px 20px', borderRadius: 20,
         background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
         border: '1px solid rgba(0,153,204,0.3)',
-        fontSize: 9, color: 'rgba(255,255,255,0.6)',
+        fontSize: 9, color: 'rgba(255,255,255,0.06)',
         fontFamily: "'Orbitron', sans-serif", letterSpacing: 2,
         pointerEvents: 'none',
       }}>

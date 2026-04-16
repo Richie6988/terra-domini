@@ -123,12 +123,12 @@ export function AttackPanel({ target, onClose }: Props) {
   const probColor = winProb >= 0.65 ? '#00884a' : winProb >= 0.4 ? '#F59E0B' : '#EF4444'
 
   return (
-    <GlassPanel title="⚔ ATTACK" onClose={onClose} accent="#dc2626">
+    <GlassPanel title="ATTACK" onClose={onClose} accent="#dc2626">
       {/* Target info */}
       <div style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 11, color: '#1a2a3a', fontWeight: 700, letterSpacing: 1 }}>{target.place_name || 'ENEMY ZONE'}</div>
-        <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>
-          OWNED BY: <span style={{ color: '#1a2a3a' }}>{target.owner_username ?? 'Unknown'}</span>
+        <div style={{ fontSize: 11, color: '#e2e8f0', fontWeight: 700, letterSpacing: 1 }}>{target.place_name || 'ENEMY ZONE'}</div>
+        <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
+          OWNED BY: <span style={{ color: '#e2e8f0' }}>{target.owner_username ?? 'Unknown'}</span>
           {target.defense_tier > 0 && <span style={{ marginLeft: 8 }}><EmojiIcon emoji="🛡" /> TIER {target.defense_tier}</span>}
         </div>
       </div>
@@ -141,21 +141,21 @@ export function AttackPanel({ target, onClose }: Props) {
             <motion.div key="setup" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
 
               {/* Attack type */}
-              <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Attack Type</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Attack Type</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 20 }}>
                 {ATTACK_TYPES.map(t => (
                   <button key={t.id} onClick={() => setAtkType(t.id)}
-                    style={{ padding: '10px', borderRadius: 10, border: `1px solid ${atkType === t.id ? t.color : 'rgba(0,60,100,0.1)'}`, background: atkType === t.id ? `${t.color}12` : 'transparent', cursor: 'pointer', textAlign: 'left' }}>
+                    style={{ padding: '10px', borderRadius: 10, border: `1px solid ${atkType === t.id ? t.color : 'rgba(255,255,255,0.08)'}`, background: atkType === t.id ? `${t.color}12` : 'transparent', cursor: 'pointer', textAlign: 'left' }}>
                     <div style={{ fontSize: 18, marginBottom: 4 }}>{t.emoji}</div>
                     <div style={{ fontSize: 12, fontWeight: 700, color: atkType === t.id ? t.color : '#E5E7EB' }}>{t.label}</div>
-                    <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.35)', marginTop: 2, lineHeight: 1.4 }}>{t.desc}</div>
+                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 2, lineHeight: 1.4 }}>{t.desc}</div>
                     <div style={{ fontSize: 9, color: t.color, marginTop: 4 }}>⏱ {t.timer}</div>
                   </button>
                 ))}
               </div>
 
               {/* Units */}
-              <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Deploy Forces</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Deploy Forces</div>
               {[
                 { key: 'infantry', emoji: '⚔️', name: 'Infantry', max: 999 },
                 { key: 'cavalry',  emoji: '🐎', name: 'Cavalry',  max: 999 },
@@ -163,10 +163,10 @@ export function AttackPanel({ target, onClose }: Props) {
               ].map(u => (
                 <div key={u.key} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, background: 'rgba(255,255,255,0.02)', borderRadius: 10, padding: '8px 12px' }}>
                   <span style={{ fontSize: 20, width: 28 }}>{u.emoji}</span>
-                  <span style={{ fontSize: 12, color: 'rgba(26,42,58,0.6)', flex: 1 }}>{u.name}</span>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.04)', flex: 1 }}>{u.name}</span>
                   <button onClick={() => setUnits(p => ({ ...p, [u.key]: Math.max(0, (p[u.key as keyof typeof p] ?? 0) - 10) }))}
-                    style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(0,60,100,0.1)', border: 'none', color: '#1a2a3a', cursor: 'pointer' }}>−</button>
-                  <span style={{ minWidth: 36, textAlign: 'center', fontFamily: 'monospace', color: '#1a2a3a', fontSize: 14, fontWeight: 600 }}>
+                    style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.08)', border: 'none', color: '#e2e8f0', cursor: 'pointer' }}>−</button>
+                  <span style={{ minWidth: 36, textAlign: 'center', fontFamily: 'monospace', color: '#e2e8f0', fontSize: 14, fontWeight: 600 }}>
                     {units[u.key as keyof typeof units]}
                   </span>
                   <button onClick={() => setUnits(p => ({ ...p, [u.key]: (p[u.key as keyof typeof p] ?? 0) + 10 }))}
@@ -175,23 +175,23 @@ export function AttackPanel({ target, onClose }: Props) {
               ))}
 
               {/* Win probability */}
-              <div style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)', borderRadius: 12, padding: '14px', marginTop: 16, marginBottom: 16 }}>
+              <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px', marginTop: 16, marginBottom: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ fontSize: 12, color: 'rgba(26,42,58,0.45)' }}>Monte Carlo Probability ({totalUnits} units)</span>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>Monte Carlo Probability ({totalUnits} units)</span>
                   <span style={{ fontSize: 18, fontWeight: 800, color: probColor, fontFamily: 'monospace' }}>{(winProb * 100).toFixed(0)}%</span>
                 </div>
-                <div style={{ height: 8, background: 'rgba(0,60,100,0.1)', borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
+                <div style={{ height: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
                   <motion.div animate={{ width: `${winProb * 100}%` }} transition={{ type: 'spring' }}
                     style={{ height: '100%', background: `linear-gradient(90deg, ${probColor}, ${probColor}88)`, borderRadius: 4 }} />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 10, color: probColor }}><EmojiIcon emoji="⚔" /> Attack {(winProb * 100).toFixed(0)}%</span>
-                  <span style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)' }}><EmojiIcon emoji="🛡" /> Defense {((1 - winProb) * 100).toFixed(0)}%</span>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}><EmojiIcon emoji="🛡" /> Defense {((1 - winProb) * 100).toFixed(0)}%</span>
                 </div>
               </div>
 
               <button onClick={() => attackMut.mutate()} disabled={attackMut.isPending || totalUnits === 0}
-                style={{ width: '100%', padding: '14px', background: totalUnits > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${totalUnits > 0 ? 'rgba(239,68,68,0.5)' : 'rgba(0,60,100,0.1)'}`, borderRadius: 12, color: totalUnits > 0 ? '#EF4444' : '#4B5563', fontSize: 15, fontWeight: 800, cursor: totalUnits > 0 ? 'pointer' : 'not-allowed', letterSpacing: '0.05em' }}>
+                style={{ width: '100%', padding: '14px', background: totalUnits > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${totalUnits > 0 ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 12, color: totalUnits > 0 ? '#EF4444' : '#4B5563', fontSize: 15, fontWeight: 800, cursor: totalUnits > 0 ? 'pointer' : 'not-allowed', letterSpacing: '0.05em' }}>
                 {attackMut.isPending ? '⏳ Launching…' : `<EmojiIcon emoji="⚔" /> LAUNCH ${typeConf.label.toUpperCase()}`}
               </button>
               <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center' }}>
@@ -204,14 +204,14 @@ export function AttackPanel({ target, onClose }: Props) {
           {phase === 'rolling' && (
             <motion.div key="rolling" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 300, gap: 24 }}>
-              <div style={{ fontSize: 14, color: 'rgba(26,42,58,0.45)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Rolling dice…</div>
+              <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Rolling dice…</div>
               <div>
                 <div style={{ fontSize: 11, color: '#EF4444', textAlign: 'center', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}><EmojiIcon emoji="⚔" /> Attacker</div>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
                   {atkDice.map((v, i) => <Die key={i} value={v} color="red" delay={i * 0.1} />)}
                 </div>
               </div>
-              <div style={{ fontSize: 20, color: 'rgba(26,42,58,0.35)' }}>vs</div>
+              <div style={{ fontSize: 20, color: 'rgba(255,255,255,0.3)' }}>vs</div>
               <div>
                 <div style={{ fontSize: 11, color: '#3B82F6', textAlign: 'center', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}><EmojiIcon emoji="🛡" /> Defender</div>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
@@ -232,7 +232,7 @@ export function AttackPanel({ target, onClose }: Props) {
               <div style={{ fontSize: 24, fontWeight: 800, color: outcome === 'win' ? '#00884a' : outcome === 'loss' ? '#EF4444' : '#F59E0B', marginBottom: 8 }}>
                 {outcome === 'win' ? 'VICTORY!' : outcome === 'loss' ? 'DEFEATED' : 'STANDOFF'}
               </div>
-              <div style={{ fontSize: 13, color: 'rgba(26,42,58,0.45)', marginBottom: 24, lineHeight: 1.6 }}>
+              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 24, lineHeight: 1.6 }}>
                 {outcome === 'win'
                   ? atkType === 'conquest'
                     ? `${target.place_name || 'Territory'} is now under your control!`
@@ -243,7 +243,7 @@ export function AttackPanel({ target, onClose }: Props) {
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={() => { setPhase('setup'); setOutcome(null) }}
-                  style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(26,42,58,0.6)', cursor: 'pointer', fontSize: 13 }}>
+                  style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.04)', cursor: 'pointer', fontSize: 13 }}>
                   <EmojiIcon emoji="🔄" /> Attack Again
                 </button>
                 <button onClick={onClose}

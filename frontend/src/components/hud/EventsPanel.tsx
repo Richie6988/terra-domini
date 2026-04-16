@@ -123,10 +123,10 @@ export function EventsPanel({ onClose }: Props) {
       }}>
         <div style={{ fontSize: 20 }}><IconSVG id="clover" size={20} /></div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, ...s }}>YOUR LUCK RATING</div>
+          <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, ...s }}>YOUR LUCK RATING</div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
             <span style={{ fontSize: 18, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>{luckTotal}</span>
-            <span style={{ fontSize: 7, color: 'rgba(26,42,58,0.35)' }}>/ 100</span>
+            <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.3)' }}>/ 100</span>
             {luckPotion > 0 && <span style={{ fontSize: 7, color: '#a855f7', fontWeight: 700 }}>+{luckPotion} POTION</span>}
           </div>
         </div>
@@ -143,9 +143,9 @@ export function EventsPanel({ onClose }: Props) {
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             flex: 1, padding: '7px', borderRadius: 16, cursor: 'pointer',
             fontSize: 7, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
-            background: tab === t.id ? 'rgba(249,115,22,0.1)' : 'rgba(255,255,255,0.5)',
-            color: tab === t.id ? '#f97316' : 'rgba(26,42,58,0.45)',
-            border: `1px solid ${tab === t.id ? 'rgba(249,115,22,0.3)' : 'rgba(0,60,100,0.1)'}`,
+            background: tab === t.id ? 'rgba(249,115,22,0.1)' : 'rgba(255,255,255,0.04)',
+            color: tab === t.id ? '#f97316' : 'rgba(255,255,255,0.35)',
+            border: `1px solid ${tab === t.id ? 'rgba(249,115,22,0.3)' : 'rgba(255,255,255,0.08)'}`,
             ...s,
           }}><IconSVG id={t.iconId} size={10} /> {t.label}</button>
         ))}
@@ -156,7 +156,7 @@ export function EventsPanel({ onClose }: Props) {
         {tab === 'live' && (
           <motion.div key="live" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
             {liveEvents.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 20, color: 'rgba(26,42,58,0.4)', fontSize: 9, ...s }}>
+              <div style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.4)', fontSize: 9, ...s }}>
                 No live events. Run: python manage.py fetch_news --demo
               </div>
             )}
@@ -167,8 +167,8 @@ export function EventsPanel({ onClose }: Props) {
               return (
                 <div key={ev.id} style={{
                   padding: '12px 14px', borderRadius: 12, marginBottom: 8,
-                  background: ev.my_registered ? `${color}06` : 'rgba(255,255,255,0.5)',
-                  border: `1px solid ${ev.my_registered ? color + '30' : 'rgba(0,60,100,0.1)'}`,
+                  background: ev.my_registered ? `${color}06` : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${ev.my_registered ? color + '30' : 'rgba(255,255,255,0.08)'}`,
                 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
@@ -186,7 +186,7 @@ export function EventsPanel({ onClose }: Props) {
                       />
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <div style={{ fontSize: 9, fontWeight: 900, color, letterSpacing: 1, ...s, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.headline}</div>
-                        <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 1 }}><IconSVG id="pin" size={8} /> {ev.location_name} · {ev.source_name}</div>
+                        <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}><IconSVG id="pin" size={8} /> {ev.location_name} · {ev.source_name}</div>
                       </div>
                     </div>
                     <span style={{
@@ -195,17 +195,17 @@ export function EventsPanel({ onClose }: Props) {
                     }}>{ev.rarity.toUpperCase()}</span>
                   </div>
 
-                  <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.5)', lineHeight: 1.6, marginBottom: 8, fontFamily: 'system-ui' }}>
+                  <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 8, fontFamily: 'system-ui' }}>
                     {ev.summary?.slice(0, 150)}
                   </div>
 
                   {/* Capacity bar */}
                   <div style={{ marginBottom: 8 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 6, color: 'rgba(26,42,58,0.35)', marginBottom: 3, ...s }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 6, color: 'rgba(255,255,255,0.3)', marginBottom: 3, ...s }}>
                       <span>{ev.registered_count}/{ev.max_participants} REGISTERED</span>
                       <span>{formatTime(ev.time_remaining - tick)} LEFT</span>
                     </div>
-                    <div style={{ height: 4, borderRadius: 2, background: 'rgba(0,60,100,0.06)', overflow: 'hidden' }}>
+                    <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                       <div style={{ height: '100%', width: `${pctFull}%`, borderRadius: 2, background: color, transition: 'width 0.5s' }} />
                     </div>
                   </div>
@@ -235,7 +235,7 @@ export function EventsPanel({ onClose }: Props) {
         {tab === 'upcoming' && (
           <motion.div key="upcoming" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
             {upcomingEvents.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 20, color: 'rgba(26,42,58,0.4)', fontSize: 9, ...s }}>
+              <div style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.4)', fontSize: 9, ...s }}>
                 No upcoming events
               </div>
             )}
@@ -246,8 +246,8 @@ export function EventsPanel({ onClose }: Props) {
               return (
                 <div key={ev.id} style={{
                   padding: '12px 14px', borderRadius: 12, marginBottom: 8,
-                  background: isSoon ? `${color}05` : 'rgba(255,255,255,0.5)',
-                  border: `1px solid ${isSoon ? color + '25' : 'rgba(0,60,100,0.1)'}`,
+                  background: isSoon ? `${color}05` : 'rgba(255,255,255,0.04)',
+                  border: `1px solid ${isSoon ? color + '25' : 'rgba(255,255,255,0.08)'}`,
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <TokenFace2D
@@ -262,17 +262,17 @@ export function EventsPanel({ onClose }: Props) {
                     />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 9, fontWeight: 900, color, letterSpacing: 1, ...s }}>{ev.headline}</div>
-                      <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 1 }}><IconSVG id="pin" size={8} /> {ev.location_name} · {ev.rarity.toUpperCase()}</div>
+                      <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}><IconSVG id="pin" size={8} /> {ev.location_name} · {ev.rarity.toUpperCase()}</div>
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
                       <div style={{
                         fontSize: isSoon ? 14 : 11, fontWeight: 900,
-                        color: isSoon ? '#dc2626' : 'rgba(26,42,58,0.5)',
+                        color: isSoon ? '#dc2626' : 'rgba(255,255,255,0.45)',
                         fontFamily: "'Share Tech Mono', monospace",
                       }}>
                         {formatTime(remaining)}
                       </div>
-                      <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)', marginTop: 2, ...s }}>
+                      <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)', marginTop: 2, ...s }}>
                         {ev.registration_cost === 0 ? 'FREE' : `${ev.registration_cost} HEX`} · {ev.max_participants} MAX
                       </div>
                     </div>
@@ -295,24 +295,24 @@ export function EventsPanel({ onClose }: Props) {
                 <div style={{ fontSize: 16, fontWeight: 900, color: '#f97316', fontFamily: "'Share Tech Mono'" }}>
                   {results.filter(r => r.result === 'won').length}
                 </div>
-                <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.35)', ...s }}>WON</div>
+                <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', ...s }}>WON</div>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 16, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono'" }}>
                   {results.filter(r => r.result === 'won').reduce((acc, r) => acc + r.hex_earned, 0)}
                 </div>
-                <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.35)', ...s }}>HEX EARNED</div>
+                <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', ...s }}>HEX EARNED</div>
               </div>
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 16, fontWeight: 900, color: '#22c55e', fontFamily: "'Share Tech Mono'" }}>
                   {results.length}
                 </div>
-                <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.35)', ...s }}>EVENTS</div>
+                <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', ...s }}>EVENTS</div>
               </div>
             </div>
 
             {results.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 20, color: 'rgba(26,42,58,0.4)', fontSize: 9, ...s }}>
+              <div style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.4)', fontSize: 9, ...s }}>
                 Register for events to see results here
               </div>
             )}
@@ -323,7 +323,7 @@ export function EventsPanel({ onClose }: Props) {
                 <motion.div key={r.id} style={{
                   padding: '10px 14px', borderRadius: 12, marginBottom: 8,
                   background: r.result === 'won' ? `${color}06` : r.result === 'pending' ? 'rgba(251,191,36,0.04)' : 'rgba(0,0,0,0.02)',
-                  border: `1px solid ${r.result === 'won' ? color + '25' : r.result === 'pending' ? 'rgba(251,191,36,0.2)' : 'rgba(0,60,100,0.06)'}`,
+                  border: `1px solid ${r.result === 'won' ? color + '25' : r.result === 'pending' ? 'rgba(251,191,36,0.2)' : 'rgba(255,255,255,0.05)'}`,
                   opacity: r.result === 'lost' ? 0.5 : 1,
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -340,7 +340,7 @@ export function EventsPanel({ onClose }: Props) {
                       size={48}
                     />
                     <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 9, fontWeight: 900, color: r.result === 'lost' ? 'rgba(26,42,58,0.4)' : color, letterSpacing: 1, ...s }}>
+                      <div style={{ fontSize: 9, fontWeight: 900, color: r.result === 'lost' ? 'rgba(255,255,255,0.4)' : color, letterSpacing: 1, ...s }}>
                         {r.headline}
                       </div>
                       <div style={{ display: 'flex', gap: 4, marginTop: 3 }}>
@@ -353,14 +353,14 @@ export function EventsPanel({ onClose }: Props) {
                       {r.result === 'won' && (
                         <>
                           <div style={{ fontSize: 11, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono'" }}>+{r.hex_earned}</div>
-                          <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)', ...s }}>HEX</div>
+                          <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)', ...s }}>HEX</div>
                         </>
                       )}
                       {r.result === 'pending' && (
                         <div style={{ fontSize: 8, color: '#f97316', fontWeight: 700, ...s }}>PENDING</div>
                       )}
                       {r.result === 'lost' && (
-                        <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.3)', ...s }}>MISSED</div>
+                        <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', ...s }}>MISSED</div>
                       )}
                     </div>
                   </div>

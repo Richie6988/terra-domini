@@ -11,7 +11,7 @@ export function Skeleton({ width, height = 12, radius = 4, style }: {
   return (
     <div style={{
       width: width ?? '100%', height, borderRadius: radius,
-      background: 'linear-gradient(90deg, rgba(0,60,100,0.06) 25%, rgba(0,60,100,0.12) 50%, rgba(0,60,100,0.06) 75%)',
+      background: 'linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%)',
       backgroundSize: '200% 100%',
       animation: 'shimmer 1.5s ease-in-out infinite',
       ...style,
@@ -25,7 +25,7 @@ export function SkeletonCard({ lines = 3 }: { lines?: number }) {
     <div style={{
       padding: 12, borderRadius: 10,
       background: 'rgba(255,255,255,0.3)',
-      border: '1px solid rgba(0,60,100,0.06)',
+      border: '1px solid rgba(255,255,255,0.05)',
       display: 'flex', flexDirection: 'column', gap: 8,
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -61,7 +61,7 @@ export function SkeletonGrid({ count = 6, cols = 2 }: { count?: number; cols?: n
         <div key={i} style={{
           padding: 10, borderRadius: 8,
           background: 'rgba(255,255,255,0.3)',
-          border: '1px solid rgba(0,60,100,0.06)',
+          border: '1px solid rgba(255,255,255,0.05)',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
         }}>
           <Skeleton width={40} height={40} radius={20} />
@@ -89,7 +89,7 @@ export function EmptyState({ icon, title, message, action }: {
         width: 80, height: 80, margin: '0 auto 16px',
         borderRadius: '50%',
         background: 'rgba(0,60,100,0.04)',
-        border: '2px dashed rgba(0,60,100,0.08)',
+        border: '2px dashed rgba(255,255,255,0.06)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 32,
       }}>
@@ -97,14 +97,14 @@ export function EmptyState({ icon, title, message, action }: {
       </div>
 
       <div style={{
-        fontSize: 10, fontWeight: 900, letterSpacing: 3, color: 'rgba(26,42,58,0.3)',
+        fontSize: 10, fontWeight: 900, letterSpacing: 3, color: 'rgba(255,255,255,0.25)',
         fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 6,
       }}>
         {title}
       </div>
 
       <div style={{
-        fontSize: 8, color: 'rgba(26,42,58,0.35)', lineHeight: 1.6, maxWidth: 250,
+        fontSize: 8, color: 'rgba(255,255,255,0.3)', lineHeight: 1.6, maxWidth: 250,
         margin: '0 auto',
       }}>
         {message}
@@ -132,7 +132,7 @@ export function Spinner({ size = 20, color = '#0099cc' }: { size?: number; color
   return (
     <div style={{
       width: size, height: size,
-      border: `2px solid rgba(0,60,100,0.08)`,
+      border: `2px solid rgba(255,255,255,0.06)`,
       borderTopColor: color,
       borderRadius: '50%',
       animation: 'spin 0.8s linear infinite',
@@ -149,7 +149,7 @@ export function PanelLoading({ message = 'LOADING' }: { message?: string }) {
     }}>
       <Spinner size={28} />
       <div style={{
-        fontSize: 8, fontWeight: 700, letterSpacing: 3, color: 'rgba(26,42,58,0.3)',
+        fontSize: 8, fontWeight: 700, letterSpacing: 3, color: 'rgba(255,255,255,0.25)',
         fontFamily: "'Orbitron', system-ui, sans-serif",
       }}>
         {message}…

@@ -53,7 +53,7 @@ function DockButton({ item, isActive, onClick, badge }: {
       <div style={{
         width: 36, height: 36,
         clipPath: 'polygon(50% 0%, 93% 25%, 93% 75%, 50% 100%, 7% 75%, 7% 25%)',
-        background: isActive ? item.color : 'rgba(0, 60, 100, 0.1)',
+        background: isActive ? item.color : 'rgba(255, 255, 255, 0.06)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 16,
         transition: 'all 0.25s ease',
@@ -61,7 +61,7 @@ function DockButton({ item, isActive, onClick, badge }: {
         <span style={{
           filter: isActive ? 'brightness(2)' : 'none',
         }}>
-          <DockIcon id={item.panel} color={isActive ? '#fff' : 'rgba(26,42,58,0.5)'} size={18} />
+          <DockIcon id={item.panel} color={isActive ? '#fff' : 'rgba(255,255,255,0.45)'} size={18} />
         </span>
       </div>
 
@@ -111,7 +111,7 @@ export function HexodDock() {
         pointerEvents: 'auto',
         WebkitOverflowScrolling: 'touch' as any,
         borderBottom: 'none',
-        boxShadow: '0 -4px 30px rgba(0,0,0,0.15), inset 0 1px 0 rgba(255,255,255,0.8)',
+        boxShadow: '0 -4px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05)',
       }}>
         {DOCK_ITEMS.map(item => (
           <DockButton

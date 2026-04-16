@@ -93,7 +93,7 @@ export function TaskCenter({ onClose }: Props) {
     <GlassPanel title="TASK CENTER" onClose={onClose} accent="#0099cc">
       {/* Reset timer + streak */}
       <div style={{
-        textAlign: 'center', fontSize: 8, color: 'rgba(26,42,58,0.45)',
+        textAlign: 'center', fontSize: 8, color: 'rgba(255,255,255,0.35)',
         letterSpacing: 2, marginBottom: 12,
         fontFamily: "'Orbitron', system-ui, sans-serif",
       }}>
@@ -105,20 +105,20 @@ export function TaskCenter({ onClose }: Props) {
         padding: '12px 14px', borderRadius: 10, marginBottom: 14,
         background: 'rgba(0,153,204,0.05)', border: '1px solid rgba(0,153,204,0.15)',
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 8, color: 'rgba(26,42,58,0.45)', letterSpacing: 1 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 8, color: 'rgba(255,255,255,0.35)', letterSpacing: 1 }}>
           <span>PROGRESS {completed}/{missions.length}</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
             <CrystalIcon size="sm" />{totalReward}/{totalPossible}
           </span>
         </div>
-        <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,60,100,0.06)', overflow: 'hidden' }}>
+        <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
           <div style={{ width: `${pct}%`, height: '100%', borderRadius: 3, background: pct >= 100 ? '#22c55e' : '#0099cc', transition: 'width 0.5s' }} />
         </div>
       </div>
 
       {/* Loading state */}
       {isLoading && (
-        <div style={{ textAlign: 'center', padding: 30, color: 'rgba(26,42,58,0.3)', fontSize: 9 }}>Loading missions...</div>
+        <div style={{ textAlign: 'center', padding: 30, color: 'rgba(255,255,255,0.25)', fontSize: 9 }}>Loading missions...</div>
       )}
 
       {/* Mission list */}
@@ -132,17 +132,17 @@ export function TaskCenter({ onClose }: Props) {
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '10px 14px', borderRadius: 10,
               background: isClaimed ? 'rgba(34,197,94,0.04)' : isDone ? 'rgba(0,153,204,0.04)' : 'rgba(255,255,255,0.4)',
-              border: `1px solid ${isClaimed ? 'rgba(34,197,94,0.15)' : isDone ? 'rgba(0,153,204,0.15)' : 'rgba(0,60,100,0.06)'}`,
+              border: `1px solid ${isClaimed ? 'rgba(34,197,94,0.15)' : isDone ? 'rgba(0,153,204,0.15)' : 'rgba(255,255,255,0.05)'}`,
               opacity: isClaimed ? 0.6 : 1,
             }}>
               <span style={{ fontSize: 20, flexShrink: 0, filter: isClaimed ? 'grayscale(0.5)' : '' }}><EmojiIcon emoji={task.icon} size={16} /></span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: '#1a2a3a', letterSpacing: 0.5 }}>{task.title}</div>
+                <div style={{ fontSize: 9, fontWeight: 700, color: '#e2e8f0', letterSpacing: 0.5 }}>{task.title}</div>
                 {/* Progress bar */}
-                <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,60,100,0.06)', marginTop: 4, overflow: 'hidden' }}>
+                <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.05)', marginTop: 4, overflow: 'hidden' }}>
                   <div style={{ width: `${taskPct}%`, height: '100%', borderRadius: 2, background: isDone ? '#22c55e' : '#0099cc', transition: 'width 0.3s' }} />
                 </div>
-                <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.3)', marginTop: 2 }}>{task.current}/{task.target}</div>
+                <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>{task.current}/{task.target}</div>
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
@@ -188,7 +188,7 @@ export function TaskCenter({ onClose }: Props) {
           <div style={{ fontSize: 8, fontWeight: 700, color: '#0099cc', letterSpacing: 1, fontFamily: "'Orbitron', sans-serif" }}>
             INVITE FRIENDS · EARN 100◆
           </div>
-          <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>{refLink}</div>
+          <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{refLink}</div>
         </div>
         <button onClick={() => { navigator.clipboard?.writeText(`https://${refLink}`); toast.success('Link copied!') }} style={{
           padding: '6px 12px', borderRadius: 8, cursor: 'pointer',

@@ -22,8 +22,8 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'stats', label: 'STATS' },
 ]
 
-const sBox: React.CSSProperties = { padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.06)' }
-const lbl: React.CSSProperties = { fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 6 }
+const sBox: React.CSSProperties = { padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.05)' }
+const lbl: React.CSSProperties = { fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 6 }
 const statCard = (c: string): React.CSSProperties => ({ padding: '12px 8px', borderRadius: 10, textAlign: 'center', background: `${c}08`, border: `1px solid ${c}20` })
 
 interface Kingdom {
@@ -36,7 +36,7 @@ const TIER_COLORS = ['#4B5563', '#10B981', '#3B82F6', '#8B5CF6', '#F59E0B', '#EC
 // ═══ KINGDOMS TAB ═══
 function KingdomsTab({ kingdoms, onTeleport }: { kingdoms: Kingdom[]; onTeleport: (lat: number, lon: number) => void }) {
   if (!kingdoms.length) return (
-    <div style={{ textAlign: 'center', padding: 40, color: 'rgba(26,42,58,0.3)' }}>
+    <div style={{ textAlign: 'center', padding: 40, color: 'rgba(255,255,255,0.25)' }}>
       <div style={{ fontSize: 40, marginBottom: 12 }}>--</div>
       <div style={{ fontSize: 11, fontWeight: 600 }}>No kingdoms yet</div>
       <div style={{ fontSize: 9, marginTop: 4 }}>Claim 2+ adjacent territories to form a kingdom</div>
@@ -51,7 +51,7 @@ function KingdomsTab({ kingdoms, onTeleport }: { kingdoms: Kingdom[]; onTeleport
           <div key={k.cluster_id} style={{
             display: 'flex', gap: 12, padding: '12px 14px', borderRadius: 12,
             background: k.is_main ? `${col}06` : 'rgba(255,255,255,0.4)',
-            border: `1.5px solid ${k.is_main ? `${col}25` : 'rgba(0,60,100,0.06)'}`,
+            border: `1.5px solid ${k.is_main ? `${col}25` : 'rgba(255,255,255,0.05)'}`,
             cursor: 'pointer', transition: 'all 0.15s',
           }}
             onClick={() => onTeleport(k.centroid_lat, k.centroid_lon)}
@@ -67,14 +67,14 @@ function KingdomsTab({ kingdoms, onTeleport }: { kingdoms: Kingdom[]; onTeleport
             {/* Info */}
             <div style={{ flex: 1 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 11, fontWeight: 700, color: '#1a2a3a' }}>{k.name || `Kingdom ${k.cluster_id.slice(0, 6)}`}</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: '#e2e8f0' }}>{k.name || `Kingdom ${k.cluster_id.slice(0, 6)}`}</span>
                 {k.is_main && <span style={{ padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 700, background: `${col}15`, color: col }}>MAIN</span>}
               </div>
-              <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
                 Tier {k.tier} · {k.size} territories
               </div>
               {/* Mini progress bar showing tier */}
-              <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,60,100,0.06)', marginTop: 4, width: 80, overflow: 'hidden' }}>
+              <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.05)', marginTop: 4, width: 80, overflow: 'hidden' }}>
                 <div style={{ width: `${Math.min(100, (k.tier / 6) * 100)}%`, height: '100%', background: col, borderRadius: 2 }} />
               </div>
             </div>
@@ -85,7 +85,7 @@ function KingdomsTab({ kingdoms, onTeleport }: { kingdoms: Kingdom[]; onTeleport
                 <CrystalIcon size="sm" />
                 <span style={{ fontSize: 13, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>+{Math.round(k.tdc_per_24h)}</span>
               </div>
-              <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)', marginTop: 1 }}>HEX/DAY</div>
+              <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)', marginTop: 1 }}>HEX/DAY</div>
             </div>
           </div>
         )
@@ -126,8 +126,8 @@ function MilitaryTab() {
         }}>
           <span style={{ fontSize: 20, flexShrink: 0 }}><EmojiIcon emoji={u.icon} size={16} /></span>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#1a2a3a' }}>{u.name}</div>
-            <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)' }}>ATK {u.atk} · DEF {u.def} · {u.cost}◆</div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: '#e2e8f0' }}>{u.name}</div>
+            <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)' }}>ATK {u.atk} · DEF {u.def} · {u.cost}◆</div>
           </div>
           <div style={{ fontSize: 16, fontWeight: 900, color: u.color, fontFamily: "'Share Tech Mono', monospace", minWidth: 30, textAlign: 'right' }}>
             ×{counts[u.name] || 0}
@@ -173,7 +173,7 @@ function StatsTab({ kingdoms }: { kingdoms: Kingdom[] }) {
           { k: 'Account Age', v: player?.date_joined ? `${Math.floor((Date.now() - new Date(player.date_joined).getTime()) / 86400000)}d` : '?', c: '#8b5cf6' },
         ].map(row => (
           <div key={row.k} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(0,60,100,0.04)' }}>
-            <span style={{ fontSize: 10, color: 'rgba(26,42,58,0.5)' }}>{row.k}</span>
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>{row.k}</span>
             <span style={{ fontSize: 10, fontWeight: 700, color: row.c, fontFamily: "'Share Tech Mono', monospace" }}>{row.v}</span>
           </div>
         ))}
@@ -202,8 +202,8 @@ function StatsTab({ kingdoms }: { kingdoms: Kingdom[] }) {
           })().map(r => (
             <div key={r.name} style={{ textAlign: 'center', padding: '6px 4px', borderRadius: 8, background: 'rgba(0,60,100,0.02)' }}>
               <div style={{ fontSize: 16 }}><EmojiIcon emoji={r.icon} size={16} /></div>
-              <div style={{ fontSize: 9, fontWeight: 700, color: '#1a2a3a', fontFamily: "'Share Tech Mono', monospace" }}>{r.val}</div>
-              <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)' }}>{r.name}/d</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#e2e8f0', fontFamily: "'Share Tech Mono', monospace" }}>{r.val}</div>
+              <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)' }}>{r.name}/d</div>
             </div>
           ))}
         </div>
@@ -234,13 +234,13 @@ export function EmpirePanel({ onClose }: Props) {
 
   return (
     <GlassPanel title="EMPIRE" onClose={onClose} accent="#cc8800">
-      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid rgba(0,60,100,0.08)', marginBottom: 14 }}>
+      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: 14 }}>
         {TABS.map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             flex: 1, padding: '10px 8px', border: 'none', cursor: 'pointer',
             background: tab === t.id ? 'rgba(204,136,0,0.08)' : 'transparent',
             borderBottom: tab === t.id ? '2px solid #cc8800' : '2px solid transparent',
-            color: tab === t.id ? '#cc8800' : 'rgba(26,42,58,0.4)',
+            color: tab === t.id ? '#cc8800' : 'rgba(255,255,255,0.4)',
             fontSize: 8, fontWeight: 700, letterSpacing: 1, fontFamily: "'Orbitron', sans-serif",
           }}>{t.label}</button>
         ))}

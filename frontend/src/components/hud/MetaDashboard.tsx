@@ -47,9 +47,9 @@ export function MetaDashboard({ onClose }: Props) {
     <GlassPanel title="WORLD META" onClose={onClose} accent="#64748b">
       {/* Stats bar */}
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12,
-        padding:'8px 12px', background:'rgba(255,255,255,0.5)', borderRadius:8,
-        border:'1px solid rgba(0,60,100,0.1)', fontFamily:"'Share Tech Mono', monospace" }}>
-        <span style={{ fontSize:9, color:'rgba(26,42,58,0.45)' }}>{totalTerr.toLocaleString()} TERRITORIES</span>
+        padding:'8px 12px', background:'rgba(255,255,255,0.04)', borderRadius:8,
+        border:'1px solid rgba(255,255,255,0.08)', fontFamily:"'Share Tech Mono', monospace" }}>
+        <span style={{ fontSize:9, color:'rgba(255,255,255,0.35)' }}>{totalTerr.toLocaleString()} TERRITORIES</span>
         <span style={{ fontSize:8, color:'#00884a', letterSpacing:1 }}>◆ LIVE</span>
       </div>
 
@@ -63,10 +63,10 @@ export function MetaDashboard({ onClose }: Props) {
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id as any)} style={{
             flex:1, padding:'6px 4px', fontSize:7, fontWeight:tab===t.id?700:500, letterSpacing:1,
-            background: tab===t.id ? 'rgba(100,116,139,0.1)' : 'rgba(255,255,255,0.5)',
-            border: `1px solid ${tab===t.id ? 'rgba(100,116,139,0.3)' : 'rgba(0,60,100,0.1)'}`,
+            background: tab===t.id ? 'rgba(100,116,139,0.1)' : 'rgba(255,255,255,0.04)',
+            border: `1px solid ${tab===t.id ? 'rgba(100,116,139,0.3)' : 'rgba(255,255,255,0.08)'}`,
             borderRadius:20, cursor:'pointer',
-            color: tab===t.id ? '#64748b' : 'rgba(26,42,58,0.4)',
+            color: tab===t.id ? '#64748b' : 'rgba(255,255,255,0.4)',
             fontFamily:"'Orbitron', system-ui, sans-serif",
           }}>{t.label}</button>
         ))}
@@ -92,11 +92,11 @@ export function MetaDashboard({ onClose }: Props) {
                           <div key={rarity} style={{ marginBottom:8 }}>
                             <div style={{ display:'flex', justifyContent:'space-between', marginBottom:4 }}>
                               <span style={{ fontSize:11, color, fontWeight:600 }}>{rarity}</span>
-                              <span style={{ fontSize:11, color:'rgba(26,42,58,0.45)', fontFamily:'monospace' }}>
+                              <span style={{ fontSize:11, color:'rgba(255,255,255,0.35)', fontFamily:'monospace' }}>
                                 {count.toLocaleString()} ({pct.toFixed(1)}%)
                               </span>
                             </div>
-                            <div style={{ height:6, background:'rgba(255,255,255,0.5)', borderRadius:3 }}>
+                            <div style={{ height:6, background:'rgba(255,255,255,0.04)', borderRadius:3 }}>
                               <motion.div
                                 initial={{width:0}} animate={{width:`${pct}%`}} transition={{duration:0.6,ease:'easeOut'}}
                                 style={{ height:'100%', background:color, borderRadius:3 }}
@@ -115,13 +115,13 @@ export function MetaDashboard({ onClose }: Props) {
                         .map(([biome, count]) => (
                           <div key={biome} style={{
                             padding:'8px 10px', borderRadius:8,
-                            background:'rgba(255,255,255,0.5)',
-                            border:'1px solid rgba(0,60,100,0.08)',
+                            background:'rgba(255,255,255,0.04)',
+                            border:'1px solid rgba(255,255,255,0.06)',
                           }}>
                             <div style={{ fontSize:12, fontWeight:700, color: BIOME_COLOR[biome] || '#9CA3AF' }}>
                               {biome}
                             </div>
-                            <div style={{ fontSize:11, color:'rgba(26,42,58,0.35)', fontFamily:'monospace' }}>
+                            <div style={{ fontSize:11, color:'rgba(255,255,255,0.3)', fontFamily:'monospace' }}>
                               {count.toLocaleString()}
                             </div>
                           </div>
@@ -140,11 +140,11 @@ export function MetaDashboard({ onClose }: Props) {
                           ['HEX émis (24h)',   meta.global_stats.hex_emitted_24h?.toLocaleString()],
                         ].map(([label, value]) => (
                           <div key={label as string} style={{
-                            padding:'8px 10px', background:'rgba(255,255,255,0.5)',
-                            borderRadius:8, border:'1px solid rgba(0,60,100,0.08)',
+                            padding:'8px 10px', background:'rgba(255,255,255,0.04)',
+                            borderRadius:8, border:'1px solid rgba(255,255,255,0.06)',
                           }}>
                             <div style={{ fontSize:11, color:'#00884a', fontWeight:700 }}>{value || '—'}</div>
-                            <div style={{ fontSize:9, color:'rgba(26,42,58,0.35)', marginTop:2 }}>{label}</div>
+                            <div style={{ fontSize:9, color:'rgba(255,255,255,0.3)', marginTop:2 }}>{label}</div>
                           </div>
                         ))}
                       </div>
@@ -164,18 +164,18 @@ export function MetaDashboard({ onClose }: Props) {
                       <div key={r.resource} style={{
                         display:'flex', alignItems:'center', gap:10,
                         padding:'8px 10px', marginBottom:6,
-                        background:'rgba(255,255,255,0.5)', borderRadius:8,
+                        background:'rgba(255,255,255,0.04)', borderRadius:8,
                         border:`1px solid ${color}22`,
                       }}>
                         <div style={{ flex:1 }}>
-                          <div style={{ fontSize:11, fontWeight:700, color:'#1a2a3a' }}>{r.resource}</div>
-                          <div style={{ fontSize:9, color:'rgba(26,42,58,0.35)' }}>
+                          <div style={{ fontSize:11, fontWeight:700, color:'#e2e8f0' }}>{r.resource}</div>
+                          <div style={{ fontSize:9, color:'rgba(255,255,255,0.3)' }}>
                             Offre {r.supply?.toLocaleString()} · Demande {r.demand?.toLocaleString()}
                           </div>
                         </div>
                         <div style={{ textAlign:'right', flexShrink:0 }}>
                           <div style={{ fontSize:11, fontWeight:700, color }}>{label}</div>
-                          <div style={{ fontSize:9, color:'rgba(26,42,58,0.35)', fontFamily:'monospace' }}>
+                          <div style={{ fontSize:9, color:'rgba(255,255,255,0.3)', fontFamily:'monospace' }}>
                             ×{pct.toFixed(2)}
                           </div>
                         </div>
@@ -196,17 +196,17 @@ export function MetaDashboard({ onClose }: Props) {
                       <div key={p.id} style={{
                         display:'flex', alignItems:'center', gap:10,
                         padding:'8px 10px', marginBottom:5,
-                        background:'rgba(255,255,255,0.5)', borderRadius:8,
+                        background:'rgba(255,255,255,0.04)', borderRadius:8,
                       }}>
                         <div style={{
                           width:24, height:24, borderRadius:'50%', flexShrink:0,
-                          background: i < 3 ? ['#FFD700','#C0C0C0','#CD7F32'][i]+'33' : 'rgba(0,60,100,0.08)',
+                          background: i < 3 ? ['#FFD700','#C0C0C0','#CD7F32'][i]+'33' : 'rgba(255,255,255,0.06)',
                           display:'flex', alignItems:'center', justifyContent:'center',
                           fontSize:12, fontWeight:800, color: i < 3 ? ['#FFD700','#C0C0C0','#CD7F32'][i] : '#6B7280',
                         }}>{i+1}</div>
                         <div style={{ flex:1 }}>
-                          <div style={{ fontSize:12, fontWeight:700, color:'#1a2a3a' }}>{p.username}</div>
-                          <div style={{ fontSize:9, color:'rgba(26,42,58,0.35)' }}>
+                          <div style={{ fontSize:12, fontWeight:700, color:'#e2e8f0' }}>{p.username}</div>
+                          <div style={{ fontSize:9, color:'rgba(255,255,255,0.3)' }}>
                             {p.territories_owned} zones · rang {p.commander_rank}
                           </div>
                         </div>
@@ -235,10 +235,10 @@ export function MetaDashboard({ onClose }: Props) {
                         display:'flex', alignItems:'center', justifyContent:'center',
                         fontSize:10, fontWeight:800, color:'#EF4444', flexShrink:0 }}>{i+1}</div>
                       <div style={{ flex:1 }}>
-                        <div style={{ fontSize:11, fontWeight:700, color:'#1a2a3a' }}>
+                        <div style={{ fontSize:11, fontWeight:700, color:'#e2e8f0' }}>
                           {z.poi_name || z.h3_index?.slice(0,12)}
                         </div>
-                        <div style={{ fontSize:9, color:'rgba(26,42,58,0.45)' }}>
+                        <div style={{ fontSize:9, color:'rgba(255,255,255,0.35)' }}>
                           {z.rarity} · {z.battle_count} batailles · {z.owner_changes} changements de main
                         </div>
                       </div>
@@ -264,11 +264,11 @@ export function MetaDashboard({ onClose }: Props) {
 function Section({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div style={{ marginBottom:20 }}>
-      <div style={{ fontSize:9, color:'rgba(26,42,58,0.35)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:10,
+      <div style={{ fontSize:9, color:'rgba(255,255,255,0.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:10,
         display:'flex', alignItems:'center', gap:6 }}>
-        <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.5)' }}/>
+        <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.04)' }}/>
         {label}
-        <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.5)' }}/>
+        <div style={{ flex:1, height:1, background:'rgba(255,255,255,0.04)' }}/>
       </div>
       {children}
     </div>

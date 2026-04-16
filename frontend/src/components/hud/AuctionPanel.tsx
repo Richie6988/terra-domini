@@ -202,7 +202,7 @@ export function AuctionPanel({ onClose }: Props) {
         /* ═══ AUCTION LIST ═══ */
         <div>
           <div style={{
-            fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)',
+            fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)',
             fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 10,
           }}>
             {MOCK_AUCTIONS.length} ACTIVE AUCTIONS · RARE++ EDITION UNIQUE
@@ -217,7 +217,7 @@ export function AuctionPanel({ onClose }: Props) {
                 style={{
                   display: 'flex', alignItems: 'center', gap: 12,
                   padding: '14px 16px', borderRadius: 12, cursor: 'pointer',
-                  background: 'rgba(255,255,255,0.5)',
+                  background: 'rgba(255,255,255,0.04)',
                   border: `1.5px solid ${RARITY_COLORS[a.rarity]}25`,
                   textAlign: 'left', width: '100%',
                 }}
@@ -226,7 +226,7 @@ export function AuctionPanel({ onClose }: Props) {
                 <div style={{ flex: 1 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                     <span style={{
-                      fontSize: 10, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1,
+                      fontSize: 10, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1,
                       fontFamily: "'Orbitron', system-ui, sans-serif",
                     }}>{a.tokenName}</span>
                     <span style={{
@@ -234,9 +234,9 @@ export function AuctionPanel({ onClose }: Props) {
                       background: RARITY_COLORS[a.rarity] + '15',
                       color: RARITY_COLORS[a.rarity],
                     }}>{a.rarity.toUpperCase()}</span>
-                    <span style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)' }}>{a.edition}</span>
+                    <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)' }}>{a.edition}</span>
                   </div>
-                  <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>
+                  <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
                     {a.bidCount} bids · Top: {a.topBidder}
                   </div>
                 </div>
@@ -265,8 +265,8 @@ export function AuctionPanel({ onClose }: Props) {
           {/* Back button */}
           <button onClick={() => setSelected(null)} style={{
             padding: '6px 12px', borderRadius: 16, cursor: 'pointer', marginBottom: 10,
-            background: 'rgba(0,60,100,0.06)', border: '1px solid rgba(0,60,100,0.1)',
-            color: 'rgba(26,42,58,0.45)', fontSize: 8, fontFamily: "'Orbitron', system-ui, sans-serif",
+            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+            color: 'rgba(255,255,255,0.35)', fontSize: 8, fontFamily: "'Orbitron', system-ui, sans-serif",
           }}>← BACK TO AUCTIONS</button>
 
           {/* Token + Bid area — side by side */}
@@ -279,14 +279,14 @@ export function AuctionPanel({ onClose }: Props) {
               cursor: 'pointer',
             }} onClick={() => setShow3D(true)}>
               <TokenHexPreview iconId={selected.tokenIcon} rarity={selected.rarity || 'rare'} catColor={selected.catColor || '#cc8800'} size={64} />
-              <div style={{ fontSize: 8, fontWeight: 900, color: '#1a2a3a', marginTop: 6, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+              <div style={{ fontSize: 8, fontWeight: 900, color: '#e2e8f0', marginTop: 6, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                 {selected.tokenName}
               </div>
               <div style={{ display: 'flex', gap: 3, justifyContent: 'center', marginTop: 4 }}>
                 <span style={{ padding: '1px 6px', borderRadius: 8, fontSize: 6, fontWeight: 700, background: RARITY_COLORS[selected.rarity] + '15', color: RARITY_COLORS[selected.rarity] }}>
                   {selected.rarity.toUpperCase()}
                 </span>
-                <span style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)' }}>{selected.edition}</span>
+                <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)' }}>{selected.edition}</span>
               </div>
               <div style={{ fontSize: 6, color: '#0099cc', marginTop: 4 }}>◆ TAP FOR 3D VIEW</div>
             </div>
@@ -299,7 +299,7 @@ export function AuctionPanel({ onClose }: Props) {
                 background: countdowns[selected.id] === 'ENDED' ? 'rgba(220,38,38,0.08)' : 'rgba(0,153,204,0.06)',
                 border: `1px solid ${countdowns[selected.id] === 'ENDED' ? 'rgba(220,38,38,0.2)' : 'rgba(0,153,204,0.15)'}`,
               }}>
-                <div style={{ fontSize: 7, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                <div style={{ fontSize: 7, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                   AUCTION ENDS IN
                 </div>
                 <div style={{
@@ -317,14 +317,14 @@ export function AuctionPanel({ onClose }: Props) {
                 background: 'rgba(204,136,0,0.06)', border: '1px solid rgba(204,136,0,0.15)',
               }}>
                 <div>
-                  <div style={{ fontSize: 6, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>CURRENT BID</div>
+                  <div style={{ fontSize: 6, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>CURRENT BID</div>
                   <div style={{ fontSize: 18, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace", display: 'flex', alignItems: 'center', gap: 4 }}>
                     <CrystalIcon size="md" />{selected.currentBid.toLocaleString()}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: 6, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>TOP BIDDER</div>
-                  <div style={{ fontSize: 10, fontWeight: 700, color: '#1a2a3a' }}>{selected.topBidder}</div>
+                  <div style={{ fontSize: 6, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>TOP BIDDER</div>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: '#e2e8f0' }}>{selected.topBidder}</div>
                 </div>
               </div>
 
@@ -336,8 +336,8 @@ export function AuctionPanel({ onClose }: Props) {
                   placeholder={`Min: ${(selected.currentBid + 100).toLocaleString()}`}
                   style={{
                     flex: 1, padding: '10px 12px', borderRadius: 10,
-                    background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.1)',
-                    fontSize: 12, fontWeight: 700, color: '#1a2a3a', outline: 'none',
+                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+                    fontSize: 12, fontWeight: 700, color: '#e2e8f0', outline: 'none',
                     fontFamily: "'Share Tech Mono', monospace",
                   }}
                 />
@@ -357,11 +357,11 @@ export function AuctionPanel({ onClose }: Props) {
           {/* Live chat */}
           <div style={{
             borderRadius: 10, overflow: 'hidden',
-            border: '1px solid rgba(0,60,100,0.1)',
+            border: '1px solid rgba(255,255,255,0.08)',
           }}>
             <div style={{
               padding: '8px 12px', background: 'rgba(0,60,100,0.04)',
-              fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)',
+              fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)',
               fontFamily: "'Orbitron', system-ui, sans-serif",
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
@@ -381,11 +381,11 @@ export function AuctionPanel({ onClose }: Props) {
                 }}>
                   <span style={{
                     fontSize: 7, fontWeight: 900,
-                    color: msg.user === 'YOU' ? '#0099cc' : msg.user === 'SYSTEM' ? '#22c55e' : msg.isBid ? '#cc8800' : 'rgba(26,42,58,0.5)',
+                    color: msg.user === 'YOU' ? '#0099cc' : msg.user === 'SYSTEM' ? '#22c55e' : msg.isBid ? '#cc8800' : 'rgba(255,255,255,0.45)',
                     fontFamily: "'Orbitron', system-ui, sans-serif", flexShrink: 0,
                   }}>{msg.user}</span>
                   <span style={{
-                    fontSize: 8, color: msg.isBid ? '#cc8800' : 'rgba(26,42,58,0.6)',
+                    fontSize: 8, color: msg.isBid ? '#cc8800' : 'rgba(255,255,255,0.04)',
                     fontWeight: msg.isBid ? 700 : 400, flex: 1,
                   }}>{msg.text}</span>
                   <span style={{ fontSize: 6, color: 'rgba(26,42,58,0.25)', flexShrink: 0 }}>{msg.time}</span>
@@ -413,8 +413,8 @@ export function AuctionPanel({ onClose }: Props) {
                 placeholder={wsConnected ? "Type a message..." : "Chat (local mode)..."}
                 style={{
                   flex: 1, padding: '6px 10px', borderRadius: 8,
-                  background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.08)',
-                  fontSize: 8, color: '#1a2a3a', outline: 'none',
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
+                  fontSize: 8, color: '#e2e8f0', outline: 'none',
                 }}
               />
               <button onClick={handleChat} style={{

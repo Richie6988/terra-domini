@@ -90,8 +90,8 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
         onClick={() => setOpen(!open)}
         style={{
           width: 36, height: 36, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: open ? 'rgba(204,136,0,0.12)' : 'rgba(235,242,250,0.92)',
-          border: `1px solid ${open ? 'rgba(204,136,0,0.3)' : 'rgba(0,60,100,0.12)'}`,
+          background: open ? 'rgba(204,136,0,0.12)' : 'rgba(13,27,42,0.92)',
+          border: `1px solid ${open ? 'rgba(204,136,0,0.3)' : 'rgba(255,255,255,0.1)'}`,
           cursor: 'pointer', color: open ? '#cc8800' : '#6b7280',
         }}
         title="Favorite locations"
@@ -107,14 +107,14 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
             exit={{ opacity: 0, scale: 0.9 }}
             style={{
               position: 'absolute', bottom: 44, left: 0, width: 260,
-              background: 'rgba(235,242,250,0.97)', backdropFilter: 'blur(20px)',
+              background: 'rgba(13,27,42,0.97)', backdropFilter: 'blur(20px)',
               borderRadius: 12,
-              border: '1px solid rgba(0,60,100,0.12)', overflow: 'hidden',
+              border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden',
               boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
             }}
           >
             {/* Header */}
-            <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(0,60,100,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: '#cc8800' }}>⭐ Saved Locations</span>
               <button
                 onClick={() => addPin(currentLat, currentLon, currentZoom)}
@@ -127,7 +127,7 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
             {/* Pin list */}
             <div style={{ maxHeight: 280, overflowY: 'auto' }}>
               {pins.length === 0 ? (
-                <div style={{ padding: '20px 12px', textAlign: 'center', color: 'rgba(26,42,58,0.4)', fontSize: 12 }}>
+                <div style={{ padding: '20px 12px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
                   No saved locations yet.<br />Navigate somewhere and click "Save here"
                 </div>
               ) : pins.map(pin => (
@@ -143,16 +143,16 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
                         onChange={e => setEditName(e.target.value)}
                         onBlur={() => { renamePin(pin.id, editName || pin.name); setEditingId(null) }}
                         onKeyDown={e => e.key === 'Enter' && (renamePin(pin.id, editName || pin.name), setEditingId(null))}
-                        style={{ background: 'rgba(0,60,100,0.04)', border: '1px solid rgba(0,60,100,0.12)', borderRadius: 4, padding: '2px 6px', color: '#1a2a3a', fontSize: 12, width: '100%', outline: 'none' }}
+                        style={{ background: 'rgba(0,60,100,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, padding: '2px 6px', color: '#e2e8f0', fontSize: 12, width: '100%', outline: 'none' }}
                       />
                     ) : (
                       <div onDoubleClick={() => { setEditingId(String(pin.id)); setEditName(pin.name) }}
-                        style={{ fontSize: 12, color: '#1a2a3a', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
+                        style={{ fontSize: 12, color: '#e2e8f0', cursor: 'pointer', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                         title="Double-click to rename">
                         {pin.name}
                       </div>
                     )}
-                    <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.4)', fontFamily: 'monospace' }}>
+                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>
                       {pin.lat.toFixed(3)}, {pin.lon.toFixed(3)}
                     </div>
                   </div>

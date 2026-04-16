@@ -67,7 +67,7 @@ export function ClaimProgressBar({ claim, compact = false, onComplete }: {
         {/* Mini progress bar */}
         <div style={{
           flex: 1, height: 4, borderRadius: 2,
-          background: 'rgba(0,60,100,0.1)', overflow: 'hidden',
+          background: 'rgba(255,255,255,0.08)', overflow: 'hidden',
         }}>
           <div style={{
             width: `${pct * 100}%`, height: '100%', borderRadius: 2,
@@ -88,7 +88,7 @@ export function ClaimProgressBar({ claim, compact = false, onComplete }: {
   return (
     <div style={{
       padding: '10px 14px', borderRadius: 12,
-      background: 'linear-gradient(180deg, rgba(235,242,250,0.95), rgba(220,230,242,0.92))',
+      background: 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(220,230,242,0.92))',
       border: `1px solid ${methodColor}30`,
       boxShadow: `0 2px 12px ${methodColor}15`,
     }}>
@@ -97,7 +97,7 @@ export function ClaimProgressBar({ claim, compact = false, onComplete }: {
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           <span style={{ fontSize: 14 }}>{methodIcon}</span>
           <span style={{
-            fontSize: 9, fontWeight: 700, color: '#1a2a3a', letterSpacing: 1,
+            fontSize: 9, fontWeight: 700, color: '#e2e8f0', letterSpacing: 1,
             fontFamily: "'Orbitron', sans-serif",
           }}>
             {claim.method === 'explore' ? 'EXPLORING' : claim.method === 'attack' ? 'ATTACKING' : 'BUYING'}
@@ -113,7 +113,7 @@ export function ClaimProgressBar({ claim, compact = false, onComplete }: {
 
       {/* Territory name */}
       <div style={{
-        fontSize: 11, fontWeight: 700, color: '#1a2a3a', marginBottom: 6,
+        fontSize: 11, fontWeight: 700, color: '#e2e8f0', marginBottom: 6,
         overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
       }}>
         {claim.territory_name}
@@ -122,7 +122,7 @@ export function ClaimProgressBar({ claim, compact = false, onComplete }: {
       {/* Progress bar */}
       <div style={{
         height: 8, borderRadius: 4,
-        background: 'rgba(0,60,100,0.08)', overflow: 'hidden',
+        background: 'rgba(255,255,255,0.06)', overflow: 'hidden',
       }}>
         <div style={{
           width: `${pct * 100}%`, height: '100%', borderRadius: 4,
@@ -135,7 +135,7 @@ export function ClaimProgressBar({ claim, compact = false, onComplete }: {
       {/* Footer */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', marginTop: 4,
-        fontSize: 7, color: 'rgba(26,42,58,0.4)',
+        fontSize: 7, color: 'rgba(255,255,255,0.4)',
       }}>
         <span>{Math.round(pct * 100)}%</span>
         <span>{claim.is_adjacent ? 'Adjacent' : 'Distant'} · {claim.hours_required}h total</span>
@@ -154,7 +154,7 @@ export function PendingClaimsList({ claims, onClaimComplete }: {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{
-        fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)',
+        fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)',
         fontFamily: "'Orbitron', sans-serif", marginBottom: 2,
       }}>
         ONGOING CLAIMS ({claims.length})

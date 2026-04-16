@@ -78,7 +78,7 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
       </div>
 
       <div style={{
-        fontSize: 8, color: 'rgba(26,42,58,0.5)', lineHeight: 1.6, marginBottom: 12, textAlign: 'center',
+        fontSize: 8, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 12, textAlign: 'center',
       }}>
         This territory will become your capital. Name your kingdom and choose its banner color.
       </div>
@@ -86,7 +86,7 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
       {/* Name input */}
       <div style={{ marginBottom: 12 }}>
         <div style={{
-          fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', marginBottom: 4,
+          fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', marginBottom: 4,
           fontFamily: "'Orbitron', system-ui, sans-serif",
         }}>
           KINGDOM NAME
@@ -99,8 +99,8 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
           maxLength={32}
           style={{
             width: '100%', padding: '10px 12px', borderRadius: 8,
-            background: 'rgba(255,255,255,0.6)', border: '1px solid rgba(0,60,100,0.12)',
-            color: '#1a2a3a', fontSize: 12, outline: 'none', boxSizing: 'border-box',
+            background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+            color: '#e2e8f0', fontSize: 12, outline: 'none', boxSizing: 'border-box',
             fontFamily: "'Share Tech Mono', monospace",
             textTransform: 'none', letterSpacing: 0,
           }}
@@ -110,7 +110,7 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
       {/* Color picker */}
       <div style={{ marginBottom: 14 }}>
         <div style={{
-          fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', marginBottom: 6,
+          fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', marginBottom: 6,
           fontFamily: "'Orbitron', system-ui, sans-serif",
         }}>
           BANNER COLOR
@@ -149,8 +149,8 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
           onClick={onCancel}
           style={{
             padding: '10px 16px', borderRadius: 20, cursor: 'pointer',
-            background: 'rgba(0,60,100,0.06)', border: '1px solid rgba(0,60,100,0.1)',
-            color: 'rgba(26,42,58,0.45)', fontSize: 8, fontWeight: 500,
+            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+            color: 'rgba(255,255,255,0.35)', fontSize: 8, fontWeight: 500,
             fontFamily: "'Orbitron', system-ui, sans-serif",
           }}
         >
@@ -175,8 +175,8 @@ function MethodCard({ method, cost, onSelect, disabled }: {
       disabled={disabled}
       style={{
         width: '100%', padding: 12, borderRadius: 10, cursor: disabled ? 'not-allowed' : 'pointer',
-        background: disabled ? 'rgba(0,60,100,0.03)' : `linear-gradient(135deg, ${method.color}08, transparent)`,
-        border: `1.5px solid ${disabled ? 'rgba(0,60,100,0.08)' : `${method.color}25`}`,
+        background: disabled ? 'rgba(255,255,255,0.03)' : `linear-gradient(135deg, ${method.color}08, transparent)`,
+        border: `1.5px solid ${disabled ? 'rgba(255,255,255,0.06)' : `${method.color}25`}`,
         opacity: disabled ? 0.5 : 1,
         textAlign: 'left', display: 'flex', flexDirection: 'column', gap: 6,
         transition: 'all 0.25s ease',
@@ -191,7 +191,7 @@ function MethodCard({ method, cost, onSelect, disabled }: {
           }}>
             {method.name}
           </div>
-          <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>
+          <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
             {method.desc}
           </div>
         </div>
@@ -221,7 +221,7 @@ function CostPill({ label, value, color }: { label: string; value: string; color
       fontFamily: "'Share Tech Mono', monospace",
       display: 'flex', gap: 4, alignItems: 'center',
     }}>
-      <span style={{ color: 'rgba(26,42,58,0.4)' }}>{label}</span>
+      <span style={{ color: 'rgba(255,255,255,0.4)' }}>{label}</span>
       <span style={{ color }}>{value}</span>
     </div>
   )
@@ -330,7 +330,7 @@ export function ConquestActions({ territory, onClaimed }: Props) {
             style={{ display: 'flex', flexDirection: 'column', gap: 6 }}
           >
             <div style={{
-              fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)',
+              fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)',
               fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 2,
             }}>
               {isUnclaimed ? 'CLAIM METHOD' : 'CONQUEST METHOD'}
@@ -365,8 +365,8 @@ export function ConquestActions({ territory, onClaimed }: Props) {
             exit={{ opacity: 0 }}
             style={{
               padding: 14, borderRadius: 10,
-              background: 'rgba(255,255,255,0.5)',
-              border: '1px solid rgba(0,60,100,0.1)',
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.08)',
             }}
           >
             <div style={{
@@ -382,14 +382,14 @@ export function ConquestActions({ territory, onClaimed }: Props) {
               display: 'flex', justifyContent: 'center', gap: 12, marginBottom: 12,
             }}>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>COST</div>
+                <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>COST</div>
                 <div style={{ fontSize: 16, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
                   <CrystalIcon size="sm" /> {costs[selectedMethod].baseCost.toLocaleString()}
                 </div>
               </div>
               {costs[selectedMethod].successChance !== undefined && (
                 <div style={{ textAlign: 'center' }}>
-                  <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>SUCCESS</div>
+                  <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>SUCCESS</div>
                   <div style={{ fontSize: 16, fontWeight: 900, color: costs[selectedMethod].successChance! > 0.6 ? '#00884a' : '#dc2626', fontFamily: "'Share Tech Mono', monospace" }}>
                     {Math.floor(costs[selectedMethod].successChance! * 100)}%
                   </div>
@@ -427,8 +427,8 @@ export function ConquestActions({ territory, onClaimed }: Props) {
                 onClick={() => setMode('methods')}
                 style={{
                   padding: '10px 16px', borderRadius: 20, cursor: 'pointer',
-                  background: 'rgba(0,60,100,0.06)', border: '1px solid rgba(0,60,100,0.1)',
-                  color: 'rgba(26,42,58,0.45)', fontSize: 8,
+                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
+                  color: 'rgba(255,255,255,0.35)', fontSize: 8,
                   fontFamily: "'Orbitron', system-ui, sans-serif",
                 }}
               >

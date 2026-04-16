@@ -186,7 +186,7 @@ function GameScreen() {
       style={{
         position: 'relative', width: '100vw', height: '100vh',
         overflow: 'hidden',
-        background: 'linear-gradient(135deg, #2d5a45, #1a3d2e)',
+        background: '#060e1a',
       }}
     >
       {/* ═══ HEXOD SHELL ═══ */}
@@ -326,7 +326,7 @@ export default function App() {
           <div style={{
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             height: '100vh',
-            background: 'linear-gradient(135deg, #2d5a45, #1a3d2e)',
+            background: '#060e1a',
             color: '#0099cc',
             fontSize: 12,
             fontFamily: "'Orbitron', system-ui, sans-serif",

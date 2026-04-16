@@ -107,12 +107,12 @@ export function CombatPanel({ onClose }: Props) {
       }}>
         <div style={{ flex: 1, textAlign: 'center' }}>
           <div style={{ fontSize: 18, fontWeight: 900, color: '#dc2626', fontFamily: "'Share Tech Mono'" }}>{force.attack}</div>
-          <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, ...s }}>ATTACK FORCE</div>
+          <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, ...s }}>ATTACK FORCE</div>
         </div>
-        <div style={{ width: 1, background: 'rgba(0,60,100,0.1)' }} />
+        <div style={{ width: 1, background: 'rgba(255,255,255,0.08)' }} />
         <div style={{ flex: 1, textAlign: 'center' }}>
           <div style={{ fontSize: 18, fontWeight: 900, color: '#3b82f6', fontFamily: "'Share Tech Mono'" }}>{force.defense}</div>
-          <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, ...s }}>DEFENSE FORCE</div>
+          <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, ...s }}>DEFENSE FORCE</div>
         </div>
       </div>
 
@@ -122,9 +122,9 @@ export function CombatPanel({ onClose }: Props) {
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             flex: 1, padding: '7px', borderRadius: 16, cursor: 'pointer',
             fontSize: 7, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
-            background: tab === t.id ? 'rgba(220,38,38,0.08)' : 'rgba(255,255,255,0.5)',
-            color: tab === t.id ? '#dc2626' : 'rgba(26,42,58,0.45)',
-            border: `1px solid ${tab === t.id ? 'rgba(220,38,38,0.25)' : 'rgba(0,60,100,0.1)'}`,
+            background: tab === t.id ? 'rgba(220,38,38,0.08)' : 'rgba(255,255,255,0.04)',
+            color: tab === t.id ? '#dc2626' : 'rgba(255,255,255,0.35)',
+            border: `1px solid ${tab === t.id ? 'rgba(220,38,38,0.25)' : 'rgba(255,255,255,0.08)'}`,
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, ...s,
           }}><IconSVG id={t.iconId} size={10} /> {t.label}</button>
         ))}
@@ -142,7 +142,7 @@ export function CombatPanel({ onClose }: Props) {
               <IconSVG id="gear" size={10} /> {training.filter(t=>!t.done).length} TRAINING
             </div>
             {training.filter(t => !t.done).map(t => (
-              <div key={t.id} style={{ fontSize: 7, color: 'rgba(26,42,58,0.5)', marginTop: 2, fontFamily: "'Share Tech Mono'" }}>
+              <div key={t.id} style={{ fontSize: 7, color: 'rgba(255,255,255,0.45)', marginTop: 2, fontFamily: "'Share Tech Mono'" }}>
                 {t.quantity}x {units[t.unit_type]?.name || t.unit_type} — {formatTime(Math.max(0, t.remaining_seconds - tick))}
               </div>
             ))}
@@ -160,7 +160,7 @@ export function CombatPanel({ onClose }: Props) {
       {/* ═══ RECRUIT TAB ═══ */}
       {tab === 'recruit' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {isLoading && <div style={{ textAlign: 'center', color: 'rgba(26,42,58,0.3)', fontSize: 9, padding: 20 }}>Loading army...</div>}
+          {isLoading && <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.25)', fontSize: 9, padding: 20 }}>Loading army...</div>}
           {Object.entries(units).map(([key, u]) => {
             const color = UNIT_COLORS[key] || '#64748b'
             const qty = recruitQty[key] || 1
@@ -168,7 +168,7 @@ export function CombatPanel({ onClose }: Props) {
             return (
               <div key={key} style={{
                 padding: '12px 14px', borderRadius: 12,
-                background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.08)',
+                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <div style={{
@@ -179,18 +179,18 @@ export function CombatPanel({ onClose }: Props) {
                     <IconSVG id={u.icon} size={22} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 10, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1, ...s }}>{u.name}</div>
-                    <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>{u.desc}</div>
+                    <div style={{ fontSize: 10, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1, ...s }}>{u.name}</div>
+                    <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{u.desc}</div>
                     <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
                       <span style={{ fontSize: 7, color: '#dc2626', fontWeight: 700, ...s }}>ATK {u.atk}</span>
                       <span style={{ fontSize: 7, color: '#3b82f6', fontWeight: 700, ...s }}>DEF {u.def}</span>
                       <span style={{ fontSize: 7, color: '#cc8800', fontWeight: 700, ...s }}>{u.cost} HEX</span>
-                      <span style={{ fontSize: 7, color: 'rgba(26,42,58,0.35)', ...s }}>{formatDuration(u.effective_train_seconds)}/unit</span>
+                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.3)', ...s }}>{formatDuration(u.effective_train_seconds)}/unit</span>
                     </div>
                   </div>
                   <div style={{ textAlign: 'right' }}>
                     <div style={{ fontSize: 14, fontWeight: 900, color, fontFamily: "'Share Tech Mono'" }}>{u.owned}</div>
-                    <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)', ...s }}>OWNED</div>
+                    <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)', ...s }}>OWNED</div>
                   </div>
                 </div>
 
@@ -199,9 +199,9 @@ export function CombatPanel({ onClose }: Props) {
                   {[1, 5, 10, 25].map(n => (
                     <button key={n} onClick={() => setRecruitQty(prev => ({...prev, [key]: n}))} style={{
                       padding: '4px 8px', borderRadius: 8, cursor: 'pointer', fontSize: 8, fontWeight: 700,
-                      background: qty === n ? `${color}15` : 'rgba(0,60,100,0.03)',
-                      border: `1px solid ${qty === n ? color+'40' : 'rgba(0,60,100,0.08)'}`,
-                      color: qty === n ? color : 'rgba(26,42,58,0.4)', ...s,
+                      background: qty === n ? `${color}15` : 'rgba(255,255,255,0.03)',
+                      border: `1px solid ${qty === n ? color+'40' : 'rgba(255,255,255,0.06)'}`,
+                      color: qty === n ? color : 'rgba(255,255,255,0.4)', ...s,
                     }}>{n}</button>
                   ))}
                   <div style={{ flex: 1 }} />
@@ -223,7 +223,7 @@ export function CombatPanel({ onClose }: Props) {
       {tab === 'train' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {training.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 20, color: 'rgba(26,42,58,0.4)', fontSize: 9, ...s }}>
+            <div style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.4)', fontSize: 9, ...s }}>
               No active training. Recruit units to start.
             </div>
           )}
@@ -238,16 +238,16 @@ export function CombatPanel({ onClose }: Props) {
             return (
               <div key={t.id} style={{
                 padding: '12px 14px', borderRadius: 12,
-                background: t.done ? 'rgba(34,197,94,0.04)' : 'rgba(255,255,255,0.5)',
-                border: `1px solid ${t.done ? 'rgba(34,197,94,0.2)' : 'rgba(0,60,100,0.08)'}`,
+                background: t.done ? 'rgba(34,197,94,0.04)' : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${t.done ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.06)'}`,
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <IconSVG id={u?.icon || 'swords'} size={24} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 9, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1, ...s }}>
+                    <div style={{ fontSize: 9, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1, ...s }}>
                       {t.quantity}x {u?.name || t.unit_type}
                     </div>
-                    <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>
+                    <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
                       {t.done ? 'TRAINING COMPLETE' : `${formatTime(remaining)} remaining`}
                     </div>
                   </div>
@@ -262,14 +262,14 @@ export function CombatPanel({ onClose }: Props) {
                 {/* Progress bar */}
                 {!t.done && (
                   <div style={{ marginTop: 8 }}>
-                    <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,60,100,0.06)', overflow: 'hidden' }}>
+                    <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                       <div style={{
                         height: '100%', width: `${pct}%`, borderRadius: 3,
                         background: `linear-gradient(90deg, ${color}, ${color}cc)`,
                         transition: 'width 1s linear',
                       }} />
                     </div>
-                    <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)', marginTop: 3, textAlign: 'right', ...s }}>
+                    <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)', marginTop: 3, textAlign: 'right', ...s }}>
                       {Math.round(pct)}%
                     </div>
                   </div>
@@ -282,7 +282,7 @@ export function CombatPanel({ onClose }: Props) {
 
       {/* ═══ HISTORY TAB ═══ */}
       {tab === 'history' && (
-        <div style={{ textAlign: 'center', padding: 30, color: 'rgba(26,42,58,0.3)', fontSize: 9, ...s }}>
+        <div style={{ textAlign: 'center', padding: 30, color: 'rgba(255,255,255,0.25)', fontSize: 9, ...s }}>
           Battle history coming soon
         </div>
       )}

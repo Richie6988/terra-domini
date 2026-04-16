@@ -81,7 +81,7 @@ export function RadarWidget() {
 
     return (
       <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size}>
-        <circle cx={cx} cy={cy} r={r + 4} fill="rgba(235,242,250,0.85)" stroke="rgba(0,60,100,0.15)" strokeWidth="1" />
+        <circle cx={cx} cy={cy} r={r + 4} fill="rgba(235,242,250,0.85)" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
         <circle cx={cx} cy={cy} r={r * 0.75} fill="none" stroke="rgba(0,153,204,0.1)" strokeWidth="0.5" />
         <circle cx={cx} cy={cy} r={r * 0.5} fill="none" stroke="rgba(0,153,204,0.1)" strokeWidth="0.5" />
         <circle cx={cx} cy={cy} r={r * 0.25} fill="none" stroke="rgba(0,153,204,0.1)" strokeWidth="0.5" />
@@ -176,7 +176,7 @@ export function RadarWidget() {
             onClick={() => setExpanded(false)}
             style={{
               position: 'fixed', inset: 0, zIndex: 1500,
-              background: 'rgba(26,42,58,0.4)', backdropFilter: 'blur(8px)',
+              background: 'rgba(255,255,255,0.4)', backdropFilter: 'blur(8px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexDirection: 'column', gap: 12,
             }}
@@ -194,9 +194,9 @@ export function RadarWidget() {
                 onClick={e => e.stopPropagation()}
                 style={{
                   padding: '12px 20px', borderRadius: 14,
-                  background: 'linear-gradient(180deg, rgba(235,242,250,0.97), rgba(220,230,242,0.97))',
+                  background: 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(10,22,40,0.95))',
                   backdropFilter: 'blur(30px)',
-                  border: '1px solid rgba(0,60,100,0.15)',
+                  border: '1px solid rgba(255,255,255,0.12)',
                   boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
                   fontFamily: "'Orbitron', system-ui, sans-serif",
                   display: 'flex', alignItems: 'center', gap: 16,
@@ -211,10 +211,10 @@ export function RadarWidget() {
                   fontSize: 22,
                 }}><EmojiIcon emoji="🎯" /></div>
                 <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 9, fontWeight: 900, color: '#1a2a3a', letterSpacing: 2 }}>
+                  <div style={{ fontSize: 9, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2 }}>
                     ACTIVE SAFARI
                   </div>
-                  <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>
+                  <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
                     Track the target using clues · Check Safari panel for details
                   </div>
                 </div>

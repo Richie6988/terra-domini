@@ -75,12 +75,12 @@ function SkillNodeCard({
         border: `1.5px solid ${
           state.completed ? color
           : state.available ? 'rgba(204,136,0,0.4)'
-          : 'rgba(0,60,100,0.1)'
+          : 'rgba(255,255,255,0.08)'
         }`,
         boxShadow: state.completed
-          ? `0 0 12px ${color}30, inset 0 1px 0 rgba(255,255,255,0.5)`
+          ? `0 0 12px ${color}30, inset 0 1px 0 rgba(255,255,255,0.04)`
           : state.available
-            ? '0 2px 8px rgba(204,136,0,0.15), inset 0 1px 0 rgba(255,255,255,0.5)'
+            ? '0 2px 8px rgba(204,136,0,0.15), inset 0 1px 0 rgba(255,255,255,0.04)'
             : 'inset 0 1px 0 rgba(255,255,255,0.3)',
         transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
         position: 'relative',
@@ -93,8 +93,8 @@ function SkillNodeCard({
           fontSize: 6, fontWeight: 900, letterSpacing: 2,
           color: state.forkLocked ? 'rgba(26,42,58,0.2)' : color,
           fontFamily: "'Orbitron', system-ui, sans-serif",
-          background: 'rgba(255,255,255,0.9)', padding: '2px 6px', borderRadius: 8,
-          border: `1px solid ${state.forkLocked ? 'rgba(0,60,100,0.1)' : `${color}40`}`,
+          background: 'rgba(255,255,255,0.08)', padding: '2px 6px', borderRadius: 8,
+          border: `1px solid ${state.forkLocked ? 'rgba(255,255,255,0.08)' : `${color}40`}`,
         }}>
           {state.forkLocked ? 'LOCKED' : 'FORK'}
         </div>
@@ -107,7 +107,7 @@ function SkillNodeCard({
           fontSize: 6, fontWeight: 900, letterSpacing: 2,
           color: '#fbbf24',
           fontFamily: "'Orbitron', system-ui, sans-serif",
-          background: 'rgba(255,255,255,0.9)', padding: '2px 8px', borderRadius: 8,
+          background: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: 8,
           border: '1px solid rgba(251,191,36,0.3)',
         }}>
           ★ ULTIMATE
@@ -117,17 +117,17 @@ function SkillNodeCard({
       {/* Header: icon + name + status */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
         <div style={{ filter: state.completed ? `drop-shadow(0 0 4px ${color})` : 'none' }}>
-          <SkillIconSVG skillId={skill.id} size={22} color={state.completed ? color : 'rgba(26,42,58,0.6)'} />
+          <SkillIconSVG skillId={skill.id} size={22} color={state.completed ? color : 'rgba(255,255,255,0.04)'} />
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{
-            fontSize: 8, fontWeight: 800, color: '#1a2a3a', letterSpacing: 1,
+            fontSize: 8, fontWeight: 800, color: '#e2e8f0', letterSpacing: 1,
             fontFamily: "'Orbitron', system-ui, sans-serif",
             overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
           }}>
             {skill.name.toUpperCase()}
           </div>
-          <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.5)', letterSpacing: 0.5 }}>
+          <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.45)', letterSpacing: 0.5 }}>
             {skill.effect}
           </div>
         </div>
@@ -143,7 +143,7 @@ function SkillNodeCard({
       {state.max > 0 && (
         <div style={{
           height: 4, borderRadius: 2, overflow: 'hidden',
-          background: 'rgba(0,60,100,0.08)', marginBottom: 4,
+          background: 'rgba(255,255,255,0.06)', marginBottom: 4,
         }}>
           <motion.div
             initial={{ width: 0 }}
@@ -163,7 +163,7 @@ function SkillNodeCard({
       {/* Cost + pour hint */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        fontSize: 7, color: 'rgba(26,42,58,0.4)',
+        fontSize: 7, color: 'rgba(255,255,255,0.4)',
         fontFamily: "'Share Tech Mono', monospace",
       }}>
         <span>{state.filled}/{state.max} ◆</span>
@@ -224,7 +224,7 @@ function BranchColumn({
               }}>
                 {branch.name.toUpperCase()}
               </div>
-              <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 1 }}>
+              <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1 }}>
                 {completed}/{total} SKILLS
               </div>
             </div>
@@ -234,7 +234,7 @@ function BranchColumn({
           <div style={{ marginBottom: 6 }}>
             <div style={{
               height: 6, borderRadius: 3, overflow: 'hidden',
-              background: 'rgba(0,60,100,0.06)',
+              background: 'rgba(255,255,255,0.05)',
             }}>
               <motion.div
                 animate={{ width: `${Math.min((reservoir / 5000) * 100, 100)}%` }}
@@ -247,7 +247,7 @@ function BranchColumn({
             </div>
             <div style={{
               display: 'flex', justifyContent: 'space-between',
-              fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 2,
+              fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2,
               fontFamily: "'Share Tech Mono', monospace",
             }}>
               <span>{Math.floor(reservoir).toLocaleString()} ◆</span>
@@ -263,7 +263,7 @@ function BranchColumn({
               min={0} max={100} value={alloc}
               onChange={e => onAllocChange(branch.id, parseInt(e.target.value))}
               style={{
-                flex: 1, height: 4, appearance: 'none', background: 'rgba(0,60,100,0.08)',
+                flex: 1, height: 4, appearance: 'none', background: 'rgba(255,255,255,0.06)',
                 borderRadius: 2, outline: 'none', cursor: 'pointer',
                 accentColor: color,
               }}
@@ -294,7 +294,7 @@ function BranchColumn({
               {/* Fork label */}
               <div style={{
                 textAlign: 'center', fontSize: 6, fontWeight: 700,
-                color: 'rgba(26,42,58,0.3)', letterSpacing: 3, marginTop: 2,
+                color: 'rgba(255,255,255,0.25)', letterSpacing: 3, marginTop: 2,
                 fontFamily: "'Orbitron', system-ui, sans-serif",
               }}>
                 ── CHOOSE ONE ──
@@ -334,7 +334,7 @@ function BranchColumn({
                 width: 2, height: 12, margin: '0 auto',
                 background: prevCompleted
                   ? `linear-gradient(to bottom, ${color}, ${color}60)`
-                  : 'rgba(0,60,100,0.08)',
+                  : 'rgba(255,255,255,0.06)',
                 borderRadius: 1,
               }} />
             )}
@@ -393,7 +393,7 @@ export function SkillTreeView({ kingdom, onPour, onForkChoice, onBranchAllocChan
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         marginBottom: 12, padding: '8px 12px',
         background: 'rgba(255,255,255,0.4)', borderRadius: 8,
-        border: '1px solid rgba(0,60,100,0.1)',
+        border: '1px solid rgba(255,255,255,0.08)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{

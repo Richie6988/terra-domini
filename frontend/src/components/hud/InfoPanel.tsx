@@ -30,28 +30,28 @@ export function InfoPanel({ onClose }: Props) {
         </div>
 
         {RULES.map(r => (
-          <div key={r.title} style={{ display: 'flex', gap: 12, padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.06)' }}>
+          <div key={r.title} style={{ display: 'flex', gap: 12, padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.05)' }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, background: `${r.color}10`, border: `1px solid ${r.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <MiniIcon id={r.icon} size={16} color={r.color} />
             </div>
             <div>
-              <div style={{ fontSize: 9, fontWeight: 700, color: '#1a2a3a', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>{r.title}</div>
-              <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.5)', marginTop: 2 }}>{r.desc}</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: '#e2e8f0', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>{r.title}</div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>{r.desc}</div>
             </div>
           </div>
         ))}
 
         {/* Contact form */}
         <div style={{ padding: 14, borderRadius: 10, background: 'rgba(100,116,139,0.04)', border: '1px solid rgba(100,116,139,0.1)' }}>
-          <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif", marginBottom: 10 }}>CONTACT SUPPORT</div>
-          <select style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(0,60,100,0.1)', fontSize: 10, background: 'rgba(0,60,100,0.02)', color: '#1a2a3a', marginBottom: 8, outline: 'none' }}>
+          <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif", marginBottom: 10 }}>CONTACT SUPPORT</div>
+          <select style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)', fontSize: 10, background: 'rgba(0,60,100,0.02)', color: '#e2e8f0', marginBottom: 8, outline: 'none' }}>
             <option value="bug"><EmojiIcon emoji="🐛" /> Bug Report</option>
             <option value="suggestion"><EmojiIcon emoji="💡" /> Suggestion</option>
             <option value="abuse"><EmojiIcon emoji="🚨" /> Report Abuse</option>
             <option value="account"><EmojiIcon emoji="👤" /> Account Issue</option>
             <option value="other"><EmojiIcon emoji="📝" /> Other</option>
           </select>
-          <textarea placeholder="Describe your issue..." rows={3} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(0,60,100,0.1)', fontSize: 10, background: 'rgba(0,60,100,0.02)', color: '#1a2a3a', resize: 'vertical', outline: 'none', fontFamily: 'system-ui', boxSizing: 'border-box' as const }} />
+          <textarea placeholder="Describe your issue..." rows={3} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)', fontSize: 10, background: 'rgba(0,60,100,0.02)', color: '#e2e8f0', resize: 'vertical', outline: 'none', fontFamily: 'system-ui', boxSizing: 'border-box' as const }} />
           <button onClick={() => { import('react-hot-toast').then(m => m.default.success('Message sent! We\'ll get back to you.')) }} style={{ width: '100%', marginTop: 8, padding: '10px', borderRadius: 8, border: 'none', background: '#64748b', color: '#fff', fontSize: 9, fontWeight: 700, letterSpacing: 2, cursor: 'pointer', fontFamily: "'Orbitron', sans-serif" }}>SEND MESSAGE</button>
         </div>
         <div style={{ textAlign: 'center', fontSize: 7, color: 'rgba(26,42,58,0.25)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>HEXOD v0.1.0 — SEASON 1 — POLYGON PoS</div>

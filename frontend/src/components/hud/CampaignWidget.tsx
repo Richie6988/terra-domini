@@ -62,7 +62,7 @@ function CampaignCard({ campaign, expanded, onToggle, onCheck, checking }: any) 
   return (
     <div style={{
       marginBottom: 10, borderRadius: 12, overflow: 'hidden',
-      border: `1px solid ${campaign.completed ? 'rgba(16,185,129,0.3)' : isLocked ? 'rgba(255,255,255,0.04)' : 'rgba(0,60,100,0.1)'}`,
+      border: `1px solid ${campaign.completed ? 'rgba(16,185,129,0.3)' : isLocked ? 'rgba(255,255,255,0.04)' : 'rgba(255,255,255,0.08)'}`,
       opacity: isLocked ? 0.5 : 1,
     }}>
       {/* Header */}
@@ -80,11 +80,11 @@ function CampaignCard({ campaign, expanded, onToggle, onCheck, checking }: any) 
           {campaign.completed ? '✅' : isLocked ? '🔒' : '🗺️'}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, fontWeight: 800, color: '#1a2a3a' }}>{campaign.name}</div>
-          <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', marginTop: 2 }}>{campaign.description}</div>
+          <div style={{ fontSize: 13, fontWeight: 800, color: '#e2e8f0' }}>{campaign.name}</div>
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>{campaign.description}</div>
           {/* Barre de progression */}
           {!isLocked && (
-            <div style={{ marginTop: 6, height: 4, background: 'rgba(0,60,100,0.1)', borderRadius: 2, overflow: 'hidden' }}>
+            <div style={{ marginTop: 6, height: 4, background: 'rgba(255,255,255,0.08)', borderRadius: 2, overflow: 'hidden' }}>
               <motion.div
                 initial={{ width: 0 }} animate={{ width: `${pct}%` }}
                 transition={{ duration: 0.5 }}
@@ -144,7 +144,7 @@ function CampaignCard({ campaign, expanded, onToggle, onCheck, checking }: any) 
                       }}>
                         {step.title}
                       </div>
-                      <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)', marginTop: 2 }}>{step.desc}</div>
+                      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>{step.desc}</div>
                       {isCurrent && (
                         <div style={{
                           marginTop: 5, fontSize: 10, color: '#F59E0B',

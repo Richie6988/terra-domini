@@ -79,7 +79,7 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: 10 }}><EmojiIcon emoji="🔥" /></div>
           <div style={{
-            fontSize: 7, fontWeight: 700, color: 'rgba(26,42,58,0.4)', letterSpacing: 3,
+            fontSize: 7, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: 3,
             fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 4,
           }}>
             TOTAL HEX BURNED FOREVER
@@ -97,7 +97,7 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
             {Math.floor(displayBurned).toLocaleString()}
           </motion.div>
           <div style={{
-            fontSize: 8, color: 'rgba(26,42,58,0.4)', marginTop: 4,
+            fontSize: 8, color: 'rgba(255,255,255,0.4)', marginTop: 4,
             fontFamily: "'Share Tech Mono', monospace",
           }}>
             {burnPct.toFixed(2)}% of minted supply
@@ -114,10 +114,10 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
         ].map(m => (
           <div key={m.label} style={{
             padding: '8px 6px', borderRadius: 8, textAlign: 'center',
-            background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.08)',
+            background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.06)',
           }}>
             <div style={{
-              fontSize: 6, color: 'rgba(26,42,58,0.35)', letterSpacing: 2, marginBottom: 3,
+              fontSize: 6, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: 3,
               fontFamily: "'Orbitron', system-ui, sans-serif",
             }}>
               {m.label}
@@ -129,7 +129,7 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
               {m.value}
             </div>
             <div style={{
-              fontSize: 6, color: 'rgba(26,42,58,0.3)',
+              fontSize: 6, color: 'rgba(255,255,255,0.25)',
               fontFamily: "'Share Tech Mono', monospace",
             }}>
               {m.sub}
@@ -165,7 +165,7 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
       {/* Burn breakdown */}
       <div>
         <div style={{
-          fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)',
+          fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)',
           fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 6,
         }}>
           BURN SOURCES
@@ -181,11 +181,11 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
             display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4,
           }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 7, color: '#1a2a3a', fontWeight: 600 }}>{src.label}</div>
-              <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.35)' }}>{src.rate}</div>
+              <div style={{ fontSize: 7, color: '#e2e8f0', fontWeight: 600 }}>{src.label}</div>
+              <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)' }}>{src.rate}</div>
             </div>
             <div style={{
-              width: 40, height: 4, borderRadius: 2, background: 'rgba(0,60,100,0.06)', overflow: 'hidden',
+              width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.05)', overflow: 'hidden',
             }}>
               <div style={{
                 height: '100%', width: `${src.pct}%`, borderRadius: 2,

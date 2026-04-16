@@ -110,7 +110,7 @@ export function TutorialArrow({ map }: Props) {
           gap: 4px; cursor: pointer;
         ">
           <div style="
-            background: rgba(235,242,250,0.97);
+            background: rgba(13,27,42,0.95);
             border: 1.5px solid #00FF87;
             border-radius: 10px;
             padding: 5px 10px;

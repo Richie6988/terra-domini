@@ -194,7 +194,7 @@ export function HintTooltip({ hintId, children, forceShow = false }: HintTooltip
                 cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '0 0 0 8px',
               }}>×</button>
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', lineHeight: 1.6 }}>{hint.body}</div>
+            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.06)', lineHeight: 1.6 }}>{hint.body}</div>
             <button onClick={dismiss} style={{
               marginTop: 8, fontSize: 10, color: 'rgba(0,255,135,0.6)',
               background: 'none', border: 'none', cursor: 'pointer',
@@ -418,7 +418,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
             </span>
             <button onClick={onComplete} style={{
               background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: 8, padding: '4px 10px', color: 'rgba(255,255,255,0.5)',
+              borderRadius: 8, padding: '4px 10px', color: 'rgba(255,255,255,0.04)',
               fontSize: 8, cursor: 'pointer', fontFamily: "'Orbitron', sans-serif",
             }}>SKIP</button>
           </motion.div>
@@ -636,7 +636,7 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
             >
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                 <span style={{ fontSize: 16, flexShrink: 0 }}><EmojiIcon emoji={item.icon} size={16} /></span>
-                <span style={{ fontSize: 12, color: item.color || 'rgba(255,255,255,0.5)' }}>{item.text}</span>
+                <span style={{ fontSize: 12, color: item.color || 'rgba(255,255,255,0.04)' }}>{item.text}</span>
               </div>
               {item.value && (
                 <span style={{

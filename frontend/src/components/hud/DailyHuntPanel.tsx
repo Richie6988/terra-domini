@@ -57,7 +57,7 @@ function HotColdBar({ distance }: { distance: number }) {
   // distance: 0 = on target, 1000+ = cold
   const pct = Math.max(0, Math.min(100, 100 - (distance / 10)))
   const color = pct > 80 ? '#dc2626' : pct > 60 ? '#f97316' : pct > 40 ? '#eab308' : pct > 20 ? '#0099cc' : '#3b82f6'
-  const label = pct > 80 ? '🔥 BURNING HOT' : pct > 60 ? '🟠 HOT' : pct > 40 ? '🟡 WARM' : pct > 20 ? '🔵 COOL' : '❄️ COLD'
+  const label = pct > 80 ? 'BURNING HOT' : pct > 60 ? 'HOT' : pct > 40 ? 'WARM' : pct > 20 ? '🔵 COOL' : '❄️ COLD'
 
   return (
     <div>
@@ -69,7 +69,7 @@ function HotColdBar({ distance }: { distance: number }) {
           {label}
         </span>
         <span style={{
-          fontSize: 8, color: 'rgba(26,42,58,0.4)',
+          fontSize: 8, color: 'rgba(255,255,255,0.4)',
           fontFamily: "'Share Tech Mono', monospace",
         }}>
           ~{distance > 1000 ? `${(distance/1000).toFixed(1)}km` : `${Math.round(distance)}m`}
@@ -77,7 +77,7 @@ function HotColdBar({ distance }: { distance: number }) {
       </div>
       <div style={{
         height: 8, borderRadius: 4, overflow: 'hidden',
-        background: 'rgba(0,60,100,0.06)',
+        background: 'rgba(255,255,255,0.05)',
       }}>
         <motion.div
           animate={{ width: `${pct}%` }}
@@ -209,7 +209,7 @@ export function DailyHuntPanel({ onClose }: Props) {
           }}>
             SAFARI COMPLETED TODAY
           </div>
-          <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.45)', letterSpacing: 1 }}>
+          <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)', letterSpacing: 1 }}>
             Come back tomorrow for a new target
           </div>
         </div>
@@ -234,7 +234,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 <IconSVG id={hunt.id} size={56} />
               </div>
               <div style={{
-                fontSize: 11, fontWeight: 900, color: '#1a2a3a', letterSpacing: 2,
+                fontSize: 11, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2,
                 fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 4,
               }}>
                 {hunt.name.toUpperCase()}
@@ -245,7 +245,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               }}>
                 {hunt.rarity.toUpperCase()} TOKEN
               </div>
-              <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.5)', lineHeight: 1.6 }}>
+              <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6 }}>
                 {hunt.hint}
               </div>
             </div>
@@ -258,7 +258,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 flex: 1, padding: '8px', borderRadius: 8, textAlign: 'center',
                 background: 'rgba(121,80,242,0.06)', border: '1px solid rgba(121,80,242,0.15)',
               }}>
-                <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>REWARD</div>
+                <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>REWARD</div>
                 <div style={{ fontSize: 14, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
                   <CrystalIcon size="sm" /> {hunt.hex_reward}
                 </div>
@@ -267,7 +267,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 flex: 1, padding: '8px', borderRadius: 8, textAlign: 'center',
                 background: 'rgba(0,153,204,0.06)', border: '1px solid rgba(0,153,204,0.15)',
               }}>
-                <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>XP</div>
+                <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>XP</div>
                 <div style={{ fontSize: 14, fontWeight: 900, color: '#0099cc', fontFamily: "'Share Tech Mono', monospace" }}>+50</div>
               </div>
             </div>
@@ -303,18 +303,18 @@ export function DailyHuntPanel({ onClose }: Props) {
 
             <div style={{
               marginTop: 16, padding: 12, borderRadius: 10,
-              background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.08)',
+              background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.06)',
               textAlign: 'center',
             }}>
               <IconSVG id={hunt.id} size={44} />
               <div style={{
-                fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 6, letterSpacing: 1,
+                fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 6, letterSpacing: 1,
                 fontFamily: "'Orbitron', system-ui, sans-serif",
               }}>
                 MOVE TOWARD THE TARGET
               </div>
               <div style={{
-                fontSize: 8, color: 'rgba(26,42,58,0.5)', marginTop: 4,
+                fontSize: 8, color: 'rgba(255,255,255,0.45)', marginTop: 4,
               }}>
                 {hunt.hint}
               </div>
@@ -370,7 +370,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               {/* Progress bar */}
               <div style={{
                 height: 6, borderRadius: 3, overflow: 'hidden',
-                background: 'rgba(0,60,100,0.06)', marginBottom: 8,
+                background: 'rgba(255,255,255,0.05)', marginBottom: 8,
               }}>
                 <motion.div
                   animate={{ width: `${scanProgress}%` }}
@@ -425,7 +425,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 TOKEN FOUND!
               </div>
               <div style={{
-                fontSize: 9, fontWeight: 700, color: '#1a2a3a', letterSpacing: 1,
+                fontSize: 9, fontWeight: 700, color: '#e2e8f0', letterSpacing: 1,
                 fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 16,
               }}>
                 {hunt.name.toUpperCase()}
@@ -473,7 +473,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", marginTop: 4 }}>
                     +{reward.hex_reward}
                   </div>
-                  <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>HEX COIN</div>
+                  <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>HEX COIN</div>
                 </div>
                 <div style={{
                   padding: '12px 20px', borderRadius: 12,
@@ -484,7 +484,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#0099cc', fontFamily: "'Share Tech Mono', monospace" }}>
                     +{reward.xp}
                   </div>
-                  <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>XP</div>
+                  <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>XP</div>
                 </div>
               </div>
 
@@ -503,9 +503,9 @@ export function DailyHuntPanel({ onClose }: Props) {
       </AnimatePresence>
 
       {/* Daily Safari Challenges */}
-      <div style={{ marginTop: 14, borderTop: '1px solid rgba(0,60,100,0.1)', paddingTop: 12 }}>
+      <div style={{ marginTop: 14, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 12 }}>
         <div style={{
-          fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)',
+          fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)',
           fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8,
         }}>
           <EmojiIcon emoji="📋" /> DAILY CHALLENGES
@@ -518,20 +518,20 @@ export function DailyHuntPanel({ onClose }: Props) {
               display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,
               padding: '8px 10px', borderRadius: 8,
               background: done ? 'rgba(0,136,74,0.05)' : 'rgba(255,255,255,0.4)',
-              border: `1px solid ${done ? 'rgba(0,136,74,0.2)' : 'rgba(0,60,100,0.08)'}`,
+              border: `1px solid ${done ? 'rgba(0,136,74,0.2)' : 'rgba(255,255,255,0.06)'}`,
               opacity: done ? 0.6 : 1,
             }}>
               <span style={{ fontSize: 14 }}><EmojiIcon emoji={ch.icon} size={16} /></span>
               <div style={{ flex: 1 }}>
                 <div style={{
-                  fontSize: 8, fontWeight: 700, color: done ? 'rgba(26,42,58,0.4)' : '#1a2a3a',
+                  fontSize: 8, fontWeight: 700, color: done ? 'rgba(255,255,255,0.4)' : '#1a2a3a',
                   fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 0.5,
                   textDecoration: done ? 'line-through' : 'none',
                 }}>
                   {ch.desc}
                 </div>
                 <div style={{
-                  height: 3, borderRadius: 2, background: 'rgba(0,60,100,0.06)',
+                  height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.05)',
                   marginTop: 3, overflow: 'hidden', maxWidth: 150,
                 }}>
                   <div style={{

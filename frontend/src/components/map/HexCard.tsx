@@ -151,17 +151,17 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
         <div style={{
           display: 'flex', alignItems: 'center', gap: 12,
           padding: '12px 20px', borderRadius: 16,
-          background: 'linear-gradient(180deg, rgba(235,242,250,0.95), rgba(220,230,242,0.92))',
+          background: 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(220,230,242,0.92))',
           backdropFilter: 'blur(30px) saturate(1.2)',
-          border: '1px solid rgba(0,60,100,0.15)',
-          boxShadow: '0 -4px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.8)',
+          border: '1px solid rgba(255,255,255,0.12)',
+          boxShadow: '0 -4px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
           fontFamily: "'Orbitron', system-ui, sans-serif",
           maxWidth: 700, width: '100%',
         }}>
           {/* Territory name + rarity */}
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{
-              fontSize: 12, fontWeight: 900, color: '#1a2a3a', letterSpacing: 2,
+              fontSize: 12, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2,
               overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
             }}>
               {cardName.toUpperCase()}
@@ -176,7 +176,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
               </span>
               <span style={{
                 padding: '2px 8px', borderRadius: 10,
-                background: 'rgba(0,60,100,0.05)', color: 'rgba(26,42,58,0.5)',
+                background: 'rgba(0,60,100,0.05)', color: 'rgba(255,255,255,0.45)',
                 fontSize: 7, fontWeight: 600,
               }}>
                 {(biome || 'rural').toUpperCase()}
@@ -194,7 +194,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
             <div style={{ fontSize: 14, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>
               +{income}
             </div>
-            <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.4)', letterSpacing: 1 }}>HEX/DAY</div>
+            <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.4)', letterSpacing: 1 }}>HEX/DAY</div>
           </div>
 
           {/* Action buttons — based on claim options */}

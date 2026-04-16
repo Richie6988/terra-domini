@@ -3,17 +3,17 @@
 
 :root {
   /* ── Core palette ── */
-  --bg-glass: rgba(235, 242, 250, 0.95);
-  --bg-secondary: rgba(220, 230, 242, 0.95);
-  --bg-card: rgba(255, 255, 255, 0.40);
-  --bg-cell-hover: rgba(255, 255, 255, 0.90);
-  --border-subtle: rgba(0, 60, 100, 0.15);
+  --bg-glass: rgba(13, 27, 42, 0.95);
+  --bg-secondary: rgba(10, 22, 40, 0.95);
+  --bg-card: rgba(255, 255, 255, 0.04);
+  --bg-cell-hover: rgba(255, 255, 255, 0.08);
+  --border-subtle: rgba(255, 255, 255, 0.08);
   --border-active: var(--hud-cyan);
-  --text-primary: #1a2a3a;
-  --text-secondary: #0077aa;
-  --text-muted: rgba(26, 42, 58, 0.45);
-  --hud-cyan: #0099cc;
-  --hud-amber: #cc8800;
+  --text-primary: #e2e8f0;
+  --text-secondary: #38bdf8;
+  --text-muted: rgba(255, 255, 255, 0.4);
+  --hud-cyan: #0CC5FF;
+  --hud-amber: #F59E0B;
   --hud-amber-bright: #fbbf24;
   --state-standby: #996600;
   --state-active: #00884a;
@@ -138,27 +138,27 @@ img { pointer-events: none; -webkit-user-drag: none; }
 /* Glass panel */
 .glass-panel {
   background: linear-gradient(180deg, var(--bg-glass) 0%, var(--bg-secondary) 100%);
-  backdrop-filter: blur(30px) saturate(1.2);
-  -webkit-backdrop-filter: blur(30px) saturate(1.2);
-  border: 1px solid var(--border-subtle);
-  box-shadow: 8px 0 30px rgba(0,0,0,0.15), inset -1px 0 0 rgba(255,255,255,0.8);
+  backdrop-filter: blur(20px) saturate(1.4);
+  -webkit-backdrop-filter: blur(20px) saturate(1.4);
+  border: 2px solid var(--border-subtle);
+  box-shadow: 0 4px 30px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.05);
 }
 
 /* HUD segment */
 .hud-segment {
-  border-radius: 8px;
-  padding: 12px 20px;
+  border-radius: 12px;
+  padding: 10px 16px;
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
   cursor: pointer;
   transition: all 0.35s cubic-bezier(0.16,1,0.3,1);
-  min-width: 220px;
+  min-width: 180px;
   animation: hud-slide-in 0.8s cubic-bezier(0.16,1,0.3,1) both;
 }
 .hud-segment:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 40px rgba(0,0,0,0.2);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.4), 0 0 15px rgba(12,197,255,0.1);
   border-color: var(--hud-cyan);
 }
 
@@ -252,7 +252,7 @@ img { pointer-events: none; -webkit-user-drag: none; }
   max-width: 95vw;
   padding: 40px 36px;
   background: rgba(255,255,255,0.95);
-  border: 1px solid rgba(0,60,100,0.1);
+  border: 1px solid rgba(255,255,255,0.08);
   border-radius: 16px;
   box-shadow: 0 20px 60px rgba(0,0,0,0.08);
 }
