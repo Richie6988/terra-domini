@@ -11,6 +11,7 @@ import { CrystalIcon } from '../shared/CrystalIcon'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 
@@ -96,7 +97,7 @@ export function TaskCenter({ onClose }: Props) {
         letterSpacing: 2, marginBottom: 12,
         fontFamily: "'Orbitron', system-ui, sans-serif",
       }}>
-        DAILY RESET {resetIn} · STREAK: 🔥 {streak} DAYS {streakReward > 0 && `(+${streakReward}◆)`}
+        DAILY RESET {resetIn} · STREAK: <EmojiIcon emoji="🔥" /> {streak} DAYS {streakReward > 0 && `(+${streakReward}◆)`}
       </div>
 
       {/* Progress bar */}
@@ -134,7 +135,7 @@ export function TaskCenter({ onClose }: Props) {
               border: `1px solid ${isClaimed ? 'rgba(34,197,94,0.15)' : isDone ? 'rgba(0,153,204,0.15)' : 'rgba(0,60,100,0.06)'}`,
               opacity: isClaimed ? 0.6 : 1,
             }}>
-              <span style={{ fontSize: 20, flexShrink: 0, filter: isClaimed ? 'grayscale(0.5)' : '' }}>{task.icon}</span>
+              <span style={{ fontSize: 20, flexShrink: 0, filter: isClaimed ? 'grayscale(0.5)' : '' }}><EmojiIcon emoji={task.icon} size={16} /></span>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ fontSize: 9, fontWeight: 700, color: '#1a2a3a', letterSpacing: 0.5 }}>{task.title}</div>
                 {/* Progress bar */}
@@ -170,7 +171,7 @@ export function TaskCenter({ onClose }: Props) {
           background: 'linear-gradient(135deg, rgba(34,197,94,0.06), rgba(34,197,94,0.02))',
           border: '1px solid rgba(34,197,94,0.2)',
         }}>
-          <div style={{ fontSize: 20, marginBottom: 4 }}>🎉</div>
+          <div style={{ fontSize: 20, marginBottom: 4 }}><EmojiIcon emoji="🎉" /></div>
           <div style={{ fontSize: 9, fontWeight: 700, color: '#22c55e', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
             ALL MISSIONS COMPLETE — CLAIM YOUR REWARDS!
           </div>

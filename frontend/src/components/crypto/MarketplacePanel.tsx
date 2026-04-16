@@ -20,6 +20,7 @@ import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { TokenHexPreview } from '../shared/TokenHexPreview'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 const RARITY_C: Record<string, string> = {
   common: '#9CA3AF', uncommon: '#10B981', rare: '#3B82F6',
@@ -41,7 +42,7 @@ function RarityBadge({ rarity, shiny }: { rarity: string; shiny?: boolean }) {
 function PriceTag({ price }: { price: number }) {
   return (
     <span style={{ fontSize: 13, fontWeight: 800, color: '#F59E0B', fontFamily: 'monospace' }}>
-      {price.toLocaleString()} 💎
+      {price.toLocaleString()} <EmojiIcon emoji="💎" />
     </span>
   )
 }
@@ -161,7 +162,7 @@ function ExplorerTab() {
           background: shiny ? 'rgba(252,211,77,0.15)' : 'rgba(255,255,255,0.04)',
           border: `1px solid ${shiny ? 'rgba(252,211,77,0.5)' : 'rgba(0,60,100,0.1)'}`,
           color: shiny ? '#FCD34D' : '#6B7280', fontWeight: shiny ? 700 : 400,
-        }}>✨ Shiny</button>
+        }}><EmojiIcon emoji="✨" /> Shiny</button>
 
         <select value={sort} onChange={e => setSort(e.target.value)} style={{
           marginLeft: 'auto', background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.12)',
@@ -217,7 +218,7 @@ function MyNFTsTab() {
     <div>
       {isLoading && <Spinner />}
       {!isLoading && territories.length === 0 && (
-        <Empty icon="🗺️" msg="No territories" sub="Claim your first hex" />
+        <Empty icon="🗺" msg="No territories" sub="Claim your first hex" />
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -333,7 +334,7 @@ function MySalesTab() {
           border: '1px solid rgba(16,185,129,0.2)', marginBottom: 14 }}>
           <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)' }}>Total gagné (après royalties)</div>
           <div style={{ fontSize: 18, fontWeight: 800, color: '#10B981', fontFamily: 'monospace' }}>
-            {parseFloat(data.total_earned).toFixed(0)} 💎
+            {parseFloat(data.total_earned).toFixed(0)} <EmojiIcon emoji="💎" />
           </div>
         </div>
       )}
@@ -453,7 +454,7 @@ export function MarketplacePanel({ onClose }: { onClose: () => void }) {
             cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
           }}
         >
-          🛒 BOOSTERS → SHOP
+          <EmojiIcon emoji="🛒" /> BOOSTERS → SHOP
         </button>
       </div>
     </GlassPanel>

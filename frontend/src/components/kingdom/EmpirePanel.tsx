@@ -11,6 +11,7 @@ import { CrystalIcon } from '../shared/CrystalIcon'
 import { api } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 type Tab = 'kingdoms' | 'military' | 'stats'
@@ -123,7 +124,7 @@ function MilitaryTab() {
           display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10,
           background: 'rgba(255,255,255,0.4)', border: `1px solid ${u.color}10`,
         }}>
-          <span style={{ fontSize: 20, flexShrink: 0 }}>{u.icon}</span>
+          <span style={{ fontSize: 20, flexShrink: 0 }}><EmojiIcon emoji={u.icon} size={16} /></span>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#1a2a3a' }}>{u.name}</div>
             <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)' }}>ATK {u.atk} · DEF {u.def} · {u.cost}◆</div>
@@ -200,7 +201,7 @@ function StatsTab({ kingdoms }: { kingdoms: Kingdom[] }) {
             ]
           })().map(r => (
             <div key={r.name} style={{ textAlign: 'center', padding: '6px 4px', borderRadius: 8, background: 'rgba(0,60,100,0.02)' }}>
-              <div style={{ fontSize: 16 }}>{r.icon}</div>
+              <div style={{ fontSize: 16 }}><EmojiIcon emoji={r.icon} size={16} /></div>
               <div style={{ fontSize: 9, fontWeight: 700, color: '#1a2a3a', fontFamily: "'Share Tech Mono', monospace" }}>{r.val}</div>
               <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)' }}>{r.name}/d</div>
             </div>

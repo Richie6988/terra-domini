@@ -17,6 +17,7 @@ import { useStore, usePlayer } from '../../store'
 import { ClaimProgressBar, type ClaimProgress } from '../shared/ClaimProgressBar'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface KingdomData {
   cluster_id: string
@@ -157,7 +158,7 @@ function OwnOverview({ k }: { k: KingdomData }) {
             background: shields > 0 ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.03)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 22, border: `2px solid ${shields > 0 ? '#3b82f6' : '#ccc'}30`,
-          }}>🛡</div>
+          }}><EmojiIcon emoji="🛡" /></div>
         </div>
       </div>
     </div>
@@ -174,7 +175,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
           border: `1px solid ${t.is_capital ? 'rgba(204,136,0,0.2)' : 'rgba(0,60,100,0.06)'}`,
         }}>
           {/* Capital badge */}
-          {t.is_capital && <span style={{ fontSize: 14 }}>👑</span>}
+          {t.is_capital && <span style={{ fontSize: 14 }}><EmojiIcon emoji="👑" /></span>}
 
           {/* Name + rarity */}
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -215,7 +216,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
           </div>
 
           {/* Shield */}
-          {t.has_shield && <span style={{ fontSize: 12, opacity: 0.6 }}>🛡</span>}
+          {t.has_shield && <span style={{ fontSize: 12, opacity: 0.6 }}><EmojiIcon emoji="🛡" /></span>}
         </div>
       ))}
     </div>
@@ -251,7 +252,7 @@ function OwnArmy({ k }: { k: KingdomData }) {
           borderRadius: 10, background: 'rgba(255,255,255,0.4)',
           border: `1px solid ${u.color}15`,
         }}>
-          <span style={{ fontSize: 18 }}>{u.icon}</span>
+          <span style={{ fontSize: 18 }}><EmojiIcon emoji={u.icon} size={16} /></span>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#1a2a3a' }}>{u.name}</div>
             <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)' }}>ATK {u.atk} · DEF {u.def}</div>
@@ -324,7 +325,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
         <div style={{ ...label, marginBottom: 8 }}>INTELLIGENCE (LEVEL {spyLevel})</div>
         {spyLevel === 0 && (
           <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.4)', fontStyle: 'italic', textAlign: 'center', padding: 16 }}>
-            🕵️ Send a spy mission to reveal enemy resources, army composition, and weaknesses.
+            <EmojiIcon emoji="🕵" /> Send a spy mission to reveal enemy resources, army composition, and weaknesses.
           </div>
         )}
         {spyLevel >= 1 && (
@@ -349,7 +350,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
           color: '#dc2626', fontSize: 10, fontWeight: 900, letterSpacing: 1,
           fontFamily: "'Orbitron', sans-serif",
         }}>
-          ⚔️ ATTACK
+          <EmojiIcon emoji="⚔" /> ATTACK
         </button>
         <button onClick={() => { setSpyLevel(s => Math.min(3, s + 1)); toast.success('Spy mission sent!') }} style={{
           padding: '14px 12px', borderRadius: 12, cursor: 'pointer',
@@ -367,7 +368,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
           color: '#22c55e', fontSize: 10, fontWeight: 900, letterSpacing: 1,
           fontFamily: "'Orbitron', sans-serif",
         }}>
-          🤝 DIPLOMACY
+          <EmojiIcon emoji="🤝" /> DIPLOMACY
         </button>
         <button onClick={() => toast.success('Buy offer sent!')} style={{
           padding: '14px 12px', borderRadius: 12, cursor: 'pointer',
@@ -376,7 +377,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
           color: '#cc8800', fontSize: 10, fontWeight: 900, letterSpacing: 1,
           fontFamily: "'Orbitron', sans-serif",
         }}>
-          💰 BUY OFFER
+          <EmojiIcon emoji="💰" /> BUY OFFER
         </button>
       </div>
 

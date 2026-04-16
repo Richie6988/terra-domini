@@ -8,6 +8,7 @@ import L from 'leaflet'
 import { useLeafletLayer } from '../ui/Utils'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../../services/api'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 type OverlayEvent = {
   id: number
@@ -110,7 +111,7 @@ export function MapOverlayLayer({ map }: Props) {
       const marker = L.marker([lat, lon], { icon: makeIcon(ev.icon, ev.type) })
       marker.bindPopup(`
         <div style="min-width:200px;font-family:monospace;font-size:12px;background:#0A0A14;color:#fff;padding:10px;border-radius:8px">
-          <div style="font-weight:700;font-size:14px;margin-bottom:4px">${ev.icon} ${ev.title}</div>
+          <div style="font-weight:700;font-size:14px;margin-bottom:4px">$<EmojiIcon emoji={ev.icon} size={16} /> ${ev.title}</div>
           ${ev.player ? `<div style="color:#6B7280;font-size:10px">by ${ev.player}</div>` : ''}
           ${ev.body ? `<div style="color:#9CA3AF;margin-top:6px">${ev.body}</div>` : ''}
         </div>

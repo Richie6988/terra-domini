@@ -7,6 +7,7 @@ import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { authApi } from '../services/api'
 import { useStore } from '../store'
+import { EmojiIcon } from '../components/shared/emojiIcons'
 
 const pageStyle: React.CSSProperties = {
   display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -100,7 +101,7 @@ export default function RegisterPage() {
             <div style={{ marginTop: 12, padding: '8px 14px', background: 'rgba(0,153,204,0.08)',
               border: '1px solid rgba(0,153,204,0.2)', borderRadius: 20, fontSize: 10, color: '#0099cc',
               fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>
-              🎁 INVITATION ACCEPTED — <strong>+50 ◆</strong> BONUS ON REGISTRATION
+              <EmojiIcon emoji="🎁" /> INVITATION ACCEPTED — <strong>+50 ◆</strong> BONUS ON REGISTRATION
             </div>
           )}
         </div>
@@ -156,7 +157,7 @@ export default function RegisterPage() {
             <label style={labelStyle}>
               CONFIRM PASSWORD
               {pwMatch && <span style={{ color: '#22c55e', marginLeft: 8, fontSize: 9, fontFamily: 'system-ui' }}>✓ match</span>}
-              {pwMismatch && <span style={{ color: '#dc2626', marginLeft: 8, fontSize: 9, fontFamily: 'system-ui' }}>✗ mismatch</span>}
+              {pwMismatch && <span style={{ color: '#dc2626', marginLeft: 8, fontSize: 9, fontFamily: 'system-ui' }}><EmojiIcon emoji="✗" /> mismatch</span>}
             </label>
             <div style={{ position: 'relative' }}>
               <input
@@ -184,7 +185,7 @@ export default function RegisterPage() {
             border: '1px solid rgba(0,153,204,0.12)', borderRadius: 8,
             fontSize: 10, color: 'rgba(26,42,58,0.6)', lineHeight: 1.8,
             fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>
-            🛡 BEGINNER PROTECTION 7 DAYS — NO ATTACKS WHILE YOU LEARN
+            <EmojiIcon emoji="🛡" /> BEGINNER PROTECTION 7 DAYS — NO ATTACKS WHILE YOU LEARN
             <br />
             ◆ FIRST TERRITORY → 100 HEX BONUS
           </div>

@@ -10,6 +10,7 @@ import { CrystalIcon } from '../shared/CrystalIcon'
 import { useKingdomStore } from '../../store/kingdomStore'
 import { useStore, usePlayer } from '../../store'
 import { territoryApi } from '../../services/api'
+import { EmojiIcon } from '../shared/emojiIcons'
 import {
   calculateConquestCost,
   type ConquestMethod, type ConquestCost,
@@ -55,7 +56,7 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
     const h3 = territory.h3 || territory.h3_index || ''
     const center = { lat: territory.lat ?? 0, lng: territory.lng ?? 0 }
     const kingdom = createKingdom(name.trim(), color, h3, center)
-    toast.success(`👑 ${kingdom.name} founded!`)
+    toast.success(`<EmojiIcon emoji="👑" /> ${kingdom.name} founded!`)
     onCreated(kingdom.id)
   }
 
@@ -73,7 +74,7 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
         fontSize: 9, fontWeight: 900, color: '#cc8800', letterSpacing: 3, marginBottom: 12,
         fontFamily: "'Orbitron', system-ui, sans-serif", textAlign: 'center',
       }}>
-        👑 FOUND YOUR KINGDOM
+        <EmojiIcon emoji="👑" /> FOUND YOUR KINGDOM
       </div>
 
       <div style={{
@@ -142,7 +143,7 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
             boxShadow: '0 4px 15px rgba(204,136,0,0.3)',
           }}
         >
-          👑 FOUND KINGDOM
+          <EmojiIcon emoji="👑" /> FOUND KINGDOM
         </button>
         <button
           onClick={onCancel}
@@ -182,7 +183,7 @@ function MethodCard({ method, cost, onSelect, disabled }: {
       }}
     >
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <span style={{ fontSize: 18 }}>{method.icon}</span>
+        <span style={{ fontSize: 18 }}><EmojiIcon emoji={method.icon} size={16} /></span>
         <div style={{ flex: 1 }}>
           <div style={{
             fontSize: 8, fontWeight: 900, color: method.color, letterSpacing: 2,
@@ -283,7 +284,7 @@ export function ConquestActions({ territory, onClaimed }: Props) {
         addTerritoryToKingdom(targetKingdom.id, territory.h3 || territory.h3_index || '')
       }
 
-      toast.success('Territory conquered! 🏴')
+      toast.success('Territory conquered! <EmojiIcon emoji="🏴" />')
       setSelectedTerritory({
         ...territory,
         owner_id: player?.id ?? null,
@@ -404,7 +405,7 @@ export function ConquestActions({ territory, onClaimed }: Props) {
                 fontSize: 8, color: kingdoms[0].color, textAlign: 'center',
                 fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
               }}>
-                ADD TO: 🏰 {kingdoms[0].name.toUpperCase()}
+                ADD TO: <EmojiIcon emoji="🏰" /> {kingdoms[0].name.toUpperCase()}
               </div>
             )}
 

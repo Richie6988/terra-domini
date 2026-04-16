@@ -11,6 +11,7 @@
 import L from 'leaflet'
 import * as h3 from 'h3-js'
 import type { TerritoryLight } from '../../types'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 const RARITY_COLOR: Record<string, string> = {
   common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
@@ -226,9 +227,9 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
 
   // Tooltip
   const income = Math.round((ta.resource_credits || ta.food_per_tick || 10) * 288)
-  const stateLabel = ta.is_control_tower ? '🗼 Tour de contrôle'
+  const stateLabel = ta.is_control_tower ? '<EmojiIcon emoji="🗼" /> Tour de contrôle'
     : isOwn ? (hasPOI ? `✅ Votre territoire · ${rarity}` : '✅ Votre territoire')
-    : isEnemy ? `👤 ${ta.owner_username}`
+    : isEnemy ? `<EmojiIcon emoji="👤" /> ${ta.owner_username}`
     : hasPOI ? `⬡ ${rarity.toUpperCase()} — Libre`
     : '⬜ Libre'
 

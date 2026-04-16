@@ -13,6 +13,7 @@ import { IconSVG } from '../shared/iconBank'
 import { TokenHexPreview } from '../shared/TokenHexPreview'
 import { Token3DViewer } from '../shared/Token3DViewer'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 
@@ -173,7 +174,7 @@ export function AuctionPanel({ onClose }: Props) {
         user: 'YOU', text: `BID: ${amt.toLocaleString()} HEX`, time: 'now', isBid: true,
       }, ...prev])
     }
-    toast.success(`🏷 Bid placed: ${amt.toLocaleString()} HEX`)
+    toast.success(`<EmojiIcon emoji="🏷" /> Bid placed: ${amt.toLocaleString()} HEX`)
     setBidAmount('')
   }, [bidAmount, selected])
 
@@ -364,7 +365,7 @@ export function AuctionPanel({ onClose }: Props) {
               fontFamily: "'Orbitron', system-ui, sans-serif",
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <span>💬 LIVE CHAT · {selected.bidCount} PARTICIPANTS</span>
+              <span><EmojiIcon emoji="💬" /> LIVE CHAT · {selected.bidCount} PARTICIPANTS</span>
               <span style={{
                 width: 8, height: 8, borderRadius: '50%',
                 background: wsConnected ? '#22c55e' : '#f59e0b',
@@ -395,7 +396,7 @@ export function AuctionPanel({ onClose }: Props) {
 
             {/* Emoji bar + chat input */}
             <div style={{ display: 'flex', gap: 2, padding: '4px 8px', background: 'rgba(0,60,100,0.02)', borderTop: '1px solid rgba(0,60,100,0.04)' }}>
-              {['🔥','👀','💰','😤','👑','💎','⚡','😂'].map(em => (
+              {['<EmojiIcon emoji="🔥" />','<EmojiIcon emoji="👀" />','<EmojiIcon emoji="💰" />','<EmojiIcon emoji="😤" />','<EmojiIcon emoji="👑" />','<EmojiIcon emoji="💎" />','<EmojiIcon emoji="⚡" />','<EmojiIcon emoji="😂" />'].map(em => (
                 <button key={em} onClick={() => sendEmoji(em)} style={{
                   padding: '2px 4px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 12,
                   opacity: 0.6, transition: 'opacity 0.15s',

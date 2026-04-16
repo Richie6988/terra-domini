@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
+import { EmojiIcon } from '../components/shared/emojiIcons'
 
 const inputSt: React.CSSProperties = {
   width: '100%', padding: '12px 14px', boxSizing: 'border-box',
@@ -65,7 +66,7 @@ export default function ForgotPasswordPage() {
         {sent ? (
           /* Success state */
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>📧</div>
+            <div style={{ fontSize: 40, marginBottom: 16 }}><EmojiIcon emoji="📧" /></div>
             <div style={{ fontSize: 12, color: '#e0f0ff', marginBottom: 8, fontWeight: 700, letterSpacing: 2 }}>
               CHECK YOUR INBOX
             </div>

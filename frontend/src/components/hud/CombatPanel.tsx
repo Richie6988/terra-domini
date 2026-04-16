@@ -16,6 +16,7 @@ import { useKingdomStore } from '../../store/kingdomStore'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 // ── Unit types (from prototype) ──
 const UNITS = [
@@ -81,7 +82,7 @@ export function CombatPanel({ onClose }: Props) {
           padding: '6px 10px', borderRadius: 8,
           background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.12)',
         }}>
-          <span style={{ fontSize: 14 }}>⚔️</span>
+          <span style={{ fontSize: 14 }}><EmojiIcon emoji="⚔" /></span>
           <div style={{ flex: 1, fontSize: 7, fontWeight: 700, color: '#dc2626', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
             {activeKingdom.name.toUpperCase()} — MILITARY
           </div>
@@ -130,7 +131,7 @@ export function CombatPanel({ onClose }: Props) {
                     clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
                     background: u.color, display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 18, color: '#fff',
-                  }}>{u.icon}</div>
+                  }}><EmojiIcon emoji={u.icon} size={16} /></div>
                   <div style={{ fontSize: 8, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>{u.name}</div>
                   <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.4)', marginTop: 3, fontFamily: "'Share Tech Mono', monospace" }}>
                     {u.cost} <CrystalIcon size="sm" /> each
@@ -184,7 +185,7 @@ export function CombatPanel({ onClose }: Props) {
               }}>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 9, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-                    {unit?.icon} {unit?.name} BATCH ({t.batch})
+                    <EmojiIcon emoji={unit?.icon || ""} size={16} /> {unit?.name} BATCH ({t.batch})
                   </div>
                   {t.active ? (
                     <>
@@ -260,7 +261,7 @@ export function CombatPanel({ onClose }: Props) {
         <div>
           {/* Active wars */}
           <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: '#dc2626', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8 }}>
-            🔴 ACTIVE WARS
+            <EmojiIcon emoji="🔴" /> ACTIVE WARS
           </div>
           <div style={{
             padding: 14, marginBottom: 12, borderRadius: 8,
@@ -289,12 +290,12 @@ export function CombatPanel({ onClose }: Props) {
               width: '100%', marginTop: 8, padding: '8px', borderRadius: 16, border: 'none', cursor: 'pointer',
               background: '#dc2626', color: '#fff', fontSize: 8, fontWeight: 900, letterSpacing: 2,
               fontFamily: "'Orbitron', system-ui, sans-serif",
-            }}>🚨 SEND REINFORCEMENTS</button>
+            }}><EmojiIcon emoji="🚨" /> SEND REINFORCEMENTS</button>
           </div>
 
           {/* Nearby threats */}
           <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8 }}>
-            📡 NEARBY THREATS
+            <EmojiIcon emoji="📡" /> NEARBY THREATS
           </div>
           <div style={{
             padding: '10px 12px', marginBottom: 6, borderRadius: 8,
@@ -321,7 +322,7 @@ export function CombatPanel({ onClose }: Props) {
 
           {/* Suggested targets */}
           <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8 }}>
-            ⚔ SUGGESTED TARGETS (NEAR YOUR LEVEL)
+            <EmojiIcon emoji="⚔" /> SUGGESTED TARGETS (NEAR YOUR LEVEL)
           </div>
           {[
             { name: 'IRON_DUKE', lvl: 41, hex: 1980, power: 35200 },
@@ -397,13 +398,13 @@ export function CombatPanel({ onClose }: Props) {
           background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)',
           color: '#cc8800', fontSize: 7, fontWeight: 700, letterSpacing: 1,
           fontFamily: "'Orbitron', system-ui, sans-serif",
-        }}>🛒 MILITARY SHOP</button>
+        }}><EmojiIcon emoji="🛒" /> MILITARY SHOP</button>
         <button onClick={() => { onClose(); setTimeout(() => setActivePanel('kingdom'), 100) }} style={{
           flex: 1, padding: '8px', borderRadius: 16, cursor: 'pointer',
           background: 'rgba(0,153,204,0.06)', border: '1px solid rgba(0,153,204,0.2)',
           color: '#0099cc', fontSize: 7, fontWeight: 700, letterSpacing: 1,
           fontFamily: "'Orbitron', system-ui, sans-serif",
-        }}>👑 KINGDOM</button>
+        }}><EmojiIcon emoji="👑" /> KINGDOM</button>
       </div>
     </GlassPanel>
   )

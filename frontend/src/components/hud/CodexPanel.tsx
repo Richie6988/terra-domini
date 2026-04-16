@@ -19,6 +19,7 @@ import { CATEGORIES } from '../shared/radarIconData'
 import { useStore } from '../../store'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 
@@ -199,7 +200,7 @@ export function CodexPanel({ onClose }: Props) {
                     padding: '10px', borderRadius: 10, cursor: 'pointer', textAlign: 'center',
                     background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.08)',
                   }}>
-                    <div style={{ fontSize: 18, marginBottom: 4 }}>{ct.icon}</div>
+                    <div style={{ fontSize: 18, marginBottom: 4 }}><EmojiIcon emoji={ct.icon} size={16} /></div>
                     <div style={{ fontSize: 8, fontWeight: 900, color: ct.color, letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                       {ct.label.replace(/[^\w\s]/g, '').trim().toUpperCase()}
                     </div>
@@ -247,7 +248,7 @@ export function CodexPanel({ onClose }: Props) {
               position: 'relative', overflow: 'hidden', minHeight: 120,
             }}>
               <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-                🏛 HEXOD MUSEUM — YOUR HALL OF FAME
+                <EmojiIcon emoji="🏛" /> HEXOD MUSEUM — YOUR HALL OF FAME
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
                 {allTokens.filter(t => t.owned > 0).slice(0, 4).map(t => (
@@ -268,7 +269,7 @@ export function CodexPanel({ onClose }: Props) {
                 ))}
               </div>
               <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.2)', marginTop: 8 }}>
-                🖱 CLICK TOKEN FOR 3D VIEW
+                <EmojiIcon emoji="🖱" /> CLICK TOKEN FOR 3D VIEW
               </div>
             </div>
           </motion.div>
@@ -284,7 +285,7 @@ export function CodexPanel({ onClose }: Props) {
               background: ct.color + '08', border: `1px solid ${ct.color}20`,
             }}>
               <div style={{ fontSize: 8, fontWeight: 700, color: ct.color, letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-                {ct.icon} {ct.label.replace(/[^\w\s]/g, '').trim().toUpperCase()}
+                <EmojiIcon emoji={ct.icon} size={16} /> {ct.label.replace(/[^\w\s]/g, '').trim().toUpperCase()}
               </div>
               <div style={{ fontSize: 9, fontWeight: 700, color: ct.color, fontFamily: "'Share Tech Mono', monospace" }}>
                 {tabStats[ct.id]?.owned || 0}/{tabStats[ct.id]?.total || 0}
@@ -358,7 +359,7 @@ export function CodexPanel({ onClose }: Props) {
                 }}>
                   {selectedTokenData.rarity.toUpperCase()}
                 </span>
-                {selectedTokenData.shiny && <span style={{ fontSize: 6, color: '#cc8800' }}>✨ SHINY</span>}
+                {selectedTokenData.shiny && <span style={{ fontSize: 6, color: '#cc8800' }}><EmojiIcon emoji="✨" /> SHINY</span>}
               </div>
             </div>
             <div style={{ fontSize: 10, fontWeight: 900, color: selectedTokenData.catColor, fontFamily: "'Share Tech Mono', monospace" }}>
@@ -390,7 +391,7 @@ export function CodexPanel({ onClose }: Props) {
               color: '#0099cc', fontSize: 7, fontWeight: 700, letterSpacing: 1,
               fontFamily: "'Orbitron', system-ui, sans-serif",
             }}>
-              🏪 MARKET
+              <EmojiIcon emoji="🏪" /> MARKET
             </button>
           </div>
 

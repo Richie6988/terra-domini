@@ -12,6 +12,7 @@ import { usePlayer, useStore } from '../../store'
 import { useKingdomStore } from '../../store/kingdomStore'
 import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 const toNum = (v: unknown) => parseFloat(String(v ?? 0)) || 0
 
@@ -42,7 +43,7 @@ function Tabs({ tabs, active, onChange }: { tabs: {id: string; label: string; ic
           color: active === t.id ? '#00884a' : '#6B7280',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
         }}>
-          {t.icon}
+          <EmojiIcon emoji={t.icon} size={16} />
           {t.label}
         </button>
       ))}
@@ -252,7 +253,7 @@ function PriceBoard() {
               <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.35)' }}>per unit</div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: '#cc8800', fontFamily: 'monospace' }}>{rate.toFixed(1)} 🪙</div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: '#cc8800', fontFamily: 'monospace' }}>{rate.toFixed(1)} <EmojiIcon emoji="🪙" /></div>
               <div style={{ fontSize: 10, color: up ? '#10B981' : '#EF4444' }}>
                 {up ? '▲' : '▼'} {Math.abs(change).toFixed(1)}%
               </div>
@@ -261,7 +262,7 @@ function PriceBoard() {
         )
       })}
       <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(255,59,48,0.06)', border: '1px solid rgba(255,59,48,0.15)', borderRadius: 10, fontSize: 11, color: '#FCA5A5' }}>
-        🔥 Hormuz Crisis: Energy +40% · Intel +25% · Affected region: Gulf
+        <EmojiIcon emoji="🔥" /> Hormuz Crisis: Energy +40% · Intel +25% · Affected region: Gulf
       </div>
     </div>
   )
@@ -332,7 +333,7 @@ export function TradePanel({ onClose }: { onClose: () => void }) {
             cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
           }}
         >
-          🏪 NFT MARKETPLACE →
+          <EmojiIcon emoji="🏪" /> NFT MARKETPLACE →
         </button>
         <button
           onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }}
@@ -343,7 +344,7 @@ export function TradePanel({ onClose }: { onClose: () => void }) {
             cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
           }}
         >
-          💎 WALLET →
+          <EmojiIcon emoji="💎" /> WALLET →
         </button>
       </div>
     </GlassPanel>

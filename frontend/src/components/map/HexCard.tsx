@@ -12,6 +12,7 @@ import { api } from '../../services/api'
 import { useStore, usePlayer } from '../../store'
 import { useSound } from '../../hooks/useSound'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 /* ── Rarity ─────────────────────────────────────────────── */
 const RARITY: Record<string, {
@@ -110,7 +111,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
         lon: t.center_lon ?? t.lon,
       })
       if (res.data.status === 'exploration_started') {
-        toast.success(`🔍 Exploration started! ${res.data.hours_required}h remaining`)
+        toast.success(`<EmojiIcon emoji="🔍" /> Exploration started! ${res.data.hours_required}h remaining`)
         setClaiming(false)
         return
       }
@@ -184,7 +185,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 padding: '2px 8px', borderRadius: 10,
                 background: 'rgba(252,211,77,0.15)', color: '#cc8800',
                 fontSize: 7, fontWeight: 700,
-              }}>✨ SHINY</span>}
+              }}><EmojiIcon emoji="✨" /> SHINY</span>}
             </div>
           </div>
 
@@ -203,7 +204,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 padding: '8px 14px', borderRadius: 10,
                 background: 'rgba(100,100,100,0.1)', border: '1px solid rgba(100,100,100,0.2)',
                 color: '#9CA3AF', fontSize: 8, fontWeight: 700, letterSpacing: 1,
-              }}>🔒 LOCKED</div>
+              }}><EmojiIcon emoji="🔒" /> LOCKED</div>
             )}
             {isFree && player && !claimOpts?.locked && claimOpts?.options?.map((opt: any) => (
               <button key={opt.method} onClick={() => handleClaim(opt.method)} disabled={claiming || !opt.available}
@@ -218,7 +219,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                   opacity: (claiming || !opt.available) ? 0.4 : 1,
                   fontFamily: "'Orbitron', sans-serif",
                 }}>
-                {claiming ? '⏳...' : opt.method === 'free' ? '🏴 FREE' : opt.method === 'buy' ? `💰 ${opt.cost}◆` : `🔍 ${opt.hours}h`}
+                {claiming ? '⏳...' : opt.method === 'free' ? '<EmojiIcon emoji="🏴" /> FREE' : opt.method === 'buy' ? `<EmojiIcon emoji="💰" /> ${opt.cost}◆` : `<EmojiIcon emoji="🔍" /> ${opt.hours}h`}
               </button>
             ))}
             {isFree && player && !claimOpts && (
@@ -227,7 +228,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 background: `linear-gradient(135deg, ${cfg.c}dd, ${cfg.c})`,
                 color: '#fff', fontSize: 8, fontWeight: 900, letterSpacing: 1,
                 fontFamily: "'Orbitron', sans-serif",
-              }}>🏴 CLAIM</button>
+              }}><EmojiIcon emoji="🏴" /> CLAIM</button>
             )}
             {isEnemy && (
               <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('combat'), 100) }} style={{
@@ -235,7 +236,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 border: '1px solid rgba(220,38,38,0.3)', background: 'rgba(220,38,38,0.08)',
                 color: '#dc2626', fontSize: 8, fontWeight: 900, letterSpacing: 1,
                 fontFamily: "'Orbitron', sans-serif",
-              }}>⚔️ ATTACK</button>
+              }}><EmojiIcon emoji="⚔" /> ATTACK</button>
             )}
             {isOwned && (
               <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('kingdom'), 100) }} style={{
@@ -243,7 +244,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 border: '1px solid rgba(0,153,204,0.3)', background: 'rgba(0,153,204,0.08)',
                 color: '#0099cc', fontSize: 8, fontWeight: 900, letterSpacing: 1,
                 fontFamily: "'Orbitron', sans-serif",
-              }}>👑 KINGDOM</button>
+              }}><EmojiIcon emoji="👑" /> KINGDOM</button>
             )}
           </div>
         </div>

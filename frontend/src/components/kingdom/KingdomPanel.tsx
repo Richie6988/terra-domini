@@ -12,6 +12,7 @@ import { ResourceIconSVG } from '../shared/iconBank'
 import { SkillTreeView } from './SkillTreeView'
 import { useKingdomStore } from '../../store/kingdomStore'
 import { useStore } from '../../store'
+import { EmojiIcon } from '../shared/emojiIcons'
 import {
   RESOURCES, BIOME_PRODUCTION, SKILL_BRANCHES,
   calculateKingdomProduction, calculateDailyHex, getBranchProgress,
@@ -50,7 +51,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           margin: '0 auto 8px', fontSize: 22, boxShadow: `0 0 20px ${kingdom.color}30`,
         }}>
-          🏰
+          <EmojiIcon emoji="🏰" />
         </div>
         <div style={{
           fontSize: 12, fontWeight: 900, color: '#1a2a3a', letterSpacing: 3,
@@ -99,7 +100,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
           const pct = prog.total > 0 ? (prog.completed / prog.total) * 100 : 0
           return (
             <div key={branch.id} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-              <span style={{ fontSize: 14, width: 20 }}>{branch.icon}</span>
+              <span style={{ fontSize: 14, width: 20 }}><EmojiIcon emoji={branch.icon} size={16} /></span>
               <div style={{ flex: 1 }}>
                 <div style={{
                   height: 6, borderRadius: 3, overflow: 'hidden',
@@ -133,7 +134,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
         fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
       }}>
         {kingdom.shieldActive ? '🛡 SHIELD ACTIVE' : '⚠ SHIELD INACTIVE'}
-        {kingdom.warZone && <span style={{ color: '#dc2626', marginLeft: 'auto' }}>🔥 WAR ZONE</span>}
+        {kingdom.warZone && <span style={{ color: '#dc2626', marginLeft: 'auto' }}><EmojiIcon emoji="🔥" /> WAR ZONE</span>}
       </div>
 
       {/* Process Day — generate resources + HEX */}
@@ -345,7 +346,7 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
           border: `1.5px solid ${method.color}20`,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <span style={{ fontSize: 20 }}>{method.icon}</span>
+            <span style={{ fontSize: 20 }}><EmojiIcon emoji={method.icon} size={16} /></span>
             <div style={{
               fontSize: 9, fontWeight: 900, color: method.color, letterSpacing: 2,
               fontFamily: "'Orbitron', system-ui, sans-serif",
@@ -379,7 +380,7 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
         fontSize: 8, color: '#0099cc', lineHeight: 1.6,
         fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
       }}>
-        💡 ADJACENT TERRITORIES COST 3.5× LESS AND SUCCEED MORE OFTEN
+        <EmojiIcon emoji="💡" /> ADJACENT TERRITORIES COST 3.5× LESS AND SUCCEED MORE OFTEN
       </div>
 
       {/* Influence requirement */}
@@ -390,7 +391,7 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
         fontSize: 8, color: '#cc8800', lineHeight: 1.6,
         fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
       }}>
-        🏛 RARE LANDMARKS REQUIRE HIGH INFLUENCE LEVEL TO PURCHASE OR INFILTRATE
+        <EmojiIcon emoji="🏛" /> RARE LANDMARKS REQUIRE HIGH INFLUENCE LEVEL TO PURCHASE OR INFILTRATE
       </div>
     </div>
   )
@@ -451,7 +452,7 @@ export function KingdomPanel({ onClose }: Props) {
                 whiteSpace: 'nowrap',
               }}
             >
-              🏰 {k.name.toUpperCase()}
+              <EmojiIcon emoji="🏰" /> {k.name.toUpperCase()}
             </button>
           ))}
         </div>
@@ -524,7 +525,7 @@ export function KingdomPanel({ onClose }: Props) {
             cursor: 'pointer', fontFamily: "'Orbitron', system-ui, sans-serif",
           }}
         >
-          🛒 KINGDOM BOOSTS → SHOP
+          <EmojiIcon emoji="🛒" /> KINGDOM BOOSTS → SHOP
         </button>
         <button
           onClick={() => { onClose(); setTimeout(() => setActivePanel('trade'), 100) }}
@@ -535,7 +536,7 @@ export function KingdomPanel({ onClose }: Props) {
             cursor: 'pointer', fontFamily: "'Orbitron', system-ui, sans-serif",
           }}
         >
-          📊 TRADE RESOURCES →
+          <EmojiIcon emoji="📊" /> TRADE RESOURCES →
         </button>
       </div>
     </GlassPanel>

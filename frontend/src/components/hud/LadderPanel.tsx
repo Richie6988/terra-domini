@@ -9,6 +9,7 @@ import { MiniIcon, StatusDot } from '../shared/MiniIcons'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 type Tab = 'global' | 'nearby' | 'alliance'
@@ -52,7 +53,7 @@ export function LadderPanel({ onClose }: Props) {
     territories: e.territories || 0,
     hex_per_day: e.hex_per_day || e.score || 0,
     isYou: e.id === String(player?.id),
-    avatar_emoji: e.avatar_emoji || '🎖️',
+    avatar_emoji: e.avatar_emoji || '<EmojiIcon emoji="🎖" />',
   }))
   const meRank = lbData?.me_rank
 

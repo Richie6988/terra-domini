@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { BURN_RATES, HEX_TOKEN } from '../../types/blockchain.types'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props {
   totalBurned?: number
@@ -41,7 +42,7 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
         padding: '4px 10px', borderRadius: 16,
         background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.12)',
       }}>
-        <span style={{ fontSize: 10 }}>🔥</span>
+        <span style={{ fontSize: 10 }}><EmojiIcon emoji="🔥" /></span>
         <span style={{
           fontSize: 8, fontWeight: 900, color: '#dc2626',
           fontFamily: "'Share Tech Mono', monospace",
@@ -76,7 +77,7 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
         }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ fontSize: 10 }}>🔥</div>
+          <div style={{ fontSize: 10 }}><EmojiIcon emoji="🔥" /></div>
           <div style={{
             fontSize: 7, fontWeight: 700, color: 'rgba(26,42,58,0.4)', letterSpacing: 3,
             fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 4,

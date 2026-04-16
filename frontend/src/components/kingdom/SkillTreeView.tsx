@@ -9,6 +9,7 @@ import { SKILL_BRANCHES, type BranchId, type SkillNode, type SkillBranch } from 
 import type { Kingdom, SkillState } from '../../types/kingdom.types'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { SkillIconSVG } from '../shared/iconBank'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props {
   kingdom: Kingdom
@@ -215,7 +216,7 @@ function BranchColumn({
 
         <div style={{ position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <span style={{ fontSize: 22, filter: `drop-shadow(0 0 4px ${color}60)` }}>{branch.icon}</span>
+            <span style={{ fontSize: 22, filter: `drop-shadow(0 0 4px ${color}60)` }}><EmojiIcon emoji={branch.icon} size={16} /></span>
             <div>
               <div style={{
                 fontSize: 8, fontWeight: 900, color, letterSpacing: 2,
@@ -415,7 +416,7 @@ export function SkillTreeView({ kingdom, onPour, onForkChoice, onBranchAllocChan
                 boxShadow: '0 2px 8px rgba(121,80,242,0.3)',
               }}
             >
-              ⚡ QUICK POUR ALL ({Math.floor(totalReservoir).toLocaleString()} ◆)
+              <EmojiIcon emoji="⚡" /> QUICK POUR ALL ({Math.floor(totalReservoir).toLocaleString()} ◆)
             </button>
           )}
         </div>

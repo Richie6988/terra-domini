@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 export interface FavoritePin {
   id: string | number
@@ -18,7 +19,7 @@ export interface FavoritePin {
   zoom: number
 }
 
-const PIN_EMOJIS = ['📍', '⭐', '🏠', '🏰', '💎', '🎯', '🔥', '👑', '🌍', '⚔️']
+const PIN_EMOJIS = ['<EmojiIcon emoji="📍" />', '⭐', '<EmojiIcon emoji="🏠" />', '<EmojiIcon emoji="🏰" />', '<EmojiIcon emoji="💎" />', '<EmojiIcon emoji="🎯" />', '<EmojiIcon emoji="🔥" />', '<EmojiIcon emoji="👑" />', '<EmojiIcon emoji="🌍" />', '<EmojiIcon emoji="⚔" />']
 
 export function useFavoritePins() {
   const [pins, setPins] = useState<FavoritePin[]>([])
@@ -38,7 +39,7 @@ export function useFavoritePins() {
     try {
       const r = await api.post('/players/pins/', { name: pinName, emoji, lat, lon, zoom })
       setPins(prev => [...prev, r.data])
-      toast.success(`📍 ${pinName} saved!`)
+      toast.success(`<EmojiIcon emoji="📍" /> ${pinName} saved!`)
       return r.data
     } catch {
       toast.error('Failed to save pin')

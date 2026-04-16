@@ -16,6 +16,7 @@ import { BoosterOpenAnimation } from './BoosterOpenAnimation'
 import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 const RARITY_COLOR: Record<string,string> = {
   common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
@@ -157,7 +158,7 @@ export function ShopPanel({ onClose }: Props) {
               background:`linear-gradient(135deg, ${activeKingdom.color}, ${activeKingdom.color}aa)`,
               display:'flex', alignItems:'center', justifyContent:'center',
               fontSize:11, boxShadow:`0 0 8px ${activeKingdom.color}30`,
-            }}>🏰</div>
+            }}><EmojiIcon emoji="🏰" /></div>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:7, fontWeight:800, color:activeKingdom.color, letterSpacing:2, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
                 {activeKingdom.name.toUpperCase()}
@@ -220,7 +221,7 @@ export function ShopPanel({ onClose }: Props) {
         {/* ═══ BOOSTERS SECTION ═══ */}
         <div id="shop-boosters" style={{ marginBottom:20 }}>
           <div style={{ fontSize:8, fontWeight:700, letterSpacing:2, color:'#cc8800', marginBottom:10, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
-            🎁 BOOSTER PACKS — 10 ITEMS EACH
+            <EmojiIcon emoji="🎁" /> BOOSTER PACKS — 10 ITEMS EACH
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:8 }}>
             {BOOSTERS.map(b => (
@@ -229,7 +230,7 @@ export function ShopPanel({ onClose }: Props) {
                 background:`linear-gradient(135deg, ${b.color}12, ${b.color}05)`,
                 border:`2px solid ${b.color}40`, transition:'all 0.25s ease',
               }}>
-                <div style={{ fontSize:28, marginBottom:6 }}>{b.icon}</div>
+                <div style={{ fontSize:28, marginBottom:6 }}><EmojiIcon emoji={b.icon} size={16} /></div>
                 <div style={{ fontSize:9, fontWeight:900, color:b.color, marginBottom:4, fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1 }}>{b.name}</div>
                 <div style={{ fontSize:7, color:'rgba(26,42,58,0.45)', lineHeight:1.6, fontFamily:'system-ui', marginBottom:8, whiteSpace:'pre-line' }}>{b.desc}</div>
                 <div style={{ fontSize:14, fontWeight:900, color:b.color, fontFamily:"'Share Tech Mono', monospace" }}>{b.price} ◆</div>
@@ -255,7 +256,7 @@ export function ShopPanel({ onClose }: Props) {
               }}>
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:9, fontWeight:900, color:'#1a2a3a', letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
-                    {item.icon} {item.name}
+                    <EmojiIcon emoji={item.icon} size={16} /> {item.name}
                   </div>
                   <div style={{ fontSize:8, color:'rgba(26,42,58,0.45)', marginTop:3, lineHeight:1.4, textTransform:'none', fontFamily:'system-ui' }}>
                     {item.desc}

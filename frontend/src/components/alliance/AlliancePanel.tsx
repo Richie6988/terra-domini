@@ -11,6 +11,7 @@ import { usePlayer, useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import { useAllianceChat } from '../../hooks/useAllianceChat'
 import type { Alliance, AllianceMember } from '../../types'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 const textInput: React.CSSProperties = {
   background: 'rgba(255,255,255,0.5)',
@@ -104,7 +105,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
 
   const createMut = useMutation({
     mutationFn: allianceApi.create,
-    onSuccess: () => { toast.success('Alliance created! 🏰'); qc.invalidateQueries({ queryKey: ['player'] }) },
+    onSuccess: () => { toast.success('Alliance created! <EmojiIcon emoji="🏰" />'); qc.invalidateQueries({ queryKey: ['player'] }) },
     onError: (e: any) => toast.error(e?.response?.data?.error ?? 'Failed'),
   })
 
@@ -184,7 +185,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                     background: b.active ? 'rgba(139,92,246,0.08)' : 'rgba(0,60,100,0.03)',
                     color: b.active ? '#8b5cf6' : 'rgba(26,42,58,0.25)',
                     border: `1px solid ${b.active ? 'rgba(139,92,246,0.2)' : 'rgba(0,60,100,0.06)'}`,
-                  }}>{b.icon} {b.label}</span>
+                  }}><EmojiIcon emoji={b.icon} size={16} /> {b.label}</span>
                 ))}
               </div>
             </div>
@@ -238,7 +239,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                   padding: '10px 8px', borderRadius: 8, cursor: 'pointer', fontSize: 7, fontWeight: 700,
                   background: `${a.color}06`, border: `1px solid ${a.color}15`,
                   color: a.color, letterSpacing: 1, fontFamily: "'Orbitron', sans-serif",
-                }}>{a.icon} {a.label}</button>
+                }}><EmojiIcon emoji={a.icon} size={16} /> {a.label}</button>
               ))}
             </div>
 
@@ -260,7 +261,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '9px 0', borderBottom: '1px solid rgba(255,255,255,0.05)',
               }}>
-                <span style={{ fontSize: 18, width: 28 }}>{ROLE_ICONS[m.role] ?? '⚔️'}</span>
+                <span style={{ fontSize: 18, width: 28 }}>{ROLE_ICONS[m.role] ?? '<EmojiIcon emoji="⚔" />'}</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, color: '#1a2a3a', fontWeight: 500 }}>{m.username}</div>
                   <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.45)' }}>

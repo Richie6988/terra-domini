@@ -15,6 +15,7 @@ import { CrystalIcon } from '../shared/CrystalIcon'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 
@@ -140,7 +141,7 @@ export function EventsPanel({ onClose }: Props) {
         background: 'linear-gradient(90deg, rgba(251,191,36,0.06), rgba(168,85,247,0.06))',
         border: '1px solid rgba(251,191,36,0.15)',
       }}>
-        <div style={{ fontSize: 20 }}>🍀</div>
+        <div style={{ fontSize: 20 }}><EmojiIcon emoji="🍀" /></div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', letterSpacing: 2, ...s }}>YOUR LUCK RATING</div>
           <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
@@ -153,7 +154,7 @@ export function EventsPanel({ onClose }: Props) {
           padding: '6px 12px', borderRadius: 10, cursor: 'pointer',
           background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.25)',
           color: '#a855f7', fontSize: 7, fontWeight: 700, letterSpacing: 1, ...s,
-        }}>🧪 BUY POTION</button>
+        }}><EmojiIcon emoji="🧪" /> BUY POTION</button>
       </div>
 
       {/* Tabs */}
@@ -187,10 +188,10 @@ export function EventsPanel({ onClose }: Props) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 16 }}>{ev.icon}</span>
+                        <span style={{ fontSize: 16 }}><EmojiIcon emoji={ev.icon} size={16} /></span>
                         <div>
                           <div style={{ fontSize: 9, fontWeight: 900, color: ev.color, letterSpacing: 1, ...s }}>{ev.name}</div>
-                          <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 1 }}>📍 {ev.loc}</div>
+                          <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 1 }}><EmojiIcon emoji="📍" /> {ev.loc}</div>
                         </div>
                       </div>
                     </div>
@@ -232,7 +233,7 @@ export function EventsPanel({ onClose }: Props) {
                         opacity: isReg ? 0.7 : 1,
                       }}
                     >
-                      {isReg ? '✅ REGISTERED' : `⚡ REGISTER — ${ev.cost} HEX`}
+                      {isReg ? '✅ REGISTERED' : `<EmojiIcon emoji="⚡" /> REGISTER — ${ev.cost} HEX`}
                     </button>
                     <div style={{ textAlign: 'center' }}>
                       <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)', ...s }}>LUCK</div>
@@ -260,10 +261,10 @@ export function EventsPanel({ onClose }: Props) {
                   border: `1px solid ${isSoon ? ev.color + '25' : 'rgba(0,60,100,0.1)'}`,
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 20 }}>{ev.icon}</span>
+                    <span style={{ fontSize: 20 }}><EmojiIcon emoji={ev.icon} size={16} /></span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 9, fontWeight: 900, color: ev.color, letterSpacing: 1, ...s }}>{ev.name}</div>
-                      <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 1 }}>📍 {ev.loc} · {ev.rarity.toUpperCase()}</div>
+                      <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 1 }}><EmojiIcon emoji="📍" /> {ev.loc} · {ev.rarity.toUpperCase()}</div>
                       <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.4)', marginTop: 2, fontFamily: 'system-ui' }}>{ev.desc}</div>
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -325,7 +326,7 @@ export function EventsPanel({ onClose }: Props) {
                   opacity: r.status === 'lost' ? 0.5 : 1,
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 18 }}>{r.icon}</span>
+                    <span style={{ fontSize: 18 }}><EmojiIcon emoji={r.icon} size={16} /></span>
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 9, fontWeight: 900, color: r.status === 'lost' ? 'rgba(26,42,58,0.4)' : r.color, letterSpacing: 1, ...s }}>
                         {r.name}
@@ -333,7 +334,7 @@ export function EventsPanel({ onClose }: Props) {
                       <div style={{ display: 'flex', gap: 4, marginTop: 3 }}>
                         <span style={{ padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 700, background: r.color + '12', color: r.color, ...s }}>{r.rarity}</span>
                         {r.status === 'won' && <span style={{ fontSize: 6, color: '#00884a' }}>#{r.serial}/{r.maxSerial}</span>}
-                        {r.luckBonus > 0 && <span style={{ fontSize: 6, color: '#a855f7' }}>🍀+{r.luckBonus}</span>}
+                        {r.luckBonus > 0 && <span style={{ fontSize: 6, color: '#a855f7' }}><EmojiIcon emoji="🍀" />+{r.luckBonus}</span>}
                       </div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
@@ -342,7 +343,7 @@ export function EventsPanel({ onClose }: Props) {
                           <div style={{ fontSize: 11, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono'" }}>+{r.hexEarned}</div>
                           <div style={{ fontSize: 6, color: 'rgba(26,42,58,0.3)', ...s }}>HEX</div>
                           {r.placeable && (
-                            <div style={{ fontSize: 6, color: '#22c55e', marginTop: 2, fontWeight: 700, ...s }}>📍 PLACE</div>
+                            <div style={{ fontSize: 6, color: '#22c55e', marginTop: 2, fontWeight: 700, ...s }}><EmojiIcon emoji="📍" /> PLACE</div>
                           )}
                         </>
                       )}
@@ -351,7 +352,7 @@ export function EventsPanel({ onClose }: Props) {
                           padding: '6px 12px', borderRadius: 8, cursor: 'pointer',
                           background: 'linear-gradient(135deg, #fbbf24, #f97316)',
                           border: 'none', color: '#fff', fontSize: 7, fontWeight: 900, ...s,
-                        }}>🎁 REVEAL</button>
+                        }}><EmojiIcon emoji="🎁" /> REVEAL</button>
                       )}
                       {r.status === 'pending' && isRevealed && (
                         <div style={{ fontSize: 8, color: '#f97316', fontWeight: 700, ...s }}>⏳ PROCESSING</div>
@@ -371,7 +372,7 @@ export function EventsPanel({ onClose }: Props) {
               background: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.15)',
             }}>
               <div style={{ fontSize: 7, color: '#22c55e', fontWeight: 700, letterSpacing: 1, ...s }}>
-                📍 WON TOKENS ARE PLACEABLE
+                <EmojiIcon emoji="📍" /> WON TOKENS ARE PLACEABLE
               </div>
               <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 3, fontFamily: 'system-ui', lineHeight: 1.5 }}>
                 Place event tokens adjacent to your captured territories to expand your empire. Higher rarity = stronger territory bonus.

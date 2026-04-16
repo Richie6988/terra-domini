@@ -20,6 +20,7 @@ import { IconSVG } from '../shared/iconBank'
 import { TokenFace2D } from '../shared/TokenFace2D'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 
@@ -281,7 +282,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 boxShadow: '0 4px 15px rgba(249,115,22,0.3)',
               }}
             >
-              🎯 START SAFARI
+              <EmojiIcon emoji="🎯" /> START SAFARI
             </button>
           </motion.div>
         )}
@@ -325,7 +326,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               fontSize: 7, color: '#0099cc', textAlign: 'center',
               fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
             }}>
-              💡 DEEP SCAN UNLOCKS AT 50M RANGE
+              <EmojiIcon emoji="💡" /> DEEP SCAN UNLOCKS AT 50M RANGE
             </div>
           </motion.div>
         )}
@@ -338,7 +339,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 fontSize: 9, fontWeight: 900, letterSpacing: 3, color: '#dc2626',
                 fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 12,
               }}>
-                🔥 DEEP SCAN IN PROGRESS
+                <EmojiIcon emoji="🔥" /> DEEP SCAN IN PROGRESS
               </div>
 
               {/* Scan animation */}
@@ -440,7 +441,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                   boxShadow: `0 4px 20px ${RARITY_COLORS[hunt.rarity]}40`,
                 }}
               >
-                ✨ COLLECT TOKEN
+                <EmojiIcon emoji="✨" /> COLLECT TOKEN
               </button>
             </div>
           </motion.div>
@@ -454,7 +455,7 @@ export function DailyHuntPanel({ onClose }: Props) {
             animate={{ opacity: 1, y: 0 }}
           >
             <div style={{ textAlign: 'center', padding: '16px 0' }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}>🎉</div>
+              <div style={{ fontSize: 48, marginBottom: 12 }}><EmojiIcon emoji="🎉" /></div>
               <div style={{
                 fontSize: 11, fontWeight: 900, letterSpacing: 3, color: '#00884a',
                 fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 16,
@@ -507,7 +508,7 @@ export function DailyHuntPanel({ onClose }: Props) {
           fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)',
           fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8,
         }}>
-          📋 DAILY CHALLENGES
+          <EmojiIcon emoji="📋" /> DAILY CHALLENGES
         </div>
         {DAILY_CHALLENGES.map(ch => {
           const pct = Math.floor((ch.progress / ch.total) * 100)
@@ -520,7 +521,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               border: `1px solid ${done ? 'rgba(0,136,74,0.2)' : 'rgba(0,60,100,0.08)'}`,
               opacity: done ? 0.6 : 1,
             }}>
-              <span style={{ fontSize: 14 }}>{ch.icon}</span>
+              <span style={{ fontSize: 14 }}><EmojiIcon emoji={ch.icon} size={16} /></span>
               <div style={{ flex: 1 }}>
                 <div style={{
                   fontSize: 8, fontWeight: 700, color: done ? 'rgba(26,42,58,0.4)' : '#1a2a3a',

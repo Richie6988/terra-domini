@@ -14,6 +14,7 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import { useLeafletLayer } from '../ui/Utils'
 import { cellToBoundary, cellToLatLng } from 'h3-js'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface AttackEvent {
   sourceH3:  string
@@ -106,7 +107,7 @@ export function AttackAnimationLayer({ map }: Props) {
           animation: floatUp 1s ease-out 0.3s forwards;
           transform-origin: center;
           filter: drop-shadow(0 0 6px #EF4444);
-        ">⚔️</div>`,
+        "><EmojiIcon emoji="⚔" /></div>`,
         className: '',
         iconSize: [24, 24],
         iconAnchor: [12, 12],
@@ -125,7 +126,7 @@ export function AttackAnimationLayer({ map }: Props) {
       layer.addLayer(targetPoly)
 
       // Labels flottants sur la cible (dégâts simulés)
-      const floatingLabels = ['⚔️ ATTAQUE', '💥 IMPACT', '🔥 SIÈGE']
+      const floatingLabels = ['<EmojiIcon emoji="⚔" /> ATTAQUE', '<EmojiIcon emoji="💥" /> IMPACT', '<EmojiIcon emoji="🔥" /> SIÈGE']
       floatingLabels.forEach((label, i) => {
         const offset = (i - 1) * 0.001
         const floatIcon = L.divIcon({

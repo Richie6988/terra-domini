@@ -13,6 +13,7 @@ import { api } from '../../services/api'
 import { RARITY_COLOR, BIOME_COLOR } from '../../styles/tokens'
 import { GlassPanel } from '../shared/GlassPanel'
 import { SkeletonPanel } from '../ui/Utils'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 
@@ -211,7 +212,7 @@ export function MetaDashboard({ onClose }: Props) {
                         </div>
                         <div style={{ textAlign:'right', flexShrink:0 }}>
                           <div style={{ fontSize:11, fontWeight:700, color:'#F59E0B', fontFamily:'monospace' }}>
-                            {(p.total_tdc || 0).toFixed(0)} 💎
+                            {(p.total_tdc || 0).toFixed(0)} <EmojiIcon emoji="💎" />
                           </div>
                         </div>
                       </div>
@@ -242,7 +243,7 @@ export function MetaDashboard({ onClose }: Props) {
                         </div>
                       </div>
                       <div style={{ fontSize:11, color:'#EF4444', fontFamily:'monospace', flexShrink:0 }}>
-                        🔥 {z.battle_count}
+                        <EmojiIcon emoji="🔥" /> {z.battle_count}
                       </div>
                     </div>
                   ))}

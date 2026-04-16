@@ -8,6 +8,7 @@
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Blip {
   id: string; angle: number; distance: number; color: string
@@ -112,7 +113,7 @@ export function RadarWidget() {
                 fill={blip.color} opacity={nearSweep ? 1 : 0.6}
                 style={{ transition: 'opacity 0.3s', cursor: 'pointer' }}
               >
-                <title>{blip.isSafari ? `🎯 SAFARI TARGET — ${Math.floor(blip.distance * 5000)}m` : `${blip.category || 'Signal'} — ${Math.floor(blip.distance * 5000)}m`}</title>
+                <title>{blip.isSafari ? `<EmojiIcon emoji="🎯" /> SAFARI TARGET — ${Math.floor(blip.distance * 5000)}m` : `${blip.category || 'Signal'} — ${Math.floor(blip.distance * 5000)}m`}</title>
               </circle>
               {blip.isSafari && (
                 <>
@@ -125,7 +126,7 @@ export function RadarWidget() {
                     <text x={bx} y={by - blipR - 6} textAnchor="middle"
                       fontSize="8" fontWeight="900" fill="#fbbf24"
                       fontFamily="'Orbitron', system-ui, sans-serif">
-                      🎯 SAFARI
+                      <EmojiIcon emoji="🎯" /> SAFARI
                     </text>
                   )}
                 </>
@@ -208,7 +209,7 @@ export function RadarWidget() {
                   border: `2px solid ${safariHeatColor}40`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 22,
-                }}>🎯</div>
+                }}><EmojiIcon emoji="🎯" /></div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 9, fontWeight: 900, color: '#1a2a3a', letterSpacing: 2 }}>
                     ACTIVE SAFARI

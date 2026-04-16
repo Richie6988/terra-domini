@@ -10,6 +10,7 @@ import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 type Tab = 'commander' | 'achievements' | 'preferences'
@@ -19,7 +20,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'achievements', label: 'ACHIEVEMENTS' },
   { id: 'preferences', label: 'PREFERENCES' },
 ]
-const AVATARS = ['🦅','🐉','🦁','🐺','🦊','🐻','🦇','🦈','🐍','🦎','🦂','🐙','🦑','🦀','🐝','🦋','🐎','🦌','🐘','🦏','🦬','🐊','🦖','🐋']
+const AVATARS = ['<EmojiIcon emoji="🦅" />','<EmojiIcon emoji="🐉" />','<EmojiIcon emoji="🦁" />','<EmojiIcon emoji="🐺" />','<EmojiIcon emoji="🦊" />','<EmojiIcon emoji="🐻" />','<EmojiIcon emoji="🦇" />','<EmojiIcon emoji="🦈" />','<EmojiIcon emoji="🐍" />','🦎','<EmojiIcon emoji="🦂" />','<EmojiIcon emoji="🐙" />','<EmojiIcon emoji="🦑" />','<EmojiIcon emoji="🦀" />','<EmojiIcon emoji="🐝" />','<EmojiIcon emoji="🦋" />','<EmojiIcon emoji="🐎" />','<EmojiIcon emoji="🦌" />','<EmojiIcon emoji="🐘" />','<EmojiIcon emoji="🦏" />','<EmojiIcon emoji="🦬" />','<EmojiIcon emoji="🐊" />','<EmojiIcon emoji="🦖" />','<EmojiIcon emoji="🐋" />']
 const AVATAR_COLORS = ['#0099cc','#cc8800','#dc2626','#22c55e','#8b5cf6','#f59e0b','#ec4899','#3b82f6','#6366f1','#14b8a6','#f97316','#64748b']
 const sBox: React.CSSProperties = { padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.06)' }
 const lbl: React.CSSProperties = { fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 6 }
@@ -28,7 +29,7 @@ const inputSt: React.CSSProperties = { width: '100%', padding: '8px 12px', borde
 function CommanderTab() {
   const player = usePlayer()
   const [name, setName] = useState(player?.display_name || '')
-  const [avatar, setAvatar] = useState((player as any)?.avatar_emoji || '🦅')
+  const [avatar, setAvatar] = useState((player as any)?.avatar_emoji || '<EmojiIcon emoji="🦅" />')
   const [avatarBg, setAvatarBg] = useState((player as any)?.avatar_color || '#0099cc')
   const [email, setEmail] = useState(player?.email || '')
   const [saving, setSaving] = useState(false)
@@ -170,7 +171,7 @@ function AchievementsTab() {
       ))}</div>
       {filtered.map((b: any) => { const done = b.unlocked; const catCol = CC[b.category] || '#6b7280'; return (
         <div key={b.id} style={{ display:'flex',gap:10,padding:'10px 12px',borderRadius:10,background:done?'rgba(204,136,0,0.04)':'rgba(255,255,255,0.4)',border:`1px solid ${done?'rgba(204,136,0,0.15)':'rgba(0,60,100,0.06)'}`,opacity:done?1:0.6 }}>
-          <span style={{ fontSize:22,filter:done?'':'grayscale(1)' }}>{b.icon}</span>
+          <span style={{ fontSize:22,filter:done?'':'grayscale(1)' }}><EmojiIcon emoji={b.icon} size={16} /></span>
           <div style={{ flex:1 }}>
             <div style={{ fontSize:10,fontWeight:700,color:'#1a2a3a' }}>{b.name}</div>
             <div style={{ fontSize:7,color:catCol,fontWeight:600,letterSpacing:1 }}>{b.category?.toUpperCase()}</div>

@@ -5,6 +5,7 @@
  */
 import { useState, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 export const RESOURCE_INFO: Record<string, {
   icon: string; color: string; label: string
@@ -53,7 +54,7 @@ export function ResourceBadge({ resource, value, showValue = true, style }: Prop
       onMouseLeave={() => { clearTimeout(timer.current); timer.current = setTimeout(() => setOpen(false), 150) }}
       onTouchStart={() => setOpen(o => !o)}
     >
-      <span style={{ fontSize: 14 }}>{info.icon}</span>
+      <span style={{ fontSize: 14 }}><EmojiIcon emoji={info.icon} size={16} /></span>
       {showValue && value !== undefined && (
         <span style={{ fontSize: 11, color: info.color, fontFamily: 'monospace', fontWeight: 700 }}>
           {value > 0 ? `+${value.toFixed(0)}` : value.toFixed(0)}
@@ -86,7 +87,7 @@ export function ResourceBadge({ resource, value, showValue = true, style }: Prop
               borderTop: `6px solid ${info.color}44`,
             }} />
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-              <span style={{ fontSize: 20 }}>{info.icon}</span>
+              <span style={{ fontSize: 20 }}><EmojiIcon emoji={info.icon} size={16} /></span>
               <div>
                 <div style={{ fontSize: 12, fontWeight: 800, color: info.color }}>{info.label}</div>
                 <div style={{ fontSize: 10, color: '#4B5563' }}>

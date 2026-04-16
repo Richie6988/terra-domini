@@ -9,6 +9,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../services/api'
 import { usePlayer } from '../store'
 import { useNavigate } from 'react-router-dom'
+import { EmojiIcon } from '../components/shared/emojiIcons'
 
 const toNum = (v: any) => parseFloat(String(v ?? 0)) || 0
 
@@ -32,7 +33,7 @@ export default function AdminPanel() {
       <div style={{ position:'fixed', inset:0, background:'#080810',
         display:'flex', alignItems:'center', justifyContent:'center',
         color:'#EF4444', fontSize:20, fontWeight:800 }}>
-        ⛔ Accès refusé — Admin uniquement
+        <EmojiIcon emoji="⛔" /> Accès refusé — Admin uniquement
       </div>
     )
   }
@@ -141,7 +142,7 @@ export default function AdminPanel() {
                   background: 'rgba(255,255,255,0.04)', borderRadius: 12,
                   padding: '14px 16px', border: `1px solid ${s.color}22`,
                 }}>
-                  <div style={{ fontSize: 22, marginBottom: 6 }}>{s.icon}</div>
+                  <div style={{ fontSize: 22, marginBottom: 6 }}><EmojiIcon emoji={s.icon} size={16} /></div>
                   <div style={{ fontSize: 22, fontWeight: 900, color: s.color, fontFamily: 'monospace' }}>{s.value}</div>
                   <div style={{ fontSize: 10, color: '#6B7280', marginTop: 4 }}>{s.label}</div>
                 </div>
@@ -182,7 +183,7 @@ export default function AdminPanel() {
               <button onClick={() => qc.invalidateQueries({ queryKey:['gm-logs'] })} style={{
                 padding:'6px 14px', borderRadius:8, background:'rgba(0,136,74,0.1)',
                 border:'1px solid rgba(0,136,74,0.25)', color:'#0099cc', fontSize:12, cursor:'pointer',
-              }}>🔄 Rafraîchir</button>
+              }}><EmojiIcon emoji="🔄" /> Rafraîchir</button>
             </div>
 
             {logsLoading ? (
@@ -207,7 +208,7 @@ export default function AdminPanel() {
                       background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
                     }}
                   >
-                    <span style={{ fontSize:16, flexShrink:0 }}>{log.icon || '📌'}</span>
+                    <span style={{ fontSize:16, flexShrink:0 }}>{log.icon || '<EmojiIcon emoji="📌" />'}</span>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{
                         fontSize:12, color:'#E5E7EB',

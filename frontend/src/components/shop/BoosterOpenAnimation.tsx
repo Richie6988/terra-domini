@@ -10,6 +10,7 @@
  */
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { EmojiIcon } from '../shared/emojiIcons'
 
 const RARITY_COLOR: Record<string,string> = {
   common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
@@ -114,7 +115,7 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
                 alignItems:'center', justifyContent:'center', gap:12,
               }}
             >
-              <div style={{ fontSize:56 }}>🎁</div>
+              <div style={{ fontSize:56 }}><EmojiIcon emoji="🎁" /></div>
               <div style={{ fontSize:13, color:'#F59E0B', fontWeight:800 }}>HEXOD</div>
               <div style={{ fontSize:9, color:'rgba(26,42,58,0.45)', textAlign:'center', padding:'0 12px' }}>
                 {cards.length} cartes à l'intérieur
@@ -157,7 +158,7 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
                 }}
               />
             ))}
-            <div style={{ fontSize:80 }}>✨</div>
+            <div style={{ fontSize:80 }}><EmojiIcon emoji="✨" /></div>
           </motion.div>
         )}
 
@@ -237,7 +238,7 @@ function CardReveal({ card, index, revealed, flipped }: {
   card: Card; index: number; revealed: boolean; flipped: boolean
 }) {
   const rc = RARITY_COLOR[card.rarity] || '#9CA3AF'
-  const biomeIcon = BIOME_ICON[card.biome || card.territory_type || ''] || '🌍'
+  const biomeIcon = BIOME_ICON[card.biome || card.territory_type || ''] || '<EmojiIcon emoji="🌍" />'
   const RANK: Record<string,number> = { common:0, uncommon:1, rare:2, epic:3, legendary:4, mythic:5 }
   const isHighRarity = (RANK[card.rarity] || 0) >= 3
 
