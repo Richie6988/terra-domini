@@ -19,35 +19,64 @@ import { CATEGORIES } from '../shared/radarIconData'
 import { useStore } from '../../store'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 
-// Category tabs matching prototype structure
+// Category tabs matching prototype structure — using iconBank IDs, no emojis
 const CODEX_TABS = [
-  { id: 'overview',  label: 'Overview',     icon: '📊' },
-  { id: 'favorites', label: '⭐ Favorites', icon: '⭐' },
-  { id: 'disaster',  label: '🔥 Disasters', icon: '🔥', color: '#dc2626' },
-  { id: 'places',    label: '🏛 Places',    icon: '🏛', color: '#3b82f6' },
-  { id: 'nature',    label: '🌲 Nature',    icon: '🌲', color: '#22c55e' },
-  { id: 'conflict',  label: '⚔ Conflict',   icon: '⚔', color: '#f97316' },
-  { id: 'culture',   label: '🎭 Culture',   icon: '🎭', color: '#ec4899' },
-  { id: 'science',   label: '🔬 Science',   icon: '🔬', color: '#0099cc' },
-  { id: 'fantastic', label: '🐉 Fantastic', icon: '🐉', color: '#8b5cf6' },
+  { id: 'overview',  label: 'Overview',    iconId: 'chart_bar' },
+  { id: 'favorites', label: 'Favorites',   iconId: 'medal' },
+  { id: 'disaster',  label: 'Disasters',   iconId: 'volcano',     color: '#dc2626' },
+  { id: 'places',    label: 'Places',      iconId: 'museum',      color: '#3b82f6' },
+  { id: 'nature',    label: 'Nature',      iconId: 'forest',      color: '#22c55e' },
+  { id: 'conflict',  label: 'Conflict',    iconId: 'swords',      color: '#f97316' },
+  { id: 'culture',   label: 'Culture',     iconId: 'theater',     color: '#ec4899' },
+  { id: 'science',   label: 'Science',     iconId: 'microscope',  color: '#0099cc' },
+  { id: 'life',      label: 'Life',        iconId: 'animal',      color: '#10b981' },
+  { id: 'fantastic', label: 'Fantastic',   iconId: 'dragon',      color: '#8b5cf6' },
 ]
 
-// Map icon bank categories to codex tabs
+// Map ALL icon bank categories to codex tabs
 const CAT_TAB_MAP: Record<string, string> = {
-  earthquake: 'disaster', volcano: 'disaster', tsunami: 'disaster', tornado: 'disaster',
-  wildfire: 'disaster', nuclear: 'disaster', avalanche: 'disaster',
-  city: 'places', monument: 'places', temple: 'places', castle: 'places', bridge: 'places',
-  forest: 'nature', mountain: 'nature', ocean: 'nature', lake: 'nature', desert: 'nature',
-  island: 'nature', river: 'nature', cave: 'nature',
-  battle: 'conflict', military: 'conflict', war: 'conflict', fort: 'conflict',
-  festival: 'culture', sport: 'culture', music: 'culture', food: 'culture', art: 'culture',
-  space: 'science', tech: 'science', lab: 'science', energy: 'science',
-  dragon: 'fantastic', mythic: 'fantastic', alien: 'fantastic', magic: 'fantastic',
-  dinosaur: 'fantastic', creature: 'fantastic',
+  // Disasters
+  earthquake: 'disaster', volcano: 'disaster', tsunami: 'disaster', nuclear: 'disaster',
+  tornado: 'disaster', avalanche: 'disaster', wildfire: 'disaster',
+  // Places & Structures
+  city: 'places', capitalCity: 'places', museum: 'places', monument: 'places', wonder: 'places',
+  cult: 'places', port: 'places', tower: 'places', observatory: 'places', farm: 'places', mine: 'places',
+  castle: 'places', temple: 'places', bridge: 'places', house: 'places', bank: 'places',
+  construction: 'places', infrastructure: 'places',
+  // Nature
+  waterfall: 'nature', cave: 'nature', mountain: 'nature', glacier: 'nature', island: 'nature',
+  forest: 'nature', ocean: 'nature', desert: 'nature', lake: 'nature', river: 'nature',
+  snow_peak: 'nature',
+  // Conflict
+  chokepoint: 'conflict', weapon: 'conflict', war: 'conflict', conspiracy: 'conflict',
+  mystery: 'conflict', piracy: 'conflict', diplomacy: 'conflict',
+  battle: 'conflict', military: 'conflict', fort: 'conflict', swords: 'conflict',
+  // Culture
+  celebs: 'culture', entertainment: 'culture', art: 'culture', sport: 'culture',
+  music: 'culture', food: 'culture', history: 'culture',
+  festival: 'culture', theater: 'culture', palette: 'culture',
+  // Science
+  science: 'science', tech: 'science', intelligence: 'science', medicine: 'science',
+  space: 'science', lab: 'science', energy: 'science', microscope: 'science',
+  rocket: 'science', satellite: 'science', brain: 'science', dna: 'science',
+  // Life & Organisms
+  vegetal: 'life', microOrganism: 'life', animal: 'life', insect: 'life',
+  mushroom: 'life', fossil: 'life', orchid: 'life', fungus: 'life',
+  eagle: 'life', whale: 'life', lion: 'life', wolf: 'life', bear: 'life',
+  fox: 'life', deer: 'life', shark: 'life', bat: 'life', butterfly: 'life',
+  bee: 'life', crab: 'life', octopus: 'life', squid: 'life', scorpion: 'life',
+  snake: 'life', horse: 'life', elephant: 'life', rhino: 'life', bison: 'life',
+  crocodile: 'life', bug: 'life',
+  // Fantastic
+  dragon: 'fantastic', phoenix: 'fantastic', alien: 'fantastic',
+  mythology: 'fantastic', countries: 'fantastic', sponsored: 'fantastic', gift: 'fantastic',
+  dinosaur: 'fantastic', trex: 'fantastic', raptor: 'fantastic', stego: 'fantastic',
+  mythic: 'fantastic', creature: 'fantastic', magic: 'fantastic',
+  // Misc → overview
+  news: 'overview', treasure: 'overview', industry: 'overview',
 }
 
 // Real collection from owned territories + store
@@ -154,7 +183,11 @@ export function CodexPanel({ onClose }: Props) {
             color: tab === t.id ? (t.color || '#7950f2') : 'rgba(26,42,58,0.45)',
             border: `1px solid ${tab === t.id ? (t.color || '#7950f2') + '40' : 'rgba(0,60,100,0.1)'}`,
             fontFamily: "'Orbitron', system-ui, sans-serif",
-          }}>{t.label}</button>
+            display: 'flex', alignItems: 'center', gap: 4,
+          }}>
+            <IconSVG id={t.iconId} size={12} />
+            {t.label}
+          </button>
         ))}
       </div>
 
@@ -200,9 +233,9 @@ export function CodexPanel({ onClose }: Props) {
                     padding: '10px', borderRadius: 10, cursor: 'pointer', textAlign: 'center',
                     background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,60,100,0.08)',
                   }}>
-                    <div style={{ fontSize: 18, marginBottom: 4 }}><EmojiIcon emoji={ct.icon} size={16} /></div>
+                    <div style={{ fontSize: 18, marginBottom: 4 }}><IconSVG id={ct.iconId} size={24} /></div>
                     <div style={{ fontSize: 8, fontWeight: 900, color: ct.color, letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-                      {ct.label.replace(/[^\w\s]/g, '').trim().toUpperCase()}
+                      {ct.label.toUpperCase()}
                     </div>
                     <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 2, fontFamily: "'Share Tech Mono', monospace" }}>
                       {st.owned}/{st.total}
@@ -221,7 +254,7 @@ export function CodexPanel({ onClose }: Props) {
         {tab === 'favorites' && (
           <motion.div key="favorites" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.35)', marginBottom: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-              ⭐ YOUR TOP TOKENS
+              <IconSVG id="medal" size={12} /> YOUR TOP TOKENS
             </div>
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
               {allTokens.filter(t => t.owned > 0).slice(0, 5).map((t, i) => (
@@ -248,7 +281,7 @@ export function CodexPanel({ onClose }: Props) {
               position: 'relative', overflow: 'hidden', minHeight: 120,
             }}>
               <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-                <EmojiIcon emoji="🏛" /> HEXOD MUSEUM — YOUR HALL OF FAME
+                <IconSVG id="museum" size={14} /> HEXOD MUSEUM — YOUR HALL OF FAME
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
                 {allTokens.filter(t => t.owned > 0).slice(0, 4).map(t => (
@@ -269,7 +302,7 @@ export function CodexPanel({ onClose }: Props) {
                 ))}
               </div>
               <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.2)', marginTop: 8 }}>
-                <EmojiIcon emoji="🖱" /> CLICK TOKEN FOR 3D VIEW
+                CLICK TOKEN FOR 3D VIEW
               </div>
             </div>
           </motion.div>
@@ -285,7 +318,7 @@ export function CodexPanel({ onClose }: Props) {
               background: ct.color + '08', border: `1px solid ${ct.color}20`,
             }}>
               <div style={{ fontSize: 8, fontWeight: 700, color: ct.color, letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-                <EmojiIcon emoji={ct.icon} size={16} /> {ct.label.replace(/[^\w\s]/g, '').trim().toUpperCase()}
+                <IconSVG id={ct.iconId} size={14} /> {ct.label.toUpperCase()}
               </div>
               <div style={{ fontSize: 9, fontWeight: 700, color: ct.color, fontFamily: "'Share Tech Mono', monospace" }}>
                 {tabStats[ct.id]?.owned || 0}/{tabStats[ct.id]?.total || 0}
@@ -359,7 +392,7 @@ export function CodexPanel({ onClose }: Props) {
                 }}>
                   {selectedTokenData.rarity.toUpperCase()}
                 </span>
-                {selectedTokenData.shiny && <span style={{ fontSize: 6, color: '#cc8800' }}><EmojiIcon emoji="✨" /> SHINY</span>}
+                {selectedTokenData.shiny && <span style={{ fontSize: 6, color: '#cc8800' }}><IconSVG id="sparkles" size={8} /> SHINY</span>}
               </div>
             </div>
             <div style={{ fontSize: 10, fontWeight: 900, color: selectedTokenData.catColor, fontFamily: "'Share Tech Mono', monospace" }}>
@@ -383,7 +416,7 @@ export function CodexPanel({ onClose }: Props) {
               color: sellMode ? '#fff' : '#22c55e', fontSize: 7, fontWeight: 700, letterSpacing: 1,
               fontFamily: "'Orbitron', system-ui, sans-serif",
             }}>
-              💰 {sellMode ? 'CANCEL' : 'SELL'}
+              <IconSVG id="hex_coin" size={10} /> {sellMode ? 'CANCEL' : 'SELL'}
             </button>
             <button onClick={() => { onClose(); setTimeout(() => setActivePanel('marketplace'), 100) }} style={{
               flex: 1, padding: '8px', borderRadius: 10, cursor: 'pointer',
@@ -391,7 +424,7 @@ export function CodexPanel({ onClose }: Props) {
               color: '#0099cc', fontSize: 7, fontWeight: 700, letterSpacing: 1,
               fontFamily: "'Orbitron', system-ui, sans-serif",
             }}>
-              <EmojiIcon emoji="🏪" /> MARKET
+              <IconSVG id="auction_gavel" size={10} /> MARKET
             </button>
           </div>
 

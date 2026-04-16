@@ -69,6 +69,12 @@ from terra_domini.apps.combat.views import BattleViewSet
 from terra_domini.apps.economy.views import ShopViewSet, StripeWebhookView, AdCampaignViewSet
 from terra_domini.apps.alliances.views import AllianceViewSet, DiplomacyViewSet
 from terra_domini.apps.events.views import ControlTowerViewSet, EventViewSet
+from terra_domini.apps.events.news_views import (
+    list_news_events as news_events_list,
+    register_for_event as news_event_register,
+    my_event_results as news_my_results,
+    resolve_events as news_resolve,
+)
 from terra_domini.apps.blockchain.marketplace_views import (
     MarketplaceListingsView, MarketplaceMyListingsView, MarketplaceListView,
     MarketplaceBuyView, MarketplaceDelistView, MarketplaceStatsView,
@@ -109,6 +115,12 @@ urlpatterns = [
     path('health/',     health_check, name='health'),
     path('api/geoip/',   GeoIPView.as_view(), name='geoip'),
     path('api/news/ticker/', news_ticker, name='news_ticker'),
+
+    # ── News Events (live news → geolocalized tokens) ─────────────────────
+    path('api/events/news/', news_events_list, name='news_events_list'),
+    path('api/events/news/<uuid:event_id>/register/', news_event_register, name='news_event_register'),
+    path('api/events/news/my-results/', news_my_results, name='news_my_results'),
+    path('api/events/news/resolve/', news_resolve, name='news_resolve'),
     path('robots.txt',  robots_txt),
     path('admin/',      admin.site.urls),
 

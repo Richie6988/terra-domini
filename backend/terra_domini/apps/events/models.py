@@ -69,3 +69,7 @@ __all_resources__ = ['ResourcePOI']
 
 from terra_domini.apps.events.unified_poi import UnifiedPOI
 __all_poi__ = ['UnifiedPOI']
+
+from terra_domini.apps.events.news_models import NewsEvent, NewsEventRegistration
+__all_news__ = ['NewsEvent', 'NewsEventRegistration']
+
