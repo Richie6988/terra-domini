@@ -17,6 +17,7 @@ import { GlassPanel } from '../shared/GlassPanel'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { IconSVG } from '../shared/iconBank'
 
 const RARITY_COLOR: Record<string,string> = {
   common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
@@ -24,55 +25,55 @@ const RARITY_COLOR: Record<string,string> = {
 }
 
 const CATS = [
-  { id:'boosters',  label:'🎁 Boosters',  color:'#cc8800' },
-  { id:'attack',    label:'⚔ Attack',     color:'#dc2626' },
-  { id:'defense',   label:'🛡 Defense',    color:'#3b82f6' },
-  { id:'resources', label:'⛏ Resources',  color:'#cc8800' },
-  { id:'chance',    label:'🍀 Chance',     color:'#22c55e' },
-  { id:'influence', label:'📢 Influence',  color:'#a855f7' },
-  { id:'customize', label:'🎨 Customize',  color:'#ec4899' },
+  { id:'boosters',  label:'Boosters',  iconId:'gift',        color:'#cc8800' },
+  { id:'attack',    label:'Attack',    iconId:'swords',      color:'#dc2626' },
+  { id:'defense',   label:'Defense',   iconId:'ui_shield',   color:'#3b82f6' },
+  { id:'resources', label:'Resources', iconId:'pickaxe',     color:'#cc8800' },
+  { id:'chance',    label:'Chance',    iconId:'clover',      color:'#22c55e' },
+  { id:'influence', label:'Influence', iconId:'megaphone',   color:'#a855f7' },
+  { id:'customize', label:'Customize', iconId:'palette',     color:'#ec4899' },
 ]
 
 // ═══ SHOP CATALOG — ported from main_prototype.html ═══
 const BOOSTERS = [
   { id:'booster_standard',  name:'STANDARD BOOSTER', icon:'📦', price:200,  color:'#0099cc',
-    desc:'7 Standard Territories\n2 Rare Tokens\n1 Random Bonus', code:'booster_pack' },
+    desc:'7 Standard Territories\n2 Rare Tokens\n1 Random Bonus', code:'booster_standard' },
   { id:'booster_rare',      name:'RARE BOOSTER',     icon:'💜', price:500,  color:'#8b5cf6',
-    desc:'5 Standard Territories\n3 Rare Tokens\n1 Epic Token\n1 Premium Bonus', code:'booster_pack' },
+    desc:'5 Standard Territories\n3 Rare Tokens\n1 Epic Token\n1 Premium Bonus', code:'booster_rare' },
   { id:'booster_legendary', name:'LEGENDARY BOOSTER', icon:'👑', price:1500, color:'#cc8800',
-    desc:'3 Standard Territories\n3 Rare Tokens\n2 Epic Tokens\n1 Legendary Token\n1 Exclusive Bonus', code:'booster_pack' },
+    desc:'3 Standard Territories\n3 Rare Tokens\n2 Epic Tokens\n1 Legendary Token\n1 Exclusive Bonus', code:'booster_legendary' },
 ]
 
 const SHOP_ITEMS: Record<string, Array<{id:string; name:string; desc:string; price:number; icon:string; code:string}>> = {
   attack: [
-    { id:'a1', name:'2X TERRITORY MINT SPEED',  desc:'Double your territory minting speed for 24 hours',         price:150, icon:'⚔', code:'atk_multiplier' },
-    { id:'a2', name:'DISTANT TERRITORY UNLOCK', desc:'Mint territories outside your adjacent zone (1 use)',       price:300, icon:'🎯', code:'build_instant_once' },
-    { id:'a3', name:'2X ARMY POWER',            desc:'Double army strength in all combats for 24 hours',          price:250, icon:'💪', code:'double_attack' },
-    { id:'a4', name:'BLITZ MODE',               desc:'Instant deployment — skip all training time for 12h',       price:400, icon:'⚡', code:'build_speed' },
+    { id:'a1', name:'2X TERRITORY MINT SPEED',  desc:'Double your territory minting speed for 24 hours',         price:150, icon:'⚔', code:'atk_2x_army' },
+    { id:'a2', name:'DISTANT TERRITORY UNLOCK', desc:'Mint territories outside your adjacent zone (1 use)',       price:300, icon:'🎯', code:'atk_distant' },
+    { id:'a3', name:'2X ARMY POWER',            desc:'Double army strength in all combats for 24 hours',          price:250, icon:'💪', code:'atk_2x_army' },
+    { id:'a4', name:'BLITZ MODE',               desc:'Instant deployment — skip all training time for 12h',       price:400, icon:'⚡', code:'atk_blitz' },
   ],
   defense: [
-    { id:'d1', name:'72H KINGDOM SHIELD',       desc:'Full protection from attacks on one kingdom',              price:500, icon:'🛡', code:'shield' },
-    { id:'d2', name:'2X DEFENSE RATING',        desc:'Double all defense values for 48 hours',                   price:350, icon:'🏰', code:'def_multiplier' },
-    { id:'d3', name:'ANTI-NUCLEAR SHIELD',      desc:'Protect against nuclear strikes for 7 days',               price:800, icon:'☢', code:'nuke_strike' },
-    { id:'d4', name:'INFLUENCE RESISTANCE',     desc:'Block influence attacks for 72 hours',                     price:200, icon:'🧠', code:'stealth_once' },
+    { id:'d1', name:'72H KINGDOM SHIELD',       desc:'Full protection from attacks on one kingdom',              price:500, icon:'🛡', code:'def_shield_72h' },
+    { id:'d2', name:'2X DEFENSE RATING',        desc:'Double all defense values for 48 hours',                   price:350, icon:'🏰', code:'def_2x_defense' },
+    { id:'d3', name:'ANTI-NUCLEAR SHIELD',      desc:'Protect against nuclear strikes for 7 days',               price:800, icon:'☢', code:'def_anti_nuke' },
+    { id:'d4', name:'INFLUENCE RESISTANCE',     desc:'Block influence attacks for 72 hours',                     price:200, icon:'🧠', code:'def_influence_resist' },
   ],
   resources: [
-    { id:'r1', name:'2X EXTRACTION RATE',       desc:'Double all resource extraction for 24 hours',              price:200, icon:'⛏', code:'production_multiplier' },
-    { id:'r2', name:'ENERGY EFFICIENCY',        desc:'-50% energy consumption for 48 hours',                     price:180, icon:'⚡', code:'build_cost_reduction' },
-    { id:'r3', name:'RARE DROP BONUS',          desc:'+50% chance for rare resource drops (24h)',                 price:350, icon:'💎', code:'hex_bonus' },
-    { id:'r4', name:'TRADE ADVANTAGE',          desc:'-10% fees on all marketplace trades for 72h',              price:250, icon:'📈', code:'build_cost_reduction' },
+    { id:'r1', name:'2X EXTRACTION RATE',       desc:'Double all resource extraction for 24 hours',              price:200, icon:'⛏', code:'eco_2x_extraction' },
+    { id:'r2', name:'ENERGY EFFICIENCY',        desc:'-50% energy consumption for 48 hours',                     price:180, icon:'⚡', code:'eco_energy' },
+    { id:'r3', name:'RARE DROP BONUS',          desc:'+50% chance for rare resource drops (24h)',                 price:350, icon:'💎', code:'eco_rare_drop' },
+    { id:'r4', name:'TRADE ADVANTAGE',          desc:'-10% fees on all marketplace trades for 72h',              price:250, icon:'📈', code:'eco_trade_advantage' },
   ],
   chance: [
-    { id:'c1', name:'+CARD RARITY',             desc:'Increase card rarity probability by 25% for 24h',          price:300, icon:'🎴', code:'hex_bonus' },
-    { id:'c2', name:'+EVENT MINT PROB',          desc:'Better odds in all event card draws for 24h',              price:250, icon:'📡', code:'hex_bonus' },
-    { id:'c3', name:'SAFARI HINTS (2H)',         desc:'Extra clues and thermal overlay during safaris',           price:100, icon:'🔮', code:'hex_bonus' },
-    { id:'c4', name:'LUCK BOOSTER',             desc:'+15% chance rating across all activities (48h)',            price:400, icon:'🍀', code:'hex_bonus' },
+    { id:'c1', name:'+CARD RARITY',             desc:'Increase card rarity probability by 25% for 24h',          price:300, icon:'🎴', code:'col_rarity' },
+    { id:'c2', name:'+EVENT MINT PROB',          desc:'Better odds in all event card draws for 24h',              price:250, icon:'📡', code:'col_luck' },
+    { id:'c3', name:'SAFARI HINTS (2H)',         desc:'Extra clues and thermal overlay during safaris',           price:100, icon:'🔮', code:'col_safari_hints' },
+    { id:'c4', name:'LUCK BOOSTER',             desc:'+15% chance rating across all activities (48h)',            price:400, icon:'🍀', code:'col_luck' },
   ],
   influence: [
-    { id:'i1', name:'GLOBAL MESSAGE',           desc:'Send 1 message visible to all online players',             price:50,  icon:'📢', code:'stealth_once' },
-    { id:'i2', name:'EXTENDED VISION',          desc:'See +5 hex further for territory conquest (24h)',           price:200, icon:'🔭', code:'hex_bonus' },
-    { id:'i3', name:'BRAG MODE',                desc:'Display double empire size — access reserved areas (24h)', price:350, icon:'🎭', code:'hex_bonus' },
-    { id:'i4', name:'RESERVED ACCESS',          desc:'Enter elite zones for advanced tokens and events',         price:600, icon:'👑', code:'hex_bonus' },
+    { id:'i1', name:'GLOBAL MESSAGE',           desc:'Send 1 message visible to all online players',             price:50,  icon:'📢', code:'soc_global_msg' },
+    { id:'i2', name:'EXTENDED VISION',          desc:'See +5 hex further for territory conquest (24h)',           price:200, icon:'🔭', code:'soc_extended_vision' },
+    { id:'i3', name:'BRAG MODE',                desc:'Display double empire size — access reserved areas (24h)', price:350, icon:'🎭', code:'soc_brag' },
+    { id:'i4', name:'RESERVED ACCESS',          desc:'Enter elite zones for advanced tokens and events',         price:600, icon:'👑', code:'soc_vip' },
   ],
   customize: [
     { id:'x1', name:'AVATAR SKINS',             desc:'Premium avatar frames, effects, and animations',           price:250, icon:'🖼', code:'custom_flag' },
@@ -84,20 +85,32 @@ const SHOP_ITEMS: Record<string, Array<{id:string; name:string; desc:string; pri
 }
 
 const EFFECT_LABEL: Record<string,string> = {
-  double_attack:       '⚔️⚔️ Double attaque',
-  atk_multiplier:      '⚔️ ATK boost',
-  def_multiplier:      '🛡️ DEF boost',
-  production_multiplier:'⚡ Production boost',
-  shield:              '🛡️ Bouclier',
-  hex_bonus:           '💰 HEX Coin bonus',
-  build_instant_once:  '⚡ Build instantané',
-  build_speed:         '🔨 Construction rapide',
-  build_cost_reduction:'💸 Réduction coûts',
-  border_color:        '🎨 Bordure custom',
-  custom_flag:         '🚩 Drapeau custom',
-  booster_pack:        '🎁 Booster pack',
-  stealth_once:        '👁️ Attaque furtive',
-  nuke_strike:         '☢️ Frappe nucléaire',
+  atk_2x_army:       'ATK x2',
+  atk_blitz:         'Blitz Mode',
+  atk_distant:       'Distant Strike',
+  atk_mint_speed:    'Mint Speed x2',
+  def_shield_72h:    'Shield 72H',
+  def_2x_defense:    'DEF x2',
+  def_anti_nuke:     'Anti-Nuke',
+  def_influence_resist: 'Influence Shield',
+  eco_2x_extraction: 'Extraction x2',
+  eco_energy:        'Energy Efficiency',
+  eco_rare_drop:     'Rare Drop Boost',
+  eco_trade_advantage: 'Trade Advantage',
+  col_luck:          'Luck +15',
+  col_rarity:        'Rarity Boost',
+  col_safari_1h:     'Continuous Safari',
+  col_safari_hints:  'Safari Hints',
+  soc_global_msg:    'Global Message',
+  soc_extended_vision: 'Extended Vision',
+  soc_brag:          'Brag Mode',
+  soc_vip:           'VIP Access',
+  hex_bonus:         'HEX Bonus',
+  booster_standard:  'Standard Booster',
+  booster_rare:      'Rare Booster',
+  booster_legendary: 'Legendary Booster',
+  custom_flag:       'Custom Flag',
+  border_color:      'Kingdom Colors',
 }
 
 function formatDuration(sec: number): string {
@@ -199,7 +212,9 @@ export function ShopPanel({ onClose }: Props) {
               border:`1px solid rgba(0,60,100,0.1)`,
               color:c.color, flexShrink:0,
               fontFamily:"'Orbitron', system-ui, sans-serif",
+            display:'flex', alignItems:'center', gap:3,
             }}>
+              <IconSVG id={c.iconId} size={10} />
               {c.label}
             </button>
           ))}
@@ -244,7 +259,7 @@ export function ShopPanel({ onClose }: Props) {
           SHOP_ITEMS[c.id] && (
             <div key={c.id} id={`shop-${c.id}`} style={{ marginBottom:20 }}>
               <div style={{ fontSize:8, fontWeight:700, letterSpacing:2, color:c.color, marginBottom:10, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
-                {c.label.toUpperCase()}
+                <IconSVG id={c.iconId} size={12} /> {c.label.toUpperCase()}
               </div>
               <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
             {SHOP_ITEMS[c.id].map(item => (

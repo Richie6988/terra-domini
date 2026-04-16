@@ -112,7 +112,6 @@ export function Token3DViewer(props: Token3DProps) {
 
   return (
     <div
-      onClick={e => { if (e.target === e.currentTarget) onCloseRef.current() }}
       style={{
         position: 'fixed', inset: 0, zIndex: 2000,
         background: 'radial-gradient(ellipse at center, rgba(5,10,20,0.95), rgba(0,0,0,0.98))',
