@@ -43,7 +43,7 @@ function Tabs({ tabs, active, onChange }: { tabs: {id: string; label: string; ic
           color: active === t.id ? '#00884a' : '#6B7280',
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
         }}>
-          <EmojiIcon emoji={t.icon} size={16} />
+          {t.icon}
           {t.label}
         </button>
       ))}

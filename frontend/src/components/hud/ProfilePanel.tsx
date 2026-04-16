@@ -11,6 +11,7 @@ import { CrystalIcon } from '../shared/CrystalIcon'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { IconSVG } from '../shared/iconBank'
 
 interface Props { onClose: () => void }
 type Tab = 'commander' | 'achievements' | 'preferences'
@@ -20,7 +21,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'achievements', label: 'ACHIEVEMENTS' },
   { id: 'preferences', label: 'PREFERENCES' },
 ]
-const AVATARS = ['<EmojiIcon emoji="🦅" />','<EmojiIcon emoji="🐉" />','<EmojiIcon emoji="🦁" />','<EmojiIcon emoji="🐺" />','<EmojiIcon emoji="🦊" />','<EmojiIcon emoji="🐻" />','<EmojiIcon emoji="🦇" />','<EmojiIcon emoji="🦈" />','<EmojiIcon emoji="🐍" />','🦎','<EmojiIcon emoji="🦂" />','<EmojiIcon emoji="🐙" />','<EmojiIcon emoji="🦑" />','<EmojiIcon emoji="🦀" />','<EmojiIcon emoji="🐝" />','<EmojiIcon emoji="🦋" />','<EmojiIcon emoji="🐎" />','<EmojiIcon emoji="🦌" />','<EmojiIcon emoji="🐘" />','<EmojiIcon emoji="🦏" />','<EmojiIcon emoji="🦬" />','<EmojiIcon emoji="🐊" />','<EmojiIcon emoji="🦖" />','<EmojiIcon emoji="🐋" />']
+const AVATARS = ['eagle','dragon','lion','wolf','fox','bear','bat','shark','snake','scorpion','octopus','squid','crab','bee','butterfly','horse','deer','elephant','rhino','bison','crocodile','trex','whale','bug']
 const AVATAR_COLORS = ['#0099cc','#cc8800','#dc2626','#22c55e','#8b5cf6','#f59e0b','#ec4899','#3b82f6','#6366f1','#14b8a6','#f97316','#64748b']
 const sBox: React.CSSProperties = { padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(0,60,100,0.06)' }
 const lbl: React.CSSProperties = { fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(26,42,58,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 6 }
@@ -29,7 +30,7 @@ const inputSt: React.CSSProperties = { width: '100%', padding: '8px 12px', borde
 function CommanderTab() {
   const player = usePlayer()
   const [name, setName] = useState(player?.display_name || '')
-  const [avatar, setAvatar] = useState((player as any)?.avatar_emoji || '<EmojiIcon emoji="🦅" />')
+  const [avatar, setAvatar] = useState((player as any)?.avatar_emoji || 'eagle')
   const [avatarBg, setAvatarBg] = useState((player as any)?.avatar_color || '#0099cc')
   const [email, setEmail] = useState(player?.email || '')
   const [saving, setSaving] = useState(false)
@@ -54,7 +55,7 @@ function CommanderTab() {
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontSize: 32, border: '3px solid rgba(255,255,255,0.9)',
           boxShadow: `0 4px 20px ${avatarBg}40, inset 0 -2px 6px rgba(0,0,0,0.1)`,
-        }}>{avatar}</div>
+        }}><IconSVG id={avatar} size={32} /></div>
         <div style={{ flex: 1 }}>
           <div style={{ fontSize: 16, fontWeight: 900, color: '#1a2a3a', letterSpacing: 1 }}>{player.display_name || player.username}</div>
           <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.4)', marginTop: 2 }}>@{player.username}</div>
@@ -98,7 +99,7 @@ function CommanderTab() {
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               transform: avatar === a ? 'scale(1.1)' : 'scale(1)',
               transition: 'all 0.15s',
-            }}>{a}</button>
+            }}><IconSVG id={a} size={22} /></button>
           ))}
         </div>
       </div>

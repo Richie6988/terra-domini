@@ -27,6 +27,39 @@ export const TIERS = {
 
 export type TierKey = keyof typeof TIERS
 
+// ══════════════════════════════════════════════════════════════════
+// BIOME IMAGES — random territory photos for demo/showcase
+// ══════════════════════════════════════════════════════════════════
+export const BIOME_IMAGES: Record<string, string[]> = {
+  urban:      ['https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=600','https://images.unsplash.com/photo-1514565131-fce0801e5785?w=600','https://images.unsplash.com/photo-1480714378408-67cf0d13bc1b?w=600'],
+  rural:      ['https://images.unsplash.com/photo-1500382017468-9049fed747ef?w=600','https://images.unsplash.com/photo-1464226184884-fa280b87c399?w=600','https://images.unsplash.com/photo-1625246333195-78d9c38ad449?w=600'],
+  forest:     ['https://images.unsplash.com/photo-1448375240586-882707db888b?w=600','https://images.unsplash.com/photo-1542273917363-3b1817f69a2d?w=600','https://images.unsplash.com/photo-1476362555312-ab9e108a0b7e?w=600'],
+  mountain:   ['https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=600','https://images.unsplash.com/photo-1519681393784-d120267933ba?w=600','https://images.unsplash.com/photo-1454496522488-7a8e488e8606?w=600'],
+  coastal:    ['https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600','https://images.unsplash.com/photo-1519046904884-53103b34b206?w=600','https://images.unsplash.com/photo-1473116763249-2faaef81ccda?w=600'],
+  desert:     ['https://images.unsplash.com/photo-1509316975850-ff9c5deb0cd9?w=600','https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?w=600','https://images.unsplash.com/photo-1542401886-65d6c61db217?w=600'],
+  tundra:     ['https://images.unsplash.com/photo-1517483000871-1dbf64a6e1c6?w=600','https://images.unsplash.com/photo-1484950763426-56b5bf172dbb?w=600'],
+  industrial: ['https://images.unsplash.com/photo-1513828583688-c52646db42da?w=600','https://images.unsplash.com/photo-1565008447742-97f6f38c985c?w=600'],
+  landmark:   ['https://images.unsplash.com/photo-1431274172761-fca41d930114?w=600','https://images.unsplash.com/photo-1499856871958-5b9627545d1a?w=600','https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=600'],
+}
+
+const ALL_IMAGES = Object.values(BIOME_IMAGES).flat()
+const TIER_KEYS: TierKey[] = ['BRONZE', 'SILVER', 'GOLD', 'EMERALD']
+
+/** Pick a random image URL for a biome (or any random if biome unknown). */
+export function randomBiomeImage(biome?: string): string {
+  const pool = (biome && BIOME_IMAGES[biome.toLowerCase()]) || ALL_IMAGES
+  return pool[Math.floor(Math.random() * pool.length)]
+}
+
+/** Pick a random tier key. Weighted: BRONZE 50%, SILVER 25%, GOLD 15%, EMERALD 10%. */
+export function randomTier(): TierKey {
+  const r = Math.random()
+  if (r < 0.50) return 'BRONZE'
+  if (r < 0.75) return 'SILVER'
+  if (r < 0.90) return 'GOLD'
+  return 'EMERALD'
+}
+
 export interface TokenFaceProps {
   tier: TierKey
   category: string       // e.g. 'ANCIENT FOREST'

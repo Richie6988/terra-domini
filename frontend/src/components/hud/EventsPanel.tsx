@@ -16,6 +16,10 @@ import { api } from '../../services/api'
 import { useStore } from '../../store'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { TokenFace2D } from '../shared/TokenFace2D'
+import type { TierKey } from '../shared/hexodTokenFace'
+
+const RARITY_TIER: Record<string, TierKey> = { uncommon: 'BRONZE', rare: 'SILVER', epic: 'GOLD', legendary: 'EMERALD', mythic: 'EMERALD' }
 
 interface Props { onClose: () => void }
 
@@ -57,7 +61,7 @@ const UPCOMING_EVENTS: UpcomingEvent[] = [
 interface EventResult {
   id: string; icon: string; name: string; rarity: string
   color: string; serial: number; maxSerial: number
-  status: 'won' | 'lost' | 'pending'; luckBonus: number
+  status: "won" | "lost" | "pending"; luckBonus: number; category?: string
   hexEarned: number; placeable: boolean
 }
 
@@ -188,7 +192,7 @@ export function EventsPanel({ onClose }: Props) {
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
                     <div style={{ flex: 1 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                        <span style={{ fontSize: 16 }}><EmojiIcon emoji={ev.icon} size={16} /></span>
+                        <TokenFace2D tier={RARITY_TIER[ev.rarity] || "BRONZE"} category={ev.category?.toUpperCase() || "EVENT"} catColor={ev.color} biome={ev.loc || "EVENT"} tokenName={ev.name.split(" — ")[0] || "EVENT"} iconId={ev.category || "event_ticket"} serial={Math.floor(Math.random()*999)+1} maxSupply={ev.maxPlayers || 1000} size={44} />
                         <div>
                           <div style={{ fontSize: 9, fontWeight: 900, color: ev.color, letterSpacing: 1, ...s }}>{ev.name}</div>
                           <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 1 }}><EmojiIcon emoji="📍" /> {ev.loc}</div>
@@ -261,7 +265,7 @@ export function EventsPanel({ onClose }: Props) {
                   border: `1px solid ${isSoon ? ev.color + '25' : 'rgba(0,60,100,0.1)'}`,
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 20 }}><EmojiIcon emoji={ev.icon} size={16} /></span>
+                    <TokenFace2D tier={RARITY_TIER[ev.rarity] || "BRONZE"} category={ev.category?.toUpperCase() || "EVENT"} catColor={ev.color} biome={ev.loc || "EVENT"} tokenName={ev.name.split(" — ")[0] || "EVENT"} iconId={ev.category || "event_ticket"} serial={Math.floor(Math.random()*999)+1} maxSupply={ev.maxPlayers || 1000} size={44} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 9, fontWeight: 900, color: ev.color, letterSpacing: 1, ...s }}>{ev.name}</div>
                       <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', marginTop: 1 }}><EmojiIcon emoji="📍" /> {ev.loc} · {ev.rarity.toUpperCase()}</div>
@@ -326,7 +330,7 @@ export function EventsPanel({ onClose }: Props) {
                   opacity: r.status === 'lost' ? 0.5 : 1,
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <span style={{ fontSize: 18 }}><EmojiIcon emoji={r.icon} size={16} /></span>
+                    <TokenFace2D tier={RARITY_TIER[r.rarity?.toLowerCase()] || "BRONZE"} category={(r.category || "EVENT").toUpperCase()} catColor={r.color} biome="EVENT" tokenName={r.name || "TOKEN"} iconId={r.category || "event_ticket"} serial={r.serial || 1} maxSupply={r.maxSerial || 1000} size={48} />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 9, fontWeight: 900, color: r.status === 'lost' ? 'rgba(26,42,58,0.4)' : r.color, letterSpacing: 1, ...s }}>
                         {r.name}

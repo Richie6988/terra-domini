@@ -88,14 +88,17 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     const map = L.map(containerRef.current, {
       center: [48.8566, 2.3522], zoom: (typeof window !== 'undefined' && window.innerWidth < 480) ? 14 : 13,
       zoomControl: false, attributionControl: false,
+      // ── SMOOTH ZOOM CONFIG ──
+      // zoomSnap: 0 = fractional zoom = smooth continuous zoom on touchpad/wheel
+      // SVG renderer (default) = polygons scale via CSS transform during zoom = GPU-free
+      // Backend accepts float zoom via int(float(zoom))
+      zoomSnap: 0,
+      zoomDelta: 1,                // button clicks still jump whole levels
+      wheelPxPerZoomLevel: 80,     // responsive to touchpad
+      wheelDebounceTime: 40,       // low debounce = immediate response
       zoomAnimation: true,
       fadeAnimation: true,
       markerZoomAnimation: true,
-      zoomSnap: 1,        // Integer zoom levels only — backend expects int
-      zoomDelta: 1,
-      wheelPxPerZoomLevel: 200, // Higher = less sensitive to touchpad = fewer zoom events
-      wheelDebounceTime: 100,   // Coalesce rapid wheel events into single zoom
-      preferCanvas: true,
     })
     const tileCfg = TILES[tile as keyof typeof TILES]
     tileRef.current = L.tileLayer(tileCfg.url, { maxZoom: tileCfg.maxZoom ?? 19 }).addTo(map)
@@ -110,77 +113,53 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     // Force Leaflet to recalculate container size (React mount timing issue)
     setTimeout(() => map.invalidateSize(), 200)
 
-    // Viewport API call — throttled, skipped during zoom animation
+    // ── VIEWPORT + ZOOM — simple debounce, no layer hiding ──
+    // Leaflet's SVG renderer uses CSS transform to scale layers during zoom.
+    // This is GPU-accelerated and looks smooth — we don't need to hide anything.
+    // We just debounce the expensive stuff (API calls + grid recalc).
     ;(map as any)._isZooming = false
+    let stabilizeTimer: ReturnType<typeof setTimeout> | null = null
 
-    const onMove = () => {
-      if ((map as any)._isZooming) return
-      clearTimeout(vpTimer.current)
-      vpTimer.current = setTimeout(() => {
-        try {
-          const c = map.getCenter()
-          const b = map.getBounds()
-          const r = Math.min(map.distance(c, b.getNorthEast()) / 1000, 25)
-          const z = Math.round(map.getZoom())
-          setZoom(z); setCenter([c.lat, c.lng])
-          storeSetCenter([c.lat, c.lng], z)
-          onViewportChange(c.lat, c.lng, r)
-        } catch (_) {}
-      }, 400)
-    }
-    map.on('moveend', onMove)
-
-    // ── ZOOM HANDLING ──
-    // Touchpad fires many zoom events in rapid succession. We coalesce them:
-    // - First zoomstart hides layers once
-    // - Subsequent zoomstart/zoomend events just reset the stabilize timer
-    // - Only 300ms after the LAST zoom activity do we recalc + show layers
-    let zoomStabilizeTimer: ReturnType<typeof setTimeout> | null = null
-    let layersHidden = false
-
-    const hideLayers = () => {
-      if (layersHidden) return
-      layersHidden = true
-      const panes = [map.getPane('overlayPane'), map.getPane('markerPane')]
-      panes.forEach(p => { if (p) { p.style.transition = 'none'; p.style.opacity = '0' } })
-    }
-    const showLayers = () => {
-      if (!layersHidden) return
-      layersHidden = false
-      const panes = [map.getPane('overlayPane'), map.getPane('markerPane')]
-      panes.forEach(p => { if (p) { p.style.transition = 'opacity 150ms ease-out'; p.style.opacity = '1' } })
+    const fireViewportUpdate = () => {
+      try {
+        const c = map.getCenter()
+        const b = map.getBounds()
+        const r = Math.min(map.distance(c, b.getNorthEast()) / 1000, 25)
+        const z = Math.round(map.getZoom())
+        setZoom(z); setCenter([c.lat, c.lng])
+        storeSetCenter([c.lat, c.lng], z)
+        onViewportChange(c.lat, c.lng, r)
+      } catch (_) {}
     }
 
     const scheduleStabilize = () => {
-      if (zoomStabilizeTimer) clearTimeout(zoomStabilizeTimer)
-      zoomStabilizeTimer = setTimeout(() => {
+      if (stabilizeTimer) clearTimeout(stabilizeTimer)
+      stabilizeTimer = setTimeout(() => {
         ;(map as any)._isZooming = false
-        // Fire viewport update (bypass the _isZooming guard)
-        try {
-          const c = map.getCenter()
-          const b = map.getBounds()
-          const r = Math.min(map.distance(c, b.getNorthEast()) / 1000, 25)
-          const z = Math.round(map.getZoom()) // integer only
-          setZoom(z); setCenter([c.lat, c.lng])
-          storeSetCenter([c.lat, c.lng], z)
-          onViewportChange(c.lat, c.lng, r)
-        } catch (_) {}
+        fireViewportUpdate()
         map.fire('td:zoomStabilized')
-        showLayers()
       }, 300)
     }
 
+    // moveend: debounced viewport update (only when NOT zooming)
+    const onMove = () => {
+      if ((map as any)._isZooming) return
+      clearTimeout(vpTimer.current)
+      vpTimer.current = setTimeout(fireViewportUpdate, 400)
+    }
+    map.on('moveend', onMove)
+
+    // Zoom: set flag, cancel pending, schedule stabilize after 300ms of inactivity
     map.on('zoomstart', () => {
       ;(map as any)._isZooming = true
       clearTimeout(vpTimer.current)
-      hideLayers()
-      if (zoomStabilizeTimer) clearTimeout(zoomStabilizeTimer) // cancel any pending stabilize
+      if (stabilizeTimer) clearTimeout(stabilizeTimer)
+    })
+    map.on('zoom', () => {
+      // Continuously fired during zoom — keep resetting the stabilize timer
+      if (stabilizeTimer) clearTimeout(stabilizeTimer)
     })
     map.on('zoomend', scheduleStabilize)
-    map.on('zoom', () => {
-      // Fired continuously during zoom animation — keeps the stabilize timer alive
-      if (zoomStabilizeTimer) clearTimeout(zoomStabilizeTimer)
-    })
 
     // Teleport listener — fired from ProfilePanel territory click
     const onFlyTo = (e: Event) => {

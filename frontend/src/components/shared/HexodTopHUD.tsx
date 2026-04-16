@@ -5,6 +5,8 @@
 import { useStore } from '../../store'
 import { IconSVG } from './iconBank'
 
+const AVATARS_SET = new Set(['eagle','dragon','lion','wolf','fox','bear','bat','shark','snake','scorpion','octopus','squid','crab','bee','butterfly','horse','deer','elephant','rhino','bison','crocodile','trex','whale','bug'])
+
 const toNum = (v: unknown): number => parseFloat(String(v ?? 0)) || 0
 
 export function HexodTopHUD() {
@@ -44,7 +46,11 @@ export function HexodTopHUD() {
           fontSize: 20, border: '2px solid rgba(255,255,255,0.9)',
           boxShadow: '0 2px 10px rgba(0,0,0,0.15)', flexShrink: 0,
         }}>
-          {(player as any).avatar_emoji || player.username?.slice(0, 2)?.toUpperCase()}
+          {/* Avatar: icon ID if set, else initials */}
+          {(player as any).avatar_emoji && AVATARS_SET.has((player as any).avatar_emoji)
+            ? <IconSVG id={(player as any).avatar_emoji} size={24} />
+            : <span style={{ fontSize: 14, fontWeight: 900, color: '#fff' }}>{player.username?.slice(0, 2)?.toUpperCase()}</span>
+          }
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: 'var(--text-primary)', letterSpacing: 1 }}>

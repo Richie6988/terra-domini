@@ -10,6 +10,7 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { createTokenViewer, type TokenViewerProps, type TierKey, TIERS } from './hexodToken3D'
+import { randomBiomeImage } from './hexodTokenFace'
 import { getIcon } from './iconBank'
 
 export { TIERS }
@@ -51,6 +52,8 @@ export function Token3DViewer(props: Token3DProps) {
   const containerRef = useRef<HTMLDivElement>(null)
   const viewerRef = useRef<ReturnType<typeof createTokenViewer> | null>(null)
   const [mounted, setMounted] = useState(false)
+  // Stable fallback image — generated once, doesn't change on re-render
+  const fallbackImg = useRef(randomBiomeImage(biome))
 
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
@@ -71,7 +74,7 @@ export function Token3DViewer(props: Token3DProps) {
       owner: owner || 'VAULT_HOLDER',
       date: date || new Date().toISOString().slice(0, 10),
       iconSvg,
-      imageSrc: imageSrc || '',
+      imageSrc: imageSrc || fallbackImg.current,
     }
     viewerRef.current = createTokenViewer(containerRef.current, initialProps)
     setMounted(true)
@@ -94,7 +97,7 @@ export function Token3DViewer(props: Token3DProps) {
       serial: serial || 1,
       maxSupply: maxSupply || 1000,
       iconSvg: iconId ? getIcon(iconId) : '',
-      imageSrc: imageSrc || '',
+      imageSrc: imageSrc || fallbackImg.current,
     })
   }, [mounted, tier, category, catColor, biome, tokenName, description, serial, maxSupply, iconId, imageSrc])
 
