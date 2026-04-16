@@ -6,3 +6,7 @@ Combat models — declared here, CombatEngine logic stays in engine.py.
 from terra_domini.apps.combat.engine import Battle, BattleParticipant, MilitaryUnit
 
 __all__ = ['Battle', 'BattleParticipant', 'MilitaryUnit']
+
+from terra_domini.apps.combat.recruitment import TrainingQueue
+__all_recruitment__ = ['TrainingQueue']
+

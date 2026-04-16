@@ -191,7 +191,7 @@ function GameScreen() {
     >
       {/* ═══ HEXOD SHELL ═══ */}
 
-      {/* 3D Globe loading animation — dives into player location */}
+      {/* 3D Globe loading animation — blocks ALL UI until complete */}
       {!mapLoaded && (
         <LoadingGlobe
           playerLat={playerCoords[0]}
@@ -199,6 +199,9 @@ function GameScreen() {
           onComplete={() => setMapLoaded(true)}
         />
       )}
+
+      {/* ═══ GAME UI — only renders after globe completes ═══ */}
+      {mapLoaded && (<>
 
       {/* News ticker — 28px fixed top */}
       <ErrorBoundary label="NewsTicker">
@@ -307,6 +310,8 @@ function GameScreen() {
 
       {/* Hotspots onboarding — cercles pulsants sur éléments cliquables */}
       <OnboardingHotspots />
+
+      </>)}
     </div>
   )
 }

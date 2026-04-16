@@ -13,7 +13,9 @@ interface Props {
 }
 
 const EARTH_RADIUS = 5
-const DURATION_MS = 3500
+const SPIN_DURATION = 3000   // 3s full revolution
+const DIVE_DURATION = 2000   // 2s dive into location
+const TOTAL_MS = SPIN_DURATION + DIVE_DURATION
 
 function latLonToSphere(lat: number, lon: number, r: number): THREE.Vector3 {
   const phi = (90 - lat) * (Math.PI / 180)
@@ -89,6 +91,10 @@ export function LoadingGlobe({ playerLat = 48.8566, playerLon = 2.3522, onComple
     marker.position.copy(targetPos)
     earth.add(marker)
 
+    // Start earth with user's location facing camera
+    const startRotY = -((playerLon + 90) * Math.PI / 180)
+    earth.rotation.y = startRotY
+
     // Animation
     const startTime = Date.now()
     let animId = 0
@@ -96,29 +102,28 @@ export function LoadingGlobe({ playerLat = 48.8566, playerLon = 2.3522, onComple
     const animate = () => {
       animId = requestAnimationFrame(animate)
       const elapsed = Date.now() - startTime
-      const t = Math.min(1, elapsed / DURATION_MS)
 
-      if (t < 0.5) {
-        // Phase 1: Spin (0-50%)
-        earth.rotation.y += 0.015
-        camera.position.z = 14
-      } else {
-        // Phase 2: Dive toward player location (50-100%)
-        const diveT = (t - 0.5) * 2 // 0→1
-        const eased = 1 - Math.pow(1 - diveT, 3) // ease-out cubic
+      if (elapsed < SPIN_DURATION) {
+        // Phase 1: Full 360° revolution from user's location
+        const spinT = elapsed / SPIN_DURATION  // 0→1
+        earth.rotation.y = startRotY + spinT * Math.PI * 2  // full revolution
+        camera.position.z = 14 - spinT * 2  // slowly approach
+      } else if (elapsed < TOTAL_MS) {
+        // Phase 2: Dive toward player location
+        const diveT = (elapsed - SPIN_DURATION) / DIVE_DURATION  // 0→1
+        const eased = 1 - Math.pow(1 - diveT, 3)  // ease-out cubic
 
-        // Rotate earth so player location faces camera
-        const targetRotY = -((playerLon + 90) * Math.PI / 180)
-        earth.rotation.y = earth.rotation.y + (targetRotY - earth.rotation.y) * 0.05
+        // Lock earth rotation so player faces camera
+        earth.rotation.y = startRotY + Math.PI * 2  // completed revolution
 
         // Camera dives in
-        camera.position.z = 14 - eased * 12
-        camera.position.y = eased * (playerLat > 0 ? 2 : -2)
+        camera.position.z = 12 - eased * 10
+        camera.position.y = eased * (playerLat > 0 ? 2 : -2) * 0.5
 
         if (diveT > 0.3) setPhase('diving')
       }
 
-      if (t >= 1) {
+      if (elapsed >= TOTAL_MS) {
         setPhase('done')
         cancelAnimationFrame(animId)
         setTimeout(onComplete, 400)
