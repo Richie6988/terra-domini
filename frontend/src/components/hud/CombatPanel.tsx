@@ -150,9 +150,9 @@ export function CombatPanel({ onClose }: Props) {
           {training.some(t => t.done) && (
             <button onClick={handleCollect} style={{
               padding: '6px 14px', borderRadius: 10, cursor: 'pointer',
-              background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-              border: 'none', color: '#fff', fontSize: 8, fontWeight: 900, letterSpacing: 1, ...s,
-            }}>COLLECT</button>
+            }}
+              className="btn-game btn-game-green"
+            >COLLECT</button>
           )}
         </div>
       )}
@@ -205,10 +205,8 @@ export function CombatPanel({ onClose }: Props) {
                     }}>{n}</button>
                   ))}
                   <div style={{ flex: 1 }} />
-                  <button onClick={() => handleRecruit(key)} style={{
-                    padding: '6px 16px', borderRadius: 10, cursor: 'pointer',
-                    background: `${color}10`, border: `1px solid ${color}30`,
-                    color, fontSize: 8, fontWeight: 900, letterSpacing: 1, ...s,
+                  <button onClick={() => handleRecruit(key)} className="btn-game btn-game-red" style={{
+                    fontSize: 9, letterSpacing: 1, ...s,
                   }}>
                     RECRUIT {qty} — {totalCost} HEX
                   </button>
@@ -252,10 +250,8 @@ export function CombatPanel({ onClose }: Props) {
                     </div>
                   </div>
                   {t.done && (
-                    <button onClick={handleCollect} style={{
-                      padding: '6px 14px', borderRadius: 10, cursor: 'pointer',
-                      background: 'linear-gradient(135deg, #22c55e, #16a34a)',
-                      border: 'none', color: '#fff', fontSize: 8, fontWeight: 900, letterSpacing: 1, ...s,
+                    <button onClick={handleCollect} className="btn-game btn-game-green" style={{
+                      fontSize: 8, letterSpacing: 1, ...s,
                     }}>COLLECT</button>
                   )}
                 </div>

@@ -524,7 +524,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               <span style={{ fontSize: 14 }}><EmojiIcon emoji={ch.icon} size={16} /></span>
               <div style={{ flex: 1 }}>
                 <div style={{
-                  fontSize: 8, fontWeight: 700, color: done ? 'rgba(255,255,255,0.4)' : '#1a2a3a',
+                  fontSize: 8, fontWeight: 700, color: done ? 'rgba(255,255,255,0.4)' : '#e2e8f0',
                   fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 0.5,
                   textDecoration: done ? 'line-through' : 'none',
                 }}>

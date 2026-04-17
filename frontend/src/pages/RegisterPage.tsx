@@ -21,7 +21,7 @@ const bgStyle: React.CSSProperties = {
 }
 const cardStyle: React.CSSProperties = {
   width: 420, maxWidth: '95vw', padding: '28px 32px',
-  background: 'linear-gradient(180deg, rgba(235,242,250,0.95) 0%, rgba(220,230,242,0.95) 100%)',
+  background: 'linear-gradient(180deg, rgba(13,27,42,0.95) 0%, rgba(10,22,40,0.95) 100%)',
   backdropFilter: 'blur(30px) saturate(1.2)',
   border: '1px solid rgba(0,60,100,0.15)',
   borderRadius: 16, position: 'relative', zIndex: 1,

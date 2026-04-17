@@ -240,10 +240,9 @@ export function ShopPanel({ onClose }: Props) {
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:8 }}>
             {BOOSTERS.map(b => (
-              <button key={b.id} onClick={() => handleBuy(b.name, b.code, b.price)} style={{
-                padding:14, borderRadius:10, cursor:'pointer', textAlign:'center',
-                background:`linear-gradient(135deg, ${b.color}12, ${b.color}05)`,
-                border:`2px solid ${b.color}40`, transition:'all 0.25s ease',
+              <button key={b.id} onClick={() => handleBuy(b.name, b.code, b.price)} className="game-card" style={{
+                padding:14, cursor:'pointer', textAlign:'center',
+                borderColor:`${b.color}40`, transition:'all 0.25s ease',
               }}>
                 <div style={{ fontSize:28, marginBottom:6 }}><EmojiIcon emoji={b.icon} size={16} /></div>
                 <div style={{ fontSize:9, fontWeight:900, color:b.color, marginBottom:4, fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1 }}>{b.name}</div>
@@ -281,15 +280,13 @@ export function ShopPanel({ onClose }: Props) {
                   <div style={{ fontSize:13, fontWeight:900, color:'#0099cc', fontFamily:"'Share Tech Mono', monospace" }}>
                     {item.price} ◆
                   </div>
-                  <button onClick={() => handleBuy(item.name, item.code, item.price)} style={{
-                    padding:'6px 14px', borderRadius:16, cursor:'pointer',
-                    background: toNum(balance) >= item.price ? (c.color || '#0099cc') : 'rgba(255,255,255,0.06)',
-                    color: toNum(balance) >= item.price ? '#fff' : 'rgba(255,255,255,0.25)',
-                    border:'none', fontSize:8, fontWeight:700, letterSpacing:1,
-                    fontFamily:"'Orbitron', system-ui, sans-serif",
+                  <button onClick={() => handleBuy(item.name, item.code, item.price)}
+                    className={toNum(balance) >= item.price ? 'btn-game btn-game-gold' : 'btn-game btn-game-glass'}
+                    style={{
+                    fontSize:9, letterSpacing:1,
                     opacity: toNum(balance) >= item.price ? 1 : 0.5,
                   }}>
-                    Buy
+                    BUY
                   </button>
                 </div>
               </div>

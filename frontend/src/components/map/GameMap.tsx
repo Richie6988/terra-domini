@@ -456,7 +456,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       {/* Global styles */}
       <style>{`
-        .td-tooltip{background:rgba(13,27,42,0.95)!important;border:1px solid rgba(255,255,255,0.12)!important;border-radius:10px!important;color:#1a2a3a!important;padding:8px 12px!important;box-shadow:0 4px 20px rgba(0,0,0,0.15)!important;font-family:'Orbitron',system-ui,sans-serif!important;font-size:9px!important;letter-spacing:1px!important;}
+        .td-tooltip{background:rgba(13,27,42,0.95)!important;border:1px solid rgba(255,255,255,0.12)!important;border-radius:10px!important;color:#e2e8f0!important;padding:8px 12px!important;box-shadow:0 4px 20px rgba(0,0,0,0.15)!important;font-family:'Orbitron',system-ui,sans-serif!important;font-size:9px!important;letter-spacing:1px!important;}
         .td-tooltip::before{display:none!important;}
         .leaflet-container{cursor:crosshair;background:#e8eef5;}
         .td-hex-own path{filter:drop-shadow(0 0 6px rgba(0,255,135,0.8))!important;}

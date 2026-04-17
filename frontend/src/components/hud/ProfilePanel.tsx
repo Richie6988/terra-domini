@@ -111,7 +111,7 @@ function CommanderTab() {
           {AVATAR_COLORS.map(c => (
             <button key={c} onClick={() => setAvatarBg(c)} style={{
               width: 28, height: 28, borderRadius: '50%', cursor: 'pointer',
-              background: c, border: avatarBg === c ? '3px solid #1a2a3a' : '2px solid rgba(255,255,255,0.08)',
+              background: c, border: avatarBg === c ? '3px solid #e2e8f0' : '2px solid rgba(255,255,255,0.08)',
               boxShadow: avatarBg === c ? `0 0 12px ${c}60` : `0 2px 6px ${c}30`,
               transform: avatarBg === c ? 'scale(1.15)' : 'scale(1)',
               transition: 'all 0.15s',

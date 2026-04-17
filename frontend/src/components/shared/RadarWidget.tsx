@@ -81,7 +81,7 @@ export function RadarWidget() {
 
     return (
       <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size}>
-        <circle cx={cx} cy={cy} r={r + 4} fill="rgba(235,242,250,0.85)" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+        <circle cx={cx} cy={cy} r={r + 4} fill="rgba(13,27,42,0.85)" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
         <circle cx={cx} cy={cy} r={r * 0.75} fill="none" stroke="rgba(0,153,204,0.1)" strokeWidth="0.5" />
         <circle cx={cx} cy={cy} r={r * 0.5} fill="none" stroke="rgba(0,153,204,0.1)" strokeWidth="0.5" />
         <circle cx={cx} cy={cy} r={r * 0.25} fill="none" stroke="rgba(0,153,204,0.1)" strokeWidth="0.5" />

@@ -57,6 +57,8 @@ function DockButton({ item, isActive, onClick, badge }: {
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 16,
         transition: 'all 0.25s ease',
+        boxShadow: isActive ? `0 0 12px ${item.color}60` : 'none',
+        transform: isActive ? 'scale(1.1)' : 'scale(1)',
       }}>
         <span style={{
           filter: isActive ? 'brightness(2)' : 'none',

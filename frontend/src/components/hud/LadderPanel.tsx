@@ -112,7 +112,7 @@ export function LadderPanel({ onClose }: Props) {
             {/* Name */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{
-                fontSize: 10, fontWeight: p.isYou ? 800 : 600, color: p.isYou ? '#8b5cf6' : '#1a2a3a',
+                fontSize: 10, fontWeight: p.isYou ? 800 : 600, color: p.isYou ? '#8b5cf6' : '#e2e8f0',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
               }}>
                 {p.username} {p.isYou && <span style={{ fontSize: 7, color: '#8b5cf6', fontWeight: 700 }}>(YOU)</span>}

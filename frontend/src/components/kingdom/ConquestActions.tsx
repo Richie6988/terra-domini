@@ -122,7 +122,7 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
               onClick={() => setColor(c)}
               style={{
                 width: 28, height: 28, borderRadius: '50%',
-                background: c, border: color === c ? '3px solid #1a2a3a' : '2px solid transparent',
+                background: c, border: color === c ? '3px solid #e2e8f0' : '2px solid transparent',
                 cursor: 'pointer', transition: 'all 0.2s',
                 boxShadow: color === c ? `0 0 12px ${c}50` : 'none',
               }}

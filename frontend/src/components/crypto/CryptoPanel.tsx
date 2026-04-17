@@ -308,7 +308,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
                     <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.04)', fontWeight: 500, fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>{tx.type?.replace(/_/g, ' ').toUpperCase()}</div>
                     <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.25)', marginTop: 1 }}>{new Date(tx.date).toLocaleDateString()}</div>
                   </div>
-                  <div style={{ fontSize: 12, fontWeight: 900, fontFamily: "'Share Tech Mono', monospace", color: TX_COLORS[tx.type] ?? '#1a2a3a' }}>
+                  <div style={{ fontSize: 12, fontWeight: 900, fontFamily: "'Share Tech Mono', monospace", color: TX_COLORS[tx.type] ?? '#e2e8f0' }}>
                     {tx.amount > 0 ? '+' : ''}{parseFloat(tx.amount).toFixed(4)} HEX
                   </div>
                 </div>

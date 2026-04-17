@@ -222,6 +222,7 @@ export function EventsPanel({ onClose }: Props) {
                       fontSize: 8, fontWeight: 700, letterSpacing: 1, ...s,
                       opacity: ev.my_registered ? 0.7 : 1,
                     }}
+                    className={ev.my_registered ? 'btn-game btn-game-glass' : 'btn-game btn-game-blue'}
                   >
                     {ev.my_registered ? 'REGISTERED' : `REGISTER — ${ev.registration_cost} HEX`}
                   </button>
