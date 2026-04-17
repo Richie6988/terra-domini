@@ -51,7 +51,7 @@ function WalletCard({ wallet, onConvert, onWithdraw }: any) {
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>In-Game HEX Coin</div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: '#cc8800', fontFamily: 'monospace', marginTop: 2 }}><EmojiIcon emoji="" /> {toF(wallet?.tdc_in_game, 0)}</div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: '#cc8800', fontFamily: 'monospace', marginTop: 2 }}>{toF(wallet?.tdc_in_game, 0)}</div>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 3 }}>Staked: {toF(wallet?.tdi_staked, 4)}</div>
         </div>
       </div>
@@ -89,7 +89,7 @@ function ConvertModal({ wallet, onClose }: { wallet: any; onClose: () => void })
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 14 }}>Rate: 1 HEX ≈ {rate.toFixed(1)} HEX Coin · Available: {toF(wallet?.tdi_balance, 4)} HEX</div>
         <input type="number" value={amount} onChange={e => setAmount(e.target.value)}
           style={{ width: '100%', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', borderRadius: 10, padding: '12px 16px', color: '#e2e8f0', fontSize: 18, fontFamily: 'monospace', outline: 'none', boxSizing: 'border-box', marginBottom: 10 }} />
-        <div style={{ textAlign: 'center', color: '#00884a', fontSize: 16, fontWeight: 700, marginBottom: 16 }}>→ <EmojiIcon emoji="" /> {preview.toFixed(1)} HEX Coin</div>
+        <div style={{ textAlign: 'center', color: '#00884a', fontSize: 16, fontWeight: 700, marginBottom: 16 }}>→ <IconSVG id="hex_coin" size={10} /> {preview.toFixed(1)} HEX Coin</div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <button onClick={onClose} style={{ padding: 12, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.35)', cursor: 'pointer' }}>Cancel</button>
           <button onClick={() => mut.mutate()} disabled={mut.isPending} style={{ padding: 12, background: 'rgba(0,136,74,0.15)', border: '1px solid rgba(0,136,74,0.4)', borderRadius: 10, color: '#00884a', cursor: 'pointer', fontWeight: 700 }}>
@@ -127,6 +127,7 @@ function CryptoNewsfeed() {
 
 import { StakingPanel } from './StakingPanel'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { IconSVG } from '../shared/iconBank'
 
 const TABS = [
   { id: 'wallet',  label: 'BALANCE'},
@@ -216,7 +217,7 @@ function TokenomicsTab() {
         background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.1)',
         fontSize: 7, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6,
       }}>
-        <div style={{ fontWeight: 700, color: '#dc2626', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 4 }}><EmojiIcon emoji="" /> DAILY BURN: {stats.dailyBurned.toLocaleString()} HEX</div>
+        <div style={{ fontWeight: 700, color: '#dc2626', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 4 }}><IconSVG id="hex_coin" size={10} /> DAILY BURN: {stats.dailyBurned.toLocaleString()} HEX</div>
         Skill upgrades, withdrawal fees (3%), territory tax, and marketplace royalties permanently reduce supply. More players = more burn = higher scarcity.
       </div>
 
@@ -340,7 +341,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
                 cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
               }}
             >
-              <EmojiIcon emoji="" /> SPEND → SHOP
+              <IconSVG id="cart" size={10} /> SPEND → SHOP
             </button>
             <button
               onClick={() => { onClose(); setTimeout(() => setActivePanel('marketplace'), 100) }}
@@ -351,7 +352,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
                 cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
               }}
             >
-              <EmojiIcon emoji="" /> NFT MARKET →
+              <IconSVG id="auction_gavel" size={10} /> NFT MARKET →
             </button>
           </div>
         </div>

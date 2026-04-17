@@ -13,6 +13,7 @@ import { useKingdomStore } from '../../store/kingdomStore'
 import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { IconSVG } from '../shared/iconBank'
 
 const toNum = (v: unknown) => parseFloat(String(v ?? 0)) || 0
 
@@ -253,7 +254,7 @@ function PriceBoard() {
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>per unit</div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: '#cc8800', fontFamily: 'monospace' }}>{rate.toFixed(1)} <EmojiIcon emoji="" /></div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: '#cc8800', fontFamily: 'monospace' }}>{rate.toFixed(1)} </div>
               <div style={{ fontSize: 10, color: up ? '#10B981' : '#EF4444' }}>
                 {up ? '▲' : '▼'} {Math.abs(change).toFixed(1)}%
               </div>
@@ -262,7 +263,7 @@ function PriceBoard() {
         )
       })}
       <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(255,59,48,0.06)', border: '1px solid rgba(255,59,48,0.15)', borderRadius: 10, fontSize: 11, color: '#FCA5A5' }}>
-        <EmojiIcon emoji="" /> Hormuz Crisis: Energy +40% · Intel +25% · Affected region: Gulf
+        Hormuz Crisis: Energy +40% · Intel +25% · Affected region: Gulf
       </div>
     </div>
   )
@@ -333,7 +334,7 @@ export function TradePanel({ onClose }: { onClose: () => void }) {
             cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
           }}
         >
-          <EmojiIcon emoji="" /> NFT MARKETPLACE →
+          <IconSVG id="auction_gavel" size={10} /> NFT MARKETPLACE →
         </button>
         <button
           onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }}
@@ -344,7 +345,7 @@ export function TradePanel({ onClose }: { onClose: () => void }) {
             cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
           }}
         >
-          <EmojiIcon emoji="" /> WALLET →
+          WALLET →
         </button>
       </div>
     </GlassPanel>

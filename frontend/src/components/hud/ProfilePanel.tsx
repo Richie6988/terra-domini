@@ -121,11 +121,9 @@ function CommanderTab() {
       </div>
 
       {/* Save */}
-      <button onClick={save} disabled={saving} style={{
-        padding: '14px 20px', borderRadius: 10, cursor: 'pointer', border: 'none',
-        background: 'linear-gradient(135deg, #0099cc, #0088bb)', color: '#fff',
-        fontSize: 11, fontWeight: 900, letterSpacing: 2, fontFamily: "'Orbitron', sans-serif",
-        opacity: saving ? 0.6 : 1, boxShadow: '0 4px 16px rgba(0,153,204,0.3)',
+      <button onClick={save} disabled={saving} className="btn-game btn-game-blue" style={{
+        width: '100%', fontSize: 11, letterSpacing: 2,
+        opacity: saving ? 0.6 : 1,
       }}>{saving ? 'SAVING...' : 'SAVE CHANGES'}</button>
 
       {/* Logout + Delete */}

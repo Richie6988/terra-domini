@@ -174,7 +174,7 @@ export function MyTerritoriesOverlay({ onFlyTo }: Props) {
               )}
               {!isLoading && territories.length === 0 && (
                 <div style={{ padding: '24px', textAlign: 'center', color: '#374151' }}>
-                  <div style={{ fontSize: 24, marginBottom: 6 }}><EmojiIcon emoji="" /></div>
+                  <div style={{ fontSize: 24, marginBottom: 6 }}></div>
                   <div style={{ fontSize: 12 }}>No territories</div>
                   <div style={{ fontSize: 10, color: '#4B5563', marginTop: 4 }}>
                     Cliquez sur un hex pour revendiquer
@@ -187,7 +187,7 @@ export function MyTerritoriesOverlay({ onFlyTo }: Props) {
                 const name    = t.custom_name || t.poi_name || t.place_name || (t.h3_index?.slice(0,10) + '…')
                 const biome   = t.territory_type || 'rural'
                 const income  = parseFloat(t.resource_credits) || 10
-                const biomeIcon = BIOME_ICON[biome] || '<EmojiIcon emoji="" />'
+                const biomeIcon = BIOME_ICON[biome] || ''
                 const hasPOI  = !!(t.poi_name || t.is_landmark)
 
                 return (
@@ -234,7 +234,7 @@ export function MyTerritoriesOverlay({ onFlyTo }: Props) {
                       <div style={{ fontSize: 11, color: '#F59E0B', fontWeight: 700, fontFamily: 'monospace' }}>
                         +{Math.round(income)}
                       </div>
-                      <div style={{ fontSize: 8, color: '#374151' }}><EmojiIcon emoji="" />/j</div>
+                      <div style={{ fontSize: 8, color: '#374151' }}>/j</div>
                     </div>
 
                     {/* Arrow */}

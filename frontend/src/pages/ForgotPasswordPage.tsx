@@ -66,7 +66,7 @@ export default function ForgotPasswordPage() {
         {sent ? (
           /* Success state */
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}><EmojiIcon emoji="" /></div>
+            <div style={{ fontSize: 40, marginBottom: 16 }}></div>
             <div style={{ fontSize: 12, color: '#e0f0ff', marginBottom: 8, fontWeight: 700, letterSpacing: 2 }}>
               CHECK YOUR INBOX
             </div>

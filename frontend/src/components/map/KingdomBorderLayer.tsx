@@ -216,7 +216,7 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
 
         marker.bindTooltip(
           `<div style="font-size:12px">
-            <strong style="color:${color}">${isMain ? '<EmojiIcon emoji="" /> Main Kingdom' : `<EmojiIcon emoji="" /> Kingdom (${k.size})`}</strong><br/>
+            <strong style="color:${color}">${isMain ? 'Main Kingdom' : `Kingdom (${k.size})`}</strong><br/>
             Tier ${k.tier} · ${k.size} territories
             ${k.tdc_per_24h ? `<br/>+${Math.round(k.tdc_per_24h)} HEX/day` : ''}
             ${k.size <= 1 ? '<br/><span style="color:#F87171;font-size:10px"> Isolated — skills frozen</span>' : ''}

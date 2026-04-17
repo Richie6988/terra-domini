@@ -171,7 +171,7 @@ export function ShopPanel({ onClose }: Props) {
               background:`linear-gradient(135deg, ${activeKingdom.color}, ${activeKingdom.color}aa)`,
               display:'flex', alignItems:'center', justifyContent:'center',
               fontSize:11, boxShadow:`0 0 8px ${activeKingdom.color}30`,
-            }}><EmojiIcon emoji="" /></div>
+            }}></div>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:7, fontWeight:800, color:activeKingdom.color, letterSpacing:2, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
                 {activeKingdom.name.toUpperCase()}
@@ -236,7 +236,7 @@ export function ShopPanel({ onClose }: Props) {
         {/* ═══ BOOSTERS SECTION ═══ */}
         <div id="shop-boosters" style={{ marginBottom:20 }}>
           <div style={{ fontSize:8, fontWeight:700, letterSpacing:2, color:'#cc8800', marginBottom:10, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
-            <EmojiIcon emoji="" /> BOOSTER PACKS — 10 ITEMS EACH
+            BOOSTER PACKS — 10 ITEMS EACH
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:8 }}>
             {BOOSTERS.map(b => (

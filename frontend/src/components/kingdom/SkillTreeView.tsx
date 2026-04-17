@@ -416,7 +416,7 @@ export function SkillTreeView({ kingdom, onPour, onForkChoice, onBranchAllocChan
                 boxShadow: '0 2px 8px rgba(121,80,242,0.3)',
               }}
             >
-              <EmojiIcon emoji="" /> QUICK POUR ALL ({Math.floor(totalReservoir).toLocaleString()} ◆)
+              QUICK POUR ALL ({Math.floor(totalReservoir).toLocaleString()} ◆)
             </button>
           )}
         </div>

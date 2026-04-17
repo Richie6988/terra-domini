@@ -56,7 +56,7 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
     const h3 = territory.h3 || territory.h3_index || ''
     const center = { lat: territory.lat ?? 0, lng: territory.lng ?? 0 }
     const kingdom = createKingdom(name.trim(), color, h3, center)
-    toast.success(`<EmojiIcon emoji="" /> ${kingdom.name} founded!`)
+    toast.success(`${kingdom.name} founded!`)
     onCreated(kingdom.id)
   }
 
@@ -74,7 +74,7 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
         fontSize: 9, fontWeight: 900, color: '#cc8800', letterSpacing: 3, marginBottom: 12,
         fontFamily: "'Orbitron', system-ui, sans-serif", textAlign: 'center',
       }}>
-        <EmojiIcon emoji="" /> FOUND YOUR KINGDOM
+        FOUND YOUR KINGDOM
       </div>
 
       <div style={{
@@ -135,24 +135,15 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
       <div style={{ display: 'flex', gap: 8 }}>
         <button
           onClick={handleCreate}
-          style={{
-            flex: 1, padding: '10px', borderRadius: 20, border: 'none', cursor: 'pointer',
-            background: 'linear-gradient(90deg, #cc8800, #d97706)',
-            color: '#fff', fontSize: 8, fontWeight: 700, letterSpacing: 2,
-            fontFamily: "'Orbitron', system-ui, sans-serif",
-            boxShadow: '0 4px 15px rgba(204,136,0,0.3)',
-          }}
+          className="btn-game btn-game-gold"
+          style={{ flex: 1, fontSize: 9, letterSpacing: 2 }}
         >
-          <EmojiIcon emoji="" /> FOUND KINGDOM
+          FOUND KINGDOM
         </button>
         <button
           onClick={onCancel}
-          style={{
-            padding: '10px 16px', borderRadius: 20, cursor: 'pointer',
-            background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-            color: 'rgba(255,255,255,0.35)', fontSize: 8, fontWeight: 500,
-            fontFamily: "'Orbitron', system-ui, sans-serif",
-          }}
+          className="btn-game btn-game-glass"
+          style={{ fontSize: 8 }}
         >
           CANCEL
         </button>
@@ -284,7 +275,7 @@ export function ConquestActions({ territory, onClaimed }: Props) {
         addTerritoryToKingdom(targetKingdom.id, territory.h3 || territory.h3_index || '')
       }
 
-      toast.success('Territory conquered! <EmojiIcon emoji="" />')
+      toast.success('Territory conquered! ')
       setSelectedTerritory({
         ...territory,
         owner_id: player?.id ?? null,
@@ -405,7 +396,7 @@ export function ConquestActions({ territory, onClaimed }: Props) {
                 fontSize: 8, color: kingdoms[0].color, textAlign: 'center',
                 fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
               }}>
-                ADD TO: <EmojiIcon emoji="" /> {kingdoms[0].name.toUpperCase()}
+                ADD TO: {kingdoms[0].name.toUpperCase()}
               </div>
             )}
 
@@ -413,11 +404,9 @@ export function ConquestActions({ territory, onClaimed }: Props) {
               <button
                 onClick={handleExecuteConquest}
                 disabled={loading}
+                className={`btn-game ${selectedMethod === 'assault' ? 'btn-game-red' : selectedMethod === 'purchase' ? 'btn-game-gold' : 'btn-game-purple'}`}
                 style={{
-                  flex: 1, padding: '10px', borderRadius: 20, border: 'none', cursor: 'pointer',
-                  background: methods.find(m => m.id === selectedMethod)?.color,
-                  color: '#fff', fontSize: 8, fontWeight: 700, letterSpacing: 2,
-                  fontFamily: "'Orbitron', system-ui, sans-serif",
+                  flex: 1, fontSize: 9, letterSpacing: 2,
                   opacity: loading ? 0.6 : 1,
                 }}
               >
@@ -425,12 +414,8 @@ export function ConquestActions({ territory, onClaimed }: Props) {
               </button>
               <button
                 onClick={() => setMode('methods')}
-                style={{
-                  padding: '10px 16px', borderRadius: 20, cursor: 'pointer',
-                  background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)',
-                  color: 'rgba(255,255,255,0.35)', fontSize: 8,
-                  fontFamily: "'Orbitron', system-ui, sans-serif",
-                }}
+                className="btn-game btn-game-glass"
+                style={{ fontSize: 8 }}
               >
                 BACK
               </button>

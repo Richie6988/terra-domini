@@ -53,7 +53,7 @@ export function LadderPanel({ onClose }: Props) {
     territories: e.territories || 0,
     hex_per_day: e.hex_per_day || e.score || 0,
     isYou: e.id === String(player?.id),
-    avatar_emoji: e.avatar_emoji || '<EmojiIcon emoji="" />',
+    avatar_emoji: e.avatar_emoji || '',
   }))
   const meRank = lbData?.me_rank
 

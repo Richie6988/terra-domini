@@ -412,7 +412,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
             }}
           >
             <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
-              style={{ fontSize: 18 }}><EmojiIcon emoji="" /></motion.span>
+              style={{ fontSize: 18 }}></motion.span>
             <span style={{ fontSize: 11, color: '#fff', fontFamily: "'Orbitron', sans-serif", letterSpacing: 1 }}>
               TAP ANY ZONE TO CLAIM — IT'S FREE!
             </span>
@@ -503,7 +503,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
                   opacity: gpsLoading ? 0.7 : 1,
                 }}
               >
-                {gpsLoading ? '<EmojiIcon emoji="" /> Finding your location…' : currentStep.action}
+                {gpsLoading ? 'Finding your location…' : currentStep.action}
               </motion.button>
             )}
 
@@ -579,7 +579,7 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
     ...battles.map(b => ({
       icon: b.won ? '' : '',
       text: b.won ? `Victoire : ${b.territory} conquis !` : `Défense échouée : ${b.territory} perdu`,
-      value: b.won && b.resources ? `+${b.resources} <EmojiIcon emoji="" />` : undefined,
+      value: b.won && b.resources ? `+${b.resources} ` : undefined,
       color: b.won ? '#10B981' : '#EF4444',
     })),
   ]
@@ -609,7 +609,7 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
           borderBottom: '1px solid rgba(0,255,135,0.15)',
           textAlign: 'center',
         }}>
-          <div style={{ fontSize: 32, marginBottom: 8 }}><EmojiIcon emoji="" /></div>
+          <div style={{ fontSize: 32, marginBottom: 8 }}></div>
           <div style={{
             fontFamily: "'Bebas Neue', sans-serif",
             fontSize: 26, letterSpacing: '1px', color: '#fff',

@@ -111,7 +111,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
         lon: t.center_lon ?? t.lon,
       })
       if (res.data.status === 'exploration_started') {
-        toast.success(`<EmojiIcon emoji="" /> Exploration started! ${res.data.hours_required}h remaining`)
+        toast.success(`Exploration started! ${res.data.hours_required}h remaining`)
         setClaiming(false)
         return
       }
@@ -151,7 +151,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
         <div style={{
           display: 'flex', alignItems: 'center', gap: 12,
           padding: '12px 20px', borderRadius: 16,
-          background: 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(220,230,242,0.92))',
+          background: 'linear-gradient(180deg, rgba(13,27,42,0.97), rgba(6,14,26,0.98))',
           backdropFilter: 'blur(30px) saturate(1.2)',
           border: '1px solid rgba(255,255,255,0.12)',
           boxShadow: '0 -4px 30px rgba(0,0,0,0.2), inset 0 1px 0 rgba(255,255,255,0.08)',
@@ -176,7 +176,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
               </span>
               <span style={{
                 padding: '2px 8px', borderRadius: 10,
-                background: 'rgba(0,60,100,0.05)', color: 'rgba(255,255,255,0.45)',
+                background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.45)',
                 fontSize: 7, fontWeight: 600,
               }}>
                 {(biome || 'rural').toUpperCase()}
@@ -185,7 +185,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 padding: '2px 8px', borderRadius: 10,
                 background: 'rgba(252,211,77,0.15)', color: '#cc8800',
                 fontSize: 7, fontWeight: 700,
-              }}><EmojiIcon emoji="" /> SHINY</span>}
+              }}>SHINY</span>}
             </div>
           </div>
 
@@ -204,47 +204,33 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 padding: '8px 14px', borderRadius: 10,
                 background: 'rgba(100,100,100,0.1)', border: '1px solid rgba(100,100,100,0.2)',
                 color: '#9CA3AF', fontSize: 8, fontWeight: 700, letterSpacing: 1,
-              }}><EmojiIcon emoji="" /> LOCKED</div>
+              }}>LOCKED</div>
             )}
             {isFree && player && !claimOpts?.locked && claimOpts?.options?.map((opt: any) => (
               <button key={opt.method} onClick={() => handleClaim(opt.method)} disabled={claiming || !opt.available}
+                className={`btn-game ${opt.method === 'free' ? 'btn-game-green' : opt.method === 'buy' ? 'btn-game-gold' : 'btn-game-blue'}`}
                 style={{
-                  padding: '8px 14px', borderRadius: 10, border: 'none', cursor: claiming ? 'wait' : opt.available ? 'pointer' : 'not-allowed',
-                  background: opt.method === 'free'
-                    ? `linear-gradient(135deg, ${cfg.c}dd, ${cfg.c})`
-                    : opt.method === 'buy'
-                    ? 'linear-gradient(135deg, rgba(204,136,0,0.8), rgba(204,136,0,0.6))'
-                    : 'linear-gradient(135deg, rgba(0,153,204,0.6), rgba(0,153,204,0.4))',
-                  color: '#fff', fontSize: 8, fontWeight: 900, letterSpacing: 1,
+                  fontSize: 9, letterSpacing: 1,
                   opacity: (claiming || !opt.available) ? 0.4 : 1,
-                  fontFamily: "'Orbitron', sans-serif",
+                  cursor: claiming ? 'wait' : opt.available ? 'pointer' : 'not-allowed',
                 }}>
-                {claiming ? '⏳...' : opt.method === 'free' ? '<EmojiIcon emoji="" /> FREE' : opt.method === 'buy' ? `<EmojiIcon emoji="" /> ${opt.cost}◆` : `<EmojiIcon emoji="" /> ${opt.hours}h`}
+                {claiming ? '...' : opt.method === 'free' ? 'FREE CLAIM' : opt.method === 'buy' ? `${opt.cost} HEX` : `EXPLORE ${opt.hours}h`}
               </button>
             ))}
             {isFree && player && !claimOpts && (
-              <button onClick={() => handleClaim('free')} disabled={claiming} style={{
-                padding: '8px 14px', borderRadius: 10, border: 'none', cursor: 'pointer',
-                background: `linear-gradient(135deg, ${cfg.c}dd, ${cfg.c})`,
-                color: '#fff', fontSize: 8, fontWeight: 900, letterSpacing: 1,
-                fontFamily: "'Orbitron', sans-serif",
-              }}><EmojiIcon emoji="" /> CLAIM</button>
+              <button onClick={() => handleClaim('free')} disabled={claiming} className="btn-game btn-game-green" style={{
+                fontSize: 9, letterSpacing: 1,
+              }}>CLAIM</button>
             )}
             {isEnemy && (
-              <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('combat'), 100) }} style={{
-                padding: '8px 14px', borderRadius: 10, cursor: 'pointer',
-                border: '1px solid rgba(220,38,38,0.3)', background: 'rgba(220,38,38,0.08)',
-                color: '#dc2626', fontSize: 8, fontWeight: 900, letterSpacing: 1,
-                fontFamily: "'Orbitron', sans-serif",
-              }}><EmojiIcon emoji="" /> ATTACK</button>
+              <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('combat'), 100) }} className="btn-game btn-game-red" style={{
+                fontSize: 9, letterSpacing: 1,
+              }}>ATTACK</button>
             )}
             {isOwned && (
-              <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('kingdom'), 100) }} style={{
-                padding: '8px 14px', borderRadius: 10, cursor: 'pointer',
-                border: '1px solid rgba(0,153,204,0.3)', background: 'rgba(0,153,204,0.08)',
-                color: '#0099cc', fontSize: 8, fontWeight: 900, letterSpacing: 1,
-                fontFamily: "'Orbitron', sans-serif",
-              }}><EmojiIcon emoji="" /> KINGDOM</button>
+              <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('kingdom'), 100) }} className="btn-game btn-game-blue" style={{
+                fontSize: 9, letterSpacing: 1,
+              }}>KINGDOM</button>
             )}
           </div>
         </div>

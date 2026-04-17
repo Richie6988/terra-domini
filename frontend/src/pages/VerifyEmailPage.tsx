@@ -63,7 +63,7 @@ export default function VerifyEmailPage() {
     try {
       const { data } = await api.post('/auth/verify-email/', { email, code: fullCode })
       setAuth(data.player, data.access, data.refresh)
-      toast.success(`Welcome to HEXOD, ${data.player.username}! <EmojiIcon emoji="" />`)
+      toast.success(`Welcome to HEXOD, ${data.player.username}! `)
       navigate('/')
     } catch (err: any) {
       const msg = err?.response?.data?.error || 'Invalid code'
@@ -113,7 +113,7 @@ export default function VerifyEmailPage() {
         }}
       >
         {/* Header */}
-        <div style={{ fontSize: 40, marginBottom: 16 }}><EmojiIcon emoji="" /></div>
+        <div style={{ fontSize: 40, marginBottom: 16 }}></div>
         <div style={{ fontSize: 18, fontWeight: 900, color: '#fff', letterSpacing: 4, marginBottom: 8 }}>
           VERIFY EMAIL
         </div>

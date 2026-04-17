@@ -105,7 +105,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
 
   const createMut = useMutation({
     mutationFn: allianceApi.create,
-    onSuccess: () => { toast.success('Alliance created! <EmojiIcon emoji="" />'); qc.invalidateQueries({ queryKey: ['player'] }) },
+    onSuccess: () => { toast.success('Alliance created! '); qc.invalidateQueries({ queryKey: ['player'] }) },
     onError: (e: any) => toast.error(e?.response?.data?.error ?? 'Failed'),
   })
 
@@ -261,7 +261,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '9px 0', borderBottom: '1px solid rgba(255,255,255,0.05)',
               }}>
-                <span style={{ fontSize: 18, width: 28 }}>{ROLE_ICONS[m.role] ?? '<EmojiIcon emoji="" />'}</span>
+                <span style={{ fontSize: 18, width: 28 }}>{ROLE_ICONS[m.role] ?? ''}</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>{m.username}</div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>

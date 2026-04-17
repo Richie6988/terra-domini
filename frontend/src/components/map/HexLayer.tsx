@@ -227,9 +227,9 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
 
   // Tooltip
   const income = Math.round((ta.resource_credits || ta.food_per_tick || 10) * 288)
-  const stateLabel = ta.is_control_tower ? '<EmojiIcon emoji="" /> Tour de contrôle'
+  const stateLabel = ta.is_control_tower ? 'Tour de contrôle'
     : isOwn ? (hasPOI ? `Votre territoire · ${rarity}` : 'Votre territoire')
-    : isEnemy ? `<EmojiIcon emoji="" /> ${ta.owner_username}`
+    : isEnemy ? `${ta.owner_username}`
     : hasPOI ? `⬡ ${rarity.toUpperCase()} — Libre`
     : '⬜ Libre'
 

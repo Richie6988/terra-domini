@@ -25,7 +25,7 @@ export function CampaignWidget() {
     mutationFn: () => api.post('/progression/campaigns/check/'),
     onSuccess: (res) => {
       if (res.data.advanced) {
-        toast.success(`<EmojiIcon emoji="" /> ${res.data.reward || 'Étape complétée !'}`, { duration: 4000 })
+        toast.success(`${res.data.reward || 'Étape complétée !'}`, { duration: 4000 })
         qc.invalidateQueries({ queryKey: ['campaigns'] })
         qc.invalidateQueries({ queryKey: ['player'] })
       } else {
@@ -151,7 +151,7 @@ function CampaignCard({ campaign, expanded, onToggle, onCheck, checking }: any) 
                           padding: '4px 8px', background: 'rgba(245,158,11,0.08)',
                           borderRadius: 6, borderLeft: '2px solid #F59E0B',
                         }}>
-                          <EmojiIcon emoji="" /> Récompense : {step.reward_label}
+                          Récompense : {step.reward_label}
                         </div>
                       )}
                     </div>

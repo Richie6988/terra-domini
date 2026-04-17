@@ -17,6 +17,7 @@ import { api } from '../../services/api'
 import { usePlayer } from '../../store'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { IconSVG } from '../shared/iconBank'
 
 const TIERS = [
   { min: 100,     max: 999,      apr: 8,  label: 'Tier 1',  color: '#10B981', badge: 'sprout' },
@@ -92,7 +93,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
       <div style={{ padding: '16px 18px 10px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: '#e2e8f0' }}><EmojiIcon emoji="" /> Staking HEX</div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#e2e8f0' }}><IconSVG id="hex_coin" size={10} /> Staking HEX</div>
             <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
               Soleil sur ton épargne — jusqu'à 25% APR
             </div>
@@ -154,7 +155,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
               display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>Solde disponible</span>
               <span style={{ fontSize: 14, fontWeight: 800, color: '#00884a', fontFamily: 'monospace' }}>
-                {balance.toFixed(2)} <EmojiIcon emoji="" />
+                {balance.toFixed(2)} 
               </span>
             </div>
 
@@ -242,7 +243,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                   <span style={{ fontSize: 14, fontWeight: 800, color: '#F59E0B', fontFamily: 'monospace' }}>
-                    +{stakingData.rewards_pending.toFixed(4)} <EmojiIcon emoji="" />
+                    +{stakingData.rewards_pending.toFixed(4)} 
                   </span>
                   <button
                     onClick={() => claimMut.mutate()}
@@ -263,7 +264,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
               borderRadius: 10 }}>
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 6 }}>Total en staking</div>
               <div style={{ fontSize: 22, fontWeight: 900, color: '#e2e8f0', fontFamily: 'monospace' }}>
-                {(stakingData?.total_staked || 0).toLocaleString()} <EmojiIcon emoji="" />
+                {(stakingData?.total_staked || 0).toLocaleString()} 
               </div>
               {getTier(stakingData?.total_staked || 0) && (
                 <div style={{ fontSize: 11, color: getTier(stakingData.total_staked)!.color, marginTop: 4 }}>

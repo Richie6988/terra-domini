@@ -282,7 +282,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 boxShadow: '0 4px 15px rgba(249,115,22,0.3)',
               }}
             >
-              <EmojiIcon emoji="" /> START SAFARI
+              START SAFARI
             </button>
           </motion.div>
         )}
@@ -326,7 +326,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               fontSize: 7, color: '#0099cc', textAlign: 'center',
               fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
             }}>
-              <EmojiIcon emoji="" /> DEEP SCAN UNLOCKS AT 50M RANGE
+              DEEP SCAN UNLOCKS AT 50M RANGE
             </div>
           </motion.div>
         )}
@@ -339,7 +339,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 fontSize: 9, fontWeight: 900, letterSpacing: 3, color: '#dc2626',
                 fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 12,
               }}>
-                <EmojiIcon emoji="" /> DEEP SCAN IN PROGRESS
+                DEEP SCAN IN PROGRESS
               </div>
 
               {/* Scan animation */}
@@ -441,7 +441,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                   boxShadow: `0 4px 20px ${RARITY_COLORS[hunt.rarity]}40`,
                 }}
               >
-                <EmojiIcon emoji="" /> COLLECT TOKEN
+                COLLECT TOKEN
               </button>
             </div>
           </motion.div>
@@ -455,7 +455,7 @@ export function DailyHuntPanel({ onClose }: Props) {
             animate={{ opacity: 1, y: 0 }}
           >
             <div style={{ textAlign: 'center', padding: '16px 0' }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}><EmojiIcon emoji="" /></div>
+              <div style={{ fontSize: 48, marginBottom: 12 }}></div>
               <div style={{
                 fontSize: 11, fontWeight: 900, letterSpacing: 3, color: '#00884a',
                 fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 16,
@@ -508,7 +508,7 @@ export function DailyHuntPanel({ onClose }: Props) {
           fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)',
           fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8,
         }}>
-          <EmojiIcon emoji="" /> DAILY CHALLENGES
+          DAILY CHALLENGES
         </div>
         {DAILY_CHALLENGES.map(ch => {
           const pct = Math.floor((ch.progress / ch.total) * 100)

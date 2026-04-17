@@ -33,7 +33,7 @@ export default function AdminPanel() {
       <div style={{ position:'fixed', inset:0, background:'#080810',
         display:'flex', alignItems:'center', justifyContent:'center',
         color:'#EF4444', fontSize:20, fontWeight:800 }}>
-        <EmojiIcon emoji="" /> Accès refusé — Admin uniquement
+        Accès refusé — Admin uniquement
       </div>
     )
   }
@@ -183,7 +183,7 @@ export default function AdminPanel() {
               <button onClick={() => qc.invalidateQueries({ queryKey:['gm-logs'] })} style={{
                 padding:'6px 14px', borderRadius:8, background:'rgba(0,136,74,0.1)',
                 border:'1px solid rgba(0,136,74,0.25)', color:'#0099cc', fontSize:12, cursor:'pointer',
-              }}><EmojiIcon emoji="" /> Rafraîchir</button>
+              }}>Rafraîchir</button>
             </div>
 
             {logsLoading ? (
@@ -208,7 +208,7 @@ export default function AdminPanel() {
                       background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
                     }}
                   >
-                    <span style={{ fontSize:16, flexShrink:0 }}>{log.icon || '<EmojiIcon emoji="" />'}</span>
+                    <span style={{ fontSize:16, flexShrink:0 }}>{log.icon || ''}</span>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{
                         fontSize:12, color:'#E5E7EB',

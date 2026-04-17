@@ -97,7 +97,7 @@ export function TaskCenter({ onClose }: Props) {
         letterSpacing: 2, marginBottom: 12,
         fontFamily: "'Orbitron', system-ui, sans-serif",
       }}>
-        DAILY RESET {resetIn} · STREAK: <EmojiIcon emoji="" /> {streak} DAYS {streakReward > 0 && `(+${streakReward}◆)`}
+        DAILY RESET {resetIn} · STREAK: {streak} DAYS {streakReward > 0 && `(+${streakReward}◆)`}
       </div>
 
       {/* Progress bar */}
@@ -171,7 +171,7 @@ export function TaskCenter({ onClose }: Props) {
           background: 'linear-gradient(135deg, rgba(34,197,94,0.06), rgba(34,197,94,0.02))',
           border: '1px solid rgba(34,197,94,0.2)',
         }}>
-          <div style={{ fontSize: 20, marginBottom: 4 }}><EmojiIcon emoji="" /></div>
+          <div style={{ fontSize: 20, marginBottom: 4 }}></div>
           <div style={{ fontSize: 9, fontWeight: 700, color: '#22c55e', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
             ALL MISSIONS COMPLETE — CLAIM YOUR REWARDS!
           </div>

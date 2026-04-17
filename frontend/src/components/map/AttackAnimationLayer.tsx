@@ -107,7 +107,7 @@ export function AttackAnimationLayer({ map }: Props) {
           animation: floatUp 1s ease-out 0.3s forwards;
           transform-origin: center;
           filter: drop-shadow(0 0 6px #EF4444);
-        "><EmojiIcon emoji="" /></div>`,
+        "></div>`,
         className: '',
         iconSize: [24, 24],
         iconAnchor: [12, 12],
@@ -126,7 +126,7 @@ export function AttackAnimationLayer({ map }: Props) {
       layer.addLayer(targetPoly)
 
       // Labels flottants sur la cible (dégâts simulés)
-      const floatingLabels = ['<EmojiIcon emoji="" /> ATTAQUE', '<EmojiIcon emoji="" /> IMPACT', '<EmojiIcon emoji="" /> SIÈGE']
+      const floatingLabels = ['ATTAQUE', 'IMPACT', 'SIÈGE']
       floatingLabels.forEach((label, i) => {
         const offset = (i - 1) * 0.001
         const floatIcon = L.divIcon({

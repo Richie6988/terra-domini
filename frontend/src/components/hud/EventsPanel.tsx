@@ -130,11 +130,10 @@ export function EventsPanel({ onClose }: Props) {
             {luckPotion > 0 && <span style={{ fontSize: 7, color: '#a855f7', fontWeight: 700 }}>+{luckPotion} POTION</span>}
           </div>
         </div>
-        <button onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }} style={{
-          padding: '6px 12px', borderRadius: 10, cursor: 'pointer',
-          background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.25)',
-          color: '#a855f7', fontSize: 7, fontWeight: 700, letterSpacing: 1, ...s,
-        }}><IconSVG id="flask" size={10} /> BUY POTION</button>
+        <button onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }}
+          className="btn-game btn-game-purple"
+          style={{ fontSize: 7, letterSpacing: 1 }}
+        ><IconSVG id="flask" size={10} /> BUY POTION</button>
       </div>
 
       {/* Tabs */}
@@ -214,15 +213,11 @@ export function EventsPanel({ onClose }: Props) {
                   <button
                     onClick={() => handleRegister(ev)}
                     disabled={ev.my_registered}
+                    className={ev.my_registered ? 'btn-game btn-game-glass' : 'btn-game btn-game-blue'}
                     style={{
-                      width: '100%', padding: '8px', borderRadius: 10, cursor: ev.my_registered ? 'default' : 'pointer',
-                      background: ev.my_registered ? 'rgba(0,136,74,0.06)' : `${color}10`,
-                      border: `1px solid ${ev.my_registered ? 'rgba(0,136,74,0.25)' : color + '30'}`,
-                      color: ev.my_registered ? '#00884a' : color,
-                      fontSize: 8, fontWeight: 700, letterSpacing: 1, ...s,
+                      width: '100%', fontSize: 9, letterSpacing: 1,
                       opacity: ev.my_registered ? 0.7 : 1,
                     }}
-                    className={ev.my_registered ? 'btn-game btn-game-glass' : 'btn-game btn-game-blue'}
                   >
                     {ev.my_registered ? 'REGISTERED' : `REGISTER — ${ev.registration_cost} HEX`}
                   </button>

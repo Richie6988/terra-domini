@@ -212,7 +212,7 @@ export function MetaDashboard({ onClose }: Props) {
                         </div>
                         <div style={{ textAlign:'right', flexShrink:0 }}>
                           <div style={{ fontSize:11, fontWeight:700, color:'#F59E0B', fontFamily:'monospace' }}>
-                            {(p.total_tdc || 0).toFixed(0)} <EmojiIcon emoji="" />
+                            {(p.total_tdc || 0).toFixed(0)} 
                           </div>
                         </div>
                       </div>
@@ -243,7 +243,7 @@ export function MetaDashboard({ onClose }: Props) {
                         </div>
                       </div>
                       <div style={{ fontSize:11, color:'#EF4444', fontFamily:'monospace', flexShrink:0 }}>
-                        <EmojiIcon emoji="" /> {z.battle_count}
+                        {z.battle_count}
                       </div>
                     </div>
                   ))}

@@ -158,7 +158,7 @@ function OwnOverview({ k }: { k: KingdomData }) {
             background: shields > 0 ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.03)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 22, border: `2px solid ${shields > 0 ? '#3b82f6' : '#ccc'}30`,
-          }}><EmojiIcon emoji="" /></div>
+          }}></div>
         </div>
       </div>
     </div>
@@ -175,7 +175,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
           border: `1px solid ${t.is_capital ? 'rgba(204,136,0,0.2)' : 'rgba(255,255,255,0.05)'}`,
         }}>
           {/* Capital badge */}
-          {t.is_capital && <span style={{ fontSize: 14 }}><EmojiIcon emoji="" /></span>}
+          {t.is_capital && <span style={{ fontSize: 14 }}></span>}
 
           {/* Name + rarity */}
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -216,7 +216,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
           </div>
 
           {/* Shield */}
-          {t.has_shield && <span style={{ fontSize: 12, opacity: 0.6 }}><EmojiIcon emoji="" /></span>}
+          {t.has_shield && <span style={{ fontSize: 12, opacity: 0.6 }}></span>}
         </div>
       ))}
     </div>
@@ -325,7 +325,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
         <div style={{ ...label, marginBottom: 8 }}>INTELLIGENCE (LEVEL {spyLevel})</div>
         {spyLevel === 0 && (
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', textAlign: 'center', padding: 16 }}>
-            <EmojiIcon emoji="" /> Send a spy mission to reveal enemy resources, army composition, and weaknesses.
+            Send a spy mission to reveal enemy resources, army composition, and weaknesses.
           </div>
         )}
         {spyLevel >= 1 && (
@@ -350,7 +350,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
           color: '#dc2626', fontSize: 10, fontWeight: 900, letterSpacing: 1,
           fontFamily: "'Orbitron', sans-serif",
         }}>
-          <EmojiIcon emoji="" /> ATTACK
+          ATTACK
         </button>
         <button onClick={() => { setSpyLevel(s => Math.min(3, s + 1)); toast.success('Spy mission sent!') }} style={{
           padding: '14px 12px', borderRadius: 12, cursor: 'pointer',
@@ -368,7 +368,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
           color: '#22c55e', fontSize: 10, fontWeight: 900, letterSpacing: 1,
           fontFamily: "'Orbitron', sans-serif",
         }}>
-          <EmojiIcon emoji="" /> DIPLOMACY
+          DIPLOMACY
         </button>
         <button onClick={() => toast.success('Buy offer sent!')} style={{
           padding: '14px 12px', borderRadius: 12, cursor: 'pointer',
@@ -377,7 +377,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
           color: '#cc8800', fontSize: 10, fontWeight: 900, letterSpacing: 1,
           fontFamily: "'Orbitron', sans-serif",
         }}>
-          <EmojiIcon emoji="" /> BUY OFFER
+          BUY OFFER
         </button>
       </div>
 

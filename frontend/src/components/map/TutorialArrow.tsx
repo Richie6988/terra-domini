@@ -119,7 +119,7 @@ export function TutorialArrow({ map }: Props) {
             white-space: nowrap;
             font-family: system-ui;
             box-shadow: 0 0 12px rgba(0,255,135,0.4);
-          "><EmojiIcon emoji="" /> GRATUIT — Revendique ici !</div>
+          ">GRATUIT — Revendique ici !</div>
           <div style="position: relative; width: 32px; height: 32px;">
             <div class="tut-ring"></div>
             <div class="tut-ring tut-ring2"></div>

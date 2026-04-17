@@ -21,6 +21,7 @@ import { CrystalIcon } from '../shared/CrystalIcon'
 import { TokenHexPreview } from '../shared/TokenHexPreview'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { IconSVG } from '../shared/iconBank'
 
 const RARITY_C: Record<string, string> = {
   common: '#9CA3AF', uncommon: '#10B981', rare: '#3B82F6',
@@ -42,7 +43,7 @@ function RarityBadge({ rarity, shiny }: { rarity: string; shiny?: boolean }) {
 function PriceTag({ price }: { price: number }) {
   return (
     <span style={{ fontSize: 13, fontWeight: 800, color: '#F59E0B', fontFamily: 'monospace' }}>
-      {price.toLocaleString()} <EmojiIcon emoji="" />
+      {price.toLocaleString()} 
     </span>
   )
 }
@@ -162,7 +163,7 @@ function ExplorerTab() {
           background: shiny ? 'rgba(252,211,77,0.15)' : 'rgba(255,255,255,0.04)',
           border: `1px solid ${shiny ? 'rgba(252,211,77,0.5)' : 'rgba(255,255,255,0.08)'}`,
           color: shiny ? '#FCD34D' : '#6B7280', fontWeight: shiny ? 700 : 400,
-        }}><EmojiIcon emoji="" /> Shiny</button>
+        }}><IconSVG id="sparkles" size={10} /> Shiny</button>
 
         <select value={sort} onChange={e => setSort(e.target.value)} style={{
           marginLeft: 'auto', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
@@ -334,7 +335,7 @@ function MySalesTab() {
           border: '1px solid rgba(16,185,129,0.2)', marginBottom: 14 }}>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>Total gagné (après royalties)</div>
           <div style={{ fontSize: 18, fontWeight: 800, color: '#10B981', fontFamily: 'monospace' }}>
-            {parseFloat(data.total_earned).toFixed(0)} <EmojiIcon emoji="" />
+            {parseFloat(data.total_earned).toFixed(0)} 
           </div>
         </div>
       )}
@@ -454,7 +455,7 @@ export function MarketplacePanel({ onClose }: { onClose: () => void }) {
             cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
           }}
         >
-          <EmojiIcon emoji="" /> BOOSTERS → SHOP
+          <IconSVG id="cart" size={10} /> BOOSTERS → SHOP
         </button>
       </div>
     </GlassPanel>
