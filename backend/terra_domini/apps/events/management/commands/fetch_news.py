@@ -180,16 +180,29 @@ def compute_cost(rarity: str) -> int:
 
 
 class Command(BaseCommand):
-    help = 'Fetch live news and create geolocalized game events'
+    help = 'Fetch live news → geolocalized game tokens. Run daily via cron.'
 
     def add_arguments(self, parser):
         parser.add_argument('--api-key', type=str, help='NewsAPI.org API key (or set NEWSAPI_KEY in settings)')
-        parser.add_argument('--count', type=int, default=15, help='Number of articles to fetch')
+        parser.add_argument('--count', type=int, default=15, help='Number of articles to fetch per country')
         parser.add_argument('--demo', action='store_true', help='Create demo events without API key')
-        parser.add_argument('--country', type=str, default='', help='Country code for headlines (us, fr, gb...)')
+        parser.add_argument('--country', type=str, default='', help='Country code (us, fr, gb...)')
+        parser.add_argument('--global', action='store_true', dest='global_mode', help='Fetch from multiple countries for global coverage')
+        parser.add_argument('--auto-resolve', action='store_true', help='Auto-resolve ended events and distribute rewards')
+        parser.add_argument('--daily', action='store_true', help='Full daily run: fetch global news + auto-resolve ended events')
 
     def handle(self, *args, **options):
-        from terra_domini.apps.events.news_models import NewsEvent
+        from terra_domini.apps.events.news_models import NewsEvent, NewsEventRegistration
+        import random as rng
+
+        # Daily mode = global fetch + auto-resolve
+        if options['daily']:
+            options['global_mode'] = True
+            options['auto_resolve'] = True
+
+        # Auto-resolve expired events
+        if options.get('auto_resolve'):
+            self._auto_resolve()
 
         if options['demo']:
             self._create_demo_events()
@@ -204,22 +217,75 @@ class Command(BaseCommand):
             ))
             return
 
-        import urllib.request
-        count = options['count']
-        country = options['country'] or 'us'
-        url = f'https://newsapi.org/v2/top-headlines?country={country}&pageSize={count}&apiKey={api_key}'
+        # Global mode: fetch from 5 diverse countries
+        countries = ['us', 'gb', 'fr', 'de', 'au'] if options.get('global_mode') else [options['country'] or 'us']
+        total_created = 0
 
+        for country_code in countries:
+            created = self._fetch_country(api_key, country_code, options['count'])
+            total_created += created
+
+        self.stdout.write(self.style.SUCCESS(f'Total: {total_created} new events created'))
+
+    def _auto_resolve(self):
+        """Resolve ended events: distribute rewards to registered players."""
+        from terra_domini.apps.events.news_models import NewsEvent, NewsEventRegistration
+        import random as rng
+        now = timezone.now()
+
+        ended = NewsEvent.objects.filter(status='live', ends_at__lt=now)
+        resolved = 0
+        for event in ended:
+            regs = list(event.registrations.filter(result='pending'))
+            if not regs:
+                event.status = 'expired'
+                event.save(update_fields=['status'])
+                continue
+
+            win_chance = {
+                'common': 0.90, 'uncommon': 0.80, 'rare': 0.60,
+                'epic': 0.40, 'legendary': 0.25, 'mythic': 0.10,
+            }.get(event.rarity, 0.50)
+
+            serial = 1
+            for reg in regs:
+                luck = rng.randint(0, 15)
+                if rng.random() < min(0.95, win_chance + luck * 0.01):
+                    reg.result = 'won'
+                    reg.hex_earned = event.hex_reward
+                    reg.token_serial = serial
+                    reg.luck_bonus = luck
+                    serial += 1
+                    player = reg.player
+                    player.tdc_in_game = float(player.tdc_in_game or 0) + event.hex_reward
+                    player.save(update_fields=['tdc_in_game'])
+                else:
+                    reg.result = 'lost'
+                    reg.luck_bonus = luck
+                reg.save()
+
+            event.status = 'ended'
+            event.save(update_fields=['status'])
+            resolved += 1
+
+        self.stdout.write(self.style.SUCCESS(f'Auto-resolved {resolved} events'))
+
+    def _fetch_country(self, api_key, country_code, count):
+        from terra_domini.apps.events.news_models import NewsEvent
+        import urllib.request
+
+        url = f'https://newsapi.org/v2/top-headlines?country={country_code}&pageSize={count}&apiKey={api_key}'
         try:
             req = urllib.request.Request(url, headers={'User-Agent': 'HEXOD/1.0'})
             with urllib.request.urlopen(req, timeout=15) as resp:
                 data = json.loads(resp.read())
         except Exception as e:
-            self.stderr.write(self.style.ERROR(f'Failed to fetch news: {e}'))
-            return
+            self.stderr.write(self.style.ERROR(f'Failed to fetch news for {country_code}: {e}'))
+            return 0
 
         if data.get('status') != 'ok':
             self.stderr.write(self.style.ERROR(f"API error: {data.get('message', 'Unknown')}"))
-            return
+            return 0
 
         articles = data.get('articles', [])
         created = 0
@@ -265,7 +331,7 @@ class Command(BaseCommand):
                 location_name=loc_name.upper(),
                 latitude=lat,
                 longitude=lon,
-                country_code=country.upper(),
+                country_code=country_code.upper(),
                 hexod_category=category,
                 rarity=rarity,
                 status='live',
@@ -277,7 +343,8 @@ class Command(BaseCommand):
             )
             created += 1
 
-        self.stdout.write(self.style.SUCCESS(f'Created {created} events, skipped {skipped} dupes'))
+        self.stdout.write(f'  [{country_code.upper()}] Created {created}, skipped {skipped}')
+        return created
 
     def _create_demo_events(self):
         """Create 15 demo events without an API key."""

@@ -206,7 +206,7 @@ export function CodexPanel({ onClose }: Props) {
       </div>
 
       <AnimatePresence mode="wait">
-        {/* ═══ OVERVIEW TAB ═══ */}
+        {/* ═══ OVERVIEW TAB — shows ALL 57 categories ═══ */}
         {tab === 'overview' && (
           <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             {/* Global progress */}
@@ -214,39 +214,63 @@ export function CodexPanel({ onClose }: Props) {
               <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, marginBottom: 4, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                 TOTAL COLLECTION PROGRESS
               </div>
-              <div style={{ fontSize: 28, fontFamily: "'Share Tech Mono', monospace", color: '#7950f2', fontWeight: 700 }}>
+              <div style={{ fontSize: 28, fontFamily: "'Share Tech Mono', monospace", color: '#F59E0B', fontWeight: 700 }}>
                 {globalOwned} <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.25)' }}>/ {globalTotal}</span>
               </div>
               <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.05)', maxWidth: 280, margin: '8px auto', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${globalPct}%`, borderRadius: 3, background: 'linear-gradient(90deg, #7950f2, #0099cc)' }} />
+                <div style={{ height: '100%', width: `${globalPct}%`, borderRadius: 3, background: 'linear-gradient(90deg, #F59E0B, #0CC5FF)' }} />
               </div>
-              <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)' }}>{globalPct}% Complete · {shinyCount} Shiny Cards</div>
+              <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)' }}>{globalPct}% COMPLETE · {shinyCount} SHINY</div>
             </div>
 
-            {/* Category breakdown grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
-              {CODEX_TABS.filter(t => t.color).map(ct => {
-                const st = tabStats[ct.id] || { owned: 0, total: 0 }
-                const pct = st.total > 0 ? Math.floor((st.owned / st.total) * 100) : 0
-                return (
-                  <button key={ct.id} onClick={() => setTab(ct.id)} style={{
-                    padding: '10px', borderRadius: 10, cursor: 'pointer', textAlign: 'center',
-                    background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
-                  }}>
-                    <div style={{ fontSize: 18, marginBottom: 4 }}><IconSVG id={ct.iconId} size={24} /></div>
-                    <div style={{ fontSize: 8, fontWeight: 900, color: ct.color, letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-                      {ct.label.toUpperCase()}
-                    </div>
-                    <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2, fontFamily: "'Share Tech Mono', monospace" }}>
-                      {st.owned}/{st.total}
-                    </div>
-                    <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.05)', marginTop: 4, overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pct}%`, borderRadius: 2, background: ct.color }} />
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
+            {/* ALL 57 categories — grouped by category family */}
+            {Object.entries(CATEGORIES).map(([groupKey, group]) => (
+              <div key={groupKey} style={{ marginBottom: 16 }}>
+                <div style={{
+                  fontSize: 8, fontWeight: 900, letterSpacing: 2, color: group.color,
+                  fontFamily: "'Orbitron', system-ui, sans-serif",
+                  marginBottom: 6, paddingBottom: 4,
+                  borderBottom: `1px solid ${group.color}30`,
+                  display: 'flex', alignItems: 'center', gap: 6,
+                }}>
+                  <IconSVG id={group.icons[0]?.id || 'mystery'} size={14} />
+                  {group.name.toUpperCase()} ({group.icons.length})
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
+                  {group.icons.map(icon => {
+                    const token = allTokens.find(t => t.id === icon.id)
+                    const owned = token?.owned || 0
+                    const total = token?.total || 1
+                    return (
+                      <button key={icon.id} onClick={() => { setSelectedToken(icon.id) }} style={{
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                        padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
+                        background: owned > 0 ? `${group.color}10` : 'rgba(255,255,255,0.02)',
+                        border: owned > 0 ? `1px solid ${group.color}30` : '1px solid rgba(255,255,255,0.05)',
+                        opacity: owned > 0 ? 1 : 0.4,
+                        filter: owned > 0 ? 'none' : 'grayscale(0.7)',
+                        transition: 'all 0.2s',
+                      }}>
+                        <div style={{
+                          width: 36, height: 36, borderRadius: '50%',
+                          background: `${icon.cat_color || group.color}20`,
+                          border: `2px solid ${icon.cat_color || group.color}40`,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        }}>
+                          <IconSVG id={icon.id} size={20} />
+                        </div>
+                        <div style={{ fontSize: 6, fontWeight: 700, color: '#e2e8f0', letterSpacing: 0.5, fontFamily: "'Orbitron', sans-serif", textAlign: 'center' }}>
+                          {icon.name.toUpperCase().slice(0, 10)}
+                        </div>
+                        <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', fontFamily: "'Share Tech Mono', monospace" }}>
+                          {owned}/{total}
+                        </div>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
           </motion.div>
         )}
 

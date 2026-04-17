@@ -83,6 +83,7 @@ function formatCountdown(endsAt: string): string {
 }
 
 export function AuctionPanel({ onClose }: Props) {
+  const [auctions, setAuctions] = useState<Auction[]>(MOCK_AUCTIONS)
   const [selected, setSelected] = useState<Auction | null>(null)
   const [bidAmount, setBidAmount] = useState('')
   const [chatMsg, setChatMsg] = useState('')
@@ -151,7 +152,7 @@ export function AuctionPanel({ onClose }: Props) {
   useEffect(() => {
     const update = () => {
       const cd: Record<string, string> = {}
-      for (const a of MOCK_AUCTIONS) cd[a.id] = formatCountdown(a.endsAt)
+      for (const a of auctions) cd[a.id] = formatCountdown(a.endsAt)
       setCountdowns(cd)
     }
     update()
@@ -165,14 +166,14 @@ export function AuctionPanel({ onClose }: Props) {
       toast.error(`Bid must exceed ${selected?.currentBid.toLocaleString()} HEX`)
       return
     }
-    // Send via WebSocket if connected, otherwise local mock
-    if (wsRef.current?.readyState === WebSocket.OPEN) {
-      wsRef.current.send(JSON.stringify({ type: 'bid', amount: amt }))
-    } else {
-      setChat(prev => [{
-        user: 'YOU', text: `BID: ${amt.toLocaleString()} HEX`, time: 'now', isBid: true,
-      }, ...prev])
-    }
+    // Update auction state locally (mock — real would go through WebSocket/API)
+    setAuctions(prev => prev.map(a => a.id === selected.id ? {
+      ...a, currentBid: amt, totalBids: a.bidCount + 1,
+    } : a))
+    setSelected(prev => prev ? { ...prev, currentBid: amt, totalBids: prev.bidCount + 1 } : null)
+    setChat(prev => [{
+      user: 'YOU', text: `BID: ${amt.toLocaleString()} HEX`, time: 'now', isBid: true,
+    }, ...prev])
     toast.success(`Bid placed: ${amt.toLocaleString()} HEX`)
     setBidAmount('')
   }, [bidAmount, selected])
@@ -204,11 +205,11 @@ export function AuctionPanel({ onClose }: Props) {
             fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)',
             fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 10,
           }}>
-            {MOCK_AUCTIONS.length} ACTIVE AUCTIONS · RARE++ EDITION UNIQUE
+            {auctions.length} ACTIVE AUCTIONS · RARE++ EDITION UNIQUE
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {MOCK_AUCTIONS.map(a => (
+            {auctions.map(a => (
               <motion.button
                 key={a.id}
                 whileHover={{ scale: 1.01 }}
