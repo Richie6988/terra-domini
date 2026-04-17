@@ -101,7 +101,7 @@ export default function RegisterPage() {
             <div style={{ marginTop: 12, padding: '8px 14px', background: 'rgba(0,153,204,0.08)',
               border: '1px solid rgba(0,153,204,0.2)', borderRadius: 20, fontSize: 10, color: '#0099cc',
               fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>
-              <EmojiIcon emoji="🎁" /> INVITATION ACCEPTED — <strong>+50 ◆</strong> BONUS ON REGISTRATION
+              <EmojiIcon emoji="" /> INVITATION ACCEPTED — <strong>+50 ◆</strong> BONUS ON REGISTRATION
             </div>
           )}
         </div>
@@ -129,8 +129,8 @@ export default function RegisterPage() {
           <div>
             <label style={labelStyle}>
               PASSWORD (MIN 10 CHARS)
-              {pwTooShort && <span style={{ color: '#f59e0b', marginLeft: 8, fontSize: 9, fontFamily: 'system-ui' }}>⚠ too short</span>}
-              {form.password.length >= 10 && <span style={{ color: '#22c55e', marginLeft: 8, fontSize: 9, fontFamily: 'system-ui' }}>✓</span>}
+              {pwTooShort && <span style={{ color: '#f59e0b', marginLeft: 8, fontSize: 9, fontFamily: 'system-ui' }}> too short</span>}
+              {form.password.length >= 10 && <span style={{ color: '#22c55e', marginLeft: 8, fontSize: 9, fontFamily: 'system-ui' }}></span>}
             </label>
             <div style={{ position: 'relative' }}>
               <input
@@ -147,7 +147,7 @@ export default function RegisterPage() {
                 background: 'none', border: 'none', cursor: 'pointer', fontSize: 14,
                 color: 'rgba(26,42,58,0.4)', padding: 4,
               }}>
-                {showPw ? '🙈' : '👁'}
+                {showPw ? '◉' : '◎'}
               </button>
             </div>
           </div>
@@ -156,8 +156,8 @@ export default function RegisterPage() {
           <div>
             <label style={labelStyle}>
               CONFIRM PASSWORD
-              {pwMatch && <span style={{ color: '#22c55e', marginLeft: 8, fontSize: 9, fontFamily: 'system-ui' }}>✓ match</span>}
-              {pwMismatch && <span style={{ color: '#dc2626', marginLeft: 8, fontSize: 9, fontFamily: 'system-ui' }}><EmojiIcon emoji="✗" /> mismatch</span>}
+              {pwMatch && <span style={{ color: '#22c55e', marginLeft: 8, fontSize: 9, fontFamily: 'system-ui' }}> match</span>}
+              {pwMismatch && <span style={{ color: '#dc2626', marginLeft: 8, fontSize: 9, fontFamily: 'system-ui' }}><EmojiIcon emoji="" /> mismatch</span>}
             </label>
             <div style={{ position: 'relative' }}>
               <input
@@ -177,7 +177,7 @@ export default function RegisterPage() {
                 background: 'none', border: 'none', cursor: 'pointer', fontSize: 14,
                 color: 'rgba(26,42,58,0.4)', padding: 4,
               }}>
-                {showConfirm ? '🙈' : '👁'}
+                {showConfirm ? '◉' : '◎'}
               </button>
             </div>
           </div>
@@ -185,7 +185,7 @@ export default function RegisterPage() {
             border: '1px solid rgba(0,153,204,0.12)', borderRadius: 8,
             fontSize: 10, color: 'rgba(26,42,58,0.6)', lineHeight: 1.8,
             fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>
-            <EmojiIcon emoji="🛡" /> BEGINNER PROTECTION 7 DAYS — NO ATTACKS WHILE YOU LEARN
+            <EmojiIcon emoji="" /> BEGINNER PROTECTION 7 DAYS — NO ATTACKS WHILE YOU LEARN
             <br />
             ◆ FIRST TERRITORY → 100 HEX BONUS
           </div>

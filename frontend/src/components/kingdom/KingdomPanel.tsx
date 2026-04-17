@@ -51,7 +51,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           margin: '0 auto 8px', fontSize: 22, boxShadow: `0 0 20px ${kingdom.color}30`,
         }}>
-          <EmojiIcon emoji="🏰" />
+          <EmojiIcon emoji="" />
         </div>
         <div style={{
           fontSize: 12, fontWeight: 900, color: '#e2e8f0', letterSpacing: 3,
@@ -133,8 +133,8 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
         fontSize: 8, color: kingdom.shieldActive ? '#00884a' : 'rgba(255,255,255,0.4)',
         fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
       }}>
-        {kingdom.shieldActive ? '🛡 SHIELD ACTIVE' : '⚠ SHIELD INACTIVE'}
-        {kingdom.warZone && <span style={{ color: '#dc2626', marginLeft: 'auto' }}><EmojiIcon emoji="🔥" /> WAR ZONE</span>}
+        {kingdom.shieldActive ? 'SHIELD ACTIVE' : 'SHIELD INACTIVE'}
+        {kingdom.warZone && <span style={{ color: '#dc2626', marginLeft: 'auto' }}><EmojiIcon emoji="" /> WAR ZONE</span>}
       </div>
 
       {/* Process Day — generate resources + HEX */}
@@ -325,17 +325,17 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
 
       {[
         {
-          icon: '⚔️', name: 'ASSAULT', color: '#dc2626',
+          icon: 'swords', name: 'ASSAULT', color: '#dc2626',
           desc: 'Military attack. Costs resources + troops. Lower cost if adjacent. Success not guaranteed.',
           stats: ['Cost: Oil + Steel', 'Duration: 5-15min', 'Success: 45-70%'],
         },
         {
-          icon: '💰', name: 'PURCHASE', color: '#d97706',
+          icon: 'money_bag', name: 'PURCHASE', color: '#d97706',
           desc: 'Buy territory with HEX. Instant for adjacent. Requires influence for rare POIs.',
           stats: ['Cost: 500-10000 ◆', 'Duration: Instant-5min', 'Success: 100%'],
         },
         {
-          icon: '🕵️', name: 'INFILTRATION', color: '#059669',
+          icon: 'spy', name: 'INFILTRATION', color: '#059669',
           desc: 'Covert takeover via spies & data. Requires Data + Components. Medium cost, medium time.',
           stats: ['Cost: Data + Components', 'Duration: 10-30min', 'Success: 60%'],
         },
@@ -380,7 +380,7 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
         fontSize: 8, color: '#0099cc', lineHeight: 1.6,
         fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
       }}>
-        <EmojiIcon emoji="💡" /> ADJACENT TERRITORIES COST 3.5× LESS AND SUCCEED MORE OFTEN
+        <EmojiIcon emoji="" /> ADJACENT TERRITORIES COST 3.5× LESS AND SUCCEED MORE OFTEN
       </div>
 
       {/* Influence requirement */}
@@ -391,7 +391,7 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
         fontSize: 8, color: '#cc8800', lineHeight: 1.6,
         fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
       }}>
-        <EmojiIcon emoji="🏛" /> RARE LANDMARKS REQUIRE HIGH INFLUENCE LEVEL TO PURCHASE OR INFILTRATE
+        <EmojiIcon emoji="" /> RARE LANDMARKS REQUIRE HIGH INFLUENCE LEVEL TO PURCHASE OR INFILTRATE
       </div>
     </div>
   )
@@ -452,7 +452,7 @@ export function KingdomPanel({ onClose }: Props) {
                 whiteSpace: 'nowrap',
               }}
             >
-              <EmojiIcon emoji="🏰" /> {k.name.toUpperCase()}
+              <EmojiIcon emoji="" /> {k.name.toUpperCase()}
             </button>
           ))}
         </div>
@@ -525,7 +525,7 @@ export function KingdomPanel({ onClose }: Props) {
             cursor: 'pointer', fontFamily: "'Orbitron', system-ui, sans-serif",
           }}
         >
-          <EmojiIcon emoji="🛒" /> KINGDOM BOOSTS → SHOP
+          <EmojiIcon emoji="" /> KINGDOM BOOSTS → SHOP
         </button>
         <button
           onClick={() => { onClose(); setTimeout(() => setActivePanel('trade'), 100) }}
@@ -536,7 +536,7 @@ export function KingdomPanel({ onClose }: Props) {
             cursor: 'pointer', fontFamily: "'Orbitron', system-ui, sans-serif",
           }}
         >
-          <EmojiIcon emoji="📊" /> TRADE RESOURCES →
+          <EmojiIcon emoji="" /> TRADE RESOURCES →
         </button>
       </div>
     </GlassPanel>

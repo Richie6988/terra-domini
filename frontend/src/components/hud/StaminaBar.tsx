@@ -69,7 +69,7 @@ function Slot({ state, progress, delay }: { state: 'full' | 'regen' | 'empty'; p
         )}
         {/* Sword icon for full slots */}
         {state === 'full' && (
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}><EmojiIcon emoji="⚔" /></div>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}><EmojiIcon emoji="" /></div>
         )}
       </div>
     </motion.div>
@@ -154,7 +154,7 @@ export function StaminaBar() {
               borderRadius: 12, padding: '12px 14px', minWidth: 220,
               boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
             }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#EF4444', marginBottom: 8 }}><EmojiIcon emoji="⚔" /> Action Slots</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: '#EF4444', marginBottom: 8 }}><EmojiIcon emoji="" /> Action Slots</div>
 
             {/* Slots breakdown */}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -192,7 +192,7 @@ export function StaminaBar() {
               </div>
               {stamina.attack_power_bonus > 0 && (
                 <div style={{ fontSize: 10, color: '#FFB800' }}>
-                  <EmojiIcon emoji="⚔" /> Attack power +{stamina.attack_power_bonus}%
+                  <EmojiIcon emoji="" /> Attack power +{stamina.attack_power_bonus}%
                 </div>
               )}
             </div>
@@ -200,9 +200,9 @@ export function StaminaBar() {
             {/* How to get more */}
             <div style={{ marginTop: 8, padding: '6px 10px', background: 'rgba(239,68,68,0.06)', borderRadius: 8 }}>
               <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6 }}>
-                <EmojiIcon emoji="🎯" /> Win clicker daily → faster regen<br />
-                <EmojiIcon emoji="🏆" /> Control Towers → extra slots<br />
-                <EmojiIcon emoji="💎" /> HEX staking → attack power bonus
+                <EmojiIcon emoji="" /> Win clicker daily → faster regen<br />
+                <EmojiIcon emoji="" /> Control Towers → extra slots<br />
+                <EmojiIcon emoji="" /> HEX staking → attack power bonus
               </div>
             </div>
           </motion.div>

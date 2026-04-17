@@ -113,7 +113,7 @@ export function RadarWidget() {
                 fill={blip.color} opacity={nearSweep ? 1 : 0.6}
                 style={{ transition: 'opacity 0.3s', cursor: 'pointer' }}
               >
-                <title>{blip.isSafari ? `<EmojiIcon emoji="🎯" /> SAFARI TARGET — ${Math.floor(blip.distance * 5000)}m` : `${blip.category || 'Signal'} — ${Math.floor(blip.distance * 5000)}m`}</title>
+                <title>{blip.isSafari ? `<EmojiIcon emoji="" /> SAFARI TARGET — ${Math.floor(blip.distance * 5000)}m` : `${blip.category || 'Signal'} — ${Math.floor(blip.distance * 5000)}m`}</title>
               </circle>
               {blip.isSafari && (
                 <>
@@ -126,7 +126,7 @@ export function RadarWidget() {
                     <text x={bx} y={by - blipR - 6} textAnchor="middle"
                       fontSize="8" fontWeight="900" fill="#fbbf24"
                       fontFamily="'Orbitron', system-ui, sans-serif">
-                      <EmojiIcon emoji="🎯" /> SAFARI
+                      <EmojiIcon emoji="" /> SAFARI
                     </text>
                   )}
                 </>
@@ -161,7 +161,7 @@ export function RadarWidget() {
           textAlign: 'center', fontSize: 6, fontWeight: 700, letterSpacing: 2,
           color: safariHeatColor, fontFamily: "'Orbitron', system-ui, sans-serif", marginTop: -2,
         }}>
-          {safariBlip ? `🎯 ${safariHeat} · ${safariDist}m` : 'RADAR'}
+          {safariBlip ? `${safariHeat} · ${safariDist}m` : 'RADAR'}
         </div>
       </div>
 
@@ -209,7 +209,7 @@ export function RadarWidget() {
                   border: `2px solid ${safariHeatColor}40`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: 22,
-                }}><EmojiIcon emoji="🎯" /></div>
+                }}><EmojiIcon emoji="" /></div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 9, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2 }}>
                     ACTIVE SAFARI

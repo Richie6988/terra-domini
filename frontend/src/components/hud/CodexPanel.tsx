@@ -3,8 +3,8 @@
  * Ported from main_prototype.html modal-codex (9 tabs).
  * This IS the collection panel — filters are inside, not separate.
  * 
- * Tabs: Overview | ⭐ Favorites | 🔥 Disasters | 🏛 Places | 🌲 Nature |
- *       ⚔ Conflict | 🎭 Culture | 🔬 Science | 🐉 Fantastic
+ * Tabs: Overview | ⭐ Favorites |  Disasters |  Places |  Nature |
+ *        Conflict |  Culture |  Science |  Fantastic
  * 
  * Each token: 3D view + marketplace + rarity badge
  */
@@ -267,7 +267,7 @@ export function CodexPanel({ onClose }: Props) {
                 }}>
                   <IconSVG id={t.id} size={32} />
                   <div style={{ fontSize: 5, fontWeight: 700, color: t.catColor, letterSpacing: 0.5, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-                    ★ #{i + 1}
+                     #{i + 1}
                   </div>
                 </button>
               ))}

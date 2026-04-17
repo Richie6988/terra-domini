@@ -17,11 +17,11 @@ import { EmojiIcon } from '../shared/emojiIcons'
 const toNum = (v: unknown) => parseFloat(String(v ?? 0)) || 0
 
 const RESOURCES = [
-  { id: 'tdc',       label: 'HEX Coins',    emoji: '🪙', color: '#cc8800' },
-  { id: 'food',      label: 'Food',         emoji: '🌾', color: '#10B981' },
-  { id: 'materials', label: 'Materials',    emoji: '⚙️',  color: 'rgba(255,255,255,0.35)' },
-  { id: 'energy',    label: 'Energy',       emoji: '⚡', color: '#F59E0B' },
-  { id: 'intel',     label: 'Intel',        emoji: '🕵️', color: '#8B5CF6' },
+  { id: 'tdc',       label: 'HEX Coins',    emoji: 'hex_coin', color: '#cc8800' },
+  { id: 'food',      label: 'Food',         emoji: 'wheat', color: '#10B981' },
+  { id: 'materials', label: 'Materials',    emoji: 'gear',  color: 'rgba(255,255,255,0.35)' },
+  { id: 'energy',    label: 'Energy',       emoji: 'lightning', color: '#F59E0B' },
+  { id: 'intel',     label: 'Intel',        emoji: 'spy', color: '#8B5CF6' },
 ]
 
 // Market rates (simplified — in prod these fluctuate based on supply/demand)
@@ -253,7 +253,7 @@ function PriceBoard() {
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>per unit</div>
             </div>
             <div style={{ textAlign: 'right' }}>
-              <div style={{ fontSize: 16, fontWeight: 700, color: '#cc8800', fontFamily: 'monospace' }}>{rate.toFixed(1)} <EmojiIcon emoji="🪙" /></div>
+              <div style={{ fontSize: 16, fontWeight: 700, color: '#cc8800', fontFamily: 'monospace' }}>{rate.toFixed(1)} <EmojiIcon emoji="" /></div>
               <div style={{ fontSize: 10, color: up ? '#10B981' : '#EF4444' }}>
                 {up ? '▲' : '▼'} {Math.abs(change).toFixed(1)}%
               </div>
@@ -262,7 +262,7 @@ function PriceBoard() {
         )
       })}
       <div style={{ marginTop: 16, padding: '10px 14px', background: 'rgba(255,59,48,0.06)', border: '1px solid rgba(255,59,48,0.15)', borderRadius: 10, fontSize: 11, color: '#FCA5A5' }}>
-        <EmojiIcon emoji="🔥" /> Hormuz Crisis: Energy +40% · Intel +25% · Affected region: Gulf
+        <EmojiIcon emoji="" /> Hormuz Crisis: Energy +40% · Intel +25% · Affected region: Gulf
       </div>
     </div>
   )
@@ -317,9 +317,9 @@ export function TradePanel({ onClose }: { onClose: () => void }) {
       />
 
       <div>
-        {tab === 'market'  && <MarketTab />}
+        {tab === 'market'&& <MarketTab />}
         {tab === 'players' && <PlayerTradeTab />}
-        {tab === 'prices'  && <PriceBoard />}
+        {tab === 'prices'&& <PriceBoard />}
       </div>
 
       {/* Cross-panel CTAs */}
@@ -333,7 +333,7 @@ export function TradePanel({ onClose }: { onClose: () => void }) {
             cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
           }}
         >
-          <EmojiIcon emoji="🏪" /> NFT MARKETPLACE →
+          <EmojiIcon emoji="" /> NFT MARKETPLACE →
         </button>
         <button
           onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }}
@@ -344,7 +344,7 @@ export function TradePanel({ onClose }: { onClose: () => void }) {
             cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
           }}
         >
-          <EmojiIcon emoji="💎" /> WALLET →
+          <EmojiIcon emoji="" /> WALLET →
         </button>
       </div>
     </GlassPanel>

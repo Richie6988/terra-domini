@@ -19,7 +19,7 @@ export interface FavoritePin {
   zoom: number
 }
 
-const PIN_EMOJIS = ['<EmojiIcon emoji="📍" />', '⭐', '<EmojiIcon emoji="🏠" />', '<EmojiIcon emoji="🏰" />', '<EmojiIcon emoji="💎" />', '<EmojiIcon emoji="🎯" />', '<EmojiIcon emoji="🔥" />', '<EmojiIcon emoji="👑" />', '<EmojiIcon emoji="🌍" />', '<EmojiIcon emoji="⚔" />']
+const PIN_EMOJIS = ['<EmojiIcon emoji="" />', '⭐', '<EmojiIcon emoji="" />', '<EmojiIcon emoji="" />', '<EmojiIcon emoji="" />', '<EmojiIcon emoji="" />', '<EmojiIcon emoji="" />', '<EmojiIcon emoji="" />', '<EmojiIcon emoji="" />', '<EmojiIcon emoji="" />']
 
 export function useFavoritePins() {
   const [pins, setPins] = useState<FavoritePin[]>([])
@@ -39,7 +39,7 @@ export function useFavoritePins() {
     try {
       const r = await api.post('/players/pins/', { name: pinName, emoji, lat, lon, zoom })
       setPins(prev => [...prev, r.data])
-      toast.success(`<EmojiIcon emoji="📍" /> ${pinName} saved!`)
+      toast.success(`<EmojiIcon emoji="" /> ${pinName} saved!`)
       return r.data
     } catch {
       toast.error('Failed to save pin')

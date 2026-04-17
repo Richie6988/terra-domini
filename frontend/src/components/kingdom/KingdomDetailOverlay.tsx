@@ -158,7 +158,7 @@ function OwnOverview({ k }: { k: KingdomData }) {
             background: shields > 0 ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.03)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: 22, border: `2px solid ${shields > 0 ? '#3b82f6' : '#ccc'}30`,
-          }}><EmojiIcon emoji="🛡" /></div>
+          }}><EmojiIcon emoji="" /></div>
         </div>
       </div>
     </div>
@@ -175,7 +175,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
           border: `1px solid ${t.is_capital ? 'rgba(204,136,0,0.2)' : 'rgba(255,255,255,0.05)'}`,
         }}>
           {/* Capital badge */}
-          {t.is_capital && <span style={{ fontSize: 14 }}><EmojiIcon emoji="👑" /></span>}
+          {t.is_capital && <span style={{ fontSize: 14 }}><EmojiIcon emoji="" /></span>}
 
           {/* Name + rarity */}
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -216,7 +216,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
           </div>
 
           {/* Shield */}
-          {t.has_shield && <span style={{ fontSize: 12, opacity: 0.6 }}><EmojiIcon emoji="🛡" /></span>}
+          {t.has_shield && <span style={{ fontSize: 12, opacity: 0.6 }}><EmojiIcon emoji="" /></span>}
         </div>
       ))}
     </div>
@@ -225,12 +225,12 @@ function OwnTerritories({ k }: { k: KingdomData }) {
 
 function OwnArmy({ k }: { k: KingdomData }) {
   const units = [
-    { name: 'Infantry', icon: '🗡', count: 24, atk: 10, def: 8, color: '#dc2626' },
-    { name: 'Naval', icon: '⚓', count: 3, atk: 35, def: 30, color: '#0099cc' },
-    { name: 'Aerial', icon: '✈️', count: 1, atk: 45, def: 15, color: '#8b5cf6' },
-    { name: 'Engineer', icon: '🔧', count: 5, atk: 8, def: 20, color: '#cc8800' },
-    { name: 'Medic', icon: '🏥', count: 2, atk: 2, def: 5, color: '#22c55e' },
-    { name: 'Spy', icon: '🕵️', count: 1, atk: 15, def: 3, color: '#475569' },
+    { name: 'Infantry', icon: 'dagger', count: 24, atk: 10, def: 8, color: '#dc2626' },
+    { name: 'Naval', icon: 'anchor', count: 3, atk: 35, def: 30, color: '#0099cc' },
+    { name: 'Aerial', icon: 'plane', count: 1, atk: 45, def: 15, color: '#8b5cf6' },
+    { name: 'Engineer', icon: 'wrench', count: 5, atk: 8, def: 20, color: '#cc8800' },
+    { name: 'Medic', icon: 'medicine', count: 2, atk: 2, def: 5, color: '#22c55e' },
+    { name: 'Spy', icon: 'spy', count: 1, atk: 15, def: 3, color: '#475569' },
   ]
 
   return (
@@ -325,7 +325,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
         <div style={{ ...label, marginBottom: 8 }}>INTELLIGENCE (LEVEL {spyLevel})</div>
         {spyLevel === 0 && (
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', textAlign: 'center', padding: 16 }}>
-            <EmojiIcon emoji="🕵" /> Send a spy mission to reveal enemy resources, army composition, and weaknesses.
+            <EmojiIcon emoji="" /> Send a spy mission to reveal enemy resources, army composition, and weaknesses.
           </div>
         )}
         {spyLevel >= 1 && (
@@ -350,7 +350,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
           color: '#dc2626', fontSize: 10, fontWeight: 900, letterSpacing: 1,
           fontFamily: "'Orbitron', sans-serif",
         }}>
-          <EmojiIcon emoji="⚔" /> ATTACK
+          <EmojiIcon emoji="" /> ATTACK
         </button>
         <button onClick={() => { setSpyLevel(s => Math.min(3, s + 1)); toast.success('Spy mission sent!') }} style={{
           padding: '14px 12px', borderRadius: 12, cursor: 'pointer',
@@ -359,7 +359,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
           color: '#475569', fontSize: 10, fontWeight: 900, letterSpacing: 1,
           fontFamily: "'Orbitron', sans-serif",
         }}>
-          🕵️ SPY ({spyLevel < 3 ? `LVL ${spyLevel + 1}` : 'MAX'})
+          SPY ({spyLevel < 3 ? `LVL ${spyLevel + 1}` : 'MAX'})
         </button>
         <button onClick={() => toast.success('Diplomacy request sent!')} style={{
           padding: '14px 12px', borderRadius: 12, cursor: 'pointer',
@@ -368,7 +368,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
           color: '#22c55e', fontSize: 10, fontWeight: 900, letterSpacing: 1,
           fontFamily: "'Orbitron', sans-serif",
         }}>
-          <EmojiIcon emoji="🤝" /> DIPLOMACY
+          <EmojiIcon emoji="" /> DIPLOMACY
         </button>
         <button onClick={() => toast.success('Buy offer sent!')} style={{
           padding: '14px 12px', borderRadius: 12, cursor: 'pointer',
@@ -377,7 +377,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
           color: '#cc8800', fontSize: 10, fontWeight: 900, letterSpacing: 1,
           fontFamily: "'Orbitron', sans-serif",
         }}>
-          <EmojiIcon emoji="💰" /> BUY OFFER
+          <EmojiIcon emoji="" /> BUY OFFER
         </button>
       </div>
 
@@ -412,8 +412,8 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
 // ════════════════════════════════════════════════════════════════
 
 const OWN_TABS = [
-  { id: 'overview', label: '📊 OVERVIEW' },
-  { id: 'territories', label: '🗺 TERRITORIES' },
+  { id: 'overview', label: 'OVERVIEW' },
+  { id: 'territories', label: 'TERRITORIES' },
   { id: 'army', label: 'ARMY', iconId: 'swords' },
 ]
 
@@ -462,7 +462,7 @@ export function KingdomDetailOverlay({ kingdom: k, isOwn, onClose }: Props) {
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: 18, boxShadow: `0 0 16px ${isOwn ? k.color : '#dc2626'}30`,
               }}>
-                {isOwn ? '👑' : '⚔️'}
+                {isOwn ? '' : '×'}
               </div>
               <div>
                 <div style={{
@@ -483,7 +483,7 @@ export function KingdomDetailOverlay({ kingdom: k, isOwn, onClose }: Props) {
               borderRadius: 8, width: 36, height: 36, cursor: 'pointer',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               color: 'rgba(255,255,255,0.45)', fontSize: 18,
-            }}>✕</button>
+            }}></button>
           </div>
 
           {/* Tabs (own only) */}

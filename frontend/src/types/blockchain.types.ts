@@ -78,10 +78,10 @@ export interface StakeTierDef {
 }
 
 export const STAKE_TIERS: StakeTierDef[] = [
-  { id: 'scout',    name: 'Scout',    icon: '🔭', lockDays: 7,   multiplier: 1.2, bonus: '+20% HEX conversion',                     color: '#94a3b8', minHex: 10 },
-  { id: 'captain',  name: 'Captain',  icon: '⚔️', lockDays: 30,  multiplier: 1.5, bonus: '+50% conversion + reduced maintenance',        color: '#3b82f6', minHex: 100 },
-  { id: 'general',  name: 'General',  icon: '🎖️', lockDays: 90,  multiplier: 2.0, bonus: '+100% conversion + no maintenance',            color: '#f59e0b', minHex: 500 },
-  { id: 'emperor',  name: 'Emperor',  icon: '👑', lockDays: 365, multiplier: 3.0, bonus: '+200% conversion + governance x3 + no maint',  color: '#dc2626', minHex: 2500 },
+  { id: 'scout',    name: 'Scout',    icon: 'observatory', lockDays: 7,   multiplier: 1.2, bonus: '+20% HEX conversion',                     color: '#94a3b8', minHex: 10 },
+  { id: 'captain',  name: 'Captain',  icon: 'swords', lockDays: 30,  multiplier: 1.5, bonus: '+50% conversion + reduced maintenance',        color: '#3b82f6', minHex: 100 },
+  { id: 'general',  name: 'General',  icon: 'medal', lockDays: 90,  multiplier: 2.0, bonus: '+100% conversion + no maintenance',            color: '#f59e0b', minHex: 500 },
+  { id: 'emperor',  name: 'Emperor',  icon: 'crown', lockDays: 365, multiplier: 3.0, bonus: '+200% conversion + governance x3 + no maint',  color: '#dc2626', minHex: 2500 },
 ]
 
 export function getStakeTier(lockDays: number): StakeTierDef | null {

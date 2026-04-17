@@ -83,7 +83,7 @@ export default function ResetPasswordPage() {
 
         {done ? (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}>✅</div>
+            <div style={{ fontSize: 40, marginBottom: 16 }}></div>
             <div style={{ fontSize: 12, color: '#22c55e', marginBottom: 8, fontWeight: 700, letterSpacing: 2 }}>
               PASSWORD RESET
             </div>

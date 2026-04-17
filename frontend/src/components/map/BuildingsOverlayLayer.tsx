@@ -6,9 +6,9 @@
  * Tooltip : nom du bâtiment + niveau + effet.
  *
  * Bâtiments supportés (CDC §2.8) :
- *   🏰 Fortification  ⛏️ Mine  🗼 Tour de contrôle
- *   💻 Centre données  🛢️ Raffinerie  🚀 Port spatial
- *   ⚛️ Réacteur  🌾 Ferme
+ *    Fortification   Mine   Tour de contrôle
+ *    Centre données   Raffinerie   Port spatial
+ *    Réacteur   Ferme
  */
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'

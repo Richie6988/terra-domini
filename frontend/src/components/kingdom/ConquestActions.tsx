@@ -56,7 +56,7 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
     const h3 = territory.h3 || territory.h3_index || ''
     const center = { lat: territory.lat ?? 0, lng: territory.lng ?? 0 }
     const kingdom = createKingdom(name.trim(), color, h3, center)
-    toast.success(`<EmojiIcon emoji="👑" /> ${kingdom.name} founded!`)
+    toast.success(`<EmojiIcon emoji="" /> ${kingdom.name} founded!`)
     onCreated(kingdom.id)
   }
 
@@ -74,7 +74,7 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
         fontSize: 9, fontWeight: 900, color: '#cc8800', letterSpacing: 3, marginBottom: 12,
         fontFamily: "'Orbitron', system-ui, sans-serif", textAlign: 'center',
       }}>
-        <EmojiIcon emoji="👑" /> FOUND YOUR KINGDOM
+        <EmojiIcon emoji="" /> FOUND YOUR KINGDOM
       </div>
 
       <div style={{
@@ -143,7 +143,7 @@ function KingdomWizard({ territory, onCreated, onCancel }: {
             boxShadow: '0 4px 15px rgba(204,136,0,0.3)',
           }}
         >
-          <EmojiIcon emoji="👑" /> FOUND KINGDOM
+          <EmojiIcon emoji="" /> FOUND KINGDOM
         </button>
         <button
           onClick={onCancel}
@@ -246,9 +246,9 @@ export function ConquestActions({ territory, onClaimed }: Props) {
   const isLandmark = territory.is_landmark ?? false
 
   const methods: { id: ConquestMethod; name: string; icon: string; color: string; desc: string }[] = [
-    { id: 'purchase', name: 'PURCHASE', icon: '💰', color: '#d97706', desc: isUnclaimed ? 'Claim with HEX. 100% success.' : 'Buy out the owner.' },
-    { id: 'assault', name: 'ASSAULT', icon: '⚔️', color: '#dc2626', desc: 'Military attack. Costs resources.' },
-    { id: 'infiltration', name: 'INFILTRATE', icon: '🕵️', color: '#059669', desc: 'Covert takeover with spies & data.' },
+    { id: 'purchase', name: 'PURCHASE', icon: 'money_bag', color: '#d97706', desc: isUnclaimed ? 'Claim with HEX. 100% success.' : 'Buy out the owner.' },
+    { id: 'assault', name: 'ASSAULT', icon: 'swords', color: '#dc2626', desc: 'Military attack. Costs resources.' },
+    { id: 'infiltration', name: 'INFILTRATE', icon: 'spy', color: '#059669', desc: 'Covert takeover with spies & data.' },
   ]
 
   const costs = methods.reduce((acc, m) => {
@@ -284,7 +284,7 @@ export function ConquestActions({ territory, onClaimed }: Props) {
         addTerritoryToKingdom(targetKingdom.id, territory.h3 || territory.h3_index || '')
       }
 
-      toast.success('Territory conquered! <EmojiIcon emoji="🏴" />')
+      toast.success('Territory conquered! <EmojiIcon emoji="" />')
       setSelectedTerritory({
         ...territory,
         owner_id: player?.id ?? null,
@@ -316,7 +316,7 @@ export function ConquestActions({ territory, onClaimed }: Props) {
         color: adjacent ? '#00884a' : '#cc8800',
         fontFamily: "'Orbitron', system-ui, sans-serif",
       }}>
-        {adjacent ? '✓ ADJACENT — REDUCED COST' : '⚠ NON-ADJACENT — HIGHER COST (×3.5)'}
+        {adjacent ? ' ADJACENT — REDUCED COST' : ' NON-ADJACENT — HIGHER COST (×3.5)'}
       </div>
 
       <AnimatePresence mode="wait">
@@ -405,7 +405,7 @@ export function ConquestActions({ territory, onClaimed }: Props) {
                 fontSize: 8, color: kingdoms[0].color, textAlign: 'center',
                 fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
               }}>
-                ADD TO: <EmojiIcon emoji="🏰" /> {kingdoms[0].name.toUpperCase()}
+                ADD TO: <EmojiIcon emoji="" /> {kingdoms[0].name.toUpperCase()}
               </div>
             )}
 

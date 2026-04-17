@@ -33,7 +33,7 @@ export default function AdminPanel() {
       <div style={{ position:'fixed', inset:0, background:'#080810',
         display:'flex', alignItems:'center', justifyContent:'center',
         color:'#EF4444', fontSize:20, fontWeight:800 }}>
-        <EmojiIcon emoji="⛔" /> Accès refusé — Admin uniquement
+        <EmojiIcon emoji="" /> Accès refusé — Admin uniquement
       </div>
     )
   }
@@ -106,11 +106,11 @@ export default function AdminPanel() {
         padding: '0 24px',
       }}>
         {([
-          { id:'dashboard', label:'📊 Dashboard' },
-          { id:'logs',      label:'📋 Logs' },
-          { id:'players',   label:'👥 Joueurs' },
-          { id:'economy',   label:'💰 Économie' },
-          { id:'shop',      label:'🏪 Shop' },
+          { id:'dashboard', label:'Dashboard' },
+          { id:'logs',      label:'Logs' },
+          { id:'players',   label:'Joueurs' },
+          { id:'economy',   label:'Économie' },
+          { id:'shop',      label:'Shop' },
         ] as {id:Tab,label:string}[]).map(t => (
           <button key={t.id} onClick={() => setTab(t.id)} style={{
             padding: '12px 20px', border: 'none', background: 'transparent',
@@ -129,14 +129,14 @@ export default function AdminPanel() {
             {/* Stats cards */}
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(180px,1fr))', gap:12, marginBottom:24 }}>
               {[
-                { label:'Joueurs total',   value: stats.total_players || 0,    icon:'👥', color:'#3B82F6' },
-                { label:'En ligne',        value: stats.online_now || 0,        icon:'🟢', color:'#10B981' },
-                { label:'Actifs 1h',       value: stats.active_1h || 0,         icon:'⚡', color:'#F59E0B' },
+                { label:'Joueurs total',   value: stats.total_players || 0,    icon:'people', color:'#3B82F6' },
+                { label:'En ligne',        value: stats.online_now || 0,        icon:'dot_green', color:'#10B981' },
+                { label:'Actifs 1h',       value: stats.active_1h || 0,         icon:'lightning', color:'#F59E0B' },
                 { label:'Nouveaux/24h',    value: stats.new_today || 0,         icon:'🆕', color:'#8B5CF6' },
-                { label:'Territories',     value: stats.total_territories || 921, icon:'🗺️', color:'#10B981' },
-                { label:'Revendiqués',     value: stats.claimed_territories || 0, icon:'🏴', color:'#0099cc' },
-                { label:'Active battles',value: stats.active_battles || 0,   icon:'⚔️', color:'#EF4444' },
-                { label:'TDC en jeu',      value: Math.round(toNum(stats.tdc_in_game)).toLocaleString(), icon:'💎', color:'#F59E0B' },
+                { label:'Territories',     value: stats.total_territories || 921, icon:'map_folded', color:'#10B981' },
+                { label:'Revendiqués',     value: stats.claimed_territories || 0, icon:'flag_black', color:'#0099cc' },
+                { label:'Active battles',value: stats.active_battles || 0,   icon:'swords', color:'#EF4444' },
+                { label:'TDC en jeu',      value: Math.round(toNum(stats.tdc_in_game)).toLocaleString(), icon:'gem', color:'#F59E0B' },
               ].map(s => (
                 <div key={s.label} style={{
                   background: 'rgba(255,255,255,0.04)', borderRadius: 12,
@@ -183,7 +183,7 @@ export default function AdminPanel() {
               <button onClick={() => qc.invalidateQueries({ queryKey:['gm-logs'] })} style={{
                 padding:'6px 14px', borderRadius:8, background:'rgba(0,136,74,0.1)',
                 border:'1px solid rgba(0,136,74,0.25)', color:'#0099cc', fontSize:12, cursor:'pointer',
-              }}><EmojiIcon emoji="🔄" /> Rafraîchir</button>
+              }}><EmojiIcon emoji="" /> Rafraîchir</button>
             </div>
 
             {logsLoading ? (
@@ -208,7 +208,7 @@ export default function AdminPanel() {
                       background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.01)',
                     }}
                   >
-                    <span style={{ fontSize:16, flexShrink:0 }}>{log.icon || '<EmojiIcon emoji="📌" />'}</span>
+                    <span style={{ fontSize:16, flexShrink:0 }}>{log.icon || '<EmojiIcon emoji="" />'}</span>
                     <div style={{ flex:1, minWidth:0 }}>
                       <div style={{
                         fontSize:12, color:'#E5E7EB',
@@ -283,7 +283,7 @@ export default function AdminPanel() {
                 }}>
                   <div>
                     <div style={{ fontSize:13, fontWeight:700, color:'#1a2a3a' }}>
-                      {p.is_staff && <span style={{ color:'#F59E0B', marginRight:4 }}>★</span>}
+                      {p.is_staff && <span style={{ color:'#F59E0B', marginRight:4 }}></span>}
                       {p.username}
                     </div>
                     <div style={{ fontSize:10, color:'#4B5563' }}>{p.email}</div>

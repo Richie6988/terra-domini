@@ -28,7 +28,7 @@ export class ErrorBoundary extends Component<EBProps, EBState> {
           border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10,
           color: '#F87171', fontSize: 11,
         }}>
-          ⚠️ Composant indisponible {this.props.label ? `(${this.props.label})` : ''}
+          Composant indisponible {this.props.label ? `(${this.props.label})` : ''}
         </div>
       )
     }

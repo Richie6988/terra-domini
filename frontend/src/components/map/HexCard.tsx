@@ -37,16 +37,16 @@ type RK = keyof typeof RARITY
 
 /* ── Biome resources ─────────────────────────────────────── */
 const BIOME_RES: Record<string, { res:string; icon:string; amount:number }[]> = {
-  urban:    [{res:'Données',    icon:'📊',amount:12},{res:'Influence', icon:'🌐',amount:8},{res:'Main-d\'œuvre',icon:'👷',amount:15}],
-  rural:    [{res:'Nourriture', icon:'🌾',amount:20},{res:'Eau',       icon:'💧',amount:15},{res:'Main-d\'œuvre',icon:'👷',amount:10}],
-  forest:   [{res:'Nourriture', icon:'🌾',amount:15},{res:'Eau',       icon:'💧',amount:12},{res:'Stabilité',   icon:'⚖️',amount:8}],
-  mountain: [{res:'Fer',        icon:'🪨',amount:18},{res:'Titanium',  icon:'🔷',amount:5},{res:'Charbon',      icon:'⬛',amount:10}],
-  coastal:  [{res:'Nourriture', icon:'🌾',amount:12},{res:'Eau',       icon:'💧',amount:20},{res:'Gaz',         icon:'💨',amount:8}],
-  desert:   [{res:'Pétrole',    icon:'🛢️',amount:15},{res:'Silicium',  icon:'💠',amount:10},{res:'Terres rares',icon:'💎',amount:4}],
-  tundra:   [{res:'Gaz',        icon:'💨',amount:12},{res:'Uranium',   icon:'☢️',amount:3},{res:'Eau',          icon:'💧',amount:8}],
-  industrial:[{res:'Acier',     icon:'⚙️',amount:15},{res:'Composants',icon:'🔌',amount:8},{res:'Pétrole',     icon:'🛢️',amount:10}],
-  landmark: [{res:'Données',    icon:'📊',amount:10},{res:'Influence', icon:'🌐',amount:12},{res:'Stabilité',   icon:'⚖️',amount:10}],
-  grassland:[{res:'Nourriture', icon:'🌾',amount:18},{res:'Main-d\'œuvre',icon:'👷',amount:8},{res:'Stabilité',icon:'⚖️',amount:6}],
+  urban:    [{res:'Données',    icon:'chart_bar',amount:12},{res:'Influence', icon:'grid_globe',amount:8},{res:'Main-d\'œuvre',icon:'worker',amount:15}],
+  rural:    [{res:'Nourriture', icon:'wheat',amount:20},{res:'Eau',       icon:'water_drop',amount:15},{res:'Main-d\'œuvre',icon:'worker',amount:10}],
+  forest:   [{res:'Nourriture', icon:'wheat',amount:15},{res:'Eau',       icon:'water_drop',amount:12},{res:'Stabilité',   icon:'',amount:8}],
+  mountain: [{res:'Fer',        icon:'rock',amount:18},{res:'Titanium',  icon:'diamond_blue',amount:5},{res:'Charbon',      icon:'⬛',amount:10}],
+  coastal:  [{res:'Nourriture', icon:'wheat',amount:12},{res:'Eau',       icon:'water_drop',amount:20},{res:'Gaz',         icon:'wind',amount:8}],
+  desert:   [{res:'Pétrole',    icon:'oil_barrel',amount:15},{res:'Silicium',  icon:'diamond_blossom',amount:10},{res:'Terres rares',icon:'gem',amount:4}],
+  tundra:   [{res:'Gaz',        icon:'wind',amount:12},{res:'Uranium',   icon:'nuclear',amount:3},{res:'Eau',          icon:'water_drop',amount:8}],
+  industrial:[{res:'Acier',     icon:'gear',amount:15},{res:'Composants',icon:'plug',amount:8},{res:'Pétrole',     icon:'oil_barrel',amount:10}],
+  landmark: [{res:'Données',    icon:'chart_bar',amount:10},{res:'Influence', icon:'grid_globe',amount:12},{res:'Stabilité',   icon:'',amount:10}],
+  grassland:[{res:'Nourriture', icon:'wheat',amount:18},{res:'Main-d\'œuvre',icon:'worker',amount:8},{res:'Stabilité',icon:'',amount:6}],
 }
 const BIOME_RES_MAPPED = BIOME_RES
 
@@ -111,7 +111,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
         lon: t.center_lon ?? t.lon,
       })
       if (res.data.status === 'exploration_started') {
-        toast.success(`<EmojiIcon emoji="🔍" /> Exploration started! ${res.data.hours_required}h remaining`)
+        toast.success(`<EmojiIcon emoji="" /> Exploration started! ${res.data.hours_required}h remaining`)
         setClaiming(false)
         return
       }
@@ -185,7 +185,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 padding: '2px 8px', borderRadius: 10,
                 background: 'rgba(252,211,77,0.15)', color: '#cc8800',
                 fontSize: 7, fontWeight: 700,
-              }}><EmojiIcon emoji="✨" /> SHINY</span>}
+              }}><EmojiIcon emoji="" /> SHINY</span>}
             </div>
           </div>
 
@@ -204,7 +204,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 padding: '8px 14px', borderRadius: 10,
                 background: 'rgba(100,100,100,0.1)', border: '1px solid rgba(100,100,100,0.2)',
                 color: '#9CA3AF', fontSize: 8, fontWeight: 700, letterSpacing: 1,
-              }}><EmojiIcon emoji="🔒" /> LOCKED</div>
+              }}><EmojiIcon emoji="" /> LOCKED</div>
             )}
             {isFree && player && !claimOpts?.locked && claimOpts?.options?.map((opt: any) => (
               <button key={opt.method} onClick={() => handleClaim(opt.method)} disabled={claiming || !opt.available}
@@ -219,7 +219,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                   opacity: (claiming || !opt.available) ? 0.4 : 1,
                   fontFamily: "'Orbitron', sans-serif",
                 }}>
-                {claiming ? '⏳...' : opt.method === 'free' ? '<EmojiIcon emoji="🏴" /> FREE' : opt.method === 'buy' ? `<EmojiIcon emoji="💰" /> ${opt.cost}◆` : `<EmojiIcon emoji="🔍" /> ${opt.hours}h`}
+                {claiming ? '⏳...' : opt.method === 'free' ? '<EmojiIcon emoji="" /> FREE' : opt.method === 'buy' ? `<EmojiIcon emoji="" /> ${opt.cost}◆` : `<EmojiIcon emoji="" /> ${opt.hours}h`}
               </button>
             ))}
             {isFree && player && !claimOpts && (
@@ -228,7 +228,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 background: `linear-gradient(135deg, ${cfg.c}dd, ${cfg.c})`,
                 color: '#fff', fontSize: 8, fontWeight: 900, letterSpacing: 1,
                 fontFamily: "'Orbitron', sans-serif",
-              }}><EmojiIcon emoji="🏴" /> CLAIM</button>
+              }}><EmojiIcon emoji="" /> CLAIM</button>
             )}
             {isEnemy && (
               <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('combat'), 100) }} style={{
@@ -236,7 +236,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 border: '1px solid rgba(220,38,38,0.3)', background: 'rgba(220,38,38,0.08)',
                 color: '#dc2626', fontSize: 8, fontWeight: 900, letterSpacing: 1,
                 fontFamily: "'Orbitron', sans-serif",
-              }}><EmojiIcon emoji="⚔" /> ATTACK</button>
+              }}><EmojiIcon emoji="" /> ATTACK</button>
             )}
             {isOwned && (
               <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('kingdom'), 100) }} style={{
@@ -244,7 +244,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 border: '1px solid rgba(0,153,204,0.3)', background: 'rgba(0,153,204,0.08)',
                 color: '#0099cc', fontSize: 8, fontWeight: 900, letterSpacing: 1,
                 fontFamily: "'Orbitron', sans-serif",
-              }}><EmojiIcon emoji="👑" /> KINGDOM</button>
+              }}><EmojiIcon emoji="" /> KINGDOM</button>
             )}
           </div>
         </div>

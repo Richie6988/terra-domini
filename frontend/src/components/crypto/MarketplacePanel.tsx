@@ -2,9 +2,9 @@
  * MarketplacePanel — Hexod NFT Marketplace MVP
  *
  * Tabs:
- *   🏪 Explorer  — toutes les annonces actives (filtres rareté/biome/prix)
- *   💎 Mes NFTs  — mes territoires mintés, mettre en vente
- *   📋 My Sales— mes annonces actives + historique vendu
+ *    Explorer  — toutes les annonces actives (filtres rareté/biome/prix)
+ *    Mes NFTs  — mes territoires mintés, mettre en vente
+ *    My Sales— mes annonces actives + historique vendu
  *
  * CDC §3.5 :
  *   - Royalties 5% → trésorerie Hexod
@@ -34,7 +34,7 @@ function RarityBadge({ rarity, shiny }: { rarity: string; shiny?: boolean }) {
   return (
     <span style={{ fontSize: 9, padding: '2px 7px', borderRadius: 4,
       background: `${c}18`, color: c, border: `1px solid ${c}33`, fontWeight: 700 }}>
-      {shiny ? '✨ ' : ''}{rarity}
+      {shiny ? <><EmojiIcon emoji='sparkles' size={10} /> </> : null}{rarity}
     </span>
   )
 }
@@ -42,7 +42,7 @@ function RarityBadge({ rarity, shiny }: { rarity: string; shiny?: boolean }) {
 function PriceTag({ price }: { price: number }) {
   return (
     <span style={{ fontSize: 13, fontWeight: 800, color: '#F59E0B', fontFamily: 'monospace' }}>
-      {price.toLocaleString()} <EmojiIcon emoji="💎" />
+      {price.toLocaleString()} <EmojiIcon emoji="" />
     </span>
   )
 }
@@ -74,7 +74,7 @@ function ListingCard({ listing, onBuy, isMine }: { listing: any; onBuy?: () => v
         </div>
         <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 4 }}>
           By {listing.seller_username}
-          {listing.status === 'sold' && <span style={{ color: '#10B981', marginLeft: 6 }}>✓ Sold</span>}
+          {listing.status === 'sold' && <span style={{ color: '#10B981', marginLeft: 6 }}>SOLD</span>}
         </div>
       </div>
       <div style={{ textAlign: 'right', flexShrink: 0 }}>
@@ -135,8 +135,8 @@ function ExplorerTab() {
           {[
             { label: 'Annonces', value: stats.active_listings, color: '#3B82F6' },
             { label: 'Sold', value: stats.total_sold, color: '#10B981' },
-            { label: 'Volume', value: `${(stats.total_volume_hex_coin||0).toLocaleString()} 💎`, color: '#F59E0B' },
-            { label: 'Prix moy.', value: `${stats.avg_list_price||0} 💎`, color: '#8B5CF6' },
+            { label: 'Volume', value: `${(stats.total_volume_hex_coin||0).toLocaleString()} `, color: '#F59E0B' },
+            { label: 'Prix moy.', value: `${stats.avg_list_price||0} `, color: '#8B5CF6' },
           ].map(s => (
             <div key={s.label} style={{ flex: '1 1 80px', background: 'rgba(255,255,255,0.04)',
               borderRadius: 9, padding: '8px 10px', border: '1px solid rgba(255,255,255,0.06)' }}>
@@ -162,7 +162,7 @@ function ExplorerTab() {
           background: shiny ? 'rgba(252,211,77,0.15)' : 'rgba(255,255,255,0.04)',
           border: `1px solid ${shiny ? 'rgba(252,211,77,0.5)' : 'rgba(255,255,255,0.08)'}`,
           color: shiny ? '#FCD34D' : '#6B7280', fontWeight: shiny ? 700 : 400,
-        }}><EmojiIcon emoji="✨" /> Shiny</button>
+        }}><EmojiIcon emoji="" /> Shiny</button>
 
         <select value={sort} onChange={e => setSort(e.target.value)} style={{
           marginLeft: 'auto', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
@@ -177,7 +177,7 @@ function ExplorerTab() {
 
       {isLoading && <Spinner />}
       {!isLoading && listings.length === 0 && (
-        <Empty icon="🏪" msg="No listings yet" sub="Be the first to list a territory" />
+        <Empty icon="" msg="No listings yet" sub="Be the first to list a territory" />
       )}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
         {listings.map(l => (
@@ -218,7 +218,7 @@ function MyNFTsTab() {
     <div>
       {isLoading && <Spinner />}
       {!isLoading && territories.length === 0 && (
-        <Empty icon="🗺" msg="No territories" sub="Claim your first hex" />
+        <Empty icon="" msg="No territories" sub="Claim your first hex" />
       )}
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -254,7 +254,7 @@ function MyNFTsTab() {
                     color: isListing ? '#F87171' : rc,
                   }}
                 >
-                  {isListing ? '✕ Annuler' : '🏷️ Vendre'}
+                  {isListing ? 'Annuler' : 'Vendre'}
                 </button>
               </div>
 
@@ -287,7 +287,7 @@ function MyNFTsTab() {
                             border: 'none', color: '#000',
                           }}
                         >
-                          {listMut.isPending ? '…' : '📤 Lister'}
+                          {listMut.isPending ? '…' : 'Lister'}
                         </button>
                       </div>
                     </div>
@@ -334,7 +334,7 @@ function MySalesTab() {
           border: '1px solid rgba(16,185,129,0.2)', marginBottom: 14 }}>
           <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>Total gagné (après royalties)</div>
           <div style={{ fontSize: 18, fontWeight: 800, color: '#10B981', fontFamily: 'monospace' }}>
-            {parseFloat(data.total_earned).toFixed(0)} <EmojiIcon emoji="💎" />
+            {parseFloat(data.total_earned).toFixed(0)} <EmojiIcon emoji="" />
           </div>
         </div>
       )}
@@ -371,7 +371,7 @@ function MySalesTab() {
       )}
 
       {active.length === 0 && sold.length === 0 && (
-        <Empty icon="📋" msg="No sales yet" sub="List a territory from My NFTs tab" />
+        <Empty icon="" msg="No sales yet" sub="List a territory from My NFTs tab" />
       )}
     </div>
   )
@@ -379,9 +379,9 @@ function MySalesTab() {
 
 /* ── Main Panel ───────────────────────────────────────────── */
 const TABS = [
-  { id: 'explore', label: '🏪 Explorer' },
-  { id: 'my-nfts', label: '💎 Mes NFTs' },
-  { id: 'my-sales', label: '📋 My Sales' },
+  { id: 'explore', label: 'Explorer' },
+  { id: 'my-nfts', label: 'Mes NFTs' },
+  { id: 'my-sales', label: 'My Sales' },
 ]
 
 export function MarketplacePanel({ onClose }: { onClose: () => void }) {
@@ -424,8 +424,8 @@ export function MarketplacePanel({ onClose }: { onClose: () => void }) {
           <motion.div key={tab} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0 }} transition={{ duration: 0.12 }}
             style={{ paddingBottom: 40 }}>
-            {tab === 'explore'  && <ExplorerTab />}
-            {tab === 'my-nfts'  && <MyNFTsTab />}
+            {tab === 'explore'&& <ExplorerTab />}
+            {tab === 'my-nfts'&& <MyNFTsTab />}
             {tab === 'my-sales' && <MySalesTab />}
           </motion.div>
         </AnimatePresence>
@@ -454,7 +454,7 @@ export function MarketplacePanel({ onClose }: { onClose: () => void }) {
             cursor:'pointer', fontFamily:"'Orbitron', system-ui, sans-serif",
           }}
         >
-          <EmojiIcon emoji="🛒" /> BOOSTERS → SHOP
+          <EmojiIcon emoji="" /> BOOSTERS → SHOP
         </button>
       </div>
     </GlassPanel>

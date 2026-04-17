@@ -57,10 +57,10 @@ function Die({ value, color, delay = 0 }: { value: number; color: string; delay?
 
 // ─── Attack type definitions ───────────────────────────────────────────────
 const ATTACK_TYPES = [
-  { id: 'conquest',  label: 'Conquest',  emoji: '⚔️',  color: '#EF4444', desc: 'Full invasion — captures territory on win. Slow but decisive.',   timer: '4h',  riskMult: 1.0 },
-  { id: 'raid',      label: 'Raid',      emoji: '💨',  color: '#F59E0B', desc: 'Steals resources without capturing. Fast, lower losses.',          timer: '1h',  riskMult: 0.7 },
-  { id: 'surprise',  label: 'Surprise',  emoji: '🌙',  color: '#8B5CF6', desc: 'Night strike — ignores some defenses. Higher risk, higher reward.', timer: '30m', riskMult: 1.3 },
-  { id: 'siege',     label: 'Siege',     emoji: '🏰',  color: '#6382FF', desc: 'Reduces fortifications without capturing. Weakens for next attack.', timer: '8h', riskMult: 0.5 },
+  { id: 'conquest',  label: 'Conquest',  iconId: 'swords',  color: '#EF4444', desc: 'Full invasion — captures territory on win. Slow but decisive.',   timer: '4h',  riskMult: 1.0 },
+  { id: 'raid',      label: 'Raid',      emoji: 'wind',  color: '#F59E0B', desc: 'Steals resources without capturing. Fast, lower losses.',          timer: '1h',  riskMult: 0.7 },
+  { id: 'surprise',  label: 'Surprise',  emoji: 'moon',  color: '#8B5CF6', desc: 'Night strike — ignores some defenses. Higher risk, higher reward.', timer: '30m', riskMult: 1.3 },
+  { id: 'siege',     label: 'Siege',     emoji: 'castle',  color: '#6382FF', desc: 'Reduces fortifications without capturing. Weakens for next attack.', timer: '8h', riskMult: 0.5 },
 ]
 
 interface Props {
@@ -113,7 +113,7 @@ export function AttackPanel({ target, onClose }: Props) {
     onError: (e: any) => {
       const data = e.response?.data
       if (e.response?.status === 429 && data?.next_slot_label) {
-        toast.error(`<EmojiIcon emoji="⚔" /> No slots — next in ${data.next_slot_label}`, { duration: 5000 })
+        toast.error(`<EmojiIcon emoji="" /> No slots — next in ${data.next_slot_label}`, { duration: 5000 })
       } else {
         toast.error(data?.error || 'Attack failed')
       }
@@ -129,7 +129,7 @@ export function AttackPanel({ target, onClose }: Props) {
         <div style={{ fontSize: 11, color: '#e2e8f0', fontWeight: 700, letterSpacing: 1 }}>{target.place_name || 'ENEMY ZONE'}</div>
         <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
           OWNED BY: <span style={{ color: '#e2e8f0' }}>{target.owner_username ?? 'Unknown'}</span>
-          {target.defense_tier > 0 && <span style={{ marginLeft: 8 }}><EmojiIcon emoji="🛡" /> TIER {target.defense_tier}</span>}
+          {target.defense_tier > 0 && <span style={{ marginLeft: 8 }}><EmojiIcon emoji="" /> TIER {target.defense_tier}</span>}
         </div>
       </div>
 
@@ -157,9 +157,9 @@ export function AttackPanel({ target, onClose }: Props) {
               {/* Units */}
               <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Deploy Forces</div>
               {[
-                { key: 'infantry', emoji: '⚔️', name: 'Infantry', max: 999 },
-                { key: 'cavalry',  emoji: '🐎', name: 'Cavalry',  max: 999 },
-                { key: 'artillery',emoji: '💣', name: 'Artillery',max: 999 },
+                { key: 'infantry', emoji: 'swords', name: 'Infantry', max: 999 },
+                { key: 'cavalry',  emoji: 'horse', name: 'Cavalry',  max: 999 },
+                { key: 'artillery',emoji: 'bomb', name: 'Artillery',max: 999 },
               ].map(u => (
                 <div key={u.key} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, background: 'rgba(255,255,255,0.02)', borderRadius: 10, padding: '8px 12px' }}>
                   <span style={{ fontSize: 20, width: 28 }}>{u.emoji}</span>
@@ -185,14 +185,14 @@ export function AttackPanel({ target, onClose }: Props) {
                     style={{ height: '100%', background: `linear-gradient(90deg, ${probColor}, ${probColor}88)`, borderRadius: 4 }} />
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 10, color: probColor }}><EmojiIcon emoji="⚔" /> Attack {(winProb * 100).toFixed(0)}%</span>
-                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}><EmojiIcon emoji="🛡" /> Defense {((1 - winProb) * 100).toFixed(0)}%</span>
+                  <span style={{ fontSize: 10, color: probColor }}><EmojiIcon emoji="" /> Attack {(winProb * 100).toFixed(0)}%</span>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}><EmojiIcon emoji="" /> Defense {((1 - winProb) * 100).toFixed(0)}%</span>
                 </div>
               </div>
 
               <button onClick={() => attackMut.mutate()} disabled={attackMut.isPending || totalUnits === 0}
                 style={{ width: '100%', padding: '14px', background: totalUnits > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${totalUnits > 0 ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 12, color: totalUnits > 0 ? '#EF4444' : '#4B5563', fontSize: 15, fontWeight: 800, cursor: totalUnits > 0 ? 'pointer' : 'not-allowed', letterSpacing: '0.05em' }}>
-                {attackMut.isPending ? '⏳ Launching…' : `<EmojiIcon emoji="⚔" /> LAUNCH ${typeConf.label.toUpperCase()}`}
+                {attackMut.isPending ? '⏳ Launching…' : `<EmojiIcon emoji="" /> LAUNCH ${typeConf.label.toUpperCase()}`}
               </button>
               <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center' }}>
                 <StaminaBar />
@@ -206,14 +206,14 @@ export function AttackPanel({ target, onClose }: Props) {
               style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 300, gap: 24 }}>
               <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Rolling dice…</div>
               <div>
-                <div style={{ fontSize: 11, color: '#EF4444', textAlign: 'center', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}><EmojiIcon emoji="⚔" /> Attacker</div>
+                <div style={{ fontSize: 11, color: '#EF4444', textAlign: 'center', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}><EmojiIcon emoji="" /> Attacker</div>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
                   {atkDice.map((v, i) => <Die key={i} value={v} color="red" delay={i * 0.1} />)}
                 </div>
               </div>
               <div style={{ fontSize: 20, color: 'rgba(255,255,255,0.3)' }}>vs</div>
               <div>
-                <div style={{ fontSize: 11, color: '#3B82F6', textAlign: 'center', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}><EmojiIcon emoji="🛡" /> Defender</div>
+                <div style={{ fontSize: 11, color: '#3B82F6', textAlign: 'center', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}><EmojiIcon emoji="" /> Defender</div>
                 <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
                   {defDice.map((v, i) => <Die key={i} value={v} color="blue" delay={0.3 + i * 0.1} />)}
                 </div>
@@ -227,7 +227,7 @@ export function AttackPanel({ target, onClose }: Props) {
               style={{ textAlign: 'center', paddingTop: 30 }}>
               <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.6 }}
                 style={{ fontSize: 64, marginBottom: 12 }}>
-                {outcome === 'win' ? '🏆' : outcome === 'loss' ? '💀' : '🤝'}
+                {outcome === 'win' ? '' : outcome === 'loss' ? '' : ''}
               </motion.div>
               <div style={{ fontSize: 24, fontWeight: 800, color: outcome === 'win' ? '#00884a' : outcome === 'loss' ? '#EF4444' : '#F59E0B', marginBottom: 8 }}>
                 {outcome === 'win' ? 'VICTORY!' : outcome === 'loss' ? 'DEFEATED' : 'STANDOFF'}
@@ -244,7 +244,7 @@ export function AttackPanel({ target, onClose }: Props) {
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={() => { setPhase('setup'); setOutcome(null) }}
                   style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.04)', cursor: 'pointer', fontSize: 13 }}>
-                  <EmojiIcon emoji="🔄" /> Attack Again
+                  <EmojiIcon emoji="" /> Attack Again
                 </button>
                 <button onClick={onClose}
                   style={{ flex: 1, padding: '12px', background: 'rgba(0,136,74,0.1)', border: '1px solid rgba(0,136,74,0.3)', borderRadius: 10, color: '#00884a', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>

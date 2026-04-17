@@ -22,11 +22,11 @@ interface Mission {
 }
 
 const FALLBACK_TASKS: Mission[] = [
-  { id: 'f1', title: 'Claim 2 territories', icon: '🏴', target: 2, current: 0, progress_pct: 0, reward_tdc: 25, reward_xp: 100, completed: false, claimed: false },
-  { id: 'f2', title: 'Win 1 battle', icon: '⚔️', target: 1, current: 0, progress_pct: 0, reward_tdc: 40, reward_xp: 150, completed: false, claimed: false },
-  { id: 'f3', title: 'Visit 3 POI zones', icon: '📍', target: 3, current: 0, progress_pct: 0, reward_tdc: 15, reward_xp: 50, completed: false, claimed: false },
-  { id: 'f4', title: 'Spend 100 HEX Coins', icon: '💰', target: 100, current: 0, progress_pct: 0, reward_tdc: 30, reward_xp: 120, completed: false, claimed: false },
-  { id: 'f5', title: 'Login streak bonus', icon: '🔥', target: 1, current: 1, progress_pct: 100, reward_tdc: 10, reward_xp: 50, completed: true, claimed: false },
+  { id: 'f1', title: 'Claim 2 territories', icon: 'flag_black', target: 2, current: 0, progress_pct: 0, reward_tdc: 25, reward_xp: 100, completed: false, claimed: false },
+  { id: 'f2', title: 'Win 1 battle', icon: 'swords', target: 1, current: 0, progress_pct: 0, reward_tdc: 40, reward_xp: 150, completed: false, claimed: false },
+  { id: 'f3', title: 'Visit 3 POI zones', icon: 'pin', target: 3, current: 0, progress_pct: 0, reward_tdc: 15, reward_xp: 50, completed: false, claimed: false },
+  { id: 'f4', title: 'Spend 100 HEX Coins', icon: 'money_bag', target: 100, current: 0, progress_pct: 0, reward_tdc: 30, reward_xp: 120, completed: false, claimed: false },
+  { id: 'f5', title: 'Login streak bonus', icon: 'flame', target: 1, current: 1, progress_pct: 100, reward_tdc: 10, reward_xp: 50, completed: true, claimed: false },
 ]
 
 export function TaskCenter({ onClose }: Props) {
@@ -97,7 +97,7 @@ export function TaskCenter({ onClose }: Props) {
         letterSpacing: 2, marginBottom: 12,
         fontFamily: "'Orbitron', system-ui, sans-serif",
       }}>
-        DAILY RESET {resetIn} · STREAK: <EmojiIcon emoji="🔥" /> {streak} DAYS {streakReward > 0 && `(+${streakReward}◆)`}
+        DAILY RESET {resetIn} · STREAK: <EmojiIcon emoji="" /> {streak} DAYS {streakReward > 0 && `(+${streakReward}◆)`}
       </div>
 
       {/* Progress bar */}
@@ -157,7 +157,7 @@ export function TaskCenter({ onClose }: Props) {
                     fontFamily: "'Orbitron', sans-serif",
                   }}>CLAIM</button>
                 )}
-                {isClaimed && <div style={{ fontSize: 7, color: '#22c55e', fontWeight: 700, marginTop: 2 }}>✓ DONE</div>}
+                {isClaimed && <div style={{ fontSize: 7, color: '#22c55e', fontWeight: 700, marginTop: 2 }}> DONE</div>}
               </div>
             </div>
           )
@@ -171,7 +171,7 @@ export function TaskCenter({ onClose }: Props) {
           background: 'linear-gradient(135deg, rgba(34,197,94,0.06), rgba(34,197,94,0.02))',
           border: '1px solid rgba(34,197,94,0.2)',
         }}>
-          <div style={{ fontSize: 20, marginBottom: 4 }}><EmojiIcon emoji="🎉" /></div>
+          <div style={{ fontSize: 20, marginBottom: 4 }}><EmojiIcon emoji="" /></div>
           <div style={{ fontSize: 9, fontWeight: 700, color: '#22c55e', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
             ALL MISSIONS COMPLETE — CLAIM YOUR REWARDS!
           </div>

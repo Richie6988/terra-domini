@@ -97,7 +97,7 @@ export function GlassPanel({
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.2)'; e.currentTarget.style.color = '#f87171' }}
             onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.04)' }}
           >
-            ✕
+            
           </button>
         </div>
 

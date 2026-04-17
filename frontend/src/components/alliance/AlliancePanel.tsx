@@ -30,7 +30,7 @@ const TIER_COLORS: Record<string, string> = {
   squad: '#3B82F6', guild: '#8B5CF6', federation: '#F59E0B'
 }
 const ROLE_ICONS: Record<string, string> = {
-  leader: '👑', officer: '⭐', veteran: '🎖️', member: '⚔️', recruit: '🌱'
+  leader: 'crown', officer: 'medal', veteran: 'medal', member: 'swords', recruit: 'sprout'
 }
 
 // ── Shared helpers ──
@@ -105,7 +105,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
 
   const createMut = useMutation({
     mutationFn: allianceApi.create,
-    onSuccess: () => { toast.success('Alliance created! <EmojiIcon emoji="🏰" />'); qc.invalidateQueries({ queryKey: ['player'] }) },
+    onSuccess: () => { toast.success('Alliance created! <EmojiIcon emoji="" />'); qc.invalidateQueries({ queryKey: ['player'] }) },
     onError: (e: any) => toast.error(e?.response?.data?.error ?? 'Failed'),
   })
 
@@ -175,10 +175,10 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
               <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>ALLIANCE BONUSES</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {[
-                  { label: '+10% DEF', icon: '🛡', active: true },
-                  { label: '+5 Influence', icon: '🎭', active: true },
-                  { label: 'Shared Radar', icon: '📡', active: (allianceInfo?.member_count || 0) >= 10 },
-                  { label: 'War Bonus', icon: '⚔️', active: (allianceInfo?.member_count || 0) >= 20 },
+                  { label: '+10% DEF', icon: 'ui_shield', active: true },
+                  { label: '+5 Influence', icon: 'theater', active: true },
+                  { label: 'Shared Radar', icon: 'safari_radar', active: (allianceInfo?.member_count || 0) >= 10 },
+                  { label: 'War Bonus', icon: 'swords', active: (allianceInfo?.member_count || 0) >= 20 },
                 ].map(b => (
                   <span key={b.label} style={{
                     padding: '4px 8px', borderRadius: 6, fontSize: 8, fontWeight: 600,
@@ -231,9 +231,9 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 14 }}>
               {[
                 { label: 'ASK FOR HELP', icon: '🆘', color: '#dc2626' },
-                { label: 'SHARE RESOURCES', icon: '📦', color: '#22c55e' },
-                { label: 'TRADE TERRITORY', icon: '🔄', color: '#cc8800' },
-                { label: 'COORDINATE ATTACK', icon: '⚔️', color: '#8b5cf6' },
+                { label: 'SHARE RESOURCES', icon: 'box', color: '#22c55e' },
+                { label: 'TRADE TERRITORY', icon: 'arrow_cycle', color: '#cc8800' },
+                { label: 'COORDINATE ATTACK', icon: 'swords', color: '#8b5cf6' },
               ].map(a => (
                 <button key={a.label} onClick={() => toast.success(`${a.label} — coming soon!`)} style={{
                   padding: '10px 8px', borderRadius: 8, cursor: 'pointer', fontSize: 7, fontWeight: 700,
@@ -261,7 +261,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                 display: 'flex', alignItems: 'center', gap: 10,
                 padding: '9px 0', borderBottom: '1px solid rgba(255,255,255,0.05)',
               }}>
-                <span style={{ fontSize: 18, width: 28 }}>{ROLE_ICONS[m.role] ?? '<EmojiIcon emoji="⚔" />'}</span>
+                <span style={{ fontSize: 18, width: 28 }}>{ROLE_ICONS[m.role] ?? '<EmojiIcon emoji="" />'}</span>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>{m.username}</div>
                   <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
@@ -293,7 +293,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                   color: s === 'war' ? '#EF4444' : s === 'alliance' ? '#10B981' : '#E5E7EB',
                   borderColor: proposeState === s ? '#6B7280' : 'rgba(255,255,255,0.08)',
                 }}>
-                  {s === 'war' ? '⚔️' : s === 'alliance' ? '🤝' : s === 'nap' ? '🕊️' : s === 'trade' ? '💰' : '⏸️'} {s}
+                  <EmojiIcon emoji={s === 'war' ? 'swords' : s === 'alliance' ? 'handshake' : s === 'nap' ? 'dove' : s === 'trade' ? 'money_bag' : 'gear'} size={10} /> {s}
                 </button>
               ))}
             </div>
@@ -334,7 +334,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
               disabled={!createForm.tag || !createForm.name || createMut.isPending}
               style={primaryBtn}
             >
-              {createMut.isPending ? 'Creating…' : '🏰 Create Alliance'}
+              {createMut.isPending ? 'Creating…' : 'Create Alliance'}
             </button>
           </div>
         )}

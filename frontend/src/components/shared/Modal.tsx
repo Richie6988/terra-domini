@@ -117,7 +117,7 @@ export function Modal({ open, onClose, title, accent = '#0099cc', width = 420, c
                   transition: 'all 0.2s ease',
                 }}
               >
-                ✕
+                
               </button>
             </div>
 
@@ -228,7 +228,7 @@ export function SubModal({ open, onClose, title, accent = '#0099cc', width = 380
                   fontSize: 13, fontFamily: "'Orbitron', system-ui, sans-serif",
                 }}
               >
-                ✕
+                
               </button>
             </div>
 

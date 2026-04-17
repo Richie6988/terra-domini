@@ -203,12 +203,21 @@ export function emojiToIcon(emoji: string): string | null {
   return EMOJI_TO_ICON[emoji] ?? EMOJI_TO_ICON[emoji.replace('\uFE0F', '')] ?? null
 }
 
-/** Render an emoji as an SVG icon — drop-in replacement for bare emoji text. */
+/** Render an emoji OR an iconBank ID as an SVG icon.
+ *  Accepts both: emoji chars ('🔥') and iconId strings ('flame').
+ *  If the input is a plain ASCII/latin string, it's treated as an iconBank ID directly. */
 export function EmojiIcon({ emoji, size = 20, className }: { emoji: string; size?: number; className?: string }) {
-  const iconId = emojiToIcon(emoji)
-  if (!iconId) {
-    // Fallback: render as text but stripped of variation selector
-    return <span className={className} style={{ fontSize: size }}>{emoji}</span>
+  if (!emoji) return null
+  // If it's a plain word (iconBank ID), render directly
+  const isIconId = /^[a-zA-Z_][a-zA-Z0-9_]*$/.test(emoji)
+  if (isIconId) {
+    return <IconSVG id={emoji} size={size} className={className} />
   }
-  return <IconSVG id={iconId} size={size} className={className} />
+  // Try emoji→icon mapping
+  const iconId = emojiToIcon(emoji)
+  if (iconId) {
+    return <IconSVG id={iconId} size={size} className={className} />
+  }
+  // Fallback: render as text
+  return <span className={className} style={{ fontSize: size }}>{emoji}</span>
 }

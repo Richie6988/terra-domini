@@ -74,13 +74,13 @@ export const TRANSLATIONS_EN = {
   'tutorial.step2.action': 'Got it →',
   'tutorial.step3.title': 'Claim your first zone!',
   'tutorial.step3.body': 'Tap any grey zone, then press "Claim Zone". It\'s yours instantly!',
-  'tutorial.step3.action': 'I claimed it! ✓',
+  'tutorial.step3.action': 'I claimed it! ',
   'tutorial.step4.title': 'You\'re earning!',
   'tutorial.step4.body': 'Your zone earns resources every 5 minutes — even offline. More zones = more earnings.',
   'tutorial.step4.action': 'What are Coins? →',
   'tutorial.step5.title': 'Coins = Real Crypto',
   'tutorial.step5.body': 'HEX Coins are real cryptocurrency. Earn from brand ads on your zones. Withdraw to your wallet anytime.',
-  'tutorial.step5.action': '🚀 Start Exploring!',
+  'tutorial.step5.action': 'Start Exploring!',
 
   // Territory panel
   'territory.production': 'Earning every 5 min',
@@ -102,8 +102,8 @@ export const TRANSLATIONS_EN = {
   'combat.units.artillery': 'Artillery',
   'combat.units.air': 'Air Support',
   'combat.units.naval': 'Naval',
-  'combat.won': 'Battle Won! 🏆',
-  'combat.lost': 'Battle Lost 💀',
+  'combat.won': 'Battle Won! ',
+  'combat.lost': 'Battle Lost ',
   'combat.type.conquest': 'Conquest',
   'combat.type.raid': 'Resource Raid',
   'combat.type.surprise': 'Surprise Attack',
@@ -130,13 +130,13 @@ export const TRANSLATIONS_EN = {
   'shop.packages': 'Coin Packages',
 
   // Notifications
-  'notif.attack_incoming': '⚔️ {player} is attacking your zone!',
-  'notif.battle_won': '🏆 You won! {territory} is yours.',
-  'notif.battle_lost': '💀 You lost {territory} to {player}.',
-  'notif.streak_risk': '⚠️ Your {days}-day streak expires in {hours}h!',
-  'notif.offline_harvest': '🌅 You earned {amount} Coins while sleeping.',
-  'notif.ad_revenue': '🪙 +{amount} HEX Coin from ads on {territory}.',
-  'notif.friend_request': '👥 {player} wants to be your ally!',
+  'notif.attack_incoming': '{player} is attacking your zone!',
+  'notif.battle_won': 'You won! {territory} is yours.',
+  'notif.battle_lost': 'You lost {territory} to {player}.',
+  'notif.streak_risk': 'Your {days}-day streak expires in {hours}h!',
+  'notif.offline_harvest': 'You earned {amount} Coins while sleeping.',
+  'notif.ad_revenue': '+{amount} HEX Coin from ads on {territory}.',
+  'notif.friend_request': '{player} wants to be your ally!',
 
   // Errors
   'error.insufficient_tdc': 'Not enough Coins. Buy more or earn from zones.',
@@ -180,13 +180,13 @@ export const TRANSLATIONS_FR: Partial<typeof TRANSLATIONS_EN> = {
   'tutorial.step2.action': 'Compris →',
   'tutorial.step3.title': 'Revendiquez votre première zone !',
   'tutorial.step3.body': 'Touchez une zone grise, puis appuyez sur "Revendiquer". Elle est à vous instantanément !',
-  'tutorial.step3.action': 'C\'est fait ! ✓',
+  'tutorial.step3.action': 'C\'est fait ! ',
   'tutorial.step4.title': 'Vous gagnez déjà !',
   'tutorial.step4.body': 'Votre zone génère des ressources toutes les 5 minutes — même hors ligne. Plus de zones = plus de gains.',
   'tutorial.step4.action': 'C\'est quoi les Pièces ? →',
   'tutorial.step5.title': 'Les Pièces = Vraie Crypto',
   'tutorial.step5.body': 'Les Pièces HEX Coin sont de la vraie cryptomonnaie. Gagnez-en grâce aux publicités sur vos zones. Retirez vers votre portefeuille à tout moment.',
-  'tutorial.step5.action': '🚀 Explorer la carte !',
+  'tutorial.step5.action': 'Explorer la carte !',
 
   'territory.production': 'Gains toutes les 5 min',
   'territory.defense': 'Défense',
@@ -196,8 +196,8 @@ export const TRANSLATIONS_FR: Partial<typeof TRANSLATIONS_EN> = {
 
   'combat.attack_launch': 'Lancer l\'attaque',
   'combat.battle_timer': 'Bataille dans',
-  'combat.won': 'Victoire ! 🏆',
-  'combat.lost': 'Défaite 💀',
+  'combat.won': 'Victoire ! ',
+  'combat.lost': 'Défaite ',
   'combat.type.conquest': 'Conquête',
   'combat.type.raid': 'Pillage',
   'combat.type.surprise': 'Attaque surprise',
@@ -206,10 +206,10 @@ export const TRANSLATIONS_FR: Partial<typeof TRANSLATIONS_EN> = {
   'shop.balance': 'Vos Pièces',
   'shop.withdraw': 'Retirer vers le portefeuille',
 
-  'notif.attack_incoming': '⚔️ {player} attaque votre zone !',
-  'notif.battle_won': '🏆 Victoire ! {territory} est à vous.',
-  'notif.battle_lost': '💀 Vous avez perdu {territory} contre {player}.',
-  'notif.offline_harvest': '🌅 Vous avez gagné {amount} Pièces pendant votre absence.',
+  'notif.attack_incoming': '{player} attaque votre zone !',
+  'notif.battle_won': 'Victoire ! {territory} est à vous.',
+  'notif.battle_lost': 'Vous avez perdu {territory} contre {player}.',
+  'notif.offline_harvest': 'Vous avez gagné {amount} Pièces pendant votre absence.',
 
   'error.insufficient_tdc': 'Pièces insuffisantes. Achetez-en ou gagnez-en via vos zones.',
   'error.territory_protected': 'Ce joueur est protégé pendant encore {time}.',
@@ -240,8 +240,8 @@ export const TRANSLATIONS_PT_BR: Partial<typeof TRANSLATIONS_EN> = {
 
   'territory.production': 'Ganhos a cada 5 min',
   'territory.claim': 'Reivindicar esta zona',
-  'combat.won': 'Vitória! 🏆',
-  'combat.lost': 'Derrota 💀',
+  'combat.won': 'Vitória! ',
+  'combat.lost': 'Derrota ',
   'shop.buy_coins': 'Comprar Moedas',
 
   'common.confirm': 'Confirmar',
@@ -267,8 +267,8 @@ export const TRANSLATIONS_JA: Partial<typeof TRANSLATIONS_EN> = {
   'tutorial.step1.action': 'プレイ開始 →',
 
   'territory.claim': 'このゾーンを獲得',
-  'combat.won': '勝利！🏆',
-  'combat.lost': '敗北 💀',
+  'combat.won': '勝利！',
+  'combat.lost': '敗北 ',
   'shop.buy_coins': 'コインを購入',
 
   'common.confirm': '確認',
@@ -294,8 +294,8 @@ export const TRANSLATIONS_ZH_CN: Partial<typeof TRANSLATIONS_EN> = {
   'tutorial.step1.action': '开始游戏 →',
 
   'territory.claim': '占领此区域',
-  'combat.won': '胜利！🏆',
-  'combat.lost': '失败 💀',
+  'combat.won': '胜利！',
+  'combat.lost': '失败 ',
   'shop.buy_coins': '购买金币',
 
   'common.confirm': '确认',

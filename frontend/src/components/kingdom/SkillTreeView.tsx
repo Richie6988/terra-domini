@@ -110,7 +110,7 @@ function SkillNodeCard({
           background: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: 8,
           border: '1px solid rgba(251,191,36,0.3)',
         }}>
-          ★ ULTIMATE
+           ULTIMATE
         </div>
       )}
 
@@ -135,7 +135,7 @@ function SkillNodeCard({
           fontSize: 12,
           color: state.completed ? '#00884a' : state.available ? '#cc8800' : 'rgba(26,42,58,0.2)',
         }}>
-          {state.completed ? '✓' : state.available ? '◆' : '🔒'}
+          {state.completed ? '' : state.available ? '◆' : '◇'}
         </div>
       </div>
 
@@ -402,7 +402,7 @@ export function SkillTreeView({ kingdom, onPour, onForkChoice, onBranchAllocChan
             fontFamily: "'Orbitron', system-ui, sans-serif",
           }}>
             BRANCH ALLOCATION: {totalAlloc}%
-            {totalAlloc !== 100 && ' ⚠ MUST BE 100%'}
+            {totalAlloc !== 100 && 'MUST BE 100%'}
           </div>
 
           {totalReservoir > 0 && (
@@ -416,7 +416,7 @@ export function SkillTreeView({ kingdom, onPour, onForkChoice, onBranchAllocChan
                 boxShadow: '0 2px 8px rgba(121,80,242,0.3)',
               }}
             >
-              <EmojiIcon emoji="⚡" /> QUICK POUR ALL ({Math.floor(totalReservoir).toLocaleString()} ◆)
+              <EmojiIcon emoji="" /> QUICK POUR ALL ({Math.floor(totalReservoir).toLocaleString()} ◆)
             </button>
           )}
         </div>

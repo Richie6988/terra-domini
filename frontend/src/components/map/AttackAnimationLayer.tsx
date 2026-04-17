@@ -107,7 +107,7 @@ export function AttackAnimationLayer({ map }: Props) {
           animation: floatUp 1s ease-out 0.3s forwards;
           transform-origin: center;
           filter: drop-shadow(0 0 6px #EF4444);
-        "><EmojiIcon emoji="⚔" /></div>`,
+        "><EmojiIcon emoji="" /></div>`,
         className: '',
         iconSize: [24, 24],
         iconAnchor: [12, 12],
@@ -126,7 +126,7 @@ export function AttackAnimationLayer({ map }: Props) {
       layer.addLayer(targetPoly)
 
       // Labels flottants sur la cible (dégâts simulés)
-      const floatingLabels = ['<EmojiIcon emoji="⚔" /> ATTAQUE', '<EmojiIcon emoji="💥" /> IMPACT', '<EmojiIcon emoji="🔥" /> SIÈGE']
+      const floatingLabels = ['<EmojiIcon emoji="" /> ATTAQUE', '<EmojiIcon emoji="" /> IMPACT', '<EmojiIcon emoji="" /> SIÈGE']
       floatingLabels.forEach((label, i) => {
         const offset = (i - 1) * 0.001
         const floatIcon = L.divIcon({
@@ -178,7 +178,7 @@ function _playResolutionAnim(
 ) {
   const isVictory = result === 'victory'
   const color = isVictory ? '#00FF87' : '#6B7280'
-  const emoji = isVictory ? '🏴' : '💀'
+  const emoji = isVictory ? '' : '×'
   const label = isVictory ? 'VICTOIRE !' : 'DÉFAITE'
 
   // Flash hex résultat

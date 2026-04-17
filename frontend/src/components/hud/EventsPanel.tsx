@@ -5,7 +5,7 @@
  * Potion de Chance from shop boosts odds.
  * Won tokens can be placed adjacent to captured territories.
  * 
- * 3 tabs: 🔴 Live | ⏳ Upcoming | 🎁 My Results
+ * 3 tabs:  Live | ⏳ Upcoming |  My Results
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'

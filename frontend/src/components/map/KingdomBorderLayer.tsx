@@ -183,7 +183,7 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
 
       // Badge centroid
       if (k.centroid_lat && k.centroid_lon) {
-        const tierLabel = isMain ? '👑' : k.size <= 1 ? '🏴' : '🏰'
+        const tierLabel = isMain ? '' : k.size <= 1 ? '' : '⬡'
         const size = isMain ? 52 : Math.min(44, 28 + Math.floor(Math.log2(k.size + 1)) * 4)
 
         const icon = L.divIcon({
@@ -216,10 +216,10 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
 
         marker.bindTooltip(
           `<div style="font-size:12px">
-            <strong style="color:${color}">${isMain ? '<EmojiIcon emoji="👑" /> Main Kingdom' : `<EmojiIcon emoji="🏰" /> Kingdom (${k.size})`}</strong><br/>
+            <strong style="color:${color}">${isMain ? '<EmojiIcon emoji="" /> Main Kingdom' : `<EmojiIcon emoji="" /> Kingdom (${k.size})`}</strong><br/>
             Tier ${k.tier} · ${k.size} territories
             ${k.tdc_per_24h ? `<br/>+${Math.round(k.tdc_per_24h)} HEX/day` : ''}
-            ${k.size <= 1 ? '<br/><span style="color:#F87171;font-size:10px">⚠️ Isolated — skills frozen</span>' : ''}
+            ${k.size <= 1 ? '<br/><span style="color:#F87171;font-size:10px"> Isolated — skills frozen</span>' : ''}
           </div>`,
           { className: 'td-tooltip', direction: 'top', offset: [0, -size / 2] }
         )

@@ -68,7 +68,7 @@ const MOCK_AUCTIONS: Auction[] = [
 
 const MOCK_CHAT: ChatMsg[] = [
   { user: 'NEXUS_LORD', text: 'BID: 12,500 HEX', time: '2min ago', isBid: true },
-  { user: 'JADE_EMPRESS', text: 'Nice try 😤', time: '3min ago' },
+  { user: 'JADE_EMPRESS', text: 'Nice try ', time: '3min ago' },
   { user: 'STORM_KING', text: 'BID: 11,000 HEX', time: '5min ago', isBid: true },
   { user: 'COMMANDER', text: 'This dragon is mine!', time: '8min ago' },
   { user: 'NEXUS_LORD', text: 'BID: 10,500 HEX', time: '12min ago', isBid: true },
@@ -174,7 +174,7 @@ export function AuctionPanel({ onClose }: Props) {
         user: 'YOU', text: `BID: ${amt.toLocaleString()} HEX`, time: 'now', isBid: true,
       }, ...prev])
     }
-    toast.success(`<EmojiIcon emoji="🏷" /> Bid placed: ${amt.toLocaleString()} HEX`)
+    toast.success(`<EmojiIcon emoji="" /> Bid placed: ${amt.toLocaleString()} HEX`)
     setBidAmount('')
   }, [bidAmount, selected])
 
@@ -365,7 +365,7 @@ export function AuctionPanel({ onClose }: Props) {
               fontFamily: "'Orbitron', system-ui, sans-serif",
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
             }}>
-              <span><EmojiIcon emoji="💬" /> LIVE CHAT · {selected.bidCount} PARTICIPANTS</span>
+              <span><EmojiIcon emoji="" /> LIVE CHAT · {selected.bidCount} PARTICIPANTS</span>
               <span style={{
                 width: 8, height: 8, borderRadius: '50%',
                 background: wsConnected ? '#22c55e' : '#f59e0b',
@@ -396,7 +396,7 @@ export function AuctionPanel({ onClose }: Props) {
 
             {/* Emoji bar + chat input */}
             <div style={{ display: 'flex', gap: 2, padding: '4px 8px', background: 'rgba(0,60,100,0.02)', borderTop: '1px solid rgba(0,60,100,0.04)' }}>
-              {['<EmojiIcon emoji="🔥" />','<EmojiIcon emoji="👀" />','<EmojiIcon emoji="💰" />','<EmojiIcon emoji="😤" />','<EmojiIcon emoji="👑" />','<EmojiIcon emoji="💎" />','<EmojiIcon emoji="⚡" />','<EmojiIcon emoji="😂" />'].map(em => (
+              {['<EmojiIcon emoji="" />','<EmojiIcon emoji="" />','<EmojiIcon emoji="" />','<EmojiIcon emoji="" />','<EmojiIcon emoji="" />','<EmojiIcon emoji="" />','<EmojiIcon emoji="" />','<EmojiIcon emoji="" />'].map(em => (
                 <button key={em} onClick={() => sendEmoji(em)} style={{
                   padding: '2px 4px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 12,
                   opacity: 0.6, transition: 'opacity 0.15s',

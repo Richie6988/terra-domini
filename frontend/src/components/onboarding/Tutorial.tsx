@@ -55,7 +55,7 @@ export const HINTS: Record<string, HintDef> = {
     body: 'This area belongs to nobody yet. Tap it to claim it as yours! You\'ll start earning Coins immediately.',
   },
   'hex-mine': {
-    id: 'hex-mine', title: 'Your Zone ✓',
+    id: 'hex-mine', title: 'Your Zone ',
     body: 'You own this! It earns Coins and resources every 5 minutes — even while you\'re offline.',
   },
   'hex-enemy': {
@@ -63,12 +63,12 @@ export const HINTS: Record<string, HintDef> = {
     body: 'This belongs to another player. You can attack it to capture it — but wait until you have enough army units.',
   },
   'hex-tower': {
-    id: 'hex-tower', title: '🗼 Control Tower',
+    id: 'hex-tower', title: 'Control Tower',
     body: 'This is a strategic landmark. 3× resource bonus for whoever controls it. Alliances fight for these daily.',
   },
   // HUD
   'tdc-balance': {
-    id: 'tdc-balance', title: '🪙 Your Coins (HEX Coin)',
+    id: 'tdc-balance', title: 'Your Coins (HEX Coin)',
     body: 'HEX Coin are your in-game currency — but they\'re also real crypto! Earn them by owning territories, win battles, and from brand ads shown on your land.',
   },
   'territory-count': {
@@ -78,19 +78,19 @@ export const HINTS: Record<string, HintDef> = {
   // Territory panel
   'defense-bar': {
     id: 'defense-bar', title: 'Defense Level',
-    body: 'Higher defense means attackers need more army to beat you. Build a Fort (🏰) to increase it.',
+    body: 'Higher defense means attackers need more army to beat you. Build a Fort () to increase it.',
   },
   'production-rates': {
     id: 'production-rates', title: 'What You Earn Here',
     body: 'These are the resources this zone generates every 5 minutes. Urban zones earn Credits. Rural zones grow Food. Build matching buildings to increase output.',
   },
   'ad-revenue': {
-    id: 'ad-revenue', title: '📢 Ad Revenue',
+    id: 'ad-revenue', title: 'Ad Revenue',
     body: 'Brands pay to show ads on popular zones. The more players see your territory, the more HEX Coin you earn. Famous landmarks earn the most!',
   },
   // Combat
   'attack-button': {
-    id: 'attack-button', title: '⚔️ Attack',
+    id: 'attack-button', title: 'Attack',
     body: 'Send army units to capture this zone. The battle takes 4-72 hours. If you win, the zone is yours! You can join an Alliance for coordinated attacks.',
   },
   'battle-timer': {
@@ -99,17 +99,17 @@ export const HINTS: Record<string, HintDef> = {
   },
   // Alliance
   'alliance-squad': {
-    id: 'alliance-squad', title: '👥 Squad (5 players)',
+    id: 'alliance-squad', title: 'Squad (5 players)',
     body: 'A Squad is the smallest alliance — 5 players. Form one with friends to coordinate attacks and share a treasury.',
   },
   // Economy
   'shield-item': {
-    id: 'shield-item', title: '🛡️ Territory Shield',
+    id: 'shield-item', title: 'Territory Shield',
     body: 'A Shield protects your zone from attacks for 6-12 hours. Max 12h of protection per day — so plan wisely!',
   },
   // POI
   'poi-crisis': {
-    id: 'poi-crisis', title: '🔥 World Event',
+    id: 'poi-crisis', title: 'World Event',
     body: 'A real-world event is affecting this region! The game reflects what\'s happening globally — resource production and battle conditions change.',
   },
 }
@@ -231,7 +231,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   },
   {
     id: 1,
-    emoji: '🔲',
+    emoji: 'square',
     title: 'Les zones qui brillent sont spéciales',
     body: 'Les hexagones colorés sont des POI (Points d\'Intérêt). Plus ils brillent, plus ils rapportent. Les zones grises sont libres à revendiquer.',
     action: 'Compris →',
@@ -239,15 +239,15 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   },
   {
     id: 2,
-    emoji: '🏴',
+    emoji: 'flag_black',
     title: 'Revendique ta première zone !',
     body: 'Tap any grey zone on the map, then press "Claim Zone". It\'s yours immediately. Go ahead!',
-    action: 'J\'ai revendiqué ma zone ✓',
+    action: 'J\'ai revendiqué ma zone ',
     requiresClaim: true,
   },
   {
     id: 3,
-    emoji: '⚡',
+    emoji: 'lightning',
     title: 'Tu gagnes déjà des HEX Coin !',
     body: 'Ta zone produit des ressources et des HEX Coin toutes les 24h — même quand tu dors. Plus tu as de zones, plus tu gagnes.',
     action: 'Et après ? →',
@@ -255,10 +255,10 @@ const TUTORIAL_STEPS: TutorialStep[] = [
   },
   {
     id: 4,
-    emoji: '🪙',
+    emoji: 'hex_coin',
     title: 'Tes missions du jour t\'attendent',
-    body: 'Chaque jour, 3 missions te guident et te récompensent. Le bouton 🎯 en bas à gauche les affiche. C\'est ta feuille de route quotidienne !',
-    action: '🚀 Explorer la carte !',
+    body: 'Chaque jour, 3 missions te guident et te récompensent. Le bouton en bas à gauche les affiche. C\'est ta feuille de route quotidienne !',
+    action: 'Explorer la carte !',
     hint: 'tdc-balance',
   },
 ]
@@ -412,7 +412,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
             }}
           >
             <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
-              style={{ fontSize: 18 }}><EmojiIcon emoji="👆" /></motion.span>
+              style={{ fontSize: 18 }}><EmojiIcon emoji="" /></motion.span>
             <span style={{ fontSize: 11, color: '#fff', fontFamily: "'Orbitron', sans-serif", letterSpacing: 1 }}>
               TAP ANY ZONE TO CLAIM — IT'S FREE!
             </span>
@@ -503,7 +503,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
                   opacity: gpsLoading ? 0.7 : 1,
                 }}
               >
-                {gpsLoading ? '<EmojiIcon emoji="📍" /> Finding your location…' : currentStep.action}
+                {gpsLoading ? '<EmojiIcon emoji="" /> Finding your location…' : currentStep.action}
               </motion.button>
             )}
 
@@ -574,12 +574,12 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
   const h = Math.round(offlineHours)
   const items: DigestItem[] = [
     { icon: '⏰', text: `Tu étais absent${h >= 2 ? 'e' : ''} depuis ${h < 1 ? 'moins d\'une heure' : h === 1 ? '1 heure' : `${h} heures`}`, color: 'rgba(255,255,255,0.4)' },
-    ...(totalResources > 0 ? [{ icon: '📦', text: 'Ressources accumulées pendant ton absence', value: `+${totalResources.toLocaleString()}`, color: '#10B981' }] : []),
+    ...(totalResources > 0 ? [{ icon: 'box', text: 'Ressources accumulées pendant ton absence', value: `+${totalResources.toLocaleString()}`, color: '#10B981' }] : []),
     ...(newTDC > 0 ? [{ icon: '◆', text: 'HEX gagnés offline', value: `+${parseFloat(String(newTDC ?? 0)).toFixed(0)} ◆`, color: '#F59E0B' }] : []),
     ...battles.map(b => ({
-      icon: b.won ? '🏴' : '💀',
+      icon: b.won ? '' : '',
       text: b.won ? `Victoire : ${b.territory} conquis !` : `Défense échouée : ${b.territory} perdu`,
-      value: b.won && b.resources ? `+${b.resources} <EmojiIcon emoji="📦" />` : undefined,
+      value: b.won && b.resources ? `+${b.resources} <EmojiIcon emoji="" />` : undefined,
       color: b.won ? '#10B981' : '#EF4444',
     })),
   ]
@@ -609,7 +609,7 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
           borderBottom: '1px solid rgba(0,255,135,0.15)',
           textAlign: 'center',
         }}>
-          <div style={{ fontSize: 32, marginBottom: 8 }}><EmojiIcon emoji="🌅" /></div>
+          <div style={{ fontSize: 32, marginBottom: 8 }}><EmojiIcon emoji="" /></div>
           <div style={{
             fontFamily: "'Bebas Neue', sans-serif",
             fontSize: 26, letterSpacing: '1px', color: '#fff',

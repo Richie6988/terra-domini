@@ -115,7 +115,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       api.post('/solana/verify-ownership/', { wallet_address: pk })
         .then(r => {
           if (r.data.owns === false) {
-            toast('⚠️ Wallet connecté mais aucun NFT Hexod détecté', { icon: '🔍' })
+            toast(' Wallet connecté mais aucun NFT Hexod détecté', { icon: 'magnifier' })
           }
         }).catch(() => {})
 

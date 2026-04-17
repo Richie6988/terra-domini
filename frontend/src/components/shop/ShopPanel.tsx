@@ -36,51 +36,51 @@ const CATS = [
 
 // ═══ SHOP CATALOG — ported from main_prototype.html ═══
 const BOOSTERS = [
-  { id:'booster_standard',  name:'STANDARD BOOSTER', icon:'📦', price:200,  color:'#0099cc',
+  { id:'booster_standard',  name:'STANDARD BOOSTER', icon:'box', price:200,  color:'#0099cc',
     desc:'7 Standard Territories\n2 Rare Tokens\n1 Random Bonus', code:'booster_standard' },
-  { id:'booster_rare',      name:'RARE BOOSTER',     icon:'💜', price:500,  color:'#8b5cf6',
+  { id:'booster_rare',      name:'RARE BOOSTER',     icon:'heart_purple', price:500,  color:'#8b5cf6',
     desc:'5 Standard Territories\n3 Rare Tokens\n1 Epic Token\n1 Premium Bonus', code:'booster_rare' },
-  { id:'booster_legendary', name:'LEGENDARY BOOSTER', icon:'👑', price:1500, color:'#cc8800',
+  { id:'booster_legendary', name:'LEGENDARY BOOSTER', icon:'crown', price:1500, color:'#cc8800',
     desc:'3 Standard Territories\n3 Rare Tokens\n2 Epic Tokens\n1 Legendary Token\n1 Exclusive Bonus', code:'booster_legendary' },
 ]
 
 const SHOP_ITEMS: Record<string, Array<{id:string; name:string; desc:string; price:number; icon:string; code:string}>> = {
   attack: [
-    { id:'a1', name:'2X TERRITORY MINT SPEED',  desc:'Double your territory minting speed for 24 hours',         price:150, icon:'⚔', code:'atk_2x_army' },
-    { id:'a2', name:'DISTANT TERRITORY UNLOCK', desc:'Mint territories outside your adjacent zone (1 use)',       price:300, icon:'🎯', code:'atk_distant' },
-    { id:'a3', name:'2X ARMY POWER',            desc:'Double army strength in all combats for 24 hours',          price:250, icon:'💪', code:'atk_2x_army' },
-    { id:'a4', name:'BLITZ MODE',               desc:'Instant deployment — skip all training time for 12h',       price:400, icon:'⚡', code:'atk_blitz' },
+    { id:'a1', name:'2X TERRITORY MINT SPEED',  desc:'Double your territory minting speed for 24 hours',         price:150, icon:'swords', code:'atk_2x_army' },
+    { id:'a2', name:'DISTANT TERRITORY UNLOCK', desc:'Mint territories outside your adjacent zone (1 use)',       price:300, icon:'target', code:'atk_distant' },
+    { id:'a3', name:'2X ARMY POWER',            desc:'Double army strength in all combats for 24 hours',          price:250, icon:'muscle', code:'atk_2x_army' },
+    { id:'a4', name:'BLITZ MODE',               desc:'Instant deployment — skip all training time for 12h',       price:400, icon:'lightning', code:'atk_blitz' },
   ],
   defense: [
-    { id:'d1', name:'72H KINGDOM SHIELD',       desc:'Full protection from attacks on one kingdom',              price:500, icon:'🛡', code:'def_shield_72h' },
-    { id:'d2', name:'2X DEFENSE RATING',        desc:'Double all defense values for 48 hours',                   price:350, icon:'🏰', code:'def_2x_defense' },
-    { id:'d3', name:'ANTI-NUCLEAR SHIELD',      desc:'Protect against nuclear strikes for 7 days',               price:800, icon:'☢', code:'def_anti_nuke' },
-    { id:'d4', name:'INFLUENCE RESISTANCE',     desc:'Block influence attacks for 72 hours',                     price:200, icon:'🧠', code:'def_influence_resist' },
+    { id:'d1', name:'72H KINGDOM SHIELD',       desc:'Full protection from attacks on one kingdom',              price:500, icon:'ui_shield', code:'def_shield_72h' },
+    { id:'d2', name:'2X DEFENSE RATING',        desc:'Double all defense values for 48 hours',                   price:350, icon:'castle', code:'def_2x_defense' },
+    { id:'d3', name:'ANTI-NUCLEAR SHIELD',      desc:'Protect against nuclear strikes for 7 days',               price:800, icon:'nuclear', code:'def_anti_nuke' },
+    { id:'d4', name:'INFLUENCE RESISTANCE',     desc:'Block influence attacks for 72 hours',                     price:200, icon:'brain', code:'def_influence_resist' },
   ],
   resources: [
-    { id:'r1', name:'2X EXTRACTION RATE',       desc:'Double all resource extraction for 24 hours',              price:200, icon:'⛏', code:'eco_2x_extraction' },
-    { id:'r2', name:'ENERGY EFFICIENCY',        desc:'-50% energy consumption for 48 hours',                     price:180, icon:'⚡', code:'eco_energy' },
-    { id:'r3', name:'RARE DROP BONUS',          desc:'+50% chance for rare resource drops (24h)',                 price:350, icon:'💎', code:'eco_rare_drop' },
-    { id:'r4', name:'TRADE ADVANTAGE',          desc:'-10% fees on all marketplace trades for 72h',              price:250, icon:'📈', code:'eco_trade_advantage' },
+    { id:'r1', name:'2X EXTRACTION RATE',       desc:'Double all resource extraction for 24 hours',              price:200, icon:'pickaxe', code:'eco_2x_extraction' },
+    { id:'r2', name:'ENERGY EFFICIENCY',        desc:'-50% energy consumption for 48 hours',                     price:180, icon:'lightning', code:'eco_energy' },
+    { id:'r3', name:'RARE DROP BONUS',          desc:'+50% chance for rare resource drops (24h)',                 price:350, icon:'gem', code:'eco_rare_drop' },
+    { id:'r4', name:'TRADE ADVANTAGE',          desc:'-10% fees on all marketplace trades for 72h',              price:250, icon:'chart_up', code:'eco_trade_advantage' },
   ],
   chance: [
-    { id:'c1', name:'+CARD RARITY',             desc:'Increase card rarity probability by 25% for 24h',          price:300, icon:'🎴', code:'col_rarity' },
-    { id:'c2', name:'+EVENT MINT PROB',          desc:'Better odds in all event card draws for 24h',              price:250, icon:'📡', code:'col_luck' },
-    { id:'c3', name:'SAFARI HINTS (2H)',         desc:'Extra clues and thermal overlay during safaris',           price:100, icon:'🔮', code:'col_safari_hints' },
-    { id:'c4', name:'LUCK BOOSTER',             desc:'+15% chance rating across all activities (48h)',            price:400, icon:'🍀', code:'col_luck' },
+    { id:'c1', name:'+CARD RARITY',             desc:'Increase card rarity probability by 25% for 24h',          price:300, icon:'cards', code:'col_rarity' },
+    { id:'c2', name:'+EVENT MINT PROB',          desc:'Better odds in all event card draws for 24h',              price:250, icon:'safari_radar', code:'col_luck' },
+    { id:'c3', name:'SAFARI HINTS (2H)',         desc:'Extra clues and thermal overlay during safaris',           price:100, icon:'crystal_ball', code:'col_safari_hints' },
+    { id:'c4', name:'LUCK BOOSTER',             desc:'+15% chance rating across all activities (48h)',            price:400, icon:'clover', code:'col_luck' },
   ],
   influence: [
-    { id:'i1', name:'GLOBAL MESSAGE',           desc:'Send 1 message visible to all online players',             price:50,  icon:'📢', code:'soc_global_msg' },
-    { id:'i2', name:'EXTENDED VISION',          desc:'See +5 hex further for territory conquest (24h)',           price:200, icon:'🔭', code:'soc_extended_vision' },
-    { id:'i3', name:'BRAG MODE',                desc:'Display double empire size — access reserved areas (24h)', price:350, icon:'🎭', code:'soc_brag' },
-    { id:'i4', name:'RESERVED ACCESS',          desc:'Enter elite zones for advanced tokens and events',         price:600, icon:'👑', code:'soc_vip' },
+    { id:'i1', name:'GLOBAL MESSAGE',           desc:'Send 1 message visible to all online players',             price:50,  icon:'megaphone', code:'soc_global_msg' },
+    { id:'i2', name:'EXTENDED VISION',          desc:'See +5 hex further for territory conquest (24h)',           price:200, icon:'observatory', code:'soc_extended_vision' },
+    { id:'i3', name:'BRAG MODE',                desc:'Display double empire size — access reserved areas (24h)', price:350, icon:'theater', code:'soc_brag' },
+    { id:'i4', name:'RESERVED ACCESS',          desc:'Enter elite zones for advanced tokens and events',         price:600, icon:'crown', code:'soc_vip' },
   ],
   customize: [
-    { id:'x1', name:'AVATAR SKINS',             desc:'Premium avatar frames, effects, and animations',           price:250, icon:'🖼', code:'custom_flag' },
-    { id:'x2', name:'FLAG & EMBLEM',            desc:'Custom kingdom flag and player emblem',                     price:150, icon:'🏴', code:'custom_flag' },
-    { id:'x3', name:'KINGDOM COLORS',           desc:'Custom hex colors on the global map',                      price:200, icon:'🎨', code:'border_color' },
-    { id:'x4', name:'MEDIA EMBEDDING',          desc:'Embed images/video on your hex territories',               price:300, icon:'📷', code:'custom_flag' },
-    { id:'x5', name:'LIVE STREAM SPACE',        desc:'Create a live streaming zone on your territory',            price:500, icon:'📺', code:'custom_flag' },
+    { id:'x1', name:'AVATAR SKINS',             desc:'Premium avatar frames, effects, and animations',           price:250, icon:'picture', code:'custom_flag' },
+    { id:'x2', name:'FLAG & EMBLEM',            desc:'Custom kingdom flag and player emblem',                     price:150, icon:'flag_black', code:'custom_flag' },
+    { id:'x3', name:'KINGDOM COLORS',           desc:'Custom hex colors on the global map',                      price:200, icon:'palette', code:'border_color' },
+    { id:'x4', name:'MEDIA EMBEDDING',          desc:'Embed images/video on your hex territories',               price:300, icon:'camera', code:'custom_flag' },
+    { id:'x5', name:'LIVE STREAM SPACE',        desc:'Create a live streaming zone on your territory',            price:500, icon:'tv', code:'custom_flag' },
   ],
 }
 
@@ -144,7 +144,7 @@ export function ShopPanel({ onClose }: Props) {
         if (res.data?.booster) {
           setBoosterResult({ cards: res.data.booster.cards, itemName })
         } else {
-          toast.success(`✅ ${itemName} purchased!`)
+          toast.success(`${itemName} purchased!`)
         }
         qc.invalidateQueries({ queryKey: ['player'] })
         qc.invalidateQueries({ queryKey: ['active-boosts'] })
@@ -171,7 +171,7 @@ export function ShopPanel({ onClose }: Props) {
               background:`linear-gradient(135deg, ${activeKingdom.color}, ${activeKingdom.color}aa)`,
               display:'flex', alignItems:'center', justifyContent:'center',
               fontSize:11, boxShadow:`0 0 8px ${activeKingdom.color}30`,
-            }}><EmojiIcon emoji="🏰" /></div>
+            }}><EmojiIcon emoji="" /></div>
             <div style={{ flex:1 }}>
               <div style={{ fontSize:7, fontWeight:800, color:activeKingdom.color, letterSpacing:2, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
                 {activeKingdom.name.toUpperCase()}
@@ -236,7 +236,7 @@ export function ShopPanel({ onClose }: Props) {
         {/* ═══ BOOSTERS SECTION ═══ */}
         <div id="shop-boosters" style={{ marginBottom:20 }}>
           <div style={{ fontSize:8, fontWeight:700, letterSpacing:2, color:'#cc8800', marginBottom:10, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
-            <EmojiIcon emoji="🎁" /> BOOSTER PACKS — 10 ITEMS EACH
+            <EmojiIcon emoji="" /> BOOSTER PACKS — 10 ITEMS EACH
           </div>
           <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:8 }}>
             {BOOSTERS.map(b => (

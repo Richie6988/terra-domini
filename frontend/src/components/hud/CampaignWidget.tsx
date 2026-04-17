@@ -25,11 +25,11 @@ export function CampaignWidget() {
     mutationFn: () => api.post('/progression/campaigns/check/'),
     onSuccess: (res) => {
       if (res.data.advanced) {
-        toast.success(`<EmojiIcon emoji="🎯" /> ${res.data.reward || 'Étape complétée !'}`, { duration: 4000 })
+        toast.success(`<EmojiIcon emoji="" /> ${res.data.reward || 'Étape complétée !'}`, { duration: 4000 })
         qc.invalidateQueries({ queryKey: ['campaigns'] })
         qc.invalidateQueries({ queryKey: ['player'] })
       } else {
-        toast('Continue — objectif en cours', { icon: '⏳' })
+        toast('Continue — objectif en cours', { icon: 'gear' })
       }
     },
   })
@@ -77,7 +77,7 @@ function CampaignCard({ campaign, expanded, onToggle, onCheck, checking }: any) 
         }}
       >
         <div style={{ fontSize: 24, flexShrink: 0 }}>
-          {campaign.completed ? '✅' : isLocked ? '🔒' : '🗺️'}
+          {campaign.completed ? '' : isLocked ? '◇' : '◆'}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 13, fontWeight: 800, color: '#e2e8f0' }}>{campaign.name}</div>
@@ -132,7 +132,7 @@ function CampaignCard({ campaign, expanded, onToggle, onCheck, checking }: any) 
                       color: isDone ? '#10B981' : isCurrent ? '#3B82F6' : '#4B5563',
                       fontWeight: 800,
                     }}>
-                      {isDone ? '✓' : step.icon || String(i + 1)}
+                      {isDone ? '' : step.icon || String(i + 1)}
                     </div>
 
                     {/* Contenu */}
@@ -151,7 +151,7 @@ function CampaignCard({ campaign, expanded, onToggle, onCheck, checking }: any) 
                           padding: '4px 8px', background: 'rgba(245,158,11,0.08)',
                           borderRadius: 6, borderLeft: '2px solid #F59E0B',
                         }}>
-                          <EmojiIcon emoji="🎁" /> Récompense : {step.reward_label}
+                          <EmojiIcon emoji="" /> Récompense : {step.reward_label}
                         </div>
                       )}
                     </div>
@@ -173,7 +173,7 @@ function CampaignCard({ campaign, expanded, onToggle, onCheck, checking }: any) 
                     opacity: checking ? 0.6 : 1,
                   }}
                 >
-                  {checking ? '⏳ Vérification…' : '🔍 Vérifier ma progression'}
+                  {checking ? 'Vérification…' : 'Vérifier ma progression'}
                 </button>
               )}
             </div>

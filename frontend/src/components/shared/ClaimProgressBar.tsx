@@ -47,7 +47,7 @@ export function ClaimProgressBar({ claim, compact = false, onComplete }: {
     return () => clearInterval(id)
   }, [claim.eta_seconds, claim.hours_required, onComplete])
 
-  const methodIcon = claim.method === 'explore' ? '🔍' : claim.method === 'attack' ? '⚔️' : '💰'
+  const methodIcon = claim.method === 'explore' ? 'magnifier' : claim.method === 'attack' ? 'swords' : 'money_bag'
   const methodColor = claim.method === 'explore' ? '#0099cc' : claim.method === 'attack' ? '#dc2626' : '#cc8800'
 
   // Format time
@@ -107,7 +107,7 @@ export function ClaimProgressBar({ claim, compact = false, onComplete }: {
           fontSize: 10, fontWeight: 900, color: methodColor,
           fontFamily: "'Share Tech Mono', monospace",
         }}>
-          {eta <= 0 ? '✅ READY!' : timeStr}
+          {eta <= 0 ? 'READY!' : timeStr}
         </span>
       </div>
 

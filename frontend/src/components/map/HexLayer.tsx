@@ -63,9 +63,9 @@ export function injectGlowFilter() {
   svg.id = 'td-svg-filters'
   svg.setAttribute('style', 'position:absolute;width:0;height:0;overflow:hidden')
   svg.innerHTML = `<defs>
-    <filter id="gf-green"  x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    <filter id="gf-gold"   x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-    <filter id="gf-blue"   x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gf-green"x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gf-gold"x="-80%" y="-80%" width="260%" height="260%"><feGaussianBlur in="SourceGraphic" stdDeviation="7" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+    <filter id="gf-blue"x="-60%" y="-60%" width="220%" height="220%"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     <filter id="gf-purple" x="-70%" y="-70%" width="240%" height="240%"><feGaussianBlur in="SourceGraphic" stdDeviation="6" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
     <filter id="gf-mythic" x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur in="SourceGraphic" stdDeviation="10" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>`
@@ -182,10 +182,10 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
 
     if (poiVisible) {
       fillOp = 0.38; weight = 4
-      cls = rarity === 'mythic'    ? 'td-own-mythic'
+      cls = rarity === 'mythic'? 'td-own-mythic'
           : rarity === 'legendary' ? 'td-own-legendary'
-          : rarity === 'epic'      ? 'td-own-epic'
-          : rarity === 'rare'      ? 'td-own-rare'
+          : rarity === 'epic'? 'td-own-epic'
+          : rarity === 'rare'? 'td-own-rare'
           : 'td-hex-own-std'
     } else {
       fillOp = 0.32; weight = 2.5; cls = 'td-hex-own-std'
@@ -227,15 +227,15 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
 
   // Tooltip
   const income = Math.round((ta.resource_credits || ta.food_per_tick || 10) * 288)
-  const stateLabel = ta.is_control_tower ? '<EmojiIcon emoji="🗼" /> Tour de contrôle'
-    : isOwn ? (hasPOI ? `✅ Votre territoire · ${rarity}` : '✅ Votre territoire')
-    : isEnemy ? `<EmojiIcon emoji="👤" /> ${ta.owner_username}`
+  const stateLabel = ta.is_control_tower ? '<EmojiIcon emoji="" /> Tour de contrôle'
+    : isOwn ? (hasPOI ? `Votre territoire · ${rarity}` : 'Votre territoire')
+    : isEnemy ? `<EmojiIcon emoji="" /> ${ta.owner_username}`
     : hasPOI ? `⬡ ${rarity.toUpperCase()} — Libre`
     : '⬜ Libre'
 
   const vulnHtml = isVulnerable
     ? `<div style="color:#EF4444;font-size:10px;font-weight:800;margin-top:3px">
-         🔓 DÉFENSES AFFAIBLIES${infiltrationCount >= 3 ? ' (DEF 15%)' : ' (DEF 50%)'}
+         DÉFENSES AFFAIBLIES${infiltrationCount >= 3 ? ' (DEF 15%)' : ' (DEF 50%)'}
          <br/><span style="color:#6B7280;font-weight:400">Infiltration${infiltrationCount >= 3 ? ' ×3' : ''} — Opportunité d'assaut !</span>
        </div>`
     : ''
