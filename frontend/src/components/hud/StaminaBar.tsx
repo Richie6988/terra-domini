@@ -9,7 +9,6 @@ import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 type StaminaData = {
   slots_max: number

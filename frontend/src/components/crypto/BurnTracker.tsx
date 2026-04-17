@@ -8,7 +8,6 @@ import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { BURN_RATES, HEX_TOKEN } from '../../types/blockchain.types'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props {
   totalBurned?: number

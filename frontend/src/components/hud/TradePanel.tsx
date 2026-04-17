@@ -12,7 +12,6 @@ import { usePlayer, useStore } from '../../store'
 import { useKingdomStore } from '../../store/kingdomStore'
 import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
-import { EmojiIcon } from '../shared/emojiIcons'
 import { IconSVG } from '../shared/iconBank'
 
 const toNum = (v: unknown) => parseFloat(String(v ?? 0)) || 0

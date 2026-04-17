@@ -39,7 +39,7 @@ function MiniTag({ color, children }: { color: string; children: React.ReactNode
 }
 function StatBox({ label, value, icon }: { label: string; value: string | number; icon?: React.ReactNode }) {
   return (
-    <div style={{ padding: '10px 8px', borderRadius: 10, background: 'rgba(0,60,100,0.04)', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
+    <div style={{ padding: '10px 8px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, color: '#8B5CF6', marginBottom: 4 }}>{icon}<span style={{ fontSize: 16, fontWeight: 900 }}>{value}</span></div>
       <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase' as const }}>{label}</div>
     </div>
@@ -183,7 +183,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                   <span key={b.label} style={{
                     padding: '4px 8px', borderRadius: 6, fontSize: 8, fontWeight: 600,
                     background: b.active ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.03)',
-                    color: b.active ? '#8b5cf6' : 'rgba(26,42,58,0.25)',
+                    color: b.active ? '#8b5cf6' : 'rgba(255,255,255,0.2)',
                     border: `1px solid ${b.active ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.05)'}`,
                   }}><EmojiIcon emoji={b.icon} size={16} /> {b.label}</span>
                 ))}
@@ -208,7 +208,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                       <>
                         <span style={{ fontWeight: 700, color: m.role === 'leader' ? '#cc8800' : '#8b5cf6' }}>{m.user}</span>
                         <span style={{ color: 'rgba(255,255,255,0.04)', marginLeft: 6 }}>{m.text || m.emoji}</span>
-                        <span style={{ color: 'rgba(26,42,58,0.2)', fontSize: 7, marginLeft: 4 }}>{m.time}</span>
+                        <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: 7, marginLeft: 4 }}>{m.time}</span>
                       </>
                     )}
                   </div>
@@ -220,7 +220,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                   onKeyDown={e => { if (e.key === 'Enter' && chatInput.trim()) { sendMessage(chatInput.trim()); setChatInput('') } }}
                   placeholder={chatConnected ? 'Type a message...' : 'Connecting...'}
                   disabled={!chatConnected}
-                  style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.08)', fontSize: 10, background: 'rgba(0,60,100,0.02)', outline: 'none', color: '#e2e8f0' }} />
+                  style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.08)', fontSize: 10, background: 'rgba(255,255,255,0.02)', outline: 'none', color: '#e2e8f0' }} />
                 <button onClick={() => { if (chatInput.trim()) { sendMessage(chatInput.trim()); setChatInput('') } }}
                   disabled={!chatConnected || !chatInput.trim()}
                   style={{ padding: '6px 12px', borderRadius: 6, background: chatConnected ? '#8b5cf6' : '#94a3b8', border: 'none', color: '#fff', fontSize: 8, fontWeight: 700, cursor: 'pointer' }}>SEND</button>

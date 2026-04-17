@@ -91,7 +91,7 @@ function SkillNodeCard({
         <div style={{
           position: 'absolute', top: -8, right: 8,
           fontSize: 6, fontWeight: 900, letterSpacing: 2,
-          color: state.forkLocked ? 'rgba(26,42,58,0.2)' : color,
+          color: state.forkLocked ? 'rgba(255,255,255,0.15)' : color,
           fontFamily: "'Orbitron', system-ui, sans-serif",
           background: 'rgba(255,255,255,0.08)', padding: '2px 6px', borderRadius: 8,
           border: `1px solid ${state.forkLocked ? 'rgba(255,255,255,0.08)' : `${color}40`}`,
@@ -133,7 +133,7 @@ function SkillNodeCard({
         </div>
         <div style={{
           fontSize: 12,
-          color: state.completed ? '#00884a' : state.available ? '#cc8800' : 'rgba(26,42,58,0.2)',
+          color: state.completed ? '#00884a' : state.available ? '#cc8800' : 'rgba(255,255,255,0.15)',
         }}>
           {state.completed ? '' : state.available ? '◆' : '◇'}
         </div>

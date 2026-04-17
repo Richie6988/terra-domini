@@ -16,7 +16,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
 import toast from 'react-hot-toast'
-import { EmojiIcon } from '../shared/emojiIcons'
 import { IconSVG } from '../shared/iconBank'
 
 const TIERS = [
@@ -140,7 +139,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
                       <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
                         {t.min.toLocaleString()}+ HEX
                       </div>
-                      <div style={{ fontSize: 9, color: 'rgba(26,42,58,0.25)', fontStyle: 'italic' }}>
+                      <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontStyle: 'italic' }}>
                         {t.label}
                       </div>
                     </div>
@@ -224,7 +223,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
               {stakeMut.isPending ? 'En cours…' : `Staker ${amount ? amount.toLocaleString() : '?'} HEX`}
             </button>
 
-            <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.25)', textAlign: 'center', marginTop: 10, lineHeight: 1.5 }}>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: 10, lineHeight: 1.5 }}>
               Staking via programme Solana (devnet). Unlock à tout moment.{'\n'}
               Les récompenses sont distribuées toutes les 24h.
             </div>
@@ -275,7 +274,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
 
             {/* Positions */}
             {(stakingData?.positions || []).length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '32px 0', color: 'rgba(26,42,58,0.25)', fontSize: 12 }}>
+              <div style={{ textAlign: 'center', padding: '32px 0', color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>
                 No active positions. Stake HEX to start earning.
               </div>
             ) : (

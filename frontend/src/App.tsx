@@ -257,7 +257,7 @@ function GameScreen() {
           padding: '10px 16px', borderRadius: 12,
           cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 10,
           pointerEvents: 'auto',
-          border: activePanel === 'tasks' ? '2px solid #cc8800' : '1px solid rgba(0,60,100,0.12)',
+          border: activePanel === 'tasks' ? '2px solid #cc8800' : '1px solid rgba(255,255,255,0.1)',
           boxShadow: activePanel === 'tasks' ? '0 0 16px rgba(204,136,0,0.3)' : '0 4px 16px rgba(0,0,0,0.08)',
           animation: activePanel !== 'tasks' ? 'taskPulse 3s ease-in-out infinite' : 'none',
         }}
@@ -267,7 +267,7 @@ function GameScreen() {
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
           <div style={{ fontSize: 10, fontWeight: 900, color: '#cc8800', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>MISSIONS</div>
-          <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.4)', fontFamily: "'Share Tech Mono', monospace" }}>DAILY REWARDS</div>
+          <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', fontFamily: "'Share Tech Mono', monospace" }}>DAILY REWARDS</div>
         </div>
       </div>
       <style>{`@keyframes taskPulse { 0%,100% { box-shadow: 0 4px 16px rgba(0,0,0,0.08); } 50% { box-shadow: 0 4px 16px rgba(204,136,0,0.3), 0 0 24px rgba(204,136,0,0.15); } }`}</style>
@@ -361,7 +361,7 @@ export default function App() {
           style: {
             background: 'rgba(235, 242, 250, 0.95)',
             backdropFilter: 'blur(12px)',
-            color: '#1a2a3a',
+            color: '#e2e8f0',
             border: '1px solid rgba(0, 153, 204, 0.2)',
             borderRadius: 8,
             fontSize: 10,

@@ -8,7 +8,6 @@
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Blip {
   id: string; angle: number; distance: number; color: string

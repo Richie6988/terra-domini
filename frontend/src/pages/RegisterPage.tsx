@@ -23,13 +23,13 @@ const cardStyle: React.CSSProperties = {
   width: 420, maxWidth: '95vw', padding: '28px 32px',
   background: 'linear-gradient(180deg, rgba(13,27,42,0.95) 0%, rgba(10,22,40,0.95) 100%)',
   backdropFilter: 'blur(30px) saturate(1.2)',
-  border: '1px solid rgba(0,60,100,0.15)',
+  border: '1px solid rgba(255,255,255,0.12)',
   borderRadius: 16, position: 'relative', zIndex: 1,
   boxShadow: '0 20px 60px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.8)',
   maxHeight: '90vh', overflowY: 'auto',
 }
 const labelStyle: React.CSSProperties = {
-  display: 'block', fontSize: 'var(--fs-auth-label)', color: 'rgba(26,42,58,0.55)',
+  display: 'block', fontSize: 'var(--fs-auth-label)', color: 'rgba(255,255,255,0.5)',
   marginBottom: 6, marginTop: 12,
   fontFamily: "var(--font-heading)",
   letterSpacing: 2, fontWeight: 700,
@@ -37,8 +37,8 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   width: '100%', padding: '12px 14px',
   background: 'rgba(255,255,255,0.6)',
-  border: '1px solid rgba(0,60,100,0.12)', borderRadius: 10,
-  color: '#1a2a3a', fontSize: 'var(--fs-auth-input)' as any, boxSizing: 'border-box',
+  border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10,
+  color: '#e2e8f0', fontSize: 'var(--fs-auth-input)' as any, boxSizing: 'border-box',
   fontFamily: "var(--font-mono)",
   textTransform: 'none', letterSpacing: 0, outline: 'none',
 }
@@ -95,7 +95,7 @@ export default function RegisterPage() {
           <div style={{ fontSize: 32, marginBottom: 4, color: '#0099cc' }}>⬡</div>
           <div style={{ fontSize: 20, fontWeight: 900, color: '#0099cc', letterSpacing: 6, marginBottom: 4,
             fontFamily: "'Orbitron', system-ui, sans-serif" }}>HEXOD</div>
-          <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.45)', letterSpacing: 2,
+          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', letterSpacing: 2,
             fontFamily: "'Orbitron', system-ui, sans-serif" }}>CLAIM YOUR FIRST TERRITORY. BUILD YOUR EMPIRE.</div>
           {refCode && (
             <div style={{ marginTop: 12, padding: '8px 14px', background: 'rgba(0,153,204,0.08)',
@@ -145,7 +145,7 @@ export default function RegisterPage() {
               <button type="button" onClick={() => setShowPw(v => !v)} style={{
                 position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
                 background: 'none', border: 'none', cursor: 'pointer', fontSize: 14,
-                color: 'rgba(26,42,58,0.4)', padding: 4,
+                color: 'rgba(255,255,255,0.4)', padding: 4,
               }}>
                 {showPw ? '◉' : '◎'}
               </button>
@@ -175,7 +175,7 @@ export default function RegisterPage() {
               <button type="button" onClick={() => setShowConfirm(v => !v)} style={{
                 position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
                 background: 'none', border: 'none', cursor: 'pointer', fontSize: 14,
-                color: 'rgba(26,42,58,0.4)', padding: 4,
+                color: 'rgba(255,255,255,0.4)', padding: 4,
               }}>
                 {showConfirm ? '◉' : '◎'}
               </button>
@@ -183,7 +183,7 @@ export default function RegisterPage() {
           </div>
           <div style={{ marginTop: 16, padding: '12px 14px', background: 'rgba(0,153,204,0.06)',
             border: '1px solid rgba(0,153,204,0.12)', borderRadius: 8,
-            fontSize: 10, color: 'rgba(26,42,58,0.6)', lineHeight: 1.8,
+            fontSize: 10, color: 'rgba(255,255,255,0.5)', lineHeight: 1.8,
             fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>
             BEGINNER PROTECTION 7 DAYS — NO ATTACKS WHILE YOU LEARN
             <br />
@@ -195,13 +195,13 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <div style={{ textAlign: 'center', marginTop: 18, fontSize: 10, color: 'rgba(26,42,58,0.45)',
+        <div style={{ textAlign: 'center', marginTop: 18, fontSize: 10, color: 'rgba(255,255,255,0.35)',
           fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>
           ALREADY A COMMANDER?{' '}
           <Link to="/login" style={{ color: '#0099cc', textDecoration: 'none', fontWeight: 700 }}>SIGN IN</Link>
         </div>
 
-        <div style={{ textAlign: 'center', marginTop: 12, fontSize: 9, color: 'rgba(26,42,58,0.3)',
+        <div style={{ textAlign: 'center', marginTop: 12, fontSize: 9, color: 'rgba(255,255,255,0.25)',
           fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1, lineHeight: 1.6 }}>
           BY REGISTERING YOU ACCEPT THE TERMS OF SERVICE AND PRIVACY POLICY.
           HEX COIN IS A UTILITY TOKEN. NOT FINANCIAL ADVICE.

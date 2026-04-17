@@ -64,7 +64,7 @@ function WalletCard({ wallet, onConvert, onWithdraw }: any) {
           ⏳ {toF(wallet.tdi_pending, 4)} HEX pending withdrawal
         </div>
       )}
-      <div style={{ marginTop: 14, fontSize: 10, color: 'rgba(26,42,58,0.25)', lineHeight: 1.6, textAlign: 'center' }}>
+      <div style={{ marginTop: 14, fontSize: 10, color: 'rgba(255,255,255,0.2)', lineHeight: 1.6, textAlign: 'center' }}>
         HEX earned = crypto equivalent of your HEX Coin purchases · Withdraw to Polygon wallet after KYC
       </div>
     </div>
@@ -126,7 +126,6 @@ function CryptoNewsfeed() {
 }
 
 import { StakingPanel } from './StakingPanel'
-import { EmojiIcon } from '../shared/emojiIcons'
 import { IconSVG } from '../shared/iconBank'
 
 const TABS = [
@@ -284,7 +283,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
             {/* How it works — explanation for non-crypto users */}
             <div style={{ marginTop: 14, padding: 14, borderRadius: 12, background: 'rgba(0,153,204,0.04)', border: '1px solid rgba(0,153,204,0.1)' }}>
               <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>HOW IT WORKS</div>
-              <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.55)', lineHeight: 1.8 }}>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', lineHeight: 1.8 }}>
                 <strong style={{ color: '#7950f2' }}>HEX Coins (◆)</strong> are your in-game currency. Earn them by owning territories, completing challenges, and winning events.
                 They can be converted to <strong style={{ color: '#cc8800' }}>HEX Crypto</strong> tokens on the Polygon blockchain — real cryptocurrency you own.
                 Staking your HEX gives you bonus resource production in your kingdoms.
@@ -307,7 +306,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
                 <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.04)', fontWeight: 500, fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>{tx.type?.replace(/_/g, ' ').toUpperCase()}</div>
-                    <div style={{ fontSize: 7, color: 'rgba(26,42,58,0.25)', marginTop: 1 }}>{new Date(tx.date).toLocaleDateString()}</div>
+                    <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)', marginTop: 1 }}>{new Date(tx.date).toLocaleDateString()}</div>
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 900, fontFamily: "'Share Tech Mono', monospace", color: TX_COLORS[tx.type] ?? '#e2e8f0' }}>
                     {tx.amount > 0 ? '+' : ''}{parseFloat(tx.amount).toFixed(4)} HEX

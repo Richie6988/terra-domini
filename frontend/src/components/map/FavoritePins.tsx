@@ -8,7 +8,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 export interface FavoritePin {
   id: string | number
@@ -131,7 +130,7 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
                   No saved locations yet.<br />Navigate somewhere and click "Save here"
                 </div>
               ) : pins.map(pin => (
-                <div key={pin.id} style={{ padding: '8px 12px', borderBottom: '1px solid rgba(0,60,100,0.05)', display: 'flex', gap: 8, alignItems: 'center' }}>
+                <div key={pin.id} style={{ padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,0.04)', display: 'flex', gap: 8, alignItems: 'center' }}>
                   <span style={{ fontSize: 16, cursor: 'pointer' }} onClick={() => {
                     const next = PIN_EMOJIS[(PIN_EMOJIS.indexOf(pin.emoji) + 1) % PIN_EMOJIS.length]
                     updateEmoji(pin.id, next)
@@ -143,7 +142,7 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
                         onChange={e => setEditName(e.target.value)}
                         onBlur={() => { renamePin(pin.id, editName || pin.name); setEditingId(null) }}
                         onKeyDown={e => e.key === 'Enter' && (renamePin(pin.id, editName || pin.name), setEditingId(null))}
-                        style={{ background: 'rgba(0,60,100,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, padding: '2px 6px', color: '#e2e8f0', fontSize: 12, width: '100%', outline: 'none' }}
+                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 4, padding: '2px 6px', color: '#e2e8f0', fontSize: 12, width: '100%', outline: 'none' }}
                       />
                     ) : (
                       <div onDoubleClick={() => { setEditingId(String(pin.id)); setEditName(pin.name) }}

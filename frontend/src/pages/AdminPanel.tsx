@@ -174,7 +174,7 @@ export default function AdminPanel() {
         {tab === 'logs' && (
           <div>
             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:16 }}>
-              <div style={{ fontSize:14, fontWeight:700, color:'#1a2a3a' }}>
+              <div style={{ fontSize:14, fontWeight:700, color:'#e2e8f0' }}>
                 Journal des actions
                 <span style={{ fontSize:10, color:'#4B5563', marginLeft:8 }}>
                   {logs.length} entrées · actualisation auto 10s
@@ -250,7 +250,7 @@ export default function AdminPanel() {
                 style={{
                   flex:1, padding:'10px 14px', background:'rgba(255,255,255,0.06)',
                   border:'1px solid rgba(255,255,255,0.1)', borderRadius:9,
-                  color:'#1a2a3a', fontSize:13,
+                  color:'#e2e8f0', fontSize:13,
                 }}
               />
             </div>
@@ -282,7 +282,7 @@ export default function AdminPanel() {
                   borderBottom:'1px solid rgba(255,255,255,0.04)',
                 }}>
                   <div>
-                    <div style={{ fontSize:13, fontWeight:700, color:'#1a2a3a' }}>
+                    <div style={{ fontSize:13, fontWeight:700, color:'#e2e8f0' }}>
                       {p.is_staff && <span style={{ color:'#F59E0B', marginRight:4 }}></span>}
                       {p.username}
                     </div>
@@ -322,7 +322,7 @@ export default function AdminPanel() {
         {/* ── SHOP ──────────────────────────────────────────────── */}
         {tab === 'shop' && (
           <div>
-            <div style={{ fontSize:14, fontWeight:700, color:'#1a2a3a', marginBottom:16 }}>
+            <div style={{ fontSize:14, fontWeight:700, color:'#e2e8f0', marginBottom:16 }}>
               Catalogue boutique ({shopItems.length} articles)
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fill,minmax(240px,1fr))', gap:10 }}>
@@ -332,7 +332,7 @@ export default function AdminPanel() {
                   border:`1px solid ${RARITY_COLOR[item.rarity] || '#374151'}33`,
                 }}>
                   <div style={{ display:'flex', justifyContent:'space-between', marginBottom:6 }}>
-                    <div style={{ fontSize:12, fontWeight:800, color:'#1a2a3a' }}>{item.name}</div>
+                    <div style={{ fontSize:12, fontWeight:800, color:'#e2e8f0' }}>{item.name}</div>
                     <div style={{ fontSize:11, color:'#F59E0B', fontFamily:'monospace', fontWeight:700 }}>
                       {parseFloat(item.price_tdc).toFixed(0)} HEX
                     </div>
@@ -398,7 +398,7 @@ function EconomyTab() {
             <div key={l as string} style={{ display:'flex', justifyContent:'space-between',
               padding:'6px 0', borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
               <span style={{ fontSize:12, color:'#6B7280' }}>{l}</span>
-              <span style={{ fontSize:12, fontWeight:700, color:'#1a2a3a', fontFamily:'monospace' }}>{v}</span>
+              <span style={{ fontSize:12, fontWeight:700, color:'#e2e8f0', fontFamily:'monospace' }}>{v}</span>
             </div>
           ))}
         </div>

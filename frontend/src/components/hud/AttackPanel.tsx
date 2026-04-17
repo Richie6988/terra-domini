@@ -13,7 +13,6 @@ import { usePlayer } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
 import type { TerritoryLight } from '../../types'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 // ─── Monte Carlo combat simulation ────────────────────────────────────────
 function rollDie(): number { return Math.floor(Math.random() * 6) + 1 }

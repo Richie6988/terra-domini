@@ -9,7 +9,6 @@ import { MiniIcon, StatusDot } from '../shared/MiniIcons'
 import { CrystalIcon } from '../shared/CrystalIcon'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 type Tab = 'global' | 'nearby' | 'alliance'
@@ -92,7 +91,7 @@ export function LadderPanel({ onClose }: Props) {
           <div key={p.rank} style={{
             display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10,
             background: p.isYou ? 'rgba(139,92,246,0.06)' : 'rgba(255,255,255,0.3)',
-            border: `1px solid ${p.isYou ? 'rgba(139,92,246,0.2)' : 'rgba(0,60,100,0.04)'}`,
+            border: `1px solid ${p.isYou ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.03)'}`,
           }}>
             {/* Rank */}
             <div style={{ width: 28, flexShrink: 0 }}>

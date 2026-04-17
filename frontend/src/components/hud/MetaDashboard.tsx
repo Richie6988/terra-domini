@@ -13,7 +13,6 @@ import { api } from '../../services/api'
 import { RARITY_COLOR, BIOME_COLOR } from '../../styles/tokens'
 import { GlassPanel } from '../shared/GlassPanel'
 import { SkeletonPanel } from '../ui/Utils'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 
@@ -276,5 +275,5 @@ function Section({ label, children }: { label: string; children: React.ReactNode
 }
 
 function EmptyState({ msg }: { msg: string }) {
-  return <div style={{ padding:'16px', textAlign:'center', color:'rgba(26,42,58,0.25)', fontSize:12 }}>{msg}</div>
+  return <div style={{ padding:'16px', textAlign:'center', color:'rgba(255,255,255,0.2)', fontSize:12 }}>{msg}</div>
 }

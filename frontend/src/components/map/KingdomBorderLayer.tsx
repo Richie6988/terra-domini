@@ -13,7 +13,6 @@ import { useQuery } from '@tanstack/react-query'
 import { cellToBoundary, gridDisk } from 'h3-js'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Kingdom {
   cluster_id: string

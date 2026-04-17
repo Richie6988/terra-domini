@@ -35,6 +35,7 @@ function DockButton({ item, isActive, onClick, badge }: {
   return (
     <button
       onClick={onClick}
+      className="dock-btn"
       style={{
         display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
         padding: '8px 6px', minWidth: 56,

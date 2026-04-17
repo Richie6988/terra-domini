@@ -88,7 +88,7 @@ export function EmptyState({ icon, title, message, action }: {
       <div style={{
         width: 80, height: 80, margin: '0 auto 16px',
         borderRadius: '50%',
-        background: 'rgba(0,60,100,0.04)',
+        background: 'rgba(255,255,255,0.03)',
         border: '2px dashed rgba(255,255,255,0.06)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         fontSize: 32,

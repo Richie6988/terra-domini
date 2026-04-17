@@ -12,7 +12,6 @@ import { api } from '../../services/api'
 import { useStore, usePlayer } from '../../store'
 import { useSound } from '../../hooks/useSound'
 import toast from 'react-hot-toast'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 /* ── Rarity ─────────────────────────────────────────────── */
 const RARITY: Record<string, {

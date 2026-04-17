@@ -9,7 +9,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { SkeletonList } from '../ui/Utils'
 import toast from 'react-hot-toast'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 export function CampaignWidget() {
   const [expanded, setExpanded] = useState<number>(0)
@@ -97,7 +96,7 @@ function CampaignCard({ campaign, expanded, onToggle, onCheck, checking }: any) 
           <div style={{ fontSize: 11, color: campaign.completed ? '#10B981' : '#6B7280', fontWeight: 700 }}>
             {campaign.current_step}/{campaign.total_steps}
           </div>
-          {!isLocked && <div style={{ fontSize: 16, color: 'rgba(26,42,58,0.25)', marginTop: 2 }}>{expanded ? '▲' : '▼'}</div>}
+          {!isLocked && <div style={{ fontSize: 16, color: 'rgba(255,255,255,0.2)', marginTop: 2 }}>{expanded ? '▲' : '▼'}</div>}
         </div>
       </button>
 

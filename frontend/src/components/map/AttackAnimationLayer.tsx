@@ -14,7 +14,6 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import { useLeafletLayer } from '../ui/Utils'
 import { cellToBoundary, cellToLatLng } from 'h3-js'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 interface AttackEvent {
   sourceH3:  string

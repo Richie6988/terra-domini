@@ -11,7 +11,6 @@
 import L from 'leaflet'
 import * as h3 from 'h3-js'
 import type { TerritoryLight } from '../../types'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 const RARITY_COLOR: Record<string, string> = {
   common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',

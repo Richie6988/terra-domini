@@ -11,7 +11,6 @@ import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 const RC: Record<string, string> = {
   common: '#9CA3AF', uncommon: '#10B981', rare: '#3B82F6',

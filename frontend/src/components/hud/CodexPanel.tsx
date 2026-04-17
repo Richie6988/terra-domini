@@ -276,7 +276,7 @@ export function CodexPanel({ onClose }: Props) {
             {/* 3D Museum placeholder */}
             <div style={{
               padding: 20, borderRadius: 12, textAlign: 'center',
-              background: 'linear-gradient(135deg, rgba(26,42,58,0.95), rgba(10,10,18,0.98))',
+              background: 'linear-gradient(135deg, rgba(10,15,25,0.95), rgba(10,10,18,0.98))',
               border: '1px solid rgba(255,255,255,0.08)',
               position: 'relative', overflow: 'hidden', minHeight: 120,
             }}>

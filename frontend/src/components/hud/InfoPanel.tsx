@@ -4,7 +4,6 @@
  */
 import { GlassPanel } from '../shared/GlassPanel'
 import { MiniIcon } from '../shared/MiniIcons'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 
@@ -24,7 +23,7 @@ export function InfoPanel({ onClose }: Props) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ padding: 16, borderRadius: 12, background: 'linear-gradient(135deg, rgba(0,153,204,0.06), rgba(0,153,204,0.02))', border: '1px solid rgba(0,153,204,0.15)' }}>
           <div style={{ fontSize: 16, fontWeight: 900, color: '#0099cc', letterSpacing: 3, fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>HEXOD</div>
-          <div style={{ fontSize: 11, color: 'rgba(26,42,58,0.7)', lineHeight: 1.8 }}>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.6)', lineHeight: 1.8 }}>
             Geo-strategic multiplayer game. Real-world territories become blockchain-backed NFTs on Polygon.
           </div>
         </div>
@@ -44,17 +43,17 @@ export function InfoPanel({ onClose }: Props) {
         {/* Contact form */}
         <div style={{ padding: 14, borderRadius: 10, background: 'rgba(100,116,139,0.04)', border: '1px solid rgba(100,116,139,0.1)' }}>
           <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif", marginBottom: 10 }}>CONTACT SUPPORT</div>
-          <select style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)', fontSize: 10, background: 'rgba(0,60,100,0.02)', color: '#e2e8f0', marginBottom: 8, outline: 'none' }}>
+          <select style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)', fontSize: 10, background: 'rgba(255,255,255,0.02)', color: '#e2e8f0', marginBottom: 8, outline: 'none' }}>
             <option value="bug">Bug Report</option>
             <option value="suggestion">Suggestion</option>
             <option value="abuse">Report Abuse</option>
             <option value="account">Account Issue</option>
             <option value="other">Other</option>
           </select>
-          <textarea placeholder="Describe your issue..." rows={3} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)', fontSize: 10, background: 'rgba(0,60,100,0.02)', color: '#e2e8f0', resize: 'vertical', outline: 'none', fontFamily: 'system-ui', boxSizing: 'border-box' as const }} />
+          <textarea placeholder="Describe your issue..." rows={3} style={{ width: '100%', padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.08)', fontSize: 10, background: 'rgba(255,255,255,0.02)', color: '#e2e8f0', resize: 'vertical', outline: 'none', fontFamily: 'system-ui', boxSizing: 'border-box' as const }} />
           <button onClick={() => { import('react-hot-toast').then(m => m.default.success('Message sent! We\'ll get back to you.')) }} style={{ width: '100%', marginTop: 8, padding: '10px', borderRadius: 8, border: 'none', background: '#64748b', color: '#fff', fontSize: 9, fontWeight: 700, letterSpacing: 2, cursor: 'pointer', fontFamily: "'Orbitron', sans-serif" }}>SEND MESSAGE</button>
         </div>
-        <div style={{ textAlign: 'center', fontSize: 7, color: 'rgba(26,42,58,0.25)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>HEXOD v0.1.0 — SEASON 1 — POLYGON PoS</div>
+        <div style={{ textAlign: 'center', fontSize: 7, color: 'rgba(255,255,255,0.2)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>HEXOD v0.1.0 — SEASON 1 — POLYGON PoS</div>
       </div>
     </GlassPanel>
   )

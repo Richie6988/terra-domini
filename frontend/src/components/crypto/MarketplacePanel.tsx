@@ -477,7 +477,7 @@ function Empty({ icon, msg, sub }: { icon: string; msg: string; sub: string }) {
     <div style={{ textAlign: 'center', padding: '36px 20px', color: 'rgba(255,255,255,0.3)' }}>
       <div style={{ fontSize: 34, marginBottom: 8 }}>{icon}</div>
       <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', fontWeight: 600 }}>{msg}</div>
-      <div style={{ fontSize: 10, color: 'rgba(26,42,58,0.25)', marginTop: 4 }}>{sub}</div>
+      <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', marginTop: 4 }}>{sub}</div>
     </div>
   )
 }

@@ -147,7 +147,7 @@ export function TaskCenter({ onClose }: Props) {
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                   <CrystalIcon size="sm" />
-                  <span style={{ fontSize: 11, fontWeight: 900, color: isClaimed ? 'rgba(26,42,58,0.25)' : '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>{task.reward_tdc}</span>
+                  <span style={{ fontSize: 11, fontWeight: 900, color: isClaimed ? 'rgba(255,255,255,0.2)' : '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>{task.reward_tdc}</span>
                 </div>
                 {isDone && !isClaimed && (
                   <button onClick={() => claimMut.mutate(task.id)} disabled={claimMut.isPending} style={{

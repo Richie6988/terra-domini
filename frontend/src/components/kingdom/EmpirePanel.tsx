@@ -172,7 +172,7 @@ function StatsTab({ kingdoms }: { kingdoms: Kingdom[] }) {
           { k: 'Territories Explored', v: String(s.territories_owned || 0), c: '#22c55e' },
           { k: 'Account Age', v: player?.date_joined ? `${Math.floor((Date.now() - new Date(player.date_joined).getTime()) / 86400000)}d` : '?', c: '#8b5cf6' },
         ].map(row => (
-          <div key={row.k} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(0,60,100,0.04)' }}>
+          <div key={row.k} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(255,255,255,0.03)' }}>
             <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>{row.k}</span>
             <span style={{ fontSize: 10, fontWeight: 700, color: row.c, fontFamily: "'Share Tech Mono', monospace" }}>{row.v}</span>
           </div>
@@ -200,7 +200,7 @@ function StatsTab({ kingdoms }: { kingdoms: Kingdom[] }) {
               { name: 'Influence', icon: 'theater', val: Math.floor(count * 3 + (biomes['landmark'] || 0) * 20) },
             ]
           })().map(r => (
-            <div key={r.name} style={{ textAlign: 'center', padding: '6px 4px', borderRadius: 8, background: 'rgba(0,60,100,0.02)' }}>
+            <div key={r.name} style={{ textAlign: 'center', padding: '6px 4px', borderRadius: 8, background: 'rgba(255,255,255,0.02)' }}>
               <div style={{ fontSize: 16 }}><EmojiIcon emoji={r.icon} size={16} /></div>
               <div style={{ fontSize: 9, fontWeight: 700, color: '#e2e8f0', fontFamily: "'Share Tech Mono', monospace" }}>{r.val}</div>
               <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)' }}>{r.name}/d</div>

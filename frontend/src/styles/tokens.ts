@@ -15,7 +15,7 @@ export const COLOR = {
   bgDark: '#0f172a',
   bgDarkAlt: '#1e293b',
   // Text
-  textPrimary: '#1a2a3a',
+  textPrimary: '#e2e8f0',
   textSecondary: '#0077aa',
   textMuted: 'rgba(26, 42, 58, 0.45)',
   // HUD accents

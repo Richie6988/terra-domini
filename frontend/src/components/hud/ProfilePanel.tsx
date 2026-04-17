@@ -130,7 +130,7 @@ function CommanderTab() {
       <div style={{ display: 'flex', gap: 8 }}>
         <button onClick={() => { useStore.getState().logout(); window.location.href = '/login' }} style={{
           flex: 1, padding: 10, borderRadius: 8, cursor: 'pointer',
-          background: 'rgba(0,60,100,0.04)', border: '1px solid rgba(255,255,255,0.08)',
+          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
           color: 'rgba(255,255,255,0.45)', fontSize: 9, fontWeight: 700, letterSpacing: 1,
         }}>LOGOUT</button>
         <button onClick={() => toast.error('Account deletion coming soon')} style={{
@@ -176,7 +176,7 @@ function AchievementsTab() {
             <div style={{ fontSize:7,color:catCol,fontWeight:600,letterSpacing:1 }}>{b.category?.toUpperCase()}</div>
             <div style={{ fontSize:8,color:'rgba(255,255,255,0.4)',marginTop:2 }}>{b.description}</div>
           </div>
-          <div style={{ textAlign:'right',flexShrink:0 }}><div style={{ display:'flex',alignItems:'center',gap:2 }}><CrystalIcon size="sm" /><span style={{ fontSize:11,fontWeight:900,color:done?'#cc8800':'rgba(26,42,58,0.25)',fontFamily:"'Share Tech Mono',monospace" }}>{b.reward_tdc}</span></div>{done&&<div style={{ fontSize:7,color:'#22c55e',fontWeight:700,marginTop:2 }}> UNLOCKED</div>}</div>
+          <div style={{ textAlign:'right',flexShrink:0 }}><div style={{ display:'flex',alignItems:'center',gap:2 }}><CrystalIcon size="sm" /><span style={{ fontSize:11,fontWeight:900,color:done?'#cc8800':'rgba(255,255,255,0.2)',fontFamily:"'Share Tech Mono',monospace" }}>{b.reward_tdc}</span></div>{done&&<div style={{ fontSize:7,color:'#22c55e',fontWeight:700,marginTop:2 }}> UNLOCKED</div>}</div>
         </div>
       )})}
     </div>

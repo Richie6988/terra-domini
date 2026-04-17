@@ -13,7 +13,6 @@ import { IconSVG } from '../shared/iconBank'
 import { TokenHexPreview } from '../shared/TokenHexPreview'
 import { Token3DViewer } from '../shared/Token3DViewer'
 import toast from 'react-hot-toast'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { onClose: () => void }
 
@@ -360,7 +359,7 @@ export function AuctionPanel({ onClose }: Props) {
             border: '1px solid rgba(255,255,255,0.08)',
           }}>
             <div style={{
-              padding: '8px 12px', background: 'rgba(0,60,100,0.04)',
+              padding: '8px 12px', background: 'rgba(255,255,255,0.03)',
               fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)',
               fontFamily: "'Orbitron', system-ui, sans-serif",
               display: 'flex', justifyContent: 'space-between', alignItems: 'center',
@@ -376,7 +375,7 @@ export function AuctionPanel({ onClose }: Props) {
             <div style={{ maxHeight: 150, overflowY: 'auto', padding: '8px 12px' }}>
               {chat.map((msg, i) => (
                 <div key={i} style={{
-                  padding: '4px 0', borderBottom: '1px solid rgba(0,60,100,0.04)',
+                  padding: '4px 0', borderBottom: '1px solid rgba(255,255,255,0.03)',
                   display: 'flex', gap: 8, alignItems: 'flex-start',
                 }}>
                   <span style={{
@@ -388,14 +387,14 @@ export function AuctionPanel({ onClose }: Props) {
                     fontSize: 8, color: msg.isBid ? '#cc8800' : 'rgba(255,255,255,0.04)',
                     fontWeight: msg.isBid ? 700 : 400, flex: 1,
                   }}>{msg.text}</span>
-                  <span style={{ fontSize: 6, color: 'rgba(26,42,58,0.25)', flexShrink: 0 }}>{msg.time}</span>
+                  <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}>{msg.time}</span>
                 </div>
               ))}
               <div ref={chatEndRef} />
             </div>
 
             {/* Emoji bar + chat input */}
-            <div style={{ display: 'flex', gap: 2, padding: '4px 8px', background: 'rgba(0,60,100,0.02)', borderTop: '1px solid rgba(0,60,100,0.04)' }}>
+            <div style={{ display: 'flex', gap: 2, padding: '4px 8px', background: 'rgba(255,255,255,0.02)', borderTop: '1px solid rgba(255,255,255,0.03)' }}>
               {['','','','','','','',''].map(em => (
                 <button key={em} onClick={() => sendEmoji(em)} style={{
                   padding: '2px 4px', border: 'none', background: 'none', cursor: 'pointer', fontSize: 12,
@@ -406,7 +405,7 @@ export function AuctionPanel({ onClose }: Props) {
                 >{em}</button>
               ))}
             </div>
-            <div style={{ display: 'flex', gap: 4, padding: '6px 8px', background: 'rgba(0,60,100,0.02)' }}>
+            <div style={{ display: 'flex', gap: 4, padding: '6px 8px', background: 'rgba(255,255,255,0.02)' }}>
               <input
                 value={chatMsg} onChange={e => setChatMsg(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleChat()}

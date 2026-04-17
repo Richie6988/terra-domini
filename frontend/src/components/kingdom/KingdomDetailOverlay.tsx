@@ -192,7 +192,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
               }}>{t.rarity?.toUpperCase()}</span>
               <span style={{
                 padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 600,
-                background: 'rgba(0,60,100,0.04)', color: 'rgba(255,255,255,0.4)',
+                background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.4)',
               }}>{t.biome?.toUpperCase()}</span>
               {t.poi_category && <span style={{
                 padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 600,
@@ -387,7 +387,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
         {k.territories.slice(0, 5).map(t => (
           <div key={t.h3_index} style={{
             display: 'flex', alignItems: 'center', gap: 8, padding: '6px 0',
-            borderBottom: '1px solid rgba(0,60,100,0.04)',
+            borderBottom: '1px solid rgba(255,255,255,0.03)',
           }}>
             <span style={{
               padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 700,

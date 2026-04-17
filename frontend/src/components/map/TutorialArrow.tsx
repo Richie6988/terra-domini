@@ -9,7 +9,6 @@ import L from 'leaflet'
 import { useQuery } from '@tanstack/react-query'
 import { api } from '../../services/api'
 import { latLngToCell, cellToLatLng, cellToBoundary, gridDisk } from 'h3-js'
-import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props { map: L.Map | null }
 

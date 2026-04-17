@@ -354,7 +354,7 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
               {method.name}
             </div>
           </div>
-          <div style={{ fontSize: 8, color: 'rgba(26,42,58,0.55)', lineHeight: 1.5, marginBottom: 8 }}>
+          <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.5)', lineHeight: 1.5, marginBottom: 8 }}>
             {method.desc}
           </div>
           <div style={{ display: 'flex', gap: 8 }}>
