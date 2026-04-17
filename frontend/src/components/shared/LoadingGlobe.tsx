@@ -107,6 +107,7 @@ export function LoadingGlobe({ playerLat = 48.8566, playerLon = 2.3522, onComple
         // Phase 1: Full 360° revolution from user's location
         const spinT = elapsed / SPIN_DURATION  // 0→1
         earth.rotation.y = startRotY + spinT * Math.PI * 2  // full revolution
+        earth.rotation.x = Math.sin(spinT * Math.PI) * 0.3  // vertical tilt
         camera.position.z = 14 - spinT * 2  // slowly approach
       } else if (elapsed < TOTAL_MS) {
         // Phase 2: Dive toward player location
@@ -118,7 +119,10 @@ export function LoadingGlobe({ playerLat = 48.8566, playerLon = 2.3522, onComple
 
         // Camera dives in
         camera.position.z = 12 - eased * 10
-        camera.position.y = eased * (playerLat > 0 ? 2 : -2) * 0.5
+        // Tilt camera to match player latitude
+        const latRad = (playerLat / 90) * 1.5
+        camera.position.y = eased * latRad
+        earth.rotation.x = (1 - eased) * Math.sin(Math.PI) * 0.3 + eased * (-playerLat * Math.PI / 180)
 
         if (diveT > 0.3) setPhase('diving')
       }

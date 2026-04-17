@@ -144,7 +144,7 @@ export default function AdminPanel() {
                 }}>
                   <div style={{ fontSize: 22, marginBottom: 6 }}><EmojiIcon emoji={s.icon} size={16} /></div>
                   <div style={{ fontSize: 22, fontWeight: 900, color: s.color, fontFamily: 'monospace' }}>{s.value}</div>
-                  <div style={{ fontSize: 10, color: '#6B7280', marginTop: 4 }}>{s.label}</div>
+                  <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>{s.label}</div>
                 </div>
               ))}
             </div>
@@ -337,7 +337,7 @@ export default function AdminPanel() {
                       {parseFloat(item.price_tdc).toFixed(0)} HEX
                     </div>
                   </div>
-                  <div style={{ fontSize:10, color:'#6B7280', marginBottom:6 }}>{item.description}</div>
+                  <div style={{ fontSize:10, color:'rgba(255,255,255,0.4)', marginBottom:6 }}>{item.description}</div>
                   <div style={{ display:'flex', gap:6 }}>
                     <span style={{ fontSize:9, padding:'2px 6px', borderRadius:10, fontWeight:700,
                       background: `${RARITY_COLOR[item.rarity] || '#374151'}22`,
@@ -397,7 +397,7 @@ function EconomyTab() {
           ].map(([l,v]) => (
             <div key={l as string} style={{ display:'flex', justifyContent:'space-between',
               padding:'6px 0', borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
-              <span style={{ fontSize:12, color:'#6B7280' }}>{l}</span>
+              <span style={{ fontSize:12, color:'rgba(255,255,255,0.4)' }}>{l}</span>
               <span style={{ fontSize:12, fontWeight:700, color:'#e2e8f0', fontFamily:'monospace' }}>{v}</span>
             </div>
           ))}
@@ -416,7 +416,7 @@ function EconomyTab() {
           ].map(([l,v]) => (
             <div key={l as string} style={{ display:'flex', justifyContent:'space-between',
               padding:'6px 0', borderBottom:'1px solid rgba(255,255,255,0.04)' }}>
-              <span style={{ fontSize:12, color:'#6B7280' }}>{l}</span>
+              <span style={{ fontSize:12, color:'rgba(255,255,255,0.4)' }}>{l}</span>
               <span style={{ fontSize:12, fontWeight:700, color:'#F59E0B', fontFamily:'monospace' }}>{v}</span>
             </div>
           ))}

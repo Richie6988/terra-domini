@@ -125,7 +125,7 @@ export function MyTerritoriesOverlay({ onFlyTo }: Props) {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <div style={{ fontSize: 13, fontWeight: 800, color: '#e2e8f0' }}>
                   Mes territoires
-                  <span style={{ fontSize: 10, color: '#6B7280', marginLeft: 8 }}>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', marginLeft: 8 }}>
                     {totalCount} zones · +{Math.round(totalIncome)}/j
                   </span>
                 </div>

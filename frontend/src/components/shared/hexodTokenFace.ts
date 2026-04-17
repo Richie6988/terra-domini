@@ -23,6 +23,7 @@ export const TIERS = {
   SILVER:  { id: 'SILVER',  metal: '#C0C0C0', carbon: '#16181A', title: '#FFFFFF', engrave_metal: '#4A4A4A' },
   GOLD:    { id: 'GOLD',    metal: '#D4AF37', carbon: '#1A1608', title: '#FFECB3', engrave_metal: '#634E14' },
   EMERALD: { id: 'EMERALD', metal: '#2ECC71', carbon: '#051209', title: '#A9DFBF', engrave_metal: '#145A32' },
+  DIAMOND: { id: 'DIAMOND', metal: '#B9F2FF', carbon: '#050D14', title: '#E0F7FA', engrave_metal: '#0D47A1' },
 } as const
 
 export type TierKey = keyof typeof TIERS

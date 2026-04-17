@@ -105,7 +105,7 @@ export function NotificationBadge({ count }: { count?: number }) {
     <div style={{
       position: 'absolute', top: -2, right: -2, zIndex: 10,
       minWidth: 16, height: 16, borderRadius: 8,
-      background: '#dc2626', border: '2px solid rgba(13,27,42,0.95)',
+      background: '#dc2626', border: '2px solid rgba(255,100,100,0.5)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
       fontSize: 8, fontWeight: 900, color: '#fff',
       fontFamily: "'Share Tech Mono', monospace",

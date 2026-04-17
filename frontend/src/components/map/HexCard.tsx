@@ -201,7 +201,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
             {isFree && player && claimOpts?.locked && (
               <div style={{
                 padding: '8px 14px', borderRadius: 10,
-                background: 'rgba(100,100,100,0.1)', border: '1px solid rgba(100,100,100,0.2)',
+                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(100,100,100,0.2)',
                 color: '#9CA3AF', fontSize: 8, fontWeight: 700, letterSpacing: 1,
               }}>LOCKED</div>
             )}

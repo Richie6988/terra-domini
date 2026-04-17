@@ -94,8 +94,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       // Backend accepts float zoom via int(float(zoom))
       zoomSnap: 0,
       zoomDelta: 1,                // button clicks still jump whole levels
-      wheelPxPerZoomLevel: 80,     // responsive to touchpad
-      wheelDebounceTime: 40,       // low debounce = immediate response
+      wheelPxPerZoomLevel: 40,     // responsive to touchpad
+      wheelDebounceTime: 20,       // low debounce = immediate response
       zoomAnimation: true,
       fadeAnimation: true,
       markerZoomAnimation: true,

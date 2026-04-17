@@ -108,7 +108,7 @@ export const CATEGORIES: Record<string, CategoryDef> = {
     name: 'Special & Epic', color: '#a855f7',
     icons: [
       { id: 'mythology',  name: 'Mythology',  cat_color: '#7c3aed' },
-      { id: 'countries',   name: 'Countries',  cat_color: '#0ea5e9' },
+      { id: 'country',    name: 'Country',  cat_color: '#0ea5e9' },
       { id: 'sponsored',  name: 'Sponsored',  cat_color: '#f59e0b' },
       { id: 'gift',       name: 'Gift',       cat_color: '#ec4899' },
     ],

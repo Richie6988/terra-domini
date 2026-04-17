@@ -19,7 +19,7 @@ import { IconSVG } from '../shared/iconBank'
 import { TokenFace2D } from '../shared/TokenFace2D'
 import type { TierKey } from '../shared/hexodTokenFace'
 
-const RARITY_TIER: Record<string, TierKey> = { common: 'BRONZE', uncommon: 'BRONZE', rare: 'SILVER', epic: 'GOLD', legendary: 'EMERALD', mythic: 'EMERALD' }
+const RARITY_TIER: Record<string, TierKey> = { common: 'BRONZE', uncommon: 'BRONZE', rare: 'SILVER', epic: 'GOLD', legendary: 'EMERALD', mythic: 'DIAMOND' }
 const RARITY_COLORS: Record<string, string> = {
   common: '#94a3b8', uncommon: '#22c55e', rare: '#3b82f6',
   epic: '#8b5cf6', legendary: '#f59e0b', mythic: '#ef4444',
@@ -107,33 +107,9 @@ export function EventsPanel({ onClose }: Props) {
   const handleReveal = (id: string) => setRevealedResults(prev => new Set([...prev, id]))
 
   const s = { fontFamily: "'Orbitron', system-ui, sans-serif" } as const
-  const luckBase = 42
-  const luckPotion = 0
-  const luckTotal = luckBase + luckPotion
 
   return (
     <GlassPanel title="EVENTS" onClose={onClose} accent="#f97316">
-      {/* Luck stat bar */}
-      <div style={{
-        display: 'flex', alignItems: 'center', gap: 12, padding: '8px 14px',
-        borderRadius: 10, marginBottom: 10,
-        background: 'linear-gradient(90deg, rgba(251,191,36,0.06), rgba(168,85,247,0.06))',
-        border: '1px solid rgba(251,191,36,0.15)',
-      }}>
-        <div style={{ fontSize: 20 }}><IconSVG id="clover" size={20} /></div>
-        <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, ...s }}>YOUR LUCK RATING</div>
-          <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
-            <span style={{ fontSize: 18, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>{luckTotal}</span>
-            <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.3)' }}>/ 100</span>
-            {luckPotion > 0 && <span style={{ fontSize: 7, color: '#a855f7', fontWeight: 700 }}>+{luckPotion} POTION</span>}
-          </div>
-        </div>
-        <button onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }}
-          className="btn-game btn-game-purple"
-          style={{ fontSize: 7, letterSpacing: 1 }}
-        ><IconSVG id="flask" size={10} /> BUY POTION</button>
-      </div>
 
       {/* Tabs */}
       <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>

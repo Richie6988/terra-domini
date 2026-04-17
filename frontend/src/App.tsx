@@ -359,17 +359,18 @@ export default function App() {
         position="top-center"
         toastOptions={{
           style: {
-            background: 'rgba(235, 242, 250, 0.95)',
+            background: 'rgba(13, 27, 42, 0.95)',
             backdropFilter: 'blur(12px)',
             color: '#e2e8f0',
-            border: '1px solid rgba(0, 153, 204, 0.2)',
-            borderRadius: 8,
-            fontSize: 10,
+            border: '1px solid rgba(12, 197, 255, 0.2)',
+            borderRadius: 12,
+            fontSize: 11,
             fontFamily: "'Orbitron', system-ui, sans-serif",
             letterSpacing: 1,
             textTransform: 'uppercase' as const,
+            boxShadow: '0 8px 30px rgba(0,0,0,0.5)',
           },
-          success: { iconTheme: { primary: '#00884a', secondary: '#fff' } },
+          success: { iconTheme: { primary: '#22c55e', secondary: '#fff' } },
           error:   { iconTheme: { primary: '#dc2626', secondary: '#fff' } },
         }}
       />

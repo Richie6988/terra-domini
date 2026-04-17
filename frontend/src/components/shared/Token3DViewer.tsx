@@ -112,10 +112,12 @@ export function Token3DViewer(props: Token3DProps) {
 
   return (
     <div
+      onClick={e => { if (e.target === e.currentTarget) onCloseRef.current() }}
       style={{
         position: 'fixed', inset: 0, zIndex: 2000,
         background: 'radial-gradient(ellipse at center, rgba(5,10,20,0.95), rgba(0,0,0,0.98))',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+        cursor: 'pointer',
       }}
     >
       <button
@@ -123,8 +125,8 @@ export function Token3DViewer(props: Token3DProps) {
         style={{
           position: 'absolute', top: 20, right: 20, zIndex: 10,
           width: 40, height: 40, borderRadius: '50%',
-          background: 'rgba(255,255,255,0.08)',
-          border: '1px solid rgba(255,255,255,0.15)',
+          background: 'rgba(255,60,60,0.25)',
+          border: '2px solid rgba(255,100,100,0.5)',
           color: '#fff', fontSize: 20, cursor: 'pointer',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           fontFamily: "'Orbitron', sans-serif",

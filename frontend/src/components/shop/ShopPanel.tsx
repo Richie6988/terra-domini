@@ -14,7 +14,6 @@ import { useStore, useTDCBalance, usePlayer } from '../../store'
 import { useKingdomStore } from '../../store/kingdomStore'
 import { BoosterOpenAnimation } from './BoosterOpenAnimation'
 import { GlassPanel } from '../shared/GlassPanel'
-import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
 import { IconSVG } from '../shared/iconBank'
@@ -181,10 +180,10 @@ export function ShopPanel({ onClose }: Props) {
               </div>
             </div>
             <div style={{
-              fontSize:7, color:'#7950f2', fontWeight:700, fontFamily:"'Share Tech Mono', monospace",
+              fontSize:7, color:'#F59E0B', fontWeight:700, fontFamily:"'Share Tech Mono', monospace",
               display:'flex', alignItems:'center', gap:3,
             }}>
-              <CrystalIcon size="sm" />{activeKingdom.dailyHex}/d
+              <IconSVG id="hex_coin" size={12} />{activeKingdom.dailyHex}/d
             </div>
           </div>
         )}
@@ -195,8 +194,8 @@ export function ShopPanel({ onClose }: Props) {
           border:'1px solid rgba(255,255,255,0.08)' }}>
           <span style={{ fontSize:9, color:'rgba(255,255,255,0.35)', letterSpacing:2, fontWeight:500 }}>BALANCE</span>
           <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-            <CrystalIcon size="lg" />
-            <span style={{ fontSize:16, fontWeight:900, color:'#7950f2', fontFamily:"'Share Tech Mono', monospace" }}>
+            <IconSVG id="hex_coin" size={20} />
+            <span style={{ fontSize:16, fontWeight:900, color:'#F59E0B', fontFamily:"'Share Tech Mono', monospace" }}>
               {toNum(balance).toFixed(0)}
             </span>
           </div>
@@ -247,7 +246,7 @@ export function ShopPanel({ onClose }: Props) {
                 <div style={{ fontSize:28, marginBottom:6 }}><EmojiIcon emoji={b.icon} size={16} /></div>
                 <div style={{ fontSize:9, fontWeight:900, color:b.color, marginBottom:4, fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1 }}>{b.name}</div>
                 <div style={{ fontSize:7, color:'rgba(255,255,255,0.35)', lineHeight:1.6, fontFamily:'system-ui', marginBottom:8, whiteSpace:'pre-line' }}>{b.desc}</div>
-                <div style={{ fontSize:14, fontWeight:900, color:b.color, fontFamily:"'Share Tech Mono', monospace" }}>{b.price} ◆</div>
+                <div style={{ fontSize:14, fontWeight:900, color:b.color, fontFamily:"'Share Tech Mono', monospace" }}>{b.price} HEX</div>
               </button>
             ))}
           </div>
@@ -272,13 +271,13 @@ export function ShopPanel({ onClose }: Props) {
                   <div style={{ fontSize:9, fontWeight:900, color:'#e2e8f0', letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
                     <EmojiIcon emoji={item.icon} size={16} /> {item.name}
                   </div>
-                  <div style={{ fontSize:8, color:'rgba(255,255,255,0.35)', marginTop:3, lineHeight:1.4, textTransform:'none', fontFamily:'system-ui' }}>
+                  <div style={{ fontSize:8, color:'rgba(255,255,255,0.5)', marginTop:4, lineHeight:1.5, textTransform:'none', fontFamily:'system-ui' }}>
                     {item.desc}
                   </div>
                 </div>
                 <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
                   <div style={{ fontSize:13, fontWeight:900, color:'#0099cc', fontFamily:"'Share Tech Mono', monospace" }}>
-                    {item.price} ◆
+                    {item.price} HEX
                   </div>
                   <button onClick={() => handleBuy(item.name, item.code, item.price)}
                     className={toNum(balance) >= item.price ? 'btn-game btn-game-gold' : 'btn-game btn-game-glass'}
@@ -304,7 +303,7 @@ export function ShopPanel({ onClose }: Props) {
         }}>
           <div>
             <div style={{ fontSize:9, fontWeight:900, color:'#cc8800', fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1, display:'flex', alignItems:'center', gap:6 }}>
-              <CrystalIcon size="sm" /> BUY CRYSTALS WITH HEX
+              <IconSVG id="hex_coin" size={12} /> BUY CRYSTALS WITH HEX
             </div>
             <div style={{ fontSize:7, color:'rgba(255,255,255,0.4)', marginTop:2, textTransform:'none', fontFamily:'system-ui' }}>
               In-game currency — earned from bonuses or purchased with HEX crypto
