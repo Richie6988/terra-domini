@@ -14,6 +14,8 @@ export function HexodTopHUD() {
   const balance = useStore(s => s.balance)
   const setActivePanel = useStore(s => s.setActivePanel)
   const myTerritories = useStore(s => s.myTerritories)
+  const godMode = useStore(s => s.godMode)
+  const toggleGodMode = useStore(s => s.toggleGodMode)
 
   if (!player) return null
 
@@ -62,6 +64,26 @@ export function HexodTopHUD() {
           </div>
         </div>
       </div>
+
+      {/* God Mode — staff only */}
+      {(player as any).is_staff && (
+        <button
+          onClick={toggleGodMode}
+          style={{
+            pointerEvents: 'auto',
+            padding: '6px 14px', borderRadius: 20, cursor: 'pointer',
+            background: godMode ? 'linear-gradient(135deg, #F59E0B, #dc2626)' : 'rgba(255,255,255,0.06)',
+            border: godMode ? '2px solid #F59E0B' : '1px solid rgba(255,255,255,0.1)',
+            color: godMode ? '#fff' : 'rgba(255,255,255,0.4)',
+            fontSize: 8, fontWeight: 900, letterSpacing: 2,
+            fontFamily: "'Orbitron', system-ui, sans-serif",
+            boxShadow: godMode ? '0 0 15px rgba(245,158,11,0.5)' : 'none',
+            transition: 'all 0.2s',
+          }}
+        >
+          <IconSVG id="crown" size={12} /> {godMode ? 'GOD MODE ON' : 'GOD MODE'}
+        </button>
+      )}
 
       {/* Right — HEX Balance */}
       <div

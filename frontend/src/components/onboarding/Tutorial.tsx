@@ -418,7 +418,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
             </span>
             <button onClick={onComplete} style={{
               background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: 8, padding: '4px 10px', color: 'rgba(255,255,255,0.04)',
+              borderRadius: 8, padding: '4px 10px', color: 'rgba(255,255,255,0.4)',
               fontSize: 8, cursor: 'pointer', fontFamily: "'Orbitron', sans-serif",
             }}>SKIP</button>
           </motion.div>
@@ -636,7 +636,7 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
             >
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                 <span style={{ fontSize: 16, flexShrink: 0 }}><EmojiIcon emoji={item.icon} size={16} /></span>
-                <span style={{ fontSize: 12, color: item.color || 'rgba(255,255,255,0.04)' }}>{item.text}</span>
+                <span style={{ fontSize: 12, color: item.color || 'rgba(255,255,255,0.4)' }}>{item.text}</span>
               </div>
               {item.value && (
                 <span style={{

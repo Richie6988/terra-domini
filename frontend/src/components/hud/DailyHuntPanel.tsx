@@ -230,13 +230,13 @@ export function DailyHuntPanel({ onClose }: Props) {
                 fontSize: 11, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2,
                 fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 4,
               }}>
-                {hunt.name.toUpperCase()}
+                {(hunt.name || "").toUpperCase()}
               </div>
               <div style={{
                 fontSize: 8, fontWeight: 700, color: RARITY_COLORS[hunt.rarity], letterSpacing: 2,
                 fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8,
               }}>
-                {hunt.rarity.toUpperCase()} TOKEN
+                {(hunt.rarity || "").toUpperCase()} TOKEN
               </div>
               <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6 }}>
                 {hunt.hint}
@@ -281,7 +281,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 fontSize: 7, fontWeight: 700, letterSpacing: 3, color: '#f97316',
                 fontFamily: "'Orbitron', system-ui, sans-serif",
               }}>
-                TRACKING: {hunt.name.toUpperCase()}
+                TRACKING: {(hunt.name || "").toUpperCase()}
               </div>
             </div>
 
@@ -393,10 +393,10 @@ export function DailyHuntPanel({ onClose }: Props) {
               >
                 <TokenFace2D
                   tier={hunt.rarity === 'mythic' ? 'EMERALD' : hunt.rarity === 'legendary' ? 'GOLD' : hunt.rarity === 'epic' ? 'SILVER' : 'BRONZE'}
-                  category={hunt.category.toUpperCase().replace(/_/g, ' ')}
+                  category={(hunt.category || "").toUpperCase().replace(/_/g, ' ')}
                   catColor={RARITY_COLORS[hunt.rarity]}
                   biome="SAFARI"
-                  tokenName={hunt.name.toUpperCase()}
+                  tokenName={(hunt.name || "").toUpperCase()}
                   iconId={hunt.id}
                   serial={Math.floor(Math.random() * 900) + 100}
                   maxSupply={1000}
@@ -414,7 +414,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 fontSize: 9, fontWeight: 700, color: '#e2e8f0', letterSpacing: 1,
                 fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 16,
               }}>
-                {hunt.name.toUpperCase()}
+                {(hunt.name || "").toUpperCase()}
               </div>
 
               <button
@@ -481,7 +481,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 fontSize: 8, color: RARITY_COLORS[hunt.rarity],
                 fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
               }}>
-                {hunt.rarity.toUpperCase()} {hunt.name.toUpperCase()} → ADDED TO CODEX
+                {(hunt.rarity || "").toUpperCase()} {(hunt.name || "").toUpperCase()} → ADDED TO CODEX
               </div>
             </div>
           </motion.div>

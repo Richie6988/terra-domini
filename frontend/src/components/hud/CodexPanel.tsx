@@ -161,7 +161,7 @@ export function CodexPanel({ onClose }: Props) {
     let tokens = tab === 'overview' || tab === 'favorites'
       ? allTokens
       : allTokens.filter(t => t.codexTab === tab)
-    if (filter) tokens = tokens.filter(t => t.name.toLowerCase().includes(filter.toLowerCase()))
+    if (filter) tokens = tokens.filter(t => (t.name || "").toLowerCase().includes(filter.toLowerCase()))
     return tokens
   }, [tab, allTokens, filter])
 
@@ -233,7 +233,7 @@ export function CodexPanel({ onClose }: Props) {
                   display: 'flex', alignItems: 'center', gap: 6,
                 }}>
                   <IconSVG id={group.icons[0]?.id || 'mystery'} size={14} />
-                  {group.name.toUpperCase()} ({group.icons.length})
+                  {(group.name || "").toUpperCase()} ({group.icons.length})
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
                   {group.icons.map(icon => {
@@ -259,7 +259,7 @@ export function CodexPanel({ onClose }: Props) {
                           <IconSVG id={icon.id} size={20} />
                         </div>
                         <div style={{ fontSize: 6, fontWeight: 700, color: '#e2e8f0', letterSpacing: 0.5, fontFamily: "'Orbitron', sans-serif", textAlign: 'center' }}>
-                          {icon.name.toUpperCase().slice(0, 10)}
+                          {(icon.name || "").toUpperCase().slice(0, 10)}
                         </div>
                         <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', fontFamily: "'Share Tech Mono', monospace" }}>
                           {owned}/{total}
@@ -318,8 +318,8 @@ export function CodexPanel({ onClose }: Props) {
                     }}>
                       <IconSVG id={t.id} size={24} />
                     </div>
-                    <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.04)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-                      {t.name.slice(0, 8).toUpperCase()}
+                    <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                      {(t.name || "").slice(0, 8).toUpperCase()}
                     </div>
                   </div>
                 ))}
@@ -341,7 +341,7 @@ export function CodexPanel({ onClose }: Props) {
               background: ct.color + '08', border: `1px solid ${ct.color}20`,
             }}>
               <div style={{ fontSize: 8, fontWeight: 700, color: ct.color, letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-                <IconSVG id={ct.iconId} size={14} /> {ct.label.toUpperCase()}
+                <IconSVG id={ct.iconId} size={14} /> {(ct.label || "").toUpperCase()}
               </div>
               <div style={{ fontSize: 9, fontWeight: 700, color: ct.color, fontFamily: "'Share Tech Mono', monospace" }}>
                 {tabStats[ct.id]?.owned || 0}/{tabStats[ct.id]?.total || 0}
@@ -374,7 +374,7 @@ export function CodexPanel({ onClose }: Props) {
                       overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                       textAlign: 'center', maxWidth: 60, margin: '2px auto 0',
                     }}>
-                      {token.name.toUpperCase()}
+                      {(token.name || "").toUpperCase()}
                     </div>
                   </div>
                 )
@@ -404,7 +404,7 @@ export function CodexPanel({ onClose }: Props) {
             <IconSVG id={selectedTokenData.id} size={40} />
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 9, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-                {selectedTokenData.name.toUpperCase()}
+                {(selectedTokenData.name || "").toUpperCase()}
               </div>
               <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
                 <span style={{
@@ -413,7 +413,7 @@ export function CodexPanel({ onClose }: Props) {
                   color: RARITY_COLORS[selectedTokenData.rarity],
                   border: `1px solid ${RARITY_COLORS[selectedTokenData.rarity]}30`,
                 }}>
-                  {selectedTokenData.rarity.toUpperCase()}
+                  {(selectedTokenData.rarity || "").toUpperCase()}
                 </span>
                 {selectedTokenData.shiny && <span style={{ fontSize: 6, color: '#cc8800' }}><IconSVG id="sparkles" size={8} /> SHINY</span>}
               </div>
@@ -481,7 +481,7 @@ export function CodexPanel({ onClose }: Props) {
         <Token3DViewer
           visible={show3D}
           onClose={() => setShow3D(false)}
-          tokenName={selectedTokenData.name.toUpperCase()}
+          tokenName={(selectedTokenData.name || "").toUpperCase()}
           category={selectedTokenData.catName}
           catColor={selectedTokenData.catColor}
           iconId={selectedTokenData.id}

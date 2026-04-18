@@ -5,12 +5,14 @@
  * Currency: HEX Coin.
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GlassPanel } from '../shared/GlassPanel'
 import { IconSVG } from '../shared/iconBank'
 import { TokenHexPreview } from '../shared/TokenHexPreview'
 import { Token3DViewer } from '../shared/Token3DViewer'
+import { api } from '../../services/api'
 import toast from 'react-hot-toast'
 
 interface Props { onClose: () => void }
@@ -82,7 +84,28 @@ function formatCountdown(endsAt: string): string {
 }
 
 export function AuctionPanel({ onClose }: Props) {
-  const [auctions, setAuctions] = useState<Auction[]>(MOCK_AUCTIONS)
+  const { data: auctionData } = useQuery({
+    queryKey: ['auctions'],
+    queryFn: () => api.get('/marketplace/listings/?type=auction').then(r => {
+      const listings = r.data?.results || r.data?.listings || []
+      // Map marketplace listings to auction format
+      return listings.filter((l: any) => l.auction_end).map((l: any) => ({
+        id: l.id, tokenName: l.territory_name || 'Unknown Token',
+        tokenIcon: l.icon_id || 'mystery', rarity: l.rarity || 'rare',
+        category: l.category || 'PLACES', catColor: '#3b82f6',
+        currentBid: l.current_bid || l.price || 0, bidCount: l.bid_count || 0,
+        topBidder: l.top_bidder || '---', endsAt: l.auction_end,
+        edition: l.edition || 'STANDARD', serial: l.serial || 1, maxSupply: l.max_supply || 1,
+      }))
+    }).catch(() => []),
+    staleTime: 15000,
+  })
+
+  const [auctions, setAuctions] = useState<Auction[]>([])
+  useEffect(() => {
+    if (auctionData && auctionData.length > 0) setAuctions(auctionData)
+  }, [auctionData])
+
   const [selected, setSelected] = useState<Auction | null>(null)
   const [bidAmount, setBidAmount] = useState('')
   const [chatMsg, setChatMsg] = useState('')
@@ -232,7 +255,7 @@ export function AuctionPanel({ onClose }: Props) {
                       padding: '1px 6px', borderRadius: 8, fontSize: 6, fontWeight: 700,
                       background: RARITY_COLORS[a.rarity] + '15',
                       color: RARITY_COLORS[a.rarity],
-                    }}>{a.rarity.toUpperCase()}</span>
+                    }}>{(a.rarity || "").toUpperCase()}</span>
                     <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)' }}>{a.edition}</span>
                   </div>
                   <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
@@ -283,7 +306,7 @@ export function AuctionPanel({ onClose }: Props) {
               </div>
               <div style={{ display: 'flex', gap: 3, justifyContent: 'center', marginTop: 4 }}>
                 <span style={{ padding: '1px 6px', borderRadius: 8, fontSize: 6, fontWeight: 700, background: RARITY_COLORS[selected.rarity] + '15', color: RARITY_COLORS[selected.rarity] }}>
-                  {selected.rarity.toUpperCase()}
+                  {(selected.rarity || "").toUpperCase()}
                 </span>
                 <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)' }}>{selected.edition}</span>
               </div>
@@ -384,7 +407,7 @@ export function AuctionPanel({ onClose }: Props) {
                     fontFamily: "'Orbitron', system-ui, sans-serif", flexShrink: 0,
                   }}>{msg.user}</span>
                   <span style={{
-                    fontSize: 8, color: msg.isBid ? '#cc8800' : 'rgba(255,255,255,0.04)',
+                    fontSize: 8, color: msg.isBid ? '#cc8800' : 'rgba(255,255,255,0.4)',
                     fontWeight: msg.isBid ? 700 : 400, flex: 1,
                   }}>{msg.text}</span>
                   <span style={{ fontSize: 6, color: 'rgba(255,255,255,0.2)', flexShrink: 0 }}>{msg.time}</span>

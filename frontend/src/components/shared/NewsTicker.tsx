@@ -102,7 +102,7 @@ export function NewsTicker() {
             padding: '0 40px',
             fontSize: 9,
             fontWeight: 500,
-            color: 'rgba(255,255,255,0.04)',
+            color: 'rgba(255,255,255,0.4)',
             letterSpacing: 1,
             display: 'flex',
             alignItems: 'center',

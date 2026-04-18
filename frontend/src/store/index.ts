@@ -62,6 +62,8 @@ interface TDCState {
 
 interface UIState {
   sidebarOpen: boolean
+  godMode: boolean
+  toggleGodMode: () => void
   activePanel: 'territory' | 'combat' | 'alliance' | 'shop' | 'profile' | 'events' | 'trade' | 'crypto' | 'ladder' | 'meta' | 'marketplace' | 'kingdom' | 'codex' | 'hunt' | 'tasks' | 'auction' | 'empire' | 'info' | null
   notifications: GameNotification[]
   wsConnected: boolean
@@ -183,6 +185,8 @@ export const useStore = create<Store>()(
 
       // ── UI ──────────────────────────────────────────────────────────────
       sidebarOpen: false,
+      godMode: false,
+      toggleGodMode: () => set((s) => ({ godMode: !s.godMode })),
       activePanel: null,
       notifications: [],
       wsConnected: false,
@@ -232,5 +236,6 @@ export const useTDCBalance = () => useStore((s) => s.balance)
 export const useActiveBattles = () => useStore((s) => s.activeBattles)
 export const useSelectedTerritory = () => useStore((s) => s.selectedTerritory)
 export const useMyTerritories = () => useStore((s) => s.myTerritories)
+export const useGodMode = () => useStore((s) => s.godMode)
 export const useNotifications = () => useStore((s) => s.notifications)
 export const useWsConnected = () => useStore((s) => s.wsConnected)

@@ -166,7 +166,7 @@ function ExplorerTab() {
 
         <select value={sort} onChange={e => setSort(e.target.value)} style={{
           marginLeft: 'auto', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)',
-          borderRadius: 8, color: 'rgba(255,255,255,0.04)', fontSize: 9, padding: '4px 8px', cursor: 'pointer',
+          borderRadius: 8, color: 'rgba(255,255,255,0.4)', fontSize: 9, padding: '4px 8px', cursor: 'pointer',
         }}>
           <option value="recent">Récents</option>
           <option value="price_asc">Prix ↑</option>

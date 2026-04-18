@@ -207,7 +207,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                     ) : (
                       <>
                         <span style={{ fontWeight: 700, color: m.role === 'leader' ? '#cc8800' : '#8b5cf6' }}>{m.user}</span>
-                        <span style={{ color: 'rgba(255,255,255,0.04)', marginLeft: 6 }}>{m.text || m.emoji}</span>
+                        <span style={{ color: 'rgba(255,255,255,0.4)', marginLeft: 6 }}>{m.text || m.emoji}</span>
                         <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: 7, marginLeft: 4 }}>{m.time}</span>
                       </>
                     )}

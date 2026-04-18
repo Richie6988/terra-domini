@@ -21,16 +21,25 @@ from rest_framework.response import Response
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def news_ticker(request):
-    """GET /api/news/ticker/ — game news feed"""
+    """GET /api/news/ticker/ — game news feed. Serves admin ticker messages first."""
+    # Try to get admin-managed ticker messages
+    try:
+        from terra_domini.apps.admin_gm.models import TickerMessage
+        admin_msgs = list(TickerMessage.objects.filter(is_active=True).order_by('-created_at')[:10].values(
+            'type', 'title', 'text'
+        ))
+        if admin_msgs:
+            return Response(admin_msgs)
+    except Exception:
+        pass
+
+    # Fallback — static news
     return Response([
-        {'type': 'alert',   'title': '🌋 VOLCANIC ERUPTION', 'text': 'Mt. Hekla erupting — special event token available! Register now.'},
-        {'type': 'update',  'title': '⬡ SEASON 1 LIVE',      'text': 'Capture territories, build kingdoms, trade NFTs on Polygon.'},
-        {'type': 'event',   'title': '⚽ CHAMPIONS LEAGUE',    'text': 'Final event — 500 spots remaining. Register in Events panel.'},
-        {'type': 'market',  'title': '📈 HEX COIN +12%',      'text': '1 HEX = €0.00099 — trading volume up 340% this week.'},
-        {'type': 'alert',   'title': '🦖 SAFARI: T-REX SPOTTED', 'text': 'Legendary dinosaur detected near mountainous terrain. Track it!'},
-        {'type': 'update',  'title': '🏆 LEADERBOARD UPDATE', 'text': 'NEXUS_LORD takes #1 with 847 territories. Can you beat them?'},
-        {'type': 'event',   'title': '🚀 MARS SUPPLY DROP',   'text': 'SpaceX mission creates legendary token. 89/200 registered.'},
-        {'type': 'market',  'title': '💎 MYTHIC AUCTION',      'text': 'Crimson Dragon token — current bid 12,500 HEX. Ends in 2 hours.'},
+        {'type': 'update',  'title': 'SEASON 1 LIVE',       'text': 'Capture territories, build kingdoms, trade NFTs on Polygon.'},
+        {'type': 'event',   'title': 'LIVE EVENTS',          'text': 'News-based tokens generated daily — register in Events panel.'},
+        {'type': 'alert',   'title': 'SAFARI ACTIVE',        'text': 'Track and capture rare creatures. One hunt per day!'},
+        {'type': 'market',  'title': 'HEX ECONOMY',          'text': 'Trade territories on the marketplace. Build your empire.'},
+        {'type': 'community','title': 'HEXOD FOUNDERS',      'text': 'Join the founding alliance — recruit in Alliance panel.'},
     ])
 
 # Mail

@@ -131,7 +131,7 @@ function MarketTab() {
       <div style={{ marginBottom: 14 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
           <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>Amount</span>
-          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.04)', fontFamily: 'monospace' }}>
+          <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', fontFamily: 'monospace' }}>
             Rate: 1 {sellRes.emoji} = {rate.toFixed(2)} {buyRes.emoji}
           </span>
         </div>

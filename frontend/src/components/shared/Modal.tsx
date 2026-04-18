@@ -105,13 +105,13 @@ export function Modal({ open, onClose, title, accent = '#0099cc', width = 420, c
               <button
                 onClick={onClose}
                 style={{
-                  background: 'rgba(0, 60, 100, 0.08)',
-                  border: '1px solid rgba(0, 60, 100, 0.12)',
+                  background: 'rgba(255,255,255,0.15)',
+                  border: '2px solid rgba(255,255,255,0.25)',
                   borderRadius: 6,
                   width: 28, height: 28,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   cursor: 'pointer',
-                  color: 'rgba(26, 42, 58, 0.45)',
+                  color: '#ffffff',
                   fontSize: 14,
                   fontFamily: "'Orbitron', system-ui, sans-serif",
                   transition: 'all 0.2s ease',

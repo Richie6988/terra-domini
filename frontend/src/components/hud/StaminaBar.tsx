@@ -157,7 +157,7 @@ export function StaminaBar() {
 
             {/* Slots breakdown */}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.04)' }}>Available</span>
+              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Available</span>
               <span style={{ fontSize: 11, fontWeight: 700, color: slots_available > 0 ? '#00884a' : '#EF4444' }}>
                 {slots_available} / {slots_max}
               </span>

@@ -330,12 +330,12 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
           </div>
         )}
         {spyLevel >= 1 && (
-          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.04)' }}>
+          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>
             Defense: ~{k.total_defense} points · Shield active on {Math.floor(k.size * 0.3)} territories
           </div>
         )}
         {spyLevel >= 2 && (
-          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.04)', marginTop: 4 }}>
+          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
             Resources: ~{Math.round(k.tdc_per_24h)} HEX/day income
           </div>
         )}

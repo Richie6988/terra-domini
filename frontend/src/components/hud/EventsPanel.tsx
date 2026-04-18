@@ -165,7 +165,7 @@ export function EventsPanel({ onClose }: Props) {
                     <span style={{
                       padding: '2px 8px', borderRadius: 8, fontSize: 6, fontWeight: 700,
                       background: color + '15', color, border: `1px solid ${color}30`, ...s, flexShrink: 0,
-                    }}>{ev.rarity.toUpperCase()}</span>
+                    }}>{(ev.rarity || "").toUpperCase()}</span>
                   </div>
 
                   <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 8, fontFamily: 'system-ui' }}>
@@ -232,7 +232,7 @@ export function EventsPanel({ onClose }: Props) {
                     />
                     <div style={{ flex: 1 }}>
                       <div style={{ fontSize: 9, fontWeight: 900, color, letterSpacing: 1, ...s }}>{ev.headline}</div>
-                      <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}><IconSVG id="pin" size={8} /> {ev.location_name} · {ev.rarity.toUpperCase()}</div>
+                      <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}><IconSVG id="pin" size={8} /> {ev.location_name} · {(ev.rarity || "").toUpperCase()}</div>
                     </div>
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
                       <div style={{

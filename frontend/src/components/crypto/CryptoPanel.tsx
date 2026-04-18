@@ -46,7 +46,7 @@ function WalletCard({ wallet, onConvert, onWithdraw }: any) {
             {toF(wallet?.tdi_balance, 4)}
             <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginLeft: 6 }}>HEX</span>
           </div>
-          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.04)', marginTop: 3 }}>≈ ${toF(wallet?.tdi_usd_value, 2)} USD</div>
+          <div style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 3 }}>≈ ${toF(wallet?.tdi_usd_value, 2)} USD</div>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>In-Game HEX Coin</div>
@@ -304,7 +304,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
               {(txHistory as any[]).map((tx: any, i: number) => (
                 <div key={i} style={{ padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
-                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.04)', fontWeight: 500, fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>{tx.type?.replace(/_/g, ' ').toUpperCase()}</div>
+                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontWeight: 500, fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1 }}>{(tx.type || "").replace(/_/g, ' ').toUpperCase()}</div>
                     <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.2)', marginTop: 1 }}>{new Date(tx.date).toLocaleDateString()}</div>
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 900, fontFamily: "'Share Tech Mono', monospace", color: TX_COLORS[tx.type] ?? '#e2e8f0' }}>

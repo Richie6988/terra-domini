@@ -162,7 +162,7 @@ export function AttackPanel({ target, onClose }: Props) {
               ].map(u => (
                 <div key={u.key} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, background: 'rgba(255,255,255,0.02)', borderRadius: 10, padding: '8px 12px' }}>
                   <span style={{ fontSize: 20, width: 28 }}>{u.emoji}</span>
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.04)', flex: 1 }}>{u.name}</span>
+                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', flex: 1 }}>{u.name}</span>
                   <button onClick={() => setUnits(p => ({ ...p, [u.key]: Math.max(0, (p[u.key as keyof typeof p] ?? 0) - 10) }))}
                     style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.08)', border: 'none', color: '#e2e8f0', cursor: 'pointer' }}>−</button>
                   <span style={{ minWidth: 36, textAlign: 'center', fontFamily: 'monospace', color: '#e2e8f0', fontSize: 14, fontWeight: 600 }}>
@@ -191,7 +191,7 @@ export function AttackPanel({ target, onClose }: Props) {
 
               <button onClick={() => attackMut.mutate()} disabled={attackMut.isPending || totalUnits === 0}
                 style={{ width: '100%', padding: '14px', background: totalUnits > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${totalUnits > 0 ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 12, color: totalUnits > 0 ? '#EF4444' : '#4B5563', fontSize: 15, fontWeight: 800, cursor: totalUnits > 0 ? 'pointer' : 'not-allowed', letterSpacing: '0.05em' }}>
-                {attackMut.isPending ? '⏳ Launching…' : `LAUNCH ${typeConf.label.toUpperCase()}`}
+                {attackMut.isPending ? '⏳ Launching…' : `LAUNCH ${(typeConf.label || "").toUpperCase()}`}
               </button>
               <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center' }}>
                 <StaminaBar />
@@ -242,7 +242,7 @@ export function AttackPanel({ target, onClose }: Props) {
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={() => { setPhase('setup'); setOutcome(null) }}
-                  style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.04)', cursor: 'pointer', fontSize: 13 }}>
+                  style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 13 }}>
                   Attack Again
                 </button>
                 <button onClick={onClose}

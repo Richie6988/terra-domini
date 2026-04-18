@@ -84,18 +84,19 @@ export function GlassPanel({
           <button
             onClick={onClose}
             style={{
-              background: 'rgba(255,255,255,0.12)',
-              border: '1px solid rgba(255,255,255,0.1)',
+              background: 'rgba(255,255,255,0.15)',
+              border: '2px solid rgba(255,255,255,0.25)',
               borderRadius: 10,
-              width: 34, height: 34,
+              width: 36, height: 36,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               cursor: 'pointer',
-              color: 'rgba(255,255,255,0.04)',
-              fontSize: 16,
+              color: '#ffffff',
+              fontSize: 18,
+              fontWeight: 700,
               transition: 'all 0.2s',
             }}
-            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.2)'; e.currentTarget.style.color = '#f87171' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.06)'; e.currentTarget.style.color = 'rgba(255,255,255,0.04)' }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(220,38,38,0.4)'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.borderColor = '#dc2626' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.15)'; e.currentTarget.style.color = '#ffffff'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.25)' }}
           >
             
           </button>

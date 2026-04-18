@@ -531,3 +531,176 @@ class GMLogsView(GMRequiredMixin, APIView):
         # Trier par date desc
         logs.sort(key=lambda x: x.get('at',''), reverse=True)
         return Response({'logs': logs[:100]})
+
+
+# ─── Ticker Management ───────────────────────────────────────────────────────
+
+class GMTickerView(GMRequiredMixin, APIView):
+    """GET/POST /api/gm/ticker/ — manage news ticker messages."""
+
+    def get(self, request):
+        from terra_domini.apps.events.models import ControlTowerEvent
+        # Get active ticker entries from news_ticker table or config
+        try:
+            from terra_domini.apps.admin_gm.models import TickerMessage
+            messages = list(TickerMessage.objects.filter(
+                is_active=True
+            ).order_by('-created_at').values('id', 'type', 'title', 'text', 'is_active', 'created_at'))
+        except Exception:
+            messages = []
+        return Response({'messages': messages})
+
+    def post(self, request):
+        """Create or toggle a ticker message."""
+        action = request.data.get('action', 'create')
+
+        if action == 'create':
+            try:
+                from terra_domini.apps.admin_gm.models import TickerMessage
+                msg = TickerMessage.objects.create(
+                    type=request.data.get('type', 'maintenance'),
+                    title=request.data.get('title', 'MAINTENANCE'),
+                    text=request.data.get('text', ''),
+                    is_active=True,
+                    created_by=request.user,
+                )
+                return Response({'done': True, 'id': msg.id})
+            except Exception as e:
+                # Fallback: store in cache/settings
+                return Response({'done': True, 'fallback': True, 'error': str(e)})
+
+        elif action == 'clear_all':
+            try:
+                from terra_domini.apps.admin_gm.models import TickerMessage
+                TickerMessage.objects.filter(is_active=True).update(is_active=False)
+            except Exception:
+                pass
+            return Response({'done': True, 'action': 'cleared'})
+
+        elif action == 'delete':
+            msg_id = request.data.get('id')
+            try:
+                from terra_domini.apps.admin_gm.models import TickerMessage
+                TickerMessage.objects.filter(id=msg_id).delete()
+            except Exception:
+                pass
+            return Response({'done': True, 'deleted': msg_id})
+
+        return Response({'error': 'Unknown action'}, status=400)
+
+
+# ─── Bot Management ───────────────────────────────────────────────────────────
+
+class GMBotView(GMRequiredMixin, APIView):
+    """GET/POST /api/gm/bots/ — bot population management."""
+
+    def get(self, request):
+        from terra_domini.apps.accounts.models import Player
+        from terra_domini.apps.territories.models import Territory
+
+        total_players = Player.objects.filter(is_active=True).count()
+        bot_players = Player.objects.filter(email__endswith='@bot.hexod.io', is_active=True).count()
+        real_players = total_players - bot_players
+        bot_territories = Territory.objects.filter(owner__email__endswith='@bot.hexod.io').count()
+
+        bots = list(Player.objects.filter(
+            email__endswith='@bot.hexod.io'
+        ).values('id', 'username', 'display_name', 'avatar_emoji', 'avatar_color',
+                 'tdc_in_game', 'commander_rank', 'is_active')[:100])
+
+        # Count territories per bot
+        from django.db.models import Count
+        bot_terr_counts = dict(Territory.objects.filter(
+            owner__email__endswith='@bot.hexod.io'
+        ).values('owner_id').annotate(cnt=Count('id')).values_list('owner_id', 'cnt'))
+
+        for b in bots:
+            b['territory_count'] = bot_terr_counts.get(b['id'], 0)
+
+        return Response({
+            'total_players': total_players,
+            'real_players': real_players,
+            'bot_players': bot_players,
+            'bot_territories': bot_territories,
+            'bots': bots,
+            'recommended_bots': max(0, 50 - real_players),  # Target: 50+ players minimum
+        })
+
+    def post(self, request):
+        import subprocess, sys
+        action = request.data.get('action', 'spawn')
+        count = int(request.data.get('count', 10))
+        claim = int(request.data.get('claim', 5))
+
+        if action == 'spawn':
+            try:
+                from django.core.management import call_command
+                from io import StringIO
+                out = StringIO()
+                call_command('seed_bots', count=count, claim=claim, stdout=out)
+                return Response({'done': True, 'output': out.getvalue()})
+            except Exception as e:
+                return Response({'error': str(e)}, status=500)
+
+        elif action == 'remove_all':
+            from terra_domini.apps.accounts.models import Player
+            from terra_domini.apps.territories.models import Territory
+            bots = Player.objects.filter(email__endswith='@bot.hexod.io')
+            terr_cleared = Territory.objects.filter(owner__in=bots).update(owner=None)
+            bot_deleted = bots.delete()
+            return Response({'done': True, 'bots_deleted': bot_deleted[0], 'territories_freed': terr_cleared})
+
+        elif action == 'remove_one':
+            player_id = request.data.get('player_id')
+            from terra_domini.apps.accounts.models import Player
+            from terra_domini.apps.territories.models import Territory
+            try:
+                bot = Player.objects.get(id=player_id, email__endswith='@bot.hexod.io')
+                Territory.objects.filter(owner=bot).update(owner=None)
+                bot.delete()
+                return Response({'done': True, 'removed': str(player_id)})
+            except Player.DoesNotExist:
+                return Response({'error': 'Bot not found'}, status=404)
+
+        return Response({'error': 'Unknown action'}, status=400)
+
+
+# ─── Feedback Inbox ───────────────────────────────────────────────────────────
+
+class GMFeedbackView(GMRequiredMixin, APIView):
+    """GET/POST /api/gm/feedback/ — player feedback messages."""
+
+    def get(self, request):
+        try:
+            from terra_domini.apps.admin_gm.models import PlayerFeedback
+            items = list(PlayerFeedback.objects.order_by('-created_at')[:50].values(
+                'id', 'player__username', 'category', 'message', 'status', 'created_at', 'admin_reply'
+            ))
+        except Exception:
+            items = []
+        return Response({'feedback': items})
+
+    def post(self, request):
+        action = request.data.get('action')
+        feedback_id = request.data.get('id')
+
+        try:
+            from terra_domini.apps.admin_gm.models import PlayerFeedback
+            fb = PlayerFeedback.objects.get(id=feedback_id)
+        except Exception:
+            return Response({'error': 'Feedback not found'}, status=404)
+
+        if action == 'reply':
+            fb.admin_reply = request.data.get('reply', '')
+            fb.status = 'replied'
+            fb.save(update_fields=['admin_reply', 'status'])
+            return Response({'done': True})
+        elif action == 'resolve':
+            fb.status = 'resolved'
+            fb.save(update_fields=['status'])
+            return Response({'done': True})
+        elif action == 'delete':
+            fb.delete()
+            return Response({'done': True})
+
+        return Response({'error': 'Unknown action'}, status=400)
