@@ -90,218 +90,78 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
     >
       {/* Header */}
       <div style={{ padding: '16px 18px 10px', borderBottom: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
           <div>
-            <div style={{ fontSize: 16, fontWeight: 800, color: '#e2e8f0' }}><IconSVG id="hex_coin" size={10} /> Staking HEX</div>
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
-              Soleil sur ton épargne — jusqu'à 25% APR
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#e2e8f0' }}><IconSVG id="hex_coin" size={14} /> AUTO-STAKING</div>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
+              All your HEX are automatically staked — earn rewards passively
             </div>
           </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)', cursor: 'pointer', fontSize: 20 }}>×</button>
-        </div>
-        <div style={{ display: 'flex', gap: 4 }}>
-          {['stake', 'positions'].map(t => (
-            <button key={t} onClick={() => setTab(t as any)} style={{
-              flex: 1, padding: '7px', fontSize: 11, fontWeight: tab === t ? 700 : 400,
-              background: tab === t ? 'rgba(245,158,11,0.1)' : 'transparent',
-              border: `1px solid ${tab === t ? 'rgba(245,158,11,0.3)' : 'rgba(255,255,255,0.05)'}`,
-              borderRadius: 8, cursor: 'pointer',
-              color: tab === t ? '#F59E0B' : '#6B7280',
-            }}>
-              {t === 'stake' ? ' Staker' : ' Positions'}
-            </button>
-          ))}
+          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.25)', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff', fontSize: 18, fontWeight: 700 }}>×</button>
         </div>
       </div>
 
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px 18px' }}>
-        {tab === 'stake' ? (
-          <>
-            {/* Tiers */}
-            <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>
-                Tiers de récompense
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
-                {TIERS.map(t => {
-                  const isActive = amount >= t.min && amount <= t.max
-                  return (
-                    <div key={t.label} style={{
-                      padding: '10px 12px', borderRadius: 10,
-                      background: isActive ? `${t.color}18` : 'rgba(255,255,255,0.03)',
-                      border: `1px solid ${isActive ? t.color + '55' : 'rgba(255,255,255,0.08)'}`,
-                      transition: 'all 0.2s',
-                    }}>
-                      <div style={{ fontSize: 16, marginBottom: 4 }}>{t.badge}</div>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: t.color }}>
-                        {t.apr}% APR
-                      </div>
-                      <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
-                        {t.min.toLocaleString()}+ HEX
-                      </div>
-                      <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.2)', fontStyle: 'italic' }}>
-                        {t.label}
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+        {/* Current balance = auto-staked amount */}
+        <div style={{ textAlign: 'center', padding: '20px', marginBottom: 16, borderRadius: 12, background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}>
+          <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, marginBottom: 4 }}>AUTO-STAKED BALANCE</div>
+          <div style={{ fontSize: 28, fontWeight: 900, color: '#F59E0B', fontFamily: "'Share Tech Mono', monospace" }}>
+            {balance.toLocaleString('en-US', { maximumFractionDigits: 0 })} <span style={{ fontSize: 12 }}>HEX</span>
+          </div>
+          {tier && (
+            <div style={{ fontSize: 10, color: tier.color, fontWeight: 700, marginTop: 4 }}>
+              {tier.label} — {tier.apr}% APR
             </div>
+          )}
+        </div>
 
-            {/* Solde */}
-            <div style={{ padding: '10px 14px', marginBottom: 14,
-              background: 'rgba(0,136,74,0.06)', border: '1px solid rgba(0,136,74,0.15)', borderRadius: 10,
-              display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>Solde disponible</span>
-              <span style={{ fontSize: 14, fontWeight: 800, color: '#00884a', fontFamily: 'monospace' }}>
-                {balance.toFixed(2)} 
-              </span>
+        {/* Daily reward preview */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+          <div style={{ padding: '12px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
+            <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2 }}>DAILY REWARD</div>
+            <div style={{ fontSize: 16, fontWeight: 900, color: '#22c55e', fontFamily: "'Share Tech Mono', monospace", marginTop: 4 }}>
+              +{calcDailyReward(balance, tier?.apr || 8).toFixed(1)} HEX
             </div>
-
-            {/* Input */}
-            <div style={{ marginBottom: 12 }}>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', marginBottom: 6 }}>
-                Montant à staker (min 100 HEX)
-              </div>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <input
-                  type="number" min={100} max={balance} value={stakeAmount}
-                  onChange={e => setStakeAmount(e.target.value)}
-                  placeholder="100"
-                  style={{
-                    flex: 1, padding: '10px 12px',
-                    background: 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${tier ? tier.color + '55' : 'rgba(255,255,255,0.1)'}`,
-                    borderRadius: 8, color: '#e2e8f0', fontSize: 14, fontFamily: 'monospace',
-                  }}
-                />
-                <button onClick={() => setStakeAmount(balance.toFixed(0))} style={{
-                  padding: '0 14px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)',
-                  background: 'rgba(255,255,255,0.04)', color: 'rgba(255,255,255,0.35)', cursor: 'pointer', fontSize: 11,
-                }}>MAX</button>
-              </div>
+          </div>
+          <div style={{ padding: '12px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
+            <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2 }}>PENDING REWARDS</div>
+            <div style={{ fontSize: 16, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", marginTop: 4 }}>
+              {parseFloat(String(stakingData?.rewards_pending || 0)).toFixed(1)} HEX
             </div>
+          </div>
+        </div>
 
-            {/* Aperçu récompenses */}
-            {tier && amount >= 100 && (
-              <motion.div
-                initial={{ opacity: 0, y: 4 }} animate={{ opacity: 1, y: 0 }}
-                style={{ padding: '12px 14px', borderRadius: 10, marginBottom: 14,
-                  background: `${tier.color}10`, border: `1px solid ${tier.color}30` }}
-              >
-                <div style={{ fontSize: 12, fontWeight: 700, color: tier.color, marginBottom: 8 }}>
-                  {tier.badge} {tier.label} — {tier.apr}% APR
-                </div>
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-                  {[
-                    { label: '/jour',  val: preview.toFixed(2) },
-                    { label: '/mois',  val: (preview * 30).toFixed(1) },
-                    { label: '/an',    val: (preview * 365).toFixed(0) },
-                  ].map(r => (
-                    <div key={r.label} style={{ textAlign: 'center', padding: '8px', background: 'rgba(0,0,0,0.3)', borderRadius: 8 }}>
-                      <div style={{ fontSize: 13, fontWeight: 800, color: tier.color, fontFamily: 'monospace' }}>{r.val}</div>
-                      <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)' }}>HEX{r.label}</div>
-                    </div>
-                  ))}
-                </div>
-              </motion.div>
-            )}
-
-            {/* Bouton staker */}
-            <button
-              onClick={() => amount >= 100 && amount <= balance && stakeMut.mutate(amount)}
-              disabled={!tier || amount < 100 || amount > balance || stakeMut.isPending}
-              style={{
-                width: '100%', padding: 14,
-                background: tier ? `${tier.color}20` : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${tier ? tier.color + '44' : 'rgba(255,255,255,0.08)'}`,
-                borderRadius: 12, color: tier ? tier.color : '#374151',
-                fontSize: 14, fontWeight: 800, cursor: tier ? 'pointer' : 'not-allowed',
-                opacity: (!tier || amount < 100 || amount > balance) ? 0.5 : 1,
-              }}
-            >
-              {stakeMut.isPending ? 'En cours…' : `Staker ${amount ? amount.toLocaleString() : '?'} HEX`}
-            </button>
-
-            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.2)', textAlign: 'center', marginTop: 10, lineHeight: 1.5 }}>
-              Staking via programme Solana (devnet). Unlock à tout moment.{'\n'}
-              Les récompenses sont distribuées toutes les 24h.
-            </div>
-          </>
-        ) : (
-          /* Positions tab */
-          <>
-            {/* Rewards pending */}
-            {(stakingData?.rewards_pending || 0) > 0 && (
-              <div style={{ padding: '12px 14px', marginBottom: 14,
-                background: 'rgba(245,158,11,0.08)', border: '1px solid rgba(245,158,11,0.25)',
-                borderRadius: 10, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#F59E0B' }}>Récompenses à réclamer</div>
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>Distribuées chaque 24h</div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 14, fontWeight: 800, color: '#F59E0B', fontFamily: 'monospace' }}>
-                    +{stakingData.rewards_pending.toFixed(4)} 
-                  </span>
-                  <button
-                    onClick={() => claimMut.mutate()}
-                    disabled={claimMut.isPending}
-                    style={{ padding: '6px 14px', borderRadius: 8, cursor: 'pointer',
-                      background: 'rgba(245,158,11,0.2)', border: '1px solid rgba(245,158,11,0.4)',
-                      color: '#F59E0B', fontSize: 11, fontWeight: 700 }}
-                  >
-                    {claimMut.isPending ? '…' : 'Réclamer'}
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Total staké */}
-            <div style={{ padding: '12px 14px', marginBottom: 14,
-              background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-              borderRadius: 10 }}>
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 6 }}>Total en staking</div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: '#e2e8f0', fontFamily: 'monospace' }}>
-                {(stakingData?.total_staked || 0).toLocaleString()} 
-              </div>
-              {getTier(stakingData?.total_staked || 0) && (
-                <div style={{ fontSize: 11, color: getTier(stakingData.total_staked)!.color, marginTop: 4 }}>
-                  {getTier(stakingData.total_staked)!.badge} {getTier(stakingData.total_staked)!.label} — {getTier(stakingData.total_staked)!.apr}% APR
-                </div>
-              )}
-            </div>
-
-            {/* Positions */}
-            {(stakingData?.positions || []).length === 0 ? (
-              <div style={{ textAlign: 'center', padding: '32px 0', color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>
-                No active positions. Stake HEX to start earning.
-              </div>
-            ) : (
-              (stakingData.positions || []).map((pos: any, i: number) => {
-                const t = getTier(pos.amount)
-                return (
-                  <div key={i} style={{ padding: '12px 14px', marginBottom: 8,
-                    background: 'rgba(255,255,255,0.04)', borderRadius: 10,
-                    border: `1px solid ${t ? t.color + '30' : 'rgba(255,255,255,0.05)'}` }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                      <span style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0', fontFamily: 'monospace' }}>
-                        {pos.amount.toLocaleString()} HEX
-                      </span>
-                      <span style={{ fontSize: 11, color: t?.color || '#6B7280', fontWeight: 700 }}>
-                        {t?.apr || 0}% APR
-                      </span>
-                    </div>
-                    <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>
-                      Depuis le {new Date(pos.staked_at).toLocaleDateString('fr-FR')} · +{(pos.daily_reward || 0).toFixed(4)} HEX/j
-                    </div>
-                  </div>
-                )
-              })
-            )}
-          </>
+        {/* Claim button */}
+        {parseFloat(String(stakingData?.rewards_pending || 0)) > 0 && (
+          <button onClick={() => claimMut.mutate()} className="btn-game btn-game-green" style={{ width: '100%', fontSize: 11, letterSpacing: 2, marginBottom: 16 }}>
+            CLAIM {parseFloat(String(stakingData?.rewards_pending || 0)).toFixed(1)} HEX
+          </button>
         )}
+
+        {/* Tiers info */}
+        <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: 8 }}>REWARD TIERS</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6 }}>
+          {TIERS.map(t => {
+            const isActive = balance >= t.min && balance <= t.max
+            return (
+              <div key={t.label} style={{
+                padding: '10px 12px', borderRadius: 10,
+                background: isActive ? `${t.color}18` : 'rgba(255,255,255,0.03)',
+                border: `1px solid ${isActive ? t.color + '55' : 'rgba(255,255,255,0.06)'}`,
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: isActive ? t.color : 'rgba(255,255,255,0.3)' }}>
+                  {t.apr}% APR
+                </div>
+                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.3)', marginTop: 2 }}>
+                  {t.min.toLocaleString()}+ HEX
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
       </div>
     </motion.div>
   )
 }
+

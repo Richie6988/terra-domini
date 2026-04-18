@@ -45,7 +45,7 @@ export function NewsTicker() {
     api.get('/news/ticker/').then(r => {
       const data = Array.isArray(r.data) ? r.data : r.data?.results ?? []
       if (data.length > 0) setItems(data)
-    }).catch(() => {})
+    }).catch(() => { setItems(MOCK_NEWS) })
   }, [])
 
   // Rotate tag label
