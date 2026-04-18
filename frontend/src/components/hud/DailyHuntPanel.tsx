@@ -17,6 +17,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { GlassPanel } from '../shared/GlassPanel'
 import { IconSVG } from '../shared/iconBank'
 import { TokenFace2D } from '../shared/TokenFace2D'
+import { Token3DViewer } from '../shared/Token3DViewer'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
@@ -94,6 +95,7 @@ function HotColdBar({ distance }: { distance: number }) {
 
 export function DailyHuntPanel({ onClose }: Props) {
   const [phase, setPhase] = useState<HuntPhase>('briefing')
+  const [show3D, setShow3D] = useState(false)
   const [distance, setDistance] = useState(850)
   const [scanProgress, setScanProgress] = useState(0)
   const [reward, setReward] = useState<{ hex_reward: number; xp: number } | null>(null)
@@ -200,6 +202,7 @@ export function DailyHuntPanel({ onClose }: Props) {
   }
 
   return (
+    <>
     <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316">
       <AnimatePresence mode="wait">
         {/* ── BRIEFING ── */}
@@ -212,8 +215,16 @@ export function DailyHuntPanel({ onClose }: Props) {
               border: `1.5px solid ${RARITY_COLORS[hunt.rarity]}25`,
               marginBottom: 12,
             }}>
-              <div style={{ marginBottom: 8 }}>
-                <IconSVG id={hunt.id} size={56} />
+              <div style={{ marginBottom: 8, cursor: 'pointer' }} onClick={() => setShow3D(true)}>
+                <TokenFace2D
+                  iconId={hunt.id}
+                  tier={hunt.rarity === 'legendary' ? 'EMERALD' : hunt.rarity === 'epic' ? 'GOLD' : hunt.rarity === 'rare' ? 'SILVER' : 'BRONZE'}
+                  catColor={RARITY_COLORS[hunt.rarity]}
+                  tokenName={hunt.name}
+                  biome="forest"
+                  size={140}
+                />
+                <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', marginTop: 4, letterSpacing: 1 }}>TAP TO VIEW 3D</div>
               </div>
               <div style={{
                 fontSize: 11, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2,
@@ -254,16 +265,9 @@ export function DailyHuntPanel({ onClose }: Props) {
               </div>
             </div>
 
-            <button
-              onClick={handleStartHunt}
-              style={{
-                width: '100%', padding: '12px', borderRadius: 20, border: 'none', cursor: 'pointer',
-                background: 'linear-gradient(90deg, #f97316, #ea580c)',
-                color: '#fff', fontSize: 9, fontWeight: 700, letterSpacing: 3,
-                fontFamily: "'Orbitron', system-ui, sans-serif",
-                boxShadow: '0 4px 15px rgba(249,115,22,0.3)',
-              }}
-            >
+            <button onClick={handleStartHunt} className="btn-game btn-game-gold" style={{
+              width: '100%', fontSize: 10, letterSpacing: 3,
+            }}>
               START SAFARI
             </button>
           </motion.div>
@@ -533,5 +537,20 @@ export function DailyHuntPanel({ onClose }: Props) {
         })}
       </div>
     </GlassPanel>
+
+      {/* 3D Token Viewer — fullscreen overlay */}
+      {show3D && (
+        <Token3DViewer
+          visible={show3D}
+          onClose={() => setShow3D(false)}
+          iconId={hunt.id}
+          tokenName={hunt.name}
+          tier={hunt.rarity === 'mythic' ? 'DIAMOND' : hunt.rarity === 'legendary' ? 'EMERALD' : hunt.rarity === 'epic' ? 'GOLD' : hunt.rarity === 'rare' ? 'SILVER' : 'BRONZE'}
+          catColor={RARITY_COLORS[hunt.rarity]}
+          biome="forest"
+          category={hunt.category}
+        />
+      )}
+    </>
   )
 }
