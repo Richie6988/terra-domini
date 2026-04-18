@@ -129,6 +129,9 @@ export function ShopPanel({ onClose }: Props) {
   const player  = usePlayer()
   const activeKingdom = useKingdomStore(s => s.getActiveKingdom())
 
+  // Extract actual HEX balance from balance object or player
+  const hexBalance = parseFloat(String(balance?.in_game ?? player?.tdc_in_game ?? 0)) || 0
+
   const { data: activeBoosts = [] } = useQuery<any[]>({
     queryKey: ['active-boosts'],
     queryFn: () => api.get('/shop/active-boosts/').then(r => r.data).catch(() => []),
@@ -136,7 +139,7 @@ export function ShopPanel({ onClose }: Props) {
   })
 
   const handleBuy = (itemName: string, itemCode: string, price: number) => {
-    const bal = toNum(balance)
+    const bal = hexBalance
     if (bal < price) { toast.error(`Not enough HEX (need ${price}, have ${Math.floor(bal)})`); return }
     api.post('/shop/purchase/', { item_code: itemCode, quantity: 1 })
       .then(res => {
@@ -196,7 +199,7 @@ export function ShopPanel({ onClose }: Props) {
           <div style={{ display:'flex', alignItems:'center', gap:6 }}>
             <IconSVG id="hex_coin" size={20} />
             <span style={{ fontSize:16, fontWeight:900, color:'#F59E0B', fontFamily:"'Share Tech Mono', monospace" }}>
-              {toNum(balance).toFixed(0)}
+              {hexBalance.toFixed(0)}
             </span>
           </div>
         </div>
@@ -280,10 +283,10 @@ export function ShopPanel({ onClose }: Props) {
                     {item.price} HEX
                   </div>
                   <button onClick={() => handleBuy(item.name, item.code, item.price)}
-                    className={toNum(balance) >= item.price ? 'btn-game btn-game-gold' : 'btn-game btn-game-glass'}
+                    className={hexBalance >= item.price ? 'btn-game btn-game-gold' : 'btn-game btn-game-glass'}
                     style={{
                     fontSize:9, letterSpacing:1,
-                    opacity: toNum(balance) >= item.price ? 1 : 0.5,
+                    opacity: hexBalance >= item.price ? 1 : 0.5,
                   }}>
                     BUY
                   </button>
