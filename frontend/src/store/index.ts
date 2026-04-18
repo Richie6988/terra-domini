@@ -64,6 +64,8 @@ interface UIState {
   sidebarOpen: boolean
   godMode: boolean
   toggleGodMode: () => void
+  pickingFavorite: boolean
+  setPickingFavorite: (v: boolean) => void
   activePanel: 'territory' | 'combat' | 'alliance' | 'shop' | 'profile' | 'events' | 'trade' | 'crypto' | 'ladder' | 'meta' | 'marketplace' | 'kingdom' | 'codex' | 'hunt' | 'tasks' | 'auction' | 'empire' | 'info' | null
   notifications: GameNotification[]
   wsConnected: boolean
@@ -187,6 +189,8 @@ export const useStore = create<Store>()(
       sidebarOpen: false,
       godMode: false,
       toggleGodMode: () => set((s) => ({ godMode: !s.godMode })),
+      pickingFavorite: false,
+      setPickingFavorite: (v) => set({ pickingFavorite: v }),
       activePanel: null,
       notifications: [],
       wsConnected: false,

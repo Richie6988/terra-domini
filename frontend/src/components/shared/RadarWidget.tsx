@@ -8,10 +8,12 @@
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import toast from 'react-hot-toast'
 
 interface Blip {
   id: string; angle: number; distance: number; color: string
   label?: string; isSafari?: boolean; category?: string
+  lat?: number; lon?: number
 }
 
 const CAT_COLORS: Record<string, string> = {
@@ -21,19 +23,29 @@ const CAT_COLORS: Record<string, string> = {
   fantastic: '#a855f7', economic_assets: '#cc8800',
 }
 
-function generateMockBlips(): Blip[] {
+function generateMockBlips(centerLat = 48.8566, centerLon = 2.3522): Blip[] {
   const cats = Object.keys(CAT_COLORS)
-  const blips: Blip[] = Array.from({ length: 6 }, (_, i) => ({
-    id: `blip-${i}`, angle: (Math.PI * 2 * i) / 6 + Math.random() * 0.5,
-    distance: 0.25 + Math.random() * 0.6,
-    color: CAT_COLORS[cats[i % cats.length]],
-    category: cats[i % cats.length],
-  }))
+  const blips: Blip[] = Array.from({ length: 6 }, (_, i) => {
+    const angle = (Math.PI * 2 * i) / 6 + Math.random() * 0.5
+    const dist = 0.25 + Math.random() * 0.6
+    // Convert radar distance (~5km max) to lat/lon offset
+    const kmOffset = dist * 5
+    return {
+      id: `blip-${i}`, angle, distance: dist,
+      color: CAT_COLORS[cats[i % cats.length]],
+      category: cats[i % cats.length],
+      lat: centerLat + Math.sin(angle) * kmOffset / 111,
+      lon: centerLon + Math.cos(angle) * kmOffset / (111 * Math.cos(centerLat * Math.PI / 180)),
+    }
+  })
   // Safari target blip
+  const sAngle = Math.random() * Math.PI * 2
+  const sDist = 0.4 + Math.random() * 0.4
   blips.push({
-    id: 'safari-target', angle: Math.random() * Math.PI * 2,
-    distance: 0.4 + Math.random() * 0.4,
+    id: 'safari-target', angle: sAngle, distance: sDist,
     color: '#fbbf24', label: 'SAFARI TARGET', isSafari: true,
+    lat: centerLat + Math.sin(sAngle) * sDist * 5 / 111,
+    lon: centerLon + Math.cos(sAngle) * sDist * 5 / (111 * Math.cos(centerLat * Math.PI / 180)),
   })
   return blips
 }
@@ -107,13 +119,31 @@ export function RadarWidget() {
           const nearSweep = angleDiff < 0.5 || angleDiff > Math.PI * 2 - 0.5
           const blipR = blip.isSafari ? (detailed ? 6 : 4) : (detailed ? 4 : 2)
           return (
-            <g key={blip.id}>
+            <g key={blip.id} style={{ cursor: 'pointer' }}
+              onClick={(e) => {
+                e.stopPropagation()
+                // Fly to this blip's location on the map
+                if (blip.lat && blip.lon) {
+                  window.dispatchEvent(new CustomEvent('terra:flyto', {
+                    detail: { lat: blip.lat, lon: blip.lon, zoom: 16 }
+                  }))
+                  setExpanded(false)
+                }
+                toast.success(`${blip.category || 'Signal'} — ${Math.floor(blip.distance * 5000)}m`, { duration: 2000 })
+              }}
+            >
+              <circle cx={bx} cy={by} r={blipR + 4} fill="transparent" />
               <circle cx={bx} cy={by} r={blipR}
                 fill={blip.color} opacity={nearSweep ? 1 : 0.6}
-                style={{ transition: 'opacity 0.3s', cursor: 'pointer' }}
-              >
-                <title>{blip.isSafari ? `SAFARI TARGET — ${Math.floor(blip.distance * 5000)}m` : `${blip.category || 'Signal'} — ${Math.floor(blip.distance * 5000)}m`}</title>
-              </circle>
+                style={{ transition: 'opacity 0.3s' }}
+              />
+              {detailed && (
+                <text x={bx} y={by + blipR + 10} textAnchor="middle"
+                  fontSize="6" fill={blip.color} opacity="0.7"
+                  fontFamily="'Orbitron', system-ui, sans-serif">
+                  {(blip.category || '').slice(0, 6).toUpperCase()}
+                </text>
+              )}
               {blip.isSafari && (
                 <>
                   <circle cx={bx} cy={by} r={blipR + 4} fill="none"

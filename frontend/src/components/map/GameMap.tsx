@@ -268,6 +268,15 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
           selectedLayer.addLayer(selectedPoly)
         } catch (_) {}
 
+        // If picking favorite mode → save pin and return
+        if (useStore.getState().pickingFavorite) {
+          window.dispatchEvent(new CustomEvent('hexod:pick-favorite', {
+            detail: { lat: geo.lat, lon: geo.lng, name: (terr as any).poi_name || (terr as any).place_name || `Hex ${hx.slice(-6)}` }
+          }))
+          selectedLayer.clearLayers()
+          return
+        }
+
         // Fetch full hex data (with POI) THEN open card
         const zoom2 = map.getZoom()
         const storeToken = useStore.getState().accessToken

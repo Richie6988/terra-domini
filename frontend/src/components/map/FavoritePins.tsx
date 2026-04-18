@@ -81,6 +81,22 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
   const [open, setOpen] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editName, setEditName] = useState('')
+  const pickingFavorite = useStore(s => s.pickingFavorite)
+  const setPickingFavorite = useStore(s => s.setPickingFavorite)
+
+  // Listen for territory pick events
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail
+      if (detail?.lat && detail?.lon) {
+        const name = detail.name || `Territory ${pins.length + 1}`
+        addPin(detail.lat, detail.lon, 15, name)
+        setPickingFavorite(false)
+      }
+    }
+    window.addEventListener('hexod:pick-favorite', handler)
+    return () => window.removeEventListener('hexod:pick-favorite', handler)
+  }, [addPin, pins.length, setPickingFavorite])
 
   return (
     <div style={{ position: 'absolute', bottom: 90, left: 12, zIndex: 500 }}>
@@ -89,14 +105,32 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
         onClick={() => setOpen(!open)}
         style={{
           width: 36, height: 36, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: open ? 'rgba(204,136,0,0.12)' : 'rgba(13,27,42,0.92)',
-          border: `1px solid ${open ? 'rgba(204,136,0,0.3)' : 'rgba(255,255,255,0.1)'}`,
-          cursor: 'pointer', color: open ? '#cc8800' : '#6b7280',
+          background: pickingFavorite ? 'rgba(245,158,11,0.3)' : open ? 'rgba(204,136,0,0.12)' : 'rgba(13,27,42,0.92)',
+          border: `1px solid ${pickingFavorite ? '#F59E0B' : open ? 'rgba(204,136,0,0.3)' : 'rgba(255,255,255,0.1)'}`,
+          cursor: 'pointer', color: pickingFavorite ? '#F59E0B' : open ? '#cc8800' : '#6b7280',
+          animation: pickingFavorite ? 'pulse-ring 1.5s infinite' : 'none',
         }}
-        title="Favorite locations"
+        title={pickingFavorite ? 'Click a territory to save' : 'Favorite locations'}
       >
         <Star size={15} />
       </button>
+
+      {/* Pick mode indicator */}
+      {pickingFavorite && (
+        <div style={{
+          position: 'absolute', bottom: 44, left: 0, width: 200,
+          padding: '8px 12px', borderRadius: 8,
+          background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)',
+          fontSize: 9, color: '#F59E0B', fontWeight: 700, letterSpacing: 1,
+          fontFamily: "'Orbitron', sans-serif",
+        }}>
+          TAP A TERRITORY TO SAVE IT
+          <button onClick={() => setPickingFavorite(false)} style={{
+            marginLeft: 8, padding: '2px 6px', borderRadius: 4, cursor: 'pointer',
+            background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', fontSize: 8,
+          }}>CANCEL</button>
+        </div>
+      )}
 
       <AnimatePresence>
         {open && (
@@ -116,7 +150,7 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
             <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
               <span style={{ fontSize: 12, fontWeight: 600, color: '#cc8800' }}>⭐ Saved Locations</span>
               <button
-                onClick={() => addPin(currentLat, currentLon, currentZoom)}
+                onClick={() => { setPickingFavorite(true); setOpen(false) }}
                 style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', background: 'rgba(204,136,0,0.08)', border: '1px solid rgba(204,136,0,0.2)', borderRadius: 6, color: '#cc8800', cursor: 'pointer', fontSize: 11 }}
               >
                 <Plus size={11} /> Save here
