@@ -37,4 +37,4 @@ export function HexCoinIcon({ size = 'md', className }: HexCoinIconProps) {
 }
 
 /** @deprecated Use HexCoinIcon instead */
-export const CrystalIcon = HexCoinIcon
+export const IconSVG = HexCoinIcon

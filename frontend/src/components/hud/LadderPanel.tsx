@@ -6,9 +6,10 @@ import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { GlassPanel } from '../shared/GlassPanel'
 import { MiniIcon, StatusDot } from '../shared/MiniIcons'
-import { CrystalIcon } from '../shared/CrystalIcon'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
+import { IconSVG } from '../shared/iconBank'
+
 
 interface Props { onClose: () => void }
 type Tab = 'global' | 'nearby' | 'alliance'
@@ -126,7 +127,7 @@ export function LadderPanel({ onClose }: Props) {
 
             {/* HEX/day */}
             <div style={{ width: 50, textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 3 }}>
-              <CrystalIcon size="sm" />
+              <IconSVG id="hex_coin" size={12} />
               <span style={{ fontSize: 9, fontWeight: 700, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>{p.hex_per_day}</span>
             </div>
           </div>

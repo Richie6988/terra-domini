@@ -7,8 +7,7 @@ import { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { SKILL_BRANCHES, type BranchId, type SkillNode, type SkillBranch } from '../../types/kingdom.types'
 import type { Kingdom, SkillState } from '../../types/kingdom.types'
-import { CrystalIcon } from '../shared/CrystalIcon'
-import { SkillIconSVG } from '../shared/iconBank'
+import { SkillIconSVG, IconSVG } from '../shared/iconBank'
 import { EmojiIcon } from '../shared/emojiIcons'
 
 interface Props {
@@ -257,7 +256,7 @@ function BranchColumn({
 
           {/* Branch allocation slider */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <CrystalIcon size="sm" />
+            <IconSVG id="hex_coin" size={12} />
             <input
               type="range"
               min={0} max={100} value={alloc}
@@ -392,7 +391,7 @@ export function SkillTreeView({ kingdom, onPour, onForkChoice, onBranchAllocChan
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
         marginBottom: 12, padding: '8px 12px',
-        background: 'rgba(255,255,255,0.4)', borderRadius: 8,
+        background: 'rgba(255,255,255,0.03)', borderRadius: 8,
         border: '1px solid rgba(255,255,255,0.08)',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -426,7 +425,7 @@ export function SkillTreeView({ kingdom, onPour, onForkChoice, onBranchAllocChan
           fontSize: 9, fontWeight: 900, color: '#7950f2',
           fontFamily: "'Share Tech Mono', monospace",
         }}>
-          <CrystalIcon size="sm" />
+          <IconSVG id="hex_coin" size={12} />
           {kingdom.dailyHex.toLocaleString()}/DAY
         </div>
       </div>

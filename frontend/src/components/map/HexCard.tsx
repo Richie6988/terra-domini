@@ -118,6 +118,8 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
       useStore.getState().setTerritories([owned as any])
       qc.invalidateQueries({ queryKey: ['player'] })
       qc.invalidateQueries({ queryKey: ['wallet'] })
+      qc.invalidateQueries({ queryKey: ['kingdoms'] })
+      qc.invalidateQueries({ queryKey: ['my-territories'] })
       play('claim')
       setCelebrating(true)
     } catch (err: any) {

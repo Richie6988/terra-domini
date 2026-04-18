@@ -29,7 +29,7 @@ export function InfoPanel({ onClose }: Props) {
         </div>
 
         {RULES.map(r => (
-          <div key={r.title} style={{ display: 'flex', gap: 12, padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.05)' }}>
+          <div key={r.title} style={{ display: 'flex', gap: 12, padding: '10px 14px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }}>
             <div style={{ width: 32, height: 32, borderRadius: 8, background: `${r.color}10`, border: `1px solid ${r.color}20`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <MiniIcon id={r.icon} size={16} color={r.color} />
             </div>

@@ -9,7 +9,7 @@
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useKingdomStore } from '../../store/kingdomStore'
-import { CrystalIcon } from '../shared/CrystalIcon'
+import { IconSVG } from './iconBank'
 
 const DAY_DURATION_SEC = 60 // Prototype: 60s. Production: 86400 (24h)
 
@@ -119,7 +119,7 @@ export function DayCycleWidget() {
           fontFamily: "'Share Tech Mono', monospace",
           transition: 'color 0.5s',
         }}>
-          <CrystalIcon size="sm" />
+          <IconSVG id="hex_coin" size={12} />
           +{lastHex.toLocaleString()}
         </div>
       )}

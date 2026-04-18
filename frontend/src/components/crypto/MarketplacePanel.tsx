@@ -17,7 +17,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
-import { CrystalIcon } from '../shared/CrystalIcon'
 import { TokenHexPreview } from '../shared/TokenHexPreview'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
@@ -397,7 +396,7 @@ export function MarketplacePanel({ onClose }: { onClose: () => void }) {
         <div style={{ display:'flex', alignItems:'center', gap:6, marginBottom:12,
           padding:'8px 12px', background:'rgba(255,255,255,0.04)', borderRadius:8,
           border:'1px solid rgba(255,255,255,0.08)' }}>
-          <CrystalIcon size="md" />
+          <IconSVG id="hex_coin" size={16} />
           <span style={{ fontSize:13, fontWeight:900, color:'#7950f2', fontFamily:"'Share Tech Mono', monospace" }}>
             {parseFloat(String(player.tdc_in_game || 0)).toFixed(0)}
           </span>
@@ -444,7 +443,7 @@ export function MarketplacePanel({ onClose }: { onClose: () => void }) {
             display:'flex', alignItems:'center', justifyContent:'center', gap:6,
           }}
         >
-          <CrystalIcon size="sm" /> TOP UP → WALLET
+          <IconSVG id="hex_coin" size={12} /> TOP UP → WALLET
         </button>
         <button
           onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }}

@@ -175,7 +175,7 @@ export function RadarWidget() {
             onClick={() => setExpanded(false)}
             style={{
               position: 'fixed', inset: 0, zIndex: 1500,
-              background: 'rgba(255,255,255,0.4)', backdropFilter: 'blur(8px)',
+              background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(8px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexDirection: 'column', gap: 12,
             }}

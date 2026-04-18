@@ -10,7 +10,7 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import { useLeafletLayer } from '../ui/Utils'
 import { useQuery } from '@tanstack/react-query'
-import { cellToBoundary, gridDisk } from 'h3-js'
+import { cellToBoundary, gridDisk, latLngToCell, cellToLatLng, getResolution } from 'h3-js'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
 
@@ -36,40 +36,52 @@ const TIER_COLOR = [
 ]
 
 /** Build outer-only boundary segments for a cluster of hexes.
- *  Returns array of [lat,lng] polyline segments forming the outer border. */
+ *  Returns array of [lat,lng] polyline segments forming the outer border.
+ *
+ *  FIX: Previously used gridDisk neighbor ordering which does NOT match
+ *  cellToBoundary edge ordering. Now uses latLngToCell on edge midpoints
+ *  nudged outward to correctly identify which neighbor is across each edge. */
 function buildOuterBorder(h3Indexes: string[]): [number, number][][] {
   const clusterSet = new Set(h3Indexes)
-  // Edge = pair of boundary vertices. An edge is "outer" if its hex neighbor is NOT in cluster.
-  // For each hex, get 6 boundary points + 6 neighbors (in order).
-  // Edge i connects vertex[i] and vertex[(i+1)%6].
-  // Neighbor i shares edge i with this hex.
-
   const outerEdges: [number, number][][] = []
 
   for (const hx of h3Indexes) {
     try {
       const boundary = cellToBoundary(hx) as [number, number][]
-      const neighbors = gridDisk(hx, 1).filter((n: string) => n !== hx)
+      const center = cellToLatLng(hx) as [number, number]
+      const res = getResolution(hx)
 
-      for (let i = 0; i < 6; i++) {
-        // Check if neighbor across edge i is in cluster
-        const neighbor = neighbors[i]
-        if (!neighbor || !clusterSet.has(neighbor)) {
-          // This edge is outer — add as segment
-          const v1 = boundary[i]
-          const v2 = boundary[(i + 1) % 6]
+      for (let i = 0; i < boundary.length; i++) {
+        const v1 = boundary[i]
+        const v2 = boundary[(i + 1) % boundary.length]
+
+        // Midpoint of this edge
+        const midLat = (v1[0] + v2[0]) / 2
+        const midLon = (v1[1] + v2[1]) / 2
+
+        // Nudge midpoint slightly AWAY from hex center (outward)
+        const dLat = midLat - center[0]
+        const dLon = midLon - center[1]
+        const nudgedLat = midLat + dLat * 0.3
+        const nudgedLon = midLon + dLon * 0.3
+
+        // Find which cell is across this edge
+        const neighborAcrossEdge = latLngToCell(nudgedLat, nudgedLon, res)
+
+        // If the neighbor is NOT in our cluster → this is an outer edge
+        if (!clusterSet.has(neighborAcrossEdge)) {
           outerEdges.push([v1, v2])
         }
       }
     } catch (_) {}
   }
 
-  // Merge connected edges into polylines
+  // Merge connected edges into polylines (greedy chain merge)
   if (outerEdges.length === 0) return []
 
-  // Simple greedy chain merge
   const chains: [number, number][][] = []
   const used = new Set<number>()
+  const EPS = 1e-8
 
   for (let start = 0; start < outerEdges.length; start++) {
     if (used.has(start)) continue
@@ -84,16 +96,14 @@ function buildOuterBorder(h3Indexes: string[]): [number, number][][] {
         const [a, b] = outerEdges[j]
         const last = chain[chain.length - 1]
         const first = chain[0]
-        // Connect to end
-        if (Math.abs(a[0] - last[0]) < 1e-8 && Math.abs(a[1] - last[1]) < 1e-8) {
+
+        if (Math.abs(a[0] - last[0]) < EPS && Math.abs(a[1] - last[1]) < EPS) {
           chain.push(b); used.add(j); changed = true
-        } else if (Math.abs(b[0] - last[0]) < 1e-8 && Math.abs(b[1] - last[1]) < 1e-8) {
+        } else if (Math.abs(b[0] - last[0]) < EPS && Math.abs(b[1] - last[1]) < EPS) {
           chain.push(a); used.add(j); changed = true
-        }
-        // Connect to start
-        else if (Math.abs(b[0] - first[0]) < 1e-8 && Math.abs(b[1] - first[1]) < 1e-8) {
+        } else if (Math.abs(b[0] - first[0]) < EPS && Math.abs(b[1] - first[1]) < EPS) {
           chain.unshift(a); used.add(j); changed = true
-        } else if (Math.abs(a[0] - first[0]) < 1e-8 && Math.abs(a[1] - first[1]) < 1e-8) {
+        } else if (Math.abs(a[0] - first[0]) < EPS && Math.abs(a[1] - first[1]) < EPS) {
           chain.unshift(b); used.add(j); changed = true
         }
       }
@@ -103,6 +113,8 @@ function buildOuterBorder(h3Indexes: string[]): [number, number][][] {
 
   return chains
 }
+
+
 
 export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
   const player = usePlayer()
@@ -180,27 +192,27 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
         }
       }
 
-      // Badge centroid
-      if (k.centroid_lat && k.centroid_lon) {
-        const tierLabel = isMain ? '' : k.size <= 1 ? '' : '⬡'
-        const size = isMain ? 52 : Math.min(44, 28 + Math.floor(Math.log2(k.size + 1)) * 4)
+      // Kingdom label — only for kingdoms with 2+ territories
+      if (k.centroid_lat && k.centroid_lon && k.size >= 2) {
+        const size = isMain ? 48 : Math.min(40, 24 + Math.floor(Math.log2(k.size + 1)) * 4)
 
         const icon = L.divIcon({
           html: `<div style="
-            width:${size}px;height:${size}px;
-            clip-path:polygon(50% 0%,100% 25%,100% 75%,50% 100%,0% 75%,0% 25%);
-            background:${color}${isMain ? '28' : '18'};
-            border:${isMain ? 2 : 1.5}px solid ${color}${isMain ? 'cc' : '88'};
-            display:flex;align-items:center;justify-content:center;flex-direction:column;
-            box-shadow:0 0 ${isMain ? 18 : 10}px ${color}${isMain ? '66' : '33'};
-            font-family:system-ui;cursor:default;
+            padding:3px 8px;
+            background:${color}22;
+            border:1.5px solid ${color}88;
+            border-radius:8px;
+            display:flex;align-items:center;gap:4px;
+            box-shadow:0 2px 8px ${color}33;
+            font-family:'Orbitron',system-ui,sans-serif;
+            cursor:pointer;white-space:nowrap;
           ">
-            <div style="font-size:${Math.round(size * 0.28)}px;line-height:1">${tierLabel}</div>
-            <div style="font-size:${Math.round(size * 0.2)}px;font-weight:900;color:#fff;line-height:1.1">${k.size}</div>
+            <div style="font-size:10px;font-weight:900;color:${color}">${k.size}</div>
+            <div style="font-size:7px;color:rgba(255,255,255,0.5);letter-spacing:1px">${isMain ? 'MAIN' : `T${k.tier}`}</div>
           </div>`,
           className: '',
-          iconSize: [size, size],
-          iconAnchor: [size / 2, size / 2],
+          iconSize: [60, 24],
+          iconAnchor: [30, 12],
         })
 
         const marker = L.marker([k.centroid_lat, k.centroid_lon], {

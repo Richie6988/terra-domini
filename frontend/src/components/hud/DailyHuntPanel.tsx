@@ -15,7 +15,6 @@ import { useState, useEffect, useCallback, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GlassPanel } from '../shared/GlassPanel'
-import { CrystalIcon } from '../shared/CrystalIcon'
 import { IconSVG } from '../shared/iconBank'
 import { TokenFace2D } from '../shared/TokenFace2D'
 import { api } from '../../services/api'
@@ -112,16 +111,7 @@ export function DailyHuntPanel({ onClose }: Props) {
 
   // Spawn new target
   const spawnMut = useMutation({
-    mutationFn: () => {
-      return new Promise<any>((resolve) => {
-        navigator.geolocation?.getCurrentPosition(
-          pos => api.post('/safari/spawn/', { lat: pos.coords.latitude, lon: pos.coords.longitude }).then(r => resolve(r.data)),
-          () => api.post('/safari/spawn/', { lat: 48.8566, lon: 2.3522 }).then(r => resolve(r.data))
-        )
-        // Timeout fallback
-        setTimeout(() => api.post('/safari/spawn/', { lat: 48.8566, lon: 2.3522 }).then(r => resolve(r.data)), 3000)
-      })
-    },
+    mutationFn: () => api.post('/safari/spawn/', { lat: 48.8566, lon: 2.3522 }).then(r => r.data),
     onSuccess: (data) => {
       toast.success(data?.message || 'New creature spawned!')
       qc.invalidateQueries({ queryKey: ['safari-active'] })
@@ -131,15 +121,7 @@ export function DailyHuntPanel({ onClose }: Props) {
 
   // Capture target
   const captureMut = useMutation({
-    mutationFn: () => {
-      return new Promise<any>((resolve, reject) => {
-        navigator.geolocation?.getCurrentPosition(
-          pos => api.post('/safari/capture/', { lat: pos.coords.latitude, lon: pos.coords.longitude }).then(r => resolve(r.data)).catch(reject),
-          () => api.post('/safari/capture/', { lat: 48.8566, lon: 2.3522 }).then(r => resolve(r.data)).catch(reject)
-        )
-        setTimeout(() => api.post('/safari/capture/', { lat: 48.8566, lon: 2.3522 }).then(r => resolve(r.data)).catch(reject), 3000)
-      })
-    },
+    mutationFn: () => api.post('/safari/capture/', { lat: 48.8566, lon: 2.3522 }).then(r => r.data),
     onSuccess: (data) => {
       setReward({ hex_reward: data.hex_earned, xp: 50 })
       setPhase('collected')
@@ -260,7 +242,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               }}>
                 <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>REWARD</div>
                 <div style={{ fontSize: 14, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                  <CrystalIcon size="sm" /> {hunt.hex_reward}
+                  <IconSVG id="hex_coin" size={12} /> {hunt.hex_reward}
                 </div>
               </div>
               <div style={{
@@ -303,7 +285,7 @@ export function DailyHuntPanel({ onClose }: Props) {
 
             <div style={{
               marginTop: 16, padding: 12, borderRadius: 10,
-              background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.06)',
+              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
               textAlign: 'center',
             }}>
               <IconSVG id={hunt.id} size={44} />
@@ -469,7 +451,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                   background: 'rgba(121,80,242,0.08)', border: '1px solid rgba(121,80,242,0.2)',
                   textAlign: 'center',
                 }}>
-                  <CrystalIcon size="md" />
+                  <IconSVG id="hex_coin" size={14} />
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", marginTop: 4 }}>
                     +{reward.hex_reward}
                   </div>
@@ -517,7 +499,7 @@ export function DailyHuntPanel({ onClose }: Props) {
             <div key={ch.id} style={{
               display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,
               padding: '8px 10px', borderRadius: 8,
-              background: done ? 'rgba(0,136,74,0.05)' : 'rgba(255,255,255,0.4)',
+              background: done ? 'rgba(0,136,74,0.05)' : 'rgba(255,255,255,0.03)',
               border: `1px solid ${done ? 'rgba(0,136,74,0.2)' : 'rgba(255,255,255,0.06)'}`,
               opacity: done ? 0.6 : 1,
             }}>

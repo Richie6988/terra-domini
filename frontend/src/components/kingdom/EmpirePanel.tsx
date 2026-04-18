@@ -7,11 +7,12 @@ import { useState, useMemo } from 'react'
 import { MiniIcon } from '../shared/MiniIcons'
 import { useQuery } from '@tanstack/react-query'
 import { GlassPanel } from '../shared/GlassPanel'
-import { CrystalIcon } from '../shared/CrystalIcon'
 import { api } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { IconSVG } from '../shared/iconBank'
+
 
 interface Props { onClose: () => void }
 type Tab = 'kingdoms' | 'military' | 'stats'
@@ -22,7 +23,7 @@ const TABS: { id: Tab; label: string }[] = [
   { id: 'stats', label: 'STATS' },
 ]
 
-const sBox: React.CSSProperties = { padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.05)' }
+const sBox: React.CSSProperties = { padding: 14, borderRadius: 12, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)' }
 const lbl: React.CSSProperties = { fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 6 }
 const statCard = (c: string): React.CSSProperties => ({ padding: '12px 8px', borderRadius: 10, textAlign: 'center', background: `${c}08`, border: `1px solid ${c}20` })
 
@@ -50,8 +51,8 @@ function KingdomsTab({ kingdoms, onTeleport }: { kingdoms: Kingdom[]; onTeleport
         return (
           <div key={k.cluster_id} style={{
             display: 'flex', gap: 12, padding: '12px 14px', borderRadius: 12,
-            background: k.is_main ? `${col}06` : 'rgba(255,255,255,0.4)',
-            border: `1.5px solid ${k.is_main ? `${col}25` : 'rgba(255,255,255,0.05)'}`,
+            background: k.is_main ? `${col}06` : 'rgba(255,255,255,0.03)',
+            border: `1.5px solid ${k.is_main ? `${col}25` : 'rgba(255,255,255,0.06)'}`,
             cursor: 'pointer', transition: 'all 0.15s',
           }}
             onClick={() => onTeleport(k.centroid_lat, k.centroid_lon)}
@@ -82,7 +83,7 @@ function KingdomsTab({ kingdoms, onTeleport }: { kingdoms: Kingdom[]; onTeleport
             {/* Income */}
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
-                <CrystalIcon size="sm" />
+                <IconSVG id="hex_coin" size={12} />
                 <span style={{ fontSize: 13, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>+{Math.round(k.tdc_per_24h)}</span>
               </div>
               <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)', marginTop: 1 }}>HEX/DAY</div>
@@ -96,19 +97,26 @@ function KingdomsTab({ kingdoms, onTeleport }: { kingdoms: Kingdom[]; onTeleport
 
 // ═══ MILITARY TAB ═══
 const UNITS = [
-  { name: 'Infantry', icon: 'INF', cost: 5, atk: 10, def: 8, color: '#dc2626' },
-  { name: 'Naval', icon: 'NAV', cost: 15, atk: 35, def: 30, color: '#0099cc' },
-  { name: 'Aerial', icon: 'AIR', cost: 25, atk: 45, def: 15, color: '#8b5cf6' },
-  { name: 'Engineer', icon: 'ENG', cost: 20, atk: 8, def: 20, color: '#cc8800' },
-  { name: 'Medic', icon: 'MED', cost: 30, atk: 2, def: 5, color: '#22c55e' },
-  { name: 'Spy', icon: 'SPY', cost: 100, atk: 15, def: 3, color: '#475569' },
+  { name: 'Infantry', icon: 'swords', cost: 50, atk: 10, def: 12, color: '#dc2626' },
+  { name: 'Cavalry', icon: 'horse', cost: 120, atk: 18, def: 8, color: '#f97316' },
+  { name: 'Artillery', icon: 'bomb', cost: 300, atk: 35, def: 4, color: '#8b5cf6' },
+  { name: 'Aerial', icon: 'plane', cost: 250, atk: 25, def: 6, color: '#0ea5e9' },
+  { name: 'Naval', icon: 'ship', cost: 200, atk: 20, def: 15, color: '#0099cc' },
+  { name: 'Spy', icon: 'spy', cost: 150, atk: 5, def: 3, color: '#475569' },
 ]
 
 function MilitaryTab() {
-  // Mock data — in prod comes from backend
-  const [counts] = useState<Record<string, number>>({ Infantry: 12, Naval: 2, Aerial: 0, Engineer: 3, Medic: 1, Spy: 0 })
-  const totalAtk = UNITS.reduce((s, u) => s + u.atk * (counts[u.name] || 0), 0)
-  const totalDef = UNITS.reduce((s, u) => s + u.def * (counts[u.name] || 0), 0)
+  const { data: armyData } = useQuery({
+    queryKey: ['my-army'],
+    queryFn: () => api.get('/combat/my-army/').then(r => r.data),
+    staleTime: 15000,
+  })
+
+  const units = armyData?.units || {}
+  const training = armyData?.training || []
+  const totalAtk = UNITS.reduce((s, u) => s + u.atk * (units[u.name.toLowerCase()] || 0), 0)
+  const totalDef = UNITS.reduce((s, u) => s + u.def * (units[u.name.toLowerCase()] || 0), 0)
+  const setActivePanel = useStore(s => s.setActivePanel)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -118,27 +126,41 @@ function MilitaryTab() {
         <div style={statCard('#3b82f6')}><div style={lbl}>TOTAL DEFENSE</div><div style={{ fontSize: 20, fontWeight: 900, color: '#3b82f6', fontFamily: "'Share Tech Mono', monospace" }}>{totalDef}</div></div>
       </div>
 
+      {/* Active training */}
+      {training.length > 0 && (
+        <div style={{ padding: '8px 12px', borderRadius: 10, background: 'rgba(245,158,11,0.06)', border: '1px solid rgba(245,158,11,0.15)' }}>
+          <div style={{ ...lbl, color: '#F59E0B' }}>TRAINING IN PROGRESS ({training.length})</div>
+          {training.map((t: any, i: number) => (
+            <div key={i} style={{ fontSize: 9, color: '#e2e8f0', marginTop: 4 }}>
+              {t.quantity}× {t.unit_type} — {t.done ? 'READY' : t.remaining}
+            </div>
+          ))}
+        </div>
+      )}
+
       {/* Unit roster */}
-      {UNITS.map(u => (
+      {UNITS.map(u => {
+        const count = units[u.name.toLowerCase()] || 0
+        return (
         <div key={u.name} style={{
           display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10,
-          background: 'rgba(255,255,255,0.4)', border: `1px solid ${u.color}10`,
+          background: 'rgba(255,255,255,0.03)', border: `1px solid ${u.color}15`,
         }}>
           <span style={{ fontSize: 20, flexShrink: 0 }}><EmojiIcon emoji={u.icon} size={16} /></span>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#e2e8f0' }}>{u.name}</div>
-            <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)' }}>ATK {u.atk} · DEF {u.def} · {u.cost}◆</div>
+            <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)' }}>ATK {u.atk} · DEF {u.def} · {u.cost} HEX</div>
           </div>
-          <div style={{ fontSize: 16, fontWeight: 900, color: u.color, fontFamily: "'Share Tech Mono', monospace", minWidth: 30, textAlign: 'right' }}>
-            ×{counts[u.name] || 0}
+          <div style={{ fontSize: 16, fontWeight: 900, color: count > 0 ? u.color : 'rgba(255,255,255,0.15)', fontFamily: "'Share Tech Mono', monospace", minWidth: 30, textAlign: 'right' }}>
+            ×{count}
           </div>
-          <button onClick={() => toast.success(`Recruiting ${u.name}...`)} style={{
-            padding: '6px 12px', borderRadius: 8, cursor: 'pointer', fontSize: 7, fontWeight: 700,
-            background: `${u.color}08`, border: `1px solid ${u.color}20`, color: u.color,
-            fontFamily: "'Orbitron', sans-serif", letterSpacing: 1,
-          }}>+ RECRUIT</button>
         </div>
-      ))}
+      )})}
+
+      {/* CTA to full combat panel */}
+      <button onClick={() => setActivePanel('combat')} className="btn-game btn-game-red" style={{ width: '100%', fontSize: 9, letterSpacing: 2 }}>
+        <IconSVG id="swords" size={12} /> OPEN MILITARY PANEL
+      </button>
     </div>
   )
 }
@@ -179,31 +201,29 @@ function StatsTab({ kingdoms }: { kingdoms: Kingdom[] }) {
         ))}
       </div>
 
-      {/* Resource production — computed from territories */}
+      {/* Resource production — computed from kingdoms data */}
       <div style={sBox}>
         <div style={lbl}>RESOURCE PRODUCTION</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6 }}>
           {(() => {
-            const ts = Object.values(useStore.getState().territories).filter((t: any) => t.owner_id === player?.id)
-            const count = ts.length || 1
-            // Resource rates scale with territory count + biome mix
-            const biomes: Record<string, number> = {}
-            ts.forEach((t: any) => { const b = t.territory_type || 'rural'; biomes[b] = (biomes[b] || 0) + 1 })
+            // Use kingdoms data from API (reactive) instead of non-reactive store
+            const totalSize = kingdoms.reduce((sum, k) => sum + k.size, 0) || 1
+            const totalTdc = kingdoms.reduce((sum, k) => sum + (k.tdc_per_24h || 0), 0)
             return [
-              { name: 'Iron', icon: 'pickaxe', val: Math.floor((biomes['mountain'] || 0) * 40 + count * 5) },
-              { name: 'Oil', icon: 'oil_barrel', val: Math.floor((biomes['industrial'] || 0) * 35 + count * 3) },
-              { name: 'Food', icon: 'wheat', val: Math.floor((biomes['rural'] || 0) * 50 + count * 8) },
-              { name: 'Energy', icon: 'lightning', val: Math.floor((biomes['urban'] || 0) * 30 + count * 4) },
-              { name: 'Water', icon: 'water_drop', val: Math.floor((biomes['coastal'] || 0) * 45 + count * 6) },
-              { name: 'Gold', icon: 'hex_coin', val: Math.floor((biomes['landmark'] || 0) * 25 + count * 2) },
-              { name: 'Data', icon: 'safari_radar', val: Math.floor((biomes['urban'] || 0) * 15 + count * 2) },
-              { name: 'Influence', icon: 'theater', val: Math.floor(count * 3 + (biomes['landmark'] || 0) * 20) },
+              { name: 'Iron', icon: 'pickaxe', val: Math.floor(totalSize * 8) },
+              { name: 'Oil', icon: 'oil_barrel', val: Math.floor(totalSize * 5) },
+              { name: 'Food', icon: 'wheat', val: Math.floor(totalSize * 12) },
+              { name: 'Energy', icon: 'lightning', val: Math.floor(totalSize * 6) },
+              { name: 'Water', icon: 'water_drop', val: Math.floor(totalSize * 9) },
+              { name: 'Gold', icon: 'hex_coin', val: Math.floor(totalTdc) },
+              { name: 'Data', icon: 'safari_radar', val: Math.floor(totalSize * 3) },
+              { name: 'Influence', icon: 'theater', val: Math.floor(totalSize * 4) },
             ]
           })().map(r => (
             <div key={r.name} style={{ textAlign: 'center', padding: '6px 4px', borderRadius: 8, background: 'rgba(255,255,255,0.02)' }}>
               <div style={{ fontSize: 16 }}><EmojiIcon emoji={r.icon} size={16} /></div>
               <div style={{ fontSize: 9, fontWeight: 700, color: '#e2e8f0', fontFamily: "'Share Tech Mono', monospace" }}>{r.val}</div>
-              <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)' }}>{r.name}/d</div>
+              <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.2)' }}>{r.name}/d</div>
             </div>
           ))}
         </div>
@@ -228,7 +248,7 @@ export function EmpirePanel({ onClose }: Props) {
   const handleTeleport = (lat: number, lon: number) => {
     onClose()
     setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('hexod:flyTo', { detail: { lat, lon, zoom: 14 } }))
+      window.dispatchEvent(new CustomEvent('terra:flyto', { detail: { lat, lon, zoom: 14 } }))
     }, 200)
   }
 

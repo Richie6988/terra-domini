@@ -191,7 +191,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* Alliance chat — real WebSocket */}
-            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.05)', marginBottom: 14 }}>
+            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
                 <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif" }}>ALLIANCE CHAT</div>
                 <div style={{ width: 6, height: 6, borderRadius: '50%', background: chatConnected ? '#22c55e' : '#dc2626' }} title={chatConnected ? 'Connected' : 'Disconnected'} />

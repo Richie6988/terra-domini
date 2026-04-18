@@ -6,11 +6,12 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
-import { CrystalIcon } from '../shared/CrystalIcon'
 import { useKingdomStore } from '../../store/kingdomStore'
 import { useStore, usePlayer } from '../../store'
 import { territoryApi } from '../../services/api'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { IconSVG } from '../shared/iconBank'
+
 import {
   calculateConquestCost,
   type ConquestMethod, type ConquestCost,
@@ -375,7 +376,7 @@ export function ConquestActions({ territory, onClaimed }: Props) {
               <div style={{ textAlign: 'center' }}>
                 <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, fontFamily: "'Orbitron', system-ui, sans-serif" }}>COST</div>
                 <div style={{ fontSize: 16, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'center' }}>
-                  <CrystalIcon size="sm" /> {costs[selectedMethod].baseCost.toLocaleString()}
+                  <IconSVG id="hex_coin" size={12} /> {costs[selectedMethod].baseCost.toLocaleString()}
                 </div>
               </div>
               {costs[selectedMethod].successChance !== undefined && (

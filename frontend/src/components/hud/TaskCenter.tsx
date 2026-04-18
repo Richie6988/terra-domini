@@ -7,11 +7,12 @@
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { GlassPanel } from '../shared/GlassPanel'
-import { CrystalIcon } from '../shared/CrystalIcon'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { IconSVG } from '../shared/iconBank'
+
 
 interface Props { onClose: () => void }
 
@@ -108,7 +109,7 @@ export function TaskCenter({ onClose }: Props) {
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 8, color: 'rgba(255,255,255,0.35)', letterSpacing: 1 }}>
           <span>PROGRESS {completed}/{missions.length}</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <CrystalIcon size="sm" />{totalReward}/{totalPossible}
+            <IconSVG id="hex_coin" size={12} />{totalReward}/{totalPossible}
           </span>
         </div>
         <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
@@ -131,7 +132,7 @@ export function TaskCenter({ onClose }: Props) {
             <div key={task.id} style={{
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '10px 14px', borderRadius: 10,
-              background: isClaimed ? 'rgba(34,197,94,0.04)' : isDone ? 'rgba(0,153,204,0.04)' : 'rgba(255,255,255,0.4)',
+              background: isClaimed ? 'rgba(34,197,94,0.04)' : isDone ? 'rgba(0,153,204,0.04)' : 'rgba(255,255,255,0.03)',
               border: `1px solid ${isClaimed ? 'rgba(34,197,94,0.15)' : isDone ? 'rgba(0,153,204,0.15)' : 'rgba(255,255,255,0.05)'}`,
               opacity: isClaimed ? 0.6 : 1,
             }}>
@@ -146,7 +147,7 @@ export function TaskCenter({ onClose }: Props) {
               </div>
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <CrystalIcon size="sm" />
+                  <IconSVG id="hex_coin" size={12} />
                   <span style={{ fontSize: 11, fontWeight: 900, color: isClaimed ? 'rgba(255,255,255,0.2)' : '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>{task.reward_tdc}</span>
                 </div>
                 {isDone && !isClaimed && (

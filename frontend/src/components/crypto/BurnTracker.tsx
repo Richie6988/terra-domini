@@ -6,7 +6,6 @@
  */
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { CrystalIcon } from '../shared/CrystalIcon'
 import { BURN_RATES, HEX_TOKEN } from '../../types/blockchain.types'
 
 interface Props {
@@ -113,7 +112,7 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
         ].map(m => (
           <div key={m.label} style={{
             padding: '8px 6px', borderRadius: 8, textAlign: 'center',
-            background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.06)',
+            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
           }}>
             <div style={{
               fontSize: 6, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: 3,

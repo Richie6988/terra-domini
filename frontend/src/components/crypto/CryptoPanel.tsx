@@ -8,7 +8,6 @@ import { motion } from 'framer-motion'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
-import { CrystalIcon } from '../shared/CrystalIcon'
 import { Token3DViewer } from '../shared/Token3DViewer'
 import { BurnTracker } from './BurnTracker'
 import { useTokenStats } from '../../hooks/useBlockchain'
@@ -83,7 +82,7 @@ function ConvertModal({ wallet, onClose }: { wallet: any; onClose: () => void })
   const preview = (parseFloat(amount) || 0) * rate
 
   return (
-    <div style={{ position: 'fixed', inset: 0, background: 'rgba(255,255,255,0.4)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(255,255,255,0.03)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
       <motion.div initial={{ y: 300 }} animate={{ y: 0 }} style={{ background: 'linear-gradient(180deg, rgba(240,245,252,0.98), rgba(225,235,248,0.98))', borderRadius: '20px 20px 0 0', padding: 28, width: '100%', maxWidth: 420, border: '1px solid rgba(255,255,255,0.08)' }}>
         <div style={{ fontSize: 17, fontWeight: 700, color: '#e2e8f0', marginBottom: 6 }}>Convert HEX → HEX Coin</div>
         <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', marginBottom: 14 }}>Rate: 1 HEX ≈ {rate.toFixed(1)} HEX Coin · Available: {toF(wallet?.tdi_balance, 4)} HEX</div>
@@ -185,7 +184,7 @@ function TokenomicsTab() {
         {statBlocks.map(s => (
           <div key={s.label} style={{
             padding: '8px 6px', borderRadius: 8, textAlign: 'center',
-            background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.06)',
+            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
           }}>
             <div style={{ fontSize: 5, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 3 }}>{s.label}</div>
             <div style={{ fontSize: 10, fontWeight: 900, color: s.color, fontFamily: "'Share Tech Mono', monospace" }}>{s.value}</div>
@@ -361,7 +360,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
       {showConvert && <ConvertModal wallet={wallet} onClose={() => setShowConvert(false)} />}
 
       {showWithdraw && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(255,255,255,0.4)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(255,255,255,0.03)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
           <motion.div initial={{ y: 300 }} animate={{ y: 0 }} style={{ background: 'linear-gradient(180deg, rgba(240,245,252,0.98), rgba(225,235,248,0.98))', borderRadius: '20px 20px 0 0', padding: 28, width: '100%', maxWidth: 420 }}>
             <div style={{ fontSize: 17, fontWeight: 700, color: '#e2e8f0', marginBottom: 4 }}>Withdraw HEX</div>
             <div style={{ fontSize: 11, color: '#EF4444', marginBottom: 16 }}>KYC required · Min 10 HEX · 24-48h</div>

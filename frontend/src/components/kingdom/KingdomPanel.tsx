@@ -7,7 +7,6 @@ import { useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { GlassPanel } from '../shared/GlassPanel'
-import { CrystalIcon } from '../shared/CrystalIcon'
 import { ResourceIconSVG, IconSVG } from '../shared/iconBank'
 import { SkillTreeView } from './SkillTreeView'
 import { useKingdomStore } from '../../store/kingdomStore'
@@ -73,7 +72,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
         ].map(stat => (
           <div key={stat.label} style={{
             padding: '10px 8px', borderRadius: 8, textAlign: 'center',
-            background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.06)',
+            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
           }}>
             <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, marginBottom: 4, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
               {stat.label}
@@ -83,7 +82,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
               fontFamily: "'Share Tech Mono', monospace",
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
             }}>
-              {stat.icon && <CrystalIcon size="sm" />}
+              {stat.icon && <IconSVG id="hex_coin" size={12} />}
               {stat.value}
             </div>
           </div>
@@ -209,7 +208,7 @@ function ResourcesTab({ kingdom, onAllocChange }: {
         background: 'linear-gradient(90deg, rgba(121,80,242,0.08), rgba(121,80,242,0.03))',
         border: '1px solid rgba(121,80,242,0.2)',
       }}>
-        <CrystalIcon size="md" />
+        <IconSVG id="hex_coin" size={16} />
         <span style={{
           fontSize: 14, fontWeight: 900, color: '#7950f2',
           fontFamily: "'Share Tech Mono', monospace",
@@ -243,7 +242,7 @@ function ResourcesTab({ kingdom, onAllocChange }: {
               return (
                 <div key={res.id} style={{
                   padding: '8px 10px', borderRadius: 8,
-                  background: 'rgba(255,255,255,0.4)',
+                  background: 'rgba(255,255,255,0.03)',
                   border: '1px solid rgba(255,255,255,0.06)',
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
@@ -361,7 +360,7 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
             {method.stats.map(stat => (
               <div key={stat} style={{
                 flex: 1, padding: '4px 6px', borderRadius: 6,
-                background: 'rgba(255,255,255,0.4)',
+                background: 'rgba(255,255,255,0.03)',
                 fontSize: 6, color: 'rgba(255,255,255,0.45)', textAlign: 'center',
                 fontFamily: "'Share Tech Mono', monospace", letterSpacing: 0.5,
               }}>
@@ -445,7 +444,7 @@ export function KingdomPanel({ onClose }: Props) {
                 padding: '4px 10px', borderRadius: 16, cursor: 'pointer',
                 fontSize: 7, fontWeight: k.id === activeKingdomId ? 800 : 500,
                 letterSpacing: 1,
-                background: k.id === activeKingdomId ? `${k.color}15` : 'rgba(255,255,255,0.4)',
+                background: k.id === activeKingdomId ? `${k.color}15` : 'rgba(255,255,255,0.03)',
                 color: k.id === activeKingdomId ? k.color : 'rgba(255,255,255,0.35)',
                 border: `1px solid ${k.id === activeKingdomId ? `${k.color}30` : 'rgba(255,255,255,0.06)'}`,
                 fontFamily: "'Orbitron', system-ui, sans-serif",
@@ -517,26 +516,32 @@ export function KingdomPanel({ onClose }: Props) {
       {/* Cross-panel CTAs */}
       <div style={{ marginTop: 14, display: 'flex', gap: 8 }}>
         <button
-          onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }}
-          style={{
-            flex: 1, padding: '10px', borderRadius: 20,
-            background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)',
-            color: '#cc8800', fontSize: 7, fontWeight: 700, letterSpacing: 2,
-            cursor: 'pointer', fontFamily: "'Orbitron', system-ui, sans-serif",
+          onClick={() => {
+            if (demoKingdom.center) {
+              window.dispatchEvent(new CustomEvent('terra:flyto', {
+                detail: { lat: demoKingdom.center.lat, lon: demoKingdom.center.lng, zoom: 15 }
+              }))
+              onClose()
+            }
           }}
+          className="btn-game btn-game-blue"
+          style={{ flex: 1, fontSize: 8, letterSpacing: 1 }}
         >
-          <IconSVG id="cart" size={10} /> KINGDOM BOOSTS → SHOP
+          <IconSVG id="target" size={10} /> VIEW ON MAP
         </button>
         <button
-          onClick={() => { onClose(); setTimeout(() => setActivePanel('trade'), 100) }}
-          style={{
-            flex: 1, padding: '10px', borderRadius: 20,
-            background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)',
-            color: '#22c55e', fontSize: 7, fontWeight: 700, letterSpacing: 2,
-            cursor: 'pointer', fontFamily: "'Orbitron', system-ui, sans-serif",
-          }}
+          onClick={() => { onClose(); setTimeout(() => setActivePanel('combat'), 100) }}
+          className="btn-game btn-game-red"
+          style={{ flex: 1, fontSize: 8, letterSpacing: 1 }}
         >
-          TRADE RESOURCES →
+          <IconSVG id="swords" size={10} /> MILITARY
+        </button>
+        <button
+          onClick={() => { onClose(); setTimeout(() => setActivePanel('shop'), 100) }}
+          className="btn-game btn-game-gold"
+          style={{ flex: 1, fontSize: 8, letterSpacing: 1 }}
+        >
+          <IconSVG id="cart" size={10} /> SHOP
         </button>
       </div>
     </GlassPanel>

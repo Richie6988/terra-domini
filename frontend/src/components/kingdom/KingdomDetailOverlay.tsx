@@ -15,9 +15,10 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { useStore, usePlayer } from '../../store'
 import { ClaimProgressBar, type ClaimProgress } from '../shared/ClaimProgressBar'
-import { CrystalIcon } from '../shared/CrystalIcon'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { IconSVG } from '../shared/iconBank'
+
 
 interface KingdomData {
   cluster_id: string
@@ -66,7 +67,7 @@ const RC: Record<string, string> = {
 // ═══ STYLES ═══
 const sectionBox: React.CSSProperties = {
   padding: 14, borderRadius: 12,
-  background: 'rgba(255,255,255,0.4)', border: '1px solid rgba(255,255,255,0.06)',
+  background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
 }
 const statCard = (color: string): React.CSSProperties => ({
   padding: '10px 8px', borderRadius: 10, textAlign: 'center',
@@ -103,7 +104,7 @@ function OwnOverview({ k }: { k: KingdomData }) {
         <div style={statCard('#cc8800')}>
           <div style={label}>INCOME/DAY</div>
           <div style={{ ...val('#cc8800'), display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-            <CrystalIcon size="sm" /> {totalIncome}
+            <IconSVG id="hex_coin" size={12} /> {totalIncome}
           </div>
         </div>
         <div style={statCard('#dc2626')}>
@@ -171,7 +172,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
       {k.territories.map(t => (
         <div key={t.h3_index} style={{
           display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
-          borderRadius: 10, background: t.is_capital ? 'rgba(204,136,0,0.06)' : 'rgba(255,255,255,0.4)',
+          borderRadius: 10, background: t.is_capital ? 'rgba(204,136,0,0.06)' : 'rgba(255,255,255,0.03)',
           border: `1px solid ${t.is_capital ? 'rgba(204,136,0,0.2)' : 'rgba(255,255,255,0.05)'}`,
         }}>
           {/* Capital badge */}
@@ -192,7 +193,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
               }}>{t.rarity?.toUpperCase()}</span>
               <span style={{
                 padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 600,
-                background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.4)',
+                background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.03)',
               }}>{t.biome?.toUpperCase()}</span>
               {t.poi_category && <span style={{
                 padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 600,
@@ -249,7 +250,7 @@ function OwnArmy({ k }: { k: KingdomData }) {
       {units.map(u => (
         <div key={u.name} style={{
           display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
-          borderRadius: 10, background: 'rgba(255,255,255,0.4)',
+          borderRadius: 10, background: 'rgba(255,255,255,0.03)',
           border: `1px solid ${u.color}15`,
         }}>
           <span style={{ fontSize: 18 }}><EmojiIcon emoji={u.icon} size={16} /></span>

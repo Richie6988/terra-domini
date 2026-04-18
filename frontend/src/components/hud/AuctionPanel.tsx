@@ -8,7 +8,6 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GlassPanel } from '../shared/GlassPanel'
-import { CrystalIcon } from '../shared/CrystalIcon'
 import { IconSVG } from '../shared/iconBank'
 import { TokenHexPreview } from '../shared/TokenHexPreview'
 import { Token3DViewer } from '../shared/Token3DViewer'
@@ -246,7 +245,7 @@ export function AuctionPanel({ onClose }: Props) {
                     fontFamily: "'Share Tech Mono', monospace",
                     display: 'flex', alignItems: 'center', gap: 4,
                   }}>
-                    <CrystalIcon size="sm" />{a.currentBid.toLocaleString()}
+                    <IconSVG id="hex_coin" size={12} />{a.currentBid.toLocaleString()}
                   </div>
                   <div style={{
                     fontSize: 8, fontWeight: 700, fontFamily: "'Share Tech Mono', monospace",
@@ -319,7 +318,7 @@ export function AuctionPanel({ onClose }: Props) {
                 <div>
                   <div style={{ fontSize: 6, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>CURRENT BID</div>
                   <div style={{ fontSize: 18, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace", display: 'flex', alignItems: 'center', gap: 4 }}>
-                    <CrystalIcon size="md" />{selected.currentBid.toLocaleString()}
+                    <IconSVG id="hex_coin" size={16} />{selected.currentBid.toLocaleString()}
                   </div>
                 </div>
                 <div style={{ textAlign: 'right' }}>
