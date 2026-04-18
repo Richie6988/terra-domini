@@ -174,20 +174,21 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
     fill='#FFB800'; fillOp=0.45; stroke='#FFD700'; weight=2.5; dash=''; cls='td-hex-tower'
 
   } else if (isOwn) {
-    const borderCol = customBorder || (poiVisible ? rc : '#00FF87')
+    // OWN territory: fill only, NO per-hex border
+    // The KingdomBorderLayer draws the unified outer border
     fill = '#00FF87'
-    stroke = borderCol
+    stroke = 'transparent'
     dash = ''
 
     if (poiVisible) {
-      fillOp = 0.38; weight = 4
+      fillOp = 0.25; weight = 0
       cls = rarity === 'mythic'? 'td-own-mythic'
           : rarity === 'legendary' ? 'td-own-legendary'
           : rarity === 'epic'? 'td-own-epic'
           : rarity === 'rare'? 'td-own-rare'
           : 'td-hex-own-std'
     } else {
-      fillOp = 0.32; weight = 2.5; cls = 'td-hex-own-std'
+      fillOp = 0.18; weight = 0; cls = 'td-hex-own-std'
     }
 
   } else if (isEnemy) {

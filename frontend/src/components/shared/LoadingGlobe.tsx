@@ -110,19 +110,19 @@ export function LoadingGlobe({ playerLat = 48.8566, playerLon = 2.3522, onComple
         earth.rotation.x = Math.sin(spinT * Math.PI) * 0.3  // vertical tilt
         camera.position.z = 14 - spinT * 2  // slowly approach
       } else if (elapsed < TOTAL_MS) {
-        // Phase 2: Dive toward player location
+        // Phase 2: Camera zooms INTO player's position on the globe
         const diveT = (elapsed - SPIN_DURATION) / DIVE_DURATION  // 0→1
-        const eased = 1 - Math.pow(1 - diveT, 3)  // ease-out cubic
+        const eased = 1 - Math.pow(1 - diveT, 4)  // ease-out quartic (faster end)
 
-        // Lock earth rotation so player faces camera
-        earth.rotation.y = startRotY + Math.PI * 2  // completed revolution
+        // Lock earth so player faces camera
+        earth.rotation.y = startRotY + Math.PI * 2
+        earth.rotation.x = 0  // reset vertical tilt
 
-        // Camera dives in
-        camera.position.z = 12 - eased * 10
-        // Tilt camera to match player latitude
-        const latRad = (playerLat / 90) * 1.5
-        camera.position.y = eased * latRad
-        earth.rotation.x = (1 - eased) * Math.sin(Math.PI) * 0.3 + eased * (-playerLat * Math.PI / 180)
+        // Camera moves to directly face the player marker
+        const targetPos = marker.getWorldPosition(new THREE.Vector3())
+        const camTarget = targetPos.clone().normalize().multiplyScalar(EARTH_RADIUS + 0.5 + (1 - eased) * 12)
+        camera.position.lerp(camTarget, 0.08 + eased * 0.15)
+        camera.lookAt(targetPos)
 
         if (diveT > 0.3) setPhase('diving')
       }

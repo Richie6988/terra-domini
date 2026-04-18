@@ -125,6 +125,15 @@ function CommanderTab() {
         opacity: saving ? 0.6 : 1,
       }}>{saving ? 'SAVING...' : 'SAVE CHANGES'}</button>
 
+      {/* Admin Panel — staff only */}
+      {(player as any)?.is_staff && (
+        <button onClick={() => { window.location.href = '/gm' }} className="btn-game btn-game-gold" style={{
+          width: '100%', fontSize: 9, letterSpacing: 2, marginBottom: 8,
+        }}>
+          <IconSVG id="crown" size={12} /> ADMIN PANEL (GM)
+        </button>
+      )}
+
       {/* Logout + Delete */}
       <div style={{ display: 'flex', gap: 8 }}>
         <button onClick={() => { useStore.getState().logout(); window.location.href = '/login' }} style={{

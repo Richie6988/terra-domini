@@ -172,8 +172,18 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
           chains.forEach(chain => {
             layer.addLayer(L.polyline(chain as L.LatLngTuple[], {
               color,
-              weight: isMain ? 3.5 : 2,
-              opacity: isMain ? 0.85 : 0.5,
+              weight: isMain ? 4 : 3,
+              opacity: isMain ? 0.95 : 0.7,
+              interactive: false,
+              lineCap: 'round', lineJoin: 'round',
+            }))
+          })
+          // Glow effect — wider semi-transparent border behind
+          chains.forEach(chain => {
+            layer.addLayer(L.polyline(chain as L.LatLngTuple[], {
+              color,
+              weight: isMain ? 10 : 7,
+              opacity: isMain ? 0.15 : 0.08,
               interactive: false,
               lineCap: 'round', lineJoin: 'round',
             }))

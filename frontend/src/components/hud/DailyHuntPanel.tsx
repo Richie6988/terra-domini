@@ -41,13 +41,6 @@ function generateDailyHunt() {
   return targets[Math.floor(Math.random() * targets.length)]
 }
 
-// Daily challenge examples
-const DAILY_CHALLENGES = [
-  { id: 'dc1', desc: 'Capture 5 Fungus species', progress: 2, total: 5, reward: 100, icon: 'mushroom' },
-  { id: 'dc2', desc: 'Capture 3 Rare Dinosaurs', progress: 1, total: 3, reward: 300, icon: 'stego' },
-  { id: 'dc3', desc: 'Track a target within 100m', progress: 0, total: 1, reward: 50, icon: 'safari_radar' },
-]
-
 const RARITY_COLORS: Record<string, string> = {
   common: '#94a3b8', uncommon: '#22c55e', rare: '#3b82f6',
   epic: '#8b5cf6', legendary: '#f59e0b', mythic: '#ef4444',
@@ -173,32 +166,6 @@ export function DailyHuntPanel({ onClose }: Props) {
   const handleStartHunt = () => {
     if (!apiTarget) spawnMut.mutate()
     setPhase('tracking')
-  }
-
-  // Check if hunt already done today
-  const today = new Date().toDateString()
-  const lastHunt = (() => { try { return localStorage.getItem('hx_last_hunt') } catch { return null } })()
-  const alreadyDone = lastHunt === today
-
-  if (alreadyDone && phase === 'briefing') {
-    return (
-      <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316">
-        <div style={{
-          textAlign: 'center', padding: 40,
-        }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}><IconSVG id='dot_green' size={40} /></div>
-          <div style={{
-            fontSize: 10, fontWeight: 900, color: '#00884a', letterSpacing: 3,
-            fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8,
-          }}>
-            SAFARI COMPLETED TODAY
-          </div>
-          <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)', letterSpacing: 1 }}>
-            Come back tomorrow for a new target
-          </div>
-        </div>
-      </GlassPanel>
-    )
   }
 
   return (
@@ -487,55 +454,6 @@ export function DailyHuntPanel({ onClose }: Props) {
           </motion.div>
         )}
       </AnimatePresence>
-
-      {/* Daily Safari Challenges */}
-      <div style={{ marginTop: 14, borderTop: '1px solid rgba(255,255,255,0.08)', paddingTop: 12 }}>
-        <div style={{
-          fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)',
-          fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8,
-        }}>
-          DAILY CHALLENGES
-        </div>
-        {DAILY_CHALLENGES.map(ch => {
-          const pct = Math.floor((ch.progress / ch.total) * 100)
-          const done = ch.progress >= ch.total
-          return (
-            <div key={ch.id} style={{
-              display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6,
-              padding: '8px 10px', borderRadius: 8,
-              background: done ? 'rgba(0,136,74,0.05)' : 'rgba(255,255,255,0.03)',
-              border: `1px solid ${done ? 'rgba(0,136,74,0.2)' : 'rgba(255,255,255,0.06)'}`,
-              opacity: done ? 0.6 : 1,
-            }}>
-              <span style={{ fontSize: 14 }}><EmojiIcon emoji={ch.icon} size={16} /></span>
-              <div style={{ flex: 1 }}>
-                <div style={{
-                  fontSize: 8, fontWeight: 700, color: done ? 'rgba(255,255,255,0.4)' : '#e2e8f0',
-                  fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 0.5,
-                  textDecoration: done ? 'line-through' : 'none',
-                }}>
-                  {ch.desc}
-                </div>
-                <div style={{
-                  height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.05)',
-                  marginTop: 3, overflow: 'hidden', maxWidth: 150,
-                }}>
-                  <div style={{
-                    height: '100%', width: `${pct}%`, borderRadius: 2,
-                    background: done ? '#00884a' : '#f97316',
-                  }} />
-                </div>
-              </div>
-              <span style={{
-                fontSize: 7, fontWeight: 700, fontFamily: "'Share Tech Mono', monospace",
-                color: done ? '#00884a' : '#f97316',
-              }}>
-                {ch.progress}/{ch.total} · +{ch.reward}◆
-              </span>
-            </div>
-          )
-        })}
-      </div>
     </GlassPanel>
 
       {/* 3D Token Viewer — fullscreen overlay */}

@@ -191,23 +191,6 @@ function TokenomicsTab() {
         ))}
       </div>
 
-      {/* Staking APY tiers */}
-      <div>
-        <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 6 }}>STAKING APY</div>
-        <div style={{ display: 'flex', gap: 6 }}>
-          {Object.entries(stats.stakingAPY).map(([days, apy]) => (
-            <div key={days} style={{
-              flex: 1, padding: '8px 6px', borderRadius: 8, textAlign: 'center',
-              background: 'linear-gradient(135deg, rgba(0,136,74,0.06), transparent)',
-              border: '1px solid rgba(0,136,74,0.15)',
-            }}>
-              <div style={{ fontSize: 14, fontWeight: 900, color: '#00884a', fontFamily: "'Share Tech Mono', monospace" }}>{apy}%</div>
-              <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1, marginTop: 2 }}>{days} DAYS</div>
-            </div>
-          ))}
-        </div>
-      </div>
-
       {/* Burn mechanics info */}
       <div style={{
         padding: '8px 10px', borderRadius: 8,
@@ -284,13 +267,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
               <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', lineHeight: 1.8 }}>
                 <strong style={{ color: '#7950f2' }}>HEX Coins (◆)</strong> are your in-game currency. Earn them by owning territories, completing challenges, and winning events.
                 They can be converted to <strong style={{ color: '#cc8800' }}>HEX Crypto</strong> tokens on the Polygon blockchain — real cryptocurrency you own.
-                Staking your HEX gives you bonus resource production in your kingdoms.
               </div>
-            </div>
-
-            {/* Staking summary */}
-            <div style={{ marginTop: 14 }}>
-              
             </div>
           </>}
 
