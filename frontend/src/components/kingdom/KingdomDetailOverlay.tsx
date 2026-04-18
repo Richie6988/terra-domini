@@ -10,6 +10,7 @@
  *   Intelligence view → Attack options → Spy → Diplomacy
  */
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
@@ -225,14 +226,22 @@ function OwnTerritories({ k }: { k: KingdomData }) {
 }
 
 function OwnArmy({ k }: { k: KingdomData }) {
-  const units = [
-    { name: 'Infantry', icon: 'dagger', count: 24, atk: 10, def: 8, color: '#dc2626' },
-    { name: 'Naval', icon: 'anchor', count: 3, atk: 35, def: 30, color: '#0099cc' },
-    { name: 'Aerial', icon: 'plane', count: 1, atk: 45, def: 15, color: '#8b5cf6' },
-    { name: 'Engineer', icon: 'wrench', count: 5, atk: 8, def: 20, color: '#cc8800' },
-    { name: 'Medic', icon: 'medicine', count: 2, atk: 2, def: 5, color: '#22c55e' },
-    { name: 'Spy', icon: 'spy', count: 1, atk: 15, def: 3, color: '#475569' },
+  const { data: armyData } = useQuery({
+    queryKey: ['my-army'],
+    queryFn: () => api.get('/combat/my-army/').then(r => r.data).catch(() => ({ units: {} })),
+    staleTime: 15000,
+  })
+
+  const armyUnits = armyData?.units || {}
+  const UNIT_DEFS = [
+    { key: 'infantry', name: 'Infantry', icon: 'swords', atk: 10, def: 12, color: '#dc2626' },
+    { key: 'cavalry', name: 'Cavalry', icon: 'horse', atk: 18, def: 8, color: '#f97316' },
+    { key: 'artillery', name: 'Artillery', icon: 'bomb', atk: 35, def: 4, color: '#8b5cf6' },
+    { key: 'aerial', name: 'Aerial', icon: 'plane', atk: 25, def: 6, color: '#0ea5e9' },
+    { key: 'naval', name: 'Naval', icon: 'ship', atk: 20, def: 15, color: '#0099cc' },
+    { key: 'spy', name: 'Spy', icon: 'spy', atk: 5, def: 3, color: '#475569' },
   ]
+  const units = UNIT_DEFS.map(u => ({ ...u, count: armyUnits[u.key] || 0 }))
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

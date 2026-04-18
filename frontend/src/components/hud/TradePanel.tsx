@@ -69,7 +69,7 @@ function MarketTab() {
     : amount / (MARKET_RATES[buying] ?? 1)
 
   const tradeMut = useMutation({
-    mutationFn: () => api.post('/tdc/purchase/', {
+    mutationFn: () => api.post('/shop/purchase/', {
       sell_resource: selling,
       buy_resource: buying,
       amount,
