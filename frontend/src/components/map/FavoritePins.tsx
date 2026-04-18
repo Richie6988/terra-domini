@@ -89,7 +89,9 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail
       if (detail?.lat && detail?.lon) {
-        const name = detail.name || `Territory ${pins.length + 1}`
+        const defaultName = detail.name || `Territory ${pins.length + 1}`
+        const name = window.prompt('Name this location:', defaultName)
+        if (!name) { setPickingFavorite(false); return }
         addPin(detail.lat, detail.lon, 15, name)
         setPickingFavorite(false)
       }

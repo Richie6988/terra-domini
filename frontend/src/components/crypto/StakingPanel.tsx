@@ -43,7 +43,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
 
   const { data: stakingData, isLoading } = useQuery({
     queryKey: ['staking-info', player?.id],
-    queryFn: () => api.get('/api/solana/staking/').then(r => r.data).catch(() => ({
+    queryFn: () => api.get('/solana/staking/').then(r => r.data).catch(() => ({
       total_staked: 0, positions: [], rewards_pending: 0,
     })),
     staleTime: 30000,
@@ -55,7 +55,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
   const preview = tier ? calcDailyReward(amount, tier.apr) : 0
 
   const stakeMut = useMutation({
-    mutationFn: (amt: number) => api.post('/api/solana/stake/', { amount: amt }),
+    mutationFn: (amt: number) => api.post('/solana/stake/', { amount: amt }),
     onSuccess: (res) => {
       toast.success(`${amount.toLocaleString()} HEX mis en staking ! APR ${tier?.apr}%`)
       qc.invalidateQueries({ queryKey: ['staking-info'] })
@@ -66,7 +66,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
   })
 
   const claimMut = useMutation({
-    mutationFn: () => api.post('/api/solana/claim-rewards/'),
+    mutationFn: () => api.post('/solana/claim-rewards/'),
     onSuccess: (res) => {
       toast.success(`+${res.data.claimed?.toFixed(2)} HEX réclamés !`)
       qc.invalidateQueries({ queryKey: ['staking-info', 'player'] })

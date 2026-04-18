@@ -124,7 +124,6 @@ function CryptoNewsfeed() {
   )
 }
 
-import { StakingPanel } from './StakingPanel'
 import { IconSVG } from '../shared/iconBank'
 
 const TABS = [
@@ -291,7 +290,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
 
             {/* Staking summary */}
             <div style={{ marginTop: 14 }}>
-              <StakingPanel onClose={() => setTab('wallet')} embedded />
+              
             </div>
           </>}
 

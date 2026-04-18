@@ -82,15 +82,17 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
   renderer.setSize(container.clientWidth, container.clientHeight)
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, CONFIG.maxPixelRatio))
   renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = 1.6
+  renderer.toneMappingExposure = 2.2
   renderer.outputColorSpace = THREE.SRGBColorSpace
   container.appendChild(renderer.domElement)
   renderer.domElement.style.cursor = 'grab'
 
-  // Lights — from gold standard
-  scene.add(new THREE.AmbientLight(0xffffff, 2.2))
-  const keyLight = new THREE.PointLight(0xffffff, 3.5, 25)
+  // Lights — bright front illumination
+  scene.add(new THREE.AmbientLight(0xffffff, 3.0))
+  const keyLight = new THREE.PointLight(0xffffff, 4.0, 25)
   keyLight.position.set(3, 3, 6); scene.add(keyLight)
+  const frontLight = new THREE.PointLight(0xffffff, 3.0, 20)
+  frontLight.position.set(0, 0, 8); scene.add(frontLight)
   const rim = new THREE.PointLight(0xffffff, 2.5, 18)
   rim.position.set(-5, -5, 4); scene.add(rim)
   const fillLight = new THREE.PointLight(0x8888ff, 1.5, 15)
@@ -119,10 +121,11 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
   const bTex = new THREE.CanvasTexture(backCanvas)
   bTex.rotation = -Math.PI / 2; bTex.center.set(0.5, 0.5); bTex.repeat.set(-1, -1); bTex.anisotropy = CONFIG.anisotropy
 
-  // Materials — from gold standard
+  // Materials — BRIGHT front face, metallic edges
   const fMat = new THREE.MeshPhysicalMaterial({
-    map: fTex, roughness: 0.02, metalness: 0.88,
-    clearcoat: 1.0, clearcoatRoughness: 0.01, reflectivity: 1.0, envMapIntensity: 10,
+    map: fTex, roughness: 0.15, metalness: 0.35,
+    clearcoat: 0.8, clearcoatRoughness: 0.05, reflectivity: 0.8,
+    emissive: 0x222222, emissiveIntensity: 0.3,
   })
   const bMat = new THREE.MeshPhysicalMaterial({
     map: bTex, clearcoat: 1, roughness: 0.01, metalness: 0.9,

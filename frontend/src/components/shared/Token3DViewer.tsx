@@ -112,30 +112,46 @@ export function Token3DViewer(props: Token3DProps) {
 
   return (
     <div
-      onClick={e => { if (e.target === e.currentTarget) onCloseRef.current() }}
+      onMouseDown={e => {
+        // Close if clicking the dark background (not the token)
+        // The canvas container is position:absolute, so clicks on the dark
+        // corners/edges hit this div
+        if (e.target === e.currentTarget) onCloseRef.current()
+      }}
       style={{
         position: 'fixed', inset: 0, zIndex: 2000,
         background: 'radial-gradient(ellipse at center, rgba(5,10,20,0.95), rgba(0,0,0,0.98))',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-        cursor: 'pointer',
       }}
     >
+      {/* Click-to-close zones: top, bottom, left, right edges */}
+      {['top','bottom','left','right'].map(side => (
+        <div key={side} onClick={() => onCloseRef.current()} style={{
+          position: 'absolute', zIndex: 3, cursor: 'pointer',
+          ...(side === 'top'    ? { top: 0, left: 0, right: 0, height: 60 } :
+              side === 'bottom' ? { bottom: 0, left: 0, right: 0, height: 80 } :
+              side === 'left'   ? { top: 60, bottom: 80, left: 0, width: '15%' } :
+                                  { top: 60, bottom: 80, right: 0, width: '15%' }),
+        }} />
+      ))}
+
       <button
         onClick={() => onCloseRef.current()}
         style={{
-          position: 'absolute', top: 20, right: 20, zIndex: 10,
-          width: 40, height: 40, borderRadius: '50%',
-          background: 'rgba(255,60,60,0.25)',
-          border: '2px solid rgba(255,100,100,0.5)',
-          color: '#fff', fontSize: 20, cursor: 'pointer',
+          position: 'absolute', top: 16, right: 16, zIndex: 10,
+          background: 'none', border: 'none',
+          color: 'rgba(255,255,255,0.6)', fontSize: 28, cursor: 'pointer',
+          width: 44, height: 44,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontFamily: "'Orbitron', sans-serif",
+          transition: 'color 0.15s',
         }}
+        onMouseEnter={e => e.currentTarget.style.color = '#ffffff'}
+        onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,0.6)'}
       >×</button>
 
       <div
         ref={containerRef}
-        style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}
+        style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, zIndex: 1 }}
       />
 
       {infoPanel && (
