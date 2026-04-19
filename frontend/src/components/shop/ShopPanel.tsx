@@ -317,7 +317,7 @@ export function ShopPanel({ onClose }: Props) {
             background:'#cc8800', color:'#fff', border:'none',
             fontSize:8, fontWeight:700, letterSpacing:1,
             fontFamily:"'Orbitron', system-ui, sans-serif",
-          }}>Buy HEX →</button>
+          }}>Buy HEX COIN→</button>
         </div>
       </GlassPanel>
 
