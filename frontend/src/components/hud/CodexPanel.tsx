@@ -76,30 +76,49 @@ function useRealCollection() {
   const myTerritories = useStore(s => s.myTerritories)
 
   return useMemo(() => {
-    const coll: Record<string, { owned: number; total: number; rarity: string; shiny: boolean }> = {}
+    const coll: Record<string, { owned: number; total: number; rarity: string; shiny: boolean; instances: any[] }> = {}
 
     // Initialize all icons from categories
     for (const cat of Object.values(CATEGORIES)) {
       for (const icon of cat.icons) {
-        coll[icon.id] = { owned: 0, total: 5 + Math.floor(icon.id.charCodeAt(0) % 15), rarity: 'common', shiny: false }
+        coll[icon.id] = {
+          owned: 0,
+          total: 5 + Math.floor(icon.id.charCodeAt(0) % 15),
+          rarity: 'common',
+          shiny: false,
+          instances: [],
+        }
       }
     }
 
-    // Count real owned territories by category
-    const owned = myTerritories ? Array.from(myTerritories) : Object.values(territories).filter((t: any) => t.owner_id)
+    // Count real owned territories by category AND collect instances
+    const owned = myTerritories
+      ? Array.from(myTerritories).map(h3 => territories[h3 as string]).filter(Boolean)
+      : Object.values(territories).filter((t: any) => t.owner_id)
     for (const t of owned) {
       const ta = t as any
       const cat = ta.poi_category || ta.territory_type || 'urban'
-      // Find matching icon
       for (const [, catData] of Object.entries(CATEGORIES)) {
         for (const icon of (catData as any).icons) {
           if (icon.id === cat || icon.id.includes(cat) || cat.includes(icon.id)) {
-            coll[icon.id] = {
-              ...coll[icon.id],
-              owned: (coll[icon.id]?.owned || 0) + 1,
+            const bucket = coll[icon.id]
+            if (!bucket) continue
+            bucket.owned += 1
+            bucket.rarity = ta.rarity || bucket.rarity || 'common'
+            bucket.shiny = bucket.shiny || ta.is_shiny || false
+            bucket.instances.push({
+              h3_index: ta.h3_index,
+              name: ta.custom_name || ta.poi_name || ta.place_name || 'Zone',
               rarity: ta.rarity || 'common',
-              shiny: ta.is_shiny || false,
-            }
+              is_shiny: ta.is_shiny || false,
+              token_id: ta.token_id,
+              center_lat: ta.center_lat ?? ta.lat,
+              center_lon: ta.center_lon ?? ta.lon,
+              captured_at: ta.captured_at,
+              tdc_per_day: ta.tdc_per_day ?? ta.resource_credits,
+              biome: ta.territory_type || ta.biome || 'rural',
+            })
+            break
           }
         }
       }
@@ -115,6 +134,7 @@ const RARITY_COLORS: Record<string, string> = {
 
 export function CodexPanel({ onClose }: Props) {
   const [tab, setTab] = useState('overview')
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)  // category family key (e.g. 'natural_disasters')
   const [selectedToken, setSelectedToken] = useState<string | null>(null)
   const [show3D, setShow3D] = useState(false)
   const [filter, setFilter] = useState('')
@@ -167,7 +187,7 @@ export function CodexPanel({ onClose }: Props) {
         scrollbarWidth: 'none',
       }}>
         {CODEX_TABS.map(t => (
-          <button key={t.id} onClick={() => { setTab(t.id); setSelectedToken(null) }} style={{
+          <button key={t.id} onClick={() => { setTab(t.id); setSelectedToken(null); setSelectedCategory(null) }} style={{
             padding: '6px 10px', borderRadius: 16, cursor: 'pointer', whiteSpace: 'nowrap',
             fontSize: 7, fontWeight: tab === t.id ? 800 : 500, letterSpacing: 1,
             background: tab === t.id ? 'rgba(121,80,242,0.15)' : 'rgba(255,255,255,0.04)',
@@ -214,41 +234,226 @@ export function CodexPanel({ onClose }: Props) {
               <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)' }}>{globalPct}% COMPLETE · {shinyCount} SHINY</div>
             </div>
 
-            {/* ALL 57 categories — flat grid, no grouping */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: 6 }}>
-              {Object.values(CATEGORIES).flatMap(group => group.icons).map(icon => {
-                const token = allTokens.find(t => t.id === icon.id)
-                const owned = token?.owned || 0
-                const total = token?.total || 1
-                const color = icon.cat_color || '#6366f1'
-                return (
-                  <button key={icon.id} onClick={() => setSelectedToken(icon.id)} style={{
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-                    padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                    background: owned > 0 ? `${color}12` : 'rgba(255,255,255,0.02)',
-                    border: owned > 0 ? `1px solid ${color}30` : '1px solid rgba(255,255,255,0.05)',
-                    opacity: owned > 0 ? 1 : 0.35,
-                    filter: owned > 0 ? 'none' : 'grayscale(0.7)',
-                    transition: 'all 0.2s',
-                  }}>
+            {/* ──────────────────────────────────────────────────────── */}
+            {/* LEVEL 1: 56 categories grid (when no category drilled in) */}
+            {/* ──────────────────────────────────────────────────────── */}
+            {!selectedCategory && (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: 6 }}>
+                {Object.values(CATEGORIES).flatMap(group => group.icons).map(icon => {
+                  const token = allTokens.find(t => t.id === icon.id)
+                  const owned = token?.owned || 0
+                  const total = token?.total || 1
+                  const color = icon.cat_color || '#6366f1'
+                  return (
+                    <button key={icon.id} onClick={() => setSelectedCategory(icon.id)} style={{
+                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
+                      padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
+                      background: owned > 0 ? `${color}12` : 'rgba(255,255,255,0.02)',
+                      border: owned > 0 ? `1px solid ${color}30` : '1px solid rgba(255,255,255,0.05)',
+                      opacity: owned > 0 ? 1 : 0.45,
+                      filter: owned > 0 ? 'none' : 'grayscale(0.6)',
+                      transition: 'all 0.2s',
+                    }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)' }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
+                    >
+                      <div style={{
+                        width: 38, height: 38, borderRadius: '50%',
+                        background: `${color}18`,
+                        border: `2px solid ${color}35`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <IconSVG id={icon.id} size={22} />
+                      </div>
+                      <div style={{ fontSize: 6, fontWeight: 700, color: '#e2e8f0', letterSpacing: 0.3, fontFamily: "'Orbitron', sans-serif", textAlign: 'center', lineHeight: 1.2 }}>
+                        {(icon.name || '').toUpperCase().slice(0, 10)}
+                      </div>
+                      <div style={{ fontSize: 6, color: owned > 0 ? color : 'rgba(255,255,255,0.3)', fontFamily: "'Share Tech Mono', monospace", fontWeight: 700 }}>
+                        {owned}/{total}
+                      </div>
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* ──────────────────────────────────────────────────────── */}
+            {/* LEVEL 2: Category DETAIL — tokens the user owns in this  */}
+            {/* category + locked slots for unowned ones                 */}
+            {/* ──────────────────────────────────────────────────────── */}
+            {selectedCategory && (() => {
+              const iconDef = Object.values(CATEGORIES).flatMap(c => c.icons).find(i => i.id === selectedCategory)
+              if (!iconDef) return null
+              const tokenData = allTokens.find(t => t.id === selectedCategory)
+              const color = iconDef.cat_color || '#6366f1'
+              const instances = (collection[selectedCategory]?.instances || []) as any[]
+              const owned = tokenData?.owned || 0
+              const total = tokenData?.total || 1
+
+              return (
+                <div>
+                  {/* BACK BUTTON + CATEGORY HEADER */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+                    <button
+                      onClick={() => setSelectedCategory(null)}
+                      className="btn-game btn-game-glass"
+                      style={{ padding: '6px 12px', fontSize: 8, letterSpacing: 2 }}
+                    >
+                      ← BACK
+                    </button>
                     <div style={{
-                      width: 38, height: 38, borderRadius: '50%',
-                      background: `${color}18`,
-                      border: `2px solid ${color}35`,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      flex: 1, display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '10px 12px', borderRadius: 10,
+                      background: `linear-gradient(135deg, ${color}18, ${color}06)`,
+                      border: `1px solid ${color}35`,
                     }}>
-                      <IconSVG id={icon.id} size={22} />
+                      <div style={{
+                        width: 40, height: 40, borderRadius: '50%',
+                        background: `${color}25`,
+                        border: `2px solid ${color}55`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <IconSVG id={iconDef.id} size={24} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontSize: 11, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
+                          {(iconDef.name || '').toUpperCase()}
+                        </div>
+                        <div style={{ fontSize: 8, color, fontFamily: "'Share Tech Mono', monospace", marginTop: 2, fontWeight: 700 }}>
+                          {owned}/{total} collected
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ fontSize: 6, fontWeight: 700, color: '#e2e8f0', letterSpacing: 0.3, fontFamily: "'Orbitron', sans-serif", textAlign: 'center', lineHeight: 1.2 }}>
-                      {(icon.name || '').toUpperCase().slice(0, 10)}
+                  </div>
+
+                  {/* Progress bar for this category */}
+                  <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.05)', marginBottom: 14, overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${(owned / Math.max(total, 1)) * 100}%`, background: color, borderRadius: 2, boxShadow: `0 0 8px ${color}60` }} />
+                  </div>
+
+                  {/* OWNED INSTANCES */}
+                  {instances.length > 0 && (
+                    <>
+                      <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.5)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>
+                        YOUR TOKENS ({instances.length})
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 8, marginBottom: 14 }}>
+                        {instances.map((inst, i) => {
+                          const rCol = RARITY_COLORS[inst.rarity] || color
+                          return (
+                            <button
+                              key={inst.h3_index || i}
+                              onClick={() => { setSelectedToken(iconDef.id); setShow3D(true) }}
+                              style={{
+                                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                                padding: '10px 6px', borderRadius: 10, cursor: 'pointer',
+                                background: `${rCol}10`,
+                                border: `1.5px solid ${rCol}35`,
+                                transition: 'all 0.2s',
+                              }}
+                              onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.background = `${rCol}20` }}
+                              onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)'; e.currentTarget.style.background = `${rCol}10` }}
+                            >
+                              <div style={{
+                                width: 44, height: 44, borderRadius: '50%',
+                                background: `${rCol}25`,
+                                border: `2px solid ${rCol}55`,
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                position: 'relative',
+                              }}>
+                                <IconSVG id={iconDef.id} size={26} />
+                                {inst.is_shiny && (
+                                  <div style={{
+                                    position: 'absolute', top: -4, right: -4,
+                                    width: 14, height: 14, borderRadius: '50%',
+                                    background: '#cc8800',
+                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                    boxShadow: '0 0 8px #cc8800',
+                                  }}>
+                                    <IconSVG id="sparkles" size={8} />
+                                  </div>
+                                )}
+                              </div>
+                              <div style={{
+                                fontSize: 7, fontWeight: 700, color: '#e2e8f0',
+                                fontFamily: "'Orbitron', sans-serif",
+                                textAlign: 'center', lineHeight: 1.2,
+                                maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                              }}>
+                                {(inst.name || '').toUpperCase().slice(0, 10)}
+                              </div>
+                              <div style={{
+                                fontSize: 6, color: rCol, letterSpacing: 1,
+                                fontFamily: "'Orbitron', sans-serif", fontWeight: 700,
+                              }}>
+                                {(inst.rarity || 'COMMON').toUpperCase()}
+                              </div>
+                              {inst.token_id != null && (
+                                <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.35)', fontFamily: "'Share Tech Mono', monospace" }}>
+                                  #{inst.token_id}
+                                </div>
+                              )}
+                            </button>
+                          )
+                        })}
+                      </div>
+                    </>
+                  )}
+
+                  {/* LOCKED SLOTS (if any remaining) */}
+                  {owned < total && (
+                    <>
+                      <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8, marginTop: 4 }}>
+                        LOCKED ({total - owned})
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
+                        {Array.from({ length: Math.min(total - owned, 20) }).map((_, i) => (
+                          <div key={i} style={{
+                            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+                            padding: '10px 6px', borderRadius: 10,
+                            background: 'rgba(255,255,255,0.02)',
+                            border: '1px solid rgba(255,255,255,0.05)',
+                            opacity: 0.4,
+                            filter: 'grayscale(1)',
+                          }}>
+                            <div style={{
+                              width: 38, height: 38, borderRadius: '50%',
+                              background: 'rgba(255,255,255,0.04)',
+                              border: '2px dashed rgba(255,255,255,0.1)',
+                              display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            }}>
+                              <IconSVG id="mystery" size={20} />
+                            </div>
+                            <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', letterSpacing: 1, fontFamily: "'Orbitron', sans-serif" }}>
+                              LOCKED
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+
+                  {/* Empty state */}
+                  {owned === 0 && (
+                    <div style={{
+                      padding: '32px 16px', textAlign: 'center',
+                      background: 'rgba(255,255,255,0.02)', borderRadius: 10,
+                      border: '1px dashed rgba(255,255,255,0.08)',
+                    }}>
+                      <div style={{ marginBottom: 8, opacity: 0.4 }}>
+                        <IconSVG id={iconDef.id} size={36} />
+                      </div>
+                      <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
+                        NO {(iconDef.name || '').toUpperCase()} TOKENS YET
+                      </div>
+                      <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)', marginTop: 6, lineHeight: 1.5 }}>
+                        Claim a {(iconDef.name || '').toLowerCase()} territory on the map to start your collection
+                      </div>
                     </div>
-                    <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', fontFamily: "'Share Tech Mono', monospace" }}>
-                      {owned}/{total}
-                    </div>
-                  </button>
-                )
-              })}
-            </div>
+                  )}
+                </div>
+              )
+            })()}
           </motion.div>
         )}
 
