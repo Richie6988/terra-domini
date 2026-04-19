@@ -494,32 +494,269 @@ Types: `fix:` | `feat:` | `refactor:` | `polish:` | `CRITICAL:` (blocker fixes)
 
 ---
 
-## 15. AGENT PERSONAS (for multi-agent critique)
+## 15. 10-AGENT AUDIT METHODOLOGY (Richard's QA framework)
 
-When Richard says "play the game" or "simulate with agents":
+When Richard says "full audit" / "10 agents" / "simulate with agents" — run all 10 critiques. Each agent has a specific role, scope, and detection commands. This is how we caught 5 missing migrations, 10+ unguarded `toUpperCase` crashes, invisible text, French leaks, and toast-only fake buttons in one pass.
 
-### Game Designer Agent
-"Does this flow make sense? Dead-ends? Feedback after every action?"
+### AGENT 1 — GAME DESIGNER
+**Scope:** Progression loops, player motivation, first-session experience.
+**Asks:** "Does this flow make sense? Are there dead-ends? Is there feedback after every action? Can a new player succeed in the first 60 seconds?"
+**Detection:**
+```bash
+# First thing new player sees
+grep -n "Route path\|Navigate to" frontend/src/App.tsx
+# Tutorial exists?
+ls frontend/src/components/onboarding/
+# Free first territory?
+grep -rn "free.*claim\|first.*territory" backend/terra_domini/apps/territories/ --include="*.py"
+# Feedback loops
+grep -rn "play.*claim\|setCelebrating\|toast.success" frontend/src/components/map/HexCard.tsx
+```
 
-### Graphic Designer Agent
-"Is it readable? Contrast issues? Does it match Richard's reference?"
+### AGENT 2 — QA / ERROR HUNTER
+**Scope:** Crashes, broken endpoints, fake interactions.
+**Asks:** "What crashes? What's fake? What returns 404? Did I test end-to-end?"
+**Detection:**
+```bash
+# TypeScript errors
+cd frontend && npx tsc --noEmit 2>&1 | grep -v baseUrl | grep error
+# Unguarded toUpperCase (crash when API returns incomplete data)
+grep -rn "\.toUpperCase()\|\.toLowerCase()" frontend/src/components/ --include="*.tsx" | grep -v "|| ''" | grep -v "|| \"\""
+# Mock data as default state (panel shows fake data)
+grep -rn "useState.*MOCK_" frontend/src/components/ --include="*.tsx"
+# Double /api/ prefix (produces /api/api/... 404)
+grep -rn "api\\.\\(get\\|post\\)('/api/" frontend/src/
+# Toast-only pretend buttons (no real API)
+grep -rn "onClick.*toast.success" frontend/src/components/ --include="*.tsx"
+# CrystalIcon orphans (replaced by IconSVG)
+grep -rn "CrystalIcon" frontend/src/
+```
 
-### QA Tester Agent
-"What crashes? What's fake? What returns 404? Did I test end-to-end?"
+### AGENT 3 — GRAPHIC DESIGNER
+**Scope:** Visual consistency, readability, dark theme integrity.
+**Asks:** "Is everything readable? Contrast issues? Does it match Richard's reference design?"
+**Detection:**
+```bash
+# Invisible text (0.04 opacity on color:)
+grep -rn "color.*rgba(255,255,255,0.04)" frontend/src/components/ --include="*.tsx"
+# White backgrounds (light theme leak)
+grep -rn "background.*rgba(255,255,255,0\\.[4-9])" frontend/src/components/ --include="*.tsx"
+# Old light-theme colors
+grep -rn "#1a2a3a\|rgba(0,60,100\|rgba(235,242,250" frontend/src/components/ --include="*.tsx"
+# Close buttons inconsistency
+grep -rn "onClick={onClose}" frontend/src/components/ --include="*.tsx"
+# Unreadable fontSize < 7
+grep -rn "fontSize: [0-6]," frontend/src/components/ --include="*.tsx"
+# Inconsistent fonts
+grep -rn "fontFamily" frontend/src/components/ --include="*.tsx" | grep -v "Orbitron\|Share Tech\|monospace\|system-ui\|sans-serif"
+```
 
-### Player Agent
-"I just logged in. What am I supposed to do? Is it fun? Do I understand?"
+### AGENT 4 — BACKEND / API INTEGRATOR
+**Scope:** Missing migrations, endpoint mismatches, seed scripts.
+**Asks:** "Do all models have migrations? Do all frontend API calls hit real endpoints? Does seed_bots actually seed everything?"
+**Detection:**
+```bash
+# Count models vs migrations per app
+for app in accounts territories combat events alliances economy progression blockchain; do
+  path="backend/terra_domini/apps/$app"
+  models=$(grep -rhE "^class \\w+\\(models\\.Model" $path/*.py 2>/dev/null | wc -l)
+  migs=$(ls $path/migrations/*.py 2>/dev/null | grep -v __init__ | wc -l)
+  echo "$app: $models models, $migs migrations"
+done
+# Frontend endpoints without backend URL pattern
+python3 -c "..."   # compares api.get() strings vs urls.py patterns
+```
+**Critical output:** Models without migrations = 500 errors. Count must match.
 
-Run all 4 critiques mentally before declaring DONE.
+### AGENT 5 — UX FLOW / DEAD-END HUNTER
+**Scope:** Empty states, loading states, navigation cues.
+**Asks:** "What does an empty panel look like? Do loading states exist? Are there dead-end screens with no exit?"
+**Detection:**
+```bash
+# Empty-state messages
+grep -rn "NO KINGDOMS\|NO TERRITORIES\|NO ALLIANCE\|empty\|Coming soon" frontend/src/components/ --include="*.tsx"
+# Panels without skeleton/loading
+grep -L "Skeleton\|Loading\|isLoading" frontend/src/components/hud/*.tsx frontend/src/components/kingdom/*.tsx
+# API calls without .catch or onError
+grep -rn "\\.catch\|onError" frontend/src/components/ --include="*.tsx" | wc -l
+# Missing back/close
+grep -L "onClose\|onBack\|goBack" frontend/src/components/hud/*.tsx
+```
+
+### AGENT 6 — PERFORMANCE / BUILD
+**Scope:** Bundle size, re-renders, unnecessary work.
+**Asks:** "How big is the bundle? Are there React.memo opportunities? Any stale closure bugs? Inline style recreations?"
+**Detection:**
+```bash
+# Bundle size
+ls -lh frontend/dist/assets/index-*.js
+# React.memo usage
+grep -rn "React.memo\|memo(" frontend/src/components/ --include="*.tsx" | wc -l
+# Inline style object count (re-render cost)
+grep -rn "style={{.*" frontend/src/components/ --include="*.tsx" | wc -l
+# setInterval/setTimeout leaks
+grep -rn "setInterval\|setTimeout" frontend/src/components/ --include="*.tsx"
+# Heavy Three.js imports
+grep -rn "from 'three'" frontend/src/ --include="*.tsx" --include="*.ts"
+```
+
+### AGENT 7 — SECURITY
+**Scope:** Exposed secrets, unsafe patterns, auth checks.
+**Asks:** "Any secrets in frontend? localStorage storing passwords? eval()? dangerouslySetInnerHTML? Are admin endpoints actually protected?"
+**Detection:**
+```bash
+# Secrets in frontend
+grep -rn "sk_live\|pk_live\|api[-_]key" frontend/src/ --include="*.tsx" --include="*.ts"
+# Password/token storage
+grep -rn "localStorage.*password\|localStorage.*secret" frontend/src/
+# eval / Function constructor
+grep -rn "eval(\|new Function(" frontend/src/
+# dangerouslySetInnerHTML (acceptable only in iconBank)
+grep -rn "dangerouslySetInnerHTML" frontend/src/
+# Admin endpoint protection
+grep -rn "IsAdminUser\|is_staff" backend/terra_domini/apps/admin_gm/
+# CORS + DEBUG (must be env-based)
+grep -n "CORS\|DEBUG\s*=" backend/terra_domini/settings/base.py
+```
+
+### AGENT 8 — MOBILE / RESPONSIVE
+**Scope:** Touch targets, viewport handling, responsive layout.
+**Asks:** "Are touch targets >= 40px? Is there a viewport meta tag? Are there media queries for mobile?"
+**Detection:**
+```bash
+# Touch targets < 40px (not tappable comfortably)
+grep -rn "width: [1-3][0-9]px.*height: [1-3][0-9]px" frontend/src/components/ --include="*.tsx"
+# Fixed pixel widths (not responsive)
+grep -rn "width: [0-9]\\{3,4\\}px" frontend/src/components/ --include="*.tsx" | grep -v "maxWidth\|minWidth"
+# Media queries
+grep -rn "@media\|window.innerWidth\|matchMedia" frontend/src/ --include="*.tsx" --include="*.ts" --include="*.css"
+# Viewport meta
+grep -n "viewport" frontend/index.html
+```
+
+### AGENT 9 — ACCESSIBILITY
+**Scope:** Screen reader support, keyboard navigation, color contrast.
+**Asks:** "Any aria-labels? Are images alt'd? Are buttons keyboard-navigable? Are we relying on color alone?"
+**Detection:**
+```bash
+# aria-label
+grep -rn "aria-label" frontend/src/components/ --include="*.tsx" | wc -l
+# Images without alt
+grep -rn "<img" frontend/src/components/ --include="*.tsx" | grep -v "alt="
+# Keyboard handlers
+grep -rn "onKeyDown\|onKeyPress\|tabIndex\|role=\"button\"" frontend/src/components/ --include="*.tsx" | wc -l
+# Icon-only buttons (no discernible name)
+grep -rn "<button[^>]*>\\s*×\\s*</button>" frontend/src/components/ --include="*.tsx"
+```
+
+### AGENT 10 — i18n / LOCALIZATION
+**Scope:** Language consistency, framework usage, date/number formats.
+**Asks:** "French leaking into English UI? Is there an i18n framework? Date formats using user locale?"
+**Detection:**
+```bash
+# French leaks in English UI
+grep -rn "Solde\|Montant\|Annuler\|Valider\|Bienvenue\|Retour" frontend/src/components/ --include="*.tsx"
+# Framework
+grep "react-i18next\|i18next\|react-intl" frontend/package.json
+# Date formats
+grep -rn "toLocaleDateString\|toLocaleString" frontend/src/ --include="*.tsx" --include="*.ts"
+```
 
 ---
 
-## 16. REFERENCES
+### AUDIT RUN PROTOCOL
+
+1. Run agents **1-10 sequentially** in a single session — copy the bash detection commands for each.
+2. Categorize findings by severity:
+   - **CRITICAL (fix now):** crashes, 500 errors, invisible UI, fake buttons
+   - **HIGH:** UX dead-ends, security issues, inconsistent styles
+   - **MEDIUM:** perf (memoization, hover handlers), a11y, i18n
+   - **LOW:** polish (hover states, skeletons, font sizes)
+3. Fix CRITICAL + HIGH in one commit with detailed root-cause description.
+4. Create GitHub issues or claude.md entries for MEDIUM + LOW.
+5. After fixes: re-run all 10 agents to verify no new issues introduced.
+
+### EXAMPLE — 10-agent session output (2026-04-19 audit)
+
+**Fixed:**
+- Agent 2: 10 unguarded `toUpperCase` → guarded with `(x || '')`
+- Agent 2: `★` emoji in AdminPanel → replaced with `·`
+- Agent 2: 1 toast-only recruit button → wired to `POST /api/combat/recruit/`
+- Agent 3: ProfilePanel invisible text (0.03) → fixed to 0.5
+- Agent 3: StakingPanel ugly close → minimal × pattern
+- Agent 4: 5 missing migrations → created idempotent `RunSQL` with `IF NOT EXISTS`
+- Agent 10: `Annuler/Vendre` → `Cancel/Sell`
+
+**Remaining:**
+- Agent 3: 66 buttons not using `btn-game` (consistency)
+- Agent 5: 5 panels without Skeleton
+- Agent 6: 1383 inline styles (memoization opportunity)
+- Agent 9: 0 `aria-label` (accessibility)
+- Agent 10: No i18n framework (post-launch concern)
+
+---
+
+### MANDATORY 4 PERSONAS BEFORE EACH "DONE"
+
+Even outside a full 10-agent audit, mentally run these 4 before every commit:
+
+**Game Designer:** "Does this flow make sense? Are there dead-ends?"
+**Graphic Designer:** "Is it readable? Does it match Richard's reference?"
+**QA Tester:** "What crashes? What's fake? What returns 404?"
+**Player:** "I just logged in. What am I supposed to do? Is it fun?"
+
+---
+
+## 16. REPO CLEANUP STATUS (2026-04-19)
+
+### DELETED (tier 1, 2, 3, 4, 5 approved by Richard):
+
+**Unused components (6 files):**
+- `frontend/src/components/crypto/StakingPanel.tsx`
+- `frontend/src/components/hud/CampaignWidget.tsx`
+- `frontend/src/components/map/GlobeView.tsx`
+- `frontend/src/components/map/MyTerritoriesOverlay.tsx`
+- `frontend/src/components/shared/HexCoinIcon.tsx`
+- `frontend/src/components/ui/ResourceTooltip.tsx`
+
+**Unused data:**
+- `frontend/public/press-kit.html`
+- *(KEPT: `backend/terra_domini_pois.csv` — will be used)*
+
+**Superseded scripts (10 files):**
+- `scripts/seed_dev.py`, `seed_pois.py`, `seed_events_calendar.py`, `smoke_test.sh`
+- `backend/scripts/seed_all_pois_master.py`, `seed_pois_world2.py`, `seed_unified_pois.py`, `seed_resources.py`, `seed_game_world.py`, `harvest_pois_osm.py`
+- *(KEPT: `scripts/init_db.sql` for future Postgres prod with many players)*
+- *(KEPT: `scripts/geo_pipeline.py` as safety)*
+
+**Emergency patches (3 files):**
+- `backend/scripts/emergency_js_patch.py`, `fix_js_crash.sh`, `patch_dist.py`
+
+**Stale docs:**
+- `DASHBOARD.md` (172 lines, 16 days stale, superseded by claude.md v5.0)
+
+### RETAINED (verified in use or future prod):
+- `claude.md` (v5.0 LIVING doc)
+- `README.md` (public-facing)
+- `QUICKSTART.md` (setup reference)
+- `read_only_templates/` — ALL 4 files referenced as "Source:" in iconBank, Token3DViewer, hexodToken3D, hexodTokenFace
+- `contracts/` — Solidity contracts for Polygon blockchain plan
+- `frontend/dist/` — REQUIRED for Windows-no-Node setup
+- `backend/scripts/ensure_db.py`, `setup_db.sh` — active
+- `backend/terra_domini_pois.csv` — reseed data source (per Richard)
+- `scripts/init_db.sql` — Postgres prod init
+- `docker-compose.yml` + `docker-compose.dev.yml` — future prod
+- `nginx/nginx.conf` — future prod
+- `start.sh` — active launcher
+- All Django management commands (`apps/*/management/commands/`)
+
+---
+
+## 17. REFERENCES
 
 - Full game spec: `llm/HEXOD_GAME_SPECS.md`
 - Blockchain plan: `llm/blockchain_architecture.md`
 - Tokenomics: `llm/tokenomics.md`
-- Previous audits: `AUDIT.md`, `DASHBOARD.md`
 - Quick reference: `QUICKSTART.md`
 
 ---
