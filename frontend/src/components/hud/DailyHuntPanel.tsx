@@ -170,42 +170,55 @@ export function DailyHuntPanel({ onClose }: Props) {
 
   return (
     <>
-    <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316">
+    <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316" width={460}>
       <AnimatePresence mode="wait">
         {/* ── BRIEFING ── */}
         {phase === 'briefing' && (
           <motion.div key="briefing" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            {/* Target card */}
+            {/* HERO target — takes center stage */}
             <div style={{
-              padding: 16, borderRadius: 10, textAlign: 'center',
-              background: `linear-gradient(135deg, ${RARITY_COLORS[hunt.rarity]}10, transparent)`,
-              border: `1.5px solid ${RARITY_COLORS[hunt.rarity]}25`,
-              marginBottom: 12,
+              padding: '24px 20px', borderRadius: 14, textAlign: 'center',
+              background: `radial-gradient(ellipse at center, ${RARITY_COLORS[hunt.rarity]}20 0%, ${RARITY_COLORS[hunt.rarity]}05 50%, transparent 100%)`,
+              border: `1.5px solid ${RARITY_COLORS[hunt.rarity]}30`,
+              marginBottom: 14,
+              position: 'relative', overflow: 'hidden',
             }}>
-              <div style={{ marginBottom: 8, cursor: 'pointer' }} onClick={() => setShow3D(true)}>
+              {/* Ambient glow */}
+              <div style={{
+                position: 'absolute', inset: 0,
+                background: `radial-gradient(circle at center, ${RARITY_COLORS[hunt.rarity]}10 0%, transparent 60%)`,
+                pointerEvents: 'none',
+              }} />
+
+              <div style={{
+                position: 'relative', zIndex: 1,
+                marginBottom: 10, cursor: 'pointer',
+                display: 'flex', justifyContent: 'center',
+              }} onClick={() => setShow3D(true)}>
                 <TokenFace2D
                   iconId={hunt.id}
                   tier={hunt.rarity === 'legendary' ? 'EMERALD' : hunt.rarity === 'epic' ? 'GOLD' : hunt.rarity === 'rare' ? 'SILVER' : 'BRONZE'}
                   catColor={RARITY_COLORS[hunt.rarity]}
                   tokenName={hunt.name}
                   biome="forest"
-                  size={140}
+                  size={220}
                 />
-                <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', marginTop: 4, letterSpacing: 1 }}>TAP TO VIEW 3D</div>
               </div>
+              <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.35)', marginTop: 6, letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>TAP TO VIEW 3D</div>
+
               <div style={{
-                fontSize: 11, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2,
-                fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 4,
+                fontSize: 16, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2,
+                fontFamily: "'Orbitron', system-ui, sans-serif", marginTop: 14, marginBottom: 4,
               }}>
                 {(hunt.name || "").toUpperCase()}
               </div>
               <div style={{
-                fontSize: 8, fontWeight: 700, color: RARITY_COLORS[hunt.rarity], letterSpacing: 2,
-                fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 8,
+                fontSize: 9, fontWeight: 700, color: RARITY_COLORS[hunt.rarity], letterSpacing: 3,
+                fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 10,
               }}>
-                {(hunt.rarity || "").toUpperCase()} TOKEN
+                {(hunt.rarity || "").toUpperCase()} TARGET
               </div>
-              <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6 }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, maxWidth: 340, margin: '0 auto' }}>
                 {hunt.hint}
               </div>
             </div>
@@ -215,25 +228,25 @@ export function DailyHuntPanel({ onClose }: Props) {
               display: 'flex', gap: 8, marginBottom: 14,
             }}>
               <div style={{
-                flex: 1, padding: '8px', borderRadius: 8, textAlign: 'center',
+                flex: 1, padding: '10px', borderRadius: 8, textAlign: 'center',
                 background: 'rgba(121,80,242,0.06)', border: '1px solid rgba(121,80,242,0.15)',
               }}>
                 <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>REWARD</div>
-                <div style={{ fontSize: 14, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                  <IconSVG id="hex_coin" size={12} /> {hunt.hex_reward}
+                <div style={{ fontSize: 16, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginTop: 2 }}>
+                  <IconSVG id="hex_coin" size={14} /> {hunt.hex_reward}
                 </div>
               </div>
               <div style={{
-                flex: 1, padding: '8px', borderRadius: 8, textAlign: 'center',
+                flex: 1, padding: '10px', borderRadius: 8, textAlign: 'center',
                 background: 'rgba(0,153,204,0.06)', border: '1px solid rgba(0,153,204,0.15)',
               }}>
                 <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>XP</div>
-                <div style={{ fontSize: 14, fontWeight: 900, color: '#0099cc', fontFamily: "'Share Tech Mono', monospace" }}>+50</div>
+                <div style={{ fontSize: 16, fontWeight: 900, color: '#0099cc', fontFamily: "'Share Tech Mono', monospace", marginTop: 2 }}>+50</div>
               </div>
             </div>
 
             <button onClick={handleStartHunt} className="btn-game btn-game-gold" style={{
-              width: '100%', fontSize: 10, letterSpacing: 3,
+              width: '100%', fontSize: 11, letterSpacing: 3, padding: '14px',
             }}>
               START SAFARI
             </button>
@@ -243,41 +256,85 @@ export function DailyHuntPanel({ onClose }: Props) {
         {/* ── TRACKING ── */}
         {phase === 'tracking' && (
           <motion.div key="tracking" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div style={{ textAlign: 'center', marginBottom: 12 }}>
+            {/* HERO TOKEN — center stage, pulsing with "tracking" energy */}
+            <div style={{
+              padding: '28px 20px 22px', borderRadius: 14, textAlign: 'center',
+              background: `radial-gradient(ellipse at center, ${RARITY_COLORS[hunt.rarity]}22 0%, ${RARITY_COLORS[hunt.rarity]}06 55%, transparent 100%)`,
+              border: `1.5px solid ${RARITY_COLORS[hunt.rarity]}35`,
+              marginBottom: 14,
+              position: 'relative', overflow: 'hidden',
+            }}>
+              {/* Pulsing scanline effect */}
+              <motion.div
+                animate={{ opacity: [0.15, 0.35, 0.15] }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+                style={{
+                  position: 'absolute', inset: 0,
+                  background: `radial-gradient(circle at center, ${RARITY_COLORS[hunt.rarity]}18 0%, transparent 55%)`,
+                  pointerEvents: 'none',
+                }}
+              />
+
               <div style={{
-                fontSize: 7, fontWeight: 700, letterSpacing: 3, color: '#f97316',
-                fontFamily: "'Orbitron', system-ui, sans-serif",
+                fontSize: 7, fontWeight: 900, letterSpacing: 4, color: '#f97316',
+                fontFamily: "'Orbitron', sans-serif", marginBottom: 14,
+                position: 'relative', zIndex: 1,
               }}>
-                TRACKING: {(hunt.name || "").toUpperCase()}
+                ⬢ TRACKING ⬢
+              </div>
+
+              <motion.div
+                animate={{ scale: [1, 1.03, 1] }}
+                transition={{ duration: 2.5, repeat: Infinity, ease: 'easeInOut' }}
+                onClick={() => setShow3D(true)}
+                style={{
+                  position: 'relative', zIndex: 1,
+                  cursor: 'pointer',
+                  display: 'flex', justifyContent: 'center',
+                }}
+              >
+                <TokenFace2D
+                  iconId={hunt.id}
+                  tier={hunt.rarity === 'legendary' ? 'EMERALD' : hunt.rarity === 'epic' ? 'GOLD' : hunt.rarity === 'rare' ? 'SILVER' : 'BRONZE'}
+                  catColor={RARITY_COLORS[hunt.rarity]}
+                  tokenName={hunt.name}
+                  biome="forest"
+                  size={200}
+                />
+              </motion.div>
+
+              <div style={{
+                fontSize: 13, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2,
+                fontFamily: "'Orbitron', sans-serif", marginTop: 12,
+                position: 'relative', zIndex: 1,
+              }}>
+                {(hunt.name || "").toUpperCase()}
+              </div>
+              <div style={{
+                fontSize: 8, fontWeight: 700, color: RARITY_COLORS[hunt.rarity], letterSpacing: 3,
+                fontFamily: "'Orbitron', sans-serif", marginTop: 4,
+                position: 'relative', zIndex: 1,
+              }}>
+                {(hunt.rarity || "").toUpperCase()}
               </div>
             </div>
 
+            {/* Hot/cold bar — AFTER the hero, not pushing it down */}
             <HotColdBar distance={distance} />
 
             <div style={{
-              marginTop: 16, padding: 12, borderRadius: 10,
-              background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
-              textAlign: 'center',
+              marginTop: 10, fontSize: 9, color: 'rgba(255,255,255,0.5)',
+              textAlign: 'center', lineHeight: 1.5,
+              maxWidth: 360, margin: '10px auto 0',
             }}>
-              <IconSVG id={hunt.id} size={44} />
-              <div style={{
-                fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 6, letterSpacing: 1,
-                fontFamily: "'Orbitron', system-ui, sans-serif",
-              }}>
-                MOVE TOWARD THE TARGET
-              </div>
-              <div style={{
-                fontSize: 8, color: 'rgba(255,255,255,0.45)', marginTop: 4,
-              }}>
-                {hunt.hint}
-              </div>
+              {hunt.hint}
             </div>
 
             <div style={{
-              marginTop: 12, padding: '6px 10px', borderRadius: 8,
-              background: 'rgba(0,153,204,0.06)', border: '1px solid rgba(0,153,204,0.1)',
-              fontSize: 7, color: '#0099cc', textAlign: 'center',
-              fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
+              marginTop: 14, padding: '8px 12px', borderRadius: 8,
+              background: 'rgba(0,153,204,0.06)', border: '1px solid rgba(0,153,204,0.15)',
+              fontSize: 8, color: '#0099cc', textAlign: 'center',
+              fontFamily: "'Orbitron', sans-serif", letterSpacing: 2,
             }}>
               DEEP SCAN UNLOCKS AT 50M RANGE
             </div>
@@ -287,21 +344,26 @@ export function DailyHuntPanel({ onClose }: Props) {
         {/* ── SCANNING ── */}
         {phase === 'scanning' && (
           <motion.div key="scanning" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div style={{ textAlign: 'center' }}>
+            <div style={{
+              padding: '26px 20px', borderRadius: 14, textAlign: 'center',
+              background: `radial-gradient(ellipse at center, rgba(220,38,38,0.22) 0%, rgba(220,38,38,0.04) 55%, transparent 100%)`,
+              border: '1.5px solid rgba(220,38,38,0.35)',
+              marginBottom: 14,
+              position: 'relative', overflow: 'hidden',
+            }}>
               <div style={{
-                fontSize: 9, fontWeight: 900, letterSpacing: 3, color: '#dc2626',
-                fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 12,
+                fontSize: 8, fontWeight: 900, letterSpacing: 4, color: '#dc2626',
+                fontFamily: "'Orbitron', sans-serif", marginBottom: 18,
               }}>
-                DEEP SCAN IN PROGRESS
+                ⬢ DEEP SCAN ⬢
               </div>
 
-              {/* Scan animation */}
+              {/* Scanning ring + token center */}
               <div style={{
-                width: 120, height: 120, margin: '0 auto 16px',
-                borderRadius: '50%', position: 'relative',
-                background: 'rgba(220,38,38,0.06)',
-                border: '2px solid rgba(220,38,38,0.2)',
+                width: 240, height: 240, margin: '0 auto 16px',
+                position: 'relative',
               }}>
+                {/* Outer rotating ring */}
                 <motion.div
                   animate={{ rotate: 360 }}
                   transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
@@ -310,33 +372,52 @@ export function DailyHuntPanel({ onClose }: Props) {
                     borderRadius: '50%',
                     border: '2px solid transparent',
                     borderTopColor: '#dc2626',
+                    borderRightColor: 'rgba(220,38,38,0.4)',
                   }}
                 />
+                {/* Inner pulsing ring */}
+                <motion.div
+                  animate={{ scale: [1, 1.08, 1], opacity: [0.4, 0.8, 0.4] }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
+                  style={{
+                    position: 'absolute', inset: 12,
+                    borderRadius: '50%',
+                    border: '1px solid rgba(220,38,38,0.3)',
+                  }}
+                />
+                {/* Token HERO in center */}
                 <div style={{
-                  position: 'absolute', inset: 0,
+                  position: 'absolute', inset: 20,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
-                  <IconSVG id={hunt.id} size={44} />
+                  <TokenFace2D
+                    iconId={hunt.id}
+                    tier={hunt.rarity === 'legendary' ? 'EMERALD' : hunt.rarity === 'epic' ? 'GOLD' : hunt.rarity === 'rare' ? 'SILVER' : 'BRONZE'}
+                    catColor={RARITY_COLORS[hunt.rarity]}
+                    tokenName={hunt.name}
+                    biome="forest"
+                    size={190}
+                  />
                 </div>
               </div>
 
               {/* Progress bar */}
               <div style={{
-                height: 6, borderRadius: 3, overflow: 'hidden',
-                background: 'rgba(255,255,255,0.05)', marginBottom: 8,
+                height: 8, borderRadius: 4, overflow: 'hidden',
+                background: 'rgba(255,255,255,0.05)', marginBottom: 10,
               }}>
                 <motion.div
                   animate={{ width: `${scanProgress}%` }}
                   style={{
-                    height: '100%', borderRadius: 3,
+                    height: '100%', borderRadius: 4,
                     background: 'linear-gradient(90deg, #dc2626, #f97316)',
-                    boxShadow: '0 0 8px rgba(220,38,38,0.4)',
+                    boxShadow: '0 0 12px rgba(220,38,38,0.5)',
                   }}
                 />
               </div>
               <div style={{
-                fontSize: 10, fontWeight: 900, color: '#dc2626',
-                fontFamily: "'Share Tech Mono', monospace",
+                fontSize: 14, fontWeight: 900, color: '#dc2626',
+                fontFamily: "'Share Tech Mono', monospace", letterSpacing: 2,
               }}>
                 {scanProgress}%
               </div>
