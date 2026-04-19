@@ -129,8 +129,20 @@ export function ShopPanel({ onClose }: Props) {
   const player  = usePlayer()
   const activeKingdom = useKingdomStore(s => s.getActiveKingdom())
 
-  // Extract actual HEX balance from balance object or player
-  const hexBalance = parseFloat(String(balance?.in_game ?? player?.tdc_in_game ?? 0)) || 0
+  // Fetch wallet directly — don't trust stale Zustand store or WS timing
+  const { data: walletData } = useQuery<any>({
+    queryKey: ['wallet-me'],
+    queryFn: () => api.get('/wallet/me/').then(r => r.data),
+    refetchInterval: 15000,
+    staleTime: 10000,
+  })
+
+  // Priority order: fresh API > Zustand store > player field > 0
+  const hexBalance = parseFloat(String(
+    walletData?.in_game ?? walletData?.tdc_in_game ??
+    balance?.in_game ??
+    player?.tdc_in_game ?? 0
+  )) || 0
 
   const { data: activeBoosts = [] } = useQuery<any[]>({
     queryKey: ['active-boosts'],
@@ -149,6 +161,7 @@ export function ShopPanel({ onClose }: Props) {
           toast.success(`${itemName} purchased!`)
         }
         qc.invalidateQueries({ queryKey: ['player'] })
+        qc.invalidateQueries({ queryKey: ['wallet-me'] })
         qc.invalidateQueries({ queryKey: ['active-boosts'] })
       })
       .catch((e: any) => toast.error(e?.response?.data?.error || 'Purchase failed'))

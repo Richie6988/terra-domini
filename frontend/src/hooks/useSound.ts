@@ -16,8 +16,17 @@
  *   play('capture')  // safari creature captured
  */
 import { useCallback, useRef, useEffect } from 'react'
+import { useStore } from '../store'
 
 type SoundId = 'claim' | 'battle' | 'reward' | 'click' | 'error' | 'notify' | 'levelup' | 'open' | 'close' | 'capture'
+
+// Categorize each sound as 'sfx' or 'music'
+const SOUND_CATEGORY: Record<SoundId, 'sfx' | 'music'> = {
+  claim: 'sfx', battle: 'sfx', reward: 'sfx', click: 'sfx',
+  error: 'sfx', notify: 'sfx', levelup: 'sfx', open: 'sfx',
+  close: 'sfx', capture: 'sfx',
+  // music tracks would go here when added
+}
 
 let audioCtx: AudioContext | null = null
 let globalMuted = false
@@ -79,6 +88,9 @@ const SOUNDS: Record<SoundId, () => void> = {
 
 export function useSound() {
   const mutedRef = useRef(globalMuted)
+  const masterSound = useStore(s => s.masterSound)
+  const musicEnabled = useStore(s => s.musicEnabled)
+  const sfxEnabled = useStore(s => s.sfxEnabled)
 
   // Listen to mute toggle from SoundToggle
   useEffect(() => {
@@ -93,14 +105,23 @@ export function useSound() {
 
   const play = useCallback((id: SoundId) => {
     if (globalMuted) return
+    if (!masterSound) return
+    const cat = SOUND_CATEGORY[id] || 'sfx'
+    if (cat === 'sfx' && !sfxEnabled) return
+    if (cat === 'music' && !musicEnabled) return
     try { SOUNDS[id]?.() } catch {}
-  }, [])
+  }, [masterSound, musicEnabled, sfxEnabled])
 
   return { play }
 }
 
-// Global play function for non-hook contexts
+// Global play function for non-hook contexts (e.g. non-React handlers)
 export function playSound(id: SoundId) {
   if (globalMuted) return
+  const s = useStore.getState()
+  if (!s.masterSound) return
+  const cat = SOUND_CATEGORY[id] || 'sfx'
+  if (cat === 'sfx' && !s.sfxEnabled) return
+  if (cat === 'music' && !s.musicEnabled) return
   try { SOUNDS[id]?.() } catch {}
 }

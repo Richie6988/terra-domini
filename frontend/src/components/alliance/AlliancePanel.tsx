@@ -6,7 +6,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Users, Shield, Sword, TrendingUp, Crown } from 'lucide-react'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
-import { allianceApi } from '../../services/api'
+import { allianceApi, api } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import { useAllianceChat } from '../../hooks/useAllianceChat'
@@ -105,8 +105,18 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
 
   const createMut = useMutation({
     mutationFn: allianceApi.create,
-    onSuccess: () => { toast.success('Alliance created! '); qc.invalidateQueries({ queryKey: ['player'] }) },
-    onError: (e: any) => toast.error(e?.response?.data?.error ?? 'Failed'),
+    onSuccess: (data: any) => {
+      toast.success(`Alliance [${data?.tag || 'NEW'}] created!`)
+      qc.invalidateQueries({ queryKey: ['player'] })
+      qc.invalidateQueries({ queryKey: ['alliance-members'] })
+      qc.invalidateQueries({ queryKey: ['alliance-search'] })
+      // Force immediate player refetch so tabs switch to Overview
+      api.get('/players/me/').then(r => useStore.setState({ player: r.data })).catch(() => {})
+    },
+    onError: (e: any) => {
+      const msg = e?.response?.data?.error || e?.response?.data?.detail || e?.message || 'Failed to create alliance'
+      toast.error(msg)
+    },
   })
 
   const leaveMut = useMutation({
@@ -332,10 +342,16 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
             <button
               onClick={() => createMut.mutate(createForm)}
               disabled={!createForm.tag || !createForm.name || createMut.isPending}
-              style={primaryBtn}
+              className="btn-game btn-game-purple"
+              style={{ width: '100%', padding: '14px', fontSize: 11, letterSpacing: 2, marginTop: 8 }}
             >
-              {createMut.isPending ? 'Creating…' : 'Create Alliance'}
+              {createMut.isPending ? 'CREATING...' : 'CREATE ALLIANCE'}
             </button>
+            {(!createForm.tag || !createForm.name) && (
+              <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)', marginTop: 8, textAlign: 'center', letterSpacing: 1 }}>
+                Fill in tag (2-6 chars) and name to continue
+              </div>
+            )}
           </div>
         )}
 

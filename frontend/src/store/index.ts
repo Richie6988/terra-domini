@@ -78,9 +78,33 @@ interface UIState {
   setWsConnected: (connected: boolean) => void
 }
 
+// ─── Settings Slice (persisted user preferences that ACTUALLY affect the game) ──
+
+export type MapTheme = 'dark' | 'light' | 'satellite' | 'topo'
+export type Language = 'en' | 'fr' | 'es' | 'de'
+
+interface SettingsState {
+  // Sound
+  masterSound: boolean
+  musicEnabled: boolean
+  sfxEnabled: boolean
+  // Map
+  mapTheme: MapTheme
+  // Other
+  notificationsEnabled: boolean
+  language: Language
+
+  setMasterSound: (v: boolean) => void
+  setMusicEnabled: (v: boolean) => void
+  setSfxEnabled: (v: boolean) => void
+  setMapTheme: (t: MapTheme) => void
+  setNotificationsEnabled: (v: boolean) => void
+  setLanguage: (l: Language) => void
+}
+
 // ─── Combined Store ───────────────────────────────────────────────────────────
 
-type Store = AuthState & GameState & TDCState & UIState
+type Store = AuthState & GameState & TDCState & UIState & SettingsState
 
 export const useStore = create<Store>()(
   persist<Store>(
@@ -205,6 +229,20 @@ export const useStore = create<Store>()(
         notifications: state.notifications.filter((_, i) => i !== index),
       })),
       setWsConnected: (connected) => set({ wsConnected: connected }),
+
+      // ── Settings (persisted) ──────────────────────────────────────────
+      masterSound: true,
+      musicEnabled: true,
+      sfxEnabled: true,
+      mapTheme: 'dark',
+      notificationsEnabled: true,
+      language: 'en',
+      setMasterSound: (v) => set({ masterSound: v }),
+      setMusicEnabled: (v) => set({ musicEnabled: v }),
+      setSfxEnabled: (v) => set({ sfxEnabled: v }),
+      setMapTheme: (t) => set({ mapTheme: t }),
+      setNotificationsEnabled: (v) => set({ notificationsEnabled: v }),
+      setLanguage: (l) => set({ language: l }),
     }),
     {
       name: 'hexod-store',
@@ -228,6 +266,13 @@ export const useStore = create<Store>()(
         isAuthenticated: state.isAuthenticated,
         mapCenter: state.mapCenter,
         mapZoom: state.mapZoom,
+        // Settings that affect gameplay (survive reloads)
+        masterSound: state.masterSound,
+        musicEnabled: state.musicEnabled,
+        sfxEnabled: state.sfxEnabled,
+        mapTheme: state.mapTheme,
+        notificationsEnabled: state.notificationsEnabled,
+        language: state.language,
       }) as any,
     }
   )
@@ -243,3 +288,11 @@ export const useMyTerritories = () => useStore((s) => s.myTerritories)
 export const useGodMode = () => useStore((s) => s.godMode)
 export const useNotifications = () => useStore((s) => s.notifications)
 export const useWsConnected = () => useStore((s) => s.wsConnected)
+
+// Settings selectors
+export const useMasterSound = () => useStore((s) => s.masterSound)
+export const useMusicEnabled = () => useStore((s) => s.musicEnabled)
+export const useSfxEnabled = () => useStore((s) => s.sfxEnabled)
+export const useMapTheme = () => useStore((s) => s.mapTheme)
+export const useNotificationsEnabled = () => useStore((s) => s.notificationsEnabled)
+export const useLanguage = () => useStore((s) => s.language)

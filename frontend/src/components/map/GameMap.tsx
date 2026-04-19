@@ -14,6 +14,7 @@ import { HexCard } from './HexCard'
 import { AttackPanel } from '../hud/AttackPanel'
 import { injectGlowFilter, makeHexPolygon, injectHexAnimations, getVisibleHexes, getHexBoundary } from './HexLayer'
 import { KingdomBorderLayer } from './KingdomBorderLayer'
+import { OwnedTerritoryHub } from '../kingdom/OwnedTerritoryHub'
 import { KingdomDetailOverlay } from '../kingdom/KingdomDetailOverlay'
 import { AttackAnimationLayer } from './AttackAnimationLayer'
 import { BuildingsOverlayLayer } from './BuildingsOverlayLayer'
@@ -59,7 +60,10 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const vpTimer      = useRef<ReturnType<typeof setTimeout>>()
   const containerRef = useRef<HTMLDivElement>(null)
 
-  const [tile,        setTile]        = useState<keyof typeof TILES>('dark')
+  const mapTheme = useStore(s => s.mapTheme)
+  const setMapTheme = useStore(s => s.setMapTheme)
+  const tile = mapTheme
+  const setTile = (t: keyof typeof TILES) => setMapTheme(t as any)
   const [poiCatFilter, setPoiCatFilter] = useState<string[]>(['all'])
   const [poiRarFilter, setPoiRarFilter] = useState<string[]>(['all'])
   const [showOverlay,  setShowOverlay]  = useState(true)
@@ -535,31 +539,49 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       <BuildingsOverlayLayer map={mapRef.current} zoom={zoom} playerId={player?.id} />
       <TutorialArrow map={mapRef.current} />
 
-      {/* Kingdom detail overlay */}
+      {/* Kingdom detail overlay — owned vs enemy */}
       {selectedKingdom && (() => {
         const tStore = useStore.getState().territories
+        const isOwn = selectedKingdom.isOwn ?? selectedKingdom.is_main
+        const enrichedTerritories = (selectedKingdom.h3_indexes || []).map((h: string, i: number) => {
+          const t = tStore[h] as any
+          return {
+            h3_index: h,
+            name: t?.poi_name || t?.place_name || h.slice(0, 12),
+            rarity: t?.rarity || 'common',
+            biome: t?.territory_type || 'rural',
+            income_per_day: Math.round((t?.resource_credits || 10) * 288),
+            defense_points: t?.defense_points || 100,
+            is_capital: i === 0,
+            has_shield: !!t?.shield_expires_at,
+            poi_category: t?.poi_category,
+            poi_icon: t?.poi_icon,
+          }
+        })
+
+        // OWN kingdom → new 3-tab hub (Gallery / Customize / Kingdom)
+        if (isOwn) {
+          return (
+            <OwnedTerritoryHub
+              kingdom={{
+                ...selectedKingdom,
+                territories: enrichedTerritories,
+              }}
+              onClose={() => setSelectedKingdom(null)}
+            />
+          )
+        }
+
+        // ENEMY kingdom → existing detail overlay (spy/attack/diplomacy)
         return (
           <KingdomDetailOverlay
             kingdom={{
               ...selectedKingdom,
-              territories: (selectedKingdom.h3_indexes || []).map((h: string, i: number) => {
-                const t = tStore[h] as any
-                return {
-                  h3_index: h,
-                  name: t?.poi_name || t?.place_name || h.slice(0, 12),
-                  rarity: t?.rarity || 'common',
-                  biome: t?.territory_type || 'rural',
-                  income_per_day: Math.round((t?.resource_credits || 10) * 288),
-                  defense_points: t?.defense_points || 100,
-                  is_capital: i === 0,
-                  has_shield: !!t?.shield_expires_at,
-                  poi_category: t?.poi_category,
-                }
-              }),
+              territories: enrichedTerritories,
               total_defense: (selectedKingdom.h3_indexes || []).reduce((s: number, h: string) => s + ((tStore[h] as any)?.defense_points || 100), 0),
               total_attack: (selectedKingdom.h3_indexes || []).length * 50,
             }}
-            isOwn={selectedKingdom.isOwn ?? selectedKingdom.is_main}
+            isOwn={false}
             onClose={() => setSelectedKingdom(null)}
           />
         )

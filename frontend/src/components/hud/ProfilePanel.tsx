@@ -192,7 +192,19 @@ function AchievementsTab() {
 }
 
 function PreferencesTab() {
-  const [sound,setSound]=useState(true),[music,setMusic]=useState(true),[sfx,setSfx]=useState(true),[notifs,setNotifs]=useState(true),[mapTheme,setMapTheme]=useState('light'),[lang,setLang]=useState('en')
+  const sound = useStore(s => s.masterSound)
+  const setSound = useStore(s => s.setMasterSound)
+  const music = useStore(s => s.musicEnabled)
+  const setMusic = useStore(s => s.setMusicEnabled)
+  const sfx = useStore(s => s.sfxEnabled)
+  const setSfx = useStore(s => s.setSfxEnabled)
+  const notifs = useStore(s => s.notificationsEnabled)
+  const setNotifs = useStore(s => s.setNotificationsEnabled)
+  const mapTheme = useStore(s => s.mapTheme)
+  const setMapTheme = useStore(s => s.setMapTheme)
+  const lang = useStore(s => s.language)
+  const setLang = useStore(s => s.setLanguage)
+
   const Tog=({l,v,f}:{l:string,v:boolean,f:(b:boolean)=>void})=>(
     <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0' }}>
       <span style={{ fontSize:10,color:'#e2e8f0',fontWeight:600 }}>{l}</span>
@@ -204,11 +216,11 @@ function PreferencesTab() {
   return (
     <div style={{ display:'flex',flexDirection:'column',gap:14 }}>
       <div style={sBox}><div style={lbl}>SOUND</div><Tog l="Master sound" v={sound} f={setSound}/><Tog l="Music" v={music} f={setMusic}/><Tog l="Sound effects" v={sfx} f={setSfx}/></div>
-      <div style={sBox}><div style={lbl}>MAP THEME</div><div style={{ display:'flex',gap:6 }}>{[{id:'light',n:'LIGHT'},{id:'satellite',n:'SAT'},{id:'topo',n:'TOPO'}].map(t=>(
-        <button key={t.id} onClick={()=>setMapTheme(t.id)} style={{ flex:1,padding:'10px 8px',borderRadius:8,cursor:'pointer',fontSize:7,fontWeight:700,letterSpacing:1,fontFamily:"'Orbitron',sans-serif",background:mapTheme===t.id?'rgba(0,153,204,0.1)':'rgba(255,255,255,0.03)',border:`2px solid ${mapTheme===t.id?'#0099cc':'rgba(255,255,255,0.05)'}`,color:mapTheme===t.id?'#0099cc':'rgba(255,255,255,0.03)' }}>{t.n}</button>
+      <div style={sBox}><div style={lbl}>MAP THEME</div><div style={{ display:'flex',gap:6,flexWrap:'wrap' }}>{[{id:'dark',n:'DARK'},{id:'light',n:'LIGHT'},{id:'satellite',n:'SAT'},{id:'topo',n:'TOPO'}].map(t=>(
+        <button key={t.id} onClick={()=>setMapTheme(t.id as any)} style={{ flex:'1 1 45%',padding:'10px 8px',borderRadius:8,cursor:'pointer',fontSize:8,fontWeight:700,letterSpacing:1,fontFamily:"'Orbitron',sans-serif",background:mapTheme===t.id?'rgba(0,153,204,0.15)':'rgba(255,255,255,0.04)',border:`2px solid ${mapTheme===t.id?'#0099cc':'rgba(255,255,255,0.08)'}`,color:mapTheme===t.id?'#0099cc':'rgba(255,255,255,0.65)' }}>{t.n}</button>
       ))}</div></div>
       <div style={sBox}><div style={lbl}>NOTIFICATIONS</div><Tog l="Push notifications" v={notifs} f={setNotifs}/></div>
-      <div style={sBox}><div style={lbl}>LANGUAGE</div><select value={lang} onChange={e=>setLang(e.target.value)} style={{ ...inputSt, cursor:'pointer' }}><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select></div>
+      <div style={sBox}><div style={lbl}>LANGUAGE</div><select value={lang} onChange={e=>setLang(e.target.value as any)} style={{ ...inputSt, cursor:'pointer' }}><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select></div>
     </div>
   )
 }
@@ -219,7 +231,7 @@ export function ProfilePanel({ onClose }: Props) {
     <GlassPanel title="PROFILE" onClose={onClose} accent="#0099cc">
       <div style={{ display:'flex',gap:0,borderBottom:'1px solid rgba(255,255,255,0.06)',marginBottom:14 }}>
         {TABS.map(t=>(
-          <button key={t.id} onClick={()=>setTab(t.id)} style={{ flex:1,padding:'10px 8px',border:'none',cursor:'pointer',background:tab===t.id?'rgba(0,153,204,0.08)':'transparent',borderBottom:tab===t.id?'2px solid #0099cc':'2px solid transparent',color:tab===t.id?'#0099cc':'rgba(255,255,255,0.03)',fontSize:8,fontWeight:700,letterSpacing:1,fontFamily:"'Orbitron',sans-serif" }}>{t.label}</button>
+          <button key={t.id} onClick={()=>setTab(t.id)} style={{ flex:1,padding:'10px 8px',border:'none',cursor:'pointer',background:tab===t.id?'rgba(0,153,204,0.08)':'transparent',borderBottom:tab===t.id?'2px solid #0099cc':'2px solid transparent',color:tab===t.id?'#0099cc':'rgba(255,255,255,0.55)',fontSize:8,fontWeight:700,letterSpacing:1,fontFamily:"'Orbitron',sans-serif" }}>{t.label}</button>
         ))}
       </div>
       {tab==='commander'&&<CommanderTab/>}

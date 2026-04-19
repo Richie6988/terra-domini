@@ -5,9 +5,10 @@
  */
 import { useMemo, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import { useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { Token3DViewer } from '../shared/Token3DViewer'
 import { ClaimCelebration } from '../shared/ClaimCelebration'
+import { OwnedTerritoryHub } from '../kingdom/OwnedTerritoryHub'
 import { api } from '../../services/api'
 import { useStore, usePlayer } from '../../store'
 import { useSound } from '../../hooks/useSound'
@@ -132,8 +133,35 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
   }, [claiming, t, player])
 
 
+  // For owned territories, wrap as kingdom-like shape for OwnedTerritoryHub
+  const asKingdom = useMemo(() => ({
+    cluster_id: t.cluster_id || t.h3_index,
+    h3_indexes: [t.h3_index],
+    size: 1,
+    tier: 1,
+    is_main: false,
+    tdc_per_24h: income * 24 / 288,
+    centroid_lat: t.center_lat ?? t.lat,
+    centroid_lon: t.center_lon ?? t.lon,
+    territories: [{
+      h3_index: t.h3_index,
+      name: cardName,
+      rarity: rarity,
+      biome: biome,
+      poi_category: t.poi_category,
+      poi_icon: t.poi_icon,
+      income_per_day: income,
+      defense_points: t.defense_points || 100,
+      is_capital: true,
+    }],
+  }), [t, cardName, rarity, biome, income])
+
   return (<>
-    {createPortal(
+    {/* OWNED hex: show 3-tab hub (Gallery/Customize/Kingdom) */}
+    {isOwned && <OwnedTerritoryHub kingdom={asKingdom as any} onClose={onClose} />}
+
+    {/* NON-OWNED hex (free or enemy): keep Token3D as primary for claim flow */}
+    {!isOwned && createPortal(
     <Token3DViewer
       visible={true}
       onClose={onClose}
