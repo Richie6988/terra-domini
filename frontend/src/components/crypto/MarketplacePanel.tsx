@@ -254,7 +254,7 @@ function MyNFTsTab() {
                     color: isListing ? '#F87171' : rc,
                   }}
                 >
-                  {isListing ? 'Annuler' : 'Vendre'}
+                  {isListing ? 'Cancel' : 'Sell'}
                 </button>
               </div>
 

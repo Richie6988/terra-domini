@@ -218,7 +218,7 @@ function PlayerTradeTab() {
       {Array.isArray(players) && players.slice(0, 5).map((p: any) => (
         <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'rgba(255,255,255,0.04)', borderRadius: 8, marginBottom: 6 }}>
           <div style={{ fontSize: 20, width: 32, height: 32, borderRadius: '50%', background: 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            {(p.avatar_emoji || p.username.slice(0,2).toUpperCase())}
+            {(p.avatar_emoji || ((p.username || "").slice(0, 2)).toUpperCase())}
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>{p.display_name || p.username}</div>

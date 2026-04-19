@@ -298,7 +298,7 @@ export function EventsPanel({ onClose }: Props) {
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <TokenFace2D
-                      tier={RARITY_TIER[r.rarity?.toLowerCase()] || 'BRONZE'}
+                      tier={RARITY_TIER[(r.rarity || "").toLowerCase()] || 'BRONZE'}
                       category={r.category?.toUpperCase() || 'EVENT'}
                       catColor={color}
                       biome={r.location_name || 'EVENT'}
@@ -314,7 +314,7 @@ export function EventsPanel({ onClose }: Props) {
                         {r.headline}
                       </div>
                       <div style={{ display: 'flex', gap: 4, marginTop: 3 }}>
-                        <span style={{ padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 700, background: color + '12', color, ...s }}>{r.rarity?.toUpperCase()}</span>
+                        <span style={{ padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 700, background: color + '12', color, ...s }}>{(r.rarity || "").toUpperCase()}</span>
                         {r.result === 'won' && r.serial && <span style={{ fontSize: 6, color: '#00884a' }}>#{r.serial}/{r.max_serial}</span>}
                         {r.luck_bonus > 0 && <span style={{ fontSize: 6, color: '#a855f7' }}>+{r.luck_bonus} LUCK</span>}
                       </div>

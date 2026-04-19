@@ -129,7 +129,7 @@ function PlayersTab() {
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: '#e2e8f0' }}>
                 {p.display_name || p.username}
-                {p.is_staff && <span style={{ color: '#F59E0B', marginLeft: 4 }}>★ ADMIN</span>}
+                {p.is_staff && <span style={{ color: '#F59E0B', marginLeft: 4 }}>ADMIN</span>}
                 {!p.is_active && <span style={{ color: '#dc2626', marginLeft: 4 }}>BANNED</span>}
                 {p.email?.endsWith('@bot.hexod.io') && <span style={{ color: '#8b5cf6', marginLeft: 4 }}>BOT</span>}
               </div>

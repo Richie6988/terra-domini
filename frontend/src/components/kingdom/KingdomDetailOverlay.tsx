@@ -270,12 +270,11 @@ function OwnArmy({ k }: { k: KingdomData }) {
           <div style={{ fontSize: 14, fontWeight: 900, color: u.color, fontFamily: "'Share Tech Mono', monospace" }}>
             ×{u.count}
           </div>
-          <button style={{
-            padding: '4px 10px', borderRadius: 8, cursor: 'pointer',
-            background: `${u.color}10`, border: `1px solid ${u.color}25`,
-            color: u.color, fontSize: 7, fontWeight: 700,
-            fontFamily: "'Orbitron', sans-serif",
-          }} onClick={() => toast.success(`Recruiting ${u.name}...`)}>
+          <button onClick={() => {
+            api.post('/combat/recruit/', { unit_type: (u as any).key || u.name.toLowerCase(), quantity: 1 })
+              .then(() => toast.success(`Training 1× ${u.name}...`))
+              .catch((e: any) => toast.error(e?.response?.data?.error || 'Not enough HEX'))
+          }} className="btn-game btn-game-red" style={{ fontSize: 7, padding: '4px 10px' }}>
             + RECRUIT
           </button>
         </div>

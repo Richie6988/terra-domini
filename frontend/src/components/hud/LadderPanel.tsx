@@ -107,7 +107,7 @@ export function LadderPanel({ onClose }: Props) {
               background: p.isYou ? 'linear-gradient(135deg, #8b5cf6, #6d28d9)' : `linear-gradient(135deg, hsl(${p.rank * 18}, 50%, 60%), hsl(${p.rank * 18 + 30}, 50%, 50%))`,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               fontSize: 10, fontWeight: 900, color: '#fff', border: '2px solid rgba(255,255,255,0.08)',
-            }}>{p.username.slice(0, 2).toUpperCase()}</div>
+            }}>{((p.username || "").slice(0, 2)).toUpperCase()}</div>
 
             {/* Name */}
             <div style={{ flex: 1, minWidth: 0 }}>

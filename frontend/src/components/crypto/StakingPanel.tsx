@@ -97,7 +97,7 @@ export function StakingPanel({ onClose, embedded = false }: Props) {
               All your HEX are automatically staked — earn rewards passively
             </div>
           </div>
-          <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.25)', borderRadius: 10, width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#fff', fontSize: 18, fontWeight: 700 }}>×</button>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', width: 32, height: 32, color: 'rgba(255,255,255,0.6)', fontSize: 22, cursor: 'pointer' }}>×</button>
         </div>
       </div>
 

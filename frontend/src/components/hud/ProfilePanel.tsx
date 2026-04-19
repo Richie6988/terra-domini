@@ -163,7 +163,7 @@ function AchievementsTab() {
 
   const achievements = achData?.achievements || []
   const cats: string[] = ['ALL', ...Array.from(new Set<string>(achievements.map((a: any) => String(a.category || '').toUpperCase()).filter(Boolean) as string[]))]
-  const filtered = cf === 'ALL' ? achievements : achievements.filter((a: any) => a.category?.toUpperCase() === cf)
+  const filtered = cf === 'ALL' ? achievements : achievements.filter((a: any) => (a.category || "").toUpperCase() === cf)
   const unlocked = achData?.unlocked_count || 0
   const total = achData?.total_count || achievements.length
 
@@ -174,14 +174,14 @@ function AchievementsTab() {
     <div style={{ display:'flex',flexDirection:'column',gap:12 }}>
       <div style={{ ...sBox, textAlign:'center' }}><div style={{ fontSize:24,fontWeight:900,color:'#cc8800',fontFamily:"'Share Tech Mono',monospace" }}>{unlocked}/{total}</div><div style={lbl}>BADGES UNLOCKED</div></div>
       <div style={{ display:'flex',gap:4,flexWrap:'wrap' }}>{cats.map((c: string)=>(
-        <button key={c} onClick={()=>setCf(c)} style={{ padding:'4px 10px',borderRadius:8,cursor:'pointer',fontSize:7,fontWeight:700,letterSpacing:1,fontFamily:"'Orbitron',sans-serif",background:cf===c?`${CC[c.toLowerCase()]||'#0099cc'}15`:'rgba(255,255,255,0.03)',border:`1px solid ${cf===c?`${CC[c.toLowerCase()]||'#0099cc'}30`:'rgba(255,255,255,0.05)'}`,color:cf===c?(CC[c.toLowerCase()]||'#0099cc'):'rgba(255,255,255,0.03)' }}>{c}</button>
+        <button key={c} onClick={()=>setCf(c)} style={{ padding:'4px 10px',borderRadius:8,cursor:'pointer',fontSize:7,fontWeight:700,letterSpacing:1,fontFamily:"'Orbitron',sans-serif",background:cf===c?`${CC[(c || '').toLowerCase()]||'#0099cc'}15`:'rgba(255,255,255,0.03)',border:`1px solid ${cf===c?`${CC[(c || '').toLowerCase()]||'#0099cc'}30`:'rgba(255,255,255,0.05)'}`,color:cf===c?(CC[(c || '').toLowerCase()]||'#0099cc'):'rgba(255,255,255,0.5)' }}>{c}</button>
       ))}</div>
       {filtered.map((b: any) => { const done = b.unlocked; const catCol = CC[b.category] || '#6b7280'; return (
         <div key={b.id} style={{ display:'flex',gap:10,padding:'10px 12px',borderRadius:10,background:done?'rgba(204,136,0,0.04)':'rgba(255,255,255,0.03)',border:`1px solid ${done?'rgba(204,136,0,0.15)':'rgba(255,255,255,0.05)'}`,opacity:done?1:0.6 }}>
           <span style={{ fontSize:22,filter:done?'':'grayscale(1)' }}><EmojiIcon emoji={b.icon} size={16} /></span>
           <div style={{ flex:1 }}>
             <div style={{ fontSize:10,fontWeight:700,color:'#e2e8f0' }}>{b.name}</div>
-            <div style={{ fontSize:7,color:catCol,fontWeight:600,letterSpacing:1 }}>{b.category?.toUpperCase()}</div>
+            <div style={{ fontSize:7,color:catCol,fontWeight:600,letterSpacing:1 }}>{(b.category || "").toUpperCase()}</div>
             <div style={{ fontSize:8,color:'rgba(255,255,255,0.4)',marginTop:2 }}>{b.description}</div>
           </div>
           <div style={{ textAlign:'right',flexShrink:0 }}><div style={{ display:'flex',alignItems:'center',gap:2 }}><IconSVG id="hex_coin" size={12} /><span style={{ fontSize:11,fontWeight:900,color:done?'#cc8800':'rgba(255,255,255,0.2)',fontFamily:"'Share Tech Mono',monospace" }}>{b.reward_tdc}</span></div>{done&&<div style={{ fontSize:7,color:'#22c55e',fontWeight:700,marginTop:2 }}> UNLOCKED</div>}</div>
