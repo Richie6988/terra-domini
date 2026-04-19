@@ -3,14 +3,16 @@
  * Tabs: Overview, Resources, Skill Tree, Conquest
  * Opened from HexodDock "kingdom" button or territory context.
  */
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { GlassPanel } from '../shared/GlassPanel'
 import { ResourceIconSVG, IconSVG } from '../shared/iconBank'
 import { SkillTreeView } from './SkillTreeView'
 import { useKingdomStore } from '../../store/kingdomStore'
-import { useStore } from '../../store'
+import { useStore, usePlayer } from '../../store'
+import { api } from '../../services/api'
 import { EmojiIcon } from '../shared/emojiIcons'
 import {
   RESOURCES, BIOME_PRODUCTION, SKILL_BRANCHES,
@@ -27,6 +29,117 @@ const TABS = [
 
 interface Props { onClose: () => void }
 
+// ── Kingdom Customization Hook ──
+function useKingdomCustomization(kingdomId: string) {
+  const key = `hx_kingdom_${kingdomId}`
+  const load = (): { name?: string; fillColor?: string; borderColor?: string; imageUrl?: string } => {
+    try { return JSON.parse(localStorage.getItem(key) || '{}') } catch { return {} }
+  }
+  const [cust, setCust] = useState(load)
+  const save = (next: typeof cust) => {
+    setCust(next)
+    try { localStorage.setItem(key, JSON.stringify(next)) } catch {}
+  }
+  return [cust, save] as const
+}
+
+// ── Kingdom Customization UI ──
+function CustomizationBlock({ kingdom }: { kingdom: Kingdom }) {
+  const [cust, setCust] = useKingdomCustomization(kingdom.id)
+  const [name, setName] = useState(cust.name || kingdom.name)
+  const [fillColor, setFillColor] = useState(cust.fillColor || kingdom.color)
+  const [borderColor, setBorderColor] = useState(cust.borderColor || kingdom.color)
+  const [imageUrl, setImageUrl] = useState(cust.imageUrl || '')
+  const [showDiaporama, setShowDiaporama] = useState(false)
+
+  const saveCustomization = () => {
+    setCust({ name, fillColor, borderColor, imageUrl })
+    toast.success(`${name} customized!`)
+  }
+
+  return (
+    <div style={{ padding: 14, borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 12 }}>
+      <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', marginBottom: 10, fontFamily: "'Orbitron', sans-serif" }}>KINGDOM CUSTOMIZATION</div>
+
+      {/* Name */}
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, marginBottom: 4 }}>NAME</div>
+        <input value={name} onChange={e => setName(e.target.value.slice(0, 30))} placeholder="My Empire" style={{
+          width: '100%', padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)',
+          background: 'rgba(0,0,0,0.3)', color: '#e2e8f0', fontSize: 10, fontFamily: "'Share Tech Mono', monospace",
+          boxSizing: 'border-box', outline: 'none',
+        }} />
+      </div>
+
+      {/* Colors */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 10 }}>
+        <div>
+          <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, marginBottom: 4 }}>FILL COLOR</div>
+          <input type="color" value={fillColor} onChange={e => setFillColor(e.target.value)} style={{
+            width: '100%', height: 32, borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)',
+            background: 'transparent', cursor: 'pointer',
+          }} />
+        </div>
+        <div>
+          <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, marginBottom: 4 }}>BORDER COLOR</div>
+          <input type="color" value={borderColor} onChange={e => setBorderColor(e.target.value)} style={{
+            width: '100%', height: 32, borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)',
+            background: 'transparent', cursor: 'pointer',
+          }} />
+        </div>
+      </div>
+
+      {/* Image embed */}
+      <div style={{ marginBottom: 10 }}>
+        <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, marginBottom: 4 }}>EMBED IMAGE URL (OPTIONAL)</div>
+        <input value={imageUrl} onChange={e => setImageUrl(e.target.value)} placeholder="https://..." style={{
+          width: '100%', padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.1)',
+          background: 'rgba(0,0,0,0.3)', color: '#e2e8f0', fontSize: 9, fontFamily: "'Share Tech Mono', monospace",
+          boxSizing: 'border-box', outline: 'none',
+        }} />
+        {imageUrl && <img src={imageUrl} alt="" style={{ width: '100%', maxHeight: 100, objectFit: 'cover', borderRadius: 6, marginTop: 6 }} onError={e => (e.currentTarget.style.display = 'none')} />}
+      </div>
+
+      <div style={{ display: 'flex', gap: 6 }}>
+        <button onClick={saveCustomization} className="btn-game btn-game-gold" style={{ flex: 1, fontSize: 8, letterSpacing: 2 }}>
+          SAVE
+        </button>
+        <button onClick={() => setShowDiaporama(true)} className="btn-game btn-game-blue" style={{ flex: 1, fontSize: 8, letterSpacing: 2 }}>
+          VIEW TOKENS
+        </button>
+      </div>
+
+      {/* Token diaporama */}
+      {showDiaporama && (
+        <div style={{
+          marginTop: 10, padding: 10, borderRadius: 8,
+          background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.08)',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.5)' }}>
+              TERRITORIES IN KINGDOM ({kingdom.territories.length})
+            </div>
+            <button onClick={() => setShowDiaporama(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer', fontSize: 14 }}>×</button>
+          </div>
+          <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
+            {kingdom.territories.slice(0, 20).map((t, i) => (
+              <div key={i} style={{
+                minWidth: 80, height: 80, borderRadius: 8,
+                background: `linear-gradient(135deg, ${fillColor}30, ${fillColor}10)`,
+                border: `2px solid ${borderColor}60`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 7, fontWeight: 700, color: '#e2e8f0', fontFamily: "'Orbitron', sans-serif",
+              }}>
+                HEX {i + 1}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Overview Tab ──
 function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay: () => void }) {
   const totalSkills = SKILL_BRANCHES.reduce((sum, b) => {
@@ -34,21 +147,29 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
     return sum + prog.completed
   }, 0)
   const maxSkills = SKILL_BRANCHES.reduce((sum, b) => sum + b.skills.length, 0)
+  const [cust] = useKingdomCustomization(kingdom.id)
+  const displayName = cust.name || kingdom.name
+  const displayColor = cust.fillColor || kingdom.color
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+      {/* Customization block */}
+      <CustomizationBlock kingdom={kingdom} />
+
       {/* Kingdom hero */}
       <div style={{
         padding: 16, borderRadius: 10,
-        background: `linear-gradient(135deg, ${kingdom.color}15, ${kingdom.color}05)`,
-        border: `1.5px solid ${kingdom.color}30`,
+        background: cust.imageUrl
+          ? `linear-gradient(135deg, ${displayColor}15, ${displayColor}05), url(${cust.imageUrl}) center/cover`
+          : `linear-gradient(135deg, ${displayColor}15, ${displayColor}05)`,
+        border: `1.5px solid ${(cust.borderColor || displayColor)}60`,
         textAlign: 'center',
       }}>
         <div style={{
           width: 48, height: 48, borderRadius: '50%',
-          background: `linear-gradient(135deg, ${kingdom.color}, ${kingdom.color}aa)`,
+          background: `linear-gradient(135deg, ${displayColor}, ${displayColor}aa)`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: '0 auto 8px', fontSize: 22, boxShadow: `0 0 20px ${kingdom.color}30`,
+          margin: '0 auto 8px', fontSize: 22, boxShadow: `0 0 20px ${displayColor}60`,
         }}>
           
         </div>
@@ -56,7 +177,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
           fontSize: 12, fontWeight: 900, color: '#e2e8f0', letterSpacing: 3,
           fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 4,
         }}>
-          {kingdom.name.toUpperCase()}
+          {(displayName || '').toUpperCase()}
         </div>
         <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)', letterSpacing: 1 }}>
           {kingdom.territories.length} TERRITORIES · CAPITAL: {kingdom.capitalHex.slice(0, 8)}…
@@ -400,11 +521,36 @@ function ConquestTab({ kingdom }: { kingdom: Kingdom }) {
 export function KingdomPanel({ onClose }: Props) {
   const [tab, setTab] = useState('overview')
   const setActivePanel = useStore(s => s.setActivePanel)
+  const player = usePlayer()
   const {
-    kingdoms, activeKingdomId, setActiveKingdom,
+    kingdoms, activeKingdomId, setActiveKingdom, createKingdom,
     setResourceAllocation, setBranchAllocation,
     pourHex, chooseFork, processDay,
   } = useKingdomStore()
+
+  // Auto-sync kingdoms from backend API → local store
+  const { data: apiData } = useQuery({
+    queryKey: ['kingdoms', player?.id],
+    queryFn: () => api.get('/territories-geo/kingdoms/').then(r => r.data),
+    staleTime: 30000,
+    enabled: !!player,
+  })
+
+  useEffect(() => {
+    const apiKingdoms = apiData?.kingdoms ?? []
+    if (!apiKingdoms.length) return
+    apiKingdoms.forEach((ak: any) => {
+      const existsInStore = kingdoms.some(k => k.id === ak.cluster_id || k.capitalHex === ak.h3_indexes?.[0])
+      if (!existsInStore && ak.h3_indexes?.length > 0) {
+        createKingdom(
+          ak.is_main ? 'Main Kingdom' : `Kingdom ${ak.cluster_id.slice(0, 6)}`,
+          ak.is_main ? '#cc8800' : '#3b82f6',
+          ak.h3_indexes[0],
+          { lat: ak.centroid_lat, lng: ak.centroid_lon }
+        )
+      }
+    })
+  }, [apiData, kingdoms, createKingdom])
 
   const kingdom = kingdoms.find(k => k.id === activeKingdomId) ?? kingdoms[0]
 
