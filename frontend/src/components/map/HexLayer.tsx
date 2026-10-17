@@ -13,6 +13,9 @@ import * as h3 from 'h3-js'
 import type { TerritoryLight } from '../../types'
 import { escapeHtml as esc } from '../../services/escapeHtml'
 
+/** Hostile territory colour (owned by another player) */
+const ENEMY_COLOR = '#FF4D5E'
+
 const RARITY_COLOR: Record<string, string> = {
   common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
   epic:'#8B5CF6', legendary:'#F59E0B', mythic:'#EC4899',
@@ -77,51 +80,39 @@ export function injectHexAnimations() {
   const s = document.createElement('style')
   s.id = 'td-hex-anim'
   s.textContent = `
-    /* FREE POI — rarity pulse (what user loves) */
-    .td-poi-free-mythic     { animation: poiMythic 2s ease-in-out infinite; }
-    .td-poi-free-legendary  { animation: poiLegend 2.5s ease-in-out infinite; }
-    .td-poi-free-epic       { animation: poiEpic 3s ease-in-out infinite; }
-    .td-poi-free-rare       { filter: drop-shadow(0 0 7px #3B82F6cc) !important; }
-    .td-poi-free-uncommon   { filter: drop-shadow(0 0 5px #10B98188) !important; }
+    /* FREE POI — rarity glow. Only legendary/mythic animate (CSS only, few hexes) */
+    .td-poi-free-mythic     { animation: poiMythic 2.4s ease-in-out infinite; }
+    .td-poi-free-legendary  { animation: poiLegend 3s ease-in-out infinite; }
+    .td-poi-free-epic       { filter: drop-shadow(0 0 8px #8B5CF6aa); }
+    .td-poi-free-rare       { filter: drop-shadow(0 0 6px #3B82F699); }
+    .td-poi-free-uncommon   { filter: drop-shadow(0 0 4px #10B98166); }
 
     @keyframes poiMythic {
-      0%,100% { filter: drop-shadow(0 0 9px #EC4899cc); }
-      50%     { filter: drop-shadow(0 0 22px #EC4899ff) drop-shadow(0 0 44px #EC489966); }
+      0%,100% { filter: drop-shadow(0 0 6px #EC4899aa); }
+      50%     { filter: drop-shadow(0 0 16px #EC4899ee); }
     }
     @keyframes poiLegend {
-      0%,100% { filter: drop-shadow(0 0 8px #F59E0Bbb); }
-      50%     { filter: drop-shadow(0 0 20px #F59E0Bff) drop-shadow(0 0 38px #F59E0B55); }
-    }
-    @keyframes poiEpic {
-      0%,100% { filter: drop-shadow(0 0 6px #8B5CF6aa); }
-      50%     { filter: drop-shadow(0 0 15px #8B5CF6ff) drop-shadow(0 0 30px #8B5CF644); }
+      0%,100% { filter: drop-shadow(0 0 6px #F59E0B99); }
+      50%     { filter: drop-shadow(0 0 14px #F59E0Bdd); }
     }
 
-    /* OWNED — green fill, rarity border pulse */
-    .td-own-mythic     { animation: ownMythic 2.5s ease-in-out infinite; }
-    .td-own-legendary  { animation: ownLegend 3s ease-in-out infinite; }
-    .td-own-epic       { filter: drop-shadow(0 0 6px #8B5CF6cc) !important; }
-    .td-own-rare       { filter: drop-shadow(0 0 5px #3B82F6cc) !important; }
+    /* OWNED — green fill (no per-hex border, see KingdomBorderLayer), rarity glow on POIs */
+    .td-own-mythic     { filter: drop-shadow(0 0 7px #EC4899bb); }
+    .td-own-legendary  { filter: drop-shadow(0 0 7px #F59E0Bbb); }
+    .td-own-epic       { filter: drop-shadow(0 0 6px #8B5CF6aa); }
+    .td-own-rare       { filter: drop-shadow(0 0 5px #3B82F699); }
 
-    @keyframes ownMythic {
-      0%,100% { filter: drop-shadow(0 0 6px #00FF8799) drop-shadow(0 0 4px #EC4899aa); }
-      50%     { filter: drop-shadow(0 0 10px #00FF87cc) drop-shadow(0 0 16px #EC4899cc); }
-    }
-    @keyframes ownLegend {
-      0%,100% { filter: drop-shadow(0 0 5px #00FF8788) drop-shadow(0 0 4px #F59E0Baa); }
-      50%     { filter: drop-shadow(0 0 9px #00FF87bb) drop-shadow(0 0 14px #F59E0Bcc); }
-    }
+    .td-hex-tower    { animation: poiLegend 2.4s ease-in-out infinite; }
 
-    .td-hex-own-std  { filter: drop-shadow(0 0 5px rgba(0,255,135,0.8)); }
-    .td-hex-enemy    { filter: drop-shadow(0 0 4px rgba(99,145,255,0.6)); }
-    .td-hex-tower    { animation: poiLegend 2s ease-in-out infinite; }
-
-    /* Vulnérabilité DEF — rouge clignotant (Alex spec) */
+    /* DEF vulnerability window — blinking red (Alex spec) */
     @keyframes vulnPulse {
-      0%,100% { filter: drop-shadow(0 0 4px #EF444488); opacity: 0.85; }
-      50%     { filter: drop-shadow(0 0 12px #EF4444cc) drop-shadow(0 0 6px #FF000088); opacity: 1; }
+      0%,100% { filter: drop-shadow(0 0 3px #EF444488); opacity: 0.85; }
+      50%     { filter: drop-shadow(0 0 10px #EF4444cc); opacity: 1; }
     }
     .td-hex-vulnerable { animation: vulnPulse 1.2s ease-in-out infinite !important; }
+    @media (prefers-reduced-motion: reduce) {
+      .td-poi-free-mythic, .td-poi-free-legendary, .td-hex-tower, .td-hex-vulnerable { animation: none !important; }
+    }
   `
   document.body.appendChild(s)
 }
@@ -172,7 +163,7 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
   let fill: string, fillOp: number, stroke: string, weight: number, dash: string, cls: string
 
   if (ta.is_control_tower) {
-    fill='#FFB800'; fillOp=0.45; stroke='#FFD700'; weight=2.5; dash=''; cls='td-hex-tower'
+    fill='#FFB800'; fillOp=0.30; stroke='#FFD24A'; weight=2; dash=''; cls='td-hex-tower'
 
   } else if (isOwn) {
     // OWN territory: fill only, NO per-hex border
@@ -182,28 +173,29 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
     dash = ''
 
     if (poiVisible) {
-      fillOp = 0.25; weight = 0
+      fillOp = 0.30; weight = 0
       cls = rarity === 'mythic'? 'td-own-mythic'
           : rarity === 'legendary' ? 'td-own-legendary'
           : rarity === 'epic'? 'td-own-epic'
           : rarity === 'rare'? 'td-own-rare'
           : 'td-hex-own-std'
     } else {
-      fillOp = 0.18; weight = 0; cls = 'td-hex-own-std'
+      fillOp = 0.22; weight = 0; cls = 'td-hex-own-std'
     }
 
   } else if (isEnemy) {
-    fill = poiVisible ? rc : '#4B8BF5'
-    fillOp = poiVisible ? 0.28 : 0.22
-    stroke = poiVisible ? rc : '#60A5FA'
-    weight = poiVisible ? 2.5 : 1.5
+    // ENEMY: hostile red outline = ownership, fill = rarity value when it is a POI
+    fill = poiVisible ? rc : ENEMY_COLOR
+    fillOp = poiVisible ? 0.26 : 0.14
+    stroke = ENEMY_COLOR
+    weight = poiVisible ? 2.2 : 1.6
     dash = ''; cls = 'td-hex-enemy'
 
   } else if (poiVisible) {
-    // FREE POI visible — rarity pulse
+    // FREE POI visible — rarity colour, graded intensity
     fill = rc
-    fillOp = rarity==='mythic' ? 0.60 : rarity==='legendary' ? 0.52 : rarity==='epic' ? 0.42 : rarity==='rare' ? 0.32 : rarity==='uncommon' ? 0.22 : 0.14
-    stroke = rc; weight = 4; dash = ''
+    fillOp = rarity==='mythic' ? 0.42 : rarity==='legendary' ? 0.38 : rarity==='epic' ? 0.32 : rarity==='rare' ? 0.26 : rarity==='uncommon' ? 0.18 : 0.12
+    stroke = rc; weight = 2; dash = ''
     cls = `td-poi-free-${rarity}`
 
   } else {
@@ -213,8 +205,8 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
 
   // Override stroke/fill si territoire vulnérable (fenêtre post-infiltration)
   if (isVulnerable && isEnemy) {
-    stroke = '#EF4444'
-    weight = Math.max(weight, 3)
+    stroke = '#FF2D2D'
+    weight = Math.max(weight, 2.6)
     dash   = '6 3'
     cls    = cls + ' td-hex-vulnerable'
   }
@@ -234,19 +226,22 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
     : hasPOI ? `${esc((rarity || '').toUpperCase())} — Unclaimed`
     : 'Unclaimed'
 
+  const stateColor = ta.is_control_tower ? '#FFD24A' : isOwn ? '#00FF87' : isEnemy ? ENEMY_COLOR : hasPOI ? rc : '#94A3B8'
   const vulnHtml = isVulnerable
-    ? `<div style="color:#EF4444;font-size:10px;font-weight:800;margin-top:3px">
-         DEFENSES WEAKENED${infiltrationCount >= 3 ? ' (DEF 15%)' : ' (DEF 50%)'}
-         <br/><span style="color:#6B7280;font-weight:400">Infiltration${infiltrationCount >= 3 ? ' ×3' : ''} — assault window open!</span>
+    ? `<div style="margin-top:6px;padding:5px 7px;border-radius:6px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35)">
+         <div style="color:#F87171;font-size:10px;font-weight:800;letter-spacing:0.5px">DEFENSES WEAKENED${infiltrationCount >= 3 ? ' (DEF 15%)' : ' (DEF 50%)'}</div>
+         <div style="color:rgba(255,255,255,0.6);font-size:10px;margin-top:1px">Infiltration${infiltrationCount >= 3 ? ' ×3' : ''} — assault window open</div>
        </div>`
     : ''
 
   poly.bindTooltip(`
-    <div style="font-size:11px;line-height:1.7;font-family:system-ui;min-width:160px">
-      <div style="font-weight:900;color:#fff;font-size:13px">${esc(ta.custom_name || ta.poi_name || ta.place_name || 'Zone ' + t.h3_index.slice(0,6))}</div>
-      <div style="color:${isOwn ? '#00FF87' : hasPOI ? rc : '#9CA3AF'}">${stateLabel}</div>
-      ${hasPOI ? `<div style="color:${rc};font-size:10px;font-weight:700">${esc(ta.poi_category)}</div>` : ''}
-      <div style="color:#10B981;font-size:10px">+${income} HEX Coin/day</div>
+    <div style="line-height:1.45;font-family:system-ui,sans-serif;min-width:170px;letter-spacing:0">
+      <div style="font-family:'Orbitron',sans-serif;font-weight:800;color:#fff;font-size:12px;letter-spacing:0.5px">${esc(ta.custom_name || ta.poi_name || ta.place_name || 'Zone ' + t.h3_index.slice(0,6))}</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:3px;color:${stateColor};font-size:11px;font-weight:700">
+        <span style="width:7px;height:7px;border-radius:2px;transform:rotate(45deg);background:${stateColor};box-shadow:0 0 6px ${stateColor}"></span>${stateLabel}
+      </div>
+      ${hasPOI ? `<div style="color:${rc};font-size:10px;font-weight:700;margin-top:2px;text-transform:uppercase;letter-spacing:1px">${esc(ta.poi_category)}</div>` : ''}
+      <div style="margin-top:4px;color:#34D399;font-size:11px;font-family:'Share Tech Mono',monospace">+${income.toLocaleString()} HEX/day</div>
       ${vulnHtml}
     </div>
   `, { className:'td-tooltip', direction:'top', sticky:true })

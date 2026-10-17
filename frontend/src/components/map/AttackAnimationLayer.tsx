@@ -102,11 +102,11 @@ export function AttackAnimationLayer({ map }: Props) {
       const midLon = (srcLatLng[1] + tgtLatLng[1]) / 2
       const arrowHead = L.divIcon({
         html: `<div style="
-          font-size:20px;
+          width:24px;height:24px;
           animation: floatUp 1s ease-out 0.3s forwards;
           transform-origin: center;
           filter: drop-shadow(0 0 6px #EF4444);
-        "></div>`,
+        "><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FCA5A5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/><path d="m19 21 2-2"/><path d="M14.5 6.5 18 3h3v3l-3.5 3.5"/><path d="m5 14 4 4"/><path d="m7 17-3 3"/><path d="m3 19 2 2"/></svg></div>`,
         className: '',
         iconSize: [24, 24],
         iconAnchor: [12, 12],
@@ -125,13 +125,13 @@ export function AttackAnimationLayer({ map }: Props) {
       layer.addLayer(targetPoly)
 
       // Labels flottants sur la cible (dégâts simulés)
-      const floatingLabels = ['ATTAQUE', 'IMPACT', 'SIÈGE']
+      const floatingLabels = ['ATTACK', 'IMPACT', 'SIEGE']
       floatingLabels.forEach((label, i) => {
         const offset = (i - 1) * 0.001
         const floatIcon = L.divIcon({
           html: `<div style="
             color: #EF4444; font-size: 11px; font-weight: 900;
-            font-family: 'Arial Black', Arial;
+            font-family: 'Orbitron', 'Arial Black', sans-serif; letter-spacing: 1px;
             text-shadow: 0 0 8px #EF4444, 0 2px 4px rgba(0,0,0,0.8);
             animation: floatUp 1.2s ease-out ${i * 0.3}s forwards;
             white-space: nowrap; pointer-events: none;
@@ -177,8 +177,11 @@ function _playResolutionAnim(
 ) {
   const isVictory = result === 'victory'
   const color = isVictory ? '#00FF87' : '#6B7280'
-  const emoji = isVictory ? '' : '×'
-  const label = isVictory ? 'VICTOIRE !' : 'DÉFAITE'
+  // Inline SVG glyphs (RULE 4 — no emoji): trophy-check for victory, cross for defeat
+  const emoji = isVictory
+    ? `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="m7.5 12.5 3 3 6-6.5"/></svg>`
+    : `<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="${color}" stroke-width="2.4" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="m8.5 8.5 7 7M15.5 8.5l-7 7"/></svg>`
+  const label = isVictory ? 'VICTORY!' : 'DEFEAT'
 
   // Flash hex résultat
   const resultPoly = L.polygon(boundary, {
@@ -193,7 +196,7 @@ function _playResolutionAnim(
   // Icône résultat
   const resultIcon = L.divIcon({
     html: `<div style="
-      font-size: 36px;
+      width: 40px; height: 40px;
       animation: victoryBurst 1s ease-out forwards;
       transform-origin: center;
       filter: drop-shadow(0 0 12px ${color});
@@ -209,7 +212,7 @@ function _playResolutionAnim(
   const labelIcon = L.divIcon({
     html: `<div style="
       color: ${color}; font-size: 16px; font-weight: 900;
-      font-family: 'Arial Black', Arial;
+      font-family: 'Orbitron', 'Arial Black', sans-serif; letter-spacing: 1px;
       text-shadow: 0 0 12px ${color}, 0 2px 4px rgba(0,0,0,0.9);
       animation: floatUp 1.5s ease-out 0.3s forwards;
       white-space: nowrap; pointer-events: none;

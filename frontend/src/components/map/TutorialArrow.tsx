@@ -116,9 +116,9 @@ export function TutorialArrow({ map }: Props) {
             font-size: 11px; font-weight: 800;
             color: #00FF87;
             white-space: nowrap;
-            font-family: system-ui;
+            font-family: 'Orbitron', system-ui, sans-serif; letter-spacing: 1px;
             box-shadow: 0 0 12px rgba(0,255,135,0.4);
-          ">GRATUIT — Revendique ici !</div>
+          ">FREE — CLAIM HERE</div>
           <div style="position: relative; width: 32px; height: 32px;">
             <div class="tut-ring"></div>
             <div class="tut-ring tut-ring2"></div>
@@ -127,9 +127,8 @@ export function TutorialArrow({ map }: Props) {
               background: #00FF87;
               border-radius: 50%;
               display: flex; align-items: center; justify-content: center;
-              font-size: 16px;
               box-shadow: 0 0 16px rgba(0,255,135,0.6);
-            ">⬇</div>
+            "><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#06231a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v15"/><path d="M5 12l7 7 7-7"/></svg></div>
           </div>
         </div>
       `,

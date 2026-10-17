@@ -36,6 +36,22 @@ const TYPE_CONFIG: Record<string, { color: string; size: number; pulse: boolean;
   airdrop:         { color: '#00FF87', size: 30, pulse: true,  trail: '' },
 }
 
+// Inline SVG glyphs per event type (RULE 4 — the API `icon` field may contain emoji, never render it)
+const P = (d: string) => `<svg width="100%" height="100%" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`
+const TYPE_GLYPH: Record<string, string> = {
+  troop_move:      P('<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>'),
+  attack_wave:     P('<path d="M14.5 17.5 3 6V3h3l11.5 11.5"/><path d="m13 19 6-6"/><path d="m16 16 4 4"/>'),
+  trade_convoy:    P('<path d="M8 3 4 7l4 4"/><path d="M4 7h16"/><path d="m16 21 4-4-4-4"/><path d="M20 17H4"/>'),
+  resource_drop:   P('<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/>'),
+  news_pin:        P('<path d="M4 22h16a2 2 0 0 0 2-2V4H8v16a2 2 0 0 1-4 0V9h4"/><path d="M12 8h6M12 12h6M12 16h4"/>'),
+  player_msg:      P('<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>'),
+  war_declaration: P('<path d="M4 22V4"/><path d="M4 4h13l-2 4 2 4H4"/>'),
+  alliance_rally:  P('<path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>'),
+  tower_siege:     P('<path d="M6 21V8l3-2V3h6v3l3 2v13"/><path d="M10 21v-5h4v5"/>'),
+  airdrop:         P('<path d="M4 10a8 8 0 0 1 16 0z"/><path d="M4 10l8 7 8-7"/><rect x="9" y="17" width="6" height="5" rx="1"/>'),
+}
+const DEFAULT_GLYPH = P('<circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/>')
+
 function makeIcon(emoji: string, type: string): L.DivIcon {
   const cfg = TYPE_CONFIG[type] || { color: '#fff', size: 28, pulse: false }
   const pulse = cfg.pulse
@@ -48,10 +64,10 @@ function makeIcon(emoji: string, type: string): L.DivIcon {
       border:2px solid ${cfg.color};
       border-radius:50%;
       display:flex;align-items:center;justify-content:center;
-      font-size:${cfg.size * 0.5}px;
+      color:${cfg.color};background-color:rgba(8,16,30,0.85);
       box-shadow:0 0 12px ${cfg.color}66, 0 0 4px ${cfg.color};
       ${pulse}
-    ">${emoji}</div>`,
+    "><div style="width:${Math.round(cfg.size * 0.5)}px;height:${Math.round(cfg.size * 0.5)}px">${TYPE_GLYPH[type] || DEFAULT_GLYPH}</div></div>`,
     className: '',
     iconSize: [cfg.size, cfg.size],
     iconAnchor: [cfg.size / 2, cfg.size / 2],
@@ -110,10 +126,10 @@ export function MapOverlayLayer({ map }: Props) {
 
       const marker = L.marker([lat, lon], { icon: makeIcon(ev.icon, ev.type) })
       marker.bindPopup(`
-        <div style="min-width:200px;font-family:monospace;font-size:12px;background:#0A0A14;color:#fff;padding:10px;border-radius:8px">
-          <div style="font-weight:700;font-size:14px;margin-bottom:4px">${esc(ev.title)}</div>
-          ${ev.player ? `<div style="color:#6B7280;font-size:10px">by ${esc(ev.player)}</div>` : ''}
-          ${ev.body ? `<div style="color:#9CA3AF;margin-top:6px">${esc(ev.body)}</div>` : ''}
+        <div style="min-width:200px;font-family:system-ui,sans-serif;font-size:12px;color:#e2e8f0;padding:2px">
+          <div style="font-family:'Orbitron',sans-serif;font-weight:800;font-size:13px;letter-spacing:0.5px;margin-bottom:4px;color:${cfg.color}">${esc(ev.title)}</div>
+          ${ev.player ? `<div style="color:rgba(255,255,255,0.55);font-size:10px">by ${esc(ev.player)}</div>` : ''}
+          ${ev.body ? `<div style="color:rgba(255,255,255,0.75);margin-top:6px;line-height:1.45">${esc(ev.body)}</div>` : ''}
         </div>
       `, { className: 'td-overlay-popup' })
 

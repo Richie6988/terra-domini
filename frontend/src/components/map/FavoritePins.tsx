@@ -3,7 +3,7 @@
  * Server-side via /api/players/pins/. LocalStorage fallback if not auth'd.
  */
 import { useState, useEffect, useCallback } from 'react'
-import { MapPin, Star, Trash2, Plus } from 'lucide-react'
+import { MapPin, Star, Trash2, Plus, Flag, Home, Heart, Gem, Crown, Swords, Shield, Target, Bookmark } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { api } from '../../services/api'
@@ -18,7 +18,19 @@ export interface FavoritePin {
   zoom: number
 }
 
-const PIN_EMOJIS = ['', '⭐', '', '', '', '', '', '', '', '']
+// Pin "emoji" field now stores an icon key (rendered as SVG — RULE 4). Legacy values fall back to MapPin.
+const PIN_EMOJIS = ['pin', 'star', 'flag', 'home', 'heart', 'gem', 'crown', 'swords', 'shield', 'target']
+const PIN_ICONS: Record<string, { Icon: any; color: string }> = {
+  pin: { Icon: MapPin, color: '#0CC5FF' }, star: { Icon: Star, color: '#FBBF24' }, flag: { Icon: Flag, color: '#F87171' },
+  home: { Icon: Home, color: '#34D399' }, heart: { Icon: Heart, color: '#F472B6' }, gem: { Icon: Gem, color: '#A78BFA' },
+  crown: { Icon: Crown, color: '#FCD34D' }, swords: { Icon: Swords, color: '#EF4444' }, shield: { Icon: Shield, color: '#60A5FA' },
+  target: { Icon: Target, color: '#FB923C' },
+}
+function PinGlyph({ id, size = 15 }: { id: string; size?: number }) {
+  const spec = PIN_ICONS[id] || PIN_ICONS.pin
+  const { Icon } = spec
+  return <Icon size={size} color={spec.color} strokeWidth={2.2} />
+}
 
 export function useFavoritePins() {
   const [pins, setPins] = useState<FavoritePin[]>([])
@@ -106,30 +118,36 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
       <button
         onClick={() => setOpen(!open)}
         style={{
-          width: 36, height: 36, borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          background: pickingFavorite ? 'rgba(245,158,11,0.3)' : open ? 'rgba(204,136,0,0.12)' : 'rgba(13,27,42,0.92)',
-          border: `1px solid ${pickingFavorite ? '#F59E0B' : open ? 'rgba(204,136,0,0.3)' : 'rgba(255,255,255,0.1)'}`,
-          cursor: 'pointer', color: pickingFavorite ? '#F59E0B' : open ? '#cc8800' : '#6b7280',
+          width: 40, height: 40, borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: pickingFavorite ? 'rgba(245,158,11,0.25)' : open ? 'rgba(204,136,0,0.16)' : 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(10,22,40,0.95))',
+          backdropFilter: 'blur(20px)',
+          border: `1px solid ${pickingFavorite ? '#F59E0B' : open ? 'rgba(204,136,0,0.45)' : 'rgba(255,255,255,0.1)'}`,
+          boxShadow: '0 6px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)',
+          cursor: 'pointer', color: pickingFavorite ? '#F59E0B' : open ? '#FBBF24' : 'rgba(255,255,255,0.7)',
           animation: pickingFavorite ? 'pulse-ring 1.5s infinite' : 'none',
         }}
-        title={pickingFavorite ? 'Click a territory to save' : 'Favorite locations'}
+        title={pickingFavorite ? 'Click a territory to save' : 'Saved locations'}
+        aria-label="Saved locations" aria-expanded={open}
       >
-        <Star size={15} />
+        <Star size={17} fill={open ? '#FBBF24' : 'none'} />
       </button>
 
       {/* Pick mode indicator */}
       {pickingFavorite && (
         <div style={{
-          position: 'absolute', bottom: 44, left: 0, width: 200,
-          padding: '8px 12px', borderRadius: 8,
-          background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.3)',
-          fontSize: 9, color: '#F59E0B', fontWeight: 700, letterSpacing: 1,
+          position: 'absolute', bottom: 48, left: 0, width: 230,
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8,
+          padding: '8px 10px 8px 12px', borderRadius: 12,
+          background: 'rgba(30,20,4,0.92)', border: '1px solid rgba(245,158,11,0.45)',
+          boxShadow: '0 6px 24px rgba(0,0,0,0.45)',
+          fontSize: 9, color: '#FBBF24', fontWeight: 700, letterSpacing: 1,
           fontFamily: "'Orbitron', sans-serif",
         }}>
           TAP A TERRITORY TO SAVE IT
           <button onClick={() => setPickingFavorite(false)} style={{
-            marginLeft: 8, padding: '2px 6px', borderRadius: 4, cursor: 'pointer',
-            background: 'rgba(255,255,255,0.1)', border: 'none', color: '#fff', fontSize: 8,
+            padding: '5px 8px', borderRadius: 8, cursor: 'pointer',
+            background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: '#fff', fontSize: 9,
+            fontFamily: "'Orbitron', sans-serif", fontWeight: 700, letterSpacing: 1,
           }}>CANCEL</button>
         </div>
       )}
@@ -141,16 +159,18 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9 }}
             style={{
-              position: 'absolute', bottom: 44, left: 0, width: 260,
+              position: 'absolute', bottom: 48, left: 0, width: 270,
               background: 'rgba(13,27,42,0.97)', backdropFilter: 'blur(20px)',
               borderRadius: 12,
               border: '1px solid rgba(255,255,255,0.1)', overflow: 'hidden',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.12)',
+              boxShadow: '0 12px 36px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.05)',
             }}
           >
             {/* Header */}
             <div style={{ padding: '10px 12px', borderBottom: '1px solid rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-              <span style={{ fontSize: 12, fontWeight: 600, color: '#cc8800' }}>⭐ Saved Locations</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, fontWeight: 800, letterSpacing: 1.5, color: '#FBBF24', fontFamily: "'Orbitron', sans-serif" }}>
+                <Star size={13} fill="#FBBF24" /> SAVED LOCATIONS
+              </span>
               <button
                 onClick={() => { setPickingFavorite(true); setOpen(false) }}
                 style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px', background: 'rgba(204,136,0,0.08)', border: '1px solid rgba(204,136,0,0.2)', borderRadius: 6, color: '#cc8800', cursor: 'pointer', fontSize: 11 }}
@@ -162,15 +182,20 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
             {/* Pin list */}
             <div style={{ maxHeight: 280, overflowY: 'auto' }}>
               {pins.length === 0 ? (
-                <div style={{ padding: '20px 12px', textAlign: 'center', color: 'rgba(255,255,255,0.4)', fontSize: 12 }}>
-                  No saved locations yet.<br />Navigate somewhere and click "Save here"
+                <div style={{ padding: '22px 14px', textAlign: 'center', color: 'rgba(255,255,255,0.5)', fontSize: 11, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+                  <Bookmark size={22} color="rgba(255,255,255,0.35)" />
+                  <span>No saved locations yet.<br />Tap "Save here", then a territory.</span>
                 </div>
               ) : pins.map(pin => (
                 <div key={pin.id} style={{ padding: '8px 12px', borderBottom: '1px solid rgba(255,255,255,0.04)', display: 'flex', gap: 8, alignItems: 'center' }}>
-                  <span style={{ fontSize: 16, cursor: 'pointer' }} onClick={() => {
+                  <button aria-label="Change pin icon" title="Change icon" style={{
+                    width: 30, height: 30, flexShrink: 0, borderRadius: 8, cursor: 'pointer',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                  }} onClick={() => {
                     const next = PIN_EMOJIS[(PIN_EMOJIS.indexOf(pin.emoji) + 1) % PIN_EMOJIS.length]
                     updateEmoji(pin.id, next)
-                  }}>{pin.emoji}</span>
+                  }}><PinGlyph id={pin.emoji} /></button>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     {editingId === pin.id ? (
                       <input
@@ -192,12 +217,12 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
                     </div>
                   </div>
                   <button onClick={() => onNavigate(pin.lat, pin.lon, pin.zoom)}
-                    style={{ padding: '4px 8px', background: 'rgba(0,153,204,0.08)', border: '1px solid rgba(0,153,204,0.2)', borderRadius: 6, color: '#0099cc', cursor: 'pointer', fontSize: 11 }}>
-                    Go
+                    style={{ padding: '6px 10px', background: 'rgba(12,197,255,0.1)', border: '1px solid rgba(12,197,255,0.3)', borderRadius: 8, color: '#0CC5FF', cursor: 'pointer', fontSize: 9, fontWeight: 800, letterSpacing: 1, fontFamily: "'Orbitron', sans-serif" }}>
+                    GO
                   </button>
-                  <button onClick={() => removePin(pin.id)}
-                    style={{ background: 'none', border: 'none', color: '#EF4444', cursor: 'pointer', padding: 2, opacity: 0.6 }}>
-                    <Trash2 size={11} />
+                  <button onClick={() => removePin(pin.id)} aria-label="Delete pin" title="Delete"
+                    style={{ background: 'none', border: 'none', color: '#F87171', cursor: 'pointer', padding: 6, opacity: 0.75 }}>
+                    <Trash2 size={13} />
                   </button>
                 </div>
               ))}

@@ -149,7 +149,7 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
             const pts = cellToBoundary(hx) as [number, number][]
             const poly = L.polygon(pts as L.LatLngTuple[], {
               fillColor: color,
-              fillOpacity: isMain ? 0.06 : 0.03,
+              fillOpacity: isMain ? 0.07 : 0.04,
               color: 'transparent', weight: 0,
               interactive: true,
             })
@@ -167,26 +167,21 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
         })
 
         // Border: only outer edges (merged kingdom border)
+        // Neon stack, drawn bottom→top: soft halo, glow, crisp core, white highlight
         if (k.h3_indexes.length >= 2) {
           const chains = buildOuterBorder(k.h3_indexes)
-          chains.forEach(chain => {
-            layer.addLayer(L.polyline(chain as L.LatLngTuple[], {
-              color,
-              weight: isMain ? 4 : 3,
-              opacity: isMain ? 0.95 : 0.7,
-              interactive: false,
-              lineCap: 'round', lineJoin: 'round',
-            }))
-          })
-          // Glow effect — wider semi-transparent border behind
-          chains.forEach(chain => {
-            layer.addLayer(L.polyline(chain as L.LatLngTuple[], {
-              color,
-              weight: isMain ? 10 : 7,
-              opacity: isMain ? 0.15 : 0.08,
-              interactive: false,
-              lineCap: 'round', lineJoin: 'round',
-            }))
+          const stack: L.PolylineOptions[] = [
+            { color, weight: isMain ? 14 : 10, opacity: isMain ? 0.10 : 0.06 },
+            { color, weight: isMain ? 6 : 4.5, opacity: isMain ? 0.28 : 0.18 },
+            { color, weight: isMain ? 2.6 : 2, opacity: isMain ? 1 : 0.85 },
+            { color: '#ffffff', weight: 0.8, opacity: isMain ? 0.55 : 0.35 },
+          ]
+          stack.forEach(opts => {
+            chains.forEach(chain => {
+              layer.addLayer(L.polyline(chain as L.LatLngTuple[], {
+                ...opts, interactive: false, lineCap: 'round', lineJoin: 'round',
+              }))
+            })
           })
         } else {
           // Single territory: draw hex border normally
@@ -194,8 +189,8 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
             const pts = cellToBoundary(k.h3_indexes[0]) as [number, number][]
             layer.addLayer(L.polygon(pts as L.LatLngTuple[], {
               fillColor: 'transparent', fillOpacity: 0,
-              color, weight: isMain ? 2.5 : 1.5,
-              opacity: isMain ? 0.7 : 0.4,
+              color, weight: isMain ? 2.2 : 1.6,
+              opacity: isMain ? 0.85 : 0.6,
               dashArray: '6,4', interactive: false,
             }))
           } catch (_) {}
@@ -204,25 +199,33 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
 
       // Kingdom label — only for kingdoms with 2+ territories
       if (k.centroid_lat && k.centroid_lon && k.size >= 2) {
-        const size = isMain ? 48 : Math.min(40, 24 + Math.floor(Math.log2(k.size + 1)) * 4)
-
+        const compact = zoom < 12
+        const size = compact ? 26 : 32
+        // Hex emblem (tier colour) with tier digit, then size + label. Static strings only (no player text).
+        const emblem = `<svg width="${compact ? 18 : 22}" height="${compact ? 18 : 22}" viewBox="0 0 24 24" style="flex-shrink:0;filter:drop-shadow(0 0 4px ${color}aa)">
+            <path d="M12 1.5 21.1 6.75v10.5L12 22.5 2.9 17.25V6.75z" fill="${color}" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
+            <text x="12" y="16" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="10" font-weight="900" fill="#06101e">${k.tier}</text>
+          </svg>`
+        const crown = `<svg width="11" height="11" viewBox="0 0 24 24" fill="#FCD34D" style="flex-shrink:0"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5z"/></svg>`
         const icon = L.divIcon({
-          html: `<div style="
-            padding:3px 8px;
-            background:${color}22;
-            border:1.5px solid ${color}88;
-            border-radius:8px;
-            display:flex;align-items:center;gap:4px;
-            box-shadow:0 2px 8px ${color}33;
-            font-family:'Orbitron',system-ui,sans-serif;
+          html: `<div class="td-kingdom-pill" style="
+            position:absolute;left:0;top:0;transform:translate(-50%,-50%);
+            height:${size}px;padding:0 ${compact ? 8 : 11}px 0 ${compact ? 4 : 5}px;
+            background:linear-gradient(180deg,rgba(14,26,44,0.94),rgba(6,12,24,0.94));
+            border:1.5px solid ${color}cc;border-radius:999px;
+            display:flex;align-items:center;gap:${compact ? 5 : 7}px;
+            box-shadow:0 0 14px ${color}55,0 3px 10px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.08);
             cursor:pointer;white-space:nowrap;
           ">
-            <div style="font-size:10px;font-weight:900;color:${color}">${k.size}</div>
-            <div style="font-size:7px;color:rgba(255,255,255,0.5);letter-spacing:1px">${isMain ? 'MAIN' : `T${k.tier}`}</div>
+            ${emblem}
+            <span style="font-family:'Share Tech Mono',monospace;font-size:${compact ? 13 : 15}px;font-weight:700;color:#fff;line-height:1">${k.size}</span>
+            ${compact ? '' : `<span style="width:1px;height:14px;background:rgba(255,255,255,0.18)"></span>
+            ${isMain ? crown : ''}
+            <span style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:800;letter-spacing:1.5px;color:${isMain ? '#FCD34D' : 'rgba(255,255,255,0.8)'}">${isMain ? 'MAIN' : 'KINGDOM'}</span>`}
           </div>`,
-          className: '',
-          iconSize: [60, 24],
-          iconAnchor: [30, 12],
+          className: 'td-kingdom-badge',
+          iconSize: [0, 0],
+          iconAnchor: [0, 0],
         })
 
         const marker = L.marker([k.centroid_lat, k.centroid_lon], {
@@ -236,10 +239,10 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
         })
 
         marker.bindTooltip(
-          `<div style="font-size:12px">
-            <strong style="color:${color}">${isMain ? 'Main Kingdom' : `Kingdom (${k.size})`}</strong><br/>
-            Tier ${k.tier} · ${k.size} territories
-            ${k.tdc_per_24h ? `<br/>+${Math.round(k.tdc_per_24h)} HEX/day` : ''}
+          `<div style="font-size:11px;line-height:1.5;font-family:system-ui,sans-serif;letter-spacing:0">
+            <strong style="color:${color};font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:0.5px">${isMain ? 'Main Kingdom' : `Kingdom (${k.size})`}</strong><br/>
+            <span style="color:rgba(255,255,255,0.75)">Tier ${k.tier} · ${k.size} territories</span>
+            ${k.tdc_per_24h ? `<br/><span style="color:#34D399;font-family:'Share Tech Mono',monospace">+${Math.round(k.tdc_per_24h).toLocaleString()} HEX/day</span>` : ''}
             ${k.size <= 1 ? '<br/><span style="color:#F87171;font-size:10px"> Isolated — skills frozen</span>' : ''}
           </div>`,
           { className: 'td-tooltip', direction: 'top', offset: [0, -size / 2] }

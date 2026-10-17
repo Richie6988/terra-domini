@@ -20,11 +20,31 @@ import { AttackAnimationLayer } from './AttackAnimationLayer'
 import { BuildingsOverlayLayer } from './BuildingsOverlayLayer'
 import { TutorialArrow } from './TutorialArrow'
 import { latLngToCell, cellToBoundary, gridDisk } from 'h3-js'
+import { Layers, Plus, Minus, Check } from 'lucide-react'
+import { getIcon } from '../shared/iconBank'
 import type { TerritoryLight } from '../../types'
 
 interface GameMapProps {
   onViewportChange: (lat: number, lon: number, radius_km: number) => void
   onTerritoryClick: (h3: string) => void
+}
+
+/** Mini preview gradients for the map-style picker */
+const TILE_SWATCH: Record<string, string> = {
+  dark: 'linear-gradient(135deg,#0b1220 0%,#1e293b 60%,#334155 100%)',
+  light: 'linear-gradient(135deg,#f1f5f9 0%,#dbe4ee 60%,#b6c6d8 100%)',
+  satellite: 'linear-gradient(135deg,#14321f 0%,#2f4f2a 50%,#5b6b3c 100%)',
+  topo: 'linear-gradient(135deg,#e8eccf 0%,#c5d1a0 55%,#9caf7a 100%)',
+}
+
+/** POI category → iconBank id (categories without a dedicated icon) */
+const POI_ICON_ALIAS: Record<string, string> = {
+  temple: 'cult', bridge: 'infrastructure', lake: 'ocean', battle: 'war', military: 'weapon',
+  festival: 'party', lab: 'science', energy: 'lightning', mythic_creature: 'mythology',
+  oil: 'oil_barrel', gas: 'res_gaz', uranium: 'nuclear',
+}
+const POI_RARITY_COLOR: Record<string, string> = {
+  common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6', epic:'#8B5CF6', legendary:'#F59E0B', mythic:'#EC4899',
 }
 
 const TILES: Record<string, { label: string; url: string; maxZoom: number; overlay?: string }> = {
@@ -193,21 +213,24 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
           const nb = cellToBoundary(n).map((p: number[]) => [p[0], p[1]])
           const nt = useStore.getState().territories[n]
           const isOwned = !!nt?.owner_id
+          const nCol = !isOwned ? '#0CC5FF' : nt.owner_id === useStore.getState().player?.id ? '#00FF87' : '#FF4D5E'
           hoverLayer.addLayer(L.polygon(nb as L.LatLngTuple[], {
-            fillColor: isOwned ? '#00FF87' : '#0099cc',
-            fillOpacity: isOwned ? 0.08 : 0.03,
-            color: isOwned ? '#00FF87' : '#0099cc',
-            weight: 0.8, opacity: isOwned ? 0.4 : 0.2,
+            fillColor: nCol,
+            fillOpacity: isOwned ? 0.06 : 0.03,
+            color: nCol,
+            weight: 0.8, opacity: isOwned ? 0.35 : 0.22,
+            interactive: false,
           }))
         })
 
         // Main hex under cursor — bright highlight
         const owned = useStore.getState().territories[hx]
-        const col = owned?.owner_id ? '#EF4444' : '#00FF87'
+        const isMine = !!owned?.owner_id && owned.owner_id === useStore.getState().player?.id
+        const col = !owned?.owner_id ? '#00FF87' : isMine ? '#7CFFC4' : '#FF4D5E'
         const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
         hoverPoly = L.polygon(boundary as L.LatLngTuple[], {
-          fillColor: col, fillOpacity: 0.20,
-          color: col, weight: 2, opacity: 1,
+          fillColor: col, fillOpacity: 0.16,
+          color: col, weight: 2, opacity: 0.95, interactive: false,
           dashArray: owned?.owner_id ? '' : '5,4',
         })
         ;(hoverPoly as any)._hxId = hx
@@ -378,20 +401,20 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       // POI icon marker at hex center — visible on map for special territories
       const ta = t as any
       if ((ta.poi_name || ta.is_landmark) && (ta.center_lat || ta.lat)) {
-        const catCol = POI_CAT_COLORS[ta.poi_category] || '#6366f1'
-        const poiLabel = (ta.poi_category || '').slice(0, 3).toUpperCase()
+        const ringCol = POI_RARITY_COLOR[ta.rarity] || POI_CAT_COLORS[ta.poi_category] || '#6366f1'
+        const iconKey = ta.poi_icon || POI_ICON_ALIAS[ta.poi_category] || ta.poi_category || 'landmark'
+        // Static iconBank SVG (trusted, not player-controlled)
+        const svg = getIcon(String(iconKey).toLowerCase()).replace('<svg ', '<svg width="100%" height="100%" ')
         const icon = L.divIcon({
           html: `<div style="
-            width:20px;height:20px;border-radius:50%;
-            background:${catCol};border:2px solid #fff;
-            display:flex;align-items:center;justify-content:center;
-            font-size:6px;font-weight:900;color:#fff;
-            font-family:'Orbitron',sans-serif;letter-spacing:0.5px;
-            box-shadow:0 1px 6px ${catCol}66;
-          ">${poiLabel}</div>`,
+            width:26px;height:26px;border-radius:50%;
+            background:#0b1626;border:2px solid ${ringCol};
+            display:flex;align-items:center;justify-content:center;overflow:hidden;
+            box-shadow:0 0 10px ${ringCol}88,0 2px 6px rgba(0,0,0,0.6);
+          "><div style="width:34px;height:34px;flex-shrink:0">${svg}</div></div>`,
           className: '',
-          iconSize: [20, 20],
-          iconAnchor: [10, 10],
+          iconSize: [26, 26],
+          iconAnchor: [13, 13],
         })
         const marker = L.marker([ta.center_lat || ta.lat, ta.center_lon || ta.lon], {
           icon, zIndexOffset: 400, interactive: false,
@@ -469,51 +492,32 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       {/* Global styles */}
       <style>{`
-        .td-tooltip{background:rgba(13,27,42,0.95)!important;border:1px solid rgba(255,255,255,0.12)!important;border-radius:10px!important;color:#e2e8f0!important;padding:8px 12px!important;box-shadow:0 4px 20px rgba(0,0,0,0.15)!important;font-family:'Orbitron',system-ui,sans-serif!important;font-size:9px!important;letter-spacing:1px!important;}
+        .td-tooltip{background:linear-gradient(180deg,rgba(14,26,44,0.97),rgba(6,12,24,0.97))!important;border:1px solid rgba(255,255,255,0.14)!important;border-radius:12px!important;color:#e2e8f0!important;padding:9px 12px!important;box-shadow:0 10px 30px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.06)!important;font-family:'Orbitron',system-ui,sans-serif!important;font-size:10px!important;letter-spacing:0.5px!important;}
         .td-tooltip::before{display:none!important;}
-        .leaflet-container{cursor:crosshair;background:#e8eef5;}
-        .td-hex-own path{filter:drop-shadow(0 0 6px rgba(0,255,135,0.8))!important;}
-        .td-hex-tower path{filter:drop-shadow(0 0 8px rgba(255,184,0,0.9))!important;animation:td-pulse 2s ease-in-out infinite;}
-        .td-hex-enemy path{filter:drop-shadow(0 0 4px rgba(99,145,255,0.6))!important;}
-        .td-hex-free path{opacity:0.7;}
-        @keyframes td-pulse{0%,100%{filter:drop-shadow(0 0 8px rgba(255,184,0,0.9));}50%{filter:drop-shadow(0 0 16px rgba(255,184,0,1.0));}}
+        .leaflet-container{cursor:crosshair;background:${tile === 'light' || tile === 'topo' ? '#d6dee8' : '#060e1a'};}
         .leaflet-attribution-flag{display:none!important;}
-        .td-hex-poi-rare path{filter:drop-shadow(0 0 6px #3B82F6aa);}
-        .td-hex-poi-epic path{animation:hexPulseEpic 3s ease-in-out infinite;}
-        .td-hex-poi-legendary path{animation:hexPulseLegendary 2.5s ease-in-out infinite;}
-        .td-hex-poi-mythic path{animation:hexPulseMythic 2s ease-in-out infinite;}
-        @keyframes hexPulseLegendary{0%,100%{filter:drop-shadow(0 0 6px #F59E0Baa);}50%{filter:drop-shadow(0 0 14px #F59E0Bff) drop-shadow(0 0 28px #F59E0B55);}}
-        @keyframes hexPulseMythic{0%,100%{filter:drop-shadow(0 0 8px #EC4899cc);}50%{filter:drop-shadow(0 0 20px #EC4899ff) drop-shadow(0 0 40px #EC489966);}}
-        @keyframes hexPulseEpic{0%,100%{filter:drop-shadow(0 0 5px #8B5CF6aa);}50%{filter:drop-shadow(0 0 12px #8B5CF6ff);}}
+        .td-kingdom-badge{overflow:visible;}
+        .td-kingdom-pill{transition:transform .15s ease;}
+        .td-kingdom-pill:hover{transform:translate(-50%,-50%) scale(1.06)!important;}
+        .td-mapctl-btn{width:40px;height:40px;display:flex;align-items:center;justify-content:center;background:transparent;border:none;color:rgba(255,255,255,0.7);cursor:pointer;transition:background .15s,color .15s;}
+        .td-mapctl-btn:hover{background:rgba(255,255,255,0.07);color:#fff;}
+        .td-mapctl-btn:active{background:rgba(255,255,255,0.12);}
+        .td-mapctl-btn[aria-expanded="true"]{color:#0CC5FF;background:rgba(12,197,255,0.12);}
+        .td-mapstyle-opt{display:flex;flex-direction:column;gap:6px;padding:6px;border-radius:10px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.08);cursor:pointer;color:rgba(255,255,255,0.65);font-family:'Orbitron',sans-serif;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;transition:border-color .15s,background .15s,transform .15s;}
+        .td-mapstyle-opt:hover{border-color:rgba(255,255,255,0.22);background:rgba(255,255,255,0.06);transform:translateY(-1px);}
+        .td-mapstyle-opt[aria-pressed="true"]{border-color:#0CC5FF;color:#fff;box-shadow:0 0 0 1px #0CC5FF55,0 0 14px rgba(12,197,255,0.25);}
+        .td-zoom-range{-webkit-appearance:none;appearance:none;flex:1;height:4px;border-radius:999px;background:rgba(255,255,255,0.12);outline:none;cursor:pointer;}
+        .td-zoom-range::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;border-radius:50%;background:#0CC5FF;border:2px solid #fff;box-shadow:0 0 8px rgba(12,197,255,0.6);}
+        .td-zoom-range::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#0CC5FF;border:2px solid #fff;}
       `}</style>
 
-      {/* Map controls — top right: tile picker + zoom slider */}
-      <div style={{ position:'absolute', top:'50%', right:12, transform:'translateY(-50%)', zIndex:500, display:'flex', flexDirection:'column', gap:0,
-        background:'rgba(13,27,42,0.92)', backdropFilter:'blur(20px)', borderRadius:10, border:'1px solid rgba(255,255,255,0.1)',
-        overflow:'hidden', boxShadow:'0 4px 16px rgba(0,0,0,0.08)' }}>
-        {/* Tile style buttons */}
-        {(Object.entries(TILES) as any[]).map(([key, cfg]) => (
-          <button key={key} onClick={() => setTile(key)} style={{
-            display:'block', width:'100%', padding:'8px 14px',
-            background: tile===key ? 'rgba(0,153,204,0.1)' : 'transparent',
-            border:'none', borderBottom:'1px solid rgba(255,255,255,0.05)',
-            color: tile===key ? '#0099cc' : 'rgba(255,255,255,0.45)', fontSize:10, cursor:'pointer', textAlign:'left',
-            fontFamily:"'Orbitron',system-ui,sans-serif", fontWeight: tile===key ? 700 : 400, letterSpacing:1,
-          }}>{cfg.label}</button>
-        ))}
-        {/* Zoom slider */}
-        <div style={{ display:'flex', alignItems:'center', gap:6, padding:'8px 10px', borderTop:'1px solid rgba(255,255,255,0.06)' }}>
-          <span style={{ fontSize:9, fontWeight:700, color:'#6b7280', fontFamily:'monospace', cursor:'pointer' }}
-            onClick={() => mapRef.current?.setZoom(zoom - 1)}>−</span>
-          <input type="range" min={3} max={19} step={1} value={zoom}
-            onChange={e => mapRef.current?.setZoom(Number(e.target.value))}
-            style={{ flex:1, height:4, cursor:'pointer', accentColor:'#0099cc' }}
-          />
-          <span style={{ fontSize:9, fontWeight:700, color:'#0099cc', fontFamily:'monospace', cursor:'pointer' }}
-            onClick={() => mapRef.current?.setZoom(zoom + 1)}>+</span>
-          <span style={{ fontSize:8, color:'#9ca3ab', fontFamily:'monospace', minWidth:18, textAlign:'right' }}>{zoom}</span>
-        </div>
-      </div>
+      {/* Map controls — right edge: compact stack (style menu + zoom) */}
+      <MapControls
+        tile={tile as string}
+        onTile={k => setTile(k as keyof typeof TILES)}
+        zoom={zoom}
+        onZoom={z => mapRef.current?.setZoom(z)}
+      />
 
       {/* Favorite pins — bottom left */}
       {showOverlay && <MapOverlayLayer map={mapRef.current} />}
@@ -599,5 +603,90 @@ function MapBtn({ onClick, children }: { onClick: () => void; children: React.Re
       style={{ width:36, height:36, borderRadius:8, background: h ? 'rgba(0,153,204,0.12)' : 'rgba(13,27,42,0.92)', backdropFilter:'blur(20px)', border:'1px solid rgba(255,255,255,0.1)', color:'#e2e8f0', fontSize:18, cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', transition:'background 0.15s', boxShadow:'0 2px 8px rgba(0,0,0,0.06)' }}>
       {children}
     </button>
+  )
+}
+/** Compact, collapsible map control: style picker popover + zoom buttons. */
+function MapControls({ tile, onTile, zoom, onZoom }: {
+  tile: string; onTile: (k: string) => void; zoom: number; onZoom: (z: number) => void
+}) {
+  const [open, setOpen] = useState(false)
+  const rootRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (!open) return
+    const onDown = (e: MouseEvent | TouchEvent) => {
+      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false)
+    }
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('touchstart', onDown)
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.removeEventListener('mousedown', onDown)
+      document.removeEventListener('touchstart', onDown)
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  const glass: React.CSSProperties = {
+    background: 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(10,22,40,0.95))',
+    backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12,
+    boxShadow: '0 6px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)',
+  }
+
+  return (
+    <div ref={rootRef} style={{ position: 'absolute', top: '50%', right: 12, transform: 'translateY(-50%)', zIndex: 500 }}>
+      <div style={{ ...glass, display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
+        <button className="td-mapctl-btn" aria-label="Map style" aria-expanded={open} title="Map style"
+          onClick={() => setOpen(o => !o)}>
+          <Layers size={18} />
+        </button>
+        <div style={{ width: 24, height: 1, background: 'rgba(255,255,255,0.08)' }} />
+        <button className="td-mapctl-btn" aria-label="Zoom in" title="Zoom in" onClick={() => onZoom(Math.min(19, zoom + 1))}>
+          <Plus size={17} />
+        </button>
+        <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 11, color: '#0CC5FF', lineHeight: '14px', userSelect: 'none' }}
+          aria-label={`Zoom level ${zoom}`}>{zoom}</div>
+        <button className="td-mapctl-btn" aria-label="Zoom out" title="Zoom out" onClick={() => onZoom(Math.max(3, zoom - 1))}>
+          <Minus size={17} />
+        </button>
+      </div>
+
+      {open && (
+        <div className="hx-rise" role="dialog" aria-label="Map style" style={{
+          ...glass, position: 'absolute', right: 52, top: 0, width: 212, padding: 12,
+          borderRadius: 14,
+        }}>
+          <div style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 10, fontWeight: 800, letterSpacing: 2, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
+            MAP STYLE
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {(Object.entries(TILES) as [string, { label: string }][]).map(([key, cfg]) => {
+              const active = tile === key
+              return (
+                <button key={key} className="td-mapstyle-opt" aria-pressed={active} onClick={() => onTile(key)}>
+                  <span style={{ position: 'relative', display: 'block', height: 34, borderRadius: 6, background: TILE_SWATCH[key], border: '1px solid rgba(255,255,255,0.1)' }}>
+                    {active && (
+                      <span style={{ position: 'absolute', top: 4, right: 4, width: 16, height: 16, borderRadius: '50%', background: '#0CC5FF', color: '#06101e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Check size={11} strokeWidth={3} />
+                      </span>
+                    )}
+                  </span>
+                  <span style={{ textAlign: 'left' }}>{cfg.label}</span>
+                </button>
+              )
+            })}
+          </div>
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '12px 0 10px' }} />
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <span style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: 'rgba(255,255,255,0.55)' }}>ZOOM</span>
+            <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 12, color: '#0CC5FF' }}>{zoom}</span>
+          </div>
+          <input type="range" className="td-zoom-range" min={3} max={19} step={1} value={zoom}
+            aria-label="Zoom level" onChange={e => onZoom(Number(e.target.value))} style={{ width: '100%' }} />
+        </div>
+      )}
+    </div>
   )
 }
