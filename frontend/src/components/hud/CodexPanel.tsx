@@ -3,8 +3,7 @@
  * Ported from main_prototype.html modal-codex (9 tabs).
  * This IS the collection panel — filters are inside, not separate.
  * 
- * Tabs: Overview | ⭐ Favorites |  Disasters |  Places |  Nature |
- *        Conflict |  Culture |  Science |  Fantastic
+ * Tabs: Overview | Favorites (flat 57-category grid inside Overview)
  * 
  * Each token: 3D view + marketplace + rarity badge
  */
@@ -18,6 +17,7 @@ import { CATEGORIES } from '../shared/radarIconData'
 import { useStore } from '../../store'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
+import { Search, ChevronLeft, Lock, Box } from 'lucide-react'
 
 interface Props { onClose: () => void }
 
@@ -127,6 +127,15 @@ function useRealCollection() {
   }, [territories, myTerritories])
 }
 
+// Very dark category colours (e.g. #1c1917) vanish on the navy UI → fall back to the group colour
+function readable(hex: string | undefined, fallback: string): string {
+  const m = /^#([0-9a-f]{6})$/i.exec(hex || '')
+  if (!m) return fallback
+  const n = parseInt(m[1], 16)
+  const lum = ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000
+  return lum < 70 ? fallback : (hex as string)
+}
+
 const RARITY_COLORS: Record<string, string> = {
   common: '#94a3b8', uncommon: '#22c55e', rare: '#3b82f6',
   epic: '#8b5cf6', legendary: '#f59e0b', mythic: '#ef4444',
@@ -180,39 +189,28 @@ export function CodexPanel({ onClose }: Props) {
   const selectedTokenData = selectedToken ? allTokens.find(t => t.id === selectedToken) : null
 
   return (
-    <GlassPanel title="TOKEN CODEX" onClose={onClose} accent="#7950f2">
-      {/* Tab row — scrollable */}
-      <div style={{
-        display: 'flex', gap: 3, overflowX: 'auto', paddingBottom: 8, marginBottom: 10,
-        scrollbarWidth: 'none',
-      }}>
+    <GlassPanel title="TOKEN CODEX" onClose={onClose} accent="#7950f2"
+      icon={<IconSVG id="museum" size={24} />} subtitle={`${allTokens.length} categories · collect them all`}>
+      {/* Tabs (Overview + Favorites only — claude.md §12) */}
+      <div className="hx-tabs" role="tablist">
         {CODEX_TABS.map(t => (
-          <button key={t.id} onClick={() => { setTab(t.id); setSelectedToken(null); setSelectedCategory(null) }} style={{
-            padding: '6px 10px', borderRadius: 16, cursor: 'pointer', whiteSpace: 'nowrap',
-            fontSize: 7, fontWeight: tab === t.id ? 800 : 500, letterSpacing: 1,
-            background: tab === t.id ? 'rgba(121,80,242,0.15)' : 'rgba(255,255,255,0.04)',
-            color: tab === t.id ? '#7950f2' : 'rgba(255,255,255,0.35)',
-            border: `1px solid ${tab === t.id ? 'rgba(121,80,242,0.4)' : 'rgba(255,255,255,0.08)'}`,
-            fontFamily: "'Orbitron', system-ui, sans-serif",
-            display: 'flex', alignItems: 'center', gap: 4,
-          }}>
-            <IconSVG id={t.iconId} size={12} />
+          <button key={t.id} role="tab" className="hx-tab" aria-selected={tab === t.id}
+            onClick={() => { setTab(t.id); setSelectedToken(null); setSelectedCategory(null) }}>
+            <IconSVG id={t.iconId} size={16} />
             {t.label}
           </button>
         ))}
       </div>
 
       {/* Search filter (inside codex per Richard's design) */}
-      <div style={{ marginBottom: 10 }}>
+      <div style={{ position: 'relative', marginBottom: 14 }}>
+        <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--hx-text-3)' }} />
         <input
+          className="hx-input"
           value={filter} onChange={e => setFilter(e.target.value)}
-          placeholder="Filter tokens..."
-          style={{
-            width: '100%', padding: '8px 12px', borderRadius: 10, boxSizing: 'border-box',
-            background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-            fontSize: 9, color: '#e2e8f0', outline: 'none',
-            fontFamily: "'Share Tech Mono', monospace",
-          }}
+          placeholder="Filter categories..."
+          aria-label="Filter categories"
+          style={{ paddingLeft: 36 }}
         />
       </div>
 
@@ -221,61 +219,94 @@ export function CodexPanel({ onClose }: Props) {
         {tab === 'overview' && (
           <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             {/* Global progress */}
-            <div style={{ textAlign: 'center', marginBottom: 16 }}>
-              <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, marginBottom: 4, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
-                TOTAL COLLECTION PROGRESS
-              </div>
-              <div style={{ fontSize: 28, fontFamily: "'Share Tech Mono', monospace", color: '#F59E0B', fontWeight: 700 }}>
-                {globalOwned} <span style={{ fontSize: 14, color: 'rgba(255,255,255,0.25)' }}>/ {globalTotal}</span>
-              </div>
-              <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.05)', maxWidth: 280, margin: '8px auto', overflow: 'hidden' }}>
-                <div style={{ height: '100%', width: `${globalPct}%`, borderRadius: 3, background: 'linear-gradient(90deg, #F59E0B, #0CC5FF)' }} />
-              </div>
-              <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)' }}>{globalPct}% COMPLETE · {shinyCount} SHINY</div>
-            </div>
+            {!selectedCategory && (() => {
+              const ownedCats = allTokens.filter(t => t.owned > 0).length
+              const R = 34, C = 2 * Math.PI * R
+              return (
+                <div className="hx-card hx-card--accent" style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 16, flexWrap: 'wrap' }}>
+                  <div style={{ position: 'relative', width: 84, height: 84, flexShrink: 0 }}>
+                    <svg viewBox="0 0 84 84" width={84} height={84} style={{ transform: 'rotate(-90deg)' }}>
+                      <circle cx="42" cy="42" r={R} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="8" />
+                      <circle cx="42" cy="42" r={R} fill="none" stroke="#7950f2" strokeWidth="8" strokeLinecap="round"
+                        strokeDasharray={C} strokeDashoffset={C * (1 - globalPct / 100)}
+                        style={{ filter: 'drop-shadow(0 0 6px #7950f2)', transition: 'stroke-dashoffset .6s' }} />
+                    </svg>
+                    <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontFamily: "'Share Tech Mono', monospace", fontSize: 20, color: '#fff' }}>
+                      {globalPct}%
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 180 }}>
+                    <div className="hx-stat__label">TOTAL COLLECTION</div>
+                    <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 28, color: '#fbbf24', marginTop: 4, lineHeight: 1 }}>
+                      {globalOwned} <span style={{ fontSize: 15, color: 'var(--hx-text-3)' }}>/ {globalTotal}</span>
+                    </div>
+                    <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
+                      <span className="hx-chip hx-chip--accent">{ownedCats}/{allTokens.length} CATEGORIES</span>
+                      <span className="hx-chip" style={{ color: '#fbbf24' }}><IconSVG id="sparkles" size={12} /> {shinyCount} SHINY</span>
+                    </div>
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* ──────────────────────────────────────────────────────── */}
-            {/* LEVEL 1: 56 categories grid (when no category drilled in) */}
+            {/* LEVEL 1: 57 categories grid (when no category drilled in) */}
             {/* ──────────────────────────────────────────────────────── */}
-            {!selectedCategory && (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(72px, 1fr))', gap: 6 }}>
-                {Object.values(CATEGORIES).flatMap(group => group.icons).map(icon => {
+            {!selectedCategory && (() => {
+              const icons = Object.values(CATEGORIES).flatMap(group => group.icons.map(icon => ({ ...icon, groupColor: group.color })))
+                .filter(icon => !filter || (icon.name || '').toLowerCase().includes(filter.toLowerCase()))
+              if (icons.length === 0) return (
+                <div className="hx-empty">
+                  <Search size={32} />
+                  <div className="hx-empty__title">NO MATCHING CATEGORY</div>
+                  <div>Try another name.</div>
+                </div>
+              )
+              return (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(104px, 1fr))', gap: 8 }}>
+                {icons.map((icon, i) => {
                   const token = allTokens.find(t => t.id === icon.id)
                   const owned = token?.owned || 0
                   const total = token?.total || 1
-                  const color = icon.cat_color || '#6366f1'
+                  const color = readable(icon.cat_color, icon.groupColor)
+                  const pct = Math.min(100, (owned / Math.max(total, 1)) * 100)
                   return (
-                    <button key={icon.id} onClick={() => setSelectedCategory(icon.id)} style={{
-                      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3,
-                      padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                      background: owned > 0 ? `${color}12` : 'rgba(255,255,255,0.02)',
-                      border: owned > 0 ? `1px solid ${color}30` : '1px solid rgba(255,255,255,0.05)',
-                      opacity: owned > 0 ? 1 : 0.45,
-                      filter: owned > 0 ? 'none' : 'grayscale(0.6)',
-                      transition: 'all 0.2s',
-                    }}
-                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)' }}
-                    onMouseLeave={e => { e.currentTarget.style.transform = 'translateY(0)' }}
+                    <button key={icon.id} onClick={() => setSelectedCategory(icon.id)}
+                      className="hx-card hx-card--interactive hx-rise"
+                      aria-label={`${icon.name}: ${owned} of ${total} collected`}
+                      style={{
+                        animationDelay: `${Math.min(i, 24) * 15}ms`, ['--accent' as any]: color,
+                        display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                        padding: '12px 8px 10px', color: '#e2e8f0',
+                        borderColor: owned > 0 ? `${color}88` : undefined,
+                        background: owned > 0 ? `linear-gradient(180deg, ${color}2a, ${color}08)` : undefined,
+                      }}
                     >
                       <div style={{
-                        width: 38, height: 38, borderRadius: '50%',
-                        background: `${color}18`,
-                        border: `2px solid ${color}35`,
+                        width: 56, height: 56, borderRadius: '50%',
+                        background: `radial-gradient(circle at 50% 35%, ${color}38, ${color}10)`,
+                        border: `2px solid ${color}${owned > 0 ? 'cc' : '55'}`,
+                        boxShadow: owned > 0 ? `0 0 14px ${color}66` : 'none',
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        filter: owned > 0 ? 'none' : 'saturate(0.55)',
                       }}>
-                        <IconSVG id={icon.id} size={22} />
+                        <IconSVG id={icon.id} size={40} />
                       </div>
-                      <div style={{ fontSize: 6, fontWeight: 700, color: '#e2e8f0', letterSpacing: 0.3, fontFamily: "'Orbitron', sans-serif", textAlign: 'center', lineHeight: 1.2 }}>
-                        {(icon.name || '').toUpperCase().slice(0, 10)}
+                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 0.6, textAlign: 'center', lineHeight: 1.25, minHeight: 23, color: owned > 0 ? '#fff' : 'var(--hx-text-2)' }}>
+                        {(icon.name || '').toUpperCase()}
                       </div>
-                      <div style={{ fontSize: 6, color: owned > 0 ? color : 'rgba(255,255,255,0.3)', fontFamily: "'Share Tech Mono', monospace", fontWeight: 700 }}>
+                      <div className="hx-progress" style={{ width: '100%', height: 4 }}>
+                        <div className="hx-progress__fill" style={{ width: `${pct}%` }} />
+                      </div>
+                      <div style={{ fontSize: 11, color: owned > 0 ? color : 'var(--hx-text-3)', fontFamily: "'Share Tech Mono', monospace" }}>
                         {owned}/{total}
                       </div>
                     </button>
                   )
                 })}
               </div>
-            )}
+              )
+            })()}
 
             {/* ──────────────────────────────────────────────────────── */}
             {/* LEVEL 2: Category DETAIL — tokens the user owns in this  */}
@@ -297,9 +328,9 @@ export function CodexPanel({ onClose }: Props) {
                     <button
                       onClick={() => setSelectedCategory(null)}
                       className="btn-game btn-game-glass"
-                      style={{ padding: '6px 12px', fontSize: 8, letterSpacing: 2 }}
+                      style={{ padding: '10px 12px', fontSize: 10, letterSpacing: 1.5, display: 'inline-flex', alignItems: 'center', gap: 4 }}
                     >
-                      ← BACK
+                      <ChevronLeft size={14} /> BACK
                     </button>
                     <div style={{
                       flex: 1, display: 'flex', alignItems: 'center', gap: 10,
@@ -319,7 +350,7 @@ export function CodexPanel({ onClose }: Props) {
                         <div style={{ fontSize: 11, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
                           {(iconDef.name || '').toUpperCase()}
                         </div>
-                        <div style={{ fontSize: 8, color, fontFamily: "'Share Tech Mono', monospace", marginTop: 2, fontWeight: 700 }}>
+                        <div style={{ fontSize: 9, color, fontFamily: "'Share Tech Mono', monospace", marginTop: 2, fontWeight: 700 }}>
                           {owned}/{total} collected
                         </div>
                       </div>
@@ -334,7 +365,7 @@ export function CodexPanel({ onClose }: Props) {
                   {/* OWNED INSTANCES */}
                   {instances.length > 0 && (
                     <>
-                      <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.5)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>
+                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.5)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>
                         YOUR TOKENS ({instances.length})
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))', gap: 8, marginBottom: 14 }}>
@@ -375,7 +406,7 @@ export function CodexPanel({ onClose }: Props) {
                                 )}
                               </div>
                               <div style={{
-                                fontSize: 7, fontWeight: 700, color: '#e2e8f0',
+                                fontSize: 9, fontWeight: 700, color: '#e2e8f0',
                                 fontFamily: "'Orbitron', sans-serif",
                                 textAlign: 'center', lineHeight: 1.2,
                                 maxWidth: 80, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
@@ -383,13 +414,13 @@ export function CodexPanel({ onClose }: Props) {
                                 {(inst.name || '').toUpperCase().slice(0, 10)}
                               </div>
                               <div style={{
-                                fontSize: 6, color: rCol, letterSpacing: 1,
+                                fontSize: 9, color: rCol, letterSpacing: 1,
                                 fontFamily: "'Orbitron', sans-serif", fontWeight: 700,
                               }}>
                                 {(inst.rarity || 'COMMON').toUpperCase()}
                               </div>
                               {inst.token_id != null && (
-                                <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.35)', fontFamily: "'Share Tech Mono', monospace" }}>
+                                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', fontFamily: "'Share Tech Mono', monospace" }}>
                                   #{inst.token_id}
                                 </div>
                               )}
@@ -403,7 +434,7 @@ export function CodexPanel({ onClose }: Props) {
                   {/* LOCKED SLOTS (if any remaining) */}
                   {owned < total && (
                     <>
-                      <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8, marginTop: 4 }}>
+                      <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8, marginTop: 4 }}>
                         LOCKED ({total - owned})
                       </div>
                       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(70px, 1fr))', gap: 6 }}>
@@ -413,8 +444,7 @@ export function CodexPanel({ onClose }: Props) {
                             padding: '10px 6px', borderRadius: 10,
                             background: 'rgba(255,255,255,0.02)',
                             border: '1px solid rgba(255,255,255,0.05)',
-                            opacity: 0.4,
-                            filter: 'grayscale(1)',
+                            opacity: 0.6,
                           }}>
                             <div style={{
                               width: 38, height: 38, borderRadius: '50%',
@@ -422,9 +452,9 @@ export function CodexPanel({ onClose }: Props) {
                               border: '2px dashed rgba(255,255,255,0.1)',
                               display: 'flex', alignItems: 'center', justifyContent: 'center',
                             }}>
-                              <IconSVG id="mystery" size={20} />
+                              <Lock size={16} color="rgba(255,255,255,0.6)" />
                             </div>
-                            <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', letterSpacing: 1, fontFamily: "'Orbitron', sans-serif" }}>
+                            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: 1, fontFamily: "'Orbitron', sans-serif" }}>
                               LOCKED
                             </div>
                           </div>
@@ -446,7 +476,7 @@ export function CodexPanel({ onClose }: Props) {
                       <div style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
                         NO {(iconDef.name || '').toUpperCase()} TOKENS YET
                       </div>
-                      <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.35)', marginTop: 6, lineHeight: 1.5 }}>
+                      <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', marginTop: 6, lineHeight: 1.5 }}>
                         Claim a {(iconDef.name || '').toLowerCase()} territory on the map to start your collection
                       </div>
                     </div>
@@ -460,9 +490,16 @@ export function CodexPanel({ onClose }: Props) {
         {/* ═══ FAVORITES TAB ═══ */}
         {tab === 'favorites' && (
           <motion.div key="favorites" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-            <div style={{ fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', marginBottom: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+            <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)', marginBottom: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
               <IconSVG id="medal" size={12} /> YOUR TOP TOKENS
             </div>
+            {allTokens.filter(t => t.owned > 0).length === 0 && (
+              <div className="hx-empty" style={{ marginBottom: 16 }}>
+                <IconSVG id="medal" size={44} />
+                <div className="hx-empty__title">NO TOKENS YET</div>
+                <div>Claim territories on the map to fill your hall of fame.</div>
+              </div>
+            )}
             <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginBottom: 16, flexWrap: 'wrap' }}>
               {allTokens.filter(t => t.owned > 0).slice(0, 5).map((t, i) => (
                 <button key={t.id} onClick={() => { setSelectedToken(t.id); setShow3D(true) }} style={{
@@ -473,7 +510,7 @@ export function CodexPanel({ onClose }: Props) {
                   boxShadow: t.shiny ? `0 0 12px ${t.catColor}40` : 'none',
                 }}>
                   <IconSVG id={t.id} size={32} />
-                  <div style={{ fontSize: 5, fontWeight: 700, color: t.catColor, letterSpacing: 0.5, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                  <div style={{ fontSize: 9, fontWeight: 700, color: t.catColor, letterSpacing: 0.5, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                      #{i + 1}
                   </div>
                 </button>
@@ -487,7 +524,7 @@ export function CodexPanel({ onClose }: Props) {
               border: '1px solid rgba(255,255,255,0.08)',
               position: 'relative', overflow: 'hidden', minHeight: 120,
             }}>
-              <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: 8, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                 <IconSVG id="museum" size={14} /> HEXOD MUSEUM — YOUR HALL OF FAME
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
@@ -502,13 +539,13 @@ export function CodexPanel({ onClose }: Props) {
                     }}>
                       <IconSVG id={t.id} size={24} />
                     </div>
-                    <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>
+                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                       {(t.name || "").slice(0, 8).toUpperCase()}
                     </div>
                   </div>
                 ))}
               </div>
-              <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.2)', marginTop: 8 }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', marginTop: 8 }}>
                 CLICK TOKEN FOR 3D VIEW
               </div>
             </div>
@@ -535,14 +572,14 @@ export function CodexPanel({ onClose }: Props) {
               </div>
               <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
                 <span style={{
-                  padding: '1px 6px', borderRadius: 8, fontSize: 6, fontWeight: 700,
+                  padding: '1px 6px', borderRadius: 8, fontSize: 9, fontWeight: 700,
                   background: RARITY_COLORS[selectedTokenData.rarity] + '15',
                   color: RARITY_COLORS[selectedTokenData.rarity],
                   border: `1px solid ${RARITY_COLORS[selectedTokenData.rarity]}30`,
                 }}>
                   {(selectedTokenData.rarity || "").toUpperCase()}
                 </span>
-                {selectedTokenData.shiny && <span style={{ fontSize: 6, color: '#cc8800' }}><IconSVG id="sparkles" size={8} /> SHINY</span>}
+                {selectedTokenData.shiny && <span style={{ fontSize: 9, color: '#cc8800' }}><IconSVG id="sparkles" size={8} /> SHINY</span>}
               </div>
             </div>
             <div style={{ fontSize: 10, fontWeight: 900, color: selectedTokenData.catColor, fontFamily: "'Share Tech Mono', monospace" }}>
@@ -552,18 +589,15 @@ export function CodexPanel({ onClose }: Props) {
 
           {/* Action buttons */}
           <div style={{ display: 'flex', gap: 6 }}>
-            <button onClick={() => setShow3D(true)} style={{
-              flex: 1, padding: '8px', borderRadius: 10, cursor: 'pointer',
-              background: 'linear-gradient(90deg, #D4AF37, #CD7F32)',
-              border: 'none', color: '#fff', fontSize: 7, fontWeight: 900, letterSpacing: 2,
-              fontFamily: "'Orbitron', system-ui, sans-serif",
+            <button onClick={() => setShow3D(true)} className="btn-game btn-game-gold" style={{
+              flex: 1, padding: '10px 8px', fontSize: 10, letterSpacing: 1.5,
             }}>
-              ◆ VIEW 3D
+              <Box size={12} style={{ verticalAlign: 'middle' }} /> VIEW 3D
             </button>
             <button onClick={() => setSellMode(!sellMode)} style={{
               flex: 1, padding: '8px', borderRadius: 10, cursor: 'pointer',
               background: sellMode ? '#22c55e' : 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.3)',
-              color: sellMode ? '#fff' : '#22c55e', fontSize: 7, fontWeight: 700, letterSpacing: 1,
+              color: sellMode ? '#fff' : '#22c55e', fontSize: 9, fontWeight: 700, letterSpacing: 1,
               fontFamily: "'Orbitron', system-ui, sans-serif",
             }}>
               <IconSVG id="hex_coin" size={10} /> {sellMode ? 'CANCEL' : 'SELL'}
@@ -571,7 +605,7 @@ export function CodexPanel({ onClose }: Props) {
             <button onClick={() => { onClose(); setTimeout(() => setActivePanel('marketplace'), 100) }} style={{
               flex: 1, padding: '8px', borderRadius: 10, cursor: 'pointer',
               background: 'rgba(0,153,204,0.08)', border: '1px solid rgba(0,153,204,0.3)',
-              color: '#0099cc', fontSize: 7, fontWeight: 700, letterSpacing: 1,
+              color: '#0099cc', fontSize: 9, fontWeight: 700, letterSpacing: 1,
               fontFamily: "'Orbitron', system-ui, sans-serif",
             }}>
               <IconSVG id="auction_gavel" size={10} /> MARKET
@@ -595,7 +629,7 @@ export function CodexPanel({ onClose }: Props) {
                 } catch (e: any) { toast.error(e?.response?.data?.error || 'Listing failed') }
               }} style={{
                 padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                background: '#22c55e', color: '#fff', fontSize: 8, fontWeight: 700,
+                background: '#22c55e', color: '#fff', fontSize: 9, fontWeight: 700,
                 fontFamily: "'Orbitron', sans-serif", letterSpacing: 1,
               }}>LIST</button>
             </div>

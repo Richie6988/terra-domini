@@ -5,7 +5,7 @@
  * Potion de Chance from shop boosts odds.
  * Won tokens can be placed adjacent to captured territories.
  * 
- * 3 tabs:  Live | ⏳ Upcoming |  My Results
+ * 3 tabs: Live | Upcoming | My Results
  */
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -17,6 +17,8 @@ import toast from 'react-hot-toast'
 import { IconSVG } from '../shared/iconBank'
 import { TokenFace2D } from '../shared/TokenFace2D'
 import type { TierKey } from '../shared/hexodTokenFace'
+import { FLAT_CATEGORIES } from '../shared/radarIconData'
+import { Clock, MapPin, Users, Check, CalendarClock, Trophy } from 'lucide-react'
 
 const RARITY_TIER: Record<string, TierKey> = { common: 'BRONZE', uncommon: 'BRONZE', rare: 'SILVER', epic: 'GOLD', legendary: 'EMERALD', mythic: 'DIAMOND' }
 const RARITY_COLORS: Record<string, string> = {
@@ -107,20 +109,31 @@ export function EventsPanel({ onClose }: Props) {
 
   const s = { fontFamily: "'Orbitron', system-ui, sans-serif" } as const
 
+  const player = useStore(s => s.player) as any
+  const mono = "'Share Tech Mono', monospace"
+  const body = { fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0 } as const
+  const catInfo = (id: string) => {
+    const f = FLAT_CATEGORIES[id]
+    const dark = (h: string) => { const m = /^#([0-9a-f]{6})$/i.exec(h || ''); if (!m) return true; const n = parseInt(m[1], 16); return ((n >> 16) * 299 + ((n >> 8) & 255) * 587 + (n & 255) * 114) / 1000 < 70 }
+    const color = f ? (dark(f.cat_color) ? f.categoryColor : f.cat_color) : '#f97316'
+    return { name: f?.name || (id || 'Event'), color }
+  }
+  const counts: Record<string, number> = { live: liveEvents.length, upcoming: upcomingEvents.length, results: results.length }
+
   return (
-    <GlassPanel title="EVENTS" onClose={onClose} accent="#f97316">
+    <GlassPanel title="EVENTS" onClose={onClose} accent="#f97316"
+      icon={<IconSVG id="event_ticket" size={24} />} subtitle="World news becomes unique tokens">
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+      <div className="hx-tabs" role="tablist">
         {TABS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex: 1, padding: '7px', borderRadius: 16, cursor: 'pointer',
-            fontSize: 7, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
-            background: tab === t.id ? 'rgba(249,115,22,0.1)' : 'rgba(255,255,255,0.04)',
-            color: tab === t.id ? '#f97316' : 'rgba(255,255,255,0.35)',
-            border: `1px solid ${tab === t.id ? 'rgba(249,115,22,0.3)' : 'rgba(255,255,255,0.08)'}`,
-            ...s,
-          }}><IconSVG id={t.iconId} size={10} /> {t.label}</button>
+          <button key={t.id} role="tab" className="hx-tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
+            {t.id === 'live'
+              ? <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#ef4444', boxShadow: '0 0 8px #ef4444' }} />
+              : t.id === 'upcoming' ? <CalendarClock size={14} /> : <Trophy size={14} />}
+            {t.label}
+            {(t.id !== 'results' || resultsData) && <span className="hx-chip" style={{ padding: '1px 6px' }}>{counts[t.id]}</span>}
+          </button>
         ))}
       </div>
 
@@ -129,97 +142,28 @@ export function EventsPanel({ onClose }: Props) {
         {tab === 'live' && (
           <motion.div key="live" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
             {liveEvents.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.4)', fontSize: 9, ...s }}>
-                No live events. Run: python manage.py fetch_news --demo
+              <div className="hx-empty">
+                <IconSVG id="news" size={48} />
+                <div className="hx-empty__title">NO LIVE EVENTS</div>
+                <div style={body}>New events spawn from world news. Check back soon.</div>
+                {player?.is_staff && <code style={{ fontFamily: mono, fontSize: 11, color: 'var(--hx-text-2)', textTransform: 'none' }}>python manage.py fetch_news --demo</code>}
               </div>
             )}
-            {liveEvents.map(ev => {
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))', gap: 10 }}>
+            {liveEvents.map((ev, i) => {
               const color = RARITY_COLORS[ev.rarity] || '#94a3b8'
-              const spotsLeft = ev.max_participants - ev.registered_count
-              const pctFull = Math.floor((ev.registered_count / ev.max_participants) * 100)
-              return (
-                <div key={ev.id} style={{
-                  padding: '12px 14px', borderRadius: 12, marginBottom: 8,
-                  background: ev.my_registered ? `${color}06` : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${ev.my_registered ? color + '30' : 'rgba(255,255,255,0.08)'}`,
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-                      <TokenFace2D
-                        tier={RARITY_TIER[ev.rarity] || 'BRONZE'}
-                        category={ev.category?.toUpperCase() || 'EVENT'}
-                        catColor={color}
-                        biome={ev.location_name || 'GLOBAL'}
-                        tokenName={ev.headline.split(' — ')[0]?.slice(0, 20) || 'EVENT'}
-                        iconId={ev.category || 'news'}
-                        imageSrc={ev.image_url}
-                        serial={ev.registered_count + 1}
-                        maxSupply={ev.max_participants}
-                        size={52}
-                      />
-                      <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ fontSize: 9, fontWeight: 900, color, letterSpacing: 1, ...s, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.headline}</div>
-                        <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}><IconSVG id="pin" size={8} /> {ev.location_name} · {ev.source_name}</div>
-                      </div>
-                    </div>
-                    <span style={{
-                      padding: '2px 8px', borderRadius: 8, fontSize: 6, fontWeight: 700,
-                      background: color + '15', color, border: `1px solid ${color}30`, ...s, flexShrink: 0,
-                    }}>{(ev.rarity || "").toUpperCase()}</span>
-                  </div>
-
-                  <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, marginBottom: 8, fontFamily: 'system-ui' }}>
-                    {ev.summary?.slice(0, 150)}
-                  </div>
-
-                  {/* Capacity bar */}
-                  <div style={{ marginBottom: 8 }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 6, color: 'rgba(255,255,255,0.3)', marginBottom: 3, ...s }}>
-                      <span>{ev.registered_count}/{ev.max_participants} REGISTERED</span>
-                      <span>{formatTime(ev.time_remaining - tick)} LEFT</span>
-                    </div>
-                    <div style={{ height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-                      <div style={{ height: '100%', width: `${pctFull}%`, borderRadius: 2, background: color, transition: 'width 0.5s' }} />
-                    </div>
-                  </div>
-
-                  {/* Action */}
-                  <button
-                    onClick={() => handleRegister(ev)}
-                    disabled={ev.my_registered}
-                    className={ev.my_registered ? 'btn-game btn-game-glass' : 'btn-game btn-game-blue'}
-                    style={{
-                      width: '100%', fontSize: 9, letterSpacing: 1,
-                      opacity: ev.my_registered ? 0.7 : 1,
-                    }}
-                  >
-                    {ev.my_registered ? 'REGISTERED' : `REGISTER — ${ev.registration_cost} HEX`}
-                  </button>
-                </div>
-              )
-            })}
-          </motion.div>
-        )}
-
-        {/* ═══ UPCOMING TAB ═══ */}
-        {tab === 'upcoming' && (
-          <motion.div key="upcoming" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
-            {upcomingEvents.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.4)', fontSize: 9, ...s }}>
-                No upcoming events
-              </div>
-            )}
-            {upcomingEvents.map(ev => {
-              const color = RARITY_COLORS[ev.rarity] || '#94a3b8'
+              const cat = catInfo(ev.category)
+              const pctFull = ev.max_participants > 0 ? Math.floor((ev.registered_count / ev.max_participants) * 100) : 0
               const remaining = ev.time_remaining - tick
-              const isSoon = remaining < 10800
               return (
-                <div key={ev.id} style={{
-                  padding: '12px 14px', borderRadius: 12, marginBottom: 8,
-                  background: isSoon ? `${color}05` : 'rgba(255,255,255,0.04)',
-                  border: `1px solid ${isSoon ? color + '25' : 'rgba(255,255,255,0.08)'}`,
+                <div key={ev.id} className="hx-card hx-rise" style={{
+                  animationDelay: `${Math.min(i, 10) * 40}ms`, ['--accent' as any]: color,
+                  display: 'flex', flexDirection: 'column', gap: 10, overflow: 'hidden',
+                  borderColor: ev.my_registered ? color + '88' : undefined,
+                  background: `linear-gradient(160deg, ${cat.color}1f 0%, rgba(255,255,255,0.03) 45%)`,
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: cat.color, boxShadow: `0 0 10px ${cat.color}` }} />
+                  <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                     <TokenFace2D
                       tier={RARITY_TIER[ev.rarity] || 'BRONZE'}
                       category={ev.category?.toUpperCase() || 'EVENT'}
@@ -228,75 +172,132 @@ export function EventsPanel({ onClose }: Props) {
                       tokenName={ev.headline.split(' — ')[0]?.slice(0, 20) || 'EVENT'}
                       iconId={ev.category || 'news'}
                       imageSrc={ev.image_url}
-                      size={44}
+                      serial={ev.registered_count + 1}
+                      maxSupply={ev.max_participants}
+                      size={64}
                     />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 9, fontWeight: 900, color, letterSpacing: 1, ...s }}>{ev.headline}</div>
-                      <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 1 }}><IconSVG id="pin" size={8} /> {ev.location_name} · {(ev.rarity || "").toUpperCase()}</div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
+                        <span className="hx-chip" style={{ color: cat.color, borderColor: cat.color + '66' }}><IconSVG id={ev.category || 'news'} size={12} /> {(cat.name || '').toUpperCase()}</span>
+                        <span className="hx-chip hx-chip--accent">{(ev.rarity || '').toUpperCase()}</span>
+                      </div>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: '#e2e8f0', letterSpacing: 1, lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{ev.headline}</div>
+                      <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, ...body }}><MapPin size={11} /> {ev.location_name} · {ev.source_name}</div>
                     </div>
-                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <div style={{
-                        fontSize: isSoon ? 14 : 11, fontWeight: 900,
-                        color: isSoon ? '#dc2626' : 'rgba(255,255,255,0.45)',
-                        fontFamily: "'Share Tech Mono', monospace",
-                      }}>
-                        {formatTime(remaining)}
-                      </div>
-                      <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)', marginTop: 2, ...s }}>
-                        {ev.registration_cost === 0 ? 'FREE' : `${ev.registration_cost} HEX`} · {ev.max_participants} MAX
-                      </div>
+                  </div>
+
+                  <div style={{ fontSize: 11, color: 'var(--hx-text-2)', lineHeight: 1.5, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden', ...body }}>
+                    {ev.summary}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    <span className="hx-chip" style={{ fontFamily: mono, fontSize: 11, color: remaining < 3600 ? '#f87171' : '#fdba74' }}><Clock size={11} /> {formatTime(remaining)}</span>
+                    <span className="hx-chip" style={{ color: '#fbbf24' }}><IconSVG id="hex_coin" size={12} /> +{ev.hex_reward} REWARD</span>
+                    <span className="hx-chip"><Users size={11} /> {ev.registered_count}/{ev.max_participants}</span>
+                  </div>
+                  <div className="hx-progress"><div className="hx-progress__fill" style={{ width: `${pctFull}%` }} /></div>
+
+                  <button
+                    onClick={() => handleRegister(ev)}
+                    disabled={ev.my_registered}
+                    className={ev.my_registered ? 'btn-game btn-game-glass' : 'btn-game btn-game-gold'}
+                    style={{ width: '100%', fontSize: 10, letterSpacing: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
+                  >
+                    {ev.my_registered ? <><Check size={14} /> REGISTERED</> : <>REGISTER · {ev.registration_cost === 0 ? 'FREE' : <><IconSVG id="hex_coin" size={13} />{ev.registration_cost}</>}</>}
+                  </button>
+                </div>
+              )
+            })}
+            </div>
+          </motion.div>
+        )}
+
+        {/* ═══ UPCOMING TAB ═══ */}
+        {tab === 'upcoming' && (
+          <motion.div key="upcoming" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
+            {upcomingEvents.length === 0 && (
+              <div className="hx-empty">
+                <CalendarClock size={40} color="#fb923c" />
+                <div className="hx-empty__title">NO UPCOMING EVENTS</div>
+                <div style={body}>Scheduled events will show up here before they go live.</div>
+              </div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {upcomingEvents.map((ev, i) => {
+              const color = RARITY_COLORS[ev.rarity] || '#94a3b8'
+              const remaining = ev.time_remaining - tick
+              const isSoon = remaining < 10800
+              return (
+                <div key={ev.id} className="hx-card hx-rise" style={{
+                  animationDelay: `${Math.min(i, 10) * 40}ms`, ['--accent' as any]: color,
+                  display: 'flex', alignItems: 'center', gap: 12, borderColor: isSoon ? color + '66' : undefined,
+                }}>
+                  <TokenFace2D
+                    tier={RARITY_TIER[ev.rarity] || 'BRONZE'}
+                    category={ev.category?.toUpperCase() || 'EVENT'}
+                    catColor={color}
+                    biome={ev.location_name || 'GLOBAL'}
+                    tokenName={ev.headline.split(' — ')[0]?.slice(0, 20) || 'EVENT'}
+                    iconId={ev.category || 'news'}
+                    imageSrc={ev.image_url}
+                    size={52}
+                  />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, color: '#e2e8f0', letterSpacing: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.headline}</div>
+                    <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+                      <span className="hx-chip hx-chip--accent">{(ev.rarity || '').toUpperCase()}</span>
+                      <span className="hx-chip"><MapPin size={11} /> {ev.location_name}</span>
+                      <span className="hx-chip">{ev.registration_cost === 0 ? 'FREE' : `${ev.registration_cost} HEX`} · {ev.max_participants} MAX</span>
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <div style={{ fontSize: 9, letterSpacing: 1.5, color: 'var(--hx-text-3)' }}>STARTS IN</div>
+                    <div style={{ fontSize: isSoon ? 18 : 15, color: isSoon ? '#f87171' : 'var(--hx-text-2)', fontFamily: mono, marginTop: 4 }}>
+                      {formatTime(remaining)}
                     </div>
                   </div>
                 </div>
               )
             })}
+            </div>
           </motion.div>
         )}
 
         {/* ═══ MY RESULTS TAB ═══ */}
         {tab === 'results' && (
           <motion.div key="results" initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}>
-            {/* Stats summary */}
-            <div style={{
-              display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6, marginBottom: 12,
-              padding: '10px', borderRadius: 10, background: 'rgba(249,115,22,0.04)', border: '1px solid rgba(249,115,22,0.12)',
-            }}>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 16, fontWeight: 900, color: '#f97316', fontFamily: "'Share Tech Mono'" }}>
-                  {results.filter(r => r.result === 'won').length}
+            <div className="hx-stat-grid" style={{ marginBottom: 14 }}>
+              {[
+                { l: 'WON', v: results.filter(r => r.result === 'won').length, c: '#fb923c' },
+                { l: 'HEX EARNED', v: results.filter(r => r.result === 'won').reduce((acc, r) => acc + r.hex_earned, 0), c: '#fbbf24' },
+                { l: 'EVENTS', v: results.length, c: '#4ade80' },
+              ].map(st => (
+                <div key={st.l} className="hx-card hx-stat">
+                  <span className="hx-stat__label">{st.l}</span>
+                  <span className="hx-stat__value" style={{ color: st.c }}>{st.v.toLocaleString()}</span>
                 </div>
-                <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', ...s }}>WON</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 16, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono'" }}>
-                  {results.filter(r => r.result === 'won').reduce((acc, r) => acc + r.hex_earned, 0)}
-                </div>
-                <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', ...s }}>HEX EARNED</div>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 16, fontWeight: 900, color: '#22c55e', fontFamily: "'Share Tech Mono'" }}>
-                  {results.length}
-                </div>
-                <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', ...s }}>EVENTS</div>
-              </div>
+              ))}
             </div>
 
             {results.length === 0 && (
-              <div style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.4)', fontSize: 9, ...s }}>
-                Register for events to see results here
+              <div className="hx-empty">
+                <Trophy size={40} color="#fb923c" />
+                <div className="hx-empty__title">NO RESULTS YET</div>
+                <div style={body}>Register for a live event to see your results here.</div>
+                <button className="btn-game btn-game-gold" onClick={() => setTab('live')} style={{ marginTop: 6 }}>BROWSE LIVE EVENTS</button>
               </div>
             )}
 
-            {results.map(r => {
+            {results.map((r, i) => {
               const color = r.color || RARITY_COLORS[r.rarity] || '#94a3b8'
+              const rc = r.result === 'won' ? '#4ade80' : r.result === 'pending' ? '#fb923c' : 'var(--hx-text-3)'
               return (
-                <motion.div key={r.id} style={{
-                  padding: '10px 14px', borderRadius: 12, marginBottom: 8,
-                  background: r.result === 'won' ? `${color}06` : r.result === 'pending' ? 'rgba(251,191,36,0.04)' : 'rgba(0,0,0,0.02)',
-                  border: `1px solid ${r.result === 'won' ? color + '25' : r.result === 'pending' ? 'rgba(251,191,36,0.2)' : 'rgba(255,255,255,0.05)'}`,
-                  opacity: r.result === 'lost' ? 0.5 : 1,
+                <motion.div key={r.id} className="hx-card hx-rise" style={{
+                  animationDelay: `${Math.min(i, 10) * 40}ms`, marginBottom: 8,
+                  borderColor: r.result === 'won' ? color + '66' : undefined,
+                  opacity: r.result === 'lost' ? 0.6 : 1,
                 }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <TokenFace2D
                       tier={RARITY_TIER[(r.rarity || "").toLowerCase()] || 'BRONZE'}
                       category={r.category?.toUpperCase() || 'EVENT'}
@@ -307,31 +308,27 @@ export function EventsPanel({ onClose }: Props) {
                       imageSrc={r.image_url}
                       serial={r.serial || 1}
                       maxSupply={r.max_serial || 1000}
-                      size={48}
+                      size={52}
                     />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 9, fontWeight: 900, color: r.result === 'lost' ? 'rgba(255,255,255,0.4)' : color, letterSpacing: 1, ...s }}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 800, color: '#e2e8f0', letterSpacing: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {r.headline}
                       </div>
-                      <div style={{ display: 'flex', gap: 4, marginTop: 3 }}>
-                        <span style={{ padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 700, background: color + '12', color, ...s }}>{(r.rarity || "").toUpperCase()}</span>
-                        {r.result === 'won' && r.serial && <span style={{ fontSize: 6, color: '#00884a' }}>#{r.serial}/{r.max_serial}</span>}
-                        {r.luck_bonus > 0 && <span style={{ fontSize: 6, color: '#a855f7' }}>+{r.luck_bonus} LUCK</span>}
+                      <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+                        <span className="hx-chip" style={{ color, borderColor: color + '55' }}>{(r.rarity || "").toUpperCase()}</span>
+                        {r.result === 'won' && r.serial && <span className="hx-chip" style={{ fontFamily: mono }}>#{r.serial}/{r.max_serial}</span>}
+                        {r.luck_bonus > 0 && <span className="hx-chip" style={{ color: '#c084fc' }}>+{r.luck_bonus} LUCK</span>}
                       </div>
                     </div>
-                    <div style={{ textAlign: 'right' }}>
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
                       {r.result === 'won' && (
-                        <>
-                          <div style={{ fontSize: 11, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono'" }}>+{r.hex_earned}</div>
-                          <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)', ...s }}>HEX</div>
-                        </>
+                        <div style={{ fontSize: 18, color: '#fbbf24', fontFamily: mono, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <IconSVG id="hex_coin" size={14} />+{r.hex_earned}
+                        </div>
                       )}
-                      {r.result === 'pending' && (
-                        <div style={{ fontSize: 8, color: '#f97316', fontWeight: 700, ...s }}>PENDING</div>
-                      )}
-                      {r.result === 'lost' && (
-                        <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', ...s }}>MISSED</div>
-                      )}
+                      <span className="hx-chip" style={{ color: rc, marginTop: 6 }}>
+                        {r.result === 'won' ? 'WON' : r.result === 'pending' ? 'PENDING' : 'MISSED'}
+                      </span>
                     </div>
                   </div>
                 </motion.div>

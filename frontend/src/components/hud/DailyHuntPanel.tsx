@@ -21,6 +21,7 @@ import { Token3DViewer } from '../shared/Token3DViewer'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { Star, Flame, Snowflake, Radar } from 'lucide-react'
 
 interface Props { onClose: () => void }
 
@@ -50,19 +51,20 @@ function HotColdBar({ distance }: { distance: number }) {
   // distance: 0 = on target, 1000+ = cold
   const pct = Math.max(0, Math.min(100, 100 - (distance / 10)))
   const color = pct > 80 ? '#dc2626' : pct > 60 ? '#f97316' : pct > 40 ? '#eab308' : pct > 20 ? '#0099cc' : '#3b82f6'
-  const label = pct > 80 ? 'BURNING HOT' : pct > 60 ? 'HOT' : pct > 40 ? 'WARM' : pct > 20 ? ' COOL' : ' COLD'
+  const label = pct > 80 ? 'BURNING HOT' : pct > 60 ? 'HOT' : pct > 40 ? 'WARM' : pct > 20 ? 'COOL' : 'COLD'
 
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
         <span style={{
-          fontSize: 8, fontWeight: 900, color, letterSpacing: 2,
+          fontSize: 9, fontWeight: 900, color, letterSpacing: 2,
           fontFamily: "'Orbitron', system-ui, sans-serif",
+          display: 'inline-flex', alignItems: 'center', gap: 5,
         }}>
-          {label}
+          {pct > 40 ? <Flame size={13} /> : <Snowflake size={13} />}{label}
         </span>
         <span style={{
-          fontSize: 8, color: 'rgba(255,255,255,0.4)',
+          fontSize: 9, color: 'rgba(255,255,255,0.4)',
           fontFamily: "'Share Tech Mono', monospace",
         }}>
           ~{distance > 1000 ? `${(distance/1000).toFixed(1)}km` : `${Math.round(distance)}m`}
@@ -102,7 +104,11 @@ export function DailyHuntPanel({ onClose }: Props) {
     staleTime: 10000,
   })
   const apiTarget = safariData?.target
-  const hunt = apiTarget || generateDailyHunt()
+  // Stable sample (was re-rolled on every render) + map API fields (creature_id / creature_name)
+  const [sampleHunt] = useState(generateDailyHunt)
+  const hunt: any = apiTarget
+    ? { ...apiTarget, id: apiTarget.creature_id || apiTarget.id, name: apiTarget.creature_name || apiTarget.name }
+    : sampleHunt
 
   // Spawn new target
   const spawnMut = useMutation({
@@ -123,10 +129,9 @@ export function DailyHuntPanel({ onClose }: Props) {
       toast.success(data.message || `Captured! +${data.hex_earned} HEX`)
       qc.invalidateQueries({ queryKey: ['safari-active'] })
     },
-    onError: () => {
-      // Fallback: accept mock capture
-      setReward({ hex_reward: hunt.hex_reward, xp: 50 })
-      setPhase('collected')
+    onError: (e: any) => {
+      // RULE 1: no fake capture/reward when the server refuses
+      toast.error(e?.response?.data?.error || 'Capture failed')
     },
   })
 
@@ -170,7 +175,8 @@ export function DailyHuntPanel({ onClose }: Props) {
 
   return (
     <>
-    <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316" width={460}>
+    <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316" width={480}
+      icon={<IconSVG id="safari_radar" size={24} />} subtitle="Track rare creatures, earn HEX">
       <AnimatePresence mode="wait">
         {/* ── BRIEFING ── */}
         {phase === 'briefing' && (
@@ -204,7 +210,10 @@ export function DailyHuntPanel({ onClose }: Props) {
                   size={220}
                 />
               </div>
-              <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.35)', marginTop: 6, letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>TAP TO VIEW 3D</div>
+              <div style={{ display: 'flex', gap: 6, justifyContent: 'center', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
+                <span className="hx-chip">TAP TO VIEW 3D</span>
+                {!apiTarget && <span className="hx-chip" style={{ color: '#fdba74', borderColor: 'rgba(249,115,22,0.45)' }}>SAMPLE · REAL TARGET ASSIGNED ON START</span>}
+              </div>
 
               <div style={{
                 fontSize: 16, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2,
@@ -218,7 +227,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               }}>
                 {(hunt.rarity || "").toUpperCase()} TARGET
               </div>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, maxWidth: 340, margin: '0 auto' }}>
+              <div style={{ fontSize: 12, color: 'var(--hx-text-2)', lineHeight: 1.5, maxWidth: 360, margin: '0 auto', fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0 }}>
                 {hunt.hint}
               </div>
             </div>
@@ -227,28 +236,27 @@ export function DailyHuntPanel({ onClose }: Props) {
             <div style={{
               display: 'flex', gap: 8, marginBottom: 14,
             }}>
-              <div style={{
-                flex: 1, padding: '10px', borderRadius: 8, textAlign: 'center',
-                background: 'rgba(121,80,242,0.06)', border: '1px solid rgba(121,80,242,0.15)',
-              }}>
-                <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>REWARD</div>
-                <div style={{ fontSize: 16, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, marginTop: 2 }}>
-                  <IconSVG id="hex_coin" size={14} /> {hunt.hex_reward}
+              <div className="hx-card" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, borderColor: 'rgba(251,191,36,0.35)', background: 'linear-gradient(180deg, rgba(251,191,36,0.12), rgba(251,191,36,0.03))' }}>
+                <IconSVG id="hex_coin" size={30} />
+                <div className="hx-stat">
+                  <span className="hx-stat__label">HEX REWARD</span>
+                  <span className="hx-stat__value" style={{ color: '#fbbf24' }}>{hunt.hex_reward}</span>
                 </div>
               </div>
-              <div style={{
-                flex: 1, padding: '10px', borderRadius: 8, textAlign: 'center',
-                background: 'rgba(0,153,204,0.06)', border: '1px solid rgba(0,153,204,0.15)',
-              }}>
-                <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>XP</div>
-                <div style={{ fontSize: 16, fontWeight: 900, color: '#0099cc', fontFamily: "'Share Tech Mono', monospace", marginTop: 2 }}>+50</div>
+              <div className="hx-card" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, borderColor: 'rgba(56,189,248,0.3)', background: 'linear-gradient(180deg, rgba(56,189,248,0.10), rgba(56,189,248,0.02))' }}>
+                <Star size={26} color="#38bdf8" fill="#38bdf8" />
+                <div className="hx-stat">
+                  <span className="hx-stat__label">XP</span>
+                  <span className="hx-stat__value" style={{ color: '#38bdf8' }}>+50</span>
+                </div>
               </div>
             </div>
 
-            <button onClick={handleStartHunt} className="btn-game btn-game-gold" style={{
-              width: '100%', fontSize: 11, letterSpacing: 3, padding: '14px',
+            <button onClick={handleStartHunt} disabled={spawnMut.isPending} className="btn-game btn-game-gold" style={{
+              width: '100%', fontSize: 13, letterSpacing: 3, padding: '16px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
             }}>
-              START SAFARI
+              <Radar size={18} /> {spawnMut.isPending ? 'SCANNING...' : 'START SAFARI'}
             </button>
           </motion.div>
         )}
@@ -276,7 +284,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               />
 
               <div style={{
-                fontSize: 7, fontWeight: 900, letterSpacing: 4, color: '#f97316',
+                fontSize: 9, fontWeight: 900, letterSpacing: 4, color: '#f97316',
                 fontFamily: "'Orbitron', sans-serif", marginBottom: 14,
                 position: 'relative', zIndex: 1,
               }}>
@@ -311,7 +319,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 {(hunt.name || "").toUpperCase()}
               </div>
               <div style={{
-                fontSize: 8, fontWeight: 700, color: RARITY_COLORS[hunt.rarity], letterSpacing: 3,
+                fontSize: 9, fontWeight: 700, color: RARITY_COLORS[hunt.rarity], letterSpacing: 3,
                 fontFamily: "'Orbitron', sans-serif", marginTop: 4,
                 position: 'relative', zIndex: 1,
               }}>
@@ -333,7 +341,7 @@ export function DailyHuntPanel({ onClose }: Props) {
             <div style={{
               marginTop: 14, padding: '8px 12px', borderRadius: 8,
               background: 'rgba(0,153,204,0.06)', border: '1px solid rgba(0,153,204,0.15)',
-              fontSize: 8, color: '#0099cc', textAlign: 'center',
+              fontSize: 9, color: '#0099cc', textAlign: 'center',
               fontFamily: "'Orbitron', sans-serif", letterSpacing: 2,
             }}>
               DEEP SCAN UNLOCKS AT 50M RANGE
@@ -352,7 +360,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               position: 'relative', overflow: 'hidden',
             }}>
               <div style={{
-                fontSize: 8, fontWeight: 900, letterSpacing: 4, color: '#dc2626',
+                fontSize: 9, fontWeight: 900, letterSpacing: 4, color: '#dc2626',
                 fontFamily: "'Orbitron', sans-serif", marginBottom: 18,
               }}>
                 ⬢ DEEP SCAN ⬢
@@ -467,15 +475,11 @@ export function DailyHuntPanel({ onClose }: Props) {
 
               <button
                 onClick={handleCollect}
-                style={{
-                  width: '100%', padding: '14px', borderRadius: 20, border: 'none', cursor: 'pointer',
-                  background: `linear-gradient(90deg, ${RARITY_COLORS[hunt.rarity]}, ${RARITY_COLORS[hunt.rarity]}cc)`,
-                  color: '#fff', fontSize: 10, fontWeight: 700, letterSpacing: 3,
-                  fontFamily: "'Orbitron', system-ui, sans-serif",
-                  boxShadow: `0 4px 20px ${RARITY_COLORS[hunt.rarity]}40`,
-                }}
+                disabled={captureMut.isPending}
+                className="btn-game btn-game-green"
+                style={{ width: '100%', padding: '15px', fontSize: 12, letterSpacing: 3 }}
               >
-                COLLECT TOKEN
+                {captureMut.isPending ? 'CAPTURING...' : 'COLLECT TOKEN'}
               </button>
             </div>
           </motion.div>
@@ -489,9 +493,9 @@ export function DailyHuntPanel({ onClose }: Props) {
             animate={{ opacity: 1, y: 0 }}
           >
             <div style={{ textAlign: 'center', padding: '16px 0' }}>
-              <div style={{ fontSize: 48, marginBottom: 12 }}></div>
+              <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'center', filter: 'drop-shadow(0 0 18px rgba(34,197,94,0.45))' }}><IconSVG id="trophy" size={72} /></div>
               <div style={{
-                fontSize: 11, fontWeight: 900, letterSpacing: 3, color: '#00884a',
+                fontSize: 11, fontWeight: 900, letterSpacing: 3, color: '#22c55e',
                 fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 16,
               }}>
                 SAFARI COMPLETE!
@@ -507,18 +511,18 @@ export function DailyHuntPanel({ onClose }: Props) {
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#7950f2', fontFamily: "'Share Tech Mono', monospace", marginTop: 4 }}>
                     +{reward.hex_reward}
                   </div>
-                  <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>HEX COIN</div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>HEX COIN</div>
                 </div>
                 <div style={{
                   padding: '12px 20px', borderRadius: 12,
                   background: 'rgba(0,153,204,0.08)', border: '1px solid rgba(0,153,204,0.2)',
                   textAlign: 'center',
                 }}>
-                  <div style={{ fontSize: 20, marginBottom: 2 }}>⭐</div>
+                  <Star size={16} color="#38bdf8" fill="#38bdf8" />
                   <div style={{ fontSize: 16, fontWeight: 900, color: '#0099cc', fontFamily: "'Share Tech Mono', monospace" }}>
                     +{reward.xp}
                   </div>
-                  <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>XP</div>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif" }}>XP</div>
                 </div>
               </div>
 
@@ -526,7 +530,7 @@ export function DailyHuntPanel({ onClose }: Props) {
                 padding: '8px 12px', borderRadius: 8,
                 background: `${RARITY_COLORS[hunt.rarity]}08`,
                 border: `1px solid ${RARITY_COLORS[hunt.rarity]}15`,
-                fontSize: 8, color: RARITY_COLORS[hunt.rarity],
+                fontSize: 9, color: RARITY_COLORS[hunt.rarity],
                 fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
               }}>
                 {(hunt.rarity || "").toUpperCase()} {(hunt.name || "").toUpperCase()} → ADDED TO CODEX
