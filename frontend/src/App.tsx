@@ -1,7 +1,7 @@
 /**
  * App.tsx — HEXOD root component with routing and panel system.
  */
-import { Suspense, lazy, useState, useEffect } from 'react'
+import { Suspense, lazy, useState, useEffect, useCallback } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
@@ -127,7 +127,10 @@ function GameScreen() {
   }, [accessToken])
   const setActivePanel       = useStore((s) => s.setActivePanel)
   const { claims, completeClaim } = usePendingClaims()
-  const [mapLoaded, setMapLoaded] = useState(false)
+  // Dev-only: /?nointro skips the 3D globe (QA screenshots)
+  const [mapLoaded, setMapLoaded] = useState(() => import.meta.env.DEV && new URLSearchParams(location.search).has('nointro'))
+  // Stable callback — an inline arrow re-ran LoadingGlobe's effect (and restarted the intro) on every App render
+  const onGlobeComplete = useCallback(() => setMapLoaded(true), [])
   const [playerCoords, setPlayerCoords] = useState<[number, number]>([48.8566, 2.3522])
 
   // Get player location for loading globe
@@ -196,7 +199,7 @@ function GameScreen() {
         <LoadingGlobe
           playerLat={playerCoords[0]}
           playerLon={playerCoords[1]}
-          onComplete={() => setMapLoaded(true)}
+          onComplete={onGlobeComplete}
         />
       )}
 

@@ -278,6 +278,9 @@ export const useStore = create<Store>()(
   )
 )
 
+// Dev-only handle for screenshot/QA scripts (stripped from production builds)
+if (import.meta.env.DEV) (window as any).__hexod = useStore
+
 // Selectors
 export const usePlayer = () => useStore((s) => s.player)
 export const useAuth = () => useStore((s) => ({ isAuthenticated: s.isAuthenticated, player: s.player }))
