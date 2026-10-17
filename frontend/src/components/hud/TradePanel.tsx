@@ -167,7 +167,7 @@ function PlayerTradeTab() {
   })
 
   const proposeMut = useMutation({
-    mutationFn: (targetId: string) => api.post('/social/propose-trade/', {
+    mutationFn: (targetId: string) => api.post('/trade/propose-trade/', {
       target_player_id: targetId,
       offer_resource: offer.resource,
       offer_amount: offer.amount,

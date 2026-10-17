@@ -94,7 +94,7 @@ export const territoryApi = {
   viewport: (lat: number, lon: number, radius_km: number) =>
     api.get(`/territories/viewport/?lat=${lat}&lon=${lon}&radius_km=${radius_km}`).then(r => r.data),
   detail: (h3: string) => api.get(`/territories/${h3}/detail/`).then(r => r.data),
-  claim: (h3: string) => api.post(`/territories/${h3}/claim/`).then(r => r.data),
+  claim: (h3: string) => api.post('/territories/claim/', { h3_index: h3 }).then(r => r.data),
   build: (h3: string, building_type: string) =>
     api.post(`/territories/${h3}/build/`, { building_type }).then(r => r.data),
 }
@@ -117,10 +117,10 @@ export const allianceApi = {
     api.post('/alliances/create/', data).then(r => r.data),
   join: (id: string) => api.post(`/alliances/${id}/join/`).then(r => r.data),
   leave: () => api.post('/alliances/leave/').then(r => r.data),
-  members: (_id?: string) => api.get('/alliances/members/').then(r => r.data?.results ?? r.data ?? []),
+  members: (id: string) => api.get(`/alliances/${id}/members/`).then(r => r.data),
   search: (q: string) => api.get(`/alliances/search/?q=${encodeURIComponent(q)}`).then(r => r.data?.results ?? r.data ?? []),
-  propose: (target_alliance_id: string, proposal_type: string) =>
-    api.post('/alliances/propose/', { target_alliance_id, proposal_type }).then(r => r.data),
+  propose: (target_alliance_tag: string, state: string) =>
+    api.post('/diplomacy/propose/', { target_alliance_tag, state }).then(r => r.data),
 }
 
 

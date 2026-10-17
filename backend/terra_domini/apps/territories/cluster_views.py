@@ -364,14 +364,15 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
                            WHEN 'mythic' THEN 6 WHEN 'legendary' THEN 5
                            WHEN 'epic' THEN 4 WHEN 'rare' THEN 3
                            WHEN 'uncommon' THEN 2 ELSE 1 END) as max_rarity_rank,
-                       u.battles_won, u.tdc_in_game,
+                       COALESCE(s.battles_won, 0) AS battles_won, u.tdc_in_game,
                        AVG(t.center_lat) as avg_lat,
                        AVG(t.center_lon) as avg_lon
-                FROM accounts_player u
+                FROM players u
                 JOIN territories t ON t.owner_id = CAST(u.id AS TEXT)
+                LEFT JOIN player_stats s ON s.player_id = u.id
                 WHERE t.center_lat BETWEEN ? AND ?
                   AND t.center_lon BETWEEN ? AND ?
-                GROUP BY u.id, u.username, u.commander_rank, u.battles_won, u.tdc_in_game
+                GROUP BY u.id, u.username, u.commander_rank, s.battles_won, u.tdc_in_game
                 ORDER BY terr_count DESC, daily_income DESC
                 LIMIT 50
             """, [lat_f - dlat, lat_f + dlat, lon_f - dlon, lon_f + dlon])
@@ -385,11 +386,12 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
                            WHEN 'mythic' THEN 6 WHEN 'legendary' THEN 5
                            WHEN 'epic' THEN 4 WHEN 'rare' THEN 3
                            WHEN 'uncommon' THEN 2 ELSE 1 END) as max_rarity_rank,
-                       u.battles_won, u.tdc_in_game,
+                       COALESCE(s.battles_won, 0) AS battles_won, u.tdc_in_game,
                        NULL as avg_lat, NULL as avg_lon
-                FROM accounts_player u
+                FROM players u
                 JOIN territories t ON t.owner_id = CAST(u.id AS TEXT)
-                GROUP BY u.id, u.username, u.commander_rank, u.battles_won, u.tdc_in_game
+                LEFT JOIN player_stats s ON s.player_id = u.id
+                GROUP BY u.id, u.username, u.commander_rank, s.battles_won, u.tdc_in_game
                 ORDER BY terr_count DESC, daily_income DESC
                 LIMIT 100
             """)

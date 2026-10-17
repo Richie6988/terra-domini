@@ -40,7 +40,7 @@ class GMDashboardView(GMRequiredMixin, APIView):
     def get(self, request):
         from terra_domini.apps.accounts.models import Player, PlayerStats
         from terra_domini.apps.territories.models import Territory
-        from terra_domini.apps.combat.engine import Battle, BattleStatus
+        from terra_domini.apps.combat.engine import Battle
         from terra_domini.apps.blockchain.service import TDCTransaction
         from terra_domini.apps.events.models import ControlTowerEvent
 
@@ -61,9 +61,9 @@ class GMDashboardView(GMRequiredMixin, APIView):
         contested          = Territory.objects.filter(under_attack=True).count() if hasattr(Territory, 'under_attack') else 0
 
         # Battle stats
-        active_battles = Battle.objects.filter(status=BattleStatus.IN_PROGRESS).count()
+        active_battles = Battle.objects.filter(status=Battle.BattleStatus.ACTIVE).count()
         resolved_today = Battle.objects.filter(
-            resolved_at__gte=day_ago
+            completed_at__gte=day_ago
         ).count()
 
         # Economy
@@ -458,7 +458,7 @@ class GMLogsView(GMRequiredMixin, APIView):
                 SELECT 'claim' as type, u.username, t.h3_index, t.rarity, t.poi_name,
                        t.captured_at, t.territory_type
                 FROM territories t
-                JOIN accounts_player u ON CAST(t.owner_id AS TEXT) = CAST(u.id AS TEXT)
+                JOIN players u ON CAST(t.owner_id AS TEXT) = CAST(u.id AS TEXT)
                 WHERE t.captured_at IS NOT NULL
                 ORDER BY t.captured_at DESC LIMIT 30
             """)
@@ -495,7 +495,7 @@ class GMLogsView(GMRequiredMixin, APIView):
             c.execute("""
                 SELECT p.username, si.name, p.created_at
                 FROM player_inventory pi
-                JOIN accounts_player p ON pi.player_id = CAST(p.id AS TEXT)
+                JOIN players p ON pi.player_id = CAST(p.id AS TEXT)
                 JOIN shop_items si ON pi.item_id = si.id
                 ORDER BY pi.acquired_at DESC LIMIT 20
             """)
@@ -512,7 +512,7 @@ class GMLogsView(GMRequiredMixin, APIView):
         try:
             c.execute("""
                 SELECT username, last_login, commander_rank, tdc_in_game
-                FROM accounts_player
+                FROM players
                 WHERE last_login IS NOT NULL
                 ORDER BY last_login DESC LIMIT 20
             """)

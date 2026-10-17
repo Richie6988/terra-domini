@@ -1,14 +1,14 @@
 /**
  * NewsTicker — 28px fixed top banner with horizontal scroll.
  * Matches prototype news-banner exactly.
- * Data from GET /api/news/ticker/ (falls back to mock data).
+ * Data from GET /api/news/ticker/ — no fake fallback (empty bar if the API fails).
  */
 import { useState, useEffect } from 'react'
 import { api } from '../../services/api'
 
 interface NewsItem {
   id: string
-  type: 'update' | 'event' | 'season' | 'maintenance' | 'community'
+  type: string
   title: string
   description: string
 }
@@ -29,23 +29,18 @@ const DOT_COLORS: Record<string, string> = {
   community: '#22c55e',
 }
 
-const MOCK_NEWS: NewsItem[] = [
-  { id: '1', type: 'update',      title: 'HEXOD v0.8',        description: 'New radar filter system deployed' },
-  { id: '2', type: 'event',       title: 'LIVE EVENT',         description: 'Volcanic eruption — Legendary token at stake' },
-  { id: '3', type: 'season',      title: 'SEASON 1',           description: 'Territorial conquest begins — claim your kingdom' },
-  { id: '4', type: 'maintenance', title: 'MAINTENANCE',        description: 'Server optimization — 02:00 UTC' },
-  { id: '5', type: 'community',   title: 'MILESTONE',          description: '10,000 territories claimed worldwide' },
-]
-
 export function NewsTicker() {
-  const [items, setItems] = useState<NewsItem[]>(MOCK_NEWS)
+  const [items, setItems] = useState<NewsItem[]>([])
   const [currentTag, setCurrentTag] = useState<NewsItem['type']>('update')
 
   useEffect(() => {
     api.get('/news/ticker/').then(r => {
       const data = Array.isArray(r.data) ? r.data : r.data?.results ?? []
-      if (data.length > 0) setItems(data)
-    }).catch(() => { setItems(MOCK_NEWS) })
+      // Backend sends {type, title, text}; older payloads used description
+      setItems(data.map((d: any, i: number) => ({
+        id: String(d.id ?? i), type: d.type || 'update', title: d.title || '', description: d.text ?? d.description ?? '',
+      })))
+    }).catch(() => {})
   }, [])
 
   // Rotate tag label
@@ -87,7 +82,7 @@ export function NewsTicker() {
         color: '#e2e8f0',
         fontFamily: "'Orbitron', system-ui, sans-serif",
       }}>
-        {currentTag.toUpperCase()}
+        {(currentTag || '').toUpperCase()}
       </div>
 
       {/* Scrolling items */}

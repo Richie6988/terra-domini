@@ -11,6 +11,7 @@
 import L from 'leaflet'
 import * as h3 from 'h3-js'
 import type { TerritoryLight } from '../../types'
+import { escapeHtml as esc } from '../../services/escapeHtml'
 
 const RARITY_COLOR: Record<string, string> = {
   common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
@@ -227,25 +228,25 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
 
   // Tooltip
   const income = Math.round((ta.resource_credits || ta.food_per_tick || 10) * 288)
-  const stateLabel = ta.is_control_tower ? 'Tour de contrôle'
-    : isOwn ? (hasPOI ? `Votre territoire · ${rarity}` : 'Votre territoire')
-    : isEnemy ? `${ta.owner_username}`
-    : hasPOI ? `⬡ ${rarity.toUpperCase()} — Libre`
-    : '⬜ Libre'
+  const stateLabel = ta.is_control_tower ? 'Control tower'
+    : isOwn ? (hasPOI ? `Your territory · ${esc(rarity)}` : 'Your territory')
+    : isEnemy ? esc(ta.owner_username)
+    : hasPOI ? `${esc((rarity || '').toUpperCase())} — Unclaimed`
+    : 'Unclaimed'
 
   const vulnHtml = isVulnerable
     ? `<div style="color:#EF4444;font-size:10px;font-weight:800;margin-top:3px">
-         DÉFENSES AFFAIBLIES${infiltrationCount >= 3 ? ' (DEF 15%)' : ' (DEF 50%)'}
-         <br/><span style="color:#6B7280;font-weight:400">Infiltration${infiltrationCount >= 3 ? ' ×3' : ''} — Opportunité d'assaut !</span>
+         DEFENSES WEAKENED${infiltrationCount >= 3 ? ' (DEF 15%)' : ' (DEF 50%)'}
+         <br/><span style="color:#6B7280;font-weight:400">Infiltration${infiltrationCount >= 3 ? ' ×3' : ''} — assault window open!</span>
        </div>`
     : ''
 
   poly.bindTooltip(`
     <div style="font-size:11px;line-height:1.7;font-family:system-ui;min-width:160px">
-      <div style="font-weight:900;color:#fff;font-size:13px">${ta.custom_name || ta.poi_name || ta.place_name || 'Zone ' + t.h3_index.slice(0,6)}</div>
+      <div style="font-weight:900;color:#fff;font-size:13px">${esc(ta.custom_name || ta.poi_name || ta.place_name || 'Zone ' + t.h3_index.slice(0,6))}</div>
       <div style="color:${isOwn ? '#00FF87' : hasPOI ? rc : '#9CA3AF'}">${stateLabel}</div>
-      ${hasPOI ? `<div style="color:${rc};font-size:10px;font-weight:700">${ta.poi_category||''}</div>` : ''}
-      <div style="color:#10B981;font-size:10px">+${income} HEX Coin/jour</div>
+      ${hasPOI ? `<div style="color:${rc};font-size:10px;font-weight:700">${esc(ta.poi_category)}</div>` : ''}
+      <div style="color:#10B981;font-size:10px">+${income} HEX Coin/day</div>
       ${vulnHtml}
     </div>
   `, { className:'td-tooltip', direction:'top', sticky:true })

@@ -1,7 +1,7 @@
 # HEXOD — claude.md v5.0
 
 > Single source of truth for all AI agents. Read this FIRST before any work.
-> Last updated: 2026-04-19 | Repo: github.com/Richie6988/terra-domini
+> Last updated: 2026-10-17 | Repo: github.com/Richie6988/terra-domini
 
 ---
 
@@ -62,6 +62,8 @@ python manage.py runserver 0.0.0.0:8000
 ```
 
 **Without `migrate`: `/api/combat/my-army/`, `/api/events/news/`, `/api/marketplace/listings/?type=auction` all return 500.**
+
+**Without `migrate` (since 2026-10-17): LOGIN itself returns 500** (`no such column: players.email_verification_code`). Migration `accounts/0003` adds the missing Player columns and marks staff as `email_verified` (same as `manage.py verify_admin`). All 2026-10-17 migrations are idempotent (`terra_domini/utils/migration_ops.py`): they skip tables/columns/indexes that already exist, so they are safe on any local DB.
 
 **Without `seed_bots`: ladder empty, no alliances visible, map has no enemy hexes.**
 
@@ -173,6 +175,19 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/
 **Detection:** `grep -rn CrystalIcon frontend/src/` should return 0.
 **Replacement:** `<IconSVG id="hex_coin" size={12} />` (small), `size={16}` (medium), `size={20}` (large).
 
+### Bug class 9 — `?` placeholders on the Django cursor
+**Cause:** `django.db.connection.cursor()` uses `%s` placeholders. `?` only works with raw `sqlite3.connect()`. With params, `?` → `TypeError: not all arguments converted during string formatting` (marketplace 500, daily production silently broken).
+**Rule:** Django cursor → `%s`. Raw `sqlite3.connect` → `?` (and it will break on Postgres — prefer the Django cursor).
+
+### Bug class 10 — Model fields without migration
+**Detection:** `python manage.py makemigrations --check --dry-run` must print `No changes detected`. Then query every model once (see §11) — `no such table/column` = missing migration.
+
+### Bug class 11 — Celery not loaded / wrong beat task names
+`terra_domini/__init__.py` MUST import the Celery app, otherwise `.delay()` targets `amqp://localhost` → 500 (leaderboard). Beat entries in `celery.py` must use the task's registered `name=` (e.g. `combat.resolve_battles`), not the module path.
+
+### Bug class 12 — Unescaped player text in Leaflet HTML
+`bindTooltip` / `bindPopup` / `L.divIcon` take raw HTML. Any player-controlled string (custom_name, username, event title/body) must go through `escapeHtml()` (`services/escapeHtml.ts`) — otherwise stored XSS for every player who hovers the hex.
+
 ---
 
 ## 6. ENDPOINT MAP (VERIFIED WORKING)
@@ -195,7 +210,8 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/
 ### Combat / Military
 - `GET /api/combat/my-army/` — **REQUIRES `training_queue` table**
 - `POST /api/combat/recruit/` — train units
-- `POST /api/combat/attack/` — launch attack
+- `POST /api/combat/attack/` — `{target_h3, attack_type, units:{infantry:N}}` → 201, battle resolves after a timer (HEX 4h, urban 12h, surprise ÷2). NO instant result.
+- `GET /api/combat/active/` · `GET /api/combat/incoming/` · `GET /api/combat/history/` — reading these also resolves expired battles (dev has no Celery beat)
 - `POST /api/combat/collect/` — collect trained units
 
 ### Events
@@ -212,7 +228,8 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/
 - `GET /api/solana/staking/` — NOT `/api/api/...` (double prefix bug)
 
 ### Alliances / Marketplace / GM
-- `GET /api/alliances/`, `POST /api/alliances/create/`
+- `GET /api/alliances/`, `POST /api/alliances/create/`, `GET /api/alliances/<id>/members/`
+- `POST /api/diplomacy/propose/` `{target_alliance_tag, state}` · `POST /api/trade/propose-trade/`
 - `GET /api/marketplace/listings/?type=auction`
 - `GET /api/gm/dashboard/` (is_staff only)
 
@@ -342,7 +359,8 @@ import { IconSVG } from '../shared/iconBank'
 ### `Player` (accounts)
 - `tdc_in_game: float` — HEX Coin balance
 - `commander_rank: int`
-- `avatar_emoji, avatar_color: str` — iconBank ID + hex color
+- `avatar_emoji` (iconBank ID, max 32), `avatar_color` (#hex) — `avatar_color` only became a real column on 2026-10-17 (before: silently dropped)
+- `/api/players/me/` now returns `is_staff`, `avatar_emoji`, `avatar_color`, `bio` (God mode + Admin buttons depend on `is_staff`)
 - `is_staff: bool` — god mode + /gm access
 
 ### `Territory` (territories)
@@ -383,6 +401,14 @@ npx tsc --noEmit 2>&1 | grep -v "baseUrl" | grep "error"   # must be empty
 npx vite build                                             # must succeed
 ```
 
+### Backend checks (2026-10-17)
+```bash
+cd backend
+python manage.py makemigrations --check --dry-run          # "No changes detected"
+python manage.py migrate                                   # on a COPY of db.sqlite3 and on a fresh DB
+# smoke: log in as admin, GET every api.get('...') path found in frontend/src → no 500
+```
+
 ### Metrics to verify
 ```bash
 grep -rn 'CrystalIcon' frontend/src/                                      # 0
@@ -413,9 +439,28 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 
 ---
 
-## 12. KNOWN ISSUES PIPELINE (2026-04-19)
+## 12. KNOWN ISSUES PIPELINE (updated 2026-10-17)
 
-### Fixed and shipped (last 30 commits)
+### Fixed 2026-10-17 (10-agent audit)
+- LOGIN 500 on any DB: 6 models had no migration (Player columns, SafariTarget columns, AllianceChatMessage, CaughtEmail, TickerMessage, PlayerFeedback) → idempotent migrations
+- Admin locked out (`email_verified=0`) → accounts/0003 verifies staff; LoginView now checks the password BEFORE answering "Email not verified" (was an account-probing leak)
+- Combat attack never worked: view written for an old Battle model (`attacker`, `territory`, `ends_at`), `is_shielded` used without `()`, missing `can_be_attacked_by`, `TerritoryOwnershipHistory` doesn't exist, AttackPanel posted to `/battles/attack/` and faked VICTORY/DEFEAT client-side. Now: real engine, units leave garrison and survivors return, battles resolve lazily on read
+- 7/12 Celery beat entries pointed at unregistered task names; Celery app never loaded in Django
+- Marketplace + daily production: `?` on Django cursor; ladder + GM dashboard: `accounts_player` table doesn't exist (it's `players`), `battles_won` lives in `player_stats`
+- `/players/me/` missing `is_staff` → God mode / Admin buttons never shown
+- Alliance members, diplomacy propose, trade propose, `territoryApi.claim`: wrong URLs (404)
+- NewsTicker: mock news shown by default + backend `text` field never displayed
+- XSS: HexLayer tooltip + MapOverlay popup interpolated player text; MapOverlay popup printed `$[object Object]`
+
+### Still open (MEDIUM / LOW)
+- Raw `sqlite3.connect()` in views (ladder, solana staking, GM logs, attack infiltration) — will break on Postgres prod
+- Unit keys differ: recruitment `aerial` vs combat engine `air` → aerial units add 0 attack power
+- Dead helpers in `services/api.ts` pointing to non-existent routes: `territoryApi.detail`, `territoryApi.build`, `eventsApi.activeEvents`
+- `backend/db.sqlite3` is committed with the admin password hash — fine for dev, never for prod
+- Defender units are not modelled in battles (only territory defense points)
+
+### Fixed and shipped (2026-04-19)
+
 - Kingdom borders: merged outer border via `latLngToCell` edge detection
 - Close buttons: clean minimal × (no red circle)
 - Token 3D: bright (metalness 0.35, exposure 2.2, emissive 0.3)

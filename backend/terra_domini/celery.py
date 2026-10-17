@@ -22,43 +22,43 @@ app.conf.beat_schedule = {
     },
     # Territory resource tick — every 5 minutes
     'territory-resource-tick': {
-        'task': 'terra_domini.apps.territories.tasks.process_territory_tick',
+        'task': 'territories.process_tick',
         'schedule': 300.0,
         'options': {'queue': 'territory'},
     },
     # Control Tower event scheduler — every hour check
     'control-tower-scheduler': {
-        'task': 'terra_domini.apps.events.tasks.schedule_control_tower_events',
+        'task': 'events.schedule_control_tower_events',
         'schedule': crontab(minute=0),
         'options': {'queue': 'default'},
     },
     # Resolve pending battles — every 60 seconds
     'resolve-pending-battles': {
-        'task': 'terra_domini.apps.combat.tasks.resolve_pending_battles',
+        'task': 'combat.resolve_battles',
         'schedule': 60.0,
         'options': {'queue': 'combat'},
     },
     # Anti-cheat behavioral analysis — every 10 minutes
     'anticheat-analysis': {
-        'task': 'terra_domini.apps.accounts.tasks.run_anticheat_analysis',
+        'task': 'accounts.run_anticheat_analysis',
         'schedule': 600.0,
         'options': {'queue': 'default'},
     },
     # TDC rate update from DEX — every 5 minutes
     'tdc-rate-update': {
-        'task': 'terra_domini.apps.blockchain.tasks.update_tdc_market_rate',
+        'task': 'blockchain.update_tdc_rate',
         'schedule': 300.0,
         'options': {'queue': 'blockchain'},
     },
     # Offline income calculation — every 5 minutes
     'offline-income': {
-        'task': 'terra_domini.apps.economy.tasks.calculate_offline_income',
+        'task': 'economy.calculate_offline_income',
         'schedule': 300.0,
         'options': {'queue': 'territory'},
     },
     # Season leaderboard refresh — every 5 minutes
     'leaderboard-refresh': {
-        'task': 'terra_domini.apps.territories.tasks.refresh_leaderboards',
+        'task': 'territories.refresh_leaderboards',
         'schedule': 300.0,
         'options': {'queue': 'default'},
     },
@@ -80,7 +80,7 @@ app.conf.beat_schedule = {
     },
     # Daily metrics snapshot
     'daily-metrics': {
-        'task': 'terra_domini.apps.accounts.tasks.daily_metrics_snapshot',
+        'task': 'accounts.daily_metrics_snapshot',
         'schedule': crontab(hour=0, minute=5),
         'options': {'queue': 'default'},
     },

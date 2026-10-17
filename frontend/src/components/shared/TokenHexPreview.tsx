@@ -46,7 +46,7 @@ export function TokenHexPreview({
 }: Props) {
   return (
     <TokenFace2D
-      tier={RARITY_TO_TIER[rarity.toLowerCase()] || 'BRONZE'}
+      tier={RARITY_TO_TIER[(rarity || 'common').toLowerCase()] || 'BRONZE'}
       category={(iconId || 'TERRITORY').toUpperCase().replace(/_/g, ' ')}
       catColor={catColor}
       biome={(biome || iconId || 'RURAL').toUpperCase().replace(/_/g, ' ')}

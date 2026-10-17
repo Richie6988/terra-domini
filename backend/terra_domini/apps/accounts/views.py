@@ -2,6 +2,7 @@
 Account API views — registration, login, profile management.
 """
 import logging
+import re
 from django.core.cache import caches
 from django.utils import timezone
 from rest_framework import generics, status
@@ -106,7 +107,8 @@ class LoginView(TokenObtainPairView):
         if email:
             try:
                 player = Player.objects.get(email=email)
-                if not player.email_verified:
+                # Password first — otherwise anyone can probe which emails exist
+                if not player.email_verified and player.check_password(request.data.get('password', '')):
                     return Response({
                         'error': 'Email not verified',
                         'requires_verification': True,
@@ -464,15 +466,18 @@ class UpdateProfileView(APIView):
         if 'display_name' in data:
             player.display_name = str(data['display_name'])[:50]
         if 'avatar_emoji' in data:
-            player.avatar_emoji = str(data['avatar_emoji'])[:8]
+            player.avatar_emoji = str(data['avatar_emoji'])[:32]
+        if 'avatar_color' in data and re.fullmatch(r'#[0-9a-fA-F]{6}', str(data['avatar_color'])):
+            player.avatar_color = data['avatar_color']
         if 'spec_path' in data and data['spec_path'] in ['military','economic','diplomatic','scientific']:
             player.spec_path = data['spec_path']
         if 'bio' in data:
             player.bio = str(data['bio'])[:300]
 
-        player.save(update_fields=['display_name','avatar_emoji','spec_path','bio'])
+        player.save(update_fields=['display_name','avatar_emoji','avatar_color','spec_path','bio'])
         return Response({'ok': True, 'display_name': player.display_name,
-                        'avatar_emoji': player.avatar_emoji, 'spec_path': player.spec_path})
+                        'avatar_emoji': player.avatar_emoji, 'avatar_color': player.avatar_color,
+                        'spec_path': player.spec_path})
 
 
 class FavoritePinsView(APIView):

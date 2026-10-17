@@ -136,12 +136,12 @@ def run_production_tick(batch_size: int = 500) -> dict:
                 if not res_updates:
                     continue
                 set_clauses = ', '.join(
-                    f"{k} = COALESCE({k}, 0) + ?" for k in res_updates
+                    f"{k} = COALESCE({k}, 0) + %s" for k in res_updates
                 )
-                set_clauses += ', last_tick_at = ?'
+                set_clauses += ', last_tick_at = %s'
                 vals = list(res_updates.values()) + [now.isoformat(), h3_index]
                 c.execute(
-                    f"UPDATE territories SET {set_clauses} WHERE h3_index = ?",
+                    f"UPDATE territories SET {set_clauses} WHERE h3_index = %s",
                     vals
                 )
 
@@ -149,7 +149,7 @@ def run_production_tick(batch_size: int = 500) -> dict:
         with connection.cursor() as c:
             for owner_id, hex_amount in owner_hex.items():
                 c.execute(
-                    "UPDATE players SET tdc_in_game = COALESCE(tdc_in_game, 0) + ? WHERE id = ?",
+                    "UPDATE players SET tdc_in_game = COALESCE(tdc_in_game, 0) + %s WHERE id = %s",
                     [hex_amount, owner_id]
                 )
 

@@ -75,11 +75,11 @@ export function TokenFace2D({
 
     const cleanup = createTokenFace2D(canvas, {
       tier,
-      category: category.toUpperCase(),
+      category: (category || '').toUpperCase(),
       catId,
       catColor,
-      biome: biome.toUpperCase(),
-      tokenName: tokenName.toUpperCase(),
+      biome: (biome || '').toUpperCase(),
+      tokenName: (tokenName || '').toUpperCase(),
       description,
       edition,
       serial,

@@ -320,9 +320,13 @@ class CombatEngine:
         Validates all preconditions before creating the Battle record.
         """
         # Validate attacker can attack
-        can_attack, reason = target_territory.can_be_attacked_by(attacker)
+        can_attack, reason = cls.can_attack(attacker, target_territory)
         if not can_attack:
             return False, reason, None
+
+        units = {k: int(v) for k, v in units.items() if int(v or 0) > 0}
+        if not units:
+            return False, "Select at least one unit", None
 
         # Validate attacker has the units
         for unit_type, count in units.items():
@@ -354,18 +358,51 @@ class CombatEngine:
             is_commander=True,
         )
 
-        # Lock units
+        # Deployed units leave the garrison; survivors come back in _apply_battle_outcome
         for unit_type, count in units.items():
-            MilitaryUnit.objects.filter(
-                player=attacker, unit_type=unit_type
-            ).update(status=MilitaryUnit.UnitStatus.BESIEGING)
+            stack = MilitaryUnit.objects.filter(
+                player=attacker, unit_type=unit_type,
+                status=MilitaryUnit.UnitStatus.GARRISON, count__gte=count,
+            ).first()
+            stack.count -= count
+            stack.save(update_fields=['count'])
 
         # Mark territory as under attack
         target_territory.is_under_attack = True
-        target_territory.current_battle = battle
+        target_territory.current_battle = battle.id
         target_territory.save(update_fields=['is_under_attack', 'current_battle'])
 
         return True, "Attack initiated", battle
+
+    @staticmethod
+    def can_attack(attacker, territory) -> tuple[bool, str]:
+        if not territory.owner_id:
+            return False, "Territory not claimed — use /claim instead"
+        if territory.owner_id == attacker.id:
+            return False, "Cannot attack your own territory"
+        if territory.is_shielded():
+            return False, "Territory is shielded"
+        if territory.owner.is_protected:
+            return False, "Owner is under protection"
+        if territory.is_under_attack:
+            return False, "Territory is already under attack"
+        return True, ""
+
+    @classmethod
+    def resolve_due(cls, battles) -> int:
+        """Resolve expired battles inline — dev runs without Celery beat."""
+        resolved = 0
+        for battle in battles.filter(status=Battle.BattleStatus.ACTIVE, resolves_at__lte=timezone.now()):
+            battle.status = Battle.BattleStatus.RESOLVING
+            battle.save(update_fields=['status'])
+            try:
+                cls.resolve_battle(battle)
+                resolved += 1
+            except Exception:
+                logger.exception(f"Battle {battle.id} resolution failed")
+                battle.status = Battle.BattleStatus.ACTIVE
+                battle.save(update_fields=['status'])
+        return resolved
 
     # ─── Private ──────────────────────────────────────────────────────────────
 
@@ -384,7 +421,7 @@ class CombatEngine:
     @staticmethod
     def _get_battle_timer(territory) -> int:
         """Determine battle duration based on territory size/importance."""
-        if territory.is_capital:
+        if getattr(territory, 'is_capital', False):
             return GAME_CFG['BATTLE_TIMER']['CAPITAL']
         if territory.is_control_tower:
             return GAME_CFG['BATTLE_TIMER']['CITY']
@@ -395,7 +432,6 @@ class CombatEngine:
     @classmethod
     def _apply_battle_outcome(cls, battle: Battle, territory, outcome: dict) -> None:
         from terra_domini.apps.territories.engine import TerritoryEngine
-        from terra_domini.apps.territories.models import TerritoryOwnershipHistory
 
         winner = outcome['winner']
         attacker_participant = battle.participants.filter(
@@ -410,13 +446,8 @@ class CombatEngine:
             territory.defense_points = int(territory.max_defense_points * 0.3)  # Captured at 30% defense
             territory.save(update_fields=['owner', 'captured_at', 'previous_owner', 'defense_points'])
 
-            TerritoryOwnershipHistory.objects.create(
-                territory=territory,
-                previous_owner=prev_owner,
-                new_owner=attacker_participant.player,
-                change_type='conquered',
-                battle=battle,
-            )
+            # No ownership-history model exists — Battle (territory_captured) + previous_owner are the record
+            logger.info(f"Territory {territory.h3_index} conquered by {attacker_participant.player_id} from {getattr(prev_owner, 'id', None)}")
 
         # Apply looted resources
         if outcome['resources_looted'] and attacker_participant:
@@ -425,6 +456,26 @@ class CombatEngine:
                 setattr(territory, stockpile_field,
                         max(0, getattr(territory, stockpile_field, 0) - amount))
             territory.save(update_fields=[f'stockpile_{r}' for r in outcome['resources_looted']])
+
+        # Survivors return to the attacker's garrison
+        if attacker_participant:
+            survived = {
+                k: max(0, v - outcome['attacker_casualties'].get(k, 0))
+                for k, v in attacker_participant.units_deployed.items()
+            }
+            attacker_participant.units_survived = survived
+            attacker_participant.units_lost = outcome['attacker_casualties']
+            attacker_participant.save(update_fields=['units_survived', 'units_lost'])
+            for unit_type, count in survived.items():
+                if count <= 0:
+                    continue
+                stack, _ = MilitaryUnit.objects.get_or_create(
+                    player=attacker_participant.player, unit_type=unit_type,
+                    status=MilitaryUnit.UnitStatus.GARRISON, territory=None,
+                    defaults={'count': 0},
+                )
+                stack.count += count
+                stack.save(update_fields=['count'])
 
         # Update battle record
         battle.status = Battle.BattleStatus.COMPLETED

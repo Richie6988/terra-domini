@@ -40,6 +40,7 @@ class PlayerProfileSerializer(serializers.ModelSerializer):
         model = Player
         fields = [
             'id', 'username', 'display_name', 'email', 'avatar_url',
+            'avatar_emoji', 'avatar_color', 'bio', 'is_staff',
             'commander_rank', 'commander_xp', 'spec_path',
             'tdc_in_game', 'total_tdc_purchased', 'total_tdc_earned_ads',
             'wallet_address', 'is_protected', 'shield_until', 'beginner_protection_until',
@@ -47,7 +48,7 @@ class PlayerProfileSerializer(serializers.ModelSerializer):
             'preferred_language', 'date_joined',
             'action_slots_max', 'action_slots_used', 'next_slot_ready_in_seconds',
             'regen_progress_pct', 'regen_bonus_pct', 'regen_seconds_per_slot']
-        read_only_fields = ['id', 'email', 'commander_rank', 'commander_xp',
+        read_only_fields = ['id', 'email', 'is_staff', 'commander_rank', 'commander_xp',
                             'tdc_in_game', 'total_tdc_purchased', 'total_tdc_earned_ads']
 
     def get_stats(self, obj):

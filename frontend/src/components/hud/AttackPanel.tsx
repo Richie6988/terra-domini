@@ -56,10 +56,10 @@ function Die({ value, color, delay = 0 }: { value: number; color: string; delay?
 
 // ─── Attack type definitions ───────────────────────────────────────────────
 const ATTACK_TYPES = [
-  { id: 'conquest',  label: 'Conquest',  iconId: 'swords',  color: '#EF4444', desc: 'Full invasion — captures territory on win. Slow but decisive.',   timer: '4h',  riskMult: 1.0 },
-  { id: 'raid',      label: 'Raid',      emoji: 'wind',  color: '#F59E0B', desc: 'Steals resources without capturing. Fast, lower losses.',          timer: '1h',  riskMult: 0.7 },
-  { id: 'surprise',  label: 'Surprise',  emoji: 'moon',  color: '#8B5CF6', desc: 'Night strike — ignores some defenses. Higher risk, higher reward.', timer: '30m', riskMult: 1.3 },
-  { id: 'siege',     label: 'Siege',     emoji: 'castle',  color: '#6382FF', desc: 'Reduces fortifications without capturing. Weakens for next attack.', timer: '8h', riskMult: 0.5 },
+  { id: 'conquest',  label: 'Conquest',  iconId: 'swords',  color: '#EF4444', desc: 'Full invasion — captures territory on win. Slow but decisive.',   timer: '4h+',  riskMult: 1.0 },
+  { id: 'raid',      label: 'Raid',      emoji: 'wind',  color: '#F59E0B', desc: 'Steals resources without capturing. Fast, lower losses.',          timer: '4h+',  riskMult: 0.7 },
+  { id: 'surprise',  label: 'Surprise',  emoji: 'moon',  color: '#8B5CF6', desc: 'Night strike — ignores some defenses. Higher risk, higher reward.', timer: '2h+', riskMult: 1.3 },
+  { id: 'siege',     label: 'Siege',     emoji: 'castle',  color: '#6382FF', desc: 'Reduces fortifications without capturing. Weakens for next attack.', timer: '4h+', riskMult: 0.5 },
 ]
 
 interface Props {
@@ -76,7 +76,8 @@ export function AttackPanel({ target, onClose }: Props) {
   const [phase, setPhase]       = useState<'setup' | 'rolling' | 'result'>('setup')
   const [atkDice, setAtkDice]   = useState<number[]>([])
   const [defDice, setDefDice]   = useState<number[]>([])
-  const [outcome, setOutcome]   = useState<'win' | 'loss' | 'draw' | null>(null)
+  const [outcome, setOutcome]   = useState<'win' | 'loss' | 'draw' | 'launched' | null>(null)
+  const [launchMsg, setLaunchMsg] = useState('')
   const [winProb, setWinProb]   = useState(0.5)
 
   const typeConf  = ATTACK_TYPES.find(t => t.id === atkType)!
@@ -90,24 +91,18 @@ export function AttackPanel({ target, onClose }: Props) {
   }, [units, atkType, target.defense_tier])
 
   const attackMut = useMutation({
-    mutationFn: () => api.post('/battles/attack/', {
+    mutationFn: () => api.post('/combat/attack/', {
       target_h3: target.h3_index,
       attack_type: atkType,
       units,
     }),
     onSuccess: (res) => {
-      // Animate dice roll
-      setPhase('rolling')
-      const aD = Array.from({ length: 3 }, rollDie)
-      const dD = Array.from({ length: 2 }, rollDie)
-      setAtkDice(aD); setDefDice(dD)
-      setTimeout(() => {
-        const result = res.data?.result ?? (winProb >= 0.5 ? 'attacker' : 'defender')
-        setOutcome(result === 'attacker' ? 'win' : result === 'draw' ? 'draw' : 'loss')
-        setPhase('result')
-        qc.invalidateQueries({ queryKey: ['battles-active'] })
-        qc.invalidateQueries({ queryKey: ['territories'] })
-      }, 2000)
+      // Battles resolve server-side after a timer — no instant outcome to show
+      setLaunchMsg(res.data?.message || 'Attack launched!')
+      setOutcome('launched')
+      setPhase('result')
+      qc.invalidateQueries({ queryKey: ['battles-active'] })
+      qc.invalidateQueries({ queryKey: ['my-army'] })
     },
     onError: (e: any) => {
       const data = e.response?.data
@@ -191,7 +186,7 @@ export function AttackPanel({ target, onClose }: Props) {
 
               <button onClick={() => attackMut.mutate()} disabled={attackMut.isPending || totalUnits === 0}
                 style={{ width: '100%', padding: '14px', background: totalUnits > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${totalUnits > 0 ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 12, color: totalUnits > 0 ? '#EF4444' : '#4B5563', fontSize: 15, fontWeight: 800, cursor: totalUnits > 0 ? 'pointer' : 'not-allowed', letterSpacing: '0.05em' }}>
-                {attackMut.isPending ? '⏳ Launching…' : `LAUNCH ${(typeConf.label || "").toUpperCase()}`}
+                {attackMut.isPending ? 'Launching…' : `LAUNCH ${(typeConf.label || "").toUpperCase()}`}
               </button>
               <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center' }}>
                 <StaminaBar />
@@ -229,10 +224,12 @@ export function AttackPanel({ target, onClose }: Props) {
                 {outcome === 'win' ? '' : outcome === 'loss' ? '' : ''}
               </motion.div>
               <div style={{ fontSize: 24, fontWeight: 800, color: outcome === 'win' ? '#00884a' : outcome === 'loss' ? '#EF4444' : '#F59E0B', marginBottom: 8 }}>
-                {outcome === 'win' ? 'VICTORY!' : outcome === 'loss' ? 'DEFEATED' : 'STANDOFF'}
+                {outcome === 'launched' ? 'ATTACK LAUNCHED' : outcome === 'win' ? 'VICTORY!' : outcome === 'loss' ? 'DEFEATED' : 'STANDOFF'}
               </div>
               <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 24, lineHeight: 1.6 }}>
-                {outcome === 'win'
+                {outcome === 'launched'
+                  ? launchMsg
+                  : outcome === 'win'
                   ? atkType === 'conquest'
                     ? `${target.place_name || 'Territory'} is now under your control!`
                     : 'Raid successful — resources plundered!'

@@ -74,10 +74,10 @@ class MarketplaceListingsView(APIView):
 
         sql = "SELECT * FROM nft_listings WHERE status='active'"
         params = []
-        if rarity: sql += " AND rarity=?"; params.append(rarity)
-        if biome:  sql += " AND biome=?";  params.append(biome)
-        if min_p:  sql += " AND price_hex_coin>=?"; params.append(float(min_p))
-        if max_p:  sql += " AND price_hex_coin<=?"; params.append(float(max_p))
+        if rarity: sql += " AND rarity=%s"; params.append(rarity)
+        if biome:  sql += " AND biome=%s";  params.append(biome)
+        if min_p:  sql += " AND price_hex_coin>=%s"; params.append(float(min_p))
+        if max_p:  sql += " AND price_hex_coin<=%s"; params.append(float(max_p))
         if shiny == '1': sql += " AND is_shiny=1"
 
         order = {
@@ -86,7 +86,7 @@ class MarketplaceListingsView(APIView):
             'rarity':     'ORDER BY is_shiny DESC, price_hex_coin DESC',
             'recent':     'ORDER BY listed_at DESC',
         }.get(sort, 'ORDER BY listed_at DESC')
-        sql += f" {order} LIMIT ?"
+        sql += f" {order} LIMIT %s"
         params.append(limit)
 
         with connection.cursor() as c:
@@ -124,7 +124,7 @@ class MarketplaceMyListingsView(APIView):
         with connection.cursor() as c:
             c.execute("""
                 SELECT * FROM nft_listings
-                WHERE seller_id=?
+                WHERE seller_id=%s
                 ORDER BY listed_at DESC LIMIT 100
             """, [str(request.user.id)])
             cols = [d[0] for d in c.description]
@@ -171,7 +171,7 @@ class MarketplaceListView(APIView):
 
         # Check no active listing already
         with connection.cursor() as c:
-            c.execute("SELECT id FROM nft_listings WHERE h3_index=? AND status='active'", [h3_index])
+            c.execute("SELECT id FROM nft_listings WHERE h3_index=%s AND status='active'", [h3_index])
             if c.fetchone():
                 return Response({'error': 'Ce territoire est déjà en vente'}, status=400)
 
@@ -183,7 +183,7 @@ class MarketplaceListView(APIView):
                 INSERT INTO nft_listings
                 (id, seller_id, seller_username, h3_index, token_id, rarity, biome,
                  poi_name, is_shiny, price_hex_coin, status, listed_at, nft_version)
-                VALUES (?,?,?,?,?,?,?,?,?,?,'active',?,?)
+                VALUES (%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,'active',%s,%s)
             """, [
                 listing_id,
                 str(request.user.id),
@@ -219,7 +219,7 @@ class MarketplaceBuyView(APIView):
 
         with transaction.atomic():
             with connection.cursor() as c:
-                c.execute("SELECT * FROM nft_listings WHERE id=? AND status='active'", [listing_id])
+                c.execute("SELECT * FROM nft_listings WHERE id=%s AND status='active'", [listing_id])
                 row = c.fetchone()
                 if not row:
                     return Response({'error': 'Annonce introuvable ou expirée'}, status=404)
@@ -271,8 +271,8 @@ class MarketplaceBuyView(APIView):
             with connection.cursor() as c:
                 c.execute("""
                     UPDATE nft_listings
-                    SET status='sold', buyer_id=?, buyer_username=?, sold_at=?
-                    WHERE id=?
+                    SET status='sold', buyer_id=%s, buyer_username=%s, sold_at=%s
+                    WHERE id=%s
                 """, [str(buyer.id), buyer.username, now, listing_id])
 
         logger.info(
@@ -301,7 +301,7 @@ class MarketplaceDelistView(APIView):
 
         with connection.cursor() as c:
             c.execute(
-                "UPDATE nft_listings SET status='cancelled' WHERE id=? AND seller_id=? AND status='active'",
+                "UPDATE nft_listings SET status='cancelled' WHERE id=%s AND seller_id=%s AND status='active'",
                 [listing_id, str(request.user.id)]
             )
             affected = c.rowcount

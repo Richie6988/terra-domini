@@ -255,7 +255,7 @@ export function BuildingsOverlayLayer({ map, zoom, playerId }: Props) {
         marker.bindTooltip(
           `<div style="font-size:12px">
             <strong style="color:${spec.color}">${spec.label}</strong>
-            ${b.level > 1 ? `<span style="color:#6B7280"> Niv.${b.level}</span>` : ''}
+            ${b.level > 1 ? `<span style="color:#6B7280"> Lv.${b.level}</span>` : ''}
           </div>`,
           { className: 'td-tooltip', direction: 'top', offset: [0, -iconSize / 2] }
         )

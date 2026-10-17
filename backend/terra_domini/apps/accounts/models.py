@@ -30,7 +30,8 @@ class Player(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField(unique=True, db_index=True)
     username = models.CharField(max_length=32, unique=True, db_index=True)
     display_name = models.CharField(max_length=64, blank=True)
-    avatar_emoji = models.CharField(max_length=8, default='🎖️', blank=True)
+    avatar_emoji = models.CharField(max_length=32, default='🎖️', blank=True)  # iconBank id (e.g. 'butterfly')
+    avatar_color = models.CharField(max_length=9, default='#0099cc', blank=True)
     bio           = models.TextField(max_length=500, blank=True, default='')
     avatar_url = models.URLField(blank=True)
 
