@@ -68,7 +68,9 @@ const TILES: Record<string, { label: string; url: string; maxZoom: number; overl
   },
 }
 const tileLayerFor = (cfg: typeof TILES[string]) =>
-  L.tileLayer(cfg.url, { maxZoom: cfg.maxZoom ?? 19, className: cfg.className, attribution: cfg.attribution })
+  // OSM's tile policy requires a Referer header (blocked otherwise)
+  L.tileLayer(cfg.url, { maxZoom: cfg.maxZoom ?? 19, className: cfg.className, attribution: cfg.attribution,
+    referrerPolicy: 'strict-origin-when-cross-origin' } as L.TileLayerOptions)
 
 export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const mapRef       = useRef<L.Map | null>(null)

@@ -40,6 +40,8 @@ SESSION_COOKIE_SECURE = True
 CSRF_COOKIE_SECURE = True
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
+# Send our origin to tile servers: OpenStreetMap blocks tile requests without a Referer
+SECURE_REFERRER_POLICY = 'strict-origin-when-cross-origin'
 
 MEDIA_ROOT = env('MEDIA_ROOT', default='/home/hexod/data/media')
 
