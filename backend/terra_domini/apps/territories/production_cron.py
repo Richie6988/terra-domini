@@ -150,7 +150,7 @@ def run_production_tick(batch_size: int = 500) -> dict:
 
     logger.info(
         f"Production tick: {processed} territories, "
-        f"{hex_coin_total:.0f} HEX Coin distributed, {errors} errors"
+        f"resources produced ({hex_coin_total:.0f} HEX/day accrues in harvest stocks, not credited), {errors} errors"
     )
     return {
         'processed': processed,

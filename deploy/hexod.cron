@@ -1,0 +1,13 @@
+# crontab -u hexod /home/hexod/terra-domini/deploy/hexod.cron
+# Replaces Celery beat (no Redis on this VPS).
+SHELL=/bin/bash
+DJANGO_SETTINGS_MODULE=terra_domini.settings.prod
+M=/home/hexod/terra-domini/.venv/bin/python /home/hexod/terra-domini/backend/manage.py
+# Bot raids on players (FOMO loop) — every 2h
+0 */2 * * *  cd /home/hexod/terra-domini/backend && $M bot_raids >> /home/hexod/data/cron.log 2>&1
+# Daily territory resources (HEX itself is collected by players)
+30 0 * * *   cd /home/hexod/terra-domini/backend && $M run_production >> /home/hexod/data/cron.log 2>&1
+# Daily news events
+15 6 * * *   cd /home/hexod/terra-domini/backend && $M fetch_news --demo >> /home/hexod/data/cron.log 2>&1
+# Nightly SQLite backup (keeps 14 days)
+0 4 * * *    sqlite3 /home/hexod/data/hexod.sqlite3 ".backup /home/hexod/data/backups/hexod-$(date +\%F).sqlite3" && find /home/hexod/data/backups -name '*.sqlite3' -mtime +14 -delete

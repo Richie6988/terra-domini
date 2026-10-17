@@ -40,3 +40,6 @@ deployments/
 backend/terra_domini/agents/poi_agent.py
 backend/terra_domini/management/
 backend/scripts/seed_pois_*.py
+
+# Production secrets (deploy/DEPLOY.md)
+.env.prod

@@ -19,6 +19,6 @@ class Command(BaseCommand):
         result = run_production_tick()
         self.stdout.write(
             f"✅ Done: {result['processed']} territories | "
-            f"{result['hex_coin_total']} HEX Coin | "
+            f"resources OK (HEX goes to harvest stocks) | "
             f"{result['errors']} errors"
         )

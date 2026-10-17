@@ -28,7 +28,7 @@ kombu==5.3.5
 flower==2.0.1
 
 # ─── Geo / Map ───────────────────────────────────────────────────────────────
-h3==3.7.7
+h3==4.1.2   # code uses the v4 API (grid_disk, latlng_to_cell)
 shapely==2.1.2
 geojson==3.1.0
 

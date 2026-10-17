@@ -2,7 +2,7 @@
 """Terra Domini — Ensure all DB tables exist. Runs at startup."""
 import os, sys, django, sqlite3
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'terra_domini.settings.dev')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'terra_domini.settings.dev')  # prod: systemd exports settings.prod
 os.environ.setdefault('DJANGO_SECRET_KEY', 'dev-secret-key-not-for-production')
 django.setup()
 
@@ -173,7 +173,9 @@ if n == 0:
 
 # Create default admin user if no players exist
 from terra_domini.apps.accounts.models import Player
-if not Player.objects.filter(email='admin@td.com').exists():
+from django.conf import settings as _settings
+# Dev only: never create a known-password admin in production
+if _settings.DEBUG and not Player.objects.filter(email='admin@td.com').exists():
     try:
         Player.objects.create_superuser(
             email='admin@td.com', username='admin', password='admin123'

@@ -54,7 +54,15 @@ def _ensure_listings_table():
         c.execute("CREATE INDEX IF NOT EXISTS idx_nft_listings_rarity ON nft_listings(rarity, status)")
 
 
-_ensure_listings_table()
+_TABLE_READY = False
+
+
+def _ready():
+    """Create nft_listings lazily (DB access at import time breaks under ASGI/uvicorn)."""
+    global _TABLE_READY
+    if not _TABLE_READY:
+        _ensure_listings_table()
+        _TABLE_READY = True
 
 RARITY_ORDER = {'common': 0, 'uncommon': 1, 'rare': 2, 'epic': 3, 'legendary': 4, 'mythic': 5}
 
@@ -64,6 +72,7 @@ class MarketplaceListingsView(APIView):
 
     def get(self, request):
         """GET /api/marketplace/listings/ — active listings with filters"""
+        _ready()
         rarity  = request.query_params.get('rarity')
         biome   = request.query_params.get('biome')
         min_p   = request.query_params.get('min_price')
@@ -121,6 +130,7 @@ class MarketplaceMyListingsView(APIView):
 
     def get(self, request):
         """GET /api/marketplace/listings/mine/ — seller's listings"""
+        _ready()
         with connection.cursor() as c:
             c.execute("""
                 SELECT * FROM nft_listings
@@ -148,6 +158,7 @@ class MarketplaceListView(APIView):
 
     def post(self, request):
         """POST /api/marketplace/list/ { h3_index, price_hex_coin }"""
+        _ready()
         h3_index = request.data.get('h3_index', '').strip()
         try:
             price = float(request.data.get('price_hex_coin', 0))
@@ -213,6 +224,7 @@ class MarketplaceBuyView(APIView):
 
     def post(self, request):
         """POST /api/marketplace/buy/ { listing_id }"""
+        _ready()
         listing_id = request.data.get('listing_id', '').strip()
         if not listing_id:
             return Response({'error': 'listing_id requis'}, status=400)
@@ -295,6 +307,7 @@ class MarketplaceDelistView(APIView):
 
     def post(self, request):
         """POST /api/marketplace/delist/ { listing_id }"""
+        _ready()
         listing_id = request.data.get('listing_id', '').strip()
         if not listing_id:
             return Response({'error': 'listing_id requis'}, status=400)
@@ -317,6 +330,7 @@ class MarketplaceStatsView(APIView):
 
     def get(self, request):
         """GET /api/marketplace/stats/ — global marketplace stats"""
+        _ready()
         with connection.cursor() as c:
             c.execute("""
                 SELECT
