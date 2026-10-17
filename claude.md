@@ -296,6 +296,13 @@ interface KingdomStore {
 
 ## 9. FRONTEND DESIGN RULES
 
+> **ART DIRECTION (owner, 2026-10-17): SUPERCELL / CARTOON** (Clash Royale / Brawl Stars), desktop and mobile equal,
+> red = enemy hexes. Royal-blue panels, 2–3px dark outlines, 3D bottom shadows (`0 4px 0 <dark>`), saturated colours,
+> white Lilita One text with dark drop shadow, NO neon glow, NO scanlines, letter-spacing ≤ 0.5px, body ≥ 11px.
+> Fonts are bundled in `src/assets/fonts` (Lilita One + Nunito). 'Orbitron'/'Share Tech Mono' in old inline styles are
+> CSS aliases of Lilita One — new code uses `var(--font-heading)` / `var(--font-mono)` / `var(--font-body)`.
+> The colour values below that mention dark navy/neon are superseded by the UI kit tokens (`--hx-*`).
+
 ### Colors (ALL dark theme)
 - Page bg: `#060e1a` (deep navy)
 - Panel bg: `rgba(13,27,42,0.97)` with `backdrop-filter: blur(20px)`

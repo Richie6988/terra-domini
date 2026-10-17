@@ -7,11 +7,13 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
+import { Mail, Lock, Eye, EyeOff, AlertCircle, Loader2, ChevronRight } from 'lucide-react'
 import { authApi } from '../services/api'
 import { useStore } from '../store'
+import { IconSVG } from '../components/shared/iconBank'
 
 // ── Animated hex grid background ──
-function HexBackground() {
+export function HexBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -56,7 +58,7 @@ function HexBackground() {
       const W = canvas!.width, H = canvas!.height
 
       const bg = ctx.createRadialGradient(W * 0.3, H * 0.4, 0, W * 0.5, H * 0.5, W * 0.8)
-      bg.addColorStop(0, '#0f1f35'); bg.addColorStop(0.5, '#0a1628'); bg.addColorStop(1, '#050c18')
+      bg.addColorStop(0, '#5cc0ff'); bg.addColorStop(0.5, '#2f7bea'); bg.addColorStop(1, '#1a3c9a')
       ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H)
 
       const cols = Math.ceil(W / (hexW * 0.75)) + 2
@@ -72,23 +74,23 @@ function HexBackground() {
           const alpha = Math.max(0.02, (1 - dist * 0.8) * 0.12 * pulse)
 
           drawHex(x, y, hexSize * 0.95)
-          ctx.strokeStyle = `rgba(0, 153, 204, ${alpha})`
-          ctx.lineWidth = 0.8
+          ctx.strokeStyle = `rgba(255, 255, 255, ${alpha * 1.3})`
+          ctx.lineWidth = 2
           ctx.stroke()
 
           if (pulse > 0.85 && dist < 0.6) {
-            ctx.fillStyle = `rgba(0, 153, 204, ${alpha * 0.3})`
+            ctx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.6})`
             ctx.fill()
           }
         }
       }
 
       const g1 = ctx.createRadialGradient(W * 0.2, H * 0.3, 0, W * 0.2, H * 0.3, W * 0.25)
-      g1.addColorStop(0, 'rgba(0, 153, 204, 0.06)'); g1.addColorStop(1, 'transparent')
+      g1.addColorStop(0, 'rgba(255, 255, 255, 0.10)'); g1.addColorStop(1, 'transparent')
       ctx.fillStyle = g1; ctx.fillRect(0, 0, W, H)
 
       const g2 = ctx.createRadialGradient(W * 0.8, H * 0.7, 0, W * 0.8, H * 0.7, W * 0.2)
-      g2.addColorStop(0, 'rgba(204, 136, 0, 0.04)'); g2.addColorStop(1, 'transparent')
+      g2.addColorStop(0, 'rgba(255, 210, 63, 0.10)'); g2.addColorStop(1, 'transparent')
       ctx.fillStyle = g2; ctx.fillRect(0, 0, W, H)
 
       particles.forEach(p => {
@@ -96,13 +98,10 @@ function HexBackground() {
         if (p.x < 0) p.x = W; if (p.x > W) p.x = 0
         if (p.y < 0) p.y = H; if (p.y > H) p.y = 0
         ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
-        ctx.fillStyle = `rgba(0, 200, 255, ${p.a * (0.5 + Math.sin(time * 3 + p.x * 0.01) * 0.5)})`
+        ctx.fillStyle = `rgba(255, 255, 255, ${p.a * (0.5 + Math.sin(time * 3 + p.x * 0.01) * 0.5)})`
         ctx.fill()
       })
 
-      const scanY = (time * 80) % H
-      ctx.fillStyle = 'rgba(0, 153, 204, 0.03)'
-      ctx.fillRect(0, scanY, W, 2)
     }
 
     animate()
@@ -132,8 +131,52 @@ function Typewriter({ texts }: { texts: string[] }) {
     return () => clearTimeout(timeout)
   }, [charIndex, deleting, textIndex, texts])
 
-  return <span>{texts[textIndex].slice(0, charIndex)}<span style={{ opacity: 0.6, animation: 'blink 1s step-end infinite' }}>|</span></span>
+  return <span>{texts[textIndex].slice(0, charIndex)}<span style={{ opacity: 0.6, animation: 'auth-blink 1s step-end infinite' }}>|</span></span>
 }
+
+// ── Brand block (hex logo + wordmark + tagline) — shared by all auth pages ──
+const hexPts = (cx: number, cy: number, r: number) =>
+  Array.from({ length: 6 }, (_, i) => {
+    const a = (Math.PI / 3) * i - Math.PI / 2
+    return `${(cx + r * Math.cos(a)).toFixed(1)},${(cy + r * Math.sin(a)).toFixed(1)}`
+  }).join(' ')
+
+export function AuthBrand({ small = false }: { small?: boolean }) {
+  const ring = [0, 1, 2, 3, 4, 5].map(i => {
+    const a = (Math.PI / 3) * i
+    return [32 + 10.6 * Math.cos(a), 32 + 10.6 * Math.sin(a)]
+  })
+  const size = small ? 44 : 64
+  return (
+    <div className="auth-brand">
+      <div className="auth-logo">
+        <svg width={size} height={size} viewBox="0 0 64 64" aria-hidden>
+          <defs>
+            <linearGradient id="auth-hg" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#6cc4ff" /><stop offset="100%" stopColor="#2563eb" />
+            </linearGradient>
+            <linearGradient id="auth-hc" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#fcd34d" /><stop offset="100%" stopColor="#cc8800" />
+            </linearGradient>
+          </defs>
+          <polygon points={hexPts(32, 32, 29)} fill="url(#auth-hg)" stroke="#12245e" strokeWidth="3" strokeLinejoin="round" />
+          {ring.map(([x, y], i) => (
+            <polygon key={i} points={hexPts(x, y, 5.4)} fill="#ffffff" stroke="#12245e" strokeWidth="1.5" strokeLinejoin="round" />
+          ))}
+          <polygon points={hexPts(32, 32, 5.4)} fill="url(#auth-hc)" stroke="#7a3e00" strokeWidth="1.5" strokeLinejoin="round" />
+        </svg>
+      </div>
+      <div className={small ? 'auth-wordmark auth-wordmark--sm' : 'auth-wordmark'}>HEXOD</div>
+      <div className="auth-tagline">OWN THE WORLD. <em>HEX BY HEX.</em></div>
+    </div>
+  )
+}
+
+const FEATURES = [
+  { icon: 'grid_globe', title: 'THE REAL WORLD IS THE BOARD', text: 'Every street on Earth is a hex you can claim.' },
+  { icon: 'castle',     title: 'BUILD YOUR KINGDOM',          text: 'Grow territory, produce resources, upgrade your empire.' },
+  { icon: 'swords',     title: 'RAID, DEFEND, ALLY',          text: 'Train armies and conquer rivals with your alliance.' },
+]
 
 // ── Main ──
 export default function LoginPage() {
@@ -142,10 +185,13 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [showPw, setShowPw] = useState(false)
 
   const handleSubmit = useCallback(async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
     try {
       const data = await authApi.login(email, password)
       setAuth(data.player, data.access, data.refresh)
@@ -156,6 +202,7 @@ export default function LoginPage() {
         toast.error('Email not verified — check your inbox')
         navigate('/verify-email', { state: { email: data.email || email } })
       } else {
+        setError(data?.error || data?.detail || 'Login failed — check your email and password.')
         toast.error(data?.error || data?.detail || 'Login failed')
       }
     } finally { setLoading(false) }
@@ -164,80 +211,80 @@ export default function LoginPage() {
   const inputSt: React.CSSProperties = {} // Now using .auth-input class
 
   return (
-    <div style={{ minHeight: '100vh', position: 'relative', overflow: 'hidden' }}>
+    <div className="auth-page">
       <HexBackground />
-      <style>{`@keyframes blink { 50% { opacity: 0 } } @keyframes float { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-8px) } } @keyframes shimmer { 0% { background-position: -200% center } 100% { background-position: 200% center } }`}</style>
+      <div className="auth-wrapper">
+        <div className="auth-shell">
+          {/* Hero */}
+          <motion.div className="auth-hero" initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.9, ease: [0.2, 0.8, 0.2, 1] }}>
+            <AuthBrand />
+            <div className="auth-typewriter">
+              <Typewriter texts={[
+                'CAPTURE · BUILD · TRADE · CONQUER',
+                'REAL MAP · REAL STRATEGY · REAL STAKES',
+                'POLYGON · ERC-721 · PLAY TO EARN',
+              ]} />
+            </div>
+            <ul className="auth-features">
+              {FEATURES.map((f, i) => (
+                <li key={f.title} className="auth-feature hx-rise" style={{ animationDelay: `${300 + i * 120}ms` }}>
+                  <IconSVG id={f.icon} size={48} />
+                  <div>
+                    <div className="auth-feature__title">{f.title}</div>
+                    <div className="auth-feature__text">{f.text}</div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
 
-      <div style={{
-        position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column',
-        alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: 20,
-      }}>
-        {/* Logo */}
-        <motion.div initial={{ opacity: 0, y: -30 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1, ease: [0.2, 0.8, 0.2, 1] }}
-          style={{ textAlign: 'center', marginBottom: 36 }}>
+          {/* Login card */}
+          <motion.div initial={{ opacity: 0, scale: 0.96 }} animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2, duration: 0.7, ease: [0.2, 0.8, 0.2, 1] }}
+            className="auth-card">
+            <div className="auth-card__head">
+              <div className="auth-title">SIGN IN</div>
+              <div className="auth-subtitle">Welcome back, Commander. Your territory awaits.</div>
+            </div>
+            {error && (
+              <div className="auth-error" role="alert"><AlertCircle size={16} style={{ flexShrink: 0, marginTop: 1 }} />{error}</div>
+            )}
+            <form onSubmit={handleSubmit}>
+              <label className="auth-label" htmlFor="login-email">EMAIL</label>
+              <div className="auth-field">
+                <Mail size={18} className="auth-field__icon" />
+                <input id="login-email" type="email" value={email} onChange={e => setEmail(e.target.value)} required
+                  autoComplete="email" placeholder="commander@hexod.io" className="auth-input auth-input--icon" />
+              </div>
 
-          <div style={{ animation: 'float 4s ease-in-out infinite', marginBottom: 12 }}>
-            <svg width="56" height="56" viewBox="0 0 60 60">
-              <defs><linearGradient id="hg" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#0099cc"/><stop offset="50%" stopColor="#00ccff"/><stop offset="100%" stopColor="#0077aa"/>
-              </linearGradient></defs>
-              <polygon points="30,2 55,16 55,44 30,58 5,44 5,16" fill="none" stroke="url(#hg)" strokeWidth="2" opacity="0.8"/>
-              <polygon points="30,10 47,20 47,40 30,50 13,40 13,20" fill="none" stroke="#0099cc" strokeWidth="1" opacity="0.4"/>
-              <text x="30" y="36" textAnchor="middle" fill="#0099cc" fontSize="18" fontWeight="900" fontFamily="Orbitron, monospace">◆</text>
-            </svg>
-          </div>
+              <label className="auth-label auth-spacer" htmlFor="login-password">PASSWORD</label>
+              <div className="auth-field">
+                <Lock size={18} className="auth-field__icon" />
+                <input id="login-password" type={showPw ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+                  required autoComplete="current-password" placeholder="••••••••••" className="auth-input auth-input--icon auth-input--toggle" />
+                <button type="button" className="auth-field__toggle" onClick={() => setShowPw(v => !v)}
+                  aria-label={showPw ? 'Hide password' : 'Show password'}>
+                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
 
-          <div style={{
-            fontSize: 42, fontWeight: 900, letterSpacing: 12, fontFamily: "'Orbitron', monospace",
-            background: 'linear-gradient(90deg, #0099cc, #00ccff, #cc8800, #0099cc)',
-            backgroundSize: '200% auto', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-            animation: 'shimmer 4s linear infinite',
-          }}>HEXOD</div>
+              <button type="submit" disabled={loading} className="auth-btn">
+                {loading ? <><Loader2 size={18} className="auth-spin" /> CONNECTING…</> : <>ENTER THE WORLD <ChevronRight size={18} strokeWidth={3} /></>}
+              </button>
+            </form>
 
-          <div style={{
-            fontSize: 10, color: 'rgba(180,210,240,0.65)', letterSpacing: 6, marginTop: 8,
-            fontFamily: "'Orbitron', sans-serif", height: 16,
-          }}>
-            <Typewriter texts={[
-              'OWN THE WORLD · HEX BY HEX',
-              'CAPTURE · BUILD · TRADE · CONQUER',
-              'REAL MAP · REAL STRATEGY · REAL STAKES',
-              'POLYGON · ERC-721 · PLAY TO EARN',
-            ]} />
-          </div>
-        </motion.div>
-
-        {/* Login card */}
-        <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.3, duration: 0.8, ease: [0.2, 0.8, 0.2, 1] }}
-          style={{}} className="auth-card">
-          <form onSubmit={handleSubmit}>
-            <label className="auth-label">
-              COMMANDER EMAIL
-            </label>
-            <input type="email" value={email} onChange={e => setEmail(e.target.value)} required placeholder="commander@hexod.io" className="auth-input" />
-
-            <label className="auth-label auth-spacer">
-              ACCESS CODE
-            </label>
-            <input type="password" value={password} onChange={e => setPassword(e.target.value)} required placeholder="••••••••••" className="auth-input" />
-
-            <button type="submit" disabled={loading} className="auth-btn">
-              {loading ? '◆ CONNECTING...' : '◆ ENTER THE WORLD'}
-            </button>
-          </form>
-
-          <div className="auth-links">
-            <Link to="/register" style={{ color: 'var(--auth-link-color)' }}>NEW COMMANDER</Link>
-            <Link to="/forgot-password" style={{ color: 'var(--auth-muted-color)', fontSize: 'var(--fs-auth-hint)' }}>FORGOT PASSWORD?</Link>
-          </div>
-        </motion.div>
+            <div className="auth-links">
+              <Link to="/register">NEW COMMANDER? CREATE ACCOUNT</Link>
+              <Link to="/forgot-password" className="auth-link--muted">FORGOT PASSWORD?</Link>
+            </div>
+          </motion.div>
+        </div>
 
         {/* Footer */}
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.5 }}
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.2 }}
           className="auth-footer">
-          HEXOD v0.1 · SEASON 1 · POLYGON POS · MADE IN FRANCE 🇫🇷
+          HEXOD v0.1 · SEASON 1 · POLYGON POS · MADE IN FRANCE · <Link to="/terms">TERMS</Link>
         </motion.div>
       </div>
     </div>

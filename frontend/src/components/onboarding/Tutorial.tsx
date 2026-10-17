@@ -14,6 +14,8 @@ import { territoryApi } from '../../services/api'
 import { useStore } from '../../store'
 import { latLngToCell } from 'h3-js'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { IconSVG } from '../shared/iconBank'
+import { ChevronRight } from 'lucide-react'
 
 // ─── Tutorial Store ───────────────────────────────────────────────────────────
 
@@ -55,7 +57,7 @@ export const HINTS: Record<string, HintDef> = {
     body: 'This area belongs to nobody yet. Tap it to claim it as yours! You\'ll start earning Coins immediately.',
   },
   'hex-mine': {
-    id: 'hex-mine', title: 'Your Zone ',
+    id: 'hex-mine', title: 'Your Zone',
     body: 'You own this! It earns Coins and resources every 5 minutes — even while you\'re offline.',
   },
   'hex-enemy': {
@@ -78,7 +80,7 @@ export const HINTS: Record<string, HintDef> = {
   // Territory panel
   'defense-bar': {
     id: 'defense-bar', title: 'Defense Level',
-    body: 'Higher defense means attackers need more army to beat you. Build a Fort () to increase it.',
+    body: 'Higher defense means attackers need more army to beat you. Build a Fort to increase it.',
   },
   'production-rates': {
     id: 'production-rates', title: 'What You Earn Here',
@@ -173,10 +175,10 @@ export function HintTooltip({ hintId, children, forceShow = false }: HintTooltip
               position: 'absolute', bottom: '100%', left: '50%',
               transform: 'translateX(-50%)', marginBottom: 8,
               zIndex: 9999, width: 240,
-              background: 'rgba(10,10,20,0.97)',
-              border: '1px solid rgba(0,255,135,0.3)',
-              borderRadius: 8, padding: '12px 14px',
-              boxShadow: '0 8px 32px rgba(0,0,0,0.6), 0 0 0 1px rgba(0,255,135,0.1)',
+              background: 'linear-gradient(180deg, #2f5fd0, #1e3c8f)',
+              border: '3px solid #0f2266',
+              borderRadius: 16, padding: '12px 14px',
+              boxShadow: '0 5px 0 #0f2266',
             }}
           >
             {/* Arrow */}
@@ -185,20 +187,20 @@ export function HintTooltip({ hintId, children, forceShow = false }: HintTooltip
               width: 0, height: 0,
               borderLeft: '6px solid transparent',
               borderRight: '6px solid transparent',
-              borderTop: '6px solid rgba(0,255,135,0.3)',
+              borderTop: '6px solid #0f2266',
             }} />
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 6 }}>
-              <div style={{ fontSize: 12, fontWeight: 600, color: '#0099cc' }}>{hint.title}</div>
+              <div style={{ fontSize: 16, color: '#ffd23f', fontFamily: 'var(--font-heading)', textShadow: '0 2px 0 rgba(0,0,0,0.45)' }}>{hint.title}</div>
               <button onClick={dismiss} style={{
                 background: 'none', border: 'none', color: 'rgba(255,255,255,0.3)',
                 cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '0 0 0 8px',
               }}>×</button>
             </div>
-            <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.06)', lineHeight: 1.6 }}>{hint.body}</div>
+            <div style={{ fontSize: 12, color: '#e3eeff', fontWeight: 600, lineHeight: 1.5, textTransform: 'none', letterSpacing: 0, fontFamily: 'system-ui, sans-serif' }}>{hint.body}</div>
             <button onClick={dismiss} style={{
-              marginTop: 8, fontSize: 10, color: 'rgba(0,255,135,0.6)',
+              marginTop: 8, fontSize: 14, color: '#ffd23f', minHeight: 28,
               background: 'none', border: 'none', cursor: 'pointer',
-              fontFamily: 'monospace', letterSpacing: '0.05em',
+              fontFamily: 'var(--font-heading)', letterSpacing: 0.5,
             }}>Got it →</button>
           </motion.div>
         )}
@@ -223,42 +225,42 @@ interface TutorialStep {
 const TUTORIAL_STEPS: TutorialStep[] = [
   {
     id: 0,
-    emoji: '⬡',
-    title: 'Welcome to Hexod!',
-    body: 'La carte du monde réel est ton plateau de jeu. Revendique des zones, construis ton empire, gagne des HEX Coin.',
-    action: "C'est parti →",
+    emoji: 'grid_globe',
+    title: 'Welcome to HEXOD',
+    body: 'The real-world map is your game board. Claim zones, build your empire and earn HEX Coin.',
+    action: "Let's go",
     requiresGPS: true,
   },
   {
     id: 1,
-    emoji: 'square',
-    title: 'Les zones qui brillent sont spéciales',
-    body: 'Les hexagones colorés sont des POI (Points d\'Intérêt). Plus ils brillent, plus ils rapportent. Les zones grises sont libres à revendiquer.',
-    action: 'Compris →',
+    emoji: 'sparkles',
+    title: 'Glowing zones are special',
+    body: 'Coloured hexes are Points of Interest (POI). The brighter they glow, the more they yield. Grey zones are free to claim.',
+    action: 'Got it',
     hint: 'hex-unclaimed',
   },
   {
     id: 2,
-    emoji: 'flag_black',
-    title: 'Revendique ta première zone !',
+    emoji: 'flag_red',
+    title: 'Claim your first zone!',
     body: 'Tap any grey zone on the map, then press "Claim Zone". It\'s yours immediately. Go ahead!',
-    action: 'J\'ai revendiqué ma zone ',
+    action: 'Claim my first zone',
     requiresClaim: true,
   },
   {
     id: 3,
     emoji: 'lightning',
-    title: 'Tu gagnes déjà des HEX Coin !',
-    body: 'Ta zone produit des ressources et des HEX Coin toutes les 24h — même quand tu dors. Plus tu as de zones, plus tu gagnes.',
-    action: 'Et après ? →',
+    title: "You're already earning HEX Coin!",
+    body: 'Your zone produces resources and HEX Coin every 24 hours, even while you sleep. The more zones you own, the more you earn.',
+    action: "What's next?",
     hint: 'production-rates',
   },
   {
     id: 4,
-    emoji: 'hex_coin',
-    title: 'Tes missions du jour t\'attendent',
-    body: 'Chaque jour, 3 missions te guident et te récompensent. Le bouton en bas à gauche les affiche. C\'est ta feuille de route quotidienne !',
-    action: 'Explorer la carte !',
+    emoji: 'daily_task',
+    title: 'Your daily missions await',
+    body: 'Every day, 3 missions guide and reward you. The button at the bottom left opens them: it is your daily roadmap!',
+    action: 'Explore the map!',
     hint: 'tdc-balance',
   },
 ]
@@ -312,7 +314,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
     setState(newState)
     saveTutorialState(newState)
 
-    // Step 4 → montrer les hotspots de l'interface
+    // Step 4 → show the interface hotspots
     if (nextStep === 4) {
       setTimeout(() => {
         import('./OnboardingHotspots').then(m => m.showTutorialHotspots())
@@ -388,12 +390,13 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
         style={{
           position: 'fixed', inset: 0, zIndex: 10000,
           pointerEvents: claimWaiting ? 'none' : 'auto',
-          background: claimWaiting ? 'transparent' : 'rgba(5,5,8,0.92)',
-          backdropFilter: claimWaiting ? 'none' : 'blur(8px)',
+          background: claimWaiting ? 'transparent' : 'rgba(10,24,70,0.72)',
+          backdropFilter: claimWaiting ? 'none' : 'blur(6px)',
           display: 'flex',
-          alignItems: claimWaiting ? 'flex-end' : 'flex-end',
+          alignItems: 'center',
           justifyContent: 'center',
-          padding: '0 16px 32px',
+          padding: '16px',
+          textTransform: 'none',
         }}
       >
         {/* Claim waiting: NO overlay at all — just a small floating pill at bottom */}
@@ -405,21 +408,21 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
               position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
               zIndex: 10001, pointerEvents: 'auto',
               padding: '12px 24px', borderRadius: 40,
-              background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(12px)',
-              border: '1px solid rgba(0,255,135,0.3)',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+              background: 'linear-gradient(180deg, #3b6fe0, #2148b0)',
+              border: '3px solid #0f2266',
+              boxShadow: '0 5px 0 #0f2266',
               display: 'flex', alignItems: 'center', gap: 12,
             }}
           >
             <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
-              style={{ fontSize: 18 }}></motion.span>
-            <span style={{ fontSize: 11, color: '#fff', fontFamily: "'Orbitron', sans-serif", letterSpacing: 1 }}>
+              style={{ display: 'flex' }}><IconSVG id="target" size={22} /></motion.span>
+            <span style={{ fontSize: 16, color: '#fff', fontFamily: 'var(--font-heading)', letterSpacing: 0.5, textTransform: 'uppercase', textShadow: '0 2px 0 rgba(0,0,0,0.45)' }}>
               TAP ANY ZONE TO CLAIM — IT'S FREE!
             </span>
             <button onClick={onComplete} style={{
-              background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)',
-              borderRadius: 8, padding: '4px 10px', color: 'rgba(255,255,255,0.4)',
-              fontSize: 8, cursor: 'pointer', fontFamily: "'Orbitron', sans-serif",
+              background: 'rgba(255,255,255,0.18)', border: '2px solid rgba(255,255,255,0.35)',
+              borderRadius: 12, padding: '8px 14px', minHeight: 36, color: '#fff',
+              fontSize: 14, cursor: 'pointer', fontFamily: 'var(--font-heading)', letterSpacing: 0.5,
             }}>SKIP</button>
           </motion.div>
         )}
@@ -433,89 +436,101 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
           style={{
             display: claimWaiting ? 'none' : undefined,
             width: '100%',
-            maxWidth: 480,
-            background: 'rgba(10,10,20,0.99)',
+            maxWidth: 440,
+            background: 'linear-gradient(180deg, #2f5fd0 0%, #1e3c8f 100%)',
             pointerEvents: 'auto',
-            border: '1px solid rgba(0,255,135,0.25)',
-            borderRadius: 16,
+            border: '3px solid #0f2266',
+            borderRadius: 24,
             overflow: 'hidden',
-            boxShadow: '0 -4px 40px rgba(0,255,135,0.1)',
+            boxShadow: '0 8px 0 #0f2266, 0 20px 40px rgba(0,0,0,0.35), inset 0 2px 0 rgba(255,255,255,0.2)',
           }}
         >
-          {!claimWaiting && <div style={{ height: 3, background: 'rgba(255,255,255,0.06)' }}>
-            <motion.div
-              initial={{ width: `${(state.currentStep / TUTORIAL_STEPS.length) * 100}%` }}
-              animate={{ width: `${progress}%` }}
-              style={{ height: '100%', background: 'var(--g, #00FF87)', borderRadius: 2 }}
-            />
-          </div>}
+          {/* Illustration */}
+          <div style={{
+            position: 'relative', height: 150, display: 'flex', alignItems: 'center', justifyContent: 'center',
+            background: 'radial-gradient(circle at 50% 60%, #8fd3ff 0%, #4fa6f5 45%, #3a7fe0 100%)',
+            borderBottom: '3px solid #0f2266',
+          }}>
+            <svg width="132" height="132" viewBox="0 0 100 100" style={{ position: 'absolute', opacity: 0.55 }} aria-hidden>
+              <polygon points="50,4 90,27 90,73 50,96 10,73 10,27" fill="rgba(255,255,255,0.22)" stroke="rgba(255,255,255,0.6)" strokeWidth="3" strokeLinejoin="round" />
+            </svg>
+            <motion.div initial={{ scale: 0.6, rotate: -8 }} animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: 'spring', stiffness: 260, damping: 16 }}
+              style={{ filter: 'drop-shadow(0 5px 0 rgba(15,34,102,0.55))' }}>
+              <IconSVG id={currentStep.emoji} size={84} />
+            </motion.div>
+            <span style={{
+              position: 'absolute', top: 12, left: 12, padding: '4px 12px', borderRadius: 12,
+              background: '#ffd23f', border: '2px solid #7a3e00', boxShadow: '0 3px 0 #7a3e00',
+              color: '#5a2d00', fontFamily: 'var(--font-heading)', fontSize: 14, letterSpacing: 0.5,
+            }}>
+              STEP {state.currentStep + 1} / {TUTORIAL_STEPS.length}
+            </span>
+          </div>
 
-          {!claimWaiting && <div style={{ display: 'flex', justifyContent: 'center', gap: 6, padding: '12px 0 0' }}>
-            {TUTORIAL_STEPS.map((s, i) => (
-              <div key={i} style={{
-                width: i === state.currentStep ? 20 : 6,
-                height: 6, borderRadius: 3,
-                background: i < state.currentStep ? '#0099cc' : i === state.currentStep ? '#0099cc' : 'rgba(255,255,255,0.15)',
-                transition: 'all 0.3s',
-              }} />
-            ))}
-          </div>}
-
-          {/* Content — hidden when claimWaiting so map is fully visible */}
-          <div style={{ padding: claimWaiting ? '12px 20px' : '20px 28px 28px' }}>
-            {!claimWaiting && <div style={{ fontSize: 48, marginBottom: 12, textAlign: 'center' }}>{currentStep.emoji}</div>}
-            {!claimWaiting && <div style={{
-              fontFamily: "'Bebas Neue', sans-serif",
-              fontSize: 28, letterSpacing: '1px', color: '#fff',
-              textAlign: 'center', marginBottom: 12,
-            }}>{currentStep.title}</div>}
-            {!claimWaiting && <div style={{
-              fontSize: 15, color: 'rgba(255,255,255,0.65)',
-              lineHeight: 1.7, textAlign: 'center', marginBottom: 24,
-            }}>{currentStep.body}</div>}
+          <div style={{ padding: '18px 24px 20px' }}>
+            <div style={{
+              fontFamily: 'var(--font-heading)', fontWeight: 400,
+              fontSize: 28, letterSpacing: 0.5, color: '#fff', textTransform: 'uppercase',
+              textShadow: '0 3px 0 rgba(0,0,0,0.45)',
+              textAlign: 'center', marginBottom: 8, lineHeight: 1.15,
+            }}>{currentStep.title}</div>
+            <div style={{
+              fontSize: 16, fontWeight: 600, color: '#e3eeff', fontFamily: 'system-ui, -apple-system, sans-serif',
+              letterSpacing: 0, lineHeight: 1.55, textAlign: 'center', marginBottom: 18,
+            }}>{currentStep.body}</div>
 
             {/* GPS error */}
             {gpsError && (
               <div style={{
                 marginBottom: 12, padding: '8px 12px',
-                background: 'rgba(255,184,0,0.08)',
-                border: '1px solid rgba(255,184,0,0.2)',
-                borderRadius: 6, fontSize: 12, color: '#F59E0B', textAlign: 'center',
+                background: '#ffd23f',
+                border: '2px solid #7a3e00',
+                borderRadius: 12, fontSize: 13, fontWeight: 700, color: '#5a2d00', textAlign: 'center',
+                fontFamily: 'system-ui, sans-serif', letterSpacing: 0,
               }}>
                 {gpsError}
               </div>
             )}
 
-            {/* Claim waiting — handled by floating pill above */}
-
             {/* Action button */}
-            {!claimWaiting && (
-              <motion.button
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                onClick={handleAction}
-                disabled={gpsLoading}
-                style={{
-                  width: '100%', padding: '16px',
-                  background: '#0099cc', border: 'none', borderRadius: 10,
-                  color: '#000', fontSize: 16, fontWeight: 700, cursor: 'pointer',
-                  fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '1px',
-                  opacity: gpsLoading ? 0.7 : 1,
-                }}
-              >
-                {gpsLoading ? 'Finding your location…' : currentStep.action}
-              </motion.button>
-            )}
+            <button
+              className="btn-game btn-game-green"
+              onClick={handleAction}
+              disabled={gpsLoading}
+              style={{
+                width: '100%', minHeight: 56, fontSize: 20, fontFamily: 'var(--font-heading)', fontWeight: 400, letterSpacing: 0.5,
+                borderRadius: 16, border: '3px solid #064e3b',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              }}
+            >
+              {gpsLoading ? 'Finding your location…' : currentStep.action}
+              {!gpsLoading && <ChevronRight size={18} strokeWidth={3} />}
+            </button>
+
+            {/* Step dots */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginTop: 16 }} aria-hidden>
+              {TUTORIAL_STEPS.map((s, i) => (
+                <div key={i} style={{
+                  width: i === state.currentStep ? 26 : 12,
+                  height: 12, borderRadius: 6,
+                  background: i <= state.currentStep ? '#ffd23f' : 'rgba(255,255,255,0.25)',
+                  border: `2px solid ${i <= state.currentStep ? '#7a3e00' : 'rgba(15,34,102,0.6)'}`,
+                  opacity: i < state.currentStep ? 0.7 : 1,
+                  transition: 'all 0.3s',
+                }} />
+              ))}
+            </div>
 
             {/* Skip option (only for non-critical steps) */}
-            {state.currentStep > 1 && !claimWaiting && (
+            {state.currentStep > 1 && (
               <button
                 onClick={onComplete}
                 style={{
-                  width: '100%', marginTop: 8, padding: '8px',
+                  display: 'block', margin: '10px auto 0', padding: '8px 14px', minHeight: 36,
                   background: 'none', border: 'none',
-                  color: 'rgba(255,255,255,0.2)', fontSize: 12,
-                  cursor: 'pointer', fontFamily: 'monospace',
+                  color: '#dbe8ff', fontSize: 14, fontWeight: 700, textDecoration: 'underline',
+                  cursor: 'pointer', fontFamily: 'system-ui, sans-serif', letterSpacing: 0,
                 }}
               >
                 Skip tutorial
@@ -573,14 +588,14 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
 
   const h = Math.round(offlineHours)
   const items: DigestItem[] = [
-    { icon: '⏰', text: `Tu étais absent${h >= 2 ? 'e' : ''} depuis ${h < 1 ? 'moins d\'une heure' : h === 1 ? '1 heure' : `${h} heures`}`, color: 'rgba(255,255,255,0.4)' },
-    ...(totalResources > 0 ? [{ icon: 'box', text: 'Ressources accumulées pendant ton absence', value: `+${totalResources.toLocaleString()}`, color: '#10B981' }] : []),
-    ...(newTDC > 0 ? [{ icon: '◆', text: 'HEX gagnés offline', value: `+${parseFloat(String(newTDC ?? 0)).toFixed(0)} ◆`, color: '#F59E0B' }] : []),
+    { icon: 'alarm', text: `You were away for ${h < 1 ? 'less than an hour' : h === 1 ? '1 hour' : `${h} hours`}`, color: '#dbe8ff' },
+    ...(totalResources > 0 ? [{ icon: 'box', text: 'Resources gathered while you were away', value: `+${totalResources.toLocaleString()}`, color: '#4ade80' }] : []),
+    ...(newTDC > 0 ? [{ icon: 'hex_coin', text: 'HEX earned offline', value: `+${parseFloat(String(newTDC ?? 0)).toFixed(0)} HEX`, color: '#F59E0B' }] : []),
     ...battles.map(b => ({
-      icon: b.won ? '' : '',
-      text: b.won ? `Victoire : ${b.territory} conquis !` : `Défense échouée : ${b.territory} perdu`,
-      value: b.won && b.resources ? `+${b.resources} ` : undefined,
-      color: b.won ? '#10B981' : '#EF4444',
+      icon: b.won ? 'trophy' : 'skull',
+      text: b.won ? `Victory: ${b.territory} captured!` : `Defense failed: ${b.territory} lost`,
+      value: b.won && b.resources ? `+${b.resources}` : undefined,
+      color: b.won ? '#4ade80' : '#fca5a5',
     })),
   ]
 
@@ -592,32 +607,32 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
       style={{
         position: 'fixed', inset: 0, zIndex: 9000,
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        background: 'rgba(5,5,8,0.88)', backdropFilter: 'blur(8px)',
+        background: 'rgba(10,24,70,0.72)',
         padding: 24,
       }}
     >
       <div style={{
         width: '100%', maxWidth: 400,
-        background: 'rgba(10,10,20,0.99)',
-        border: '1px solid rgba(255,255,255,0.08)',
-        borderRadius: 16, overflow: 'hidden',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.6)',
+        background: 'linear-gradient(180deg, #2f5fd0 0%, #1e3c8f 100%)',
+        border: '3px solid #0f2266',
+        borderRadius: 24, overflow: 'hidden',
+        boxShadow: '0 8px 0 #0f2266, 0 20px 40px rgba(0,0,0,0.35)',
       }}>
         <div style={{
           padding: '24px 24px 16px',
-          background: 'rgba(0,255,135,0.06)',
-          borderBottom: '1px solid rgba(0,255,135,0.15)',
+          background: 'radial-gradient(circle at 50% 40%, #8fd3ff 0%, #3a7fe0 100%)',
+          borderBottom: '3px solid #0f2266',
           textAlign: 'center',
         }}>
-          <div style={{ fontSize: 32, marginBottom: 8 }}></div>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8 }}><IconSVG id="castle" size={48} /></div>
           <div style={{
-            fontFamily: "'Bebas Neue', sans-serif",
-            fontSize: 26, letterSpacing: '1px', color: '#fff',
+            fontFamily: 'var(--font-heading)', fontWeight: 400,
+            fontSize: 28, letterSpacing: 0.5, color: '#fff', textShadow: '0 3px 0 rgba(0,0,0,0.45)',
           }}>
-            PENDANT TON ABSENCE
+            WHILE YOU WERE AWAY
           </div>
-          <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-            Ton empire n'a jamais cessé de travailler
+          <div style={{ fontSize: 14, fontWeight: 600, color: '#fff', marginTop: 6, textTransform: 'none', letterSpacing: 0, fontFamily: 'system-ui, sans-serif' }}>
+            Your empire never stopped working
           </div>
         </div>
 
@@ -631,16 +646,16 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
               style={{
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                 padding: '10px 0',
-                borderBottom: i < items.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+                borderBottom: i < items.length - 1 ? '2px solid rgba(255,255,255,0.1)' : 'none',
               }}
             >
               <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                 <span style={{ fontSize: 16, flexShrink: 0 }}><EmojiIcon emoji={item.icon} size={16} /></span>
-                <span style={{ fontSize: 12, color: item.color || 'rgba(255,255,255,0.4)' }}>{item.text}</span>
+                <span style={{ fontSize: 13, fontWeight: 600, color: item.color || '#dbe8ff', textTransform: 'none', letterSpacing: 0, fontFamily: 'system-ui, sans-serif' }}>{item.text}</span>
               </div>
               {item.value && (
                 <span style={{
-                  fontFamily: 'monospace', fontSize: 13, fontWeight: 600,
+                  fontFamily: 'var(--font-heading)', fontSize: 17,
                   color: item.color || '#fff', flexShrink: 0, marginLeft: 8,
                 }}>
                   {item.value}
@@ -651,18 +666,10 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
         </div>
 
         <div style={{ padding: '0 24px 24px' }}>
-          <motion.button
-            whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}
-            onClick={onDismiss}
-            style={{
-              width: '100%', padding: '14px',
-              background: '#0099cc', border: 'none', borderRadius: 10,
-              color: '#000', fontSize: 15, fontWeight: 700, cursor: 'pointer',
-              fontFamily: "'Bebas Neue', sans-serif", letterSpacing: '1px',
-            }}
-          >
-            Resume Command →
-          </motion.button>
+          <button className="btn-game btn-game-green" onClick={onDismiss}
+            style={{ width: '100%', minHeight: 54, fontSize: 20, fontFamily: 'var(--font-heading)', fontWeight: 400, letterSpacing: 0.5, borderRadius: 16, border: '3px solid #064e3b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+            Resume Command <ChevronRight size={18} strokeWidth={3} />
+          </button>
         </div>
       </div>
     </motion.div>

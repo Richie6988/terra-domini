@@ -1,16 +1,16 @@
 /**
- * OnboardingHotspots — met en évidence les éléments cliquables lors du tutorial.
- * Masque semi-transparent + spotlight circulaire + bulle explicative positionnée.
- * Déclenché par event 'hexod:hotspot:show' / 'hexod:hotspot:hide'.
+ * OnboardingHotspots — highlights clickable elements during the tutorial.
+ * Semi-transparent mask + circular spotlight + positioned tip bubble.
+ * Triggered by event 'hexod:hotspot:show' / 'hexod:hotspot:hide'.
  */
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
 interface Hotspot {
   id: string
-  x: number        // px depuis gauche
-  y: number        // px depuis haut
-  r: number        // rayon spotlight px
+  x: number        // px from left
+  y: number        // px from top
+  r: number        // spotlight radius px
   label: string
   tip: string
   tipDir: 'top' | 'bottom' | 'left' | 'right'
@@ -46,7 +46,7 @@ export function OnboardingHotspots() {
         touchAction: 'none',
       }}
     >
-      {/* Masque SVG avec trous pour chaque hotspot */}
+      {/* SVG mask with a hole for each hotspot */}
       <svg style={{ position: 'absolute', inset: 0, width: '100%', height: '100%' }}>
         <defs>
           <mask id="hotspot-mask">
@@ -58,14 +58,14 @@ export function OnboardingHotspots() {
         </defs>
         <rect
           width="100%" height="100%"
-          fill="rgba(0,0,0,0.72)"
+          fill="rgba(10,24,70,0.7)"
           mask="url(#hotspot-mask)"
         />
-        {/* Cercles de mise en évidence */}
+        {/* Highlight rings */}
         {hotspots.map(h => (
           <g key={h.id}>
-            <circle cx={h.x} cy={h.y} r={h.r} fill="none" stroke="#00FF87" strokeWidth="2" opacity="0.9" />
-            <circle cx={h.x} cy={h.y} r={h.r + 6} fill="none" stroke="#00FF87" strokeWidth="1" opacity="0.4">
+            <circle cx={h.x} cy={h.y} r={h.r} fill="none" stroke="#ffd23f" strokeWidth="4" opacity="1" />
+            <circle cx={h.x} cy={h.y} r={h.r + 6} fill="none" stroke="#ffffff" strokeWidth="2" opacity="0.6">
               <animate attributeName="r" values={`${h.r+6};${h.r+18};${h.r+6}`} dur="2s" repeatCount="indefinite" />
               <animate attributeName="opacity" values="0.4;0;0.4" dur="2s" repeatCount="indefinite" />
             </circle>
@@ -73,7 +73,7 @@ export function OnboardingHotspots() {
         ))}
       </svg>
 
-      {/* Bulles explicatives */}
+      {/* Tip bubbles */}
       {hotspots.map(h => {
         const off = 20 + h.r
         const pos: Record<string, React.CSSProperties> = {
@@ -83,10 +83,10 @@ export function OnboardingHotspots() {
           right:  { left: h.x + off, top: h.y,    transform: 'translateY(-50%)' },
         }
         const arrowStyle: Record<string, React.CSSProperties> = {
-          top:    { bottom: -7, left: '50%', transform: 'translateX(-50%)', borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderTop: '7px solid rgba(0,255,135,0.25)', width: 0, height: 0 },
-          bottom: { top:    -7, left: '50%', transform: 'translateX(-50%)', borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderBottom: '7px solid rgba(0,255,135,0.25)', width: 0, height: 0 },
-          left:   { right:  -7, top:  '50%', transform: 'translateY(-50%)',  borderTop: '7px solid transparent', borderBottom: '7px solid transparent', borderLeft: '7px solid rgba(0,255,135,0.25)', width: 0, height: 0 },
-          right:  { left:   -7, top:  '50%', transform: 'translateY(-50%)',  borderTop: '7px solid transparent', borderBottom: '7px solid transparent', borderRight: '7px solid rgba(0,255,135,0.25)', width: 0, height: 0 },
+          top:    { bottom: -7, left: '50%', transform: 'translateX(-50%)', borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderTop: '7px solid #0f2266', width: 0, height: 0 },
+          bottom: { top:    -7, left: '50%', transform: 'translateX(-50%)', borderLeft: '7px solid transparent', borderRight: '7px solid transparent', borderBottom: '7px solid #0f2266', width: 0, height: 0 },
+          left:   { right:  -7, top:  '50%', transform: 'translateY(-50%)',  borderTop: '7px solid transparent', borderBottom: '7px solid transparent', borderLeft: '7px solid #0f2266', width: 0, height: 0 },
+          right:  { left:   -7, top:  '50%', transform: 'translateY(-50%)',  borderTop: '7px solid transparent', borderBottom: '7px solid transparent', borderRight: '7px solid #0f2266', width: 0, height: 0 },
         }
         return (
           <motion.div
@@ -97,16 +97,16 @@ export function OnboardingHotspots() {
             style={{
               position: 'absolute', pointerEvents: 'none',
               ...pos[h.tipDir],
-              maxWidth: 200,
-              background: 'rgba(4,4,16,0.96)',
-              border: '1px solid rgba(0,255,135,0.25)',
-              borderRadius: 12, padding: '10px 14px',
-              boxShadow: '0 4px 24px rgba(0,0,0,0.6)',
+              maxWidth: 230,
+              background: 'linear-gradient(180deg, #2f5fd0, #1e3c8f)',
+              border: '3px solid #0f2266',
+              borderRadius: 16, padding: '10px 14px',
+              boxShadow: '0 5px 0 #0f2266',
             }}
           >
             <div style={{ position: 'absolute', ...arrowStyle[h.tipDir] }} />
-            <div style={{ fontSize: 12, fontWeight: 800, color: '#00FF87', marginBottom: 4 }}>{h.label}</div>
-            <div style={{ fontSize: 11, color: '#9CA3AF', lineHeight: 1.5 }}>{h.tip}</div>
+            <div style={{ fontSize: 17, color: '#ffd23f', marginBottom: 4, fontFamily: 'var(--font-heading)', letterSpacing: 0.5, textTransform: 'uppercase', textShadow: '0 2px 0 rgba(0,0,0,0.45)' }}>{h.label}</div>
+            <div style={{ fontSize: 13, color: '#fff', fontWeight: 600, lineHeight: 1.45, textTransform: 'none', letterSpacing: 0, fontFamily: 'system-ui, sans-serif' }}>{h.tip}</div>
           </motion.div>
         )
       })}
@@ -114,7 +114,7 @@ export function OnboardingHotspots() {
   )
 }
 
-/** Helper — déclenche les hotspots depuis n'importe quel composant */
+/** Helper — show hotspots from any component */
 export function showHotspots(spots: Hotspot[]) {
   window.dispatchEvent(new CustomEvent('hexod:hotspot:show', { detail: { spots } }))
 }
@@ -122,7 +122,7 @@ export function hideHotspots() {
   window.dispatchEvent(new CustomEvent('hexod:hotspot:hide'))
 }
 
-/** Hotspots prédéfinis pour le tutorial step 2 */
+/** Predefined hotspots for the tutorial */
 export function showTutorialHotspots() {
   const W = window.innerWidth, H = window.innerHeight
   showHotspots([
@@ -130,15 +130,15 @@ export function showTutorialHotspots() {
       id: 'missions-btn',
       x: 38, y: H - 84,
       r: 32,
-      label: 'Missions du jour',
-      tip: 'Tes objectifs quotidiens. Commence ici chaque jour.',
+      label: 'Daily Missions',
+      tip: 'Your daily objectives. Start here every day.',
       tipDir: 'right',
     },
     {
       id: 'poi-filter',
       x: 34, y: 60,
       r: 28,
-      label: 'Filtres POI',
+      label: 'POI Filters',
       tip: 'Filter special zones by type or rarity.',
       tipDir: 'right',
     },
@@ -146,8 +146,8 @@ export function showTutorialHotspots() {
       id: 'my-territories',
       x: 34, y: 110,
       r: 28,
-      label: '⬡ Mes zones',
-      tip: 'Accès rapide à tous tes territoires. Clique pour vous y téléporter.',
+      label: 'My Zones',
+      tip: 'Quick access to all your territories. Click one to fly there.',
       tipDir: 'right',
     },
     {
@@ -155,7 +155,7 @@ export function showTutorialHotspots() {
       x: W / 2, y: H - 40,
       r: 120,
       label: 'Navigation',
-      tip: 'Combat, Alliance, Profil, Crypto — tout est là.',
+      tip: 'Combat, Alliance, Profile, Crypto: it is all here.',
       tipDir: 'top',
     },
   ])

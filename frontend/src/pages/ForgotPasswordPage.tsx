@@ -7,14 +7,9 @@ import { Link } from 'react-router-dom'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { api } from '../services/api'
-import { EmojiIcon } from '../components/shared/emojiIcons'
+import { Mail, MailCheck, ArrowLeft, Loader2, ChevronRight } from 'lucide-react'
+import { HexBackground, AuthBrand } from './LoginPage'
 
-const inputSt: React.CSSProperties = {
-  width: '100%', padding: '12px 14px', boxSizing: 'border-box',
-  background: 'rgba(0,153,204,0.06)', border: '1px solid rgba(0,153,204,0.15)',
-  borderRadius: 10, outline: 'none', color: '#e0f0ff', fontSize: 15,
-  fontFamily: "'Share Tech Mono', monospace",
-}
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('')
@@ -38,85 +33,45 @@ export default function ForgotPasswordPage() {
   }, [email])
 
   return (
-    <div style={{
-      minHeight: '100vh', display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center', padding: 20,
-      background: 'radial-gradient(ellipse at center, #0a0a12 0%, #000 70%)',
-      fontFamily: "'Orbitron', system-ui, sans-serif",
-    }}>
-      <motion.div
-        initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-        style={{
-          width: '100%', maxWidth: 400, padding: 32,
-          background: 'rgba(5,5,15,0.9)', borderRadius: 16,
-          border: '1px solid rgba(0,153,204,0.15)',
-          boxShadow: '0 0 80px rgba(0,153,204,0.08)',
-        }}
-      >
-        {/* Header */}
-        <div style={{ textAlign: 'center', marginBottom: 24 }}>
-          <div style={{ fontSize: 24, fontWeight: 900, color: '#fff', letterSpacing: 6, marginBottom: 8 }}>
-            HEX<span style={{ color: '#0099cc' }}>O</span>D
-          </div>
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', letterSpacing: 3 }}>
-            PASSWORD RECOVERY
-          </div>
+    <div className="auth-page">
+      <HexBackground />
+      <div className="auth-wrapper">
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} style={{ marginBottom: 24 }}>
+          <AuthBrand small />
+        </motion.div>
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="auth-card">
+          {sent ? (
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="auth-center">
+              <div className="auth-badge auth-badge--ok"><MailCheck size={30} /></div>
+              <div className="auth-title">CHECK YOUR INBOX</div>
+              <div className="auth-subtitle">
+                If <strong>{email}</strong> is registered, you'll receive a password reset link. Check your spam folder too.
+              </div>
+              <div className="auth-hint">The link expires in 24 hours.</div>
+              <Link to="/login" className="auth-btn auth-btn--ghost">BACK TO LOGIN</Link>
+            </motion.div>
+          ) : (
+            <form onSubmit={handleSubmit}>
+              <div className="auth-card__head">
+                <div className="auth-title">PASSWORD RECOVERY</div>
+                <div className="auth-subtitle">Enter your account email and we'll send you a reset link.</div>
+              </div>
+              <label className="auth-label" htmlFor="forgot-email">EMAIL ADDRESS</label>
+              <div className="auth-field">
+                <Mail size={18} className="auth-field__icon" />
+                <input id="forgot-email" type="email" value={email} onChange={e => setEmail(e.target.value)}
+                  required placeholder="commander@hexod.io" autoComplete="email" className="auth-input auth-input--icon" autoFocus />
+              </div>
+              <button type="submit" disabled={loading} className="auth-btn">
+                {loading ? <><Loader2 size={18} className="auth-spin" /> SENDING…</> : <>SEND RESET LINK <ChevronRight size={18} strokeWidth={3} /></>}
+              </button>
+            </form>
+          )}
+        </motion.div>
+        <div className="auth-footer" style={{ marginTop: 24 }}>
+          <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><ArrowLeft size={14} /> BACK TO LOGIN</Link>
         </div>
-
-        {sent ? (
-          /* Success state */
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 40, marginBottom: 16 }}></div>
-            <div style={{ fontSize: 12, color: '#e0f0ff', marginBottom: 8, fontWeight: 700, letterSpacing: 2 }}>
-              CHECK YOUR INBOX
-            </div>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', lineHeight: 1.6, fontFamily: 'system-ui' }}>
-              If <strong style={{ color: '#0099cc' }}>{email}</strong> is registered, 
-              you'll receive a password reset link. Check your spam folder too.
-            </p>
-            <p style={{ fontSize: 11, color: 'rgba(255,255,255,0.25)', marginTop: 16, fontFamily: 'system-ui' }}>
-              Link expires in 24 hours.
-            </p>
-            <Link to="/login" style={{
-              display: 'inline-block', marginTop: 20, padding: '14px 28px',
-              background: 'rgba(0,153,204,0.15)', border: '1px solid rgba(0,153,204,0.3)',
-              borderRadius: 10, outline: 'none', color: '#0099cc', fontSize: 11, fontWeight: 700,
-              letterSpacing: 2, textDecoration: 'none',
-            }}>
-              ◆ BACK TO LOGIN
-            </Link>
-          </motion.div>
-        ) : (
-          /* Form */
-          <form onSubmit={handleSubmit}>
-            <label style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', letterSpacing: 2, display: 'block', marginBottom: 6 }}>
-              EMAIL ADDRESS
-            </label>
-            <input
-              type="email" value={email} onChange={e => setEmail(e.target.value)}
-              required placeholder="commander@hexod.io" style={inputSt}
-              autoFocus
-            />
-
-            <button type="submit" disabled={loading} style={{
-              width: '100%', padding: '12px 0', marginTop: 16,
-              background: loading ? 'rgba(0,153,204,0.1)' : 'linear-gradient(135deg, #0099cc, #0077aa)',
-              border: 'none', borderRadius: 10, cursor: loading ? 'wait' : 'pointer',
-              color: '#fff', fontSize: 10, fontWeight: 900, letterSpacing: 3,
-              fontFamily: "'Orbitron', sans-serif",
-              boxShadow: loading ? 'none' : '0 4px 20px rgba(0,153,204,0.3)',
-            }}>
-              {loading ? '◆ SENDING...' : '◆ SEND RESET LINK'}
-            </button>
-          </form>
-        )}
-
-        <div style={{ textAlign: 'center', marginTop: 20, fontSize: 10 }}>
-          <Link to="/login" style={{ color: 'rgba(0,200,255,0.5)', textDecoration: 'none', letterSpacing: 2 }}>
-            ← BACK TO LOGIN
-          </Link>
-        </div>
-      </motion.div>
+      </div>
     </div>
   )
 }
