@@ -346,6 +346,20 @@ const RARITY_COLORS = {
 }}>×</button>
 ```
 
+### UI KIT v2 (2026-10-17) — `index.css` "HEXOD UI KIT v2"
+Use these classes instead of re-inventing inline styles:
+`hx-card` (+`--interactive` hover lift, `--accent`), `hx-section-title`, `hx-tabs`/`hx-tab` (`aria-selected`),
+`hx-stat`/`__label`/`__value`(`--accent`), `hx-stat-grid`, `hx-chip`(`--accent`), `hx-progress`/`__fill`,
+`hx-close`, `hx-icon-btn` (40px), `hx-input`, `hx-empty`/`__title`, `hx-skeleton`, `hx-divider`, `hx-rise`.
+Accent: `--accent` CSS var (GlassPanel sets it from its `accent` prop; elsewhere `style={{ ['--accent' as any]: '#cc8800' }}`).
+Tokens: `--hx-text/-2/-3`, `--hx-line(-strong)`, `--hx-surface(-2)`, `--acc-<panel>`, `--rar-<rarity>`.
+GlassPanel: `title, onClose, accent, width, icon?, subtitle?` — × close (aria-label), ESC closes, full-screen on phones.
+Minimum font size: 9px.
+
+### QA screenshots (dev only)
+`/?nointro` skips the 3D globe; `window.__hexod` = Zustand store (`__hexod.getState().setActivePanel('empire')`).
+Both are compiled out of production builds (`import.meta.env.DEV`).
+
 ### Icons — always use iconBank
 ```tsx
 import { IconSVG } from '../shared/iconBank'
