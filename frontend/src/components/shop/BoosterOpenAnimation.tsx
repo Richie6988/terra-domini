@@ -159,18 +159,18 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
 
   const bc=bestCard?RC[bestCard.rarity]:'#F59E0B'
   const counts = Object.keys(RK).map(r => ({ r, n: cards.filter(c => c.rarity === r).length })).filter(x => x.n > 0).reverse()
-  const orb = "'Orbitron', sans-serif"
+  const orb = 'var(--font-heading)'
   return (
     <div style={{position:'fixed',inset:0,zIndex:9999,background:'radial-gradient(ellipse at 50% 42%, #14284f 0%, #081326 48%, #020208 100%)',overflow:'hidden'}}>
       <div ref={elRef} style={{position:'absolute',inset:0}} />
       {/* Header */}
       <div style={{position:'absolute',top:22,left:0,right:0,textAlign:'center',pointerEvents:'none',padding:'0 64px'}}>
-        <div style={{fontSize:10,letterSpacing:4,color:'rgba(255,255,255,0.5)',fontFamily:orb}}>HEXOD BOOSTER</div>
-        <div style={{fontSize:18,fontWeight:900,letterSpacing:3,color:'#fbbf24',fontFamily:orb,textShadow:'0 0 18px rgba(251,191,36,0.55)',marginTop:4,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
+        <div style={{fontSize: 11,letterSpacing:0.5,color:'rgba(255,255,255,0.5)',fontFamily:orb}}>HEXOD BOOSTER</div>
+        <div style={{fontSize:18,fontWeight:900,letterSpacing:0.5,color:'#fbbf24',fontFamily:orb,textShadow:'0 2px 0 rgba(0,0,0,0.45)',marginTop:4,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
           {(packName || 'BOOSTER PACK').toUpperCase()}
         </div>
         {(phase==='reveal'||phase==='done') && cards.length>0 && (
-          <div style={{display:'inline-flex',alignItems:'center',gap:8,marginTop:10,padding:'4px 12px',borderRadius:999,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.12)',fontSize:11,color:'#e2e8f0',fontFamily:"'Share Tech Mono', monospace"}}>
+          <div style={{display:'inline-flex',alignItems:'center',gap:8,marginTop:10,padding:'4px 12px',borderRadius:999,background:'rgba(255,255,255,0.06)',border:'2px solid rgba(255,255,255,0.12)',fontSize:11,color:'#e2e8f0',fontFamily:"'Share Tech Mono', monospace"}}>
             REVEALED {revealed}/{cards.length}
           </div>
         )}
@@ -185,35 +185,35 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
           style={{position:'absolute',top:'50%',left:'50%',width:340,height:340,marginLeft:-170,marginTop:-170,borderRadius:'50%',pointerEvents:'none',
             background:'radial-gradient(circle, rgba(245,158,11,0.28) 0%, rgba(245,158,11,0.08) 40%, transparent 70%)'}} />)}
         {phase==='pack'&&(<motion.button key="tap" onClick={doExplode} initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} exit={{opacity:0}}
-          style={{position:'absolute',bottom:72,left:'50%',x:'-50%',padding:'14px 30px',borderRadius:999,cursor:'pointer',border:'1.5px solid rgba(251,191,36,0.6)',
-            background:'linear-gradient(180deg, rgba(251,191,36,0.22), rgba(251,191,36,0.06))',boxShadow:'0 0 30px rgba(251,191,36,0.35), inset 0 1px 0 rgba(255,255,255,0.15)',
-            color:'#fbbf24',fontSize:14,fontWeight:900,letterSpacing:4,fontFamily:orb,textShadow:'0 0 16px rgba(251,191,36,0.6)'}}>
+          style={{position:'absolute',bottom:72,left:'50%',x:'-50%',padding:'14px 30px',borderRadius:999,cursor:'pointer',border:'3px solid rgba(251,191,36,0.6)',
+            background:'linear-gradient(180deg, rgba(251,191,36,0.22), rgba(251,191,36,0.06))',boxShadow:'0 4px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.15)',
+            color:'#fbbf24',fontSize:14,fontWeight:900,letterSpacing:0.5,fontFamily:orb,textShadow:'0 2px 0 rgba(0,0,0,0.45)'}}>
           <motion.span animate={{opacity:[0.6,1,0.6]}} transition={{duration:1.5,repeat:Infinity}}>TAP TO OPEN</motion.span>
-          <div style={{fontSize:10,letterSpacing:2,color:'rgba(255,255,255,0.55)',marginTop:4,fontWeight:400}}>{cards.length} TOKENS INSIDE</div>
+          <div style={{fontSize: 11,letterSpacing:0.5,color:'rgba(255,255,255,0.55)',marginTop:4,fontWeight:400}}>{cards.length} TOKENS INSIDE</div>
         </motion.button>)}
         {phase==='explode'&&(<motion.div key="white" initial={{opacity:0.9}} animate={{opacity:0}} transition={{duration:0.6}}
           style={{position:'absolute',inset:0,background:'#fff',pointerEvents:'none'}} />)}
         {phase==='explode'&&(<motion.div key="bang" initial={{opacity:0,scale:2}} animate={{opacity:[0,1,0],scale:[2,3,4]}} transition={{duration:0.8}}
-          style={{position:'absolute',top:'50%',left:'50%',x:'-50%',y:'-50%',color:'#fff',fontSize:24,fontWeight:900,letterSpacing:8,fontFamily:orb}}>OPENING</motion.div>)}
+          style={{position:'absolute',top:'50%',left:'50%',x:'-50%',y:'-50%',color:'#fff',fontSize:24,fontWeight:900,letterSpacing:0.5,fontFamily:orb}}>OPENING</motion.div>)}
         {phase==='done'&&(<motion.div key="sum" initial={{opacity:0,y:40}} animate={{opacity:1,y:0}} transition={{delay:0.3}}
           style={{position:'absolute',bottom:28,left:16,right:16,margin:'0 auto',maxWidth:420,display:'flex',flexDirection:'column',alignItems:'center',gap:12,zIndex:10,
-            padding:'16px 18px',borderRadius:18,background:'linear-gradient(180deg, rgba(13,27,42,0.92), rgba(6,14,26,0.96))',border:`1.5px solid ${bc}55`,boxShadow:`0 0 40px ${bc}30, 0 18px 50px rgba(0,0,0,0.6)`}}>
+            padding:'16px 18px',borderRadius:18,background:'linear-gradient(180deg, rgba(13,27,42,0.92), rgba(6,14,26,0.96))',border:`3px solid ${bc}55`,boxShadow:`0 4px 0 rgba(0,0,0,0.35), 0 18px 50px rgba(0,0,0,0.6)`}}>
           {bestCard ? (<>
-            <div style={{fontSize:9,letterSpacing:3,color:'rgba(255,255,255,0.5)',fontFamily:orb}}>BEST PULL</div>
-            <div style={{padding:'8px 18px',borderRadius:999,background:`${bc}1f`,border:`1px solid ${bc}66`,color:bc,fontSize:12,fontWeight:900,letterSpacing:2,fontFamily:orb,textShadow:`0 0 15px ${bc}80`,display:'flex',alignItems:'center',gap:6,maxWidth:'100%'}}>
+            <div style={{fontSize: 11,letterSpacing:0.5,color:'rgba(255,255,255,0.5)',fontFamily:orb}}>BEST PULL</div>
+            <div style={{padding:'8px 18px',borderRadius:999,background:`${bc}1f`,border:`2px solid ${bc}66`,color:bc,fontSize:12,fontWeight:900,letterSpacing:0.5,fontFamily:orb,textShadow:'0 2px 0 rgba(0,0,0,0.45)',display:'flex',alignItems:'center',gap:6,maxWidth:'100%'}}>
               {bestCard.is_shiny&&<IconSVG id="sparkles" size={14} />}
               <span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{(RL[bestCard.rarity]||bestCard.rarity||'').toUpperCase()} · {bestCard.poi_name||bestCard.h3_index?.slice(-6)}</span>
             </div>
             <div style={{display:'flex',gap:6,flexWrap:'wrap',justifyContent:'center'}}>
               {counts.map(({r,n})=>(
-                <span key={r} style={{padding:'3px 10px',borderRadius:999,fontSize:10,fontWeight:700,letterSpacing:1,fontFamily:orb,color:RC[r],background:`${RC[r]}18`,border:`1px solid ${RC[r]}44`}}>{n} × {(RL[r]||r).toUpperCase()}</span>
+                <span key={r} style={{padding:'3px 10px',borderRadius:999,fontSize: 11,fontWeight:700,letterSpacing:0.5,fontFamily:orb,color:RC[r],background:`${RC[r]}18`,border:`2px solid ${RC[r]}44`}}>{n} × {(RL[r]||r).toUpperCase()}</span>
               ))}
             </div>
-            <div style={{fontSize:10,color:'rgba(255,255,255,0.55)',letterSpacing:1,fontFamily:"'Share Tech Mono', monospace"}}>{cards.length} TOKENS REVEALED</div>
+            <div style={{fontSize: 11,color:'rgba(255,255,255,0.55)',letterSpacing:0.5,fontFamily:"'Share Tech Mono', monospace"}}>{cards.length} TOKENS REVEALED</div>
           </>) : (
-            <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',letterSpacing:1,fontFamily:orb}}>THIS PACK WAS EMPTY</div>
+            <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',letterSpacing:0.5,fontFamily:orb}}>THIS PACK WAS EMPTY</div>
           )}
-          <button onClick={onClose} className="btn-game btn-game-gold" style={{width:'100%',minHeight:44,fontSize:12,letterSpacing:3}}>CONTINUE</button></motion.div>)}
+          <button onClick={onClose} className="btn-game btn-game-gold" style={{width:'100%',minHeight:44,fontSize:12,letterSpacing:0.5}}>CONTINUE</button></motion.div>)}
       </AnimatePresence>
       <button onClick={onClose} aria-label="Close" className="hx-close" style={{position:'absolute',top:16,right:16,zIndex:10}}>×</button>
     </div>)

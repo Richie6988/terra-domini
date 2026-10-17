@@ -3,7 +3,7 @@
  */
 import { useState, useRef } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import { Users, Shield, Sword, TrendingUp, Crown } from 'lucide-react'
+import { Users, Shield, Sword, TrendingUp, Crown, Search, Plus, MessageSquare, Handshake, ArrowLeftRight, Home } from 'lucide-react'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { allianceApi, api } from '../../services/api'
@@ -12,19 +12,11 @@ import { GlassPanel } from '../shared/GlassPanel'
 import { useAllianceChat } from '../../hooks/useAllianceChat'
 import type { Alliance, AllianceMember } from '../../types'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { IconSVG } from '../shared/iconBank'
 
-const textInput: React.CSSProperties = {
-  background: 'rgba(255,255,255,0.04)',
-  border: '1px solid rgba(255,255,255,0.1)',
-  borderRadius: 8,
-  padding: '9px 12px',
-  color: '#e2e8f0',
-  fontSize: 13,
-  outline: 'none',
-  width: '100%',
-  boxSizing: 'border-box' as const,
-}
+const ACC = '#3b82f6'
 
+const textInput: React.CSSProperties = { marginBottom: 12 }
 
 const TIER_COLORS: Record<string, string> = {
   squad: '#3B82F6', guild: '#8B5CF6', federation: '#F59E0B'
@@ -35,46 +27,49 @@ const ROLE_ICONS: Record<string, string> = {
 
 // ── Shared helpers ──
 function MiniTag({ color, children }: { color: string; children: React.ReactNode }) {
-  return <span style={{ padding: '2px 8px', borderRadius: 10, background: `${color}15`, color, fontSize: 8, fontWeight: 700, border: `1px solid ${color}30` }}>{children}</span>
+  return <span className="hx-chip" style={{ background: `${color}1c`, color, borderColor: `${color}55`, textTransform: 'uppercase' }}>{children}</span>
 }
 function StatBox({ label, value, icon }: { label: string; value: string | number; icon?: React.ReactNode }) {
   return (
-    <div style={{ padding: '10px 8px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', textAlign: 'center' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, color: '#8B5CF6', marginBottom: 4 }}>{icon}<span style={{ fontSize: 16, fontWeight: 900 }}>{value}</span></div>
-      <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, textTransform: 'uppercase' as const }}>{label}</div>
+    <div className="hx-card" style={{ padding: '12px 12px' }}>
+      <div className="hx-stat">
+        <span className="hx-stat__label" style={{ display: 'flex', alignItems: 'center', gap: 5 }}>{icon}{label.toUpperCase()}</span>
+        <span className="hx-stat__value hx-stat__value--accent">{value}</span>
+      </div>
     </div>
   )
 }
 function Empty({ text }: { text: string }) {
-  return <div style={{ padding: 40, textAlign: 'center', color: 'rgba(255,255,255,0.25)', fontSize: 12 }}>{text}</div>
+  return <div className="hx-empty"><Users size={32} /><div className="hx-empty__title">{text}</div></div>
 }
-const primaryBtn: React.CSSProperties = { padding: '10px 16px', borderRadius: 10, border: 'none', cursor: 'pointer', background: 'linear-gradient(135deg, #8B5CF6, #7C3AED)', color: '#fff', fontSize: 11, fontWeight: 700, letterSpacing: 1 }
-const dangerBtn: React.CSSProperties = { padding: '10px 16px', borderRadius: 10, border: '1px solid rgba(220,38,38,0.3)', cursor: 'pointer', background: 'rgba(220,38,38,0.08)', color: '#dc2626', fontSize: 11, fontWeight: 700, letterSpacing: 1 }
-const labelStyle: React.CSSProperties = { fontSize: 8, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, marginBottom: 6, textTransform: 'uppercase' as const }
+const primaryBtn: React.CSSProperties = { fontSize: 11, minHeight: 40 }
+const dangerBtn: React.CSSProperties = { minHeight: 40, fontSize: 11, color: '#fca5a5' }
+const labelStyle: React.CSSProperties = { display: 'block', fontSize: 11, fontWeight: 700, color: 'rgba(226,232,240,0.55)', letterSpacing:0.5, marginBottom: 6, textTransform: 'uppercase' as const }
 
+
+const TAB_META: Record<string, { label: string; icon: React.ReactNode }> = {
+  overview: { label: 'Overview', icon: <Home size={13} /> },
+  members: { label: 'Members', icon: <Users size={13} /> },
+  diplomacy: { label: 'Diplomacy', icon: <Handshake size={13} /> },
+  create: { label: 'Create', icon: <Plus size={13} /> },
+  search: { label: 'Search', icon: <Search size={13} /> },
+  trade: { label: 'Trade', icon: <ArrowLeftRight size={13} /> },
+}
 
 function AlliancePanelTabBar({ tabs, active, onChange }: { tabs: string[]; active: string; onChange: (t: string) => void }) {
   return (
-    <div style={{ display: 'flex', gap: 4, padding: '10px 20px 0', background: 'rgba(255,255,255,0.02)', flexShrink: 0 }}>
+    <div className="hx-tabs" role="tablist">
       {tabs.map(t => (
-        <button key={t} onClick={() => onChange(t)} style={{
-          flex: 1, padding: '8px 6px', borderRadius: '8px 8px 0 0', border: 'none', cursor: 'pointer',
-          background: active === t ? 'rgba(139,92,246,0.15)' : 'transparent',
-          borderBottom: active === t ? '2px solid #8B5CF6' : '2px solid transparent',
-          color: active === t ? '#C084FC' : '#6B7280', fontSize: 12, fontWeight: active === t ? 600 : 400,
-          textTransform: 'capitalize',
-        }}>{t}</button>
+        <button key={t} role="tab" className="hx-tab" aria-selected={active === t} onClick={() => onChange(t)}>
+          {TAB_META[t]?.icon}{TAB_META[t]?.label ?? t}
+        </button>
       ))}
     </div>
   )
 }
 
 function SectionLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.08em', textTransform: 'uppercase', margin: '12px 0 6px', fontWeight: 500 }}>
-      {children}
-    </div>
-  )
+  return <div className="hx-section-title" style={{ marginTop: 6 }}>{children}</div>
 }
 
 export function AlliancePanel({ onClose }: { onClose: () => void }) {
@@ -94,7 +89,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
   const { data: membersData } = useQuery({
     queryKey: ['alliance-members', alliance?.id],
     queryFn: () => allianceApi.members(alliance!.id),
-    enabled: !!alliance?.id && tab === 'members',
+    enabled: !!alliance?.id && (tab === 'members' || tab === 'overview'),
   })
 
   const { data: searchResults } = useQuery({
@@ -141,30 +136,51 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
   const allianceInfo: Alliance | null = membersData?.alliance ?? null
 
   return (
-    <PanelShell title="Alliance & Diplomacy" icon={<Users size={18} color="#8B5CF6" />} onClose={onClose}>
+    <PanelShell title="ALLIANCE" icon={<IconSVG id="handshake" size={24} />} onClose={onClose}
+      subtitle={alliance ? `[${alliance.tag}] ${alliance.name}` : 'Join forces with other commanders'}>
       {/* Tabs */}
       <AlliancePanelTabBar
         tabs={alliance
           ? ['overview', 'members', 'diplomacy', 'trade']
-          : ['create', 'search', 'trade']}
+          : ['overview', 'create', 'search', 'trade']}
         active={tab}
         onChange={setTab as any}
       />
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
+      <div>
+
+        {/* ── NO ALLIANCE — landing ─────────────────────────────────────── */}
+        {tab === 'overview' && !alliance && (
+          <div className="hx-empty hx-rise" style={{ padding: '36px 20px', gap: 12 }}>
+            <IconSVG id="handshake" size={64} />
+            <div className="hx-empty__title" style={{ fontSize: 14 }}>YOU'RE NOT IN AN ALLIANCE</div>
+            <div style={{ fontSize: 12, color: 'rgba(226,232,240,0.6)', maxWidth: 360, lineHeight: 1.5, textTransform: 'none', fontFamily: 'system-ui', letterSpacing: 0 }}>
+              Team up with other commanders to chat, coordinate and conduct diplomacy together.
+            </div>
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center', marginTop: 4 }}>
+              <button className="btn-game btn-game-blue" onClick={() => setTab('create')} style={{ minHeight: 44, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Plus size={15} /> CREATE ALLIANCE
+              </button>
+              <button className="btn-game btn-game-glass" onClick={() => setTab('search')} style={{ minHeight: 44, display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Search size={15} /> FIND AN ALLIANCE
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* ── OVERVIEW ──────────────────────────────────────────────────── */}
         {tab === 'overview' && alliance && (
           <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+            <div className="hx-card hx-card--accent" style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
               <div style={{
-                width: 52, height: 52, borderRadius: 12,
-                background: alliance.banner_color ?? '#10B981',
+                width: 60, height: 60, flexShrink: 0,
+                clipPath: 'polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)',
+                background: `linear-gradient(160deg, ${alliance.banner_color ?? ACC}, ${alliance.banner_color ?? ACC}88)`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 20, fontWeight: 700, color: '#e2e8f0',
-              }}>[{alliance.tag}]</div>
-              <div>
-                <div style={{ fontSize: 17, fontWeight: 500, color: '#e2e8f0' }}>{alliance.name}</div>
+                fontSize: 13, fontWeight: 900, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+              }}>{alliance.tag}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 17, fontWeight: 900, color: '#e2e8f0', letterSpacing:0.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{alliance.name}</div>
                 <div style={{ display: 'flex', gap: 6, marginTop: 4 }}>
                   <MiniTag color={TIER_COLORS[alliance.tier] ?? '#6B7280'}>{alliance.tier}</MiniTag>
                   <MiniTag color="#6B7280">{player?.alliance?.role ?? 'member'}</MiniTag>
@@ -173,16 +189,16 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
             </div>
 
             {allianceInfo && (
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 20 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0,1fr))', gap: 8, marginBottom: 14 }}>
                 <StatBox label="Members" value={allianceInfo.member_count} icon={<Users size={13} />} />
                 <StatBox label="Territories" value={allianceInfo.territory_count} icon={<Shield size={13} />} />
-                <StatBox label="War Score" value={allianceInfo.war_score.toLocaleString()} icon={<Sword size={13} />} />
+                <StatBox label="War Score" value={(allianceInfo.war_score ?? 0).toLocaleString()} icon={<Sword size={13} />} />
               </div>
             )}
 
             {/* Alliance bonuses */}
-            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(139,92,246,0.04)', border: '1px solid rgba(139,92,246,0.12)', marginBottom: 14 }}>
-              <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif", marginBottom: 8 }}>ALLIANCE BONUSES</div>
+            <div className="hx-card" style={{ marginBottom: 14 }}>
+              <div className="hx-section-title" style={{ marginTop: 0 }}>ALLIANCE BONUSES</div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                 {[
                   { label: '+10% DEF', icon: 'ui_shield', active: true },
@@ -191,34 +207,37 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                   { label: 'War Bonus', icon: 'swords', active: (allianceInfo?.member_count || 0) >= 20 },
                 ].map(b => (
                   <span key={b.label} style={{
-                    padding: '4px 8px', borderRadius: 6, fontSize: 8, fontWeight: 600,
-                    background: b.active ? 'rgba(139,92,246,0.08)' : 'rgba(255,255,255,0.03)',
-                    color: b.active ? '#8b5cf6' : 'rgba(255,255,255,0.2)',
-                    border: `1px solid ${b.active ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.05)'}`,
-                  }}><EmojiIcon emoji={b.icon} size={16} /> {b.label}</span>
+                    padding: '5px 10px', borderRadius: 999, fontSize: 11, fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: 6,
+                    background: b.active ? 'rgba(59,130,246,0.14)' : 'rgba(255,255,255,0.03)',
+                    color: b.active ? '#93c5fd' : 'rgba(255,255,255,0.4)',
+                    border: `2px solid ${b.active ? 'rgba(59,130,246,0.4)' : 'rgba(255,255,255,0.08)'}`,
+                    filter: b.active ? undefined : 'grayscale(1)',
+                  }}><EmojiIcon emoji={b.icon} size={18} /> {b.label}</span>
                 ))}
               </div>
             </div>
 
             {/* Alliance chat — real WebSocket */}
-            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.05)', marginBottom: 14 }}>
+            <div className="hx-card" style={{ marginBottom: 14 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
-                <div style={{ fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)', fontFamily: "'Orbitron', sans-serif" }}>ALLIANCE CHAT</div>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', background: chatConnected ? '#22c55e' : '#dc2626' }} title={chatConnected ? 'Connected' : 'Disconnected'} />
+                <div className="hx-section-title" style={{ margin: 0 }}><MessageSquare size={13} /> ALLIANCE CHAT</div>
+                <span className="hx-chip" style={{ color: chatConnected ? '#4ade80' : '#f87171' }} title={chatConnected ? 'Connected' : 'Disconnected'}>
+                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: chatConnected ? '#22c55e' : '#dc2626' }} />{chatConnected ? 'LIVE' : 'OFFLINE'}
+                </span>
               </div>
               <div style={{ maxHeight: 150, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8 }}>
                 {chatMessages.length === 0 && (
-                  <div style={{ padding: 10, fontSize: 8, color: 'rgba(255,255,255,0.25)', textAlign: 'center' }}>No messages yet. Say hello!</div>
+                  <div style={{ padding: 12, fontSize: 11, color: 'rgba(255,255,255,0.45)', textAlign: 'center', textTransform: 'none', fontFamily: 'system-ui', letterSpacing: 0 }}>No messages yet. Say hello!</div>
                 )}
                 {chatMessages.map((m, i) => (
-                  <div key={i} style={{ padding: '4px 8px', borderRadius: 6, background: m.type === 'system' ? 'rgba(139,92,246,0.04)' : 'rgba(255,255,255,0.03)', fontSize: 9 }}>
+                  <div key={i} style={{ padding: '4px 8px', borderRadius: 6, background: m.type === 'system' ? 'rgba(59,130,246,0.06)' : 'rgba(255,255,255,0.04)', fontSize: 11, textTransform: 'none', letterSpacing: 0 }}>
                     {m.type === 'system' ? (
                       <span style={{ color: 'rgba(255,255,255,0.3)', fontStyle: 'italic' }}>{m.text}</span>
                     ) : (
                       <>
-                        <span style={{ fontWeight: 700, color: m.role === 'leader' ? '#cc8800' : '#8b5cf6' }}>{m.user}</span>
-                        <span style={{ color: 'rgba(255,255,255,0.4)', marginLeft: 6 }}>{m.text || m.emoji}</span>
-                        <span style={{ color: 'rgba(255,255,255,0.15)', fontSize: 7, marginLeft: 4 }}>{m.time}</span>
+                        <span style={{ fontWeight: 700, color: m.role === 'leader' ? '#fbbf24' : '#93c5fd' }}>{m.user}</span>
+                        <span style={{ color: 'rgba(226,232,240,0.8)', marginLeft: 6, fontFamily: 'system-ui' }}>{m.text || m.emoji}</span>
+                        <span style={{ color: 'rgba(255,255,255,0.4)', fontSize: 11, marginLeft: 6 }}>{m.time}</span>
                       </>
                     )}
                   </div>
@@ -230,35 +249,41 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                   onKeyDown={e => { if (e.key === 'Enter' && chatInput.trim()) { sendMessage(chatInput.trim()); setChatInput('') } }}
                   placeholder={chatConnected ? 'Type a message...' : 'Connecting...'}
                   disabled={!chatConnected}
-                  style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.08)', fontSize: 10, background: 'rgba(255,255,255,0.02)', outline: 'none', color: '#e2e8f0' }} />
+                  className="hx-input" aria-label="Chat message" style={{ flex: 1 }} />
                 <button onClick={() => { if (chatInput.trim()) { sendMessage(chatInput.trim()); setChatInput('') } }}
                   disabled={!chatConnected || !chatInput.trim()}
-                  style={{ padding: '6px 12px', borderRadius: 6, background: chatConnected ? '#8b5cf6' : '#94a3b8', border: 'none', color: '#fff', fontSize: 8, fontWeight: 700, cursor: 'pointer' }}>SEND</button>
+                  className="btn-game btn-game-blue" style={{ fontSize: 11, padding: '8px 14px' }}>SEND</button>
               </div>
             </div>
 
-            {/* Quick actions */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 14 }}>
+            {/* Quick actions — no backend yet: disabled with SOON chip */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: 8, marginBottom: 14 }}>
               {[
-                { label: 'ASK FOR HELP', icon: '🆘', color: '#dc2626' },
-                { label: 'SHARE RESOURCES', icon: 'box', color: '#22c55e' },
-                { label: 'TRADE TERRITORY', icon: 'arrow_cycle', color: '#cc8800' },
-                { label: 'COORDINATE ATTACK', icon: 'swords', color: '#8b5cf6' },
+                { label: 'ASK FOR HELP', icon: 'alarm', color: '#f87171' },
+                { label: 'SHARE RESOURCES', icon: 'box', color: '#4ade80' },
+                { label: 'TRADE TERRITORY', icon: 'arrow_cycle', color: '#fbbf24' },
+                { label: 'COORDINATE ATTACK', icon: 'swords', color: '#93c5fd' },
               ].map(a => (
-                <button key={a.label} onClick={() => toast.success(`${a.label} — coming soon!`)} style={{
-                  padding: '10px 8px', borderRadius: 8, cursor: 'pointer', fontSize: 7, fontWeight: 700,
-                  background: `${a.color}06`, border: `1px solid ${a.color}15`,
-                  color: a.color, letterSpacing: 1, fontFamily: "'Orbitron', sans-serif",
-                }}><EmojiIcon emoji={a.icon} size={16} /> {a.label}</button>
+                <button key={a.label} disabled aria-disabled="true" title="Coming soon" style={{
+                  padding: '10px 10px', borderRadius: 10, cursor: 'not-allowed', fontSize: 11, fontWeight: 700, minHeight: 44,
+                  background: 'rgba(255,255,255,0.03)', border: '2px solid rgba(255,255,255,0.08)',
+                  color: a.color, letterSpacing:0.5, fontFamily: 'var(--font-heading)', opacity: 0.7,
+                  display: 'flex', alignItems: 'center', gap: 8, textAlign: 'left',
+                }}>
+                  <span style={{ filter: 'grayscale(0.6)' }}><IconSVG id={a.icon} size={22} /></span>
+                  <span style={{ flex: 1 }}>{a.label}</span>
+                  <span className="hx-chip" style={{ fontSize: 11, padding: '2px 6px' }}>SOON</span>
+                </button>
               ))}
             </div>
 
             <button
               onClick={() => leaveMut.mutate()}
               disabled={leaveMut.isPending}
+              className="btn-game btn-game-glass"
               style={{ ...dangerBtn, width: '100%', marginTop: 8 }}
             >
-              Leave Alliance
+              LEAVE ALLIANCE
             </button>
           </div>
         )}
@@ -266,22 +291,22 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
         {/* ── MEMBERS ───────────────────────────────────────────────────── */}
         {tab === 'members' && (
           <div>
-            {members.map(m => (
-              <div key={m.id} style={{
-                display: 'flex', alignItems: 'center', gap: 10,
-                padding: '9px 0', borderBottom: '1px solid rgba(255,255,255,0.05)',
-              }}>
-                <span style={{ fontSize: 18, width: 28 }}>{ROLE_ICONS[m.role] ?? ''}</span>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 500 }}>{m.username}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>
-                    Rank {m.commander_rank} • {m.territories_owned} territories
+            {!membersData && alliance && [0, 1, 2].map(i => <div key={i} className="hx-skeleton" style={{ height: 58, marginBottom: 8, borderRadius: 12 }} />)}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {members.map((m, i) => (
+              <div key={m.id} className="hx-card hx-rise" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', animationDelay: `${i * 40}ms` }}>
+                <IconSVG id={ROLE_ICONS[m.role] || 'person'} size={34} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.display_name || m.username}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 3, fontFamily: "'Share Tech Mono', monospace" }}>
+                    RANK {m.commander_rank} · {m.territories_owned} TERRITORIES
                   </div>
                 </div>
-                <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.3)', textTransform: 'capitalize' }}>{m.role}</span>
+                <MiniTag color={m.role === 'leader' ? '#fbbf24' : m.role === 'officer' ? '#93c5fd' : '#94a3b8'}>{m.role}</MiniTag>
               </div>
             ))}
-            {members.length === 0 && <Empty text="No members data" />}
+            </div>
+            {membersData && members.length === 0 && <Empty text="NO MEMBERS FOUND" />}
           </div>
         )}
 
@@ -292,31 +317,44 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
             <input
               value={proposeTarget} onChange={e => setProposeTarget(e.target.value)}
               placeholder="Target alliance tag (e.g. IRON)"
-              style={textInput}
+              className="hx-input" style={textInput}
             />
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 12 }}>
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
               {(['war', 'ceasefire', 'nap', 'trade', 'alliance'] as const).map(s => (
-                <button key={s} onClick={() => setProposeState(s)} style={{
-                  padding: '5px 11px', borderRadius: 6, fontSize: 12, border: '1px solid',
-                  cursor: 'pointer',
-                  background: proposeState === s ? '#4B5563' : 'rgba(255,255,255,0.04)',
-                  color: s === 'war' ? '#EF4444' : s === 'alliance' ? '#10B981' : '#E5E7EB',
-                  borderColor: proposeState === s ? '#6B7280' : 'rgba(255,255,255,0.08)',
+                <button key={s} onClick={() => setProposeState(s)} aria-pressed={proposeState === s} style={{
+                  padding: '8px 12px', borderRadius: 10, fontSize: 11, fontWeight: 700, letterSpacing:0.5, border: '2px solid', minHeight: 40,
+                  cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, textTransform: 'uppercase',
+                  background: proposeState === s ? 'rgba(59,130,246,0.2)' : 'rgba(255,255,255,0.04)',
+                  color: s === 'war' ? '#f87171' : s === 'alliance' ? '#4ade80' : '#e2e8f0',
+                  borderColor: proposeState === s ? 'rgba(59,130,246,0.7)' : 'rgba(255,255,255,0.1)',
+                  boxShadow: proposeState === s ? '0 4px 0 rgba(0,0,0,0.35)' : 'none',
                 }}>
-                  <EmojiIcon emoji={s === 'war' ? 'swords' : s === 'alliance' ? 'handshake' : s === 'nap' ? 'dove' : s === 'trade' ? 'money_bag' : 'gear'} size={10} /> {s}
+                  <EmojiIcon emoji={s === 'war' ? 'swords' : s === 'alliance' ? 'handshake' : s === 'nap' ? 'dove' : s === 'trade' ? 'money_bag' : 'gear'} size={18} /> {s}
                 </button>
               ))}
             </div>
-            <button onClick={() => proposeMut.mutate()} disabled={!proposeTarget || !proposeState} style={primaryBtn}>
-              Send Proposal
+            <button onClick={() => proposeMut.mutate()} disabled={!proposeTarget || !proposeState} className="btn-game btn-game-blue" style={{ ...primaryBtn, width: '100%' }}>
+              SEND PROPOSAL
             </button>
           </div>
         )}
 
         {/* ── CREATE ────────────────────────────────────────────────────── */}
         {tab === 'create' && (
-          <div>
+          <div className="hx-rise">
             <SectionLabel>New alliance</SectionLabel>
+            {/* Live badge preview */}
+            <div className="hx-card" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+              <div style={{
+                width: 52, height: 52, flexShrink: 0, clipPath: 'polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)',
+                background: `linear-gradient(160deg, ${createForm.banner_color}, ${createForm.banner_color}88)`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+              }}>{createForm.tag || 'TAG'}</div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontSize: 14, fontWeight: 900, color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{createForm.name || 'Your alliance name'}</div>
+                <div style={{ fontSize: 11, color: 'rgba(226,232,240,0.5)', marginTop: 3 }}>PREVIEW</div>
+              </div>
+            </div>
             {[
               { key: 'tag', label: 'Tag (2-6 chars)', placeholder: 'TERRA' },
               { key: 'name', label: 'Name', placeholder: 'Terra Dominators' },
@@ -329,7 +367,7 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
                   onChange={e => setCreateForm(p => ({ ...p, [f.key]: f.key === 'tag' ? e.target.value.toUpperCase() : e.target.value }))}
                   placeholder={f.placeholder}
                   maxLength={f.key === 'tag' ? 6 : 200}
-                  style={textInput}
+                  className="hx-input" aria-label={f.label} style={textInput}
                 />
               </div>
             ))}
@@ -337,18 +375,19 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
             <input
               type="color" value={createForm.banner_color}
               onChange={e => setCreateForm(p => ({ ...p, banner_color: e.target.value }))}
-              style={{ width: '100%', height: 40, borderRadius: 8, border: 'none', cursor: 'pointer', marginBottom: 16 }}
+              aria-label="Banner color"
+              style={{ width: '100%', height: 44, borderRadius: 10, border: '2px solid rgba(255,255,255,0.16)', background: 'rgba(0,0,0,0.3)', padding: 4, cursor: 'pointer', marginBottom: 16 }}
             />
             <button
               onClick={() => createMut.mutate(createForm)}
               disabled={!createForm.tag || !createForm.name || createMut.isPending}
-              className="btn-game btn-game-purple"
-              style={{ width: '100%', padding: '14px', fontSize: 11, letterSpacing: 2, marginTop: 8 }}
+              className="btn-game btn-game-blue"
+              style={{ width: '100%', padding: '14px', fontSize: 11, letterSpacing:0.5, marginTop: 8 }}
             >
               {createMut.isPending ? 'CREATING...' : 'CREATE ALLIANCE'}
             </button>
             {(!createForm.tag || !createForm.name) && (
-              <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)', marginTop: 8, textAlign: 'center', letterSpacing: 1 }}>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 10, textAlign: 'center', letterSpacing:0.5 }}>
                 Fill in tag (2-6 chars) and name to continue
               </div>
             )}
@@ -358,43 +397,52 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
         {/* ── SEARCH ────────────────────────────────────────────────────── */}
         {tab === 'search' && (
           <div>
-            <input
-              value={searchQ} onChange={e => setSearchQ(e.target.value)}
-              placeholder="Search alliances…" style={{ ...textInput, marginBottom: 16 }}
-            />
-            {(searchResults as Alliance[] ?? []).map((a: Alliance) => (
-              <div key={a.id} style={{
-                padding: '12px', background: 'rgba(255,255,255,0.04)',
-                borderRadius: 10, marginBottom: 8,
-                border: '1px solid rgba(255,255,255,0.08)',
-                display: 'flex', alignItems: 'center', gap: 10,
-              }}>
-                <div style={{ width: 40, height: 40, borderRadius: 8, background: '#8B5CF6', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 700, color: '#e2e8f0' }}>
-                  [{a.tag}]
+            <div style={{ position: 'relative', marginBottom: 14 }}>
+              <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'rgba(226,232,240,0.5)' }} />
+              <input
+                value={searchQ} onChange={e => setSearchQ(e.target.value)}
+                placeholder="Search alliances by name…" className="hx-input" aria-label="Search alliances" style={{ paddingLeft: 36 }}
+              />
+            </div>
+            {searchQ.length < 2 && (
+              <div className="hx-empty"><Search size={30} /><div className="hx-empty__title">FIND YOUR ALLIANCE</div>
+                <div style={{ fontSize: 11, textTransform: 'none', fontFamily: 'system-ui', letterSpacing: 0 }}>Type at least 2 characters</div></div>
+            )}
+            {searchQ.length >= 2 && Array.isArray(searchResults) && searchResults.length === 0 && (
+              <div className="hx-empty"><Users size={30} /><div className="hx-empty__title">NO ALLIANCES FOUND</div></div>
+            )}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {(searchResults as Alliance[] ?? []).map((a: Alliance, i: number) => (
+              <div key={a.id} className="hx-card hx-card--interactive hx-rise" style={{ display: 'flex', alignItems: 'center', gap: 12, animationDelay: `${i * 40}ms`, cursor: 'default' }}>
+                <div style={{
+                  width: 46, height: 46, flexShrink: 0, clipPath: 'polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)',
+                  background: `linear-gradient(160deg, ${a.banner_color || ACC}, ${a.banner_color || ACC}88)`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 11, fontWeight: 900, color: '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.6)',
+                }}>{a.tag}</div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</div>
+                  <div style={{ display: 'flex', gap: 6, marginTop: 5, flexWrap: 'wrap' }}>
+                    <MiniTag color={TIER_COLORS[a.tier] ?? '#94a3b8'}>{a.tier}</MiniTag>
+                    <span className="hx-chip"><Users size={11} /> {a.member_count}</span>
+                  </div>
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: '#e2e8f0' }}>{a.name}</div>
-                  <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)' }}>{a.member_count} members • {a.tier}</div>
-                </div>
-                {a.is_recruiting && (
-                  <button onClick={() => joinMut.mutate(a.id)} style={{ ...primaryBtn, width: 'auto', padding: '6px 14px', fontSize: 12, marginTop: 0 }}>
-                    Join
+                {a.is_recruiting ? (
+                  <button onClick={() => joinMut.mutate(a.id)} className="btn-game btn-game-green" style={{ fontSize: 11, padding: '8px 16px', flexShrink: 0 }}>
+                    JOIN
                   </button>
-                )}
+                ) : <span className="hx-chip">CLOSED</span>}
               </div>
             ))}
+            </div>
           </div>
         )}
 
         {/* ── TRADE ─────────────────────────────────────────────────── */}
         {tab === 'trade' && (
-          <div style={{
-            textAlign: 'center', padding: '40px 20px', color: 'rgba(255,255,255,0.3)',
-            fontSize: 8, letterSpacing: 2, fontFamily: "'Orbitron', system-ui, sans-serif",
-          }}>
-            ALLIANCE TRADE
-            <br /><br />
-            COMING SOON — EXCHANGE RESOURCES WITH YOUR ALLIES
+          <div className="hx-empty">
+            <IconSVG id="ui_trade" size={52} />
+            <div className="hx-empty__title">ALLIANCE TRADE <span className="hx-chip" style={{ marginLeft: 6 }}>SOON</span></div>
+            <div style={{ fontSize: 11, textTransform: 'none', fontFamily: 'system-ui', letterSpacing: 0 }}>Exchange resources with your allies.</div>
           </div>
         )}
       </div>
@@ -409,15 +457,16 @@ export function AlliancePanel({ onClose }: { onClose: () => void }) {
 
 // ─── Shared Panel Shell ───────────────────────────────────────────────────────
 function PanelShell({
-  title, icon, children, onClose,
+  title, icon, subtitle, children, onClose,
 }: {
   title: string
   icon: React.ReactNode
+  subtitle?: React.ReactNode
   children: React.ReactNode
   onClose: () => void
 }) {
   return (
-    <GlassPanel title={title} onClose={onClose} accent="#3b82f6">
+    <GlassPanel title={title} onClose={onClose} accent={ACC} icon={icon} subtitle={subtitle}>
       {children}
     </GlassPanel>
   )

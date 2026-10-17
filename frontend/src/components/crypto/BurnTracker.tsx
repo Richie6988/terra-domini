@@ -6,6 +6,7 @@
  */
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
+import { Flame } from 'lucide-react'
 import { BURN_RATES, HEX_TOKEN } from '../../types/blockchain.types'
 
 interface Props {
@@ -38,19 +39,19 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
       <div style={{
         display: 'flex', alignItems: 'center', gap: 6,
         padding: '4px 10px', borderRadius: 16,
-        background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.12)',
+        background: 'rgba(220,38,38,0.06)', border: '2px solid rgba(220,38,38,0.12)',
       }}>
-        <span style={{ fontSize: 10 }}></span>
+        <Flame size={12} color="#f87171" />
         <span style={{
-          fontSize: 8, fontWeight: 900, color: '#dc2626',
+          fontSize: 11, fontWeight: 900, color: '#dc2626',
           fontFamily: "'Share Tech Mono', monospace",
         }}>
           {Math.floor(displayBurned).toLocaleString()} BURNED
         </span>
         {isDeflationary && (
           <span style={{
-            fontSize: 6, color: '#00884a', fontWeight: 700,
-            fontFamily: "'Orbitron', system-ui, sans-serif", letterSpacing: 1,
+            fontSize: 11, color: '#4ade80', fontWeight: 700,
+            fontFamily: 'var(--font-heading)', letterSpacing:0.5,
           }}>
             DEFLATIONARY ↗
           </span>
@@ -65,7 +66,7 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
       <div style={{
         padding: 16, borderRadius: 12, textAlign: 'center',
         background: 'linear-gradient(135deg, rgba(220,38,38,0.06), rgba(220,38,38,0.02))',
-        border: '1.5px solid rgba(220,38,38,0.15)',
+        border: '3px solid rgba(220,38,38,0.15)',
         position: 'relative', overflow: 'hidden',
       }}>
         {/* Animated fire particles */}
@@ -75,12 +76,12 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
         }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
-          <div style={{ fontSize: 10 }}></div>
+          <Flame size={22} color="#f87171" style={{ marginBottom: 4 }} />
           <div style={{
-            fontSize: 7, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing: 3,
-            fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 4,
+            fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.4)', letterSpacing:0.5,
+            fontFamily: 'var(--font-heading)', marginBottom: 4,
           }}>
-            TOTAL HEX BURNED FOREVER
+            TOTAL HEX BURNED <span className="hx-chip" style={{ color: '#fbbf24', marginLeft: 6 }}>SIMULATED</span>
           </div>
           <motion.div
             key={Math.floor(displayBurned)}
@@ -89,13 +90,13 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
             style={{
               fontSize: 22, fontWeight: 900, color: '#dc2626',
               fontFamily: "'Share Tech Mono', monospace",
-              textShadow: '0 0 20px rgba(220,38,38,0.3)',
+              textShadow:'0 2px 0 rgba(0,0,0,0.45)',
             }}
           >
             {Math.floor(displayBurned).toLocaleString()}
           </motion.div>
           <div style={{
-            fontSize: 8, color: 'rgba(255,255,255,0.4)', marginTop: 4,
+            fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 4,
             fontFamily: "'Share Tech Mono', monospace",
           }}>
             {burnPct.toFixed(2)}% of minted supply
@@ -112,22 +113,22 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
         ].map(m => (
           <div key={m.label} style={{
             padding: '8px 6px', borderRadius: 8, textAlign: 'center',
-            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+            background: 'rgba(255,255,255,0.03)', border: '2px solid rgba(255,255,255,0.06)',
           }}>
             <div style={{
-              fontSize: 6, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, marginBottom: 3,
-              fontFamily: "'Orbitron', system-ui, sans-serif",
+              fontSize: 11, color: 'rgba(255,255,255,0.5)', letterSpacing:0.5, marginBottom: 3,
+              fontFamily: 'var(--font-heading)',
             }}>
               {m.label}
             </div>
             <div style={{
-              fontSize: 11, fontWeight: 900, color: m.color,
+              fontSize: 15, fontWeight: 900, color: m.color,
               fontFamily: "'Share Tech Mono', monospace",
             }}>
               {m.value}
             </div>
             <div style={{
-              fontSize: 6, color: 'rgba(255,255,255,0.25)',
+              fontSize: 11, color: 'rgba(255,255,255,0.45)',
               fontFamily: "'Share Tech Mono', monospace",
             }}>
               {m.sub}
@@ -140,19 +141,19 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
       <div style={{
         padding: '8px 12px', borderRadius: 8,
         background: isDeflationary ? 'rgba(0,136,74,0.06)' : 'rgba(204,136,0,0.06)',
-        border: `1px solid ${isDeflationary ? 'rgba(0,136,74,0.15)' : 'rgba(204,136,0,0.15)'}`,
+        border: `2px solid ${isDeflationary ? 'rgba(0,136,74,0.15)' : 'rgba(204,136,0,0.15)'}`,
         display: 'flex', alignItems: 'center', gap: 8,
       }}>
         <div style={{
           width: 8, height: 8, borderRadius: '50%',
-          background: isDeflationary ? '#00884a' : '#cc8800',
-          boxShadow: `0 0 8px ${isDeflationary ? '#00884a' : '#cc8800'}`,
+          background: isDeflationary ? '#22c55e' : '#cc8800',
+          boxShadow: `0 4px 0 rgba(0,0,0,0.35)`,
           animation: 'pulse 2s infinite',
         }} />
         <div style={{
-          fontSize: 7, fontWeight: 700, letterSpacing: 2,
+          fontSize: 11, fontWeight: 700, letterSpacing:0.5,
           color: isDeflationary ? '#00884a' : '#cc8800',
-          fontFamily: "'Orbitron', system-ui, sans-serif",
+          fontFamily: 'var(--font-heading)',
         }}>
           {isDeflationary
             ? 'NET DEFLATIONARY — SUPPLY SHRINKING'
@@ -163,8 +164,8 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
       {/* Burn breakdown */}
       <div>
         <div style={{
-          fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.3)',
-          fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 6,
+          fontSize: 11, fontWeight: 700, letterSpacing:0.5, color: 'rgba(255,255,255,0.5)',
+          fontFamily: 'var(--font-heading)', marginBottom: 6,
         }}>
           BURN SOURCES
         </div>
@@ -176,14 +177,14 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
           { label: 'Ultimate Skills', rate: `${BURN_RATES.ultimateSkillCost} HEX each`, pct: 5 },
         ].map(src => (
           <div key={src.label} style={{
-            display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4,
+            display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8,
           }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 7, color: '#e2e8f0', fontWeight: 600 }}>{src.label}</div>
-              <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)' }}>{src.rate}</div>
+              <div style={{ fontSize: 11, color: '#e2e8f0', fontWeight: 600 }}>{src.label}</div>
+              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)' }}>{src.rate}</div>
             </div>
             <div style={{
-              width: 40, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.05)', overflow: 'hidden',
+              width: 60, height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.05)', overflow: 'hidden',
             }}>
               <div style={{
                 height: '100%', width: `${src.pct}%`, borderRadius: 2,
@@ -191,7 +192,7 @@ export function BurnTracker({ totalBurned = 47832, dailyBurnRate = 1247, totalMi
               }} />
             </div>
             <span style={{
-              fontSize: 7, fontWeight: 700, color: '#dc2626', minWidth: 24, textAlign: 'right',
+              fontSize: 11, fontWeight: 700, color: '#dc2626', minWidth: 24, textAlign: 'right',
               fontFamily: "'Share Tech Mono', monospace",
             }}>
               {src.pct}%

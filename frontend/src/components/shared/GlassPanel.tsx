@@ -38,9 +38,9 @@ export function GlassPanel({
         onClick={onClose}
         style={{
           position: 'fixed', inset: 0, zIndex: 1000,
-          background: 'rgba(0, 5, 15, 0.75)',
-          backdropFilter: 'blur(6px)',
-          WebkitBackdropFilter: 'blur(6px)',
+          background: 'rgba(6, 14, 34, 0.6)',
+          backdropFilter: 'blur(3px)',
+          WebkitBackdropFilter: 'blur(3px)',
         }}
       />
 
@@ -63,19 +63,20 @@ export function GlassPanel({
           maxWidth: 960,
           maxHeight: '92vh',
           pointerEvents: 'auto',
-          background: 'linear-gradient(180deg, #0d1b2a 0%, #0a1628 60%, #060e1a 100%)',
-          border: `2px solid ${accent}40`,
-          borderRadius: 18,
-          boxShadow: `0 0 40px ${accent}15, 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)`,
+          background: 'var(--hx-panel)',
+          border: '3px solid var(--hx-line-strong)',
+          borderRadius: 22,
+          boxShadow: '0 8px 0 var(--hx-ink), 0 24px 50px rgba(0,0,0,0.5), inset 0 2px 0 rgba(255,255,255,0.18)',
           display: 'flex',
           flexDirection: 'column' as const,
           overflow: 'hidden',
         }}>
         {/* Header — banner style */}
         <div style={{
-          padding: '14px 20px',
-          background: `linear-gradient(180deg, ${accent}18 0%, ${accent}08 100%)`,
-          borderBottom: `2px solid ${accent}50`,
+          padding: '12px 16px 12px 18px',
+          background: `linear-gradient(180deg, color-mix(in srgb, ${accent} 78%, #fff 22%) 0%, ${accent} 60%, color-mix(in srgb, ${accent} 82%, #000) 100%)`,
+          borderBottom: '3px solid var(--hx-line-strong)',
+          boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.35)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
@@ -84,63 +85,45 @@ export function GlassPanel({
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
             {icon ? (
               <span style={{
-                width: 36, height: 36, borderRadius: 10, flexShrink: 0,
+                width: 42, height: 42, borderRadius: 14, flexShrink: 0,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                background: `linear-gradient(180deg, ${accent}33, ${accent}14)`,
-                border: `1px solid ${accent}55`,
-                boxShadow: `0 0 14px ${accent}30, inset 0 1px 0 rgba(255,255,255,0.1)`,
-                color: accent,
+                background: 'linear-gradient(180deg, #ffffff 0%, #e3ecff 100%)',
+                border: '3px solid var(--hx-line-strong)',
+                boxShadow: '0 3px 0 rgba(0,0,0,0.35)',
+                color: `color-mix(in srgb, ${accent} 75%, #000)`,
               }}>{icon}</span>
             ) : (
               <span style={{
-                width: 8, height: 8, borderRadius: 2, background: accent, flexShrink: 0,
-                boxShadow: `0 0 8px ${accent}`,
+                width: 14, height: 14, borderRadius: 4, background: '#fff', flexShrink: 0,
+                border: '2px solid var(--hx-line-strong)', transform: 'rotate(45deg)',
               }} />
             )}
             <div style={{ minWidth: 0 }}>
               <div style={{
-                fontSize: 15, fontWeight: 900, letterSpacing: 4,
-                color: accent,
-                fontFamily: "'Orbitron', system-ui, sans-serif",
-                textShadow: `0 0 15px ${accent}60`,
+                fontSize: 22, fontWeight: 400, letterSpacing: 0.8,
+                color: '#fff',
+                fontFamily: 'var(--font-heading)',
+                textShadow: '0 3px 0 rgba(0,0,0,0.45), 0 0 1px rgba(0,0,0,0.6)',
                 whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
               }}>
                 {title}
               </div>
               {subtitle && (
-                <div style={{ marginTop: 3, fontSize: 9, letterSpacing: 1.5, color: 'rgba(226,232,240,0.5)' }}>
+                <div style={{ marginTop: 2, fontSize: 11, letterSpacing: 0.4, color: 'rgba(255,255,255,0.9)', textShadow: '0 1px 0 rgba(0,0,0,0.4)' }}>
                   {subtitle}
                 </div>
               )}
             </div>
           </div>
-          <button
-            onClick={onClose}
-            aria-label="Close"
-            style={{
-              background: 'none',
-              border: 'none',
-              width: 36, height: 36, flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              cursor: 'pointer',
-              color: 'rgba(255,255,255,0.6)',
-              fontSize: 26, lineHeight: 1,
-              fontWeight: 400,
-              transition: 'color 0.15s',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.color = '#ffffff' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,0.6)' }}
-          >
-            ×
-          </button>
+          <button onClick={onClose} aria-label="Close" className="hx-close">×</button>
         </div>
 
         {/* Content */}
         <div style={{
           flex: 1,
           overflowY: 'auto',
-          padding: '16px 20px',
-          color: '#e2e8f0',
+          padding: '16px 18px 20px',
+          color: '#fff',
         }}>
           {children}
         </div>

@@ -182,19 +182,19 @@ export function ShopPanel({ onClose }: Props) {
             display:'flex', alignItems:'center', gap:8, marginBottom:10,
             padding:'8px 12px', borderRadius:8,
             background:`linear-gradient(90deg, ${activeKingdom.color}08, transparent)`,
-            border:`1px solid ${activeKingdom.color}15`,
+            border:`2px solid ${activeKingdom.color}15`,
           }}>
             <div style={{
               width:24, height:24, borderRadius:'50%',
               background:`linear-gradient(135deg, ${activeKingdom.color}, ${activeKingdom.color}aa)`,
               display:'flex', alignItems:'center', justifyContent:'center',
-              fontSize:11, boxShadow:`0 0 8px ${activeKingdom.color}30`,
+              fontSize:11, boxShadow:`0 4px 0 rgba(0,0,0,0.35)`,
             }}><IconSVG id="castle" size={18} /></div>
             <div style={{ flex:1 }}>
-              <div style={{ fontSize:10, fontWeight:800, color:activeKingdom.color, letterSpacing:2, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
+              <div style={{ fontSize: 11, fontWeight:800, color:activeKingdom.color, letterSpacing:0.5, fontFamily:'var(--font-heading)' }}>
                 {(activeKingdom.name || '').toUpperCase()}
               </div>
-              <div style={{ fontSize:9, color:'rgba(255,255,255,0.5)', letterSpacing:1, marginTop:2 }}>
+              <div style={{ fontSize: 11, color:'rgba(255,255,255,0.5)', letterSpacing:0.5, marginTop:2 }}>
                 BOOSTS APPLY TO THIS KINGDOM
               </div>
             </div>
@@ -216,7 +216,7 @@ export function ShopPanel({ onClose }: Props) {
               <span className="hx-stat__value hx-stat__value--accent" style={{ fontSize:26 }}>{Math.floor(hexBalance).toLocaleString()}</span>
             </div>
           </div>
-          <button className="btn-game btn-game-glass" style={{ fontSize:10, padding:'10px 14px', flexShrink:0 }}
+          <button className="btn-game btn-game-glass" style={{ fontSize: 11, padding:'10px 14px', flexShrink:0 }}
             onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }}>GET HEX</button>
         </div>
 
@@ -224,7 +224,7 @@ export function ShopPanel({ onClose }: Props) {
         <div style={{ display:'flex', gap:6, overflowX:'auto', padding:'4px 0 10px', marginBottom:12, position:'sticky', top:-16, zIndex:2, background:'#0b1828', scrollbarWidth:'none' }}>
           {CATS.map(c => (
             <button key={c.id} className="hx-chip" onClick={() => document.getElementById(`shop-${c.id}`)?.scrollIntoView({ behavior:'smooth', block:'start' })} style={{
-              cursor:'pointer', flexShrink:0, minHeight:34, padding:'6px 12px', fontSize:10, color:c.color,
+              cursor:'pointer', flexShrink:0, minHeight:34, padding:'6px 12px', fontSize: 11, color:c.color,
               borderColor:`${c.color}40`, background:`${c.color}12`,
             }}>
               <IconSVG id={c.iconId} size={16} />
@@ -271,17 +271,17 @@ export function ShopPanel({ onClose }: Props) {
                 <div key={b.id} className="shop-pack hx-rise" style={{
                   animationDelay:`${i*60}ms`,
                   background:`radial-gradient(120% 80% at 50% 0%, ${b.color}38 0%, ${b.color}0d 45%, rgba(255,255,255,0.02) 100%)`,
-                  border:`1.5px solid ${b.color}66`,
-                  boxShadow:`0 0 24px ${b.color}22, inset 0 1px 0 rgba(255,255,255,0.08)`,
+                  border:`3px solid ${b.color}66`,
+                  boxShadow:`0 4px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.08)`,
                 }}>
                   <div style={{ position:'relative', width:76, height:76, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
                     <div style={{ position:'absolute', inset:0, clipPath:'polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)',
                       background:`linear-gradient(160deg, ${b.color}, ${b.color}33)`, opacity:0.9 }} />
                     <div style={{ position:'absolute', inset:3, clipPath:'polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)', background:'#0b1828' }} />
-                    <div style={{ position:'relative', filter:`drop-shadow(0 0 10px ${b.color})` }}><IconSVG id={b.icon} size={44} /></div>
+                    <div style={{ position:'relative', filter:`drop-shadow(0 3px 0 rgba(0,0,0,0.45))` }}><IconSVG id={b.icon} size={44} /></div>
                   </div>
                   <div className="shop-pack__body">
-                    <div style={{ fontSize:12, fontWeight:900, color:b.color, fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1.5, textShadow:`0 0 12px ${b.color}66` }}>{b.name}</div>
+                    <div style={{ fontSize:12, fontWeight:900, color:b.color, fontFamily:'var(--font-heading)', letterSpacing:0.5, textShadow:'0 2px 0 rgba(0,0,0,0.45)' }}>{b.name}</div>
                     <div style={{ display:'flex', flexDirection:'column', gap:3, fontSize:11, color:'rgba(226,232,240,0.7)', fontFamily:'system-ui', textTransform:'none', letterSpacing:0 }}>
                       {b.desc.split('\n').map(line => (
                         <span key={line} style={{ display:'flex', alignItems:'center', gap:6 }}>
@@ -318,11 +318,11 @@ export function ShopPanel({ onClose }: Props) {
               return (
               <div key={item.id} className="hx-card shop-row hx-rise" style={{ animationDelay:`${i*40}ms`, padding:'10px 12px' }}>
                 <div style={{ width:46, height:46, borderRadius:12, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center',
-                  background:`linear-gradient(160deg, ${c.color}30, ${c.color}0a)`, border:`1px solid ${c.color}40` }}>
+                  background:`linear-gradient(160deg, ${c.color}30, ${c.color}0a)`, border:`2px solid ${c.color}40` }}>
                   <IconSVG id={item.icon} size={32} />
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:11, fontWeight:900, color:'#e2e8f0', letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif", lineHeight:1.3 }}>
+                  <div style={{ fontSize:11, fontWeight:900, color:'#e2e8f0', letterSpacing:0.5, fontFamily:'var(--font-heading)', lineHeight:1.3 }}>
                     {item.name}
                   </div>
                   <div className="shop-row__desc" style={{ fontSize:11, color:'rgba(226,232,240,0.6)', marginTop:4, lineHeight:1.4, textTransform:'none', fontFamily:'system-ui', letterSpacing:0 }}>
@@ -336,7 +336,7 @@ export function ShopPanel({ onClose }: Props) {
                   <button onClick={() => handleBuy(item.name, item.code, item.price)}
                     className={canAfford ? 'btn-game btn-game-gold' : 'btn-game btn-game-glass'}
                     aria-label={`Buy ${item.name}`}
-                    style={{ fontSize:10, padding:'8px 16px', minHeight:36, opacity: canAfford ? 1 : 0.55 }}>
+                    style={{ fontSize: 11, padding:'8px 16px', minHeight:36, opacity: canAfford ? 1 : 0.55 }}>
                     BUY
                   </button>
                 </div>
@@ -353,13 +353,13 @@ export function ShopPanel({ onClose }: Props) {
           <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0, flex:'1 1 220px' }}>
             <IconSVG id="ui_wallet" size={34} />
             <div>
-              <div style={{ fontSize:11, fontWeight:900, color:'#d8b4fe', fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1 }}>NEED MORE HEX?</div>
+              <div style={{ fontSize:11, fontWeight:900, color:'#d8b4fe', fontFamily:'var(--font-heading)', letterSpacing:0.5 }}>NEED MORE HEX?</div>
               <div style={{ fontSize:11, color:'rgba(226,232,240,0.6)', marginTop:3, textTransform:'none', fontFamily:'system-ui', letterSpacing:0 }}>
                 Earn HEX from territories and events, or top up from your wallet.
               </div>
             </div>
           </div>
-          <button className="btn-game btn-game-purple" onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }} style={{ fontSize:10 }}>
+          <button className="btn-game btn-game-purple" onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }} style={{ fontSize: 11 }}>
             OPEN WALLET
           </button>
         </div>
@@ -392,10 +392,10 @@ function ActiveBoostBadge({ boost }: { boost: any }) {
 
   return (
     <div style={{
-      padding:'5px 10px', borderRadius:20, fontSize:10, fontWeight:700,
-      background:'rgba(34,197,94,0.12)', border:'1px solid rgba(34,197,94,0.35)',
+      padding:'5px 10px', borderRadius:20, fontSize: 11, fontWeight:700,
+      background:'rgba(34,197,94,0.12)', border:'2px solid rgba(34,197,94,0.35)',
       color:'#4ade80', display:'flex', alignItems:'center', gap:5,
-      letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif",
+      letterSpacing:0.5, fontFamily:'var(--font-heading)',
     }}>
       {label}
       {mins != null && <span style={{ color:'rgba(255,255,255,0.55)', marginLeft:2, display:'inline-flex', alignItems:'center', gap:3 }}><Clock size={11} /> {mins < 60 ? `${mins}min` : `${Math.ceil(mins/60)}h`}</span>}
