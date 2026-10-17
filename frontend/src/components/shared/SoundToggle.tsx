@@ -19,23 +19,25 @@ export function SoundToggle() {
   return (
     <button
       onClick={() => setMuted(m => !m)}
-      title={muted ? 'UNMUTE' : 'MUTE'}
+      title={muted ? 'Unmute' : 'Mute'}
+      aria-label={muted ? 'Unmute sound' : 'Mute sound'}
+      aria-pressed={muted}
       style={{
         position: 'fixed',
-        bottom: 80, left: 16,
+        bottom: 96, left: 16,
         zIndex: 900,
-        width: 36, height: 36,
+        width: 40, height: 40,
         borderRadius: '50%',
         background: 'rgba(13,27,42,0.85)',
         backdropFilter: 'blur(12px)',
-        border: '1px solid rgba(255,255,255,0.12)',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+        border: '1px solid rgba(255,255,255,0.14)',
+        boxShadow: '0 4px 14px rgba(0,0,0,0.45)',
         cursor: 'pointer',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         transition: 'all 0.25s ease',
-        color: muted ? 'rgba(255,255,255,0.25)' : '#0099cc',
+        color: muted ? 'rgba(255,255,255,0.45)' : '#38bdf8',
       }}
     >
       <svg viewBox="0 0 24 24" width={16} height={16} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

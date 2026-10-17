@@ -7,6 +7,8 @@
 import { useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 
+const PANEL_BG = 'linear-gradient(180deg, #0d1b2a 0%, #0a1628 60%, #060e1a 100%)'
+
 // ── Modal (primary) ──
 
 interface ModalProps {
@@ -46,9 +48,9 @@ export function Modal({ open, onClose, title, accent = '#0099cc', width = 420, c
             onClick={onClose}
             style={{
               position: 'fixed', inset: 0,
-              background: 'rgba(26, 42, 58, 0.4)',
-              backdropFilter: 'blur(4px)',
-              WebkitBackdropFilter: 'blur(4px)',
+              background: 'rgba(0, 5, 15, 0.75)',
+              backdropFilter: 'blur(6px)',
+              WebkitBackdropFilter: 'blur(6px)',
               zIndex: 1200,
             }}
           />
@@ -56,6 +58,7 @@ export function Modal({ open, onClose, title, accent = '#0099cc', width = 420, c
           {/* Modal panel */}
           <motion.div
             ref={ref}
+            role="dialog" aria-modal="true" aria-label={title}
             initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.92, y: 20 }}
@@ -68,12 +71,12 @@ export function Modal({ open, onClose, title, accent = '#0099cc', width = 420, c
               maxHeight: 'calc(100vh - 80px)',
               zIndex: 1201,
               // Glassmorphism
-              background: 'linear-gradient(180deg, rgba(235, 242, 250, 0.97) 0%, rgba(220, 230, 242, 0.97) 100%)',
-              backdropFilter: 'blur(30px) saturate(1.2)',
-              WebkitBackdropFilter: 'blur(30px) saturate(1.2)',
-              border: '1px solid rgba(0, 60, 100, 0.15)',
-              borderRadius: 12,
-              boxShadow: '0 20px 60px rgba(0,0,0,0.25), inset 0 1px 0 rgba(255,255,255,0.08)',
+              ['--accent' as any]: accent,
+              background: PANEL_BG,
+              border: `2px solid ${accent}40`,
+              borderRadius: 18,
+              color: '#e2e8f0',
+              boxShadow: `0 0 40px ${accent}15, 0 20px 60px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.05)`,
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
@@ -82,43 +85,28 @@ export function Modal({ open, onClose, title, accent = '#0099cc', width = 420, c
             {/* Sticky header */}
             <div style={{
               padding: '16px 20px',
-              borderBottom: `2px solid ${accent}`,
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.2) 100%)',
+              borderBottom: `2px solid ${accent}50`,
+              background: `linear-gradient(180deg, ${accent}18 0%, ${accent}08 100%)`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               flexShrink: 0,
             }}>
               <div style={{
-                fontSize: 12,
-                fontWeight: 700,
+                fontSize: 14,
+                fontWeight: 900,
                 letterSpacing: 3,
                 color: accent,
+                textShadow: `0 0 14px ${accent}60`,
                 fontFamily: "'Orbitron', system-ui, sans-serif",
                 display: 'flex',
                 alignItems: 'center',
                 gap: 10,
               }}>
-                <span style={{ fontSize: 14 }}>◆</span>
+                <span style={{ width: 8, height: 8, borderRadius: 2, background: accent, boxShadow: `0 0 8px ${accent}`, flexShrink: 0 }} />
                 {title}
               </div>
-              <button
-                onClick={onClose}
-                style={{
-                  background: 'rgba(255,255,255,0.15)',
-                  border: '2px solid rgba(255,255,255,0.25)',
-                  borderRadius: 6,
-                  width: 28, height: 28,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  cursor: 'pointer',
-                  color: '#ffffff',
-                  fontSize: 14,
-                  fontFamily: "'Orbitron', system-ui, sans-serif",
-                  transition: 'all 0.2s ease',
-                }}
-              >
-                
-              </button>
+              <button onClick={onClose} className="hx-close" aria-label="Close">×</button>
             </div>
 
             {/* Scrollable body */}
@@ -173,14 +161,15 @@ export function SubModal({ open, onClose, title, accent = '#0099cc', width = 380
             onClick={onClose}
             style={{
               position: 'fixed', inset: 0,
-              background: 'rgba(26, 42, 58, 0.3)',
-              backdropFilter: 'blur(2px)',
+              background: 'rgba(0, 5, 15, 0.55)',
+              backdropFilter: 'blur(3px)',
               zIndex: 1400,
             }}
           />
 
           {/* SubModal panel */}
           <motion.div
+            role="dialog" aria-modal="true" aria-label={title}
             initial={{ opacity: 0, scale: 0.9, y: 30 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 30 }}
@@ -192,12 +181,12 @@ export function SubModal({ open, onClose, title, accent = '#0099cc', width = 380
               width: Math.min(width, window.innerWidth - 48),
               maxHeight: 'calc(100vh - 120px)',
               zIndex: 1401,
-              background: 'linear-gradient(180deg, rgba(240, 245, 252, 0.98) 0%, rgba(225, 235, 248, 0.98) 100%)',
-              backdropFilter: 'blur(30px) saturate(1.2)',
-              WebkitBackdropFilter: 'blur(30px) saturate(1.2)',
-              border: '1px solid rgba(0, 60, 100, 0.18)',
-              borderRadius: 10,
-              boxShadow: '0 24px 70px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.08)',
+              ['--accent' as any]: accent,
+              background: PANEL_BG,
+              border: `2px solid ${accent}40`,
+              borderRadius: 16,
+              color: '#e2e8f0',
+              boxShadow: '0 24px 70px rgba(0,0,0,0.65), inset 0 1px 0 rgba(255,255,255,0.05)',
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
@@ -206,30 +195,21 @@ export function SubModal({ open, onClose, title, accent = '#0099cc', width = 380
             {/* Header */}
             <div style={{
               padding: '14px 18px',
-              borderBottom: `2px solid ${accent}`,
-              background: 'linear-gradient(180deg, rgba(255,255,255,0.04) 0%, rgba(255,255,255,0.15) 100%)',
+              borderBottom: `2px solid ${accent}50`,
+              background: `linear-gradient(180deg, ${accent}14 0%, ${accent}06 100%)`,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
               flexShrink: 0,
             }}>
               <div style={{
-                fontSize: 11, fontWeight: 600, letterSpacing: 2,
+                fontSize: 12, fontWeight: 900, letterSpacing: 2,
                 color: accent,
                 fontFamily: "'Orbitron', system-ui, sans-serif",
               }}>
                 {title}
               </div>
-              <button
-                onClick={onClose}
-                style={{
-                  background: 'none', border: 'none',
-                  cursor: 'pointer', color: 'rgba(26, 42, 58, 0.4)',
-                  fontSize: 13, fontFamily: "'Orbitron', system-ui, sans-serif",
-                }}
-              >
-                
-              </button>
+              <button onClick={onClose} className="hx-close" aria-label="Close">×</button>
             </div>
 
             {/* Body */}
@@ -256,34 +236,14 @@ interface TabBarProps {
 
 export function ModalTabBar({ tabs, active, onChange, accent = '#0099cc' }: TabBarProps) {
   return (
-    <div style={{
-      display: 'flex', gap: 4,
-      marginBottom: 16,
-      borderBottom: '1px solid rgba(0, 60, 100, 0.1)',
-      paddingBottom: 8,
-    }}>
+    <div className="hx-tabs" role="tablist" style={{ ['--accent' as any]: accent }}>
       {tabs.map(tab => (
         <button
           key={tab.id}
+          role="tab"
+          className="hx-tab"
+          aria-selected={active === tab.id}
           onClick={() => onChange(tab.id)}
-          style={{
-            padding: '7px 14px',
-            borderRadius: 20,
-            border: 'none',
-            background: active === tab.id
-              ? `${accent}18`
-              : 'rgba(255, 255, 255, 0.5)',
-            color: active === tab.id ? accent : 'rgba(26, 42, 58, 0.45)',
-            fontSize: 8,
-            fontWeight: active === tab.id ? 700 : 500,
-            letterSpacing: 1,
-            cursor: 'pointer',
-            fontFamily: "'Orbitron', system-ui, sans-serif",
-            transition: 'all 0.25s ease',
-            boxShadow: active === tab.id
-              ? `0 2px 8px ${accent}22`
-              : 'none',
-          }}
         >
           {tab.label}
         </button>
@@ -308,18 +268,19 @@ export function PillButton({ label, onClick, color = '#0099cc', disabled = false
       onClick={onClick}
       disabled={disabled}
       style={{
-        padding: '9px 14px',
+        minHeight: 36,
+        padding: '9px 16px',
         fontFamily: "'Orbitron', system-ui, sans-serif",
-        fontSize: 8,
-        fontWeight: 500,
-        letterSpacing: 1,
-        borderRadius: 20,
-        border: 'none',
-        background: disabled ? 'rgba(0, 60, 100, 0.06)' : 'rgba(255, 255, 255, 0.75)',
-        color: disabled ? 'rgba(26, 42, 58, 0.25)' : color,
+        fontSize: 10,
+        fontWeight: 700,
+        letterSpacing: 1.5,
+        borderRadius: 999,
+        border: `1px solid ${disabled ? 'rgba(255,255,255,0.08)' : `${color}66`}`,
+        background: disabled ? 'rgba(255,255,255,0.03)' : `linear-gradient(180deg, ${color}2e, ${color}12)`,
+        color: disabled ? 'rgba(255,255,255,0.35)' : color,
         cursor: disabled ? 'not-allowed' : 'pointer',
-        boxShadow: disabled ? 'none' : '0 2px 8px rgba(0,50,80,0.1), inset 0 1px 0 rgba(255,255,255,0.08)',
-        transition: 'all 0.25s ease',
+        boxShadow: disabled ? 'none' : `0 0 12px ${color}22, inset 0 1px 0 rgba(255,255,255,0.08)`,
+        transition: 'all 0.2s ease',
         width: fullWidth ? '100%' : 'auto',
       }}
     >

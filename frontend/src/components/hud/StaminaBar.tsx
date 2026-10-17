@@ -9,6 +9,7 @@ import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
+import { Clock, Swords } from 'lucide-react'
 
 type StaminaData = {
   slots_max: number
@@ -45,12 +46,12 @@ function Slot({ state, progress, delay }: { state: 'full' | 'regen' | 'empty'; p
       initial={{ scale: 0.8, opacity: 0 }}
       animate={{ scale: 1, opacity: 1 }}
       transition={{ delay: delay * 0.05, type: 'spring', stiffness: 400 }}
-      style={{ position: 'relative', width: 20, height: 20, flexShrink: 0 }}
+      style={{ position: 'relative', width: 24, height: 24, flexShrink: 0 }}
     >
       {/* Slot background */}
       <div style={{
-        width: '100%', height: '100%', borderRadius: 4,
-        background: c.bg, border: `1px solid ${c.border}`,
+        width: '100%', height: '100%', borderRadius: 7,
+        background: state === 'full' ? 'linear-gradient(180deg, #f87171, #b91c1c)' : c.bg, border: `1.5px solid ${c.border}`,
         boxShadow: c.glow,
         overflow: 'hidden', position: 'relative',
       }}>
@@ -68,7 +69,7 @@ function Slot({ state, progress, delay }: { state: 'full' | 'regen' | 'empty'; p
         )}
         {/* Sword icon for full slots */}
         {state === 'full' && (
-          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10 }}></div>
+          <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}><Swords size={13} color="#fff" strokeWidth={2.5} /></div>
         )}
       </div>
     </motion.div>
@@ -120,7 +121,7 @@ export function StaminaBar() {
       onMouseLeave={() => setShowTooltip(false)}>
 
       {/* Compact slot row */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 3, cursor: 'default' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'default' }} aria-label={`Action slots ${slots_available} of ${slots_max}`}>
         {Array.from({ length: slots_max }).map((_, i) => {
           const isUsed   = i >= slots_available
           const isRegen  = isUsed && i === slots_available  // first draining slot
@@ -135,7 +136,7 @@ export function StaminaBar() {
         })}
         {/* Next ready label */}
         {slots_used > 0 && (
-          <span style={{ fontSize: 9, color: '#F59E0B', fontFamily: 'monospace', marginLeft: 4, whiteSpace: 'nowrap' }}>
+          <span style={{ fontSize: 11, color: '#F59E0B', fontFamily: "'Share Tech Mono', monospace", marginLeft: 6, whiteSpace: 'nowrap' }}>
             {localSeconds > 0 ? `+1 in ${fmt(localSeconds)}` : 'READY'}
           </span>
         )}
@@ -151,14 +152,14 @@ export function StaminaBar() {
               marginTop: 8, zIndex: 9999, pointerEvents: 'none',
               background: 'rgba(13,27,42,0.97)', border: '1px solid rgba(239,68,68,0.3)',
               borderRadius: 12, padding: '12px 14px', minWidth: 220,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+              boxShadow: '0 12px 32px rgba(0,0,0,0.55)',
             }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#EF4444', marginBottom: 8 }}>Action Slots</div>
+            <div style={{ fontSize: 11, fontWeight: 900, color: '#f87171', marginBottom: 10, letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>ACTION SLOTS</div>
 
             {/* Slots breakdown */}
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-              <span style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)' }}>Available</span>
-              <span style={{ fontSize: 11, fontWeight: 700, color: slots_available > 0 ? '#00884a' : '#EF4444' }}>
+              <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)' }}>Available</span>
+              <span style={{ fontSize: 13, fontFamily: "'Share Tech Mono', monospace", color: slots_available > 0 ? '#22c55e' : '#EF4444' }}>
                 {slots_available} / {slots_max}
               </span>
             </div>
@@ -167,7 +168,7 @@ export function StaminaBar() {
             {slots_used > 0 && (
               <div style={{ marginBottom: 8 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 4 }}>
-                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>Next slot in</span>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)' }}>Next slot in</span>
                   <span style={{ fontSize: 10, color: '#F59E0B', fontFamily: 'monospace', fontWeight: 700 }}>
                     {fmt(localSeconds)}
                   </span>
@@ -183,10 +184,10 @@ export function StaminaBar() {
 
             {/* Regen time */}
             <div style={{ borderTop: '1px solid rgba(255,255,255,0.06)', paddingTop: 8, marginTop: 4 }}>
-              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)', lineHeight: 1.7 }}>
-                ⏱ Regen: {fmt(stamina.regen_seconds_per_slot)} per slot
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)', lineHeight: 1.7, display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+                <Clock size={11} /> Regen: {fmt(stamina.regen_seconds_per_slot)} per slot
                 {stamina.regen_bonus_pct > 0 && (
-                  <span style={{ color: '#00884a' }}> (+{stamina.regen_bonus_pct}% bonus)</span>
+                  <span style={{ color: '#22c55e' }}> (+{stamina.regen_bonus_pct}% bonus)</span>
                 )}
               </div>
               {stamina.attack_power_bonus > 0 && (
@@ -198,10 +199,10 @@ export function StaminaBar() {
 
             {/* How to get more */}
             <div style={{ marginTop: 8, padding: '6px 10px', background: 'rgba(239,68,68,0.06)', borderRadius: 8 }}>
-              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', lineHeight: 1.6 }}>
-                Win clicker daily → faster regen<br />
-                Control Towers → extra slots<br />
-                HEX staking → attack power bonus
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', lineHeight: 1.6 }}>
+                Win clicker daily: faster regen<br />
+                Control Towers: extra slots<br />
+                HEX staking: attack power bonus
               </div>
             </div>
           </motion.div>

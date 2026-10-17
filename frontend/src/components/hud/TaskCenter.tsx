@@ -12,6 +12,7 @@ import { useStore } from '../../store'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
 import { IconSVG } from '../shared/iconBank'
+import { Check, Clock, Copy, Flame } from 'lucide-react'
 
 
 interface Props { onClose: () => void }
@@ -21,14 +22,6 @@ interface Mission {
   progress_pct: number; reward_tdc: number; reward_xp: number;
   completed: boolean; claimed: boolean;
 }
-
-const FALLBACK_TASKS: Mission[] = [
-  { id: 'f1', title: 'Claim 2 territories', icon: 'flag_black', target: 2, current: 0, progress_pct: 0, reward_tdc: 25, reward_xp: 100, completed: false, claimed: false },
-  { id: 'f2', title: 'Win 1 battle', icon: 'swords', target: 1, current: 0, progress_pct: 0, reward_tdc: 40, reward_xp: 150, completed: false, claimed: false },
-  { id: 'f3', title: 'Visit 3 POI zones', icon: 'pin', target: 3, current: 0, progress_pct: 0, reward_tdc: 15, reward_xp: 50, completed: false, claimed: false },
-  { id: 'f4', title: 'Spend 100 HEX Coins', icon: 'money_bag', target: 100, current: 0, progress_pct: 0, reward_tdc: 30, reward_xp: 120, completed: false, claimed: false },
-  { id: 'f5', title: 'Login streak bonus', icon: 'flame', target: 1, current: 1, progress_pct: 100, reward_tdc: 10, reward_xp: 50, completed: true, claimed: false },
-]
 
 export function TaskCenter({ onClose }: Props) {
   const isAuth = useStore(s => s.isAuthenticated)
@@ -50,9 +43,18 @@ export function TaskCenter({ onClose }: Props) {
     enabled: isAuth,
   })
 
-  const missions: Mission[] = missionData?.missions?.length ? missionData.missions : FALLBACK_TASKS
-  const streak = streakData?.current_streak || 1
-  const streakReward = streakData?.streak?.reward_tdc || 10
+  // RULE 1: no fake fallback missions — an empty list shows an honest empty state
+  const missions: Mission[] = missionData?.missions ?? []
+  const streak: number | null = streakData?.current_streak ?? null
+  const streakReward: number = streakData?.streak?.reward_tdc ?? 0
+
+  // Real invite link (GET /social/my-referral/) — replaces the old hard-coded hexod.io/ref/<username>
+  const { data: referral, isLoading: refLoading } = useQuery({
+    queryKey: ['my-referral'],
+    queryFn: () => api.get('/social/my-referral/').then(r => r.data),
+    staleTime: 300000,
+    enabled: isAuth,
+  })
 
   // Claim mission
   const claimMut = useMutation({
@@ -87,78 +89,112 @@ export function TaskCenter({ onClose }: Props) {
   const totalReward = missions.filter(t => t.completed).reduce((s, t) => s + t.reward_tdc, 0)
   const totalPossible = missions.reduce((s, t) => s + t.reward_tdc, 0)
   const pct = missions.length ? Math.floor((completed / missions.length) * 100) : 0
-  const player = useStore(s => s.player)
-  const refLink = `hexod.io/ref/${player?.username || 'COMMANDER'}`
+  const inviteUrl: string = referral?.invite_url || ''
+  const copyInvite = () => {
+    if (!inviteUrl || !navigator.clipboard) { toast.error('Copy not available'); return }
+    navigator.clipboard.writeText(inviteUrl).then(() => toast.success('Invite link copied')).catch(() => toast.error('Copy failed'))
+  }
 
   return (
-    <GlassPanel title="TASK CENTER" onClose={onClose} accent="#0099cc">
-      {/* Reset timer + streak */}
-      <div style={{
-        textAlign: 'center', fontSize: 8, color: 'rgba(255,255,255,0.35)',
-        letterSpacing: 2, marginBottom: 12,
-        fontFamily: "'Orbitron', system-ui, sans-serif",
-      }}>
-        DAILY RESET {resetIn} · STREAK: {streak} DAYS {streakReward > 0 && `(+${streakReward}◆)`}
-      </div>
-
-      {/* Progress bar */}
-      <div style={{
-        padding: '12px 14px', borderRadius: 10, marginBottom: 14,
-        background: 'rgba(0,153,204,0.05)', border: '1px solid rgba(0,153,204,0.15)',
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6, fontSize: 8, color: 'rgba(255,255,255,0.35)', letterSpacing: 1 }}>
-          <span>PROGRESS {completed}/{missions.length}</span>
-          <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <IconSVG id="hex_coin" size={12} />{totalReward}/{totalPossible}
+    <GlassPanel
+      title="TASK CENTER" onClose={onClose} accent="#f5a524" width={620}
+      icon={<IconSVG id="daily_task" size={24} />}
+      subtitle={`Daily missions · resets in ${resetIn}`}
+    >
+      {/* Key stats */}
+      <div className="hx-stat-grid" style={{ marginBottom: 12, gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))' }}>
+        <div className="hx-card hx-stat">
+          <span className="hx-stat__label">COMPLETED</span>
+          <span className="hx-stat__value hx-stat__value--accent">{completed}<span style={{ fontSize: 14, color: 'var(--hx-text-3)' }}>/{missions.length}</span></span>
+        </div>
+        <div className="hx-card hx-stat">
+          <span className="hx-stat__label">REWARDS</span>
+          <span className="hx-stat__value" style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#fbbf24' }}>
+            <IconSVG id="hex_coin" size={20} />{totalReward}<span style={{ fontSize: 14, color: 'var(--hx-text-3)' }}>/{totalPossible}</span>
           </span>
         </div>
-        <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-          <div style={{ width: `${pct}%`, height: '100%', borderRadius: 3, background: pct >= 100 ? '#22c55e' : '#0099cc', transition: 'width 0.5s' }} />
+        <div className="hx-card hx-stat">
+          <span className="hx-stat__label">LOGIN STREAK</span>
+          <span className="hx-stat__value" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Flame size={18} color="#f97316" />{streak ?? '—'}
+            <span style={{ fontSize: 10, color: 'var(--hx-text-3)', fontFamily: 'var(--font-heading)' }}>DAYS</span>
+          </span>
+          {streakReward > 0 && (
+            <span className="hx-chip hx-chip--accent" style={{ alignSelf: 'flex-start', marginTop: 2 }}>
+              +{streakReward} <IconSVG id="hex_coin" size={12} /> TODAY
+            </span>
+          )}
+        </div>
+        <div className="hx-card hx-stat">
+          <span className="hx-stat__label">NEXT RESET</span>
+          <span className="hx-stat__value" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 18 }}>
+            <Clock size={16} color="rgba(226,232,240,0.6)" />{resetIn}
+          </span>
         </div>
       </div>
+
+      {/* Overall progress */}
+      {missions.length > 0 && (
+        <div className="hx-progress" style={{ height: 8, marginBottom: 16, ['--accent' as any]: pct >= 100 ? '#22c55e' : '#f5a524' }}>
+          <div className="hx-progress__fill" style={{ width: `${pct}%` }} />
+        </div>
+      )}
+
+      <div className="hx-section-title">TODAY'S MISSIONS</div>
 
       {/* Loading state */}
       {isLoading && (
-        <div style={{ textAlign: 'center', padding: 30, color: 'rgba(255,255,255,0.25)', fontSize: 9 }}>Loading missions...</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          {[0, 1, 2].map(i => <div key={i} className="hx-skeleton" style={{ height: 64, borderRadius: 12 }} />)}
+        </div>
+      )}
+
+      {/* Empty state — honest: the API returned no missions */}
+      {!isLoading && missions.length === 0 && (
+        <div className="hx-empty">
+          <IconSVG id="daily_task" size={44} />
+          <div className="hx-empty__title">NO MISSIONS TODAY</div>
+          <div>New daily missions arrive at the next reset — in {resetIn}.</div>
+        </div>
       )}
 
       {/* Mission list */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        {missions.map(task => {
+        {missions.map((task, i) => {
           const isDone = task.completed
           const isClaimed = task.claimed
           const taskPct = Math.min(100, task.progress_pct)
+          const tone = isClaimed ? '#22c55e' : isDone ? '#22c55e' : '#f5a524'
           return (
-            <div key={task.id} style={{
-              display: 'flex', alignItems: 'center', gap: 10,
-              padding: '10px 14px', borderRadius: 10,
-              background: isClaimed ? 'rgba(34,197,94,0.04)' : isDone ? 'rgba(0,153,204,0.04)' : 'rgba(255,255,255,0.03)',
-              border: `1px solid ${isClaimed ? 'rgba(34,197,94,0.15)' : isDone ? 'rgba(0,153,204,0.15)' : 'rgba(255,255,255,0.05)'}`,
+            <div key={task.id} className={`hx-card hx-rise${isDone && !isClaimed ? ' hx-card--accent' : ''}`} style={{
+              ['--accent' as any]: tone, animationDelay: `${i * 50}ms`,
+              display: 'flex', alignItems: 'center', gap: 12,
               opacity: isClaimed ? 0.6 : 1,
             }}>
-              <span style={{ fontSize: 20, flexShrink: 0, filter: isClaimed ? 'grayscale(0.5)' : '' }}><EmojiIcon emoji={task.icon} size={16} /></span>
+              <span style={{
+                width: 44, height: 44, borderRadius: 12, flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: `linear-gradient(180deg, ${tone}2a, ${tone}0a)`, border: `1px solid ${tone}44`,
+                filter: isClaimed ? 'grayscale(0.5)' : undefined,
+              }}><EmojiIcon emoji={task.icon} size={26} /></span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 9, fontWeight: 700, color: '#e2e8f0', letterSpacing: 0.5 }}>{task.title}</div>
-                {/* Progress bar */}
-                <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.05)', marginTop: 4, overflow: 'hidden' }}>
-                  <div style={{ width: `${taskPct}%`, height: '100%', borderRadius: 2, background: isDone ? '#22c55e' : '#0099cc', transition: 'width 0.3s' }} />
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#e2e8f0', letterSpacing: 0.5, marginBottom: 6 }}>{task.title}</div>
+                <div className="hx-progress">
+                  <div className="hx-progress__fill" style={{ width: `${taskPct}%` }} />
                 </div>
-                <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)', marginTop: 2 }}>{task.current}/{task.target}</div>
+                <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 4, fontFamily: 'var(--font-mono)' }}>{task.current}/{task.target}</div>
               </div>
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                  <IconSVG id="hex_coin" size={12} />
-                  <span style={{ fontSize: 11, fontWeight: 900, color: isClaimed ? 'rgba(255,255,255,0.2)' : '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>{task.reward_tdc}</span>
-                </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6, flexShrink: 0 }}>
+                <span className="hx-chip" style={{ color: isClaimed ? 'var(--hx-text-3)' : '#fbbf24', fontFamily: 'var(--font-mono)', fontSize: 12 }}>
+                  <IconSVG id="hex_coin" size={14} />+{task.reward_tdc}
+                </span>
                 {isDone && !isClaimed && (
-                  <button onClick={() => claimMut.mutate(task.id)} disabled={claimMut.isPending} style={{
-                    marginTop: 4, padding: '4px 10px', borderRadius: 8, cursor: 'pointer',
-                    background: '#22c55e', border: 'none', color: '#fff',
-                    fontSize: 7, fontWeight: 700, letterSpacing: 1,
-                    fontFamily: "'Orbitron', sans-serif",
-                  }}>CLAIM</button>
+                  <button className="btn-game btn-game-green" onClick={() => claimMut.mutate(task.id)} disabled={claimMut.isPending}
+                    style={{ padding: '7px 14px', fontSize: 10 }}>CLAIM</button>
                 )}
-                {isClaimed && <div style={{ fontSize: 7, color: '#22c55e', fontWeight: 700, marginTop: 2 }}> DONE</div>}
+                {isClaimed && (
+                  <span className="hx-chip" style={{ color: '#22c55e', borderColor: 'rgba(34,197,94,0.4)' }}><Check size={12} /> DONE</span>
+                )}
               </div>
             </div>
           )
@@ -166,36 +202,38 @@ export function TaskCenter({ onClose }: Props) {
       </div>
 
       {/* Bonus: all complete */}
-      {completed === missions.length && claimed < missions.length && (
-        <div style={{
-          marginTop: 14, padding: 14, borderRadius: 10, textAlign: 'center',
-          background: 'linear-gradient(135deg, rgba(34,197,94,0.06), rgba(34,197,94,0.02))',
-          border: '1px solid rgba(34,197,94,0.2)',
+      {missions.length > 0 && completed === missions.length && claimed < missions.length && (
+        <div className="hx-card hx-card--accent" style={{
+          ['--accent' as any]: '#22c55e', marginTop: 14, textAlign: 'center',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
         }}>
-          <div style={{ fontSize: 20, marginBottom: 4 }}></div>
-          <div style={{ fontSize: 9, fontWeight: 700, color: '#22c55e', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
+          <IconSVG id="trophy" size={28} />
+          <div style={{ fontSize: 10, fontWeight: 700, color: '#22c55e', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
             ALL MISSIONS COMPLETE — CLAIM YOUR REWARDS!
           </div>
         </div>
       )}
 
-      {/* Referral */}
-      <div style={{
-        marginTop: 14, padding: '10px 14px', borderRadius: 10,
-        background: 'rgba(0,153,204,0.04)', border: '1px solid rgba(0,153,204,0.1)',
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+      {/* Referral — real invite link; reward attribution is not wired yet (see report) */}
+      <div className="hx-card" style={{
+        ['--accent' as any]: '#3b82f6', marginTop: 16,
+        display: 'flex', alignItems: 'center', gap: 12,
       }}>
-        <div>
-          <div style={{ fontSize: 8, fontWeight: 700, color: '#0099cc', letterSpacing: 1, fontFamily: "'Orbitron', sans-serif" }}>
-            INVITE FRIENDS · EARN 100◆
+        <IconSVG id="referral" size={36} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 11, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1.5, fontFamily: "'Orbitron', sans-serif" }}>INVITE FRIENDS</span>
+            <span className="hx-chip">REWARDS SOON</span>
           </div>
-          <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{refLink}</div>
+          {refLoading
+            ? <div className="hx-skeleton" style={{ height: 10, width: '70%', marginTop: 6 }} />
+            : <div style={{ fontSize: 10, color: 'var(--hx-text-2)', marginTop: 4, fontFamily: 'var(--font-mono)', textTransform: 'none',
+                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inviteUrl || 'Invite link unavailable'}</div>}
         </div>
-        <button onClick={() => { navigator.clipboard?.writeText(`https://${refLink}`); toast.success('Link copied!') }} style={{
-          padding: '6px 12px', borderRadius: 8, cursor: 'pointer',
-          background: '#0099cc', border: 'none', color: '#fff',
-          fontSize: 7, fontWeight: 700, letterSpacing: 1, fontFamily: "'Orbitron', sans-serif",
-        }}>COPY</button>
+        <button className="btn-game btn-game-blue" onClick={copyInvite} disabled={!inviteUrl}
+          aria-label="Copy invite link" style={{ padding: '8px 14px', fontSize: 10, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+          <Copy size={13} /> COPY
+        </button>
       </div>
     </GlassPanel>
   )

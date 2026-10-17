@@ -19,6 +19,8 @@ const TAG_COLORS: Record<string, string> = {
   season: '#a855f7',
   maintenance: '#cc8800',
   community: '#22c55e',
+  alert: '#f97316',
+  market: '#cc8800',
 }
 
 const DOT_COLORS: Record<string, string> = {
@@ -27,7 +29,14 @@ const DOT_COLORS: Record<string, string> = {
   season: '#a855f7',
   maintenance: '#cc8800',
   community: '#22c55e',
+  alert: '#f97316',
+  market: '#fbbf24',
 }
+
+const TICKER_CSS = `
+.hxn-bar:hover .hxn-track { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .hxn-track { animation-duration: 0s !important; } }
+`
 
 export function NewsTicker() {
   const [items, setItems] = useState<NewsItem[]>([])
@@ -57,36 +66,44 @@ export function NewsTicker() {
   // Duplicate items for seamless scroll
   const doubled = [...items, ...items]
 
+  const tagColor = TAG_COLORS[currentTag] || TAG_COLORS.update
+
   return (
-    <div style={{
+    <div className="hxn-bar" role="region" aria-label="News" style={{
       position: 'fixed', top: 0, left: 0, right: 0,
       height: 28,
-      background: 'linear-gradient(90deg, rgba(13,27,42,0.95), rgba(10,22,40,0.95), rgba(13,27,42,0.95))',
+      background: 'linear-gradient(180deg, rgba(10,22,40,0.97), rgba(6,14,26,0.97))',
       zIndex: 900,
       display: 'flex',
       alignItems: 'center',
       overflow: 'hidden',
-      borderBottom: '1px solid rgba(12,197,255,0.15)',
+      borderBottom: '1px solid rgba(12,197,255,0.22)',
+      boxShadow: '0 2px 12px rgba(0,0,0,0.4)',
     }}>
-      {/* Tag badge */}
+      <style>{TICKER_CSS}</style>
+      {/* Tag pill */}
       <div style={{
-        flexShrink: 0,
-        padding: '0 12px',
-        fontSize: 8,
-        fontWeight: 900,
-        letterSpacing: 2,
-        height: '100%',
-        display: 'flex',
-        alignItems: 'center',
-        background: TAG_COLORS[currentTag] || TAG_COLORS.update,
-        color: '#e2e8f0',
-        fontFamily: "'Orbitron', system-ui, sans-serif",
+        flexShrink: 0, height: '100%', display: 'flex', alignItems: 'center',
+        padding: '0 10px 0 8px', position: 'relative', zIndex: 1,
+        background: 'linear-gradient(90deg, rgba(6,14,26,1) 85%, rgba(6,14,26,0))',
       }}>
-        {(currentTag || '').toUpperCase()}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          height: 18, padding: '0 10px', borderRadius: 999,
+          fontSize: 9, fontWeight: 900, letterSpacing: 1.5,
+          background: `linear-gradient(180deg, ${tagColor}, ${tagColor}cc)`,
+          color: '#fff', textShadow: '0 1px 2px rgba(0,0,0,0.4)',
+          boxShadow: `0 0 12px ${tagColor}66, inset 0 1px 0 rgba(255,255,255,0.3)`,
+          fontFamily: "'Orbitron', system-ui, sans-serif",
+          transition: 'background 0.4s, box-shadow 0.4s',
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff', boxShadow: '0 0 6px #fff' }} />
+          {(currentTag || '').toUpperCase()}
+        </div>
       </div>
 
       {/* Scrolling items */}
-      <div style={{
+      <div className="hxn-track" style={{
         display: 'flex',
         animation: `news-scroll ${items.length * 60}s linear infinite`,
         whiteSpace: 'nowrap',
@@ -94,10 +111,10 @@ export function NewsTicker() {
         {doubled.map((item, i) => (
           <div key={`${item.id}-${i}`} style={{
             flexShrink: 0,
-            padding: '0 40px',
-            fontSize: 9,
+            padding: '0 32px',
+            fontSize: 10,
             fontWeight: 500,
-            color: 'rgba(255,255,255,0.4)',
+            color: 'rgba(226,232,240,0.68)',
             letterSpacing: 1,
             display: 'flex',
             alignItems: 'center',
@@ -105,11 +122,12 @@ export function NewsTicker() {
             fontFamily: "'Orbitron', system-ui, sans-serif",
           }}>
             <span style={{
-              width: 4, height: 4, borderRadius: '50%',
+              width: 6, height: 6, borderRadius: '50%',
               background: DOT_COLORS[item.type] || '#0099cc',
+              boxShadow: `0 0 8px ${DOT_COLORS[item.type] || '#0099cc'}`,
               flexShrink: 0,
             }} />
-            <strong style={{ color: '#e2e8f0', fontWeight: 700 }}>{item.title}</strong>
+            <strong style={{ color: DOT_COLORS[item.type] || '#e2e8f0', fontWeight: 900 }}>{item.title}</strong>
             <span>{item.description}</span>
           </div>
         ))}

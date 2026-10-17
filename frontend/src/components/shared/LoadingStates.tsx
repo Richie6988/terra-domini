@@ -3,17 +3,15 @@
  * Consistent loading UX across all panels.
  * Glassmorphism style with shimmer animation.
  */
+import { EmojiIcon } from './emojiIcons'
 
 // ── Skeleton Block ──
 export function Skeleton({ width, height = 12, radius = 4, style }: {
   width?: number | string; height?: number; radius?: number; style?: React.CSSProperties
 }) {
   return (
-    <div style={{
-      width: width ?? '100%', height, borderRadius: radius,
-      background: 'linear-gradient(90deg, rgba(255,255,255,0.05) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.05) 75%)',
-      backgroundSize: '200% 100%',
-      animation: 'shimmer 1.5s ease-in-out infinite',
+    <div className="hx-skeleton" style={{
+      width: width ?? '100%', height, borderRadius: radius, flexShrink: 0,
       ...style,
     }} />
   )
@@ -22,12 +20,7 @@ export function Skeleton({ width, height = 12, radius = 4, style }: {
 // ── Skeleton Card ──
 export function SkeletonCard({ lines = 3 }: { lines?: number }) {
   return (
-    <div style={{
-      padding: 12, borderRadius: 10,
-      background: 'rgba(255,255,255,0.3)',
-      border: '1px solid rgba(255,255,255,0.05)',
-      display: 'flex', flexDirection: 'column', gap: 8,
-    }}>
+    <div className="hx-card" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <Skeleton width={32} height={32} radius={16} />
         <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
@@ -58,15 +51,12 @@ export function SkeletonGrid({ count = 6, cols = 2 }: { count?: number; cols?: n
   return (
     <div style={{ display: 'grid', gridTemplateColumns: `repeat(${cols}, 1fr)`, gap: 8 }}>
       {Array.from({ length: count }).map((_, i) => (
-        <div key={i} style={{
-          padding: 10, borderRadius: 8,
-          background: 'rgba(255,255,255,0.3)',
-          border: '1px solid rgba(255,255,255,0.05)',
+        <div key={i} className="hx-card" style={{
           display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
         }}>
           <Skeleton width={40} height={40} radius={20} />
           <Skeleton width="70%" height={8} />
-          <Skeleton width="50%" height={6} />
+          <Skeleton width="50%" height={8} />
         </div>
       ))}
     </div>
@@ -81,45 +71,19 @@ export function EmptyState({ icon, title, message, action }: {
   action?: { label: string; onClick: () => void }
 }) {
   return (
-    <div style={{
-      textAlign: 'center', padding: '40px 20px',
-    }}>
-      {/* Illustrated empty icon */}
+    <div className="hx-empty">
+      {/* icon = iconBank id (or legacy emoji) → always rendered as SVG */}
       <div style={{
-        width: 80, height: 80, margin: '0 auto 16px',
-        borderRadius: '50%',
-        background: 'rgba(255,255,255,0.03)',
-        border: '2px dashed rgba(255,255,255,0.06)',
+        width: 72, height: 72, borderRadius: '50%',
+        background: 'rgba(255,255,255,0.03)', border: '1px dashed var(--hx-line-strong)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
-        fontSize: 32,
       }}>
-        {icon}
+        {icon ? <EmojiIcon emoji={icon} size={40} /> : null}
       </div>
-
-      <div style={{
-        fontSize: 10, fontWeight: 900, letterSpacing: 3, color: 'rgba(255,255,255,0.25)',
-        fontFamily: "'Orbitron', system-ui, sans-serif", marginBottom: 6,
-      }}>
-        {title}
-      </div>
-
-      <div style={{
-        fontSize: 8, color: 'rgba(255,255,255,0.3)', lineHeight: 1.6, maxWidth: 250,
-        margin: '0 auto',
-      }}>
-        {message}
-      </div>
-
+      <div className="hx-empty__title">{title}</div>
+      <div style={{ fontSize: 10, lineHeight: 1.6, maxWidth: 280 }}>{message}</div>
       {action && (
-        <button
-          onClick={action.onClick}
-          style={{
-            marginTop: 16, padding: '8px 20px', borderRadius: 20,
-            background: 'rgba(0,153,204,0.08)', border: '1px solid rgba(0,153,204,0.2)',
-            color: '#0099cc', fontSize: 7, fontWeight: 700, letterSpacing: 2,
-            cursor: 'pointer', fontFamily: "'Orbitron', system-ui, sans-serif",
-          }}
-        >
+        <button className="btn-game btn-game-blue" onClick={action.onClick} style={{ marginTop: 6, padding: '9px 18px', fontSize: 10 }}>
           {action.label}
         </button>
       )}
@@ -149,7 +113,7 @@ export function PanelLoading({ message = 'LOADING' }: { message?: string }) {
     }}>
       <Spinner size={28} />
       <div style={{
-        fontSize: 8, fontWeight: 700, letterSpacing: 3, color: 'rgba(255,255,255,0.25)',
+        fontSize: 10, fontWeight: 700, letterSpacing: 3, color: 'rgba(255,255,255,0.5)',
         fontFamily: "'Orbitron', system-ui, sans-serif",
       }}>
         {message}…

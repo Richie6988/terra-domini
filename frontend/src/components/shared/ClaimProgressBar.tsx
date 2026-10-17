@@ -4,6 +4,7 @@
  * Auto-updates every second with countdown timer.
  */
 import { useState, useEffect } from 'react'
+import { IconSVG } from './iconBank'
 
 interface ClaimProgress {
   id: number
@@ -59,14 +60,15 @@ export function ClaimProgressBar({ claim, compact = false, onComplete }: {
   if (compact) {
     return (
       <div style={{
-        display: 'flex', alignItems: 'center', gap: 6,
-        padding: '4px 8px', borderRadius: 8,
-        background: `${methodColor}10`, border: `1px solid ${methodColor}25`,
+        display: 'flex', alignItems: 'center', gap: 8,
+        padding: '6px 10px', borderRadius: 10,
+        background: 'rgba(10,22,40,0.92)', border: `1px solid ${methodColor}55`,
+        boxShadow: `0 4px 14px rgba(0,0,0,0.4), 0 0 10px ${methodColor}22`,
       }}>
-        <span style={{ fontSize: 10 }}>{methodIcon}</span>
+        <IconSVG id={methodIcon} size={16} />
         {/* Mini progress bar */}
         <div style={{
-          flex: 1, height: 4, borderRadius: 2,
+          flex: 1, height: 6, borderRadius: 3,
           background: 'rgba(255,255,255,0.08)', overflow: 'hidden',
         }}>
           <div style={{
@@ -76,7 +78,7 @@ export function ClaimProgressBar({ claim, compact = false, onComplete }: {
           }} />
         </div>
         <span style={{
-          fontSize: 7, fontWeight: 700, color: methodColor, minWidth: 40, textAlign: 'right',
+          fontSize: 11, color: methodColor, minWidth: 44, textAlign: 'right',
           fontFamily: "'Share Tech Mono', monospace",
         }}>
           {eta <= 0 ? 'READY' : timeStr}
@@ -88,14 +90,14 @@ export function ClaimProgressBar({ claim, compact = false, onComplete }: {
   return (
     <div style={{
       padding: '10px 14px', borderRadius: 12,
-      background: 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(220,230,242,0.92))',
+      background: 'linear-gradient(180deg, rgba(13,27,42,0.96), rgba(6,14,26,0.96))',
       border: `1px solid ${methodColor}30`,
       boxShadow: `0 2px 12px ${methodColor}15`,
     }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 14 }}>{methodIcon}</span>
+          <IconSVG id={methodIcon} size={20} />
           <span style={{
             fontSize: 9, fontWeight: 700, color: '#e2e8f0', letterSpacing: 1,
             fontFamily: "'Orbitron', sans-serif",
@@ -135,7 +137,7 @@ export function ClaimProgressBar({ claim, compact = false, onComplete }: {
       {/* Footer */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', marginTop: 4,
-        fontSize: 7, color: 'rgba(255,255,255,0.4)',
+        fontSize: 9, color: 'rgba(255,255,255,0.5)',
       }}>
         <span>{Math.round(pct * 100)}%</span>
         <span>{claim.is_adjacent ? 'Adjacent' : 'Distant'} · {claim.hours_required}h total</span>
@@ -154,7 +156,7 @@ export function PendingClaimsList({ claims, onClaimComplete }: {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
       <div style={{
-        fontSize: 8, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)',
+        fontSize: 10, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.55)',
         fontFamily: "'Orbitron', sans-serif", marginBottom: 2,
       }}>
         ONGOING CLAIMS ({claims.length})

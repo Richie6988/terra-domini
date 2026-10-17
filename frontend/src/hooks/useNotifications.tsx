@@ -107,7 +107,7 @@ export function NotificationBadge({ count }: { count?: number }) {
       minWidth: 16, height: 16, borderRadius: 8,
       background: '#dc2626', border: '2px solid rgba(255,100,100,0.5)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontSize: 8, fontWeight: 900, color: '#fff',
+      fontSize: 9, fontWeight: 900, color: '#fff',
       fontFamily: "'Share Tech Mono', monospace",
       padding: '0 3px',
       boxShadow: '0 1px 4px rgba(220,38,38,0.4)',

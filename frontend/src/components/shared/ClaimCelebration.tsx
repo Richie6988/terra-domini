@@ -18,7 +18,7 @@ const RARITY_CONFIG: Record<string, { color: string; particles: number; label: s
   rare:      { color: '#3B82F6', particles: 80,  label: 'RARE DISCOVERY!' },
   epic:      { color: '#8B5CF6', particles: 120, label: 'EPIC CONQUEST!' },
   legendary: { color: '#F59E0B', particles: 180, label: 'LEGENDARY PRIZE!' },
-  mythic:    { color: '#EC4899', particles: 250, label: 'MYTHIC ' },
+  mythic:    { color: '#EC4899', particles: 250, label: 'MYTHIC ASCENSION!' },
 }
 
 export function ClaimCelebration({ visible, territoryName, rarity, onComplete }: Props) {
@@ -179,7 +179,7 @@ export function ClaimCelebration({ visible, territoryName, rarity, onComplete }:
             initial={{ opacity: 0 }}
             animate={{ opacity: 0.5 }}
             transition={{ delay: 1.2 }}
-            style={{ fontSize: 9, color: '#fff', letterSpacing: 4, marginTop: 12 }}
+            style={{ fontSize: 10, color: '#fff', letterSpacing: 4, marginTop: 12 }}
           >
             ADDED TO YOUR EMPIRE
           </motion.div>

@@ -9,6 +9,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
+import { IconSVG } from './iconBank'
 
 interface Blip {
   id: string; angle: number; distance: number; color: string
@@ -92,12 +93,20 @@ export function RadarWidget() {
 
     return (
       <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size}>
-        <circle cx={cx} cy={cy} r={r + 4} fill="rgba(13,27,42,0.85)" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
-        <circle cx={cx} cy={cy} r={r * 0.75} fill="none" stroke="rgba(0,153,204,0.1)" strokeWidth="0.5" />
-        <circle cx={cx} cy={cy} r={r * 0.5} fill="none" stroke="rgba(0,153,204,0.1)" strokeWidth="0.5" />
-        <circle cx={cx} cy={cy} r={r * 0.25} fill="none" stroke="rgba(0,153,204,0.1)" strokeWidth="0.5" />
-        <line x1={cx - r} y1={cy} x2={cx + r} y2={cy} stroke="rgba(0,153,204,0.08)" strokeWidth="0.5" />
-        <line x1={cx} y1={cy - r} x2={cx} y2={cy + r} stroke="rgba(0,153,204,0.08)" strokeWidth="0.5" />
+        <circle cx={cx} cy={cy} r={r + 7} fill="rgba(6,14,26,0.92)" stroke="rgba(12,197,255,0.35)" strokeWidth="1.5" />
+        <circle cx={cx} cy={cy} r={r + 3} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
+        {Array.from({ length: 24 }).map((_, i) => {
+          const a = (i / 24) * Math.PI * 2
+          const major = i % 6 === 0
+          const r1 = r + (major ? 1 : 3), r2 = r + 6
+          return <line key={i} x1={cx + Math.cos(a) * r1} y1={cy + Math.sin(a) * r1} x2={cx + Math.cos(a) * r2} y2={cy + Math.sin(a) * r2}
+            stroke={major ? 'rgba(12,197,255,0.7)' : 'rgba(12,197,255,0.25)'} strokeWidth={major ? 1.5 : 1} />
+        })}
+        <circle cx={cx} cy={cy} r={r * 0.75} fill="none" stroke="rgba(12,197,255,0.18)" strokeWidth="0.75" />
+        <circle cx={cx} cy={cy} r={r * 0.5} fill="none" stroke="rgba(12,197,255,0.18)" strokeWidth="0.75" />
+        <circle cx={cx} cy={cy} r={r * 0.25} fill="none" stroke="rgba(12,197,255,0.18)" strokeWidth="0.75" />
+        <line x1={cx - r} y1={cy} x2={cx + r} y2={cy} stroke="rgba(12,197,255,0.14)" strokeWidth="0.75" />
+        <line x1={cx} y1={cy - r} x2={cx} y2={cy + r} stroke="rgba(12,197,255,0.14)" strokeWidth="0.75" />
 
         <path
           d={`M ${cx} ${cy} L ${trailStartX} ${trailStartY} A ${r} ${r} 0 0 1 ${sweepX} ${sweepY} Z`}
@@ -139,7 +148,7 @@ export function RadarWidget() {
               />
               {detailed && (
                 <text x={bx} y={by + blipR + 10} textAnchor="middle"
-                  fontSize="6" fill={blip.color} opacity="0.7"
+                  fontSize="9" fill={blip.color} opacity="0.85"
                   fontFamily="'Orbitron', system-ui, sans-serif">
                   {(blip.category || '').slice(0, 6).toUpperCase()}
                 </text>
@@ -153,7 +162,7 @@ export function RadarWidget() {
                   </circle>
                   {detailed && (
                     <text x={bx} y={by - blipR - 6} textAnchor="middle"
-                      fontSize="8" fontWeight="900" fill="#fbbf24"
+                      fontSize="10" fontWeight="900" fill="#fbbf24"
                       fontFamily="'Orbitron', system-ui, sans-serif">
                       SAFARI
                     </text>
@@ -166,10 +175,12 @@ export function RadarWidget() {
 
         <circle cx={cx} cy={cy} r={detailed ? 4 : 3} fill="#0099cc" />
         <circle cx={cx} cy={cy} r={detailed ? 7 : 5} fill="none" stroke="#0099cc" strokeWidth="0.5" opacity="0.5" />
-        <text x={cx} y={detailed ? 18 : 14} textAnchor="middle"
-          fontSize={detailed ? 9 : 7} fontWeight="700" fill="#dc2626"
+        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(12,197,255,0.4)" strokeWidth="1" />
+        <rect x={cx - (detailed ? 9 : 7)} y={cy - r + 3} width={detailed ? 18 : 14} height={detailed ? 14 : 12} rx="3"
+          fill="#dc2626" />
+        <text x={cx} y={cy - r + (detailed ? 13.5 : 12.2)} textAnchor="middle"
+          fontSize={detailed ? 10 : 9} fontWeight="900" fill="#fff"
           fontFamily="'Orbitron', system-ui, sans-serif">N</text>
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(0,153,204,0.3)" strokeWidth="1" />
       </svg>
     )
   }, [sweepAngle, blips])
@@ -180,16 +191,22 @@ export function RadarWidget() {
       <div
         onClick={() => setExpanded(true)}
         style={{
-          position: 'fixed', bottom: 80, right: 16, zIndex: 900,
-          cursor: 'pointer', filter: 'drop-shadow(0 2px 8px rgba(0,0,0,0.3))',
+          position: 'fixed', bottom: 96, right: 12, zIndex: 900,
+          cursor: 'pointer', filter: 'drop-shadow(0 4px 14px rgba(0,0,0,0.5))',
+          display: 'flex', flexDirection: 'column', alignItems: 'center',
         }}
-        title="CLICK TO EXPAND RADAR"
+        title="Expand radar"
+        role="button" aria-label="Expand radar"
       >
         {renderRadar(100, false)}
         <div style={{
-          textAlign: 'center', fontSize: 6, fontWeight: 700, letterSpacing: 2,
-          color: safariHeatColor, fontFamily: "'Orbitron', system-ui, sans-serif", marginTop: -2,
+          display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: -4,
+          height: 18, padding: '0 8px', borderRadius: 999,
+          background: 'rgba(6,14,26,0.92)', border: `1px solid ${safariHeatColor}66`,
+          fontSize: 9, fontWeight: 700, letterSpacing: 1.5, whiteSpace: 'nowrap',
+          color: safariHeatColor, fontFamily: "'Orbitron', system-ui, sans-serif",
         }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: safariHeatColor, boxShadow: `0 0 6px ${safariHeatColor}` }} />
           {safariBlip ? `${safariHeat} · ${safariDist}m` : 'RADAR'}
         </div>
       </div>
@@ -205,7 +222,7 @@ export function RadarWidget() {
             onClick={() => setExpanded(false)}
             style={{
               position: 'fixed', inset: 0, zIndex: 1500,
-              background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(8px)',
+              background: 'rgba(0,5,15,0.7)', backdropFilter: 'blur(8px)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexDirection: 'column', gap: 12,
             }}
@@ -237,13 +254,12 @@ export function RadarWidget() {
                   background: `linear-gradient(135deg, ${safariHeatColor}20, ${safariHeatColor}05)`,
                   border: `2px solid ${safariHeatColor}40`,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: 22,
-                }}></div>
+                }}><IconSVG id="safari_radar" size={30} /></div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 9, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2 }}>
                     ACTIVE SAFARI
                   </div>
-                  <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
+                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', marginTop: 3, lineHeight: 1.4 }}>
                     Track the target using clues · Check Safari panel for details
                   </div>
                 </div>
@@ -255,7 +271,7 @@ export function RadarWidget() {
                     {safariDist}m
                   </div>
                   <div style={{
-                    fontSize: 7, fontWeight: 700, color: safariHeatColor, letterSpacing: 2,
+                    fontSize: 9, fontWeight: 700, color: safariHeatColor, letterSpacing: 2,
                   }}>
                     {safariHeat}
                   </div>
@@ -264,7 +280,7 @@ export function RadarWidget() {
             )}
 
             <div style={{
-              fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2,
+              fontSize: 9, color: 'rgba(255,255,255,0.5)', letterSpacing: 2,
               fontFamily: "'Orbitron', system-ui, sans-serif",
             }}>
               CLICK OUTSIDE TO CLOSE · ESC

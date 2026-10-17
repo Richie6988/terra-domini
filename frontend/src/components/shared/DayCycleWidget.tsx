@@ -75,16 +75,17 @@ export function DayCycleWidget() {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 8,
-      padding: '4px 10px', borderRadius: 20,
+      padding: '4px 10px', borderRadius: 20, marginTop: 44,
+      boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
       background: flash
         ? 'linear-gradient(90deg, rgba(121,80,242,0.15), rgba(121,80,242,0.05))'
-        : 'rgba(255,255,255,0.04)',
+        : 'rgba(10,22,40,0.92)',
       border: `1px solid ${flash ? 'rgba(121,80,242,0.3)' : 'rgba(255,255,255,0.08)'}`,
       transition: 'all 0.5s ease',
     }}>
       {/* Day counter */}
       <div style={{
-        fontSize: 7, fontWeight: 900, color: '#cc8800', letterSpacing: 2,
+        fontSize: 9, fontWeight: 900, color: '#fbbf24', letterSpacing: 2,
         fontFamily: "'Orbitron', system-ui, sans-serif",
       }}>
         DAY {dayCount}
@@ -105,7 +106,7 @@ export function DayCycleWidget() {
 
       {/* Timer text */}
       <div style={{
-        fontSize: 9, fontWeight: 900, color: '#0099cc', minWidth: 32,
+        fontSize: 11, color: '#38bdf8', minWidth: 32,
         fontFamily: "'Share Tech Mono', monospace",
       }}>
         {mins}:{secs.toString().padStart(2, '0')}
@@ -115,7 +116,7 @@ export function DayCycleWidget() {
       {lastHex > 0 && (
         <div style={{
           display: 'flex', alignItems: 'center', gap: 3,
-          fontSize: 8, fontWeight: 900, color: flash ? '#7950f2' : 'rgba(255,255,255,0.4)',
+          fontSize: 10, color: flash ? '#a78bfa' : 'rgba(255,255,255,0.55)',
           fontFamily: "'Share Tech Mono', monospace",
           transition: 'color 0.5s',
         }}>
