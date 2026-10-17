@@ -234,7 +234,7 @@ export const useStore = create<Store>()(
       masterSound: true,
       musicEnabled: true,
       sfxEnabled: true,
-      mapTheme: 'dark',
+      mapTheme: 'light',  // OpenStreetMap by default
       notificationsEnabled: true,
       language: 'en',
       setMasterSound: (v) => set({ masterSound: v }),

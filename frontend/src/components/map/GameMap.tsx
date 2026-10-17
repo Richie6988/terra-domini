@@ -32,7 +32,7 @@ interface GameMapProps {
 /** Mini preview gradients for the map-style picker */
 const TILE_SWATCH: Record<string, string> = {
   dark: 'linear-gradient(135deg,#0b1220 0%,#1e293b 60%,#334155 100%)',
-  light: 'linear-gradient(135deg,#f1f5f9 0%,#dbe4ee 60%,#b6c6d8 100%)',
+  light: 'linear-gradient(135deg,#f2efe9 0%,#cfe6b8 55%,#aad3df 100%)',
   satellite: 'linear-gradient(135deg,#14321f 0%,#2f4f2a 50%,#5b6b3c 100%)',
   topo: 'linear-gradient(135deg,#e8eccf 0%,#c5d1a0 55%,#9caf7a 100%)',
 }
@@ -47,29 +47,28 @@ const POI_RARITY_COLOR: Record<string, string> = {
   common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6', epic:'#8B5CF6', legendary:'#F59E0B', mythic:'#EC4899',
 }
 
-const TILES: Record<string, { label: string; url: string; maxZoom: number; overlay?: string }> = {
-  dark: {
-    label: 'Dark',
-    url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    maxZoom: 19,
-  },
-  light: {
-    label: 'Light',
-    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
-    maxZoom: 19,
-  },
+// No API key needed (Carto basemaps now require one on production domains → "API KEY REQUIRED" tiles)
+const OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
+const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+const TILES: Record<string, { label: string; url: string; maxZoom: number; overlay?: string; className?: string; attribution: string }> = {
+  light: { label: 'Map', url: OSM_URL, maxZoom: 19, attribution: OSM_ATTR },
+  dark: { label: 'Dark', url: OSM_URL, maxZoom: 19, className: 'hx-tiles-dark', attribution: OSM_ATTR },
   satellite: {
     label: 'Satellite',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
     maxZoom: 18,
     overlay: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
+    attribution: 'Tiles &copy; Esri',
   },
   topo: {
     label: 'Topo',
     url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
     maxZoom: 17,
+    attribution: OSM_ATTR + ', &copy; OpenTopoMap',
   },
 }
+const tileLayerFor = (cfg: typeof TILES[string]) =>
+  L.tileLayer(cfg.url, { maxZoom: cfg.maxZoom ?? 19, className: cfg.className, attribution: cfg.attribution })
 
 export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const mapRef       = useRef<L.Map | null>(null)
@@ -82,7 +81,13 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
   const mapTheme = useStore(s => s.mapTheme)
   const setMapTheme = useStore(s => s.setMapTheme)
-  const tile = mapTheme
+  const tile = (mapTheme in TILES ? mapTheme : 'light') as keyof typeof TILES
+  // One-time switch to OpenStreetMap for players who had the old Carto default saved
+  useEffect(() => {
+    try {
+      if (!localStorage.getItem('hx_tiles_osm')) { localStorage.setItem('hx_tiles_osm', '1'); setMapTheme('light' as any) }
+    } catch { /* ignore */ }
+  }, [setMapTheme])
   const setTile = (t: keyof typeof TILES) => setMapTheme(t as any)
   const [poiCatFilter, setPoiCatFilter] = useState<string[]>(['all'])
   const [poiRarFilter, setPoiRarFilter] = useState<string[]>(['all'])
@@ -111,7 +116,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
     const map = L.map(containerRef.current, {
       center: [48.8566, 2.3522], zoom: (typeof window !== 'undefined' && window.innerWidth < 480) ? 14 : 13,
-      zoomControl: false, attributionControl: false,
+      zoomControl: false, attributionControl: true, minZoom: 3,  // OSM attribution required; zoom<3 = useless world strip
       // ── SMOOTH ZOOM CONFIG ──
       // zoomSnap: 0 = fractional zoom = smooth continuous zoom on touchpad/wheel
       // SVG renderer (default) = polygons scale via CSS transform during zoom = GPU-free
@@ -125,7 +130,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       markerZoomAnimation: true,
     })
     const tileCfg = TILES[tile as keyof typeof TILES]
-    tileRef.current = L.tileLayer(tileCfg.url, { maxZoom: tileCfg.maxZoom ?? 19 }).addTo(map)
+    tileRef.current = tileLayerFor(tileCfg).addTo(map)
     if (tileCfg.overlay) {
       overlayRef.current = L.tileLayer(tileCfg.overlay, { maxZoom: 19, opacity: 0.8 }).addTo(map)
     }
@@ -344,7 +349,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     const map = mapRef.current; if (!map || !tileRef.current) return
     map.removeLayer(tileRef.current)
     const cfg = TILES[tile as keyof typeof TILES]
-    tileRef.current = L.tileLayer(cfg.url, { maxZoom: cfg.maxZoom ?? 19 }).addTo(map)
+    tileRef.current = tileLayerFor(cfg).addTo(map)
     overlayRef.current?.remove()
     overlayRef.current = null
     if (cfg.overlay) {

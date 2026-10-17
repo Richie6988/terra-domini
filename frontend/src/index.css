@@ -213,7 +213,13 @@ img { pointer-events: none; -webkit-user-drag: none; }
      so they don't bleed above shell UI components */
   isolation: isolate;
 }
-.leaflet-control-attribution { display: none; }
+.leaflet-control-attribution {
+  font-size: 9px !important; line-height: 1.4; padding: 1px 6px !important;
+  background: rgba(12,26,54,0.7) !important; color: #dbe7ff !important; border-radius: 6px 0 0 0;
+}
+.leaflet-control-attribution a { color: #9fd0ff !important; }
+/* "Dark" map style = OpenStreetMap tiles tinted (no API key) */
+.hx-tiles-dark { filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.55); }
 /* Leaflet controls stay inside map, don't escape stacking context */
 .leaflet-control-container { z-index: 50 !important; }
 
