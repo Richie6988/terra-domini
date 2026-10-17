@@ -105,6 +105,11 @@ const queryClient = new QueryClient({
   },
 })
 
+function SkipIntro({ onDone }: { onDone: () => void }) {
+  useEffect(() => { onDone() }, [onDone])
+  return null
+}
+
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useStore((s) => s.isAuthenticated)
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />
@@ -197,11 +202,14 @@ function GameScreen() {
 
       {/* 3D Globe loading animation — blocks ALL UI until complete */}
       {!mapLoaded && (
-        <LoadingGlobe
-          playerLat={playerCoords[0]}
-          playerLon={playerCoords[1]}
-          onComplete={onGlobeComplete}
-        />
+        // WebGL can be blocked (Brave shields, old GPUs): skip the intro instead of crashing the app
+        <ErrorBoundary label="LoadingGlobe" fallback={<SkipIntro onDone={onGlobeComplete} />}>
+          <LoadingGlobe
+            playerLat={playerCoords[0]}
+            playerLon={playerCoords[1]}
+            onComplete={onGlobeComplete}
+          />
+        </ErrorBoundary>
       )}
 
       {/* ═══ GAME UI — only renders after globe completes ═══ */}
