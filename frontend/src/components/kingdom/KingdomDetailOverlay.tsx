@@ -19,6 +19,14 @@ import { ClaimProgressBar, type ClaimProgress } from '../shared/ClaimProgressBar
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
 import { IconSVG } from '../shared/iconBank'
+import { Lock, Shield, Crown, Swords } from 'lucide-react'
+
+/** /combat/my-army/ returns units as {key: {owned,...}} — accept legacy number form too */
+const ownedCount = (v: any): number => typeof v === 'number' ? v : Number(v?.owned) || 0
+
+const SoonChip = () => (
+  <span className="hx-chip" style={{ fontSize: 9, padding: '2px 6px', color: '#fbbf24', borderColor: 'rgba(251,191,36,0.4)', background: 'rgba(251,191,36,0.1)' }}>SOON</span>
+)
 
 
 interface KingdomData {
@@ -75,7 +83,7 @@ const statCard = (color: string): React.CSSProperties => ({
   background: `${color}08`, border: `1px solid ${color}20`,
 })
 const label: React.CSSProperties = {
-  fontSize: 7, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)',
+  fontSize: 9, fontWeight: 700, letterSpacing: 2, color: 'rgba(255,255,255,0.4)',
   fontFamily: "'Orbitron', sans-serif", marginBottom: 2,
 }
 const val = (c: string): React.CSSProperties => ({
@@ -157,10 +165,11 @@ function OwnOverview({ k }: { k: KingdomData }) {
           </div>
           <div style={{
             width: 48, height: 48, borderRadius: '50%',
-            background: shields > 0 ? 'rgba(59,130,246,0.1)' : 'rgba(0,0,0,0.03)',
+            background: shields > 0 ? 'rgba(59,130,246,0.1)' : 'rgba(255,255,255,0.04)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontSize: 22, border: `2px solid ${shields > 0 ? '#3b82f6' : '#ccc'}30`,
-          }}></div>
+            color: shields > 0 ? '#3b82f6' : 'rgba(255,255,255,0.4)',
+            border: `2px solid ${shields > 0 ? '#3b82f640' : 'rgba(255,255,255,0.12)'}`,
+          }}><Shield size={22} /></div>
         </div>
       </div>
     </div>
@@ -177,7 +186,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
           border: `1px solid ${t.is_capital ? 'rgba(204,136,0,0.2)' : 'rgba(255,255,255,0.05)'}`,
         }}>
           {/* Capital badge */}
-          {t.is_capital && <span style={{ fontSize: 14 }}></span>}
+          {t.is_capital && <span style={{ color: '#cc8800', display: 'flex' }} aria-label="Capital"><Crown size={16} /></span>}
 
           {/* Name + rarity */}
           <div style={{ flex: 1, minWidth: 0 }}>
@@ -189,15 +198,15 @@ function OwnTerritories({ k }: { k: KingdomData }) {
             </div>
             <div style={{ display: 'flex', gap: 4, marginTop: 2 }}>
               <span style={{
-                padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 700,
+                padding: '1px 6px', borderRadius: 6, fontSize: 9, fontWeight: 700,
                 background: `${RC[t.rarity] || '#999'}15`, color: RC[t.rarity] || '#999',
               }}>{t.rarity?.toUpperCase()}</span>
               <span style={{
-                padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 600,
-                background: 'rgba(255,255,255,0.03)', color: 'rgba(255,255,255,0.03)',
+                padding: '1px 6px', borderRadius: 6, fontSize: 9, fontWeight: 600,
+                background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.55)',
               }}>{t.biome?.toUpperCase()}</span>
               {t.poi_category && <span style={{
-                padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 600,
+                padding: '1px 6px', borderRadius: 6, fontSize: 9, fontWeight: 600,
                 background: 'rgba(121,80,242,0.08)', color: '#7950f2',
               }}>POI</span>}
             </div>
@@ -208,17 +217,17 @@ function OwnTerritories({ k }: { k: KingdomData }) {
             <div style={{ fontSize: 11, fontWeight: 900, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>
               +{t.income_per_day}
             </div>
-            <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)' }}>HEX/DAY</div>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>HEX/DAY</div>
           </div>
 
           {/* Defense */}
           <div style={{ textAlign: 'right', flexShrink: 0, minWidth: 36 }}>
             <div style={{ fontSize: 9, fontWeight: 700, color: '#3b82f6' }}>{t.defense_points}</div>
-            <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)' }}>DEF</div>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>DEF</div>
           </div>
 
           {/* Shield */}
-          {t.has_shield && <span style={{ fontSize: 12, opacity: 0.6 }}></span>}
+          {t.has_shield && <span style={{ color: '#3b82f6', display: 'flex', opacity: 0.8 }} aria-label="Shielded"><Shield size={14} /></span>}
         </div>
       ))}
     </div>
@@ -241,7 +250,7 @@ function OwnArmy({ k }: { k: KingdomData }) {
     { key: 'naval', name: 'Naval', icon: 'ship', atk: 20, def: 15, color: '#0099cc' },
     { key: 'spy', name: 'Spy', icon: 'spy', atk: 5, def: 3, color: '#475569' },
   ]
-  const units = UNIT_DEFS.map(u => ({ ...u, count: armyUnits[u.key] || 0 }))
+  const units = UNIT_DEFS.map(u => ({ ...u, count: ownedCount(armyUnits[u.key]) }))
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -265,7 +274,7 @@ function OwnArmy({ k }: { k: KingdomData }) {
           <span style={{ fontSize: 18 }}><EmojiIcon emoji={u.icon} size={16} /></span>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 10, fontWeight: 700, color: '#e2e8f0' }}>{u.name}</div>
-            <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)' }}>ATK {u.atk} · DEF {u.def}</div>
+            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>ATK {u.atk} · DEF {u.def}</div>
           </div>
           <div style={{ fontSize: 14, fontWeight: 900, color: u.color, fontFamily: "'Share Tech Mono', monospace" }}>
             ×{u.count}
@@ -274,7 +283,7 @@ function OwnArmy({ k }: { k: KingdomData }) {
             api.post('/combat/recruit/', { unit_type: (u as any).key || u.name.toLowerCase(), quantity: 1 })
               .then(() => toast.success(`Training 1× ${u.name}...`))
               .catch((e: any) => toast.error(e?.response?.data?.error || 'Not enough HEX'))
-          }} className="btn-game btn-game-red" style={{ fontSize: 7, padding: '4px 10px' }}>
+          }} className="btn-game btn-game-red" style={{ fontSize: 9, padding: '4px 10px' }}>
             + RECRUIT
           </button>
         </div>
@@ -288,7 +297,6 @@ function OwnArmy({ k }: { k: KingdomData }) {
 // ════════════════════════════════════════════════════════════════
 
 function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
-  const [spyLevel, setSpyLevel] = useState(0) // 0=nothing, 1=basic, 2=resources, 3=army
   const setActivePanel = useStore(s => s.setActivePanel)
 
   return (
@@ -301,14 +309,14 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
           <span style={{
-            padding: '2px 8px', borderRadius: 6, fontSize: 7, fontWeight: 900,
+            padding: '2px 8px', borderRadius: 6, fontSize: 9, fontWeight: 900,
             background: 'rgba(220,38,38,0.12)', color: '#dc2626', letterSpacing: 2,
           }}>ENEMY</span>
           <span style={{ fontSize: 11, fontWeight: 700, color: '#e2e8f0' }}>
             {k.owner_username}
           </span>
         </div>
-        <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.45)' }}>
+        <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)' }}>
           Tier {k.tier} · {k.size} territories
         </div>
       </div>
@@ -331,63 +339,36 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
 
       {/* Intelligence */}
       <div style={sectionBox}>
-        <div style={{ ...label, marginBottom: 8 }}>INTELLIGENCE (LEVEL {spyLevel})</div>
-        {spyLevel === 0 && (
-          <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)', fontStyle: 'italic', textAlign: 'center', padding: 16 }}>
-            Send a spy mission to reveal enemy resources, army composition, and weaknesses.
-          </div>
-        )}
-        {spyLevel >= 1 && (
-          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>
-            Defense: ~{k.total_defense} points · Shield active on {Math.floor(k.size * 0.3)} territories
-          </div>
-        )}
-        {spyLevel >= 2 && (
-          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', marginTop: 4 }}>
-            Resources: ~{Math.round(k.tdc_per_24h)} HEX/day income
-          </div>
-        )}
+        <div style={{ ...label, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>INTELLIGENCE <SoonChip /></div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 10, color: 'rgba(255,255,255,0.5)', padding: '10px 4px', lineHeight: 1.5 }}>
+          <Lock size={18} style={{ flexShrink: 0, color: 'rgba(255,255,255,0.4)' }} />
+          Spy missions are not available yet. They will reveal enemy resources, army composition and weaknesses.
+        </div>
       </div>
 
       {/* Actions */}
       <div style={{ ...label, marginTop: 4 }}>ACTIONS</div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        <button onClick={() => { onClose(); setTimeout(() => setActivePanel('combat'), 100) }} style={{
-          padding: '14px 12px', borderRadius: 12, cursor: 'pointer',
-          background: 'linear-gradient(135deg, rgba(220,38,38,0.08), rgba(220,38,38,0.04))',
-          border: '1px solid rgba(220,38,38,0.2)',
-          color: '#dc2626', fontSize: 10, fontWeight: 900, letterSpacing: 1,
-          fontFamily: "'Orbitron', sans-serif",
-        }}>
-          ATTACK
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <button onClick={() => { onClose(); setTimeout(() => setActivePanel('combat'), 100) }}
+          className="btn-game btn-game-red" style={{ minHeight: 48, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <Swords size={16} /> ATTACK
         </button>
-        <button onClick={() => { setSpyLevel(s => Math.min(3, s + 1)); toast.success('Spy mission sent!') }} style={{
-          padding: '14px 12px', borderRadius: 12, cursor: 'pointer',
-          background: 'linear-gradient(135deg, rgba(71,85,105,0.08), rgba(71,85,105,0.04))',
-          border: '1px solid rgba(71,85,105,0.2)',
-          color: '#475569', fontSize: 10, fontWeight: 900, letterSpacing: 1,
-          fontFamily: "'Orbitron', sans-serif",
-        }}>
-          SPY ({spyLevel < 3 ? `LVL ${spyLevel + 1}` : 'MAX'})
-        </button>
-        <button onClick={() => toast.success('Diplomacy request sent!')} style={{
-          padding: '14px 12px', borderRadius: 12, cursor: 'pointer',
-          background: 'linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.04))',
-          border: '1px solid rgba(34,197,94,0.2)',
-          color: '#22c55e', fontSize: 10, fontWeight: 900, letterSpacing: 1,
-          fontFamily: "'Orbitron', sans-serif",
-        }}>
-          DIPLOMACY
-        </button>
-        <button onClick={() => toast.success('Buy offer sent!')} style={{
-          padding: '14px 12px', borderRadius: 12, cursor: 'pointer',
-          background: 'linear-gradient(135deg, rgba(204,136,0,0.08), rgba(204,136,0,0.04))',
-          border: '1px solid rgba(204,136,0,0.2)',
-          color: '#cc8800', fontSize: 10, fontWeight: 900, letterSpacing: 1,
-          fontFamily: "'Orbitron', sans-serif",
-        }}>
-          BUY OFFER
-        </button>
+        {[
+          { id: 'spy', label: 'SPY', icon: 'spy' },
+          { id: 'diplomacy', label: 'DIPLOMACY', icon: 'handshake' },
+          { id: 'buy', label: 'BUY OFFER', icon: 'money_bag' },
+        ].map(a => (
+          <button key={a.id} disabled aria-disabled="true" title="Coming soon" style={{
+            minHeight: 48, padding: '10px 12px', borderRadius: 12, cursor: 'not-allowed',
+            background: 'rgba(255,255,255,0.03)', border: '1px dashed rgba(255,255,255,0.14)',
+            color: 'rgba(255,255,255,0.45)', fontSize: 10, fontWeight: 900, letterSpacing: 1,
+            fontFamily: "'Orbitron', sans-serif",
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}>
+            <span style={{ opacity: 0.5, display: 'flex' }}><IconSVG id={a.icon} size={18} /></span>
+            {a.label} <SoonChip />
+          </button>
+        ))}
       </div>
 
       {/* Territory list (limited view) */}
@@ -399,16 +380,16 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
             borderBottom: '1px solid rgba(255,255,255,0.03)',
           }}>
             <span style={{
-              padding: '1px 6px', borderRadius: 6, fontSize: 6, fontWeight: 700,
+              padding: '1px 6px', borderRadius: 6, fontSize: 9, fontWeight: 700,
               background: `${RC[t.rarity] || '#999'}15`, color: RC[t.rarity] || '#999',
             }}>{t.rarity?.toUpperCase()}</span>
             <span style={{ fontSize: 9, color: '#e2e8f0', flex: 1 }}>{t.name || t.h3_index.slice(0, 12)}</span>
-            <span style={{ fontSize: 8, color: '#3b82f6', fontWeight: 700 }}>DEF {t.defense_points}</span>
+            <span style={{ fontSize: 9, color: '#3b82f6', fontWeight: 700 }}>DEF {t.defense_points}</span>
           </div>
         ))}
         {k.size > 5 && (
-          <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.25)', textAlign: 'center', marginTop: 6 }}>
-            +{k.size - 5} more {spyLevel < 1 ? '(send spy to reveal)' : ''}
+          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)', textAlign: 'center', marginTop: 6 }}>
+            +{k.size - 5} more
           </div>
         )}
       </div>
@@ -469,9 +450,9 @@ export function KingdomDetailOverlay({ kingdom: k, isOwn, onClose }: Props) {
                 width: 40, height: 40, borderRadius: '50%',
                 background: `linear-gradient(135deg, ${isOwn ? k.color : '#dc2626'}, ${isOwn ? k.color : '#dc2626'}88)`,
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 18, boxShadow: `0 0 16px ${isOwn ? k.color : '#dc2626'}30`,
+                color: '#fff', boxShadow: `0 0 16px ${isOwn ? k.color : '#dc2626'}30`,
               }}>
-                {isOwn ? '' : '×'}
+                {isOwn ? <Crown size={20} /> : <Swords size={20} />}
               </div>
               <div>
                 <div style={{
@@ -480,36 +461,21 @@ export function KingdomDetailOverlay({ kingdom: k, isOwn, onClose }: Props) {
                 }}>
                   {k.name?.toUpperCase() || (isOwn ? 'MY KINGDOM' : `${k.owner_username}'S KINGDOM`)}
                 </div>
-                <div style={{ fontSize: 8, color: 'rgba(255,255,255,0.4)', letterSpacing: 1 }}>
+                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', letterSpacing: 1 }}>
                   TIER {k.tier} · {k.size} TERRITORIES
                   {!isOwn && ` · OWNER: ${k.owner_username}`}
                 </div>
               </div>
             </div>
             {/* Close */}
-            <button onClick={onClose} style={{
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: 8, width: 36, height: 36, cursor: 'pointer',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'rgba(255,255,255,0.45)', fontSize: 18,
-            }}></button>
+            <button onClick={onClose} className="hx-close" aria-label="Close">×</button>
           </div>
 
           {/* Tabs (own only) */}
           {isOwn && (
-            <div style={{
-              display: 'flex', gap: 0, borderBottom: '1px solid rgba(255,255,255,0.06)',
-              flexShrink: 0,
-            }}>
+            <div className="hx-tabs" style={{ margin: '12px 20px 0', flexShrink: 0, ['--accent' as any]: k.color || '#cc8800' }}>
               {OWN_TABS.map(t => (
-                <button key={t.id} onClick={() => setTab(t.id)} style={{
-                  flex: 1, padding: '10px 8px', border: 'none', cursor: 'pointer',
-                  background: tab === t.id ? `${k.color || '#0099cc'}10` : 'transparent',
-                  borderBottom: tab === t.id ? `2px solid ${k.color || '#0099cc'}` : '2px solid transparent',
-                  color: tab === t.id ? k.color || '#0099cc' : 'rgba(255,255,255,0.4)',
-                  fontSize: 8, fontWeight: 700, letterSpacing: 1,
-                  fontFamily: "'Orbitron', sans-serif",
-                }}>
+                <button key={t.id} onClick={() => setTab(t.id)} className="hx-tab" aria-selected={tab === t.id}>
                   {t.label}
                 </button>
               ))}

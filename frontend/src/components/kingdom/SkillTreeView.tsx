@@ -9,6 +9,7 @@ import { SKILL_BRANCHES, type BranchId, type SkillNode, type SkillBranch } from 
 import type { Kingdom, SkillState } from '../../types/kingdom.types'
 import { SkillIconSVG, IconSVG } from '../shared/iconBank'
 import { EmojiIcon } from '../shared/emojiIcons'
+import { Lock, Check, Crown, GitFork } from 'lucide-react'
 
 interface Props {
   kingdom: Kingdom
@@ -61,39 +62,45 @@ function SkillNodeCard({
       onMouseLeave={() => setHovering(false)}
       onClick={handlePour}
       whileHover={statusClass !== 'locked' ? { y: -3, scale: 1.02 } : {}}
+      whileTap={statusClass !== 'locked' ? { scale: 0.98 } : {}}
+      className={state.available && !state.completed && !state.forkLocked ? 'hx-skill-available' : undefined}
+      role="button"
+      aria-label={`${skill.name} — ${state.completed ? 'completed' : statusClass === 'locked' ? 'locked' : 'available, click to pour HEX'}`}
       style={{
+        ['--node-color' as any]: color,
         width: '100%',
-        padding: 10,
-        borderRadius: 10,
+        boxSizing: 'border-box',
+        padding: '12px 10px 10px',
+        borderRadius: 12,
         cursor: statusClass === 'locked' ? 'not-allowed' : 'pointer',
-        opacity: statusClass === 'locked' ? 0.4 : 1,
-        filter: statusClass === 'locked' ? 'grayscale(0.8)' : 'none',
         background: state.completed
-          ? `linear-gradient(135deg, ${color}15, ${color}08)`
-          : 'rgba(255,255,255,0.4)',
-        border: `1.5px solid ${
+          ? `linear-gradient(160deg, ${color}30, ${color}10)`
+          : statusClass === 'locked'
+            ? 'rgba(255,255,255,0.02)'
+            : `linear-gradient(160deg, ${color}18, rgba(255,255,255,0.03))`,
+        border: `1.5px ${statusClass === 'locked' ? 'dashed' : 'solid'} ${
           state.completed ? color
-          : state.available ? 'rgba(204,136,0,0.4)'
-          : 'rgba(255,255,255,0.08)'
+          : statusClass === 'locked' ? 'rgba(255,255,255,0.1)'
+          : `${color}90`
         }`,
         boxShadow: state.completed
-          ? `0 0 12px ${color}30, inset 0 1px 0 rgba(255,255,255,0.06)`
-          : state.available
-            ? '0 2px 8px rgba(204,136,0,0.15), inset 0 1px 0 rgba(255,255,255,0.06)'
-            : 'inset 0 1px 0 rgba(255,255,255,0.3)',
-        transition: 'all 0.3s cubic-bezier(0.16,1,0.3,1)',
+          ? `0 0 16px ${color}45, inset 0 1px 0 rgba(255,255,255,0.1)`
+          : statusClass === 'locked'
+            ? 'none'
+            : `0 2px 10px ${color}25, inset 0 1px 0 rgba(255,255,255,0.06)`,
+        transition: 'background 0.3s, border-color 0.3s',
         position: 'relative',
       }}
     >
       {/* Fork indicator */}
-      {skill.isFork && (
+      {skill.isFork && state.forkLocked && (
         <div style={{
-          position: 'absolute', top: -8, right: 8,
-          fontSize: 6, fontWeight: 900, letterSpacing: 2,
-          color: state.forkLocked ? 'rgba(255,255,255,0.15)' : color,
+          position: 'absolute', top: -9, right: 8,
+          fontSize: 9, fontWeight: 900, letterSpacing: 1.5,
+          color: state.forkLocked ? 'rgba(255,255,255,0.45)' : color,
           fontFamily: "'Orbitron', system-ui, sans-serif",
-          background: 'rgba(255,255,255,0.08)', padding: '2px 6px', borderRadius: 8,
-          border: `1px solid ${state.forkLocked ? 'rgba(255,255,255,0.08)' : `${color}40`}`,
+          background: '#0d1b2a', padding: '1px 6px', borderRadius: 8,
+          border: `1px solid ${state.forkLocked ? 'rgba(255,255,255,0.12)' : `${color}60`}`,
         }}>
           {state.forkLocked ? 'LOCKED' : 'FORK'}
         </div>
@@ -102,39 +109,49 @@ function SkillNodeCard({
       {/* Ultimate indicator */}
       {skill.isUltimate && (
         <div style={{
-          position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)',
-          fontSize: 6, fontWeight: 900, letterSpacing: 2,
-          color: '#fbbf24',
+          position: 'absolute', top: -9, left: '50%', transform: 'translateX(-50%)',
+          fontSize: 9, fontWeight: 900, letterSpacing: 1.5,
+          color: '#fbbf24', whiteSpace: 'nowrap',
           fontFamily: "'Orbitron', system-ui, sans-serif",
-          background: 'rgba(255,255,255,0.08)', padding: '2px 8px', borderRadius: 8,
-          border: '1px solid rgba(251,191,36,0.3)',
+          background: '#0d1b2a', padding: '1px 7px', borderRadius: 8,
+          border: '1px solid rgba(251,191,36,0.45)',
+          display: 'flex', alignItems: 'center', gap: 3,
         }}>
-           ULTIMATE
+          <Crown size={10} /> ULTIMATE
         </div>
       )}
 
       {/* Header: icon + name + status */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-        <div style={{ filter: state.completed ? `drop-shadow(0 0 4px ${color})` : 'none' }}>
-          <SkillIconSVG skillId={skill.id} size={22} color={state.completed ? color : 'rgba(255,255,255,0.04)'} />
-        </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{
-            fontSize: 8, fontWeight: 800, color: '#e2e8f0', letterSpacing: 1,
-            fontFamily: "'Orbitron', system-ui, sans-serif",
-            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-          }}>
-            {skill.name.toUpperCase()}
-          </div>
-          <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.45)', letterSpacing: 0.5 }}>
-            {skill.effect}
-          </div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
+        <div style={{
+          width: 30, height: 30, borderRadius: 8, flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: statusClass === 'locked' ? 'rgba(255,255,255,0.04)' : `${color}22`,
+          border: `1px solid ${statusClass === 'locked' ? 'rgba(255,255,255,0.08)' : `${color}55`}`,
+          filter: state.completed ? `drop-shadow(0 0 5px ${color})` : 'none',
+        }}>
+          <SkillIconSVG skillId={skill.id} size={18} color={statusClass === 'locked' ? 'rgba(255,255,255,0.35)' : state.completed ? '#fff' : color} />
         </div>
         <div style={{
-          fontSize: 12,
-          color: state.completed ? '#00884a' : state.available ? '#cc8800' : 'rgba(255,255,255,0.15)',
+          width: 18, height: 18, borderRadius: '50%', flexShrink: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: state.completed ? color : 'transparent',
+          color: state.completed ? '#fff' : statusClass === 'locked' ? 'rgba(255,255,255,0.4)' : color,
         }}>
-          {state.completed ? '' : state.available ? '◆' : '◇'}
+          {state.completed ? <Check size={12} strokeWidth={3} /> : statusClass === 'locked' ? <Lock size={12} /> : <IconSVG id="hex_coin" size={14} />}
+        </div>
+      </div>
+      <div style={{ marginBottom: 8, minWidth: 0 }}>
+        <div style={{
+          fontSize: 9, fontWeight: 800, letterSpacing: 0.3, lineHeight: 1.25,
+          color: statusClass === 'locked' ? 'rgba(226,232,240,0.55)' : '#e2e8f0',
+          fontFamily: "'Orbitron', system-ui, sans-serif",
+          overflowWrap: 'break-word',
+        }}>
+          {skill.name.toUpperCase()}
+        </div>
+        <div style={{ fontSize: 9, lineHeight: 1.3, marginTop: 2, color: statusClass === 'locked' ? 'rgba(255,255,255,0.4)' : 'rgba(255,255,255,0.62)' }}>
+          {skill.effect}
         </div>
       </div>
 
@@ -162,20 +179,20 @@ function SkillNodeCard({
       {/* Cost + pour hint */}
       <div style={{
         display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        fontSize: 7, color: 'rgba(255,255,255,0.4)',
+        fontSize: 9, color: 'rgba(255,255,255,0.5)',
         fontFamily: "'Share Tech Mono', monospace",
       }}>
-        <span>{state.filled}/{state.max} ◆</span>
-        {state.available && !state.completed && hovering && (
+        <span>{state.filled.toLocaleString()}/{state.max.toLocaleString()} HEX</span>
+        {state.available && !state.completed && !state.forkLocked && (
           <motion.span
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            style={{ color, fontWeight: 700, fontSize: 7, fontFamily: "'Orbitron', system-ui, sans-serif" }}
+            style={{ color, fontWeight: 700, fontSize: 9, opacity: hovering ? 1 : 0.75, fontFamily: "'Orbitron', system-ui, sans-serif" }}
           >
-            CLICK TO POUR
+            POUR
           </motion.span>
         )}
-        {state.completed && <span style={{ color: '#00884a' }}>COMPLETE</span>}
+        {state.completed && <span style={{ color, fontWeight: 700 }}>DONE</span>}
       </div>
     </motion.div>
   )
@@ -198,19 +215,20 @@ function BranchColumn({
   const total = branch.skills.length
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 160 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8, minWidth: 0 }}>
       {/* Branch header */}
       <div style={{
         padding: '10px 12px', borderRadius: 10,
-        background: `linear-gradient(135deg, ${color}08, ${color}04)`,
-        border: `1.5px solid ${color}30`,
+        background: `linear-gradient(160deg, ${color}26, ${color}08)`,
+        border: `1.5px solid ${color}55`,
+        boxShadow: `inset 0 1px 0 rgba(255,255,255,0.06), 0 4px 14px ${color}18`,
         position: 'relative', overflow: 'hidden',
       }}>
         {/* Pulse background */}
         <div style={{
           position: 'absolute', inset: 0,
           background: `radial-gradient(circle at 50% 50%, ${color}15, transparent 70%)`,
-          animation: 'pulse 4s ease-in-out infinite',
+          animation: 'pulse-icon 4s ease-in-out infinite',
         }} />
 
         <div style={{ position: 'relative', zIndex: 1 }}>
@@ -218,12 +236,12 @@ function BranchColumn({
             <span style={{ fontSize: 22, filter: `drop-shadow(0 0 4px ${color}60)` }}><EmojiIcon emoji={branch.icon} size={16} /></span>
             <div>
               <div style={{
-                fontSize: 8, fontWeight: 900, color, letterSpacing: 2,
+                fontSize: 9, fontWeight: 900, color, letterSpacing: 1, lineHeight: 1.25,
                 fontFamily: "'Orbitron', system-ui, sans-serif",
               }}>
                 {branch.name.toUpperCase()}
               </div>
-              <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 1 }}>
+              <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', letterSpacing: 1, marginTop: 2, fontFamily: "'Share Tech Mono', monospace" }}>
                 {completed}/{total} SKILLS
               </div>
             </div>
@@ -246,10 +264,10 @@ function BranchColumn({
             </div>
             <div style={{
               display: 'flex', justifyContent: 'space-between',
-              fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2,
+              fontSize: 9, color: 'rgba(255,255,255,0.55)', marginTop: 3,
               fontFamily: "'Share Tech Mono', monospace",
             }}>
-              <span>{Math.floor(reservoir).toLocaleString()} ◆</span>
+              <span style={{ color: '#e2e8f0' }}>{Math.floor(reservoir).toLocaleString()} HEX</span>
               <span>RESERVOIR</span>
             </div>
           </div>
@@ -268,7 +286,7 @@ function BranchColumn({
               }}
             />
             <span style={{
-              fontSize: 8, fontWeight: 900, color, minWidth: 28, textAlign: 'right',
+              fontSize: 10, fontWeight: 900, color, minWidth: 30, textAlign: 'right',
               fontFamily: "'Share Tech Mono', monospace",
             }}>
               {alloc}%
@@ -289,29 +307,29 @@ function BranchColumn({
         if (isForkPair) {
           // Render fork pair
           return (
-            <div key={skill.id} style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            <div key={skill.id} style={{
+              display: 'flex', flexDirection: 'column', gap: 12,
+              padding: '18px 6px 8px', marginTop: 6, borderRadius: 12, position: 'relative',
+              border: `1px dashed ${color}50`, background: `${color}08`,
+            }}>
               {/* Fork label */}
               <div style={{
-                textAlign: 'center', fontSize: 6, fontWeight: 700,
-                color: 'rgba(255,255,255,0.25)', letterSpacing: 3, marginTop: 2,
+                position: 'absolute', top: -8, left: '50%', transform: 'translateX(-50%)',
+                display: 'flex', alignItems: 'center', gap: 4, whiteSpace: 'nowrap',
+                fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color,
+                background: '#0d1b2a', padding: '1px 8px', borderRadius: 8,
                 fontFamily: "'Orbitron', system-ui, sans-serif",
               }}>
-                ── CHOOSE ONE ──
+                <GitFork size={10} /> CHOOSE ONE
               </div>
-              <div style={{ display: 'flex', gap: 4 }}>
-                <div style={{ flex: 1 }}>
-                  <SkillNodeCard
-                    skill={skill} branch={branch} state={state}
-                    kingdom={kingdom} onPour={onPour} onForkChoice={onForkChoice}
-                  />
-                </div>
-                <div style={{ flex: 1 }}>
-                  <SkillNodeCard
-                    skill={nextSkill} branch={branch} state={kingdom.skillStates[nextSkill.id]}
-                    kingdom={kingdom} onPour={onPour} onForkChoice={onForkChoice}
-                  />
-                </div>
-              </div>
+              <SkillNodeCard
+                skill={skill} branch={branch} state={state}
+                kingdom={kingdom} onPour={onPour} onForkChoice={onForkChoice}
+              />
+              <SkillNodeCard
+                skill={nextSkill} branch={branch} state={kingdom.skillStates[nextSkill.id]}
+                kingdom={kingdom} onPour={onPour} onForkChoice={onForkChoice}
+              />
             </div>
           )
         }
@@ -330,11 +348,12 @@ function BranchColumn({
           <div key={skill.id}>
             {showConnector && (
               <div style={{
-                width: 2, height: 12, margin: '0 auto',
+                width: 3, height: 14, margin: '-8px auto 6px',
                 background: prevCompleted
-                  ? `linear-gradient(to bottom, ${color}, ${color}60)`
-                  : 'rgba(255,255,255,0.06)',
-                borderRadius: 1,
+                  ? `linear-gradient(to bottom, ${color}, ${color}80)`
+                  : 'rgba(255,255,255,0.12)',
+                boxShadow: prevCompleted ? `0 0 6px ${color}` : 'none',
+                borderRadius: 2,
               }} />
             )}
             <SkillNodeCard
@@ -387,42 +406,38 @@ export function SkillTreeView({ kingdom, onPour, onForkChoice, onBranchAllocChan
 
   return (
     <div>
+      <style>{`@keyframes hxSkillPulse { 0%,100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--node-color) 55%, transparent), 0 2px 10px color-mix(in srgb, var(--node-color) 20%, transparent); } 50% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--node-color) 0%, transparent), 0 0 18px color-mix(in srgb, var(--node-color) 45%, transparent); } }
+.hx-skill-available { animation: hxSkillPulse 2.2s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .hx-skill-available { animation: none; } }`}</style>
       {/* Allocation summary + Quick Pour */}
-      <div style={{
-        display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-        marginBottom: 12, padding: '8px 12px',
-        background: 'rgba(255,255,255,0.03)', borderRadius: 8,
-        border: '1px solid rgba(255,255,255,0.08)',
+      <div className="hx-card" style={{
+        display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 10,
+        marginBottom: 16, padding: '10px 14px',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <div style={{
-            fontSize: 7, letterSpacing: 2, fontWeight: 700,
-            color: totalAlloc === 100 ? '#00884a' : '#dc2626',
+            fontSize: 10, letterSpacing: 1.5, fontWeight: 700,
+            color: totalAlloc === 100 ? '#22c55e' : '#ef4444',
             fontFamily: "'Orbitron', system-ui, sans-serif",
           }}>
             BRANCH ALLOCATION: {totalAlloc}%
-            {totalAlloc !== 100 && 'MUST BE 100%'}
+            {totalAlloc !== 100 && ' — MUST BE 100%'}
           </div>
 
           {totalReservoir > 0 && (
             <button
               onClick={handleQuickPour}
-              style={{
-                padding: '4px 10px', borderRadius: 14, border: 'none', cursor: 'pointer',
-                background: 'linear-gradient(90deg, #7950f2, #6d28d9)',
-                color: '#fff', fontSize: 6, fontWeight: 700, letterSpacing: 2,
-                fontFamily: "'Orbitron', system-ui, sans-serif",
-                boxShadow: '0 2px 8px rgba(121,80,242,0.3)',
-              }}
+              className="btn-game btn-game-purple"
+              style={{ padding: '8px 14px', fontSize: 9, letterSpacing: 1.5 }}
             >
-              QUICK POUR ALL ({Math.floor(totalReservoir).toLocaleString()} ◆)
+              QUICK POUR ALL ({Math.floor(totalReservoir).toLocaleString()} HEX)
             </button>
           )}
         </div>
 
         <div style={{
           display: 'flex', alignItems: 'center', gap: 4,
-          fontSize: 9, fontWeight: 900, color: '#7950f2',
+          fontSize: 13, fontWeight: 900, color: '#a78bfa',
           fontFamily: "'Share Tech Mono', monospace",
         }}>
           <IconSVG id="hex_coin" size={12} />
@@ -432,14 +447,16 @@ export function SkillTreeView({ kingdom, onPour, onForkChoice, onBranchAllocChan
 
       {/* Branches grid — horizontal scroll on mobile */}
       <div style={{
-        display: 'flex',
+        display: 'grid',
+        gridTemplateColumns: `repeat(${SKILL_BRANCHES.length}, minmax(140px, 1fr))`,
         gap: 10,
         overflowX: 'auto',
+        paddingTop: 4,
         paddingBottom: 12,
         scrollSnapType: 'x mandatory',
       }}>
         {SKILL_BRANCHES.map(branch => (
-          <div key={branch.id} style={{ scrollSnapAlign: 'start', minWidth: 170, flex: '0 0 170px' }}>
+          <div key={branch.id} style={{ scrollSnapAlign: 'start', minWidth: 0 }}>
             <BranchColumn
               branch={branch}
               kingdom={kingdom}

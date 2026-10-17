@@ -12,6 +12,8 @@ import { api } from '../../services/api'
 import { usePlayer } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
+import { Clock, Minus, Plus, ArrowRight, RotateCcw, Info } from 'lucide-react'
+import { IconSVG } from '../shared/iconBank'
 import type { TerritoryLight } from '../../types'
 
 // ─── Monte Carlo combat simulation ────────────────────────────────────────
@@ -57,9 +59,9 @@ function Die({ value, color, delay = 0 }: { value: number; color: string; delay?
 // ─── Attack type definitions ───────────────────────────────────────────────
 const ATTACK_TYPES = [
   { id: 'conquest',  label: 'Conquest',  iconId: 'swords',  color: '#EF4444', desc: 'Full invasion — captures territory on win. Slow but decisive.',   timer: '4h+',  riskMult: 1.0 },
-  { id: 'raid',      label: 'Raid',      emoji: 'wind',  color: '#F59E0B', desc: 'Steals resources without capturing. Fast, lower losses.',          timer: '4h+',  riskMult: 0.7 },
-  { id: 'surprise',  label: 'Surprise',  emoji: 'moon',  color: '#8B5CF6', desc: 'Night strike — ignores some defenses. Higher risk, higher reward.', timer: '2h+', riskMult: 1.3 },
-  { id: 'siege',     label: 'Siege',     emoji: 'castle',  color: '#6382FF', desc: 'Reduces fortifications without capturing. Weakens for next attack.', timer: '4h+', riskMult: 0.5 },
+  { id: 'raid',      label: 'Raid',      iconId: 'tornado',  color: '#F59E0B', desc: 'Steals resources without capturing. Fast, lower losses.',          timer: '4h+',  riskMult: 0.7 },
+  { id: 'surprise',  label: 'Surprise',  iconId: 'moon',  color: '#8B5CF6', desc: 'Night strike — ignores some defenses. Higher risk, higher reward.', timer: '2h+', riskMult: 1.3 },
+  { id: 'siege',     label: 'Siege',     iconId: 'castle',  color: '#6382FF', desc: 'Reduces fortifications without capturing. Weakens for next attack.', timer: '4h+', riskMult: 0.5 },
 ]
 
 interface Props {
@@ -114,20 +116,24 @@ export function AttackPanel({ target, onClose }: Props) {
     },
   })
 
-  const probColor = winProb >= 0.65 ? '#00884a' : winProb >= 0.4 ? '#F59E0B' : '#EF4444'
+  const probColor = winProb >= 0.65 ? '#22c55e' : winProb >= 0.4 ? '#F59E0B' : '#EF4444'
 
   return (
-    <GlassPanel title="ATTACK" onClose={onClose} accent="#dc2626">
+    <GlassPanel title="ATTACK" onClose={onClose} accent="#dc2626" width={560}
+      icon={<IconSVG id="target" size={24} />} subtitle={target.place_name || 'Enemy zone'}>
       {/* Target info */}
-      <div style={{ marginBottom: 12 }}>
-        <div style={{ fontSize: 11, color: '#e2e8f0', fontWeight: 700, letterSpacing: 1 }}>{target.place_name || 'ENEMY ZONE'}</div>
-        <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.35)', marginTop: 2 }}>
-          OWNED BY: <span style={{ color: '#e2e8f0' }}>{target.owner_username ?? 'Unknown'}</span>
-          {target.defense_tier > 0 && <span style={{ marginLeft: 8 }}>TIER {target.defense_tier}</span>}
+      <div className="hx-card" style={{ marginBottom: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <IconSVG id="flag_red" size={40} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800, letterSpacing: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{target.place_name || 'ENEMY ZONE'}</div>
+          <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+            <span className="hx-chip">OWNER <span style={{ color: '#e2e8f0' }}>{target.owner_username ?? 'Unknown'}</span></span>
+            {target.defense_tier > 0 && <span className="hx-chip hx-chip--accent">DEFENSE TIER {target.defense_tier}</span>}
+          </div>
         </div>
       </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px' }}>
+      <div>
         <AnimatePresence mode="wait">
 
           {/* SETUP */}
@@ -135,44 +141,53 @@ export function AttackPanel({ target, onClose }: Props) {
             <motion.div key="setup" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
 
               {/* Attack type */}
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Attack Type</div>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 20 }}>
+              <div className="hx-section-title">ATTACK TYPE</div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))', gap: 8, marginBottom: 18 }}>
                 {ATTACK_TYPES.map(t => (
                   <button key={t.id} onClick={() => setAtkType(t.id)}
-                    style={{ padding: '10px', borderRadius: 10, border: `1px solid ${atkType === t.id ? t.color : 'rgba(255,255,255,0.08)'}`, background: atkType === t.id ? `${t.color}12` : 'transparent', cursor: 'pointer', textAlign: 'left' }}>
-                    <div style={{ fontSize: 18, marginBottom: 4 }}>{t.emoji}</div>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: atkType === t.id ? t.color : '#E5E7EB' }}>{t.label}</div>
-                    <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.3)', marginTop: 2, lineHeight: 1.4 }}>{t.desc}</div>
-                    <div style={{ fontSize: 9, color: t.color, marginTop: 4 }}>⏱ {t.timer}</div>
+                    aria-pressed={atkType === t.id}
+                    className="hx-card hx-card--interactive"
+                    style={{ ['--accent' as any]: t.color, padding: 12, borderColor: atkType === t.id ? t.color : undefined, background: atkType === t.id ? `linear-gradient(180deg, ${t.color}26, ${t.color}08)` : undefined, boxShadow: atkType === t.id ? `0 0 16px ${t.color}30` : undefined, textAlign: 'left', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                    <IconSVG id={t.iconId} size={34} />
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1.5, color: atkType === t.id ? '#fff' : '#e2e8f0' }}>{t.label}</div>
+                      <div style={{ fontSize: 11, color: 'var(--hx-text-2)', marginTop: 4, lineHeight: 1.4, fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0 }}>{t.desc}</div>
+                      <span className="hx-chip" style={{ marginTop: 8, color: t.color }}><Clock size={11} /> {t.timer}</span>
+                    </div>
                   </button>
                 ))}
               </div>
 
               {/* Units */}
-              <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Deploy Forces</div>
+              <div className="hx-section-title">DEPLOY FORCES</div>
               {[
                 { key: 'infantry', emoji: 'swords', name: 'Infantry', max: 999 },
                 { key: 'cavalry',  emoji: 'horse', name: 'Cavalry',  max: 999 },
                 { key: 'artillery',emoji: 'bomb', name: 'Artillery',max: 999 },
               ].map(u => (
-                <div key={u.key} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10, background: 'rgba(255,255,255,0.02)', borderRadius: 10, padding: '8px 12px' }}>
-                  <span style={{ fontSize: 20, width: 28 }}>{u.emoji}</span>
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', flex: 1 }}>{u.name}</span>
+                <div key={u.key} className="hx-card" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, padding: '8px 12px' }}>
+                  <IconSVG id={u.emoji} size={30} />
+                  <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.5, color: '#e2e8f0', flex: 1 }}>{u.name}</span>
                   <button onClick={() => setUnits(p => ({ ...p, [u.key]: Math.max(0, (p[u.key as keyof typeof p] ?? 0) - 10) }))}
-                    style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(255,255,255,0.08)', border: 'none', color: '#e2e8f0', cursor: 'pointer' }}>−</button>
-                  <span style={{ minWidth: 36, textAlign: 'center', fontFamily: 'monospace', color: '#e2e8f0', fontSize: 14, fontWeight: 600 }}>
+                    aria-label={`Remove 10 ${u.name}`} className="hx-icon-btn"><Minus size={16} /></button>
+                  <span style={{ minWidth: 48, textAlign: 'center', fontFamily: "'Share Tech Mono', monospace", color: '#e2e8f0', fontSize: 18 }}>
                     {units[u.key as keyof typeof units]}
                   </span>
                   <button onClick={() => setUnits(p => ({ ...p, [u.key]: (p[u.key as keyof typeof p] ?? 0) + 10 }))}
-                    style={{ width: 28, height: 28, borderRadius: 6, background: 'rgba(239,68,68,0.15)', border: '1px solid rgba(239,68,68,0.3)', color: '#EF4444', cursor: 'pointer' }}>+</button>
+                    aria-label={`Add 10 ${u.name}`} className="hx-icon-btn" style={{ color: '#f87171', borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.12)' }}><Plus size={16} /></button>
                 </div>
               ))}
 
               {/* Win probability */}
-              <div style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: 12, padding: '14px', marginTop: 16, marginBottom: 16 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                  <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.35)' }}>Monte Carlo Probability ({totalUnits} units)</span>
-                  <span style={{ fontSize: 18, fontWeight: 800, color: probColor, fontFamily: 'monospace' }}>{(winProb * 100).toFixed(0)}%</span>
+              <div className="hx-card" style={{ marginTop: 14, marginBottom: 16 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, gap: 8 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--hx-text-2)' }}>
+                      WIN CHANCE <span className="hx-chip" style={{ color: '#fbbf24', borderColor: 'rgba(251,191,36,0.4)' }}>ESTIMATE</span>
+                    </div>
+                    <div style={{ fontSize: 9, color: 'var(--hx-text-3)', marginTop: 4 }}>{totalUnits} UNITS DEPLOYED</div>
+                  </div>
+                  <span style={{ fontSize: 28, color: probColor, fontFamily: "'Share Tech Mono', monospace" }}>~{(winProb * 100).toFixed(0)}%</span>
                 </div>
                 <div style={{ height: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
                   <motion.div animate={{ width: `${winProb * 100}%` }} transition={{ type: 'spring' }}
@@ -180,12 +195,18 @@ export function AttackPanel({ target, onClose }: Props) {
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 10, color: probColor }}>Attack {(winProb * 100).toFixed(0)}%</span>
-                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.3)' }}>Defense {((1 - winProb) * 100).toFixed(0)}%</span>
+                  <span style={{ fontSize: 10, color: 'var(--hx-text-3)' }}>Defense {((1 - winProb) * 100).toFixed(0)}%</span>
+                </div>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginTop: 10, fontSize: 11, lineHeight: 1.4, color: 'var(--hx-text-3)', fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0 }}>
+                  <Info size={13} style={{ flexShrink: 0, marginTop: 1 }} />
+                  Client-side dice simulation for guidance only. The server resolves the real battle after the timer.
                 </div>
               </div>
 
               <button onClick={() => attackMut.mutate()} disabled={attackMut.isPending || totalUnits === 0}
-                style={{ width: '100%', padding: '14px', background: totalUnits > 0 ? 'rgba(239,68,68,0.15)' : 'rgba(255,255,255,0.04)', border: `1px solid ${totalUnits > 0 ? 'rgba(239,68,68,0.5)' : 'rgba(255,255,255,0.08)'}`, borderRadius: 12, color: totalUnits > 0 ? '#EF4444' : '#4B5563', fontSize: 15, fontWeight: 800, cursor: totalUnits > 0 ? 'pointer' : 'not-allowed', letterSpacing: '0.05em' }}>
+                className="btn-game btn-game-red"
+                style={{ width: '100%', padding: '15px', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+                <IconSVG id={typeConf.iconId} size={20} />
                 {attackMut.isPending ? 'Launching…' : `LAUNCH ${(typeConf.label || "").toUpperCase()}`}
               </button>
               <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center' }}>
@@ -220,13 +241,13 @@ export function AttackPanel({ target, onClose }: Props) {
             <motion.div key="result" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
               style={{ textAlign: 'center', paddingTop: 30 }}>
               <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.6 }}
-                style={{ fontSize: 64, marginBottom: 12 }}>
-                {outcome === 'win' ? '' : outcome === 'loss' ? '' : ''}
+                style={{ marginBottom: 14, display: 'flex', justifyContent: 'center', filter: 'drop-shadow(0 0 18px rgba(220,38,38,0.45))' }}>
+                <IconSVG id={outcome === 'launched' ? 'swords' : outcome === 'win' ? 'trophy' : outcome === 'loss' ? 'skull' : 'scales'} size={84} />
               </motion.div>
-              <div style={{ fontSize: 24, fontWeight: 800, color: outcome === 'win' ? '#00884a' : outcome === 'loss' ? '#EF4444' : '#F59E0B', marginBottom: 8 }}>
+              <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: 3, color: outcome === 'launched' ? '#f87171' : outcome === 'win' ? '#22c55e' : outcome === 'loss' ? '#EF4444' : '#F59E0B', marginBottom: 8 }}>
                 {outcome === 'launched' ? 'ATTACK LAUNCHED' : outcome === 'win' ? 'VICTORY!' : outcome === 'loss' ? 'DEFEATED' : 'STANDOFF'}
               </div>
-              <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.35)', marginBottom: 24, lineHeight: 1.6 }}>
+              <div style={{ fontSize: 13, color: 'var(--hx-text-2)', marginBottom: 24, lineHeight: 1.6, fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0 }}>
                 {outcome === 'launched'
                   ? launchMsg
                   : outcome === 'win'
@@ -239,12 +260,12 @@ export function AttackPanel({ target, onClose }: Props) {
               </div>
               <div style={{ display: 'flex', gap: 8 }}>
                 <button onClick={() => { setPhase('setup'); setOutcome(null) }}
-                  style={{ flex: 1, padding: '12px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 10, color: 'rgba(255,255,255,0.4)', cursor: 'pointer', fontSize: 13 }}>
-                  Attack Again
+                  className="btn-game btn-game-glass" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  <RotateCcw size={14} /> ATTACK AGAIN
                 </button>
                 <button onClick={onClose}
-                  style={{ flex: 1, padding: '12px', background: 'rgba(0,136,74,0.1)', border: '1px solid rgba(0,136,74,0.3)', borderRadius: 10, color: '#00884a', cursor: 'pointer', fontSize: 13, fontWeight: 700 }}>
-                  Map →
+                  className="btn-game btn-game-green" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                  BACK TO MAP <ArrowRight size={14} />
                 </button>
               </div>
             </motion.div>

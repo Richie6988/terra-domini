@@ -55,11 +55,28 @@ function mkBackTex(r: string): THREE.CanvasTexture {
   return new THREE.CanvasTexture(c)
 }
 
+/** Grid layout for revealed cards — fits the visible frustum at z=0 (camera z=5, fov 50). */
+function layoutTargets(n: number, aspect: number) {
+  const visH = 2 * 5 * Math.tan((25 * Math.PI) / 180)
+  const visW = visH * aspect
+  const maxCols = aspect < 0.8 ? 2 : 5
+  const cols = Math.max(1, n > maxCols ? Math.ceil(n / Math.ceil(n / maxCols)) : n)
+  const rows = Math.ceil(n / cols)
+  const pitch = Math.min(1.25, (visW * 0.9) / cols, (visH * 0.58) / rows)
+  const scale = pitch / 0.92
+  return Array.from({ length: n }, (_, i) => {
+    const r = Math.floor(i / cols), inRow = Math.min(cols, n - r * cols), c = i - r * cols
+    return { x: (c - (inRow - 1) / 2) * pitch, y: 0.45 + ((rows - 1) / 2 - r) * pitch, scale }
+  })
+}
+
 export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
   const elRef = useRef<HTMLDivElement>(null)
   const sRef = useRef<any>(null)
   const [phase, setPhase] = useState<Phase>('pack')
   const [bestCard, setBestCard] = useState<Card|null>(null)
+  const [revealed, setRevealed] = useState(0)
+  const [flash, setFlash] = useState<{ color: string; k: number } | null>(null)
 
   useEffect(() => {
     const el = elRef.current; if (!el) return
@@ -100,7 +117,8 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
       if(st.phase==='reveal'||st.phase==='done'){st.cms.forEach((m:any,i:number)=>{if(!m._tgt)return;m.position.lerp(m._tgt,0.06);const ry=st.fl.has(i)?0:Math.PI;m.rotation.y+=(ry-m.rotation.y)*0.1})}
       ren.render(sc,cam) }
     loop()
-    const onR=()=>{const w2=el.clientWidth,h2=el.clientHeight;cam.aspect=w2/h2;cam.updateProjectionMatrix();ren.setSize(w2,h2)}
+    const onR=()=>{const w2=el.clientWidth,h2=el.clientHeight;cam.aspect=w2/h2;cam.updateProjectionMatrix();ren.setSize(w2,h2)
+      if(st.cms.length){const L=layoutTargets(st.cms.length,cam.aspect);st.cms.forEach((m:any,i:number)=>{m._tgt?.set(L[i].x,L[i].y,0);m.scale.setScalar(L[i].scale)})}}
     window.addEventListener('resize',onR)
     return ()=>{cancelAnimationFrame(st._r);window.removeEventListener('resize',onR);ren.dispose();if(el.contains(ren.domElement))el.removeChild(ren.domElement)}
   }, [])
@@ -113,13 +131,15 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
     setTimeout(()=>{
       s.sc.remove(s.pk);if(s.prt){s.sc.remove(s.prt.pts);s.prt=null};s.sc.remove(p2.pts)
       const n=cards.length
+      const L=layoutTargets(n,s.cam.aspect)
+      if(n===0){s.phase='done';setPhase('done');return}
       cards.forEach((card,i)=>{
         const geo=new THREE.PlaneGeometry(0.7,0.7)
         const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:mkCardTex(card),metalness:0.1,roughness:0.5}))
         const back=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:mkBackTex(card.rarity),metalness:0.3,roughness:0.4,side:THREE.BackSide}))
         back.rotation.y=Math.PI;mesh.add(back);mesh.position.set(0,0,0);mesh.rotation.y=Math.PI
-        const angle=((i-(n-1)/2)/Math.max(n-1,1))*1.5
-        ;(mesh as any)._tgt=new THREE.Vector3(Math.sin(angle)*2,-Math.cos(angle)*0.15+0.1,-0.5+Math.abs(angle)*-0.3)
+        mesh.scale.setScalar(L[i].scale)
+        ;(mesh as any)._tgt=new THREE.Vector3(L[i].x,L[i].y,0)
         if(['rare','epic','legendary','mythic'].includes(card.rarity)){
           const gm=new THREE.MeshBasicMaterial({color:RC[card.rarity],transparent:true,opacity:0,side:THREE.DoubleSide})
           const gl=new THREE.Mesh(new THREE.PlaneGeometry(0.8,0.8),gm);gl.position.z=-0.01;mesh.add(gl);(mesh as any)._gm=gm}
@@ -127,7 +147,9 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
       s.phase='reveal';setPhase('reveal')
       let idx=0;const flipNext=()=>{
         if(idx>=n){setTimeout(()=>{s.phase='done';setPhase('done');setBestCard(cards.reduce((a,b)=>(RK[b.rarity]||0)>(RK[a.rarity]||0)?b:a,cards[0]))},600);return}
-        s.fl.add(idx);const gm=(s.cms[idx] as any)?._gm
+        s.fl.add(idx);setRevealed(idx+1)
+        if((RK[cards[idx]?.rarity]||0)>=2)setFlash({color:RC[cards[idx].rarity]||'#fff',k:idx})
+        const gm=(s.cms[idx] as any)?._gm
         if(gm){let g=0;const gi=setInterval(()=>{g+=0.05;gm.opacity=Math.min(0.3,g);if(g>=0.3)clearInterval(gi)},30)}
         idx++;setTimeout(flipNext,500)};setTimeout(flipNext,400)
     },900)
@@ -136,23 +158,63 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
   useEffect(()=>{const el=elRef.current;if(!el)return;const h=()=>{if(phase==='pack')doExplode()};el.addEventListener('click',h);return()=>el.removeEventListener('click',h)},[phase,doExplode])
 
   const bc=bestCard?RC[bestCard.rarity]:'#F59E0B'
+  const counts = Object.keys(RK).map(r => ({ r, n: cards.filter(c => c.rarity === r).length })).filter(x => x.n > 0).reverse()
+  const orb = "'Orbitron', sans-serif"
   return (
-    <div style={{position:'fixed',inset:0,zIndex:9999,background:'#020208'}}>
+    <div style={{position:'fixed',inset:0,zIndex:9999,background:'radial-gradient(ellipse at 50% 42%, #14284f 0%, #081326 48%, #020208 100%)',overflow:'hidden'}}>
       <div ref={elRef} style={{position:'absolute',inset:0}} />
+      {/* Header */}
+      <div style={{position:'absolute',top:22,left:0,right:0,textAlign:'center',pointerEvents:'none',padding:'0 64px'}}>
+        <div style={{fontSize:10,letterSpacing:4,color:'rgba(255,255,255,0.5)',fontFamily:orb}}>HEXOD BOOSTER</div>
+        <div style={{fontSize:18,fontWeight:900,letterSpacing:3,color:'#fbbf24',fontFamily:orb,textShadow:'0 0 18px rgba(251,191,36,0.55)',marginTop:4,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>
+          {(packName || 'BOOSTER PACK').toUpperCase()}
+        </div>
+        {(phase==='reveal'||phase==='done') && cards.length>0 && (
+          <div style={{display:'inline-flex',alignItems:'center',gap:8,marginTop:10,padding:'4px 12px',borderRadius:999,background:'rgba(255,255,255,0.06)',border:'1px solid rgba(255,255,255,0.12)',fontSize:11,color:'#e2e8f0',fontFamily:"'Share Tech Mono', monospace"}}>
+            REVEALED {revealed}/{cards.length}
+          </div>
+        )}
+      </div>
+      {/* Rarity flash */}
       <AnimatePresence>
-        {phase==='pack'&&(<motion.div key="tap" initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} exit={{opacity:0}}
-          style={{position:'absolute',bottom:80,left:'50%',transform:'translateX(-50%)',color:'#F59E0B',fontSize:14,fontWeight:900,letterSpacing:3,fontFamily:"'Orbitron', sans-serif",textShadow:'0 0 20px #F59E0B80'}}>
-          <motion.span animate={{opacity:[0.5,1,0.5]}} transition={{duration:1.5,repeat:Infinity}}>TAP TO OPEN</motion.span></motion.div>)}
-        {phase==='explode'&&(<motion.div key="bang" initial={{opacity:0,scale:2}} animate={{opacity:[0,1,0],scale:[2,3,4]}} transition={{duration:0.8}}
-          style={{position:'absolute',top:'50%',left:'50%',transform:'translate(-50%,-50%)',color:'#fff',fontSize:24,fontWeight:900,letterSpacing:8,fontFamily:"'Orbitron', sans-serif"}}>OPENING</motion.div>)}
-        {phase==='done'&&bestCard&&(<motion.div key="sum" initial={{opacity:0,y:40}} animate={{opacity:1,y:0}} transition={{delay:0.3}}
-          style={{position:'absolute',bottom:40,left:'50%',transform:'translateX(-50%)',display:'flex',flexDirection:'column',alignItems:'center',gap:12,zIndex:10}}>
-          <div style={{padding:'8px 20px',borderRadius:20,background:`${bc}15`,border:`1px solid ${bc}40`,color:bc,fontSize:11,fontWeight:900,letterSpacing:2,fontFamily:"'Orbitron', sans-serif",textShadow:`0 0 15px ${bc}60`,display:'flex',alignItems:'center',gap:6}}>
-            {bestCard.is_shiny&&<IconSVG id="sparkles" size={12} />}
-            {RL[bestCard.rarity]?.toUpperCase()} · {bestCard.poi_name||bestCard.h3_index?.slice(-6)}</div>
-          <div style={{fontSize:8,color:'rgba(255,255,255,0.4)',letterSpacing:1,fontFamily:"'Share Tech Mono', monospace"}}>{cards.length} TOKENS OBTAINED</div>
-          <button onClick={onClose} style={{padding:'12px 40px',borderRadius:30,cursor:'pointer',background:'linear-gradient(135deg, #F59E0B, #cc8800)',border:'none',color:'#fff',fontSize:12,fontWeight:900,letterSpacing:3,fontFamily:"'Orbitron', sans-serif",boxShadow:'0 4px 30px rgba(245,158,11,0.4)'}}>CONTINUE</button></motion.div>)}
+        {flash && (<motion.div key={'f'+flash.k} initial={{opacity:0}} animate={{opacity:[0,1,0]}} transition={{duration:0.7}}
+          style={{position:'absolute',inset:0,pointerEvents:'none',background:`radial-gradient(circle at 50% 45%, ${flash.color}66 0%, ${flash.color}22 35%, transparent 65%)`}} />)}
       </AnimatePresence>
-      <button onClick={onClose} style={{position:'absolute',top:20,right:20,zIndex:10,width:36,height:36,borderRadius:'50%',background:'rgba(255,255,255,0.08)',border:'1px solid rgba(255,255,255,0.15)',color:'#fff',fontSize:18,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center'}}>×</button>
+      <AnimatePresence>
+        {phase==='pack'&&(<motion.div key="glow" initial={{opacity:0}} animate={{opacity:1}} exit={{opacity:0}}
+          style={{position:'absolute',top:'50%',left:'50%',width:340,height:340,marginLeft:-170,marginTop:-170,borderRadius:'50%',pointerEvents:'none',
+            background:'radial-gradient(circle, rgba(245,158,11,0.28) 0%, rgba(245,158,11,0.08) 40%, transparent 70%)'}} />)}
+        {phase==='pack'&&(<motion.button key="tap" onClick={doExplode} initial={{opacity:0,y:20}} animate={{opacity:1,y:0}} exit={{opacity:0}}
+          style={{position:'absolute',bottom:72,left:'50%',x:'-50%',padding:'14px 30px',borderRadius:999,cursor:'pointer',border:'1.5px solid rgba(251,191,36,0.6)',
+            background:'linear-gradient(180deg, rgba(251,191,36,0.22), rgba(251,191,36,0.06))',boxShadow:'0 0 30px rgba(251,191,36,0.35), inset 0 1px 0 rgba(255,255,255,0.15)',
+            color:'#fbbf24',fontSize:14,fontWeight:900,letterSpacing:4,fontFamily:orb,textShadow:'0 0 16px rgba(251,191,36,0.6)'}}>
+          <motion.span animate={{opacity:[0.6,1,0.6]}} transition={{duration:1.5,repeat:Infinity}}>TAP TO OPEN</motion.span>
+          <div style={{fontSize:10,letterSpacing:2,color:'rgba(255,255,255,0.55)',marginTop:4,fontWeight:400}}>{cards.length} TOKENS INSIDE</div>
+        </motion.button>)}
+        {phase==='explode'&&(<motion.div key="white" initial={{opacity:0.9}} animate={{opacity:0}} transition={{duration:0.6}}
+          style={{position:'absolute',inset:0,background:'#fff',pointerEvents:'none'}} />)}
+        {phase==='explode'&&(<motion.div key="bang" initial={{opacity:0,scale:2}} animate={{opacity:[0,1,0],scale:[2,3,4]}} transition={{duration:0.8}}
+          style={{position:'absolute',top:'50%',left:'50%',x:'-50%',y:'-50%',color:'#fff',fontSize:24,fontWeight:900,letterSpacing:8,fontFamily:orb}}>OPENING</motion.div>)}
+        {phase==='done'&&(<motion.div key="sum" initial={{opacity:0,y:40}} animate={{opacity:1,y:0}} transition={{delay:0.3}}
+          style={{position:'absolute',bottom:28,left:16,right:16,margin:'0 auto',maxWidth:420,display:'flex',flexDirection:'column',alignItems:'center',gap:12,zIndex:10,
+            padding:'16px 18px',borderRadius:18,background:'linear-gradient(180deg, rgba(13,27,42,0.92), rgba(6,14,26,0.96))',border:`1.5px solid ${bc}55`,boxShadow:`0 0 40px ${bc}30, 0 18px 50px rgba(0,0,0,0.6)`}}>
+          {bestCard ? (<>
+            <div style={{fontSize:9,letterSpacing:3,color:'rgba(255,255,255,0.5)',fontFamily:orb}}>BEST PULL</div>
+            <div style={{padding:'8px 18px',borderRadius:999,background:`${bc}1f`,border:`1px solid ${bc}66`,color:bc,fontSize:12,fontWeight:900,letterSpacing:2,fontFamily:orb,textShadow:`0 0 15px ${bc}80`,display:'flex',alignItems:'center',gap:6,maxWidth:'100%'}}>
+              {bestCard.is_shiny&&<IconSVG id="sparkles" size={14} />}
+              <span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{(RL[bestCard.rarity]||bestCard.rarity||'').toUpperCase()} · {bestCard.poi_name||bestCard.h3_index?.slice(-6)}</span>
+            </div>
+            <div style={{display:'flex',gap:6,flexWrap:'wrap',justifyContent:'center'}}>
+              {counts.map(({r,n})=>(
+                <span key={r} style={{padding:'3px 10px',borderRadius:999,fontSize:10,fontWeight:700,letterSpacing:1,fontFamily:orb,color:RC[r],background:`${RC[r]}18`,border:`1px solid ${RC[r]}44`}}>{n} × {(RL[r]||r).toUpperCase()}</span>
+              ))}
+            </div>
+            <div style={{fontSize:10,color:'rgba(255,255,255,0.55)',letterSpacing:1,fontFamily:"'Share Tech Mono', monospace"}}>{cards.length} TOKENS REVEALED</div>
+          </>) : (
+            <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',letterSpacing:1,fontFamily:orb}}>THIS PACK WAS EMPTY</div>
+          )}
+          <button onClick={onClose} className="btn-game btn-game-gold" style={{width:'100%',minHeight:44,fontSize:12,letterSpacing:3}}>CONTINUE</button></motion.div>)}
+      </AnimatePresence>
+      <button onClick={onClose} aria-label="Close" className="hx-close" style={{position:'absolute',top:16,right:16,zIndex:10}}>×</button>
     </div>)
 }

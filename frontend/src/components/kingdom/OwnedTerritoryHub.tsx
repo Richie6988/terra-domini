@@ -22,6 +22,7 @@ import { Token3DViewer } from '../shared/Token3DViewer'
 import { TokenHexPreview } from '../shared/TokenHexPreview'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
+import { Crown, LayoutGrid, Palette, Lock, MapPin } from 'lucide-react'
 
 interface Kingdom {
   cluster_id?: string
@@ -64,11 +65,53 @@ const TIER_COLOR: Record<number, string> = {
   1: '#94a3b8', 2: '#22c55e', 3: '#3b82f6', 4: '#8b5cf6', 5: '#f59e0b', 6: '#ef4444',
 }
 
-const TABS: Array<{ id: 'gallery' | 'customize' | 'kingdom'; label: string; iconId: string }> = [
-  { id: 'gallery',   label: 'GALLERY',   iconId: 'medal' },
-  { id: 'customize', label: 'CUSTOMIZE', iconId: 'palette' },
-  { id: 'kingdom',   label: 'KINGDOM',   iconId: 'crown' },
+const TABS: Array<{ id: 'gallery' | 'customize' | 'kingdom'; label: string; Icon: typeof Crown }> = [
+  { id: 'gallery',   label: 'GALLERY',   Icon: LayoutGrid },
+  { id: 'customize', label: 'CUSTOMIZE', Icon: Palette },
+  { id: 'kingdom',   label: 'KINGDOM',   Icon: Crown },
 ]
+
+const ACCENT = '#cc8800'
+const HEAD = "'Orbitron', sans-serif"
+const MONO = "'Share Tech Mono', monospace"
+const RARITY_ORDER = ['mythic', 'legendary', 'epic', 'rare', 'uncommon', 'common']
+const HEX_CLIP = 'polygon(25% 4%, 75% 4%, 100% 50%, 75% 96%, 25% 96%, 0% 50%)'
+const fieldLabel: React.CSSProperties = { fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.5)', letterSpacing: 1.5, marginBottom: 6, fontFamily: HEAD }
+
+/** Segmented bar of rarity counts (real token data) */
+function RarityBar({ tokens }: { tokens: TokenInfo[] }) {
+  const counts: Record<string, number> = {}
+  tokens.forEach(t => { const r = (t.rarity || 'common').toLowerCase(); counts[r] = (counts[r] || 0) + 1 })
+  const total = tokens.length || 1
+  return (
+    <div>
+      <div style={{ display: 'flex', height: 8, borderRadius: 999, overflow: 'hidden', background: 'rgba(255,255,255,0.06)', gap: 2 }}>
+        {RARITY_ORDER.filter(r => counts[r]).map(r => (
+          <div key={r} title={`${r} × ${counts[r]}`} style={{ width: `${(counts[r] / total) * 100}%`, background: RARITY_COLORS[r], boxShadow: `0 0 8px ${RARITY_COLORS[r]}80` }} />
+        ))}
+      </div>
+      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+        {RARITY_ORDER.filter(r => counts[r]).map(r => (
+          <span key={r} className="hx-chip" style={{ color: RARITY_COLORS[r], borderColor: `${RARITY_COLORS[r]}55`, background: `${RARITY_COLORS[r]}14` }}>
+            {r.toUpperCase()} × {counts[r]}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+function ColorField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+  return (
+    <label style={{ display: 'block', cursor: 'pointer' }}>
+      <div style={fieldLabel}>{label}</div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, minHeight: 40, padding: '4px 10px 4px 4px', borderRadius: 10, background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.16)' }}>
+        <input type="color" value={value} onChange={e => onChange(e.target.value)} aria-label={label} style={{ width: 32, height: 32, padding: 0, border: 'none', borderRadius: 8, background: 'transparent', cursor: 'pointer' }} />
+        <span style={{ fontSize: 12, color: '#e2e8f0', fontFamily: MONO, textTransform: 'uppercase' }}>{value}</span>
+      </div>
+    </label>
+  )
+}
 
 // ════════════════════════════════════════════════════════════════
 // Customization hook (localStorage-backed)
@@ -94,76 +137,82 @@ function GalleryTab({ kingdom, tokens, onToken3D }: {
   tokens: TokenInfo[]
   onToken3D: (token: TokenInfo) => void
 }) {
+  const rank = (t: TokenInfo) => RARITY_ORDER.indexOf((t.rarity || 'common').toLowerCase())
+  const sorted = [...tokens].sort((a, b) => (a.is_capital ? -1 : b.is_capital ? 1 : (rank(a) < 0 ? 9 : rank(a)) - (rank(b) < 0 ? 9 : rank(b))))
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{
-        padding: '10px 12px', borderRadius: 8,
-        background: 'rgba(121,80,242,0.06)',
-        border: '1px solid rgba(121,80,242,0.15)',
-        fontSize: 8, color: 'rgba(255,255,255,0.55)',
-        letterSpacing: 1, fontFamily: "'Orbitron', sans-serif",
-      }}>
-        {tokens.length} TOKEN{tokens.length !== 1 ? 'S' : ''} IN THIS KINGDOM · TAP TO VIEW IN 3D
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      {/* Collection summary */}
+      <div className="hx-card" style={{ padding: '12px 14px' }}>
+        <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 10, marginBottom: 10 }}>
+          <div className="hx-section-title" style={{ margin: 0 }}>COLLECTION</div>
+          <div style={{ fontFamily: MONO, fontSize: 20, color: '#e2e8f0' }}>
+            {tokens.length} <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', fontFamily: HEAD, letterSpacing: 1 }}>TOKEN{tokens.length !== 1 ? 'S' : ''}</span>
+          </div>
+        </div>
+        {tokens.length > 0 && <RarityBar tokens={tokens} />}
       </div>
 
       {tokens.length === 0 ? (
-        <div style={{
-          textAlign: 'center', padding: 40,
-          color: 'rgba(255,255,255,0.3)',
-          fontSize: 9, letterSpacing: 2,
-          fontFamily: "'Orbitron', sans-serif",
-        }}>
-          NO TOKENS YET
+        <div className="hx-empty">
+          <LayoutGrid size={28} color={ACCENT} />
+          <div className="hx-empty__title">NO TOKENS YET</div>
+          <div>Claim territories in this kingdom to grow your collection</div>
         </div>
       ) : (
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fill, minmax(90px, 1fr))',
-          gap: 10,
-        }}>
-          {tokens.map((token, i) => {
-            const color = RARITY_COLORS[(token.rarity || 'common').toLowerCase()] || '#94a3b8'
-            return (
-              <button
-                key={`${token.h3_index}-${i}`}
-                onClick={() => onToken3D(token)}
-                style={{
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
-                  padding: '8px 4px', borderRadius: 10, cursor: 'pointer',
-                  background: `${color}08`,
-                  border: `1px solid ${color}25`,
-                  transition: 'all 0.2s',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = `${color}15`; e.currentTarget.style.transform = 'translateY(-2px)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = `${color}08`; e.currentTarget.style.transform = 'translateY(0)' }}
-              >
-                <TokenHexPreview
-                  iconId={token.poi_icon || token.poi_category?.toLowerCase() || token.biome || 'city'}
-                  rarity={(token.rarity || 'common').toLowerCase()}
-                  catColor={color}
-                  size={56}
-                  shiny={(token.rarity || '').toLowerCase() === 'mythic'}
-                />
-                <div style={{
-                  fontSize: 7, fontWeight: 700, color: '#e2e8f0',
-                  fontFamily: "'Orbitron', sans-serif",
-                  textAlign: 'center',
-                  overflow: 'hidden', textOverflow: 'ellipsis',
-                  whiteSpace: 'nowrap', maxWidth: 80,
-                }}>
-                  {(token.name || 'ZONE').toUpperCase().slice(0, 10)}
-                </div>
-                {token.is_capital && (
+        <>
+          <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', letterSpacing: 1.5, fontFamily: HEAD, marginTop: -4 }}>TAP A TOKEN TO INSPECT IN 3D</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(124px, 1fr))', gap: 10 }}>
+            {sorted.map((token, i) => {
+              const r = (token.rarity || 'common').toLowerCase()
+              const color = RARITY_COLORS[r] || '#94a3b8'
+              const premium = r === 'legendary' || r === 'mythic'
+              return (
+                <button
+                  key={`${token.h3_index}-${i}`}
+                  onClick={() => onToken3D(token)}
+                  className="hx-card hx-card--interactive hx-rise"
+                  aria-label={`Inspect ${token.name || 'token'} in 3D`}
+                  style={{
+                    ['--accent' as any]: color,
+                    animationDelay: `${i * 40}ms`,
+                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                    padding: '14px 8px 10px', color: 'inherit', font: 'inherit', textAlign: 'center',
+                    background: `radial-gradient(circle at 50% 30%, ${color}${premium ? '40' : '24'}, transparent 65%), linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))`,
+                    borderColor: `${color}${premium ? '90' : '50'}`,
+                    boxShadow: premium ? `0 0 18px ${color}35, inset 0 1px 0 rgba(255,255,255,0.08)` : undefined,
+                    overflow: 'hidden',
+                  }}
+                >
+                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: color, boxShadow: `0 0 10px ${color}` }} />
+                  {token.is_capital && (
+                    <span className="hx-chip" style={{ position: 'absolute', top: 8, left: 6, padding: '2px 6px', color: '#fbbf24', borderColor: 'rgba(251,191,36,0.5)', background: 'rgba(0,0,0,0.55)' }}>
+                      <Crown size={10} /> CAPITAL
+                    </span>
+                  )}
+                  <div style={{ marginTop: token.is_capital ? 14 : 0 }}>
+                    <TokenHexPreview
+                      iconId={token.poi_icon || token.poi_category?.toLowerCase() || token.biome || 'city'}
+                      rarity={r}
+                      catColor={color}
+                      size={72}
+                      shiny={r === 'mythic'}
+                    />
+                  </div>
                   <div style={{
-                    fontSize: 6, color: '#fbbf24',
-                    fontFamily: "'Share Tech Mono', monospace",
-                    letterSpacing: 1,
-                  }}>CAPITAL</div>
-                )}
-              </button>
-            )
-          })}
-        </div>
+                    fontSize: 10, fontWeight: 700, color: '#e2e8f0', fontFamily: HEAD, letterSpacing: 0.5,
+                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%',
+                  }}>
+                    {(token.name || 'ZONE').toUpperCase()}
+                  </div>
+                  <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 1.5, color, fontFamily: HEAD }}>{r.toUpperCase()}</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'rgba(255,255,255,0.65)', fontFamily: MONO }}>
+                    <IconSVG id="hex_coin" size={11} /> +{(token.income_per_day || 0).toLocaleString()}/d
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </>
       )}
     </div>
   )
@@ -217,97 +266,39 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
       {/* Name */}
       <div>
-        <div style={{
-          fontSize: 7, color: 'rgba(255,255,255,0.45)',
-          letterSpacing: 2, marginBottom: 6,
-          fontFamily: "'Orbitron', sans-serif",
-        }}>KINGDOM NAME</div>
+        <div style={fieldLabel}>KINGDOM NAME</div>
         <input
+          className="hx-input"
           value={name}
           onChange={e => setName(e.target.value.slice(0, 30))}
           placeholder="Name your empire..."
-          style={{
-            width: '100%', padding: '10px 12px', borderRadius: 8,
-            border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(0,0,0,0.3)',
-            color: '#e2e8f0', fontSize: 12,
-            fontFamily: "'Share Tech Mono', monospace",
-            boxSizing: 'border-box', outline: 'none',
-          }}
+          style={{ fontFamily: MONO, boxSizing: 'border-box' }}
         />
       </div>
 
       {/* Colors */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        <div>
-          <div style={{
-            fontSize: 7, color: 'rgba(255,255,255,0.45)',
-            letterSpacing: 2, marginBottom: 6,
-            fontFamily: "'Orbitron', sans-serif",
-          }}>FILL COLOR</div>
-          <input
-            type="color"
-            value={fillColor}
-            onChange={e => setFillColor(e.target.value)}
-            style={{
-              width: '100%', height: 36, borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.1)',
-              background: 'transparent', cursor: 'pointer',
-            }}
-          />
-        </div>
-        <div>
-          <div style={{
-            fontSize: 7, color: 'rgba(255,255,255,0.45)',
-            letterSpacing: 2, marginBottom: 6,
-            fontFamily: "'Orbitron', sans-serif",
-          }}>BORDER COLOR</div>
-          <input
-            type="color"
-            value={borderColor}
-            onChange={e => setBorderColor(e.target.value)}
-            style={{
-              width: '100%', height: 36, borderRadius: 8,
-              border: '1px solid rgba(255,255,255,0.1)',
-              background: 'transparent', cursor: 'pointer',
-            }}
-          />
-        </div>
+        <ColorField label="FILL COLOR" value={fillColor} onChange={setFillColor} />
+        <ColorField label="BORDER COLOR" value={borderColor} onChange={setBorderColor} />
       </div>
 
       {/* Embed image */}
       <div>
-        <div style={{
-          fontSize: 7, color: embedUnlocked ? 'rgba(255,255,255,0.45)' : 'rgba(255,255,255,0.25)',
-          letterSpacing: 2, marginBottom: 6,
-          fontFamily: "'Orbitron', sans-serif",
-          display: 'flex', alignItems: 'center', gap: 6,
-        }}>
+        <div style={{ ...fieldLabel, display: 'flex', alignItems: 'center', gap: 6 }}>
           EMBED IMAGE URL
           {!embedUnlocked && (
-            <span style={{
-              fontSize: 6, padding: '2px 6px', borderRadius: 4,
-              background: 'rgba(245,158,11,0.1)', color: '#f59e0b',
-            }}>
-              UNLOCK AT {minTerritoriesForEmbed} TERRITORIES
+            <span className="hx-chip" style={{ color: '#f59e0b', borderColor: 'rgba(245,158,11,0.45)', background: 'rgba(245,158,11,0.12)' }}>
+              <Lock size={10} /> UNLOCK AT {minTerritoriesForEmbed} TERRITORIES
             </span>
           )}
         </div>
         <input
+          className="hx-input"
           value={imageUrl}
           onChange={e => setImageUrl(e.target.value)}
           disabled={!embedUnlocked}
           placeholder="https://..."
-          style={{
-            width: '100%', padding: '10px 12px', borderRadius: 8,
-            border: '1px solid rgba(255,255,255,0.1)',
-            background: 'rgba(0,0,0,0.3)',
-            color: embedUnlocked ? '#e2e8f0' : 'rgba(255,255,255,0.3)',
-            fontSize: 10,
-            fontFamily: "'Share Tech Mono', monospace",
-            boxSizing: 'border-box', outline: 'none',
-            opacity: embedUnlocked ? 1 : 0.5,
-          }}
+          style={{ fontFamily: MONO, boxSizing: 'border-box', opacity: embedUnlocked ? 1 : 0.5 }}
         />
         {imageUrl && embedUnlocked && (
           <img
@@ -325,19 +316,19 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
 
       {/* Live preview — diaporama */}
       <div>
+        <div style={fieldLabel}>LIVE PREVIEW</div>
         <div style={{
-          fontSize: 7, color: 'rgba(255,255,255,0.45)',
-          letterSpacing: 2, marginBottom: 6,
-          fontFamily: "'Orbitron', sans-serif",
-        }}>LIVE PREVIEW</div>
-        <div style={{
-          padding: 14, borderRadius: 10,
+          padding: 16, borderRadius: 12,
           background: imageUrl
-            ? `linear-gradient(135deg, ${fillColor}20, ${fillColor}08), url(${imageUrl}) center/cover`
-            : `linear-gradient(135deg, ${fillColor}20, ${fillColor}08)`,
+            ? `linear-gradient(135deg, ${fillColor}40, rgba(6,14,26,0.8)), url(${imageUrl}) center/cover`
+            : `radial-gradient(circle at 50% 0%, ${fillColor}45, transparent 70%), linear-gradient(135deg, ${fillColor}20, ${fillColor}08)`,
           border: `2px solid ${borderColor}`,
+          boxShadow: `0 0 18px ${borderColor}40`,
           textAlign: 'center',
         }}>
+          <div style={{ width: 48, height: 48, margin: '0 auto 8px', clipPath: HEX_CLIP, background: `linear-gradient(160deg, ${fillColor}, ${fillColor}88)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
+            <Crown size={22} />
+          </div>
           <div style={{
             fontSize: 14, fontWeight: 900, color: '#e2e8f0',
             letterSpacing: 2, fontFamily: "'Orbitron', sans-serif",
@@ -346,7 +337,7 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
             {(name || 'KINGDOM').toUpperCase()}
           </div>
           <div style={{
-            fontSize: 8, color: 'rgba(255,255,255,0.6)',
+            fontSize: 10, color: 'rgba(255,255,255,0.7)',
             marginTop: 4, letterSpacing: 1,
             textShadow: '0 1px 4px rgba(0,0,0,0.8)',
           }}>
@@ -358,23 +349,18 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
       {/* Token strip */}
       {tokens.length > 0 && (
         <div>
-          <div style={{
-            fontSize: 7, color: 'rgba(255,255,255,0.45)',
-            letterSpacing: 2, marginBottom: 6,
-            fontFamily: "'Orbitron', sans-serif",
-          }}>TERRITORIES IN KINGDOM</div>
+          <div style={fieldLabel}>TERRITORIES IN KINGDOM</div>
           <div style={{ display: 'flex', gap: 6, overflowX: 'auto', paddingBottom: 4 }}>
             {tokens.slice(0, 20).map((t, i) => (
-              <div key={i} style={{
-                minWidth: 60, height: 60, borderRadius: 8, flexShrink: 0,
-                background: `linear-gradient(135deg, ${fillColor}25, ${fillColor}08)`,
-                border: `2px solid ${borderColor}60`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 7, fontWeight: 700, color: '#e2e8f0',
-                fontFamily: "'Orbitron', sans-serif",
-                textAlign: 'center', padding: 4,
-              }}>
-                {(t.name || 'Z').slice(0, 6).toUpperCase()}
+              <div key={i} style={{ width: 64, height: 64, flexShrink: 0, clipPath: HEX_CLIP, background: borderColor, padding: 2, boxSizing: 'border-box' }}>
+                <div style={{
+                  width: '100%', height: '100%', clipPath: HEX_CLIP,
+                  background: `linear-gradient(160deg, ${fillColor}66, ${fillColor}22), #0d1b2a`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 9, fontWeight: 700, color: '#e2e8f0', fontFamily: HEAD, textAlign: 'center',
+                }}>
+                  {(t.name || 'Z').slice(0, 6).toUpperCase()}
+                </div>
               </div>
             ))}
           </div>
@@ -385,7 +371,7 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
         onClick={handleSave}
         disabled={saving}
         className="btn-game btn-game-gold"
-        style={{ width: '100%', fontSize: 10, letterSpacing: 2, marginTop: 4 }}
+        style={{ width: '100%', minHeight: 46, fontSize: 11, letterSpacing: 2, marginTop: 4 }}
       >
         {saving ? 'SAVING…' : 'SAVE CUSTOMIZATION'}
       </button>
@@ -415,33 +401,47 @@ function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[]
     biomeCount[b] = (biomeCount[b] || 0) + 1
   })
 
+  // Backend rule (kingdom_engine.recompute_kingdoms): tier = min(6, size // 3)
+  const size = kingdom.size || tokens.length
+  const nextAt = tier >= 6 ? null : (tier + 1) * 3
+  const tierPct = nextAt ? Math.max(0, Math.min(100, ((size - tier * 3) / 3) * 100)) : 100
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
       {/* Hero */}
-      <div style={{
-        padding: 14, borderRadius: 10,
-        background: `linear-gradient(135deg, ${tierColor}15, ${tierColor}05)`,
-        border: `1px solid ${tierColor}30`,
+      <div className="hx-card" style={{
+        padding: 16,
+        background: `radial-gradient(circle at 50% 0%, ${tierColor}30, transparent 70%), linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))`,
+        borderColor: `${tierColor}55`,
         textAlign: 'center',
       }}>
         <div style={{
-          fontSize: 7, color: tierColor, letterSpacing: 3, fontWeight: 900,
+          fontSize: 10, color: tierColor, letterSpacing: 3, fontWeight: 900,
           fontFamily: "'Orbitron', sans-serif",
         }}>
           TIER {tier} KINGDOM
         </div>
         <div style={{
-          fontSize: 26, fontWeight: 900, color: '#e2e8f0',
+          fontSize: 34, fontWeight: 900, color: '#e2e8f0',
           fontFamily: "'Share Tech Mono', monospace",
-          marginTop: 4, letterSpacing: 1,
+          marginTop: 4, letterSpacing: 1, textShadow: `0 0 18px ${tierColor}80`,
         }}>
-          {kingdom.size || tokens.length}
+          {size}
         </div>
         <div style={{
-          fontSize: 7, color: 'rgba(255,255,255,0.4)', letterSpacing: 2,
+          fontSize: 9, color: 'rgba(255,255,255,0.5)', letterSpacing: 2,
           fontFamily: "'Orbitron', sans-serif",
         }}>
           TERRITORIES
+        </div>
+        <div style={{ marginTop: 12, textAlign: 'left' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, letterSpacing: 1, fontFamily: HEAD, color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>
+            <span>{nextAt ? `NEXT: TIER ${tier + 1}` : 'MAX TIER'}</span>
+            <span style={{ fontFamily: MONO, color: tierColor }}>{nextAt ? `${size}/${nextAt} HEXES` : `${size} HEXES`}</span>
+          </div>
+          <div className="hx-progress" style={{ ['--accent' as any]: tierColor }}>
+            <div className="hx-progress__fill" style={{ width: `${tierPct}%` }} />
+          </div>
         </div>
       </div>
 
@@ -473,47 +473,20 @@ function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[]
 
       {/* Rarity breakdown */}
       {Object.keys(rarityCount).length > 0 && (
-        <div>
-          <div style={{
-            fontSize: 7, color: 'rgba(255,255,255,0.45)',
-            letterSpacing: 2, marginBottom: 8,
-            fontFamily: "'Orbitron', sans-serif",
-          }}>RARITY BREAKDOWN</div>
-          <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-            {Object.entries(rarityCount).map(([r, n]) => (
-              <div key={r} style={{
-                padding: '4px 10px', borderRadius: 6,
-                background: `${RARITY_COLORS[r] || '#94a3b8'}15`,
-                border: `1px solid ${RARITY_COLORS[r] || '#94a3b8'}35`,
-                color: RARITY_COLORS[r] || '#94a3b8',
-                fontSize: 8, fontWeight: 700, letterSpacing: 1,
-                fontFamily: "'Orbitron', sans-serif",
-              }}>
-                {r.toUpperCase()} × {n}
-              </div>
-            ))}
-          </div>
+        <div className="hx-card">
+          <div className="hx-section-title" style={{ marginTop: 0 }}>RARITY BREAKDOWN</div>
+          <RarityBar tokens={tokens} />
         </div>
       )}
 
       {/* Biome distribution */}
       {Object.keys(biomeCount).length > 0 && (
-        <div>
-          <div style={{
-            fontSize: 7, color: 'rgba(255,255,255,0.45)',
-            letterSpacing: 2, marginBottom: 8,
-            fontFamily: "'Orbitron', sans-serif",
-          }}>BIOME DISTRIBUTION</div>
+        <div className="hx-card">
+          <div className="hx-section-title" style={{ marginTop: 0 }}>BIOME DISTRIBUTION</div>
           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
             {Object.entries(biomeCount).map(([b, n]) => (
-              <div key={b} style={{
-                padding: '4px 10px', borderRadius: 6,
-                background: 'rgba(255,255,255,0.03)',
-                border: '1px solid rgba(255,255,255,0.08)',
-                color: 'rgba(255,255,255,0.6)',
-                fontSize: 8, fontWeight: 700, letterSpacing: 1,
-                fontFamily: "'Orbitron', sans-serif",
-              }}>
+              <div key={b} className="hx-chip" style={{ padding: '3px 10px 3px 4px', fontSize: 10, color: 'rgba(255,255,255,0.75)' }}>
+                <IconSVG id={b} size={18} />
                 {b.toUpperCase()} × {n}
               </div>
             ))}
@@ -523,14 +496,13 @@ function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[]
 
       {/* Location */}
       {kingdom.centroid_lat !== undefined && kingdom.centroid_lon !== undefined && (
-        <div style={{
-          padding: '10px 12px', borderRadius: 8,
-          background: 'rgba(255,255,255,0.03)',
-          border: '1px solid rgba(255,255,255,0.06)',
-          fontSize: 7, color: 'rgba(255,255,255,0.5)',
+        <div className="hx-card" style={{
+          padding: '10px 14px', display: 'flex', alignItems: 'center', gap: 8,
+          fontSize: 11, color: 'rgba(255,255,255,0.6)',
           fontFamily: "'Share Tech Mono', monospace",
           letterSpacing: 1,
         }}>
+          <MapPin size={14} color={ACCENT} />
           {kingdom.centroid_lat.toFixed(4)}, {kingdom.centroid_lon.toFixed(4)}
         </div>
       )}
@@ -538,22 +510,23 @@ function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[]
   )
 }
 
-const statCard = (color: string) => ({
-  padding: '10px 12px', borderRadius: 10,
-  background: `linear-gradient(135deg, ${color}10, ${color}04)`,
-  border: `1px solid ${color}25`,
+const statCard = (color: string): React.CSSProperties => ({
+  padding: '12px 14px', borderRadius: 12,
+  background: `linear-gradient(160deg, ${color}1c, ${color}06)`,
+  border: `1px solid ${color}40`,
+  boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.05)',
 })
 
 const statLabel: React.CSSProperties = {
-  fontSize: 7, color: 'rgba(255,255,255,0.45)',
+  fontSize: 9, color: 'rgba(255,255,255,0.45)',
   letterSpacing: 2, marginBottom: 4,
   fontFamily: "'Orbitron', sans-serif",
 }
 
 const statValue = (color: string): React.CSSProperties => ({
-  fontSize: 14, fontWeight: 900, color,
+  fontSize: 20, fontWeight: 900, color,
   fontFamily: "'Share Tech Mono', monospace",
-  display: 'flex', alignItems: 'center', gap: 4,
+  display: 'flex', alignItems: 'center', gap: 6,
 })
 
 // ════════════════════════════════════════════════════════════════
@@ -606,30 +579,21 @@ export function OwnedTerritoryHub({ kingdom, initialTab = 'gallery', onClose }: 
       <GlassPanel
         title={kingdomName.toUpperCase()}
         onClose={onClose}
-        accent={accentColor}
-        width={480}
+        accent={ACCENT}
+        width={520}
+        icon={<Crown size={20} />}
+        subtitle={
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ color: accentColor, fontWeight: 700 }}>TIER {kingdom.tier || 1}</span>
+            <span>· {kingdom.size || tokens.length} TERRITORIES</span>
+          </span>
+        }
       >
         {/* Tab bar */}
-        <div style={{
-          display: 'flex', gap: 4, marginBottom: 14,
-        }}>
+        <div className="hx-tabs" role="tablist">
           {TABS.map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              style={{
-                flex: 1, padding: '8px 4px', borderRadius: 20, cursor: 'pointer',
-                fontSize: 8, fontWeight: tab === t.id ? 800 : 500, letterSpacing: 1,
-                background: tab === t.id ? `${accentColor}15` : 'rgba(255,255,255,0.04)',
-                color: tab === t.id ? accentColor : 'rgba(255,255,255,0.4)',
-                border: `1px solid ${tab === t.id ? `${accentColor}40` : 'rgba(255,255,255,0.08)'}`,
-                fontFamily: "'Orbitron', sans-serif",
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4,
-                transition: 'all 0.2s',
-              }}
-            >
-              <IconSVG id={t.iconId} size={11} />
-              {t.label}
+            <button key={t.id} role="tab" className="hx-tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
+              <t.Icon size={14} /> {t.label}
             </button>
           ))}
         </div>

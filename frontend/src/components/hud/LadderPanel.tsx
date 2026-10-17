@@ -8,7 +8,7 @@ import { GlassPanel } from '../shared/GlassPanel'
 import { MiniIcon, StatusDot } from '../shared/MiniIcons'
 import { api } from '../../services/api'
 import { usePlayer } from '../../store'
-import { IconSVG } from '../shared/iconBank'
+import { IconSVG, ICON_BANK } from '../shared/iconBank'
 
 
 interface Props { onClose: () => void }
@@ -35,104 +35,186 @@ function Medal({ rank }: { rank: number }) {
 }
 
 // Real leaderboard from backend
+const PODIUM = ['#f59e0b', '#cbd5e1', '#cd7f32'] // gold, silver, bronze
+
+function Avatar({ p, size }: { p: any; size: number }) {
+  const icon = p.avatar_emoji && ICON_BANK[p.avatar_emoji] ? p.avatar_emoji : null
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: '50%', flexShrink: 0,
+      background: p.isYou ? 'linear-gradient(135deg, #8b5cf6, #6d28d9)' : 'linear-gradient(135deg, rgba(255,255,255,0.12), rgba(255,255,255,0.04))',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      fontSize: Math.round(size * 0.36), fontWeight: 900, color: '#fff',
+      border: `2px solid ${p.isYou ? '#a78bfa' : 'rgba(255,255,255,0.14)'}`,
+    }}>
+      {icon ? <IconSVG id={icon} size={Math.round(size * 0.8)} /> : ((p.username || '').slice(0, 2)).toUpperCase()}
+    </div>
+  )
+}
 
 export function LadderPanel({ onClose }: Props) {
   const [tab, setTab] = useState<Tab>('global')
   const player = usePlayer()
 
-  // Fetch real leaderboard from backend
+  // Fetch real leaderboard from backend ('nearby' is served by /leaderboard/regional/; no alliance ladder yet)
   const { data: lbData, isLoading } = useQuery({
     queryKey: ['leaderboard', tab],
-    queryFn: () => api.get(`/leaderboard/${tab}/`).then(r => r.data).catch(() => null),
+    queryFn: () => api.get(`/leaderboard/${tab === 'nearby' ? 'regional' : tab}/`).then(r => r.data).catch(() => null),
     staleTime: 30000,
+    enabled: tab !== 'alliance',
   })
 
-  const entries = (lbData?.entries || []).map((e: any, i: number) => ({
+  const rawEntries = lbData?.entries || []
+  const hasHexPerDay = rawEntries.some((e: any) => e.hex_per_day != null)
+  const entries = rawEntries.map((e: any, i: number) => ({
     rank: e.rank || i + 1,
     username: e.username || e.display_name,
     territories: e.territories || 0,
     hex_per_day: e.hex_per_day || e.score || 0,
-    isYou: e.id === String(player?.id),
+    isYou: e.is_me || e.id === String(player?.id),
     avatar_emoji: e.avatar_emoji || '',
+    alliance: e.alliance || null,
+    battles_won: e.battles_won,
   }))
-  const meRank = lbData?.me_rank
+  const meRank = lbData?.me_rank ?? entries.find((p: any) => p.isYou)?.rank
+  const me = entries.find((p: any) => p.isYou)
+  const valueLabel = hasHexPerDay ? 'HEX/D' : 'SCORE'
+  const podium = entries.slice(0, 3)
+  const rest = entries.slice(3)
+  const mono = "'Share Tech Mono', monospace"
 
   return (
-    <GlassPanel title="LADDER" onClose={onClose} accent="#8b5cf6">
+    <GlassPanel title="LADDER" onClose={onClose} accent="#8b5cf6"
+      icon={<IconSVG id="trophy" size={24} />} subtitle="Commander rankings by score">
+      {/* Your rank */}
+      {tab !== 'alliance' && me && (
+        <div className="hx-card hx-card--accent" style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+          <div className="hx-stat">
+            <span className="hx-stat__label">YOUR RANK</span>
+            <span className="hx-stat__value hx-stat__value--accent">#{meRank ?? '-'}</span>
+          </div>
+          <div style={{ flex: 1, fontSize: 10, color: 'var(--hx-text-3)', letterSpacing: 1 }}>
+            OF {entries.length} RANKED PLAYERS
+          </div>
+          <div className="hx-stat" style={{ textAlign: 'right' }}>
+            <span className="hx-stat__label">{valueLabel}</span>
+            <span className="hx-stat__value">{Number(me.hex_per_day).toLocaleString()}</span>
+          </div>
+        </div>
+      )}
+
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 0, borderBottom: '1px solid rgba(255,255,255,0.06)', marginBottom: 14 }}>
-        {TABS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex: 1, padding: '10px 8px', border: 'none', cursor: 'pointer',
-            background: tab === t.id ? 'rgba(139,92,246,0.08)' : 'transparent',
-            borderBottom: tab === t.id ? '2px solid #8b5cf6' : '2px solid transparent',
-            color: tab === t.id ? '#8b5cf6' : 'rgba(255,255,255,0.4)',
-            fontSize: 8, fontWeight: 700, letterSpacing: 1, fontFamily: "'Orbitron', sans-serif",
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-          }}>
-            <MiniIcon id={t.icon} size={12} color={tab === t.id ? '#8b5cf6' : 'rgba(255,255,255,0.25)'} />
-            {t.label}
-          </button>
-        ))}
+      <div className="hx-tabs" role="tablist">
+        {TABS.map(t => {
+          const soon = t.id === 'alliance'
+          return (
+            <button key={t.id} role="tab" className="hx-tab" aria-selected={tab === t.id}
+              disabled={soon} aria-disabled={soon}
+              onClick={() => !soon && setTab(t.id)}
+              style={soon ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}>
+              <MiniIcon id={t.icon} size={13} />
+              {t.label}
+              {soon && <span className="hx-chip" style={{ padding: '1px 6px' }}>SOON</span>}
+            </button>
+          )
+        })}
       </div>
+
+      {isLoading && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {[0, 1, 2, 3, 4].map(i => <div key={i} className="hx-skeleton" style={{ height: 48 }} />)}
+        </div>
+      )}
+      {!isLoading && entries.length === 0 && (
+        <div className="hx-empty">
+          <IconSVG id="trophy" size={44} />
+          <div className="hx-empty__title">NO PLAYERS RANKED YET</div>
+          <div>Claim territories to appear on the ladder.</div>
+        </div>
+      )}
+
+      {/* Podium — top 3 */}
+      {podium.length > 0 && (
+        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${podium.length}, 1fr)`, gap: 8, alignItems: 'end', marginBottom: 14 }}>
+          {[podium[1], podium[0], podium[2]].filter(Boolean).map((p: any, i: number) => {
+            const c = PODIUM[p.rank - 1] || '#94a3b8'
+            const first = p.rank === 1
+            return (
+              <div key={p.rank} className="hx-rise" style={{
+                animationDelay: `${i * 60}ms`,
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, minWidth: 0,
+                padding: first ? '16px 8px 14px' : '12px 8px', borderRadius: 14,
+                background: `linear-gradient(180deg, ${c}26 0%, ${c}08 70%, rgba(255,255,255,0.02) 100%)`,
+                border: `1px solid ${p.isYou ? '#a78bfa' : c + '66'}`,
+                boxShadow: p.isYou ? '0 0 18px rgba(139,92,246,0.35)' : `inset 0 1px 0 rgba(255,255,255,0.08), 0 0 16px ${c}1f`,
+              }}>
+                <div style={{
+                  width: 26, height: 26, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  background: `linear-gradient(180deg, ${c}, ${c}aa)`, color: '#1a0f00', fontWeight: 900, fontSize: 12,
+                  fontFamily: mono, boxShadow: `0 0 12px ${c}88`,
+                }}>{p.rank}</div>
+                <Avatar p={p} size={first ? 52 : 42} />
+                <div style={{ fontSize: first ? 11 : 10, fontWeight: 800, color: p.isYou ? '#c4b5fd' : '#e2e8f0', maxWidth: '100%', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {p.username}
+                </div>
+                {p.isYou && <span className="hx-chip hx-chip--accent">YOU</span>}
+                <div style={{ fontFamily: mono, fontSize: first ? 20 : 16, color: c, lineHeight: 1 }}>
+                  {Number(p.hex_per_day).toLocaleString()}
+                </div>
+                <div style={{ fontSize: 9, color: 'var(--hx-text-3)', letterSpacing: 1 }}>{valueLabel} · {p.territories} TERR</div>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Column headers */}
-      <div style={{ display: 'flex', padding: '0 12px 8px', gap: 8, fontSize: 6, fontWeight: 700, color: 'rgba(255,255,255,0.25)', letterSpacing: 2, fontFamily: "'Orbitron', sans-serif" }}>
-        <span style={{ width: 28 }}>#</span>
-        <span style={{ flex: 1 }}>PLAYER</span>
-        <span style={{ width: 50, textAlign: 'right' }}>TERR</span>
-        <span style={{ width: 50, textAlign: 'right' }}>HEX/D</span>
-      </div>
+      {rest.length > 0 && (
+        <div style={{ display: 'flex', padding: '0 12px 8px', gap: 10, fontSize: 9, fontWeight: 700, color: 'var(--hx-text-3)', letterSpacing: 1.5 }}>
+          <span style={{ width: 30 }}>#</span>
+          <span style={{ flex: 1 }}>PLAYER</span>
+          <span style={{ width: 44, textAlign: 'right' }}>TERR</span>
+          <span style={{ width: 72, textAlign: 'right' }}>{valueLabel}</span>
+        </div>
+      )}
 
-      {/* Player rows */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-        {isLoading && <div style={{ textAlign: 'center', padding: 30, color: 'rgba(255,255,255,0.25)', fontSize: 9 }}>Loading rankings...</div>}
-        {!isLoading && entries.length === 0 && <div style={{ textAlign: 'center', padding: 30, color: 'rgba(255,255,255,0.25)', fontSize: 9 }}>No players ranked yet. Claim territories to appear!</div>}
-        {entries.map((p: any) => (
-          <div key={p.rank} style={{
-            display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10,
-            background: p.isYou ? 'rgba(139,92,246,0.06)' : 'rgba(255,255,255,0.3)',
-            border: `1px solid ${p.isYou ? 'rgba(139,92,246,0.2)' : 'rgba(255,255,255,0.03)'}`,
+      {/* Player rows (rank 4+) */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+        {rest.map((p: any, i: number) => (
+          <div key={p.rank} className="hx-rise" style={{
+            animationDelay: `${Math.min(i, 12) * 25}ms`,
+            display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 10, minHeight: 48,
+            background: p.isYou ? 'linear-gradient(90deg, rgba(139,92,246,0.22), rgba(139,92,246,0.06))' : 'rgba(255,255,255,0.03)',
+            border: `1px solid ${p.isYou ? 'rgba(167,139,250,0.6)' : 'var(--hx-line)'}`,
+            boxShadow: p.isYou ? '0 0 14px rgba(139,92,246,0.25)' : 'none',
           }}>
-            {/* Rank */}
-            <div style={{ width: 28, flexShrink: 0 }}>
-              {p.rank <= 3 ? <Medal rank={p.rank} /> : (
-                <span style={{ fontSize: 11, fontWeight: 900, color: 'rgba(255,255,255,0.25)', fontFamily: "'Share Tech Mono', monospace" }}>{p.rank}</span>
-              )}
-            </div>
-
-            {/* Avatar circle */}
-            <div style={{
-              width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-              background: p.isYou ? 'linear-gradient(135deg, #8b5cf6, #6d28d9)' : `linear-gradient(135deg, hsl(${p.rank * 18}, 50%, 60%), hsl(${p.rank * 18 + 30}, 50%, 50%))`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 10, fontWeight: 900, color: '#fff', border: '2px solid rgba(255,255,255,0.08)',
-            }}>{((p.username || "").slice(0, 2)).toUpperCase()}</div>
-
-            {/* Name */}
+            <div style={{ width: 30, flexShrink: 0, fontSize: 13, color: 'var(--hx-text-2)', fontFamily: mono }}>{p.rank}</div>
+            <Avatar p={p} size={32} />
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontSize: 10, fontWeight: p.isYou ? 800 : 600, color: p.isYou ? '#8b5cf6' : '#e2e8f0',
-                overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-              }}>
-                {p.username} {p.isYou && <span style={{ fontSize: 7, color: '#8b5cf6', fontWeight: 700 }}>(YOU)</span>}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, fontWeight: 700, color: p.isYou ? '#c4b5fd' : '#e2e8f0' }}>
+                <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.username}</span>
+                {p.isYou && <span className="hx-chip hx-chip--accent" style={{ padding: '1px 6px' }}>YOU</span>}
               </div>
-              <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.25)' }}>{p.kingdoms} kingdoms</div>
+              <div style={{ fontSize: 9, color: 'var(--hx-text-3)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {p.alliance || 'NO ALLIANCE'}{p.battles_won != null ? ` · ${p.battles_won} WINS` : ''}
+              </div>
             </div>
-
-            {/* Territories */}
-            <div style={{ width: 50, textAlign: 'right', fontSize: 11, fontWeight: 900, color: '#0099cc', fontFamily: "'Share Tech Mono', monospace" }}>
-              {p.territories}
-            </div>
-
-            {/* HEX/day */}
-            <div style={{ width: 50, textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 3 }}>
-              <IconSVG id="hex_coin" size={12} />
-              <span style={{ fontSize: 9, fontWeight: 700, color: '#cc8800', fontFamily: "'Share Tech Mono', monospace" }}>{p.hex_per_day}</span>
+            <div style={{ width: 44, textAlign: 'right', fontSize: 14, color: '#38bdf8', fontFamily: mono }}>{p.territories}</div>
+            <div style={{ width: 72, textAlign: 'right', display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 4 }}>
+              {hasHexPerDay && <IconSVG id="hex_coin" size={12} />}
+              <span style={{ fontSize: 14, color: '#fbbf24', fontFamily: mono }}>{Number(p.hex_per_day).toLocaleString()}</span>
             </div>
           </div>
         ))}
       </div>
+
+      {tab === 'alliance' && (
+        <div className="hx-empty">
+          <MiniIcon id="empire" size={36} />
+          <div className="hx-empty__title">ALLIANCE LADDER</div>
+          <span className="hx-chip hx-chip--accent">SOON</span>
+        </div>
+      )}
     </GlassPanel>
   )
 }

@@ -17,6 +17,9 @@ import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
 import { IconSVG } from '../shared/iconBank'
+import { Clock } from 'lucide-react'
+
+const SHOP_ACCENT = '#fbbf24'
 
 const RARITY_COLOR: Record<string,string> = {
   common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
@@ -116,7 +119,7 @@ function formatDuration(sec: number): string {
   if (!sec) return 'Permanent'
   if (sec < 3600) return `${Math.round(sec/60)}min`
   if (sec < 86400) return `${Math.round(sec/3600)}h`
-  return `${Math.round(sec/86400)}j`
+  return `${Math.round(sec/86400)}d`
 }
 
 interface Props { onClose: () => void }
@@ -172,7 +175,7 @@ export function ShopPanel({ onClose }: Props) {
 
   return (
     <>
-      <GlassPanel title="SHOP" onClose={onClose} accent="#cc8800">
+      <GlassPanel title="SHOP" onClose={onClose} accent={SHOP_ACCENT} icon={<IconSVG id="cart" size={24} />} subtitle="Boosters, boosts & cosmetics">
         {/* Kingdom active bonuses banner */}
         {activeKingdom && (
           <div style={{
@@ -186,17 +189,17 @@ export function ShopPanel({ onClose }: Props) {
               background:`linear-gradient(135deg, ${activeKingdom.color}, ${activeKingdom.color}aa)`,
               display:'flex', alignItems:'center', justifyContent:'center',
               fontSize:11, boxShadow:`0 0 8px ${activeKingdom.color}30`,
-            }}></div>
+            }}><IconSVG id="castle" size={18} /></div>
             <div style={{ flex:1 }}>
-              <div style={{ fontSize:7, fontWeight:800, color:activeKingdom.color, letterSpacing:2, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
-                {activeKingdom.name.toUpperCase()}
+              <div style={{ fontSize:10, fontWeight:800, color:activeKingdom.color, letterSpacing:2, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
+                {(activeKingdom.name || '').toUpperCase()}
               </div>
-              <div style={{ fontSize:6, color:'rgba(255,255,255,0.4)', letterSpacing:1 }}>
+              <div style={{ fontSize:9, color:'rgba(255,255,255,0.5)', letterSpacing:1, marginTop:2 }}>
                 BOOSTS APPLY TO THIS KINGDOM
               </div>
             </div>
             <div style={{
-              fontSize:7, color:'#F59E0B', fontWeight:700, fontFamily:"'Share Tech Mono', monospace",
+              fontSize:12, color:'#F59E0B', fontWeight:700, fontFamily:"'Share Tech Mono', monospace",
               display:'flex', alignItems:'center', gap:3,
             }}>
               <IconSVG id="hex_coin" size={12} />{activeKingdom.dailyHex}/d
@@ -205,31 +208,26 @@ export function ShopPanel({ onClose }: Props) {
         )}
 
         {/* Balance display */}
-        <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12,
-          padding:'8px 12px', background:'rgba(255,255,255,0.04)', borderRadius:8,
-          border:'1px solid rgba(255,255,255,0.08)' }}>
-          <span style={{ fontSize:9, color:'rgba(255,255,255,0.35)', letterSpacing:2, fontWeight:500 }}>BALANCE</span>
-          <div style={{ display:'flex', alignItems:'center', gap:6 }}>
-            <IconSVG id="hex_coin" size={20} />
-            <span style={{ fontSize:16, fontWeight:900, color:'#F59E0B', fontFamily:"'Share Tech Mono', monospace" }}>
-              {hexBalance.toFixed(0)}
-            </span>
+        <div className="hx-card hx-card--accent" style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:12, gap:12, padding:'14px 16px' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:12, minWidth:0 }}>
+            <IconSVG id="hex_coin" size={36} />
+            <div className="hx-stat">
+              <span className="hx-stat__label">HEX BALANCE</span>
+              <span className="hx-stat__value hx-stat__value--accent" style={{ fontSize:26 }}>{Math.floor(hexBalance).toLocaleString()}</span>
+            </div>
           </div>
+          <button className="btn-game btn-game-glass" style={{ fontSize:10, padding:'10px 14px', flexShrink:0 }}
+            onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }}>GET HEX</button>
         </div>
 
         {/* Category quick-nav — scrolls to section */}
-        <div style={{ display:'flex', gap:4, overflowX:'auto', paddingBottom:8, marginBottom:12, position:'sticky', top:0, zIndex:1, background:'rgba(13,27,42,0.95)', backdropFilter:'blur(8px)' }}>
+        <div style={{ display:'flex', gap:6, overflowX:'auto', padding:'4px 0 10px', marginBottom:12, position:'sticky', top:-16, zIndex:2, background:'#0b1828', scrollbarWidth:'none' }}>
           {CATS.map(c => (
-            <button key={c.id} onClick={() => document.getElementById(`shop-${c.id}`)?.scrollIntoView({ behavior:'smooth', block:'start' })} style={{
-              padding:'6px 10px', borderRadius:20, cursor:'pointer', whiteSpace:'nowrap',
-              fontSize:7, fontWeight:500, letterSpacing:1,
-              background:'rgba(255,255,255,0.04)',
-              border:`1px solid rgba(255,255,255,0.08)`,
-              color:c.color, flexShrink:0,
-              fontFamily:"'Orbitron', system-ui, sans-serif",
-            display:'flex', alignItems:'center', gap:3,
+            <button key={c.id} className="hx-chip" onClick={() => document.getElementById(`shop-${c.id}`)?.scrollIntoView({ behavior:'smooth', block:'start' })} style={{
+              cursor:'pointer', flexShrink:0, minHeight:34, padding:'6px 12px', fontSize:10, color:c.color,
+              borderColor:`${c.color}40`, background:`${c.color}12`,
             }}>
-              <IconSVG id={c.iconId} size={10} />
+              <IconSVG id={c.iconId} size={16} />
               {c.label}
             </button>
           ))}
@@ -237,9 +235,8 @@ export function ShopPanel({ onClose }: Props) {
 
         {/* Active boosts */}
         {activeBoosts.length > 0 && (
-          <div style={{ padding:'8px 10px', marginBottom:12, borderRadius:6,
-            background:'rgba(0,136,74,0.06)', border:'1px solid rgba(0,136,74,0.15)' }}>
-            <div style={{ fontSize:7, color:'rgba(255,255,255,0.35)', letterSpacing:2, marginBottom:6, fontWeight:700, fontFamily:"'Orbitron', system-ui, sans-serif" }}>ACTIVE BOOSTS</div>
+          <div className="hx-card" style={{ marginBottom:14, ['--accent' as any]:'#22c55e', borderColor:'rgba(34,197,94,0.3)' }}>
+            <div className="hx-section-title" style={{ marginTop:0 }}>ACTIVE BOOSTS</div>
             <div style={{ display:'flex', gap:6, flexWrap:'wrap' }}>
               {activeBoosts.slice(0,5).map((b:any) => (
                 <ActiveBoostBadge key={b.id} boost={b} />
@@ -249,88 +246,122 @@ export function ShopPanel({ onClose }: Props) {
         )}
 
         {/* ═══ BOOSTERS SECTION ═══ */}
-        <div id="shop-boosters" style={{ marginBottom:20 }}>
-          <div style={{ fontSize:8, fontWeight:700, letterSpacing:2, color:'#cc8800', marginBottom:10, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
-            BOOSTER PACKS — 10 ITEMS EACH
+        <style>{`
+          .shop-packs { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+          .shop-pack { position:relative; overflow:hidden; border-radius:14px; padding:16px 14px 14px; display:flex; flex-direction:column; align-items:center; text-align:center; gap:8px;
+            transition:transform .18s cubic-bezier(.16,1,.3,1), box-shadow .18s; }
+          .shop-pack:hover { transform:translateY(-3px); }
+          .shop-pack__body { display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; width:100%; }
+          .shop-row { display:flex; align-items:center; gap:12px; }
+          @media (max-width:640px) {
+            .shop-packs { grid-template-columns:1fr; }
+            .shop-pack { flex-direction:row; text-align:left; align-items:center; }
+            .shop-pack__body { align-items:flex-start; }
+            .shop-row__desc { display:none; }
+          }
+        `}</style>
+        <div id="shop-boosters" style={{ marginBottom:22, ['--accent' as any]: SHOP_ACCENT }}>
+          <div className="hx-section-title">
+            <IconSVG id="gift" size={16} /> BOOSTER PACKS
           </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:10, marginBottom:8 }}>
-            {BOOSTERS.map(b => (
-              <button key={b.id} onClick={() => handleBuy(b.name, b.code, b.price)} className="game-card" style={{
-                padding:14, cursor:'pointer', textAlign:'center',
-                borderColor:`${b.color}40`, transition:'all 0.25s ease',
-              }}>
-                <div style={{ fontSize:28, marginBottom:6 }}><EmojiIcon emoji={b.icon} size={16} /></div>
-                <div style={{ fontSize:9, fontWeight:900, color:b.color, marginBottom:4, fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1 }}>{b.name}</div>
-                <div style={{ fontSize:7, color:'rgba(255,255,255,0.35)', lineHeight:1.6, fontFamily:'system-ui', marginBottom:8, whiteSpace:'pre-line' }}>{b.desc}</div>
-                <div style={{ fontSize:14, fontWeight:900, color:b.color, fontFamily:"'Share Tech Mono', monospace" }}>{b.price} HEX</div>
-              </button>
-            ))}
+          <div className="shop-packs">
+            {BOOSTERS.map((b, i) => {
+              const canAfford = hexBalance >= b.price
+              return (
+                <div key={b.id} className="shop-pack hx-rise" style={{
+                  animationDelay:`${i*60}ms`,
+                  background:`radial-gradient(120% 80% at 50% 0%, ${b.color}38 0%, ${b.color}0d 45%, rgba(255,255,255,0.02) 100%)`,
+                  border:`1.5px solid ${b.color}66`,
+                  boxShadow:`0 0 24px ${b.color}22, inset 0 1px 0 rgba(255,255,255,0.08)`,
+                }}>
+                  <div style={{ position:'relative', width:76, height:76, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center' }}>
+                    <div style={{ position:'absolute', inset:0, clipPath:'polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)',
+                      background:`linear-gradient(160deg, ${b.color}, ${b.color}33)`, opacity:0.9 }} />
+                    <div style={{ position:'absolute', inset:3, clipPath:'polygon(50% 0,93% 25%,93% 75%,50% 100%,7% 75%,7% 25%)', background:'#0b1828' }} />
+                    <div style={{ position:'relative', filter:`drop-shadow(0 0 10px ${b.color})` }}><IconSVG id={b.icon} size={44} /></div>
+                  </div>
+                  <div className="shop-pack__body">
+                    <div style={{ fontSize:12, fontWeight:900, color:b.color, fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1.5, textShadow:`0 0 12px ${b.color}66` }}>{b.name}</div>
+                    <div style={{ display:'flex', flexDirection:'column', gap:3, fontSize:11, color:'rgba(226,232,240,0.7)', fontFamily:'system-ui', textTransform:'none', letterSpacing:0 }}>
+                      {b.desc.split('\n').map(line => (
+                        <span key={line} style={{ display:'flex', alignItems:'center', gap:6 }}>
+                          <span style={{ width:5, height:5, borderRadius:1, background:b.color, transform:'rotate(45deg)', flexShrink:0 }} />{line}
+                        </span>
+                      ))}
+                    </div>
+                    <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:'auto', paddingTop:4 }}>
+                      <IconSVG id="hex_coin" size={18} />
+                      <span style={{ fontSize:20, fontWeight:900, color:'#fde68a', fontFamily:"'Share Tech Mono', monospace" }}>{b.price.toLocaleString()}</span>
+                    </div>
+                    <button onClick={() => handleBuy(b.name, b.code, b.price)}
+                      className={canAfford ? 'btn-game btn-game-gold' : 'btn-game btn-game-glass'}
+                      style={{ width:'100%', minHeight:40, fontSize:11, opacity: canAfford ? 1 : 0.6 }}>
+                      {canAfford ? 'OPEN PACK' : 'NOT ENOUGH HEX'}
+                    </button>
+                  </div>
+                </div>
+              )
+            })}
           </div>
         </div>
 
         {/* ═══ ALL ITEM CATEGORIES — one-pager ═══ */}
         {CATS.filter(c => c.id !== 'boosters').map(c => (
           SHOP_ITEMS[c.id] && (
-            <div key={c.id} id={`shop-${c.id}`} style={{ marginBottom:20 }}>
-              <div style={{ fontSize:8, fontWeight:700, letterSpacing:2, color:c.color, marginBottom:10, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
-                <IconSVG id={c.iconId} size={12} /> {c.label.toUpperCase()}
+            <div key={c.id} id={`shop-${c.id}`} style={{ marginBottom:22, ['--accent' as any]: c.color, scrollMarginTop:56 }}>
+              <div className="hx-section-title">
+                <IconSVG id={c.iconId} size={16} /> {c.label.toUpperCase()}
               </div>
               <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-            {SHOP_ITEMS[c.id].map(item => (
-              <div key={item.id} style={{
-                display:'flex', justifyContent:'space-between', alignItems:'center',
-                padding:'12px 14px', borderRadius:8,
-                background:'rgba(255,255,255,0.04)', border:'1px solid rgba(255,255,255,0.08)',
-                transition:'all 0.25s ease',
-              }}>
+            {SHOP_ITEMS[c.id].map((item, i) => {
+              const canAfford = hexBalance >= item.price
+              return (
+              <div key={item.id} className="hx-card shop-row hx-rise" style={{ animationDelay:`${i*40}ms`, padding:'10px 12px' }}>
+                <div style={{ width:46, height:46, borderRadius:12, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center',
+                  background:`linear-gradient(160deg, ${c.color}30, ${c.color}0a)`, border:`1px solid ${c.color}40` }}>
+                  <IconSVG id={item.icon} size={32} />
+                </div>
                 <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ fontSize:9, fontWeight:900, color:'#e2e8f0', letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif" }}>
-                    <EmojiIcon emoji={item.icon} size={16} /> {item.name}
+                  <div style={{ fontSize:11, fontWeight:900, color:'#e2e8f0', letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif", lineHeight:1.3 }}>
+                    {item.name}
                   </div>
-                  <div style={{ fontSize:8, color:'rgba(255,255,255,0.5)', marginTop:4, lineHeight:1.5, textTransform:'none', fontFamily:'system-ui' }}>
+                  <div className="shop-row__desc" style={{ fontSize:11, color:'rgba(226,232,240,0.6)', marginTop:4, lineHeight:1.4, textTransform:'none', fontFamily:'system-ui', letterSpacing:0 }}>
                     {item.desc}
                   </div>
                 </div>
-                <div style={{ display:'flex', alignItems:'center', gap:8, flexShrink:0 }}>
-                  <div style={{ fontSize:13, fontWeight:900, color:'#0099cc', fontFamily:"'Share Tech Mono', monospace" }}>
-                    {item.price} HEX
+                <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:6, flexShrink:0 }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:4, fontSize:15, fontWeight:900, color:'#fde68a', fontFamily:"'Share Tech Mono', monospace" }}>
+                    <IconSVG id="hex_coin" size={16} />{item.price}
                   </div>
                   <button onClick={() => handleBuy(item.name, item.code, item.price)}
-                    className={hexBalance >= item.price ? 'btn-game btn-game-gold' : 'btn-game btn-game-glass'}
-                    style={{
-                    fontSize:9, letterSpacing:1,
-                    opacity: hexBalance >= item.price ? 1 : 0.5,
-                  }}>
+                    className={canAfford ? 'btn-game btn-game-gold' : 'btn-game btn-game-glass'}
+                    aria-label={`Buy ${item.name}`}
+                    style={{ fontSize:10, padding:'8px 16px', minHeight:36, opacity: canAfford ? 1 : 0.55 }}>
                     BUY
                   </button>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
             </div>
           )
         ))}
 
         {/* Buy HEX CTA */}
-        <div style={{ marginTop:16, padding:'14px 16px', borderRadius:8,
-          background:'linear-gradient(135deg, rgba(251,191,36,0.1), rgba(245,158,11,0.05))',
-          border:'1px solid rgba(204,136,0,0.3)',
-          display:'flex', justifyContent:'space-between', alignItems:'center',
-        }}>
-          <div>
-            <div style={{ fontSize:9, fontWeight:900, color:'#cc8800', fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1, display:'flex', alignItems:'center', gap:6 }}>
-              <IconSVG id="hex_coin" size={12} /> BUY CRYSTALS WITH HEX
-            </div>
-            <div style={{ fontSize:7, color:'rgba(255,255,255,0.4)', marginTop:2, textTransform:'none', fontFamily:'system-ui' }}>
-              In-game currency — earned from bonuses or purchased with HEX crypto
+        <div className="hx-card hx-card--accent" style={{ marginTop:8, ['--accent' as any]:'#a855f7',
+          display:'flex', justifyContent:'space-between', alignItems:'center', gap:12, flexWrap:'wrap' }}>
+          <div style={{ display:'flex', alignItems:'center', gap:10, minWidth:0, flex:'1 1 220px' }}>
+            <IconSVG id="ui_wallet" size={34} />
+            <div>
+              <div style={{ fontSize:11, fontWeight:900, color:'#d8b4fe', fontFamily:"'Orbitron', system-ui, sans-serif", letterSpacing:1 }}>NEED MORE HEX?</div>
+              <div style={{ fontSize:11, color:'rgba(226,232,240,0.6)', marginTop:3, textTransform:'none', fontFamily:'system-ui', letterSpacing:0 }}>
+                Earn HEX from territories and events, or top up from your wallet.
+              </div>
             </div>
           </div>
-          <button onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }} style={{
-            padding:'8px 14px', borderRadius:16, cursor:'pointer',
-            background:'#cc8800', color:'#fff', border:'none',
-            fontSize:8, fontWeight:700, letterSpacing:1,
-            fontFamily:"'Orbitron', system-ui, sans-serif",
-          }}>Buy HEX COIN→</button>
+          <button className="btn-game btn-game-purple" onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }} style={{ fontSize:10 }}>
+            OPEN WALLET
+          </button>
         </div>
       </GlassPanel>
 
@@ -361,13 +392,13 @@ function ActiveBoostBadge({ boost }: { boost: any }) {
 
   return (
     <div style={{
-      padding:'4px 8px', borderRadius:20, fontSize:8, fontWeight:700,
-      background:'rgba(0,136,74,0.08)', border:'1px solid rgba(0,136,74,0.2)',
-      color:'#00884a', display:'flex', alignItems:'center', gap:4,
+      padding:'5px 10px', borderRadius:20, fontSize:10, fontWeight:700,
+      background:'rgba(34,197,94,0.12)', border:'1px solid rgba(34,197,94,0.35)',
+      color:'#4ade80', display:'flex', alignItems:'center', gap:5,
       letterSpacing:1, fontFamily:"'Orbitron', system-ui, sans-serif",
     }}>
       {label}
-      {mins != null && <span style={{ color:'rgba(255,255,255,0.3)', marginLeft:2 }}>· {mins < 60 ? `${mins}min` : `${Math.ceil(mins/60)}h`}</span>}
+      {mins != null && <span style={{ color:'rgba(255,255,255,0.55)', marginLeft:2, display:'inline-flex', alignItems:'center', gap:3 }}><Clock size={11} /> {mins < 60 ? `${mins}min` : `${Math.ceil(mins/60)}h`}</span>}
     </div>
   )
 }

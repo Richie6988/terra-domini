@@ -10,6 +10,7 @@ import { usePlayer } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import { IconSVG } from '../shared/iconBank'
 import toast from 'react-hot-toast'
+import { Swords, Shield, Users, Hourglass, History, Clock } from 'lucide-react'
 
 interface UnitDef {
   name: string; icon: string; atk: number; def: number; cost: number
@@ -98,117 +99,136 @@ export function CombatPanel({ onClose }: Props) {
     aerial: '#8b5cf6', naval: '#3b82f6', spy: '#ec4899',
   }
 
+  const unitList = Object.values(units)
+  const maxAtk = Math.max(1, ...unitList.map(u => u.atk))
+  const maxDef = Math.max(1, ...unitList.map(u => u.def))
+  const totalOwned = unitList.reduce((a, u) => a + (u.owned || 0), 0)
+  const activeTraining = training.filter(t => !t.done)
+  const mono = "'Share Tech Mono', monospace"
+  const label = { fontSize: 9, letterSpacing: 1.5, color: 'var(--hx-text-3)', fontWeight: 700, ...s } as const
+
+  const StatBar = ({ name, value, max, color }: { name: string; value: number; max: number; color: string }) => (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+      <span style={{ ...label, width: 28, color }}>{name}</span>
+      <div className="hx-progress" style={{ flex: 1, ['--accent' as any]: color }}>
+        <div className="hx-progress__fill" style={{ width: `${(value / max) * 100}%` }} />
+      </div>
+      <span style={{ fontFamily: mono, fontSize: 13, color: '#e2e8f0', width: 26, textAlign: 'right' }}>{value}</span>
+    </div>
+  )
+
   return (
-    <GlassPanel title="MILITARY" onClose={onClose} accent="#dc2626">
+    <GlassPanel title="MILITARY" onClose={onClose} accent="#dc2626"
+      icon={<IconSVG id="swords" size={24} />} subtitle="Recruit, train and command your army">
       {/* Force summary */}
-      <div style={{
-        display: 'flex', gap: 12, marginBottom: 12, padding: '10px 14px', borderRadius: 10,
-        background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.12)',
-      }}>
-        <div style={{ flex: 1, textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#dc2626', fontFamily: "'Share Tech Mono'" }}>{force.attack}</div>
-          <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, ...s }}>ATTACK FORCE</div>
-        </div>
-        <div style={{ width: 1, background: 'rgba(255,255,255,0.08)' }} />
-        <div style={{ flex: 1, textAlign: 'center' }}>
-          <div style={{ fontSize: 18, fontWeight: 900, color: '#3b82f6', fontFamily: "'Share Tech Mono'" }}>{force.defense}</div>
-          <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.3)', letterSpacing: 2, ...s }}>DEFENSE FORCE</div>
-        </div>
+      <div className="hx-stat-grid" style={{ marginBottom: 14 }}>
+        {[
+          { l: 'ATTACK FORCE', v: force.attack, c: '#f87171', icon: <Swords size={18} /> },
+          { l: 'DEFENSE FORCE', v: force.defense, c: '#60a5fa', icon: <Shield size={18} /> },
+          { l: 'UNITS OWNED', v: totalOwned, c: '#e2e8f0', icon: <Users size={18} /> },
+        ].map(st => (
+          <div key={st.l} className="hx-card" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <span style={{ color: st.c, width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.05)', border: '1px solid var(--hx-line)' }}>{st.icon}</span>
+            <div className="hx-stat">
+              <span className="hx-stat__label">{st.l}</span>
+              <span className="hx-stat__value" style={{ color: st.c }}>{st.v.toLocaleString()}</span>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Tabs */}
-      <div style={{ display: 'flex', gap: 4, marginBottom: 10 }}>
+      <div className="hx-tabs" role="tablist">
         {TABS.map(t => (
-          <button key={t.id} onClick={() => setTab(t.id)} style={{
-            flex: 1, padding: '7px', borderRadius: 16, cursor: 'pointer',
-            fontSize: 7, fontWeight: tab === t.id ? 700 : 500, letterSpacing: 1,
-            background: tab === t.id ? 'rgba(220,38,38,0.08)' : 'rgba(255,255,255,0.04)',
-            color: tab === t.id ? '#dc2626' : 'rgba(255,255,255,0.35)',
-            border: `1px solid ${tab === t.id ? 'rgba(220,38,38,0.25)' : 'rgba(255,255,255,0.08)'}`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, ...s,
-          }}><IconSVG id={t.iconId} size={10} /> {t.label}</button>
+          <button key={t.id} role="tab" className="hx-tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
+            {t.id === 'recruit' ? <Swords size={14} /> : t.id === 'train' ? <Hourglass size={14} /> : <History size={14} />}
+            {t.label}
+            {t.id === 'train' && activeTraining.length > 0 && <span className="hx-chip hx-chip--accent" style={{ padding: '1px 6px' }}>{activeTraining.length}</span>}
+          </button>
         ))}
       </div>
 
       {/* Active training banner */}
-      {training.filter(t => !t.done).length > 0 && (
-        <div style={{
-          marginBottom: 10, padding: '8px 12px', borderRadius: 10,
-          background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+      {activeTraining.length > 0 && tab !== 'train' && (
+        <div className="hx-card" style={{
+          marginBottom: 12, ['--accent' as any]: '#f59e0b',
+          borderColor: 'rgba(245,158,11,0.35)', background: 'linear-gradient(180deg, rgba(245,158,11,0.10), rgba(245,158,11,0.03))',
         }}>
-          <div>
-            <div style={{ fontSize: 7, color: '#cc8800', fontWeight: 700, letterSpacing: 1, ...s }}>
-              <IconSVG id="gear" size={10} /> {training.filter(t=>!t.done).length} TRAINING
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: 8 }}>
+            <div style={{ ...label, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 6 }}>
+              <Hourglass size={13} /> {activeTraining.length} IN TRAINING
             </div>
-            {training.filter(t => !t.done).map(t => (
-              <div key={t.id} style={{ fontSize: 7, color: 'rgba(255,255,255,0.45)', marginTop: 2, fontFamily: "'Share Tech Mono'" }}>
-                {t.quantity}x {units[t.unit_type]?.name || t.unit_type} — {formatTime(Math.max(0, t.remaining_seconds - tick))}
-              </div>
-            ))}
+            {training.some(t => t.done) && (
+              <button onClick={handleCollect} className="btn-game btn-game-green" style={{ padding: '8px 14px', fontSize: 10 }}>COLLECT</button>
+            )}
           </div>
-          {training.some(t => t.done) && (
-            <button onClick={handleCollect} style={{
-              padding: '6px 14px', borderRadius: 10, cursor: 'pointer',
-            }}
-              className="btn-game btn-game-green"
-            >COLLECT</button>
-          )}
+          {activeTraining.map(t => (
+            <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11, color: 'var(--hx-text-2)', marginTop: 4 }}>
+              <span style={{ flex: 1 }}>{t.quantity}x {units[t.unit_type]?.name || t.unit_type}</span>
+              <span style={{ fontFamily: mono, fontSize: 13, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 4 }}>
+                <Clock size={12} /> {formatTime(Math.max(0, t.remaining_seconds - tick))}
+              </span>
+            </div>
+          ))}
         </div>
       )}
 
       {/* ═══ RECRUIT TAB ═══ */}
       {tab === 'recruit' && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {isLoading && <div style={{ textAlign: 'center', color: 'rgba(255,255,255,0.25)', fontSize: 9, padding: 20 }}>Loading army...</div>}
-          {Object.entries(units).map(([key, u]) => {
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))', gap: 10 }}>
+          {isLoading && [0, 1, 2, 3].map(i => <div key={i} className="hx-skeleton" style={{ height: 180, borderRadius: 12 }} />)}
+          {Object.entries(units).map(([key, u], idx) => {
             const color = UNIT_COLORS[key] || '#64748b'
             const qty = recruitQty[key] || 1
             const totalCost = u.cost * qty
             return (
-              <div key={key} style={{
-                padding: '12px 14px', borderRadius: 12,
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div key={key} className="hx-card hx-rise" style={{ animationDelay: `${idx * 40}ms`, display: 'flex', flexDirection: 'column', gap: 12, ['--accent' as any]: color }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
                   <div style={{
-                    width: 40, height: 40, borderRadius: 10,
-                    background: `${color}12`, border: `1px solid ${color}25`,
+                    width: 56, height: 56, borderRadius: 14, flexShrink: 0,
+                    background: `radial-gradient(circle at 50% 35%, ${color}40, ${color}12)`, border: `1px solid ${color}66`,
+                    boxShadow: `0 0 16px ${color}22, inset 0 1px 0 rgba(255,255,255,0.12)`,
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
-                    <IconSVG id={u.icon} size={22} />
+                    <IconSVG id={u.icon} size={38} />
                   </div>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 10, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1, ...s }}>{u.name}</div>
-                    <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{u.desc}</div>
-                    <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
-                      <span style={{ fontSize: 7, color: '#dc2626', fontWeight: 700, ...s }}>ATK {u.atk}</span>
-                      <span style={{ fontSize: 7, color: '#3b82f6', fontWeight: 700, ...s }}>DEF {u.def}</span>
-                      <span style={{ fontSize: 7, color: '#cc8800', fontWeight: 700, ...s }}>{u.cost} HEX</span>
-                      <span style={{ fontSize: 7, color: 'rgba(255,255,255,0.3)', ...s }}>{formatDuration(u.effective_train_seconds)}/unit</span>
-                    </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1.5, ...s }}>{u.name}</div>
+                    <div style={{ fontSize: 11, color: 'var(--hx-text-2)', marginTop: 4, lineHeight: 1.4, fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0 }}>{u.desc}</div>
                   </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 14, fontWeight: 900, color, fontFamily: "'Share Tech Mono'" }}>{u.owned}</div>
-                    <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)', ...s }}>OWNED</div>
+                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <div style={{ fontSize: 24, color, fontFamily: mono, lineHeight: 1 }}>{u.owned}</div>
+                    <div style={{ ...label, marginTop: 4 }}>OWNED</div>
                   </div>
                 </div>
 
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <StatBar name="ATK" value={u.atk} max={maxAtk} color="#ef4444" />
+                  <StatBar name="DEF" value={u.def} max={maxDef} color="#3b82f6" />
+                </div>
+
+                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <span className="hx-chip"><IconSVG id="hex_coin" size={12} /> {u.cost} HEX / UNIT</span>
+                  <span className="hx-chip"><Clock size={11} /> {formatDuration(u.effective_train_seconds)} / UNIT</span>
+                </div>
+
                 {/* Quantity + recruit button */}
-                <div style={{ display: 'flex', gap: 6, marginTop: 8, alignItems: 'center' }}>
-                  {[1, 5, 10, 25].map(n => (
-                    <button key={n} onClick={() => setRecruitQty(prev => ({...prev, [key]: n}))} style={{
-                      padding: '4px 8px', borderRadius: 8, cursor: 'pointer', fontSize: 8, fontWeight: 700,
-                      background: qty === n ? `${color}15` : 'rgba(255,255,255,0.03)',
-                      border: `1px solid ${qty === n ? color+'40' : 'rgba(255,255,255,0.06)'}`,
-                      color: qty === n ? color : 'rgba(255,255,255,0.4)', ...s,
-                    }}>{n}</button>
-                  ))}
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
+                  <div style={{ display: 'flex', gap: 4, padding: 3, borderRadius: 10, background: 'rgba(0,0,0,0.25)', border: '1px solid var(--hx-line)' }}>
+                    {[1, 5, 10, 25].map(n => (
+                      <button key={n} aria-label={`Quantity ${n}`} onClick={() => setRecruitQty(prev => ({...prev, [key]: n}))} style={{
+                        minWidth: 36, height: 34, borderRadius: 8, cursor: 'pointer', fontSize: 12, fontFamily: mono,
+                        background: qty === n ? `${color}33` : 'transparent',
+                        border: `1px solid ${qty === n ? color + '99' : 'transparent'}`,
+                        color: qty === n ? '#fff' : 'var(--hx-text-3)', transition: 'background .15s, color .15s',
+                      }}>{n}</button>
+                    ))}
+                  </div>
                   <div style={{ flex: 1 }} />
                   <button onClick={() => handleRecruit(key)} className="btn-game btn-game-red" style={{
-                    fontSize: 9, letterSpacing: 1, ...s,
+                    fontSize: 10, letterSpacing: 1, padding: '11px 14px', display: 'inline-flex', alignItems: 'center', gap: 6,
                   }}>
-                    RECRUIT {qty} — {totalCost} HEX
+                    RECRUIT {qty} · <IconSVG id="hex_coin" size={13} />{totalCost.toLocaleString()}
                   </button>
                 </div>
               </div>
@@ -221,11 +241,17 @@ export function CombatPanel({ onClose }: Props) {
       {tab === 'train' && (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
           {training.length === 0 && (
-            <div style={{ textAlign: 'center', padding: 20, color: 'rgba(255,255,255,0.4)', fontSize: 9, ...s }}>
-              No active training. Recruit units to start.
+            <div className="hx-empty">
+              <Hourglass size={36} color="#f87171" />
+              <div className="hx-empty__title">NO ACTIVE TRAINING</div>
+              <div>Recruit units to start training them.</div>
+              <button className="btn-game btn-game-red" onClick={() => setTab('recruit')} style={{ marginTop: 6 }}>RECRUIT UNITS</button>
             </div>
           )}
-          {training.map(t => {
+          {training.some(t => t.done) && (
+            <button onClick={handleCollect} className="btn-game btn-game-green" style={{ alignSelf: 'flex-end', fontSize: 10 }}>COLLECT ALL READY</button>
+          )}
+          {training.map((t, idx) => {
             const u = units[t.unit_type]
             const color = UNIT_COLORS[t.unit_type] || '#64748b'
             const remaining = Math.max(0, t.remaining_seconds - tick)
@@ -234,40 +260,32 @@ export function CombatPanel({ onClose }: Props) {
             const pct = total > 0 ? Math.min(100, ((total - remaining) / total) * 100) : 100
 
             return (
-              <div key={t.id} style={{
-                padding: '12px 14px', borderRadius: 12,
-                background: t.done ? 'rgba(34,197,94,0.04)' : 'rgba(255,255,255,0.04)',
-                border: `1px solid ${t.done ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.06)'}`,
+              <div key={t.id} className="hx-card hx-rise" style={{
+                animationDelay: `${idx * 40}ms`, ['--accent' as any]: t.done ? '#22c55e' : color,
+                borderColor: t.done ? 'rgba(34,197,94,0.4)' : undefined,
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <IconSVG id={u?.icon || 'swords'} size={24} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                  <IconSVG id={u?.icon || 'swords'} size={36} />
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 9, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1, ...s }}>
+                    <div style={{ fontSize: 12, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1, ...s }}>
                       {t.quantity}x {u?.name || t.unit_type}
                     </div>
-                    <div style={{ fontSize: 7, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>
-                      {t.done ? 'TRAINING COMPLETE' : `${formatTime(remaining)} remaining`}
+                    <div style={{ fontSize: 10, color: t.done ? '#4ade80' : 'var(--hx-text-3)', marginTop: 4, letterSpacing: 1 }}>
+                      {t.done ? 'TRAINING COMPLETE' : 'IN TRAINING'}
                     </div>
                   </div>
-                  {t.done && (
-                    <button onClick={handleCollect} className="btn-game btn-game-green" style={{
-                      fontSize: 8, letterSpacing: 1, ...s,
-                    }}>COLLECT</button>
+                  {t.done ? (
+                    <button onClick={handleCollect} className="btn-game btn-game-green" style={{ fontSize: 10, letterSpacing: 1 }}>COLLECT</button>
+                  ) : (
+                    <span className="hx-chip" style={{ fontFamily: mono, fontSize: 12 }}><Clock size={12} /> {formatTime(remaining)}</span>
                   )}
                 </div>
-                {/* Progress bar */}
                 {!t.done && (
-                  <div style={{ marginTop: 8 }}>
-                    <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-                      <div style={{
-                        height: '100%', width: `${pct}%`, borderRadius: 3,
-                        background: `linear-gradient(90deg, ${color}, ${color}cc)`,
-                        transition: 'width 1s linear',
-                      }} />
+                  <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div className="hx-progress" style={{ flex: 1 }}>
+                      <div className="hx-progress__fill" style={{ width: `${pct}%`, transition: 'width 1s linear' }} />
                     </div>
-                    <div style={{ fontSize: 6, color: 'rgba(255,255,255,0.25)', marginTop: 3, textAlign: 'right', ...s }}>
-                      {Math.round(pct)}%
-                    </div>
+                    <span style={{ fontSize: 11, color: 'var(--hx-text-2)', fontFamily: mono, width: 36, textAlign: 'right' }}>{Math.round(pct)}%</span>
                   </div>
                 )}
               </div>
@@ -278,8 +296,11 @@ export function CombatPanel({ onClose }: Props) {
 
       {/* ═══ HISTORY TAB ═══ */}
       {tab === 'history' && (
-        <div style={{ textAlign: 'center', padding: 30, color: 'rgba(255,255,255,0.25)', fontSize: 9, ...s }}>
-          Battle history coming soon
+        <div className="hx-empty">
+          <History size={36} color="#f87171" />
+          <div className="hx-empty__title">BATTLE HISTORY</div>
+          <span className="hx-chip hx-chip--accent">SOON</span>
+          <div>Your resolved battles will be listed here.</div>
         </div>
       )}
     </GlassPanel>
