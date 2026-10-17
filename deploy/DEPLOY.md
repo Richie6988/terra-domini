@@ -6,7 +6,7 @@ Même architecture que PaintIt : **nginx système + gunicorn sous systemd + SQLi
 |---|---|---|
 | Utilisateur Linux | `paintit` | `hexod` |
 | Code | `/home/paintit/Django` | `/home/hexod/terra-domini` |
-| Port interne | `127.0.0.1:8000` | `127.0.0.1:8001` |
+| Port interne | `127.0.0.1:8000` | `127.0.0.1:8002` |
 | Base | `db.sqlite3` | `/home/hexod/data/hexod.sqlite3` (hors du dépôt git) |
 | Service | `paintit.service` | `hexod.service` |
 | Site nginx | `/etc/nginx/sites-available/paintit` | `/etc/nginx/sites-available/hexod` |
@@ -71,7 +71,7 @@ sudo cp /home/hexod/terra-domini/deploy/hexod.service /etc/systemd/system/hexod.
 sudo systemctl daemon-reload
 sudo systemctl enable --now hexod
 sudo systemctl status hexod --no-pager
-curl -s http://127.0.0.1:8001/health/        # → {"status": "ok", ...}
+curl -s http://127.0.0.1:8002/health/        # → {"status": "ok", ...}
 ```
 Logs : `sudo journalctl -u hexod -f`
 

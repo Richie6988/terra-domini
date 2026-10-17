@@ -1,6 +1,6 @@
 # /etc/systemd/system/hexod.service
 [Unit]
-Description=HEXOD game (Django ASGI: gunicorn + uvicorn) on 127.0.0.1:8001
+Description=HEXOD game (Django ASGI: gunicorn + uvicorn) on 127.0.0.1:8002
 After=network.target
 
 [Service]
@@ -11,7 +11,7 @@ Environment=DJANGO_SETTINGS_MODULE=terra_domini.settings.prod
 # 1 worker: no Redis → in-memory cache/websocket layer must stay in one process.
 # (Add Redis + REDIS_HOST in .env.prod before raising -w.)
 ExecStart=/home/hexod/terra-domini/.venv/bin/gunicorn terra_domini.asgi:application \
-    -k uvicorn.workers.UvicornWorker -w 1 --bind 127.0.0.1:8001 \
+    -k uvicorn.workers.UvicornWorker -w 1 --bind 127.0.0.1:8002 \
     --timeout 120 --access-logfile - --error-logfile -
 Restart=always
 RestartSec=5
