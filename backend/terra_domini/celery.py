@@ -38,6 +38,12 @@ app.conf.beat_schedule = {
         'schedule': 60.0,
         'options': {'queue': 'combat'},
     },
+    # Bot raids on human players — every 2 hours (FOMO loop)
+    'bot-raids': {
+        'task': 'combat.bot_raids',
+        'schedule': 7200.0,
+        'options': {'queue': 'combat'},
+    },
     # Anti-cheat behavioral analysis — every 10 minutes
     'anticheat-analysis': {
         'task': 'accounts.run_anticheat_analysis',

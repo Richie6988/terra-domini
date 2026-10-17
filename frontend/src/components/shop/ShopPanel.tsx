@@ -39,11 +39,11 @@ const CATS = [
 // ═══ SHOP CATALOG — ported from main_prototype.html ═══
 const BOOSTERS = [
   { id:'booster_standard',  name:'STANDARD BOOSTER', icon:'box', price:200,  color:'#0099cc',
-    desc:'7 Standard Territories\n2 Rare Tokens\n1 Random Bonus', code:'booster_standard' },
+    desc:'3 free territories\nCommon to Rare\nSmall Epic/Legendary chance', code:'booster_standard' },
   { id:'booster_rare',      name:'RARE BOOSTER',     icon:'heart_purple', price:500,  color:'#8b5cf6',
-    desc:'5 Standard Territories\n3 Rare Tokens\n1 Epic Token\n1 Premium Bonus', code:'booster_rare' },
-  { id:'booster_legendary', name:'LEGENDARY BOOSTER', icon:'crown', price:1500, color:'#cc8800',
-    desc:'3 Standard Territories\n3 Rare Tokens\n2 Epic Tokens\n1 Legendary Token\n1 Exclusive Bonus', code:'booster_legendary' },
+    desc:'4 free territories\n1 Rare or better guaranteed', code:'booster_rare' },
+  { id:'booster_legendary', name:'LEGENDARY BOOSTER', icon:'crown', price:1200, color:'#cc8800',
+    desc:'5 free territories\n1 Legendary guaranteed', code:'booster_legendary' },
 ]
 
 const SHOP_ITEMS: Record<string, Array<{id:string; name:string; desc:string; price:number; icon:string; code:string}>> = {
@@ -263,6 +263,7 @@ export function ShopPanel({ onClose }: Props) {
         <div id="shop-boosters" style={{ marginBottom:22, ['--accent' as any]: SHOP_ACCENT }}>
           <div className="hx-section-title">
             <IconSVG id="gift" size={16} /> BOOSTER PACKS
+            <span className="hx-chip hx-chip--accent" title="Packs with random content can't be bought with purchased HEX">EARNED HEX ONLY</span>
           </div>
           <div className="shop-packs">
             {BOOSTERS.map((b, i) => {

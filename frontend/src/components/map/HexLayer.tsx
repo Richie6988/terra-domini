@@ -12,6 +12,7 @@ import L from 'leaflet'
 import * as h3 from 'h3-js'
 import type { TerritoryLight } from '../../types'
 import { escapeHtml as esc } from '../../services/escapeHtml'
+import { hexPerDay } from '../../services/balance'
 
 /** Hostile territory colour (owned by another player) */
 const ENEMY_COLOR = '#FF4D5E'
@@ -219,7 +220,7 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
   })
 
   // Tooltip
-  const income = Math.round((ta.resource_credits || ta.food_per_tick || 10) * 288)
+  const income = hexPerDay(ta.rarity, ta.is_shiny)
   const stateLabel = ta.is_control_tower ? 'Control tower'
     : isOwn ? (hasPOI ? `Your territory · ${esc(rarity)}` : 'Your territory')
     : isEnemy ? esc(ta.owner_username)

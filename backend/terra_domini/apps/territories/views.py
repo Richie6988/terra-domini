@@ -461,7 +461,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         territory = Territory.objects.filter(h3_index=h3_index).first()
         from terra_domini.apps.accounts.models import PlayerStats, Player as P
         stats, _ = PlayerStats.objects.get_or_create(player=request.user)
-        owned_count = stats.territories_owned
+        # Real count (PlayerStats.territories_owned drifts: seeded/captured hexes never updated it)
+        owned_count = Territory.objects.filter(owner=request.user).count()
         is_first = owned_count == 0
 
         # Check ownership
@@ -486,7 +487,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             pass
 
         # Costs
-        buy_cost = 50 if (is_adjacent or is_first) else 125
+        from terra_domini.apps.economy.balance import buy_cost as _buy_cost
+        buy_cost = _buy_cost(owned_count, is_adjacent or is_first, (territory.rarity if territory else 'common'))
         explore_hours = round(1.0 * (1.2 ** min(owned_count, 50)) * (1 if is_adjacent or is_first else 2), 1)
         player_obj = P.objects.get(id=request.user.id)
         balance = float(player_obj.tdc_in_game)
@@ -571,7 +573,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
 
         from terra_domini.apps.accounts.models import PlayerStats, Player as P
         stats, _ = PlayerStats.objects.get_or_create(player=request.user)
-        owned_count = stats.territories_owned
+        # Real count (PlayerStats.territories_owned drifts: seeded/captured hexes never updated it)
+        owned_count = Territory.objects.filter(owner=request.user).count()
         is_first = owned_count == 0
         method = request.data.get('method', 'free')
 
@@ -605,8 +608,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 return Response({'error': 'Free claim is only for your first territory.'}, status=403)
 
         elif method == 'buy':
-            base_cost = 50
-            cost = base_cost if is_adjacent or is_first else int(base_cost * 2.5)
+            from terra_domini.apps.economy.balance import buy_cost as _buy_cost, consume_purchased_first
+            cost = _buy_cost(owned_count, is_adjacent or is_first, territory.rarity or 'common')
             player_obj = P.objects.get(id=request.user.id)
             if float(player_obj.tdc_in_game) < cost:
                 return Response({
@@ -617,6 +620,9 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             P.objects.filter(id=request.user.id).update(
                 tdc_in_game=player_obj.tdc_in_game - cost
             )
+            consume_purchased_first(player_obj, cost)
+            from terra_domini.apps.progression.missions import track
+            track(request.user, 'spend_tdc', cost)
 
         elif method == 'explore':
             base_hours = 1.0 * (1.2 ** min(owned_count, 50))
@@ -674,6 +680,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         territory.owner = request.user
         territory.captured_at = timezone.now()
         territory.save(update_fields=['owner', 'captured_at'])
+        from terra_domini.apps.progression.missions import track
+        track(request.user, 'claim')
 
         # Async NFT mint (non-blocking — doesn't fail the claim)
         try:

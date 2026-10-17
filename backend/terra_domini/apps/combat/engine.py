@@ -374,6 +374,22 @@ class CombatEngine:
 
         return True, "Attack initiated", battle
 
+    @classmethod
+    def npc_attack(cls, bot, territory, units: dict, battle_type: str = 'raid') -> 'Battle':
+        """Bot raid: same as initiate_attack but NPC troops don't come from a garrison."""
+        timer = cls._get_battle_timer(territory)
+        battle = Battle.objects.create(
+            target_territory=territory, defender=territory.owner, battle_type=battle_type,
+            status=Battle.BattleStatus.ACTIVE,
+            resolves_at=timezone.now() + timezone.timedelta(seconds=timer),
+        )
+        BattleParticipant.objects.create(battle=battle, player=bot, side=BattleParticipant.Side.ATTACKER,
+                                         units_deployed=units, is_commander=True)
+        territory.is_under_attack = True
+        territory.current_battle = battle.id
+        territory.save(update_fields=['is_under_attack', 'current_battle'])
+        return battle
+
     @staticmethod
     def can_attack(attacker, territory) -> tuple[bool, str]:
         if not territory.owner_id:

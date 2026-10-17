@@ -96,6 +96,9 @@ class BattleViewSet(viewsets.GenericViewSet):
                 action_slots_used=F('action_slots_used') - 1)
             return Response({'error': reason}, status=400)
 
+        from terra_domini.apps.progression.missions import track
+        track(request.user, 'win_battles')
+
         # Map overlay event for attack
         try:
             from terra_domini.apps.territories.models import MapOverlayEvent
@@ -117,6 +120,34 @@ class BattleViewSet(viewsets.GenericViewSet):
             'battle_id': str(battle.id),
             'message': f"Attack launched! Battle resolves in {hours:.1f}h.",
         }, status=201)
+
+    @action(detail=False, methods=['POST'], url_path='reinforce')
+    def reinforce(self, request):
+        """POST /api/combat/reinforce/ {battle_id} — defender spends HEX to add defense before resolution."""
+        from django.db import transaction
+        from django.db.models import F
+        from terra_domini.apps.accounts.models import Player as P
+        from terra_domini.apps.economy import balance as B
+        from terra_domini.apps.progression.missions import track
+        try:
+            battle = Battle.objects.select_related('target_territory').get(
+                id=request.data.get('battle_id'), defender=request.user, status=Battle.BattleStatus.ACTIVE)
+        except (Battle.DoesNotExist, ValueError, Exception):
+            return Response({'error': 'No active attack on your territory with this id'}, status=404)
+        t = battle.target_territory
+        cap = (t.max_defense_points or 100) * 2
+        if (t.defense_points or 0) >= cap:
+            return Response({'error': 'Defenses are already at maximum'}, status=409)
+        with transaction.atomic():
+            p = P.objects.select_for_update().get(id=request.user.id)
+            if float(p.tdc_in_game) < B.REINFORCE_COST:
+                return Response({'error': f'Need {B.REINFORCE_COST} HEX'}, status=402)
+            P.objects.filter(id=p.id).update(tdc_in_game=F('tdc_in_game') - B.REINFORCE_COST)
+            t.defense_points = min(cap, (t.defense_points or 0) + B.REINFORCE_DEFENSE)
+            t.save(update_fields=['defense_points'])
+        B.consume_purchased_first(p, B.REINFORCE_COST)
+        track(request.user, 'spend_tdc', B.REINFORCE_COST)
+        return Response({'ok': True, 'defense_points': t.defense_points, 'max': cap, 'cost': B.REINFORCE_COST})
 
     @action(detail=False, methods=['GET'], url_path='active')
     def active_battles(self, request):

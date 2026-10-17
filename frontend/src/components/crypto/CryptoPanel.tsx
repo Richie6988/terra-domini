@@ -38,7 +38,7 @@ function PriceTicker({ prices }: { prices: Record<string, any> }) {
   )
 }
 
-function WalletCard({ wallet, onConvert, onWithdraw }: any) {
+function WalletCard({ wallet, onConvert, onWithdraw, onCashOut }: any) {
   const inGame = parseFloat(String(wallet?.tdc_in_game ?? 0)) || 0
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 14 }}>
@@ -72,6 +72,7 @@ function WalletCard({ wallet, onConvert, onWithdraw }: any) {
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginTop: 14 }}>
           <button onClick={onConvert} className="btn-game btn-game-purple" style={{ fontSize: 11, minHeight: 42 }}>CONVERT → HEX COIN</button>
           <button onClick={onWithdraw} className="btn-game btn-game-glass" style={{ fontSize: 11, minHeight: 42 }}>WITHDRAW</button>
+          <button onClick={onCashOut} className="btn-game btn-game-gold" style={{ fontSize: 11, minHeight: 42, gridColumn: '1 / -1' }}>CASH OUT EARNED HEX COIN → HEX TOKEN</button>
         </div>
         {wallet?.tdi_pending > 0 && (
           <div style={{ marginTop: 10, padding: '8px 10px', background: 'rgba(245,158,11,0.1)', border: '2px solid rgba(245,158,11,0.25)', borderRadius: 8, fontSize: 11, color: '#F59E0B', display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -109,6 +110,42 @@ function ConvertModal({ wallet, onClose }: { wallet: any; onClose: () => void })
           <button onClick={onClose} className="btn-game btn-game-glass" style={{ minHeight: 42 }}>CANCEL</button>
           <button onClick={() => mut.mutate()} disabled={mut.isPending} className="btn-game btn-game-purple" style={{ minHeight: 42 }}>
             {mut.isPending ? 'CONVERTING…' : 'CONVERT'}
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
+function CashOutModal({ onClose }: { onClose: () => void }) {
+  const [amount, setAmount] = useState('1000')
+  const qc = useQueryClient()
+  const { data: loop } = useQuery<any>({ queryKey: ['loop-status'], queryFn: () => api.get('/loop/status/').then(r => r.data) })
+  const mut = useMutation({
+    mutationFn: () => api.post('/wallet/cash-out/', { amount_hex: parseFloat(amount) }),
+    onSuccess: (r) => {
+      toast.success(`+${r.data.tdi_received?.toFixed(2)} HEX token (${r.data.hex_burned} HEX burned)`)
+      ;['wallet', 'loop-status'].forEach(k => qc.invalidateQueries({ queryKey: [k] })); onClose()
+    },
+    onError: (e: any) => toast.error(e.response?.data?.error || 'Cash-out failed'),
+  })
+  const amt = parseFloat(amount) || 0
+  return (
+    <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,5,15,0.6)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
+      <motion.div initial={{ y: 300 }} animate={{ y: 0 }} style={{ background: 'var(--hx-panel)', borderRadius: '22px 22px 0 0', padding: 24, width: '100%', maxWidth: 440, border: '3px solid var(--hx-line-strong)', boxShadow: '0 -6px 0 var(--hx-ink)', ['--accent' as any]: '#f5a623' }}>
+        <div style={{ fontFamily: 'var(--font-heading)', fontSize: 20, color: '#fff', textShadow: '0 2px 0 rgba(0,0,0,0.45)', marginBottom: 6 }}>CASH OUT</div>
+        <div style={{ fontSize: 12, color: 'var(--hx-text-2)', marginBottom: 14, textTransform: 'none', fontFamily: 'var(--font-body)', fontWeight: 800 }}>
+          Only HEX Coin earned by playing can be cashed out (purchased HEX can't). 5% is burned. Minimum 1,000.
+          Earned balance: <b style={{ color: '#fde68a' }}>{Math.floor(loop?.earned_balance ?? 0).toLocaleString()}</b>
+        </div>
+        <input type="number" min={1000} value={amount} onChange={e => setAmount(e.target.value)} className="hx-input" aria-label="Amount of HEX Coin to cash out" style={{ fontSize: 18, marginBottom: 10 }} />
+        <div style={{ fontSize: 13, color: '#fff', marginBottom: 16, fontFamily: 'var(--font-heading)' }}>
+          Burned: {(amt * 0.05).toFixed(0)} · Converted: {(amt * 0.95).toFixed(0)} HEX Coin → HEX token at market price
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+          <button onClick={onClose} className="btn-game btn-game-glass" style={{ minHeight: 44 }}>CANCEL</button>
+          <button onClick={() => mut.mutate()} disabled={mut.isPending || amt < 1000} className="btn-game btn-game-gold" style={{ minHeight: 44 }}>
+            {mut.isPending ? 'CASHING OUT…' : 'CASH OUT'}
           </button>
         </div>
       </motion.div>
@@ -235,6 +272,7 @@ function TokenomicsTab() {
 export function CryptoPanel({ onClose }: { onClose: () => void }) {
   const [tab, setTab] = useState('wallet')
   const [showConvert, setShowConvert] = useState(false)
+  const [showCashOut, setShowCashOut] = useState(false)
   const [showWithdraw, setShowWithdraw] = useState(false)
   const [show3D, setShow3D] = useState(false)
   const [wAddr, setWAddr] = useState('')
@@ -270,7 +308,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
 
         <div>
           {tab === 'wallet' && <>
-            <WalletCard wallet={wallet} onConvert={() => setShowConvert(true)} onWithdraw={() => setShowWithdraw(true)} />
+            <WalletCard wallet={wallet} onConvert={() => setShowConvert(true)} onWithdraw={() => setShowWithdraw(true)} onCashOut={() => setShowCashOut(true)} />
 
             {/* How it works — explanation for non-crypto users */}
             <div className="hx-card" style={{ marginTop: 4 }}>
@@ -323,6 +361,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
       </GlassPanel>
 
       {showConvert && <ConvertModal wallet={wallet} onClose={() => setShowConvert(false)} />}
+      {showCashOut && <CashOutModal onClose={() => setShowCashOut(false)} />}
 
       {showWithdraw && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,5,15,0.75)', backdropFilter: 'blur(6px)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>

@@ -3,6 +3,7 @@ Main API views — territory, combat, shop, TDC.
 All endpoints require JWT authentication unless noted.
 """
 import logging
+from decimal import Decimal
 from django.conf import settings
 
 # Safe game config — works without GAME in settings
@@ -436,6 +437,14 @@ class ShopViewSet(viewsets.GenericViewSet):
         if float(player.tdc_in_game) < float(total_cost):
             return Response({'error': 'Insufficient TDC balance'}, status=402)
 
+        # Random-content packs: earned HEX only (no paid loot boxes — owner decision, see economy/balance.py)
+        from terra_domini.apps.economy import balance as _B
+        if item.effect_type == 'booster_pack' and _B.spendable_earned(player) < Decimal(str(total_cost)):
+            return Response({
+                'error': 'Booster packs can only be opened with HEX earned in-game (not purchased HEX).',
+                'earned_balance': float(_B.spendable_earned(player)),
+            }, status=402)
+
         # Check daily limit
         if item.max_per_day > 0:
             today_key = f'item_daily:{player.id}:{item_code}:{timezone.now().date()}'
@@ -473,13 +482,18 @@ class ShopViewSet(viewsets.GenericViewSet):
                 sold_count=F('sold_count') + quantity
             )
 
+        if item.effect_type != 'booster_pack':
+            _B.consume_purchased_first(player, total_cost)
+        from terra_domini.apps.progression.missions import track
+        track(player, 'spend_tdc', int(total_cost))
+
         # Booster pack — ajouter les cartes tirées dans la réponse
         booster_result = None
         if item.effect_type == 'booster_pack':
-            booster_result = _open_booster_pack(item_code)
+            booster_result = _open_booster_pack(item_code, player)
 
         resp = {
-            'message': 'Achat réussi !',
+            'message': 'Purchase complete!',
             'item': item_code,
             'quantity': quantity,
             'tdc_spent': float(total_cost),
@@ -798,7 +812,7 @@ def _apply_item_effect(player, item, quantity, territory_h3=None):
         pass  # géré dans la vue purchase
 
 
-def _open_booster_pack(item_code: str) -> dict:
+def _open_booster_pack(item_code: str, player=None) -> dict:
     """
     Tire aléatoirement des territoires POI selon les garanties du pack.
     Retourne la liste des territoires tirés (pour l'animation d'ouverture).
@@ -808,18 +822,25 @@ def _open_booster_pack(item_code: str) -> dict:
 
     PACK_ODDS = {
         'booster_standard': [
-            ('common',    0.35), ('uncommon', 0.35), ('rare', 0.25),
-            ('epic',      0.04), ('legendary',0.01),
+            ('common',    0.55), ('uncommon', 0.30), ('rare', 0.12),
+            ('epic',      0.025), ('legendary',0.005),
         ],
-        'booster_premium': [
-            ('rare',      0.40), ('epic',     0.40), ('legendary', 0.15),
-            ('mythic',    0.05),
+        'booster_rare': [
+            ('uncommon',  0.40), ('rare',     0.40), ('epic', 0.17),
+            ('legendary', 0.03),
         ],
-        'booster_mythic': [
-            ('epic',      0.20), ('legendary',0.45), ('mythic',    0.35),
+        'booster_legendary': [
+            ('rare',      0.45), ('epic',     0.40), ('legendary', 0.13),
+            ('mythic',    0.02),
         ],
     }
-    PACK_COUNT = {'booster_standard': 3, 'booster_premium': 5, 'booster_mythic': 3}
+    PACK_ODDS['booster_premium'] = PACK_ODDS['booster_rare']        # legacy codes
+    PACK_ODDS['booster_mythic'] = PACK_ODDS['booster_legendary']
+    PACK_COUNT = {'booster_standard': 3, 'booster_rare': 4, 'booster_legendary': 5,
+                  'booster_premium': 4, 'booster_mythic': 5}
+    # Guaranteed minimum rarity on the last card (what the shop advertises)
+    PACK_GUARANTEE = {'booster_rare': 'rare', 'booster_legendary': 'legendary',
+                      'booster_premium': 'rare', 'booster_mythic': 'legendary'}
 
     odds   = PACK_ODDS.get(item_code, PACK_ODDS['booster_standard'])
     count  = PACK_COUNT.get(item_code, 3)
@@ -828,19 +849,25 @@ def _open_booster_pack(item_code: str) -> dict:
     rarities_pool = [r for r, _ in odds]
     weights       = [w for _, w in odds]
 
-    for _ in range(count):
-        rarity = random.choices(rarities_pool, weights=weights)[0]
-        # Tirer un territoire POI libre de cette rareté
-        pool = list(Territory.objects.filter(
-            rarity=rarity, is_landmark=True, owner__isnull=True
-        ).values('h3_index','poi_name','territory_type','biome','is_shiny','rarity').order_by('?')[:20])
-        if pool:
-            cards.append(random.choice(pool))
-        else:
-            # Fallback: n'importe quel territoire de cette rareté
-            fb = Territory.objects.filter(rarity=rarity).values(
-                'h3_index','poi_name','territory_type','biome','is_shiny','rarity'
-            ).order_by('?').first()
-            if fb:
-                cards.append(fb)
+    order = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
+    rolls = [random.choices(rarities_pool, weights=weights)[0] for _ in range(count)]
+    g = PACK_GUARANTEE.get(item_code)
+    if g and not any(order.index(r) >= order.index(g) for r in rolls):
+        rolls[-1] = g
+    for rarity in rolls:
+        # Only FREE territories (never someone else's); fall back to lower rarities if none left
+        card = None
+        for r in order[:order.index(rarity) + 1][::-1]:
+            qs = Territory.objects.filter(rarity=r, owner__isnull=True)
+            card = (qs.filter(is_landmark=True).order_by('?').first() or qs.order_by('?').first())
+            if card:
+                break
+        if not card:
+            continue
+        if player is not None:
+            card.owner = player
+            card.captured_at = timezone.now()
+            card.save(update_fields=['owner', 'captured_at'])
+        cards.append({'h3_index': card.h3_index, 'poi_name': card.poi_name, 'territory_type': card.territory_type,
+                      'biome': card.biome, 'is_shiny': card.is_shiny, 'rarity': card.rarity})
     return {'cards': cards, 'count': len(cards)}

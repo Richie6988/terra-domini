@@ -44,14 +44,7 @@ RARITY_MULT = {
 }
 
 # Rarity → base daily HEX Coin income
-RARITY_INCOME = {
-    'common':   10,
-    'uncommon': 30,
-    'rare':     80,
-    'epic':     200,
-    'legendary':500,
-    'mythic':  2000,
-}
+from terra_domini.apps.economy.balance import HEX_PER_DAY as RARITY_INCOME  # single source of truth
 
 POI_BIOME_MAP = {
     'capital_city':'urban',     'financial_hub':'urban',   'stock_exchange':'urban',
@@ -92,11 +85,29 @@ def _roll_standard_rarity(biome: str, near_poi_rarities: list[str]) -> str:
     total = biome_tier + neighbor_bonus * 0.4
     r = random.random()
 
-    if total >= 4 and r < 0.02:  return 'legendary'
-    if total >= 3 and r < 0.08:  return 'epic'
-    if total >= 2 and r < 0.18:  return 'rare'
+    if total >= 4 and r < 0.02:  return _apply_scarcity('legendary')
+    if total >= 3 and r < 0.08:  return _apply_scarcity('epic')
+    if total >= 2 and r < 0.18:  return _apply_scarcity('rare')
     if total >= 1 and r < 0.38:  return 'uncommon'
     return 'common'
+
+
+def _apply_scarcity(rarity: str) -> str:
+    """Downgrade when a rarity already exceeds its world share (economy/balance.py)."""
+    from django.core.cache import cache
+    from terra_domini.apps.economy.balance import RARITY_MAX_SHARE, RARITY_ORDER
+    from terra_domini.apps.territories.models import Territory
+    while rarity in RARITY_MAX_SHARE:
+        counts = cache.get('rarity_counts')
+        if counts is None:
+            from django.db.models import Count
+            counts = dict(Territory.objects.values_list('rarity').annotate(n=Count('id')))
+            cache.set('rarity_counts', counts, 600)
+        total = sum(counts.values()) or 1
+        if counts.get(rarity, 0) / total <= RARITY_MAX_SHARE[rarity]:
+            break
+        rarity = RARITY_ORDER[RARITY_ORDER.index(rarity) - 1]
+    return rarity
 
 
 def _compute_resources(biome: str, rarity: str, is_poi: bool, poi_bonus_pct: int = 0) -> dict:

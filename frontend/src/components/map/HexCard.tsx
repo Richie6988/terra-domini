@@ -15,6 +15,7 @@ import { useSound } from '../../hooks/useSound'
 import toast from 'react-hot-toast'
 import { Swords, Lock, Shield, User, Compass, Coins, Crown } from 'lucide-react'
 import { IconSVG } from '../shared/iconBank'
+import { hexPerDay } from '../../services/balance'
 
 /* ── Rarity ─────────────────────────────────────────────── */
 const RARITY: Record<string, {
@@ -73,7 +74,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
   const isShiny=!!t.is_shiny
 
   const cardName=t.custom_name||t.poi_name||t.place_name||'Zone'
-  const income=Math.round((t.resource_credits||t.food_per_tick||10)*288)
+  const income=hexPerDay(t.rarity, t.is_shiny)
 
   const facts=useMemo(()=>{
     const r=[]
@@ -142,7 +143,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
     size: 1,
     tier: 1,
     is_main: false,
-    tdc_per_24h: income * 24 / 288,
+    tdc_per_24h: income,
     centroid_lat: t.center_lat ?? t.lat,
     centroid_lon: t.center_lon ?? t.lon,
     territories: [{

@@ -18,6 +18,7 @@ import { OnboardingHotspots } from './components/onboarding/OnboardingHotspots'
 // ─── HEXOD Shell Components ─────────────────────────────────
 import { NewsTicker } from './components/shared/NewsTicker'
 import { HexodTopHUD, MissionsButton } from './components/shared/HexodTopHUD'
+import { HarvestButton, NudgeStack } from './components/shared/SessionLoop'
 import { HexodDock } from './components/shared/HexodDock'
 import { RadarWidget } from './components/shared/RadarWidget'
 import { IconSVG } from './components/shared/iconBank'
@@ -253,6 +254,8 @@ function GameScreen() {
 
       {/* Missions — left side below HUD */}
       <MissionsButton />
+      <HarvestButton />
+      <NudgeStack />
 
       {/* Side panels — triggered by HexodDock */}
       <AnimatePresence>

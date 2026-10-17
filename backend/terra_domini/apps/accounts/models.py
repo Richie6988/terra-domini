@@ -74,6 +74,10 @@ class Player(AbstractBaseUser, PermissionsMixin):
     wallet_address = models.CharField(max_length=42, blank=True, db_index=True)
     tdc_in_game = models.DecimalField(max_digits=20, decimal_places=6, default=0)
     total_tdc_purchased = models.DecimalField(max_digits=20, decimal_places=6, default=0)
+    # Purchased HEX not yet spent — can't buy random boosters nor be withdrawn (economy/balance.py)
+    hex_purchased_balance = models.DecimalField(max_digits=20, decimal_places=6, default=0)
+    # Harvest loop: production accumulates since this time, capped (economy/balance.py)
+    harvest_last_at = models.DateTimeField(null=True, blank=True)
     total_tdc_spent = models.DecimalField(max_digits=20, decimal_places=6, default=0)
     total_tdc_earned_ads = models.DecimalField(max_digits=20, decimal_places=6, default=0)
 

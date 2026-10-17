@@ -145,13 +145,8 @@ def run_production_tick(batch_size: int = 500) -> dict:
                     vals
                 )
 
-        # Bulk update player HEX Coin (tdc_in_game)
-        with connection.cursor() as c:
-            for owner_id, hex_amount in owner_hex.items():
-                c.execute(
-                    "UPDATE players SET tdc_in_game = COALESCE(tdc_in_game, 0) + %s WHERE id = %s",
-                    [hex_amount, owner_id]
-                )
+        # HEX Coin is NOT credited here any more: it accumulates in the player's
+        # harvest stock and must be collected (economy/loop_views.py, capped).
 
     logger.info(
         f"Production tick: {processed} territories, "

@@ -160,7 +160,13 @@ def recompute_kingdoms(player) -> list[dict]:
             centroid_lat = sum(lats) / len(lats)
             centroid_lon = sum(lons) / len(lons)
 
-            tdc24 = agg['resource_credits'] * 288
+            # Real harvest rate (economy/balance.py) — was resource_credits × 288 (cosmetic)
+            from terra_domini.apps.economy.balance import territory_hex_per_day
+            from terra_domini.apps.territories.models import Territory as _T
+            tdc24 = round(sum(
+                territory_hex_per_day(r, s, len(component) > 1)
+                for r, s in _T.objects.filter(h3_index__in=list(component)).values_list('rarity', 'is_shiny')
+            ), 2)
             size = len(component)
             tier = min(6, size // 3)
 

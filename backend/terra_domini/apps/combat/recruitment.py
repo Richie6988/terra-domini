@@ -168,6 +168,11 @@ def recruit(request):
     # Deduct cost
     player.tdc_in_game = balance - total_cost
     player.save(update_fields=['tdc_in_game'])
+    from terra_domini.apps.economy.balance import consume_purchased_first
+    from terra_domini.apps.progression.missions import track
+    consume_purchased_first(player, total_cost)
+    track(player, 'recruit', quantity)
+    track(player, 'spend_tdc', total_cost)
 
     # Training time: admin gets fast-track
     train_s = udef['admin_train_seconds'] if player.is_staff else udef['train_seconds']

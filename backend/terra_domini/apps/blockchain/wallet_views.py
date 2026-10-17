@@ -105,6 +105,35 @@ class WalletViewSet(viewsets.GenericViewSet):
     def prices(self, request):
         return Response(_get_prices())
 
+    @action(detail=False, methods=['POST'], url_path='cash-out')
+    def cash_out(self, request):
+        """Convert EARNED HEX Coin → HEX token (TDI) at 1 HEX = $0.001, 5% burned.
+        Purchased HEX can't be cashed out (economy/balance.py). Withdrawal to Polygon still needs KYC."""
+        from django.db import transaction
+        from terra_domini.apps.accounts.models import Player
+        from terra_domini.apps.economy import balance as B
+        try:
+            amount = Decimal(str(request.data.get('amount_hex', 0)))
+        except Exception:
+            return Response({'error': 'amount_hex must be a number'}, status=400)
+        if amount < 1000:
+            return Response({'error': 'Minimum cash-out is 1,000 HEX'}, status=400)
+        with transaction.atomic():
+            player = Player.objects.select_for_update().get(id=request.user.id)
+            earned = B.spendable_earned(player)
+            if earned < amount:
+                return Response({'error': f'Only earned HEX can be cashed out ({earned:.0f} available).',
+                                 'earned_balance': float(earned)}, status=402)
+            burned = (amount * B.CONVERT_BURN_PCT).quantize(Decimal('0.000001'))
+            prices = _get_prices()
+            tdi_price = Decimal(str(prices.get('TDI', {}).get('price_usd', 0.002))) or Decimal('0.002')
+            tdi = ((amount - burned) * Decimal('0.001') / tdi_price).quantize(Decimal('0.000001'))
+            wallet = _ensure_wallet(player)
+            Player.objects.filter(id=player.id).update(tdc_in_game=F('tdc_in_game') - amount)
+            type(wallet).objects.filter(pk=wallet.pk).update(tdi_balance=F('tdi_balance') + tdi)
+        return Response({'success': True, 'hex_spent': float(amount), 'hex_burned': float(burned),
+                         'tdi_received': float(tdi), 'tdi_price_usd': float(tdi_price)})
+
     @action(detail=False, methods=['POST'], url_path='convert')
     def convert(self, request):
         """Convert TDI → TDC at current rate (1 TDI = X TDC based on prices)."""

@@ -460,6 +460,23 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 
 ---
 
+## 11b. GAME LOOP & ECONOMY (owner, 2026-10-17) — `economy/balance.py` is the single source of truth
+
+- **5-minute session + FOMO**: territories fill a HEX stock capped at 8h (`STORAGE_CAP_HOURS`). Nothing is credited
+  automatically (daily cron no longer credits HEX). `GET /api/loop/status/` (harvest, streak check-in, missions, nudges)
+  and `POST /api/loop/collect/`. Overflow is lost and reported (`lost`).
+- **Pace (fast)**: HEX/day common 60 → mythic 3000; buy cost `120 × 1.22^(owned-1)` (×2.5 non-adjacent, × rarity price).
+- **Rarity scarcity**: world share caps (legendary 1%, epic 4%, rare 10%) in `territory_engine._apply_scarcity`.
+- **Missions**: templates seeded (progression/0002); `progression/missions.track(player, type, n)` hooks in claim, buy,
+  collect, recruit, attack, reinforce, shop.
+- **Combat FOMO**: `POST /api/combat/reinforce/` (80 HEX, +60 def, cap 2× max); `combat.bot_raids` every 2h (beat) or
+  `python manage.py bot_raids` — bots raid humans with ≥3 hexes, never the capital.
+- **Crypto (real, no paid randomness)**: `Player.hex_purchased_balance` tracks purchased HEX. Booster packs (random)
+  and `POST /api/wallet/cash-out/` (HEX → token, 5% burn, min 1000) accept EARNED HEX only. Boosters grant real FREE
+  territories with the advertised guarantee. Run `python manage.py seed_shop` once (catalog was empty).
+- Frontend mirror: `services/balance.ts`; HUD: `components/shared/SessionLoop.tsx` (HarvestButton, NudgeStack,
+  opt-in browser notifications).
+
 ## 12. KNOWN ISSUES PIPELINE (updated 2026-10-17)
 
 ### Fixed 2026-10-17 (10-agent audit)

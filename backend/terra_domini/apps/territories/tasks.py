@@ -274,6 +274,7 @@ def fulfill_tdc_purchase(self, payment_intent_id: str):
     Player.objects.filter(id=player.id).update(
         tdc_in_game=F('tdc_in_game') + total_tdc,
         total_tdc_purchased=F('total_tdc_purchased') + total_tdc,
+        hex_purchased_balance=F('hex_purchased_balance') + total_tdc,  # purchased HEX bucket (balance.py)
     )
 
     # Log transaction
