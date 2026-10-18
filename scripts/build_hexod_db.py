@@ -17,7 +17,7 @@ Rarity = combined score (visitors + geopolitics + rare fact, or fame proxy) rank
 family, then cut by quotas: legendary 1% · epic 4% · rare 10% · uncommon 25% · common 60%.
 Requires: openpyxl, h3>=4, wordninja (glued-words repair).
 """
-import ast, csv, hashlib, json, math, re, sys
+import ast, csv, hashlib, json, math, re, sys, unicodedata
 from urllib.parse import unquote
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -278,6 +278,20 @@ def norm_name(s):
     return re.sub(r'[^a-z0-9]', '', (s or '').lower().replace('_', ' '))
 
 
+_NAME_STOP = {'the', 'of', 'de', 'la', 'le', 'du', 'des', 'and', 'museum', 'musee', 'paris', 'london', 'city', 'national', 'park'}
+
+
+def name_words(s):
+    return {w for w in re.findall(r'[a-z0-9]+', unicodedata.normalize('NFKD', s or '').encode('ascii', 'ignore').decode().lower())
+            if len(w) > 2 and w not in _NAME_STOP}
+
+
+def km(lat1, lon1, lat2, lon2):
+    p = math.pi / 180
+    a = 0.5 - math.cos((lat2 - lat1) * p) / 2 + math.cos(lat1 * p) * math.cos(lat2 * p) * (1 - math.cos((lon2 - lon1) * p)) / 2
+    return 12742 * math.asin(math.sqrt(max(0.0, a)))
+
+
 HUB_CATEGORIES = {'trade_node', 'capital_city', 'financial_hub', 'stock_exchange', 'mega_port'}
 
 # Strategic points are few and are the Risk objectives: their own, richer ladder
@@ -412,6 +426,19 @@ def main():
             if not other.get('lat') or (p['lat'] and abs(other['lat'] - p['lat']) < 0.5 and abs(other['lon'] - p['lon']) < 0.5):
                 return None  # duplicate (same name, same place)
         seen_names.setdefault(nk, p)
+        if not (cell and cell in seen_cells) and p.get('lat') is not None and p.get('kind') == 'landmark':
+            # Same place under a slightly different name within 2 km ("Louvre Paris" / "Louvre Museum Paris")
+            words = name_words(p['name'])
+            for q in pois:
+                if q.get('lat') is None or q.get('kind') != 'landmark':
+                    continue
+                if abs(q['lat'] - p['lat']) > 0.02 or abs(q['lon'] - p['lon']) > 0.03:
+                    continue
+                qw = name_words(q['name'])
+                if words and qw and (words <= qw or qw <= words or len(words & qw) / len(words | qw) >= 0.5) and km(p['lat'], p['lon'], q['lat'], q['lon']) <= 2:
+                    cell = q['h3_r8'] or cell   # merge into q below
+                    seen_cells.setdefault(cell, q)
+                    break
         if cell and cell in seen_cells:
             keep = seen_cells[cell]          # same hex = same place: enrich the kept record, drop the duplicate
             for k, v in p.items():
@@ -472,6 +499,10 @@ def main():
     for r in sheet(SRC / 'wiki_full_extract.xlsx', 'BRUT'):
         lat, lon = fnum(r['latitude']), fnum(r['longitude'])
         if lat is None or lon is None:
+            continue
+        wname = clean(r['name_1']) or clean(r['name'])
+        if len(wname) < 5 or (' ' not in wname and len(wname) < 8 and not clean(r['category'])):
+            issues.append(f"wiki entry dropped: truncated name '{wname}' (re-extract the full title)")
             continue
         raw_cat = clean(r['category']).lower()
         slug, codex = POI_CAT.get(raw_cat, ('anomaly', 'mystery'))
@@ -595,8 +626,12 @@ def main():
                 + (2 if p['quality'] == 'premium' else 0))
     assign_rarity(fam['landmark'], landmark_score)
     assign_rarity(fam['strategic'], lambda p: (p['geopolitical_score'] or 0) + 0.1 * (p['visitors_score'] or 0), STRATEGIC_QUOTAS)
-    for k in ('city', 'country'):  # source files are ordered by importance → fame proxy = rank
-        assign_rarity(fam[k], lambda p: -p.get('_rank', 0))
+    # cities: global ranking by population (parsed from their article); no coordinates → stays common (codex only)
+    assign_rarity([p for p in fam['city'] if p.get('lat') is not None], lambda p: p.get('population') or 0)
+    for p in fam['city']:
+        if p.get('lat') is None:
+            p['rarity'] = 'common'
+    assign_rarity(fam['country'], lambda p: -p.get('_rank', 0))   # source file ordered by importance
     for p in pois:
         if p['uid'] in forced_rarity:
             p['rarity'] = forced_rarity[p['uid']]
