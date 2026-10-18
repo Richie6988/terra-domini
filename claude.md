@@ -465,6 +465,9 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 - **5-minute session + FOMO**: territories fill a HEX stock capped at 8h (`STORAGE_CAP_HOURS`). Nothing is credited
   automatically (daily cron no longer credits HEX). `GET /api/loop/status/` (harvest, streak check-in, missions, nudges)
   and `POST /api/loop/collect/`. Overflow is lost and reported (`lost`).
+- **Combat (veteran playtest 2026-10-18)**: `GET /api/combat/preview/` gives the exact server win chance; reinforce/incoming
+  return `hold_chance`. Bot raids are conquests (a 'raid' never captures). Shop: `IMPLEMENTED_EFFECTS` — purchase refuses
+  any effect the code doesn't apply (no HEX taken for nothing); atk/def boosts capped at +25%.
 - **Starter boost**: accounts younger than `BEGINNER_DAYS` (3) produce x`BEGINNER_MULT` (4) — time-based so buying a zone never lowers the rate.
 - **Pace (fast)**: HEX/day common 60 → mythic 3000; buy cost `120 × 1.22^(owned-1)` (×2.5 non-adjacent, × rarity price).
 - **Rarity scarcity**: world share caps (legendary 1%, epic 4%, rare 10%) in `territory_engine._apply_scarcity`.

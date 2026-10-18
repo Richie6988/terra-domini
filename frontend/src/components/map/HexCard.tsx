@@ -60,8 +60,8 @@ const fmtHours = (h: number) => {
 }
 
 /* ── Main HexCard ────────────────────────────────────────── */
-export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = false }:{
-  territory:any; onClose:()=>void; onRequestClaim?:()=>void; isNewClaim?: boolean
+export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewClaim = false }:{
+  territory:any; onClose:()=>void; onRequestClaim?:()=>void; onAttack?:()=>void; isNewClaim?: boolean
 }) {
   const player=usePlayer()
   const setActivePanel = useStore(s => s.setActivePanel)
@@ -335,7 +335,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
               }}>COULD NOT LOAD PRICES — RETRY</button>
             )}
             {isEnemy && (
-              <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('combat'), 100) }} className="btn-game btn-game-red" style={{
+              <button onClick={() => { if (onAttack) onAttack(); else { onClose(); setTimeout(() => useStore.getState().setActivePanel('combat'), 100) } }} className="btn-game btn-game-red" style={{
                 flex: 1, minHeight: 46, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 14, letterSpacing: 0.5,
               }}><Swords size={17} />ATTACK</button>
             )}

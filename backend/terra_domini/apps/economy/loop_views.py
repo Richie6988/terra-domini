@@ -20,6 +20,10 @@ from rest_framework.response import Response
 from terra_domini.apps.economy import balance as B
 
 
+def _tname(t):
+    return t.custom_name or t.place_name or t.poi_name or 'Your territory'
+
+
 def _fmt_left(delta):
     mins = max(0, int(delta.total_seconds() // 60))
     return f'{mins // 60}h {mins % 60:02d}m' if mins >= 60 else f'{mins} min'
@@ -108,10 +112,18 @@ def loop_status(request):
     nudges = []
     for b in incoming:
         t = b.target_territory
+        try:
+            from terra_domini.apps.combat.views import _hold_chance
+            hold = round(100 * _hold_chance(b, t))
+        except Exception:
+            hold = None
+        left = _fmt_left(b.resolves_at - now)
+        body = (f'{_tname(t)}: battle ends in {left} — {hold}% chance to hold. Reinforce to be safe.'
+                if hold is not None and hold >= 50 else f'{_tname(t)} falls in {left} unless you reinforce.')
         nudges.append({
             'id': f'attack-{b.id}', 'type': 'under_attack', 'priority': 100,
             'title': 'Your territory is under attack!',
-            'body': f'{t.place_name or t.h3_index[:8]} falls in {_fmt_left(b.resolves_at - now)} unless you reinforce.',
+            'body': body, 'hold_chance': hold,
             'ends_at': b.resolves_at.isoformat(), 'battle_id': str(b.id),
             'cta': {'label': f'REINFORCE ({B.REINFORCE_COST})', 'action': 'reinforce'},
         })
@@ -119,7 +131,7 @@ def loop_status(request):
         nudges.append({
             'id': f'lost-{b.id}', 'type': 'territory_lost', 'priority': 90,
             'title': 'Territory lost',
-            'body': f'{b.target_territory.place_name or b.target_territory.h3_index[:8]} was conquered while you were away. Strike back!',
+            'body': f'{_tname(b.target_territory)} was conquered while you were away. Strike back!',
             'cta': {'label': 'MILITARY', 'panel': 'combat'},
         })
     if harvest['is_full']:
@@ -141,7 +153,7 @@ def loop_status(request):
         nudges.append({
             'id': f'result-{b.id}', 'type': 'battle_result', 'priority': 70,
             'title': 'Victory!' if won else 'Attack repelled',
-            'body': f"{b.target_territory.place_name or b.target_territory.h3_index[:8]}: "
+            'body': f"{_tname(b.target_territory)}: "
                     + ('territory captured.' if b.territory_captured else ('raid succeeded.' if won else 'regroup and try again.')),
             'cta': {'label': 'VIEW', 'panel': 'combat'},
         })

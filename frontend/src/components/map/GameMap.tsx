@@ -399,8 +399,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
               if (r.ok) { const d = await r.json(); enriched = { ...ter, ...d.territory } }
             } catch(_) {}
           }
-          setSelectedTerritoryState(enriched)
-          if ((enriched as any).owner_id && (enriched as any).owner_id !== player?.id) setAttackTarget(enriched)
+          setSelectedTerritoryState(enriched)   // enemy hex: the card's ATTACK button opens AttackPanel
         }
       })
       if (poly) layer.addLayer(poly)
@@ -537,6 +536,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
             key={selectedTerritory.h3_index || selectedHex}
             territory={selectedTerritory}
             onClose={() => { setSelectedHex(null); setSelectedTerritoryState(null); selectedLayerRef.current?.clearLayers() }}
+            onAttack={() => { const t = selectedTerritory; setSelectedHex(null); setSelectedTerritoryState(null); setAttackTarget(t) }}
           />
         )}
       </AnimatePresence>
