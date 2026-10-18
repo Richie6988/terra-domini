@@ -310,14 +310,32 @@ def codex_cards(request):
                               'wiki_url': c.get('wiki_url', ''), 'count': caught[c['uid']], 'owned': True})
     by_cat = Counter(c['category'] for c in creatures)
 
+    # History album: retrospective tokens (history_event POIs) — own the hex to own the card
+    history = [{
+        'uid': p['uid'], 'name': p['name'], 'rarity': p['rarity'], 'category': 'history', 'event_date': p.get('event_date') or '',
+        'h3_index': p.get('h3_r8'), 'lat': p.get('lat'), 'lon': p.get('lon'), 'country_code': p.get('country_code') or '',
+        'description': (p.get('description') or '')[:400], 'wiki_url': p.get('wiki_url') or '', 'image_url': p.get('image_url') or '',
+        'owned': p.get('h3_r8') in owned, 'no': no,
+    } for no, p in enumerate(on_map, 1) if p.get('game_category') == 'history_event']
+    history.sort(key=lambda c: (not c['owned'], c['event_date'] or '9999'))
+    # News tokens won on world events (sport, geopolitics) — the hex holder at the end gets the card
+    from terra_domini.apps.events.news_models import EventCard
+    events = [{
+        'uid': str(e.id), 'name': e.headline, 'rarity': e.rarity, 'category': e.kind or 'news', 'event_date': e.event_date.isoformat(),
+        'h3_index': e.h3_index, 'lat': e.latitude, 'lon': e.longitude, 'location': e.location_name,
+        'image_url': e.image_url, 'wiki_url': e.source_url, 'owned': True, 'no': n,
+    } for n, e in enumerate(EventCard.objects.filter(player=player).order_by('event_date'), 1)]
+
     return Response({
-        'rare': rare, 'biomes': biomes, 'resources': res, 'creatures': creatures,
+        'rare': rare, 'biomes': biomes, 'resources': res, 'creatures': creatures, 'history': history, 'events': events,
         'creature_families': [{'id': k, 'total': v, 'owned': by_cat.get(k, 0)} for k, v in totals.most_common()],
         'summary': {
             'rare': {'owned': sum(c['owned'] for c in rare), 'total': sum(1 for c in rare if c['rarity'] in order and order[c['rarity']] <= 3)},
             'biomes': {'owned': len(mine_b), 'total': len(biomes)},
             'resources': {'owned': sum(r['owned'] for r in res), 'total': len(res)},
             'creatures': {'owned': len(creatures), 'total': len(creatures_db)},
+            'history': {'owned': sum(c['owned'] for c in history), 'total': len(history)},
+            'events': {'owned': len(events), 'total': len(events)},
         },
     })
 
@@ -347,7 +365,7 @@ def territory_card(request, h3_index):
         return Response({'error': 'Invalid hex'}, status=400)
     t = Territory.objects.select_related('owner').filter(h3_index=h3_index).first()
     poi = UnifiedPOI.objects.filter(h3_index=h3_index, is_active=True).values(
-        'name', 'category', 'token_id', 'real_output', 'description', 'fun_fact', 'wiki_url', 'image_url', 'rarity', 'country_code').first() or {}
+        'name', 'category', 'token_id', 'real_output', 'description', 'fun_fact', 'wiki_url', 'image_url', 'image_credit', 'event_date', 'rarity', 'country_code').first() or {}
     rarity = (t.rarity if t else None) or 'common'
     connected = False
     if t and t.owner_id:
@@ -374,5 +392,7 @@ def territory_card(request, h3_index):
         'title': poi.get('real_output') or '', 'description': poi.get('description') or '',
         'fun_fact': (poi.get('fun_fact') or '').split('\n')[0], 'wiki_url': poi.get('wiki_url') or '',
         'image_url': poi.get('image_url') or '',
+        'image_credit': poi.get('image_credit') or '',   # author · license (CC BY-SA requires it next to the picture)
+        'event_date': poi.get('event_date') or '',
         'minted': bool(t and t.token_minted_at),
     })

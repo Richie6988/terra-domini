@@ -9,7 +9,7 @@ import { api } from '../../services/api'
 import { IconSVG } from '../shared/iconBank'
 import { useStore } from '../../store'
 
-export type CardFamily = 'rare' | 'biomes' | 'resources' | 'creatures'
+export type CardFamily = 'rare' | 'biomes' | 'resources' | 'creatures' | 'history' | 'events'
 
 const RARITY_COLOR: Record<string, string> = {
   common: '#94a3b8', uncommon: '#22c55e', rare: '#3b82f6', epic: '#8b5cf6', legendary: '#f59e0b', mythic: '#ef4444',
@@ -35,7 +35,7 @@ const CREATURE_FAMILY: Record<string, { label: string; icon: string }> = {
 }
 
 interface CardsData {
-  rare: any[]; biomes: any[]; resources: any[]; creatures: any[]
+  rare: any[]; biomes: any[]; resources: any[]; creatures: any[]; history: any[]; events: any[]
   creature_families: { id: string; total: number; owned: number }[]
   summary: Record<CardFamily, { owned: number; total: number }>
 }
@@ -48,6 +48,8 @@ export function useCodexCards() {
   })
 }
 
+const dateLabel = (d?: string) => !d ? '' : d.length === 4 ? d
+  : new Date(d.length === 7 ? `${d}-01` : d).toLocaleDateString('en-GB', d.length === 7 ? { month: 'short', year: 'numeric' } : { day: 'numeric', month: 'short', year: 'numeric' })
 const fmt = (n: number) => (n >= 100 ? Math.round(n).toLocaleString() : n.toFixed(1))
 
 function Card({ owned, accent, icon, title, sub, children, onClick, no }: {
@@ -96,8 +98,13 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
   )
 
   const s = data.summary[family]
-  const label = family === 'rare' ? 'RARE CARDS' : family === 'biomes' ? 'BIOME CARDS' : family === 'creatures' ? 'CREATURE CARDS' : 'RESOURCE CARDS'
-  const explain = family === 'creatures'
+  const label = family === 'rare' ? 'RARE CARDS' : family === 'biomes' ? 'BIOME CARDS' : family === 'creatures' ? 'CREATURE CARDS'
+    : family === 'history' ? 'HISTORY CARDS' : family === 'events' ? 'EVENT CARDS' : 'RESOURCE CARDS'
+  const explain = family === 'history'
+    ? 'Moments that shaped the world, on the spot where they happened. Own the hex to own the card.'
+    : family === 'events'
+    ? 'Live world events (matches, news on strategic points). Hold the hex when the event ends to win its card.'
+    : family === 'creatures'
     ? 'Real species caught in the Safari. Duplicates count up (x2, x3…) for future swaps.'
     : family === 'rare'
     ? 'Famous places of the world (rare to legendary). Own the hex to own the card.'
@@ -148,6 +155,10 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
         {list.slice(0, 300).map(c => family === 'creatures' ? (
           <Card key={c.uid} owned accent={RARITY_COLOR[c.rarity] || '#94a3b8'} icon={CREATURE_FAMILY[c.category]?.icon || 'animal'}
             title={c.name} sub={`${c.rarity.toUpperCase()}${c.count > 1 ? ` · x${c.count}` : ''}`} onClick={() => setOpen(c)} no={c.no} />
+        ) : family === 'history' || family === 'events' ? (
+          <Card key={c.uid} owned={c.owned} accent={RARITY_COLOR[c.rarity] || '#94a3b8'} icon={family === 'events' ? 'trophy' : 'history'}
+            title={c.name} sub={`${dateLabel(c.event_date)}${c.country_code ? ` · ${c.country_code}` : c.location ? ` · ${c.location}` : ''}`}
+            onClick={() => setOpen(c)} no={c.no} />
         ) : family === 'rare' ? (
           <Card key={c.uid} owned={c.owned} accent={RARITY_COLOR[c.rarity] || '#94a3b8'} icon={c.category || 'monument'}
             title={c.name} sub={`${c.rarity.toUpperCase()}${c.country_code ? ` · ${c.country_code}` : ''}`} onClick={() => setOpen(c)} no={c.no} />
@@ -169,7 +180,8 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
       </div>
       {list.length > 300 && <div style={{ fontSize: 12, color: 'var(--hx-text-3)', marginTop: 10 }}>Showing 300 of {list.length} — use the filter.</div>}
       {!list.length && <div style={{ fontSize: 13, color: 'var(--hx-text-3)', padding: 20, textAlign: 'center', textTransform: 'none' }}>
-        {family === 'creatures' ? 'No creature yet — start a hunt in the Safari.' : 'No card here yet.'}</div>}
+        {family === 'creatures' ? 'No creature yet — start a hunt in the Safari.'
+          : family === 'events' ? 'No event card yet — hold a live event hex (Events panel) until it ends.' : 'No card here yet.'}</div>}
 
       {open && (
         <div className="hx-card" style={{ marginTop: 14, borderColor: 'var(--hx-accent, #7950f2)', textTransform: 'none', letterSpacing: 0 }}>
@@ -178,6 +190,10 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
             <button className="hx-nudge__x" aria-label="Close card" onClick={() => setOpen(null)}>×</button>
           </div>
           {family === 'creatures' && <p style={{ fontSize: 13, lineHeight: 1.45, margin: '8px 0' }}>{open.description}</p>}
+          {(family === 'history' || family === 'events') && <>
+            <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: '6px 0 0' }}>{dateLabel(open.event_date)}{open.location ? ` · ${open.location}` : ''} · {String(open.rarity).toUpperCase()}</p>
+            {open.description && <p style={{ fontSize: 13, lineHeight: 1.45, margin: '8px 0' }}>{open.description}</p>}
+          </>}
           {family === 'rare' && <>
             <p style={{ fontSize: 13, lineHeight: 1.45, margin: '8px 0' }}>{open.description}</p>
             {open.fun_fact && <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: '0 0 8px' }}>Did you know? {open.fun_fact}</p>}
@@ -196,7 +212,7 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
                 flyTo({ lat, lon, zoom: open.center ? 6 : 14 })
               }}>SHOW ON MAP</button>
             )}
-            {open.wiki_url && <a className="btn-game btn-game-gold" href={open.wiki_url} target="_blank" rel="noreferrer">WIKIPEDIA</a>}
+            {open.wiki_url && <a className="btn-game btn-game-gold" href={open.wiki_url} target="_blank" rel="noreferrer">{family === 'events' ? 'SOURCE' : 'WIKIPEDIA'}</a>}
           </div>
         </div>
       )}

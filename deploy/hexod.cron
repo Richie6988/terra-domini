@@ -11,3 +11,5 @@ M=/home/hexod/terra-domini/.venv/bin/python /home/hexod/terra-domini/backend/man
 5 * * * *    cd /home/hexod/terra-domini/backend && $M world_events >> /home/hexod/data/cron.log 2>&1
 # Nightly SQLite backup (keeps 14 days)
 0 4 * * *    sqlite3 /home/hexod/data/hexod.sqlite3 ".backup /home/hexod/data/backups/hexod-$(date +\%F).sqlite3" && find /home/hexod/data/backups -name '*.sqlite3' -mtime +14 -delete
+# Token DB: new candidates from the agents → Wikipedia check (pictures, coordinates) → game, nightly
+30 3 * * *   cd /home/hexod/terra-domini && bash deploy/wiki_refresh.sh >> /home/hexod/data/cron.log 2>&1

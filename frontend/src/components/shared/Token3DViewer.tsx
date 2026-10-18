@@ -68,6 +68,7 @@ export function Token3DViewer(props: Token3DProps) {
   const [infoH, setInfoH] = useState(0)
   const viewerRef = useRef<ReturnType<typeof createTokenViewer> | null>(null)
   const [mounted, setMounted] = useState(false)
+  const [credit, setCredit] = useState<{ text: string; wiki: string } | null>(null)   // picture author + license (CC BY-SA)
   // Stable fallback image — generated once, doesn't change on re-render
   const fallbackImg = useRef(randomBiomeImage(biome))
 
@@ -125,7 +126,11 @@ export function Token3DViewer(props: Token3DProps) {
     api.get(`/codex/territory/${h3Index}/`).then(({ data: d }) => {
       if (!alive || !viewerRef.current) return
       // Front texts from the DB (the card's own words), then the deed on the back
-      const front = [d.title, d.description].filter(Boolean).join(' — ') || d.fun_fact
+      // History tokens: the date leads ("11 Sep 2001 — ...")
+      const when = d.event_date ? new Date(d.event_date.length === 4 ? `${d.event_date}-01-01` : d.event_date)
+        .toLocaleDateString('en-GB', d.event_date.length === 4 ? { year: 'numeric' } : d.event_date.length === 7 ? { month: 'short', year: 'numeric' } : { day: 'numeric', month: 'short', year: 'numeric' }) : ''
+      const front = [when, d.title, d.description].filter(Boolean).join(' — ') || d.fun_fact
+      setCredit(d.image_url && d.image_credit ? { text: d.image_credit, wiki: d.wiki_url || '' } : null)
       if (front) viewerRef.current.update({ description: front.length > 240 ? front.slice(0, 237).replace(/\s+\S*$/, '') + '…' : front })
       if (d.image_url) viewerRef.current.update({ imageSrc: d.image_url })   // validated image from the DB beats the stock photo
       viewerRef.current.update({
@@ -208,6 +213,13 @@ export function Token3DViewer(props: Token3DProps) {
         // With an info sheet the stage ends 12px above it (sheet sits at bottom: 30); hexodToken3D refits on resize
         style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: infoPanel && infoH ? infoH + 42 : 0, zIndex: 1 }}
       />
+
+      {credit && (
+        <a href={credit.wiki || undefined} target="_blank" rel="noreferrer" style={{
+          position: 'absolute', top: 18, left: 16, zIndex: 6, maxWidth: '60%', fontFamily: 'var(--font-body)', fontSize: 10,
+          color: 'rgba(255,255,255,0.55)', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+        }}>Photo: {credit.text} · Wikipedia</a>
+      )}
 
       {!infoPanel && (
         <div style={{

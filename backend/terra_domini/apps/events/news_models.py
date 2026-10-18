@@ -115,3 +115,27 @@ class NewsEventRegistration(models.Model):
 
     def __str__(self):
         return f"{self.player.username} → {self.event.headline[:30]} ({self.result})"
+
+
+class EventCard(models.Model):
+    """News token (2026-10-18): the player who holds a world event's hex when it ends wins its card.
+    One card per event and winner — a dated, numbered collectible of the real headline."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='event_cards')
+    event = models.ForeignKey(NewsEvent, null=True, on_delete=models.SET_NULL, related_name='cards')
+    headline = models.CharField(max_length=300)
+    kind = models.CharField(max_length=20, blank=True, default='')        # sport / geopolitics / ...
+    location_name = models.CharField(max_length=200, blank=True, default='')
+    h3_index = models.CharField(max_length=20, blank=True, default='')
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
+    rarity = models.CharField(max_length=12, default='rare')
+    image_url = models.URLField(max_length=512, blank=True, default='')
+    source_url = models.URLField(max_length=512, blank=True, default='')
+    event_date = models.DateField()
+    won_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'event_cards'
+        unique_together = ('player', 'event')
+        ordering = ['-event_date']

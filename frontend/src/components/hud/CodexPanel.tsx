@@ -29,6 +29,8 @@ const CODEX_TABS = [
   { id: 'biomes',    label: 'Biomes',      iconId: 'globe' },
   { id: 'resources', label: 'Resources',   iconId: 'pickaxe' },
   { id: 'creatures', label: 'Creatures',   iconId: 'dinosaur' },
+  { id: 'history',   label: 'History',     iconId: 'history' },
+  { id: 'events',    label: 'Events',      iconId: 'trophy' },
   { id: 'favorites', label: 'Favorites',   iconId: 'medal' },
 ]
 
@@ -220,7 +222,7 @@ export function CodexPanel({ onClose }: Props) {
       </div>
 
       <AnimatePresence mode="wait">
-        {(tab === 'rare' || tab === 'biomes' || tab === 'resources' || tab === 'creatures') && (
+        {(tab === 'rare' || tab === 'biomes' || tab === 'resources' || tab === 'creatures' || tab === 'history' || tab === 'events') && (
           <motion.div key={tab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <CodexCards family={tab as CardFamily} filter={filter} />
           </motion.div>

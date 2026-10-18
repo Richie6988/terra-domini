@@ -88,6 +88,7 @@ class Command(BaseCommand):
                     wiki_url=p['wiki_url'] if len(p.get('wiki_url') or '') <= 200 else '', fun_fact=_fun_fact(p),
                     is_active=True, is_featured=p.get('quality') == 'premium', verified=True, source='hexod_db', db_uid=p['uid'][:60],
                     image_url=p['image_url'] if str(p.get('image_url', '')).startswith('https://') else '',
+                    image_credit=(p.get('image_credit') or '')[:300], event_date=(p.get('event_date') or '')[:10],
                     token_id=p.get('token_id') or None, visitors_per_year=int(p.get('visitors_per_year') or 0),
                     geopolitical_score=int(p.get('geopolitical_score') or 0),
                 ))

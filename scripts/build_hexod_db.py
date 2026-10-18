@@ -17,7 +17,7 @@ Rarity = combined score (visitors + geopolitics + rare fact, or fame proxy) rank
 family, then cut by quotas: legendary 1% · epic 4% · rare 10% · uncommon 25% · common 60%.
 Requires: openpyxl, h3>=4, wordninja (glued-words repair).
 """
-import ast, csv, hashlib, json, math, re, sys, unicodedata
+import ast, csv, hashlib, json, math, os, re, sys, unicodedata
 from urllib.parse import unquote
 from collections import Counter, defaultdict
 from pathlib import Path
@@ -28,7 +28,7 @@ import wordninja
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / 'data' / 'hexod_db' / 'sources'
-OUT = ROOT / 'data' / 'hexod_db'
+OUT = Path(os.environ.get('HEXOD_DB_OUT') or ROOT / 'data' / 'hexod_db')   # the VPS writes outside the repo (deploy/wiki_refresh.sh)
 LEGACY_CSV = ROOT / 'backend' / 'terra_domini_pois.csv'
 H3_RES = 8  # the game grid (claude.md: ALWAYS resolution 8)
 
@@ -310,6 +310,24 @@ def assign_rarity(items, key, quotas=None):
         i = stop
 
 
+RANKS_ALL = ('common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic')
+
+
+def wiki_title(url):
+    """English Wikipedia URL → normalised article title (lowercase, spaces) — the dedup / enrichment key."""
+    m = re.search(r'en\.(?:m\.)?wikipedia\.org/wiki/([^?#]+)', url or '')
+    return unquote(m.group(1)).replace('_', ' ').strip().lower() if m else ''
+
+
+def load_wiki_enrich():
+    """sources/wiki_enrich.csv (scripts/wiki_enrich.py, run on the VPS) → {title: row}."""
+    f = SRC / 'wiki_enrich.csv'
+    if not f.exists():
+        return {}
+    with open(f, newline='', encoding='utf-8') as fh:
+        return {r['title'].strip().lower(): r for r in csv.DictReader(fh)}
+
+
 def h3cell(lat, lon):
     try:
         return h3.latlng_to_cell(lat, lon, H3_RES)
@@ -420,7 +438,15 @@ def main():
     rare_facts = {k: ('' if fact_n[v] >= 3 else v) for k, v in rare_facts.items()}
     pois, seen_names, seen_cells, merged = [], {}, {}, []
 
-    def add_poi(p):
+    def free_cell_near(cell):
+        """Nearest hex (rings 1-3) not used by another token — distinct things never share a hex."""
+        for k in (1, 2, 3):
+            for c in sorted(h3.grid_ring(cell, k)):
+                if c not in seen_cells:
+                    return c
+        return None
+
+    def add_poi(p, displace=False):
         p['name'] = re.sub(r'\s+', ' ', unquote(p['name']).replace('_', ' ')).strip()
         p.setdefault('aliases', '')
         nk, cell = norm_name(p['name']), p['h3_r8']
@@ -442,10 +468,19 @@ def main():
                     cell = q['h3_r8'] or cell   # merge into q below
                     seen_cells.setdefault(cell, q)
                     break
+        if displace and cell and cell in seen_cells:
+            q = seen_cells[cell]
+            words, qw = name_words(p['name']), name_words(q['name'])
+            same = words and qw and (words <= qw or qw <= words or len(words & qw) / len(words | qw) >= 0.5)
+            if not same:   # a different verified article (an event at a landmark, two museums side by side) → next free hex
+                c2 = free_cell_near(cell)
+                if c2:
+                    p['h3_r8'] = cell = c2
+                    p['lat'], p['lon'] = (round(x, 5) for x in h3.cell_to_latlng(c2))
         if cell and cell in seen_cells:
             keep = seen_cells[cell]          # same hex = same place: enrich the kept record, drop the duplicate
             for k, v in p.items():
-                if k not in ('uid', 'source', 'name', 'quality', 'kind') and v and not keep.get(k):
+                if k not in ('uid', 'source', 'name', 'quality', 'kind', 'pending_wiki', 'rarity', 'curation') and v and not keep.get(k):
                     keep[k] = v
             keep['aliases'] = ', '.join(x for x in [keep.get('aliases', ''), p['name']] if x)
             merged.append({'kept': keep['name'], 'merged': p['name'], 'source': p['source'], 'h3_r8': cell})
@@ -615,6 +650,64 @@ def main():
                     forced_rarity[tgt['uid']] = r['rarity'].strip()
                 curated_n += 1
 
+    # ── candidates (agents + editors): sources/candidates/*.csv — live only once Wikipedia confirms the article ──
+    wiki = load_wiki_enrich()
+    known_titles = {wiki_title(p.get('wiki_url')) for p in pois} - {''}
+    cand_n = Counter()
+    for f in sorted((SRC / 'candidates').glob('*.csv')):
+        with open(f, newline='', encoding='utf-8') as fh:
+            for r in csv.DictReader(fh):
+                name, url = (r.get('name') or '').strip(), (r.get('wiki_url') or '').strip()
+                lat, lon, t = fnum(r.get('lat')), fnum(r.get('lon')), wiki_title(r.get('wiki_url'))
+                if not name or not t or lat is None or lon is None:
+                    cand_n['invalid'] += 1; continue
+                if t in known_titles:
+                    cand_n['duplicate'] += 1; continue
+                w = wiki.get(t)
+                if w and str(w.get('exists')) == '0':
+                    cand_n['no_article'] += 1; issues.append(f"candidate {name} ({f.name}): no Wikipedia article '{t}' → dropped"); continue
+                if w and w.get('lat') and w.get('lon'):   # Wikipedia's coordinates win
+                    wl, wo = float(w['lat']), float(w['lon'])
+                    if km(lat, lon, wl, wo) > 100:
+                        issues.append(f"candidate {name}: agent position {km(lat, lon, wl, wo):.0f} km from Wikipedia's — Wikipedia kept")
+                    lat, lon = wl, wo
+                slug = (r.get('game_category') or 'anomaly').strip()
+                kind = 'history' if (r.get('kind') or '').strip() == 'history' else 'landmark'
+                tgt = add_poi({
+                    'uid': f"cand-{hashlib.md5(t.encode()).hexdigest()[:10]}", 'source': f'candidate:{f.stem}', 'kind': kind,
+                    'quality': 'candidate', 'name': name[:60], 'game_category': slug,
+                    'codex_category': 'history' if slug == 'history_event' else next((v[1] for v in POI_CAT.values() if v[0] == slug), 'mystery'),
+                    'lat': lat, 'lon': lon, 'h3_r8': h3cell(lat, lon), 'country_code': (r.get('country_code') or '').strip()[:3],
+                    'title': (r.get('title') or '').strip(), 'description': (r.get('description') or '').strip(),
+                    'fun_fact_1': (r.get('fun_fact_1') or '').strip(), 'fun_fact_2': '', 'fun_fact_3': '', 'rare_fact': '',
+                    'visitors_per_year': 0, 'visitors_score': 0, 'geopolitical_score': 0, 'grade': '', 'wiki_url': url,
+                    'image': '', 'token_id': None, 'event_date': (r.get('event_date') or '').strip()[:10],
+                    'pending_wiki': not w, 'rarity': 'common',
+                    'curation': {'by': (r.get('curated_by') or '').strip(), 'at': (r.get('curated_at') or '').strip(),
+                                 'notes': (r.get('notes') or '').strip()},
+                }, displace=True)
+                if tgt is None:
+                    cand_n['merged'] += 1; continue
+                known_titles.add(t)
+                if (r.get('rarity') or '').strip() in RANKS_ALL:
+                    forced_rarity[tgt['uid']] = r['rarity'].strip()
+                cand_n['pending' if not w else 'verified'] += 1
+    if cand_n:
+        print('candidates:', dict(cand_n))
+
+    # ── Wikipedia enrichment on every token: picture + credit, intro when the text is missing ──
+    for p in pois:
+        w = wiki.get(wiki_title(p.get('wiki_url')))
+        if not w or str(w.get('exists')) != '1':
+            continue
+        if w.get('image_url') and not str(p.get('image_url', '')).startswith('https://'):
+            p['image_url'] = w['image_url']
+            p['image_credit'] = ' · '.join(x for x in (w.get('image_artist', '')[:120], w.get('image_license', '')) if x) or 'Wikimedia Commons'
+        if w.get('extract') and len(p.get('description') or '') < 40:
+            p['description'] = w['extract']
+        if w.get('wikidata'):
+            p['wikidata'] = w['wikidata']
+
     # Curated rows whose notes start with 'DUPLICATE OF <uid>' are dropped (the kept token holds the curation)
     dup = {p['uid'] for p in pois if (p.get('curation') or {}).get('notes', '').upper().startswith('DUPLICATE OF')}
     for p in pois:
@@ -625,6 +718,8 @@ def main():
     # ── rarity (per family, combined score) ──
     fam = defaultdict(list)
     for p in pois:
+        if p['source'].startswith('candidate'):
+            continue   # candidates carry their author's rarity (quotas per file), see forced_rarity
         fam['strategic' if p.get('strategic') else p['kind']].append(p)
     def landmark_score(p):
         vs = p['visitors_score'] or (min(100, 12 * math.log10(p['visitors_per_year'] + 1)) if p['visitors_per_year'] else 0)
@@ -659,8 +754,8 @@ def main():
         if p['uid'] in forced_rarity:
             p['rarity'] = forced_rarity[p['uid']]
     for p in pois:
-        p['score'] = round(landmark_score(p), 1) if p['kind'] == 'landmark' else None
-        p['on_map'] = bool(p['h3_r8'])
+        p['score'] = round(landmark_score(p), 1) if p['kind'] == 'landmark' and not p['source'].startswith('candidate') else None
+        p['on_map'] = bool(p['h3_r8']) and not p.get('pending_wiki')   # candidates wait for the Wikipedia check
         p.pop('_rank', None)
 
     # ── creatures (Safari / Codex) ──
@@ -688,6 +783,11 @@ def main():
         if not c['codex_category']:
             near = Counter(x['codex_category'] for x in creatures[max(0, i - 15):i + 16] if x['codex_category'])
             c['codex_category'] = near.most_common(1)[0][0] if near else 'animal'
+    for c in creatures:   # Wikipedia picture for the Safari / Codex card
+        w = wiki.get(wiki_title(c.get('wiki_url')))
+        if w and str(w.get('exists')) == '1' and w.get('image_url'):
+            c['image_url'] = w['image_url']
+            c['image_credit'] = ' · '.join(x for x in (w.get('image_artist', '')[:120], w.get('image_license', '')) if x)
     assign_rarity(creatures, lambda c: c['fame'])
     for c in creatures:
         c.pop('fame')

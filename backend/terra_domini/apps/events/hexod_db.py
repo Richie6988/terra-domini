@@ -13,7 +13,10 @@ import random
 from functools import lru_cache
 from pathlib import Path
 
-DB_PATH = Path(os.environ.get('HEXOD_DB_JSON') or Path(__file__).resolve().parents[4] / 'data' / 'hexod_db' / 'hexod_db.json')
+REPO_DB = Path(__file__).resolve().parents[4] / 'data' / 'hexod_db' / 'hexod_db.json'
+# On the VPS the refreshed DB (Wikipedia pictures, verified candidates) lives outside the repo: HEXOD_DB_JSON in .env.prod
+_env_db = os.environ.get('HEXOD_DB_JSON')
+DB_PATH = Path(_env_db) if _env_db and Path(_env_db).exists() else REPO_DB
 
 # Safari spawn odds by rarity and HEX reward on capture
 SPAWN_WEIGHTS = {'common': 55, 'uncommon': 25, 'rare': 13, 'epic': 6, 'legendary': 1}

@@ -179,6 +179,11 @@ def resolve() -> int:
                 Player.objects.filter(id=owner_id).update(tdc_in_game=F('tdc_in_game') + ev.hex_reward)
                 ev.winner_id = owner_id
                 ev.status = NewsEvent.Status.ENDED
+                from terra_domini.apps.events.news_models import EventCard   # the news token goes to the album
+                EventCard.objects.get_or_create(player_id=owner_id, event=ev, defaults=dict(
+                    headline=ev.headline[:300], kind=ev.event_kind or '', location_name=(ev.poi_name or ev.location_name or '')[:200],
+                    h3_index=ev.h3_index, latitude=ev.latitude, longitude=ev.longitude, rarity=ev.rarity or 'rare',
+                    image_url=(ev.image_url or '')[:512], source_url=(ev.source_url or '')[:512], event_date=ev.ends_at.date()))
             else:
                 ev.status = NewsEvent.Status.EXPIRED
             ev.save(update_fields=['winner', 'status'])

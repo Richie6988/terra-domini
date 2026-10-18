@@ -89,6 +89,11 @@ class POICategory(models.TextChoices):
     # 🧬 Science
     RESEARCH_STATION = 'research_station', 'Research Station'
     PARTICLE_COLLIDER= 'particle_collider','Particle Collider'
+    HISTORY_EVENT    = 'history_event',    'History Event'
+    NEWS_EVENT       = 'news_event',       'News Event'
+    DESERT           = 'desert',           'Desert'
+    INFRASTRUCTURE   = 'infrastructure',   'Infrastructure'
+    COUNTRY          = 'country',          'Country'
     OBSERVATORY      = 'observatory',      'Major Observatory'
 
 
@@ -132,6 +137,11 @@ POI_VISUAL = {
     'ancient_ruins':    {'emoji': '🗿', 'color': '#92400E', 'size': 'md', 'rarity': 'uncommon',  'game_resource': 'culture',   'bonus': 45},
     'religious_site':   {'emoji': '🕌', 'color': '#D97706', 'size': 'md', 'rarity': 'uncommon',  'game_resource': 'culture',   'bonus': 40},
     'royal_palace':     {'emoji': '👑', 'color': '#F59E0B', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'culture',   'bonus': 70},
+    'history_event':    {'emoji': '', 'color': '#B45309', 'size': 'md', 'rarity': 'rare', 'game_resource': 'culture', 'bonus': 30},
+    'news_event':       {'emoji': '', 'color': '#DC2626', 'size': 'md', 'rarity': 'rare', 'game_resource': 'influence', 'bonus': 40},
+    'desert':           {'emoji': '', 'color': '#D97706', 'size': 'lg', 'rarity': 'uncommon', 'game_resource': 'energy', 'bonus': 20},
+    'infrastructure':   {'emoji': '', 'color': '#475569', 'size': 'md', 'rarity': 'uncommon', 'game_resource': 'materials', 'bonus': 25},
+    'country':          {'emoji': '', 'color': '#0EA5E9', 'size': 'lg', 'rarity': 'rare', 'game_resource': 'influence', 'bonus': 30},
     'museum':           {'emoji': '🏛️', 'color': '#7C3AED', 'size': 'md', 'rarity': 'common',    'game_resource': 'culture',   'bonus': 30},
     'conspiracy':       {'emoji': '👁️', 'color': '#4B5563', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'intel',     'bonus': 100},
     'secret_facility':  {'emoji': '🔒', 'color': '#1F2937', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'intel',     'bonus': 180},
@@ -227,6 +237,10 @@ class UnifiedPOI(models.Model):
     image_url    = models.URLField(max_length=500, blank=True, default='')
     validated_by = models.ForeignKey('accounts.Player', null=True, blank=True, on_delete=models.SET_NULL, related_name='validated_pois')
     validated_at = models.DateTimeField(null=True, blank=True)
+    # ── Wikipedia enrichment + history/news tokens (2026-10-18) ──
+    image_credit = models.CharField(max_length=300, blank=True, default='')   # "Author · CC BY-SA 4.0" (required by the license)
+    event_date   = models.CharField(max_length=10, blank=True, default='')    # history/news tokens: YYYY[-MM[-DD]]
+    expires_at   = models.DateTimeField(null=True, blank=True)                 # news tokens leave the map after this
     class Meta:
         db_table = 'unified_poi'
         ordering = ['-is_featured', '-bonus_pct', 'name']
