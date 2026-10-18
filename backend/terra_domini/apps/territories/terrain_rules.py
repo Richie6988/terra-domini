@@ -12,6 +12,7 @@ their resources, POIs). First rule that matches wins:
                                wetland, tundra, built-up. Inside a city core only water/forest/mountain/ice stay natural.
 5. Named region             → keywords of the DB region (Sahara → desert, Rainforest → forest, Himalayan → mountain,
                                Savannah/Steppe/Plain → rural, Islands/Coast → coastal, Arctic/Taiga → tundra…)
+0. Land/sea mask           → Natural Earth 1:10m (offline): open sea = ocean, shoreline = coastal, ice sheets = ice
 6. Ocean region only        → coastal
 7. Old latitude/longitude heuristic (biome_engine._geo_biome)
 """
@@ -77,6 +78,11 @@ def terrain(lat: float, lon: float, poi_category: str = '', precise: bool = True
         return POI_CATEGORY_BIOME[poi_category], f'POI {poi_category}'
     if poi_category in INDUSTRIAL_POI:
         return 'industrial', f'POI {poi_category}'
+    # Land or sea: offline Natural Earth mask, always available — open sea is never anything else
+    from terra_domini.apps.territories.landmask import is_land, sea_share
+    land, sea = is_land(lat, lon), sea_share(lat, lon)
+    if land is False and sea >= 0.85:
+        return 'ocean', 'open sea (Natural Earth coastline)'
     lc = None
     if precise:
         from terra_domini.apps.territories.landcover import classify
@@ -92,6 +98,8 @@ def terrain(lat: float, lon: float, poi_category: str = '', precise: bool = True
             if abs(plat - lat) < 0.07 and abs(plon - lon) < 0.1 and _km(lat, lon, plat, plon) <= 6:
                 return 'industrial', 'industrial site nearby'
     region = biome_for(round(lat, 3), round(lon, 3))
+    if not lc and land and sea < 0.15 and (lat < -60 or (lat > 67 and -60 < lon < -20)):
+        return 'ice', 'ice sheet (Antarctica / Greenland)'
     if lc:
         if near and near[1] <= near[0]['radius_km'] * 1.8 and lc[0] in ('farmland', 'grassland'):
             heavy = region and HEAVY_RESOURCES & set(region.get('resource_ids', []))
@@ -107,8 +115,10 @@ def terrain(lat: float, lon: float, poi_category: str = '', precise: bool = True
             for rx, biome in REGION_RULES:
                 if re.search(rx, name):
                     return biome, f"region {region['name']}"
-        else:
+        elif land is None or sea >= 0.15:   # a sea region only says coastal where the coast really is
             return 'coastal', f"sea region {region['name']}"
+    if land is not None and sea >= 0.15:
+        return 'coastal', 'shoreline (Natural Earth coastline)'
     return _geo_biome(lat, lon), 'latitude/longitude'
 
 

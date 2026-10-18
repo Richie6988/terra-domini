@@ -275,7 +275,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
           h3_index: hx, h3: hx, h3_resolution: 8,
           owner_id: null, owner_username: null,
           alliance_id: null, alliance_tag: null,
-          territory_type: 'rural', type: 'rural',
+          territory_type: '', type: '',   // terrain comes from the server (HexCard asks codex/territory)
           defense_tier: 1, defense_points: 100,
           is_control_tower: false, is_landmark: false,
           is_under_attack: false, ad_slot_enabled: false,

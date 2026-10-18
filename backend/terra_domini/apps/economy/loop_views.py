@@ -353,15 +353,21 @@ TERRAIN_LABEL = {
 }
 
 
-def _place_description(t, region, rates, meta) -> str:
+def _terrain_of(t, lat, lon) -> str:
+    """Terrain shown on the card: the territory's measured biome, else the terrain rules for this point
+    (hexes nobody created yet — open sea included)."""
+    if t and t.biome and t.biome != 'grassland':
+        return t.biome
+    from terra_domini.apps.territories.terrain_rules import terrain
+    return terrain(round(lat, 4), round(lon, 4))[0] if lat is not None else (t.territory_type if t else '')
+
+
+def _place_description(t, terr, region, rates, meta) -> str:
     """Card text of a hex without a POI, only from what is known about it: measured terrain, place, region, elevation,
     what it produces. Never invented."""
-    if not t:
-        return ''
-    terr = (t.biome if t.biome and t.biome != 'grassland' else '') or t.territory_type or 'rural'
-    where = ', '.join(x for x in (t.place_name, region['name'] if region else '', t.country_code) if x)
+    where = ', '.join(x for x in ((t.place_name if t else ''), region['name'] if region else '', (t.country_code if t else '')) if x)
     bits = [f"{TERRAIN_LABEL.get(terr, terr.title())}{' · ' + where if where else ''}."]
-    if t.elevation_m is not None and t.elevation_m > 0 and terr not in ('ocean', 'lake'):
+    if t and t.elevation_m is not None and t.elevation_m > 0 and terr not in ('ocean', 'lake'):
         bits.append(f'{t.elevation_m:,} m above sea level.')
     top = [meta[k]['name'] for k, _ in sorted(rates.items(), key=lambda kv: -kv[1])[:3] if k in meta]
     if top:
@@ -444,7 +450,7 @@ def territory_card(request, h3_index):
         'h3_index': h3_index, 'lat': round(lat, 4), 'lon': round(lon, 4),
         'edition': (t.nft_version if t else 1) or 1, 'edition_label': B.edition_label(t.nft_version if t else 1),
         'edition_value_mult': B.edition_value_mult(t.nft_version if t else 1),
-        'terrain': (t.territory_type if t else '') or '', 'country_code': (t.country_code if t else '') or poi.get('country_code', '') or '',
+        'terrain': _terrain_of(t, lat, lon), 'country_code': (t.country_code if t else '') or poi.get('country_code', '') or '',
         'rarity': rarity, 'is_shiny': bool(t and t.is_shiny),
         'owner': t.owner.username if t and t.owner_id else None,
         'captured_at': t.captured_at.date().isoformat() if t and t.captured_at else None,
@@ -455,7 +461,7 @@ def territory_card(request, h3_index):
                             key=lambda r: -r['per_day']),
         'poi_name': poi.get('name'), 'poi_category': poi.get('category'), 'token_id': (t.token_id if t else None) or poi.get('token_id'),
         # Front of the token: texts from the HEXOD master DB
-        'title': poi.get('real_output') or '', 'description': poi.get('description') or _place_description(t, region, rates, meta),
+        'title': poi.get('real_output') or '', 'description': poi.get('description') or _place_description(t, _terrain_of(t, lat, lon), region, rates, meta),
         'fun_fact': (poi.get('fun_fact') or '').split('\n')[0], 'wiki_url': poi.get('wiki_url') or '',
         'image_url': poi.get('image_url') or '',
         'satellite_url': satellite_tile_url(lat, lon),   # real view of the hex: picture of every non-POI card

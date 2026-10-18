@@ -98,7 +98,10 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
   },[t])
 
   // measured terrain (ocean, lake, ice, farmland…) is more precise than the territory type; 'grassland' = legacy default
-  const biome  = (t.biome && t.biome !== 'grassland' ? t.biome : '') || t.territory_type || 'rural'
+  // Hexes nobody created yet have no terrain on the client: ask the server (land/sea mask + measured land cover)
+  const { data: cardInfo } = useQuery<any>({ queryKey: ['codex-territory', t.h3_index],
+    queryFn: () => api.get(`/codex/territory/${t.h3_index}/`).then(r => r.data), enabled: !!t.h3_index, staleTime: 300000 })
+  const biome  = (t.biome && t.biome !== 'grassland' ? t.biome : '') || cardInfo?.terrain || t.territory_type || ''
   const biomeIcon = ({ lake: 'water_drop', ice: 'glacier', farmland: 'wheat', grassland: 'sprout', wetland: 'leaf', water: 'ocean', arctic: 'tundra' } as Record<string, string>)[biome] || biome
   const serieNum = t.token_id ? (parseInt(String(t.token_id)) % cfg.serieMax) + 1 : undefined
 
@@ -222,7 +225,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
       serial={serieNum || 1}
       maxSupply={cfg.serieMax}
       edition="GENESIS"
-      biome={(biome || 'rural').toUpperCase()}
+      biome={(biome || '...').toUpperCase()}
       power={t.poi_geo_score || 50}
       rarity={rarity === 'mythic' ? 99 : rarity === 'legendary' ? 95 : rarity === 'epic' ? 85 : rarity === 'rare' ? 70 : rarity === 'uncommon' ? 50 : 30}
       infoPanel={
@@ -258,7 +261,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
               <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
                 <span className="hx-chip hx-chip--accent">{cfg.label.toUpperCase()}</span>
                 <span className="hx-chip">
-                  <IconSVG id={biomeIcon} size={14} />{(biome || 'rural').toUpperCase()}
+                  <IconSVG id={biomeIcon || 'globe'} size={14} />{(biome || '...').toUpperCase()}
                 </span>
                 {isShiny && <span className="hx-chip" style={{ color: '#FCD34D', borderColor: 'rgba(252,211,77,0.4)', background: 'rgba(252,211,77,0.12)' }}>SHINY</span>}
                 {isEnemy && <span className="hx-chip" style={{ color: '#FF8A95', borderColor: 'rgba(255,77,94,0.45)', background: 'rgba(255,77,94,0.12)' }}>ENEMY</span>}
