@@ -315,7 +315,19 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
                 <span>LOCKED{claimOpts?.locked_reason ? ` — ${String(claimOpts.locked_reason).toUpperCase()}` : ''}</span>
               </div>
             )}
-            {isFree && player && !claimOpts?.locked && claimOpts?.options?.map((opt: any) => (
+            {isFree && player && claimOpts?.options?.filter((o: any) => o.method === 'euro').map((opt: any) => (
+              <button key="euro" onClick={() => {
+                setClaiming(true)
+                api.post('/shop/hex-checkout/', { territory_h3: t.h3_index })
+                  .then(r => { window.location.href = r.data.url })
+                  .catch((e: any) => { toast.error(e?.response?.data?.error || 'Payment unavailable'); setClaiming(false) })
+              }} disabled={claiming} className="btn-game btn-game-gold"
+                title={`${opt.cost} HEX, paid by card: the HEX is credited and spent on this territory`}
+                style={{ flex: '1 1 140px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 13 }}>
+                <IconSVG id="hex_coin" size={16} />{claiming ? '...' : `UNLOCK NOW · ${opt.eur} €`}
+              </button>
+            ))}
+            {isFree && player && !claimOpts?.locked && claimOpts?.options?.filter((o: any) => o.method !== 'euro').map((opt: any) => (
               <button key={opt.method} onClick={() => handleClaim(opt.method)} disabled={claiming || !opt.available}
                 className={`btn-game ${opt.method === 'free' ? 'btn-game-green' : opt.method === 'buy' ? 'btn-game-gold' : 'btn-game-blue'}`}
                 style={{

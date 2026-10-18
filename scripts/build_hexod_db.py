@@ -256,12 +256,18 @@ def norm_name(s):
     return re.sub(r'[^a-z0-9]', '', (s or '').lower().replace('_', ' '))
 
 
-def assign_rarity(items, key):
+HUB_CATEGORIES = {'trade_node', 'capital_city', 'financial_hub', 'stock_exchange', 'mega_port'}
+
+# Strategic points are few and are the Risk objectives: their own, richer ladder
+STRATEGIC_QUOTAS = [('legendary', 0.15), ('epic', 0.40), ('rare', 0.75), ('uncommon', 1.0), ('common', 1.0)]
+
+
+def assign_rarity(items, key, quotas=None):
     """Rank by key (desc) and cut by QUOTAS. Stable: ties broken by uid hash."""
     ranked = sorted(items, key=lambda x: (-key(x), hashlib.md5(x['uid'].encode()).hexdigest()))
     n = len(ranked)
     i = 0
-    for rarity, cum in QUOTAS:
+    for rarity, cum in (quotas or QUOTAS):
         stop = max(i, min(n, round(n * cum))) if rarity != 'common' else n
         for x in ranked[i:stop]:
             x['rarity'] = rarity
@@ -424,6 +430,34 @@ def main():
             'token_id': int(fnum(r['token_id']) or 0) or None,
         })
 
+    # ── strategic points of the globe (curated, sources/strategic_points.csv) ──
+    # Existing record (same name or same hex) → flagged strategic + geopolitical weight raised; else added.
+    strat_csv = SRC / 'strategic_points.csv'
+    if strat_csv.exists():
+        with open(strat_csv, newline='', encoding='utf-8') as f:
+            for r in csv.DictReader(f):
+                lat, lon = fnum(r['lat']), fnum(r['lon'])
+                cell = h3cell(lat, lon)
+                slug = r['game_category']
+                codex = next((v[1] for k, v in POI_CAT.items() if v[0] == slug), 'chokepoint')
+                hit = seen_names.get(norm_name(r['name'])) or seen_cells.get(cell)
+                if hit is not None and hit in pois:
+                    hit['strategic'] = True
+                    hit['geopolitical_score'] = max(hit.get('geopolitical_score') or 0, fnum(r['geopolitical_score']) or 0)
+                    hit['description'] = hit.get('description') or r['description']
+                    hit['wiki_url'] = hit.get('wiki_url') or r['wiki_url']
+                    continue
+                p = add_poi({
+                    'uid': f"strat-{norm_name(r['name'])[:40]}", 'source': 'strategic', 'kind': 'landmark', 'quality': 'strategic',
+                    'name': r['name'], 'game_category': slug, 'codex_category': codex, 'lat': lat, 'lon': lon, 'h3_r8': cell,
+                    'country_code': r['country_code'], 'title': '', 'description': r['description'],
+                    'fun_fact_1': '', 'fun_fact_2': '', 'fun_fact_3': '', 'rare_fact': '', 'visitors_per_year': 0,
+                    'visitors_score': 0, 'geopolitical_score': fnum(r['geopolitical_score']) or 0, 'grade': '',
+                    'wiki_url': r['wiki_url'], 'image': '', 'token_id': None,
+                })
+                if p:
+                    p['strategic'] = True
+
     # ── cities & countries ──
     for fname, kind, prefix in (('city_full_extract.xlsx', 'city', 'city'), ('country_full_extract.xlsx', 'country', 'country')):
         for idx, r in enumerate(sheet(SRC / fname)):
@@ -449,11 +483,17 @@ def main():
     # ── rarity (per family, combined score) ──
     fam = defaultdict(list)
     for p in pois:
-        fam[p['kind']].append(p)
+        fam['strategic' if p.get('strategic') else p['kind']].append(p)
     def landmark_score(p):
         vs = p['visitors_score'] or (min(100, 12 * math.log10(p['visitors_per_year'] + 1)) if p['visitors_per_year'] else 0)
-        return 0.45 * vs + 0.45 * (p['geopolitical_score'] or 0) + (10 if p['rare_fact'] else 0) + (5 if p['quality'] == 'premium' else 0)
+        if p.get('game_category') in HUB_CATEGORIES or re.search(r'airport|international hub', f"{p.get('title', '')} {p['name']}", re.I) \
+                or re.search(r' International$', p['name']) or (p['visitors_per_year'] or 0) > 25_000_000:   # no single monument gets 25M+
+            vs *= 0.55   # airports/cities/financial hubs count passengers or residents, not visitors of the landmark
+        # landmarks: fame first (visitors), geopolitics second — strategic points have their own ladder
+        return (0.7 * vs + 0.3 * (p['geopolitical_score'] or 0) + (4 if p['rare_fact'] else 0)
+                + (2 if p['quality'] == 'premium' else 0))
     assign_rarity(fam['landmark'], landmark_score)
+    assign_rarity(fam['strategic'], lambda p: (p['geopolitical_score'] or 0) + 0.1 * (p['visitors_score'] or 0), STRATEGIC_QUOTAS)
     for k in ('city', 'country'):  # source files are ordered by importance → fame proxy = rank
         assign_rarity(fam[k], lambda p: -p.get('_rank', 0))
     for p in pois:

@@ -81,8 +81,11 @@ export function useHexPurchaseReturn() {
     api.post('/shop/hex-checkout/confirm/', { session_id: sid }).then(r => {
       const s = useStore.getState()
       s.setBalance({ ...(s.balance || {}), in_game: r.data.balance } as any)
-      toast.success(`+${Math.round(r.data.hex).toLocaleString()} HEX added to your balance!`, { duration: 6000 })
-      ;['loop-status', 'wallet', 'wallet-me', 'player'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
+      if (r.data.territory) {
+        if (r.data.claimed) toast.success('Territory unlocked — it is yours!', { duration: 6000 })
+        else toast(`Someone took that territory first — your ${Math.round(r.data.hex).toLocaleString()} HEX are on your balance.`, { duration: 7000 })
+      } else toast.success(`+${Math.round(r.data.hex).toLocaleString()} HEX added to your balance!`, { duration: 6000 })
+      ;['loop-status', 'wallet', 'wallet-me', 'player', 'kingdoms', 'my-territories'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
     }).catch((e: any) => toast(e?.response?.data?.error || 'Payment received — your HEX will appear in a moment.', { duration: 6000 }))
   }, [])
 }

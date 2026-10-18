@@ -1,0 +1,50 @@
+name,game_category,lat,lon,country_code,geopolitical_score,description,wiki_url
+The Pentagon,military_base,38.8719,-77.0563,US,100,"Headquarters of the United States Department of Defense in Arlington, Virginia.",https://en.wikipedia.org/wiki/The_Pentagon
+Cheyenne Mountain Complex,military_base,38.7442,-104.8461,US,95,Hardened nuclear bunker in Colorado that hosted NORAD's command centre.,https://en.wikipedia.org/wiki/Cheyenne_Mountain_Complex
+GCHQ,intelligence_hq,51.8994,-2.1244,GB,92,"The United Kingdom's signals intelligence agency, housed in the ""Doughnut"" at Cheltenham.",https://en.wikipedia.org/wiki/GCHQ
+CIA Headquarters,intelligence_hq,38.9517,-77.1467,US,95,"George Bush Center for Intelligence in Langley, Virginia.",https://en.wikipedia.org/wiki/George_Bush_Center_for_Intelligence
+NSA Headquarters,intelligence_hq,39.1086,-76.7717,US,93,"Headquarters of the US National Security Agency at Fort Meade, Maryland.",https://en.wikipedia.org/wiki/National_Security_Agency
+Ramstein Air Base,military_base,49.4369,7.6003,DE,88,US Air Force base in Germany and headquarters of US Air Forces in Europe.,https://en.wikipedia.org/wiki/Ramstein_Air_Base
+Diego Garcia,naval_base,-7.3133,72.4111,IO,92,Atoll in the Chagos Archipelago hosting a joint US–UK military base in the Indian Ocean.,https://en.wikipedia.org/wiki/Diego_Garcia
+Pearl Harbor,naval_base,21.3649,-157.9507,US,90,"Lagoon harbour on Oahu, home of the US Pacific Fleet.",https://en.wikipedia.org/wiki/Pearl_Harbor
+Sevastopol Naval Base,naval_base,44.6167,33.5254,UA,92,Main base of the Russian Black Sea Fleet in Crimea.,https://en.wikipedia.org/wiki/Sevastopol_Naval_Base
+Camp Lemonnier,military_base,11.5469,43.1556,DJ,85,US Navy expeditionary base in Djibouti overlooking the Bab-el-Mandeb strait.,https://en.wikipedia.org/wiki/Camp_Lemonnier
+Andersen Air Force Base,military_base,13.584,144.93,GU,85,"US Air Force base on Guam, a key bomber base in the western Pacific.",https://en.wikipedia.org/wiki/Andersen_Air_Force_Base
+Naval Station Norfolk,naval_base,36.9461,-76.3138,US,88,"The largest naval base in the world, in Norfolk, Virginia.",https://en.wikipedia.org/wiki/Naval_Station_Norfolk
+NATO Headquarters,alliance_hq,50.8794,4.4269,BE,95,Political and administrative headquarters of the North Atlantic Treaty Organization in Brussels.,https://en.wikipedia.org/wiki/Headquarters_of_NATO
+United Nations Headquarters,international_org,40.749,-73.968,US,98,Seat of the United Nations General Assembly and Security Council in New York City.,https://en.wikipedia.org/wiki/Headquarters_of_the_United_Nations
+Three Gorges Dam,mega_dam,30.823,111.003,CN,95,"Hydroelectric gravity dam on the Yangtze, the world's largest power station by installed capacity.",https://en.wikipedia.org/wiki/Three_Gorges_Dam
+Itaipu Dam,mega_dam,-25.408,-54.5888,BR,88,Hydroelectric dam on the Paraná River shared by Brazil and Paraguay.,https://en.wikipedia.org/wiki/Itaipu_Dam
+Grand Ethiopian Renaissance Dam,mega_dam,11.215,35.093,ET,90,"Africa's largest hydroelectric dam, on the Blue Nile, at the heart of a Nile water dispute.",https://en.wikipedia.org/wiki/Grand_Ethiopian_Renaissance_Dam
+Aswan High Dam,mega_dam,23.9706,32.8775,EG,88,Embankment dam across the Nile that created Lake Nasser.,https://en.wikipedia.org/wiki/Aswan_Dam
+Hoover Dam,mega_dam,36.0161,-114.7377,US,80,Concrete arch-gravity dam on the Colorado River that created Lake Mead.,https://en.wikipedia.org/wiki/Hoover_Dam
+Strait of Malacca,chokepoint,2.2,101.9,MY,97,Narrow sea lane between the Malay Peninsula and Sumatra carrying a quarter of world trade.,https://en.wikipedia.org/wiki/Strait_of_Malacca
+Bab-el-Mandeb,chokepoint,12.58,43.33,YE,95,Strait between Yemen and Djibouti linking the Red Sea to the Gulf of Aden.,https://en.wikipedia.org/wiki/Bab-el-Mandeb
+Strait of Gibraltar,chokepoint,35.96,-5.5,ES,92,Strait linking the Atlantic Ocean to the Mediterranean Sea.,https://en.wikipedia.org/wiki/Strait_of_Gibraltar
+Bosphorus,chokepoint,41.12,29.07,TR,92,"Strait through Istanbul, the only sea route between the Black Sea and the Mediterranean.",https://en.wikipedia.org/wiki/Bosporus
+Øresund,chokepoint,55.95,12.7,DK,80,"Strait between Denmark and Sweden, a gateway to the Baltic Sea.",https://en.wikipedia.org/wiki/%C3%98resund
+Taiwan Strait,chokepoint,24.5,119.5,TW,98,"Strait between Taiwan and mainland China, one of the world's most tense sea lanes.",https://en.wikipedia.org/wiki/Taiwan_Strait
+Strait of Dover,chokepoint,51.0,1.45,GB,85,The narrowest part of the English Channel and one of the busiest shipping lanes.,https://en.wikipedia.org/wiki/Strait_of_Dover
+Strait of Hormuz,chokepoint,26.57,56.25,OM,100,Strait between Oman and Iran through which about a fifth of the world's oil passes.,https://en.wikipedia.org/wiki/Strait_of_Hormuz
+Suez Canal,chokepoint,30.58,32.27,EG,98,Artificial waterway in Egypt connecting the Mediterranean Sea to the Red Sea.,https://en.wikipedia.org/wiki/Suez_Canal
+Panama Canal,chokepoint,9.08,-79.68,PA,96,Artificial waterway across the Isthmus of Panama linking the Atlantic and Pacific.,https://en.wikipedia.org/wiki/Panama_Canal
+Port of Shanghai,mega_port,30.62,122.06,CN,92,The world's busiest container port.,https://en.wikipedia.org/wiki/Port_of_Shanghai
+Port of Singapore,mega_port,1.264,103.84,SG,92,"One of the world's busiest transhipment ports, at the southern end of the Strait of Malacca.",https://en.wikipedia.org/wiki/Port_of_Singapore
+Port of Rotterdam,mega_port,51.95,4.14,NL,88,The largest seaport in Europe.,https://en.wikipedia.org/wiki/Port_of_Rotterdam
+Baikonur Cosmodrome,space_center,45.965,63.305,KZ,90,"The world's first and largest operational space launch facility, in Kazakhstan.",https://en.wikipedia.org/wiki/Baikonur_Cosmodrome
+Guiana Space Centre,space_center,5.239,-52.768,GF,88,European spaceport near Kourou in French Guiana.,https://en.wikipedia.org/wiki/Guiana_Space_Centre
+Kennedy Space Center,space_center,28.573,-80.649,US,92,"NASA's primary launch centre on Merritt Island, Florida.",https://en.wikipedia.org/wiki/Kennedy_Space_Center
+Jiuquan Satellite Launch Center,space_center,40.958,100.291,CN,88,"China's first and largest spaceport, in the Gobi Desert.",https://en.wikipedia.org/wiki/Jiuquan_Satellite_Launch_Center
+Starbase,space_center,25.997,-97.157,US,85,"SpaceX's Starship production and launch site at Boca Chica, Texas.",https://en.wikipedia.org/wiki/SpaceX_Starbase
+Zaporizhzhia Nuclear Power Plant,nuclear_plant,47.512,34.586,UA,96,"The largest nuclear power plant in Europe, on the Dnieper in Ukraine.",https://en.wikipedia.org/wiki/Zaporizhzhia_Nuclear_Power_Plant
+Kashiwazaki-Kariwa Nuclear Power Plant,nuclear_plant,37.429,138.595,JP,85,"The world's largest nuclear power plant by net electrical rating, in Niigata, Japan.",https://en.wikipedia.org/wiki/Kashiwazaki-Kariwa_Nuclear_Power_Plant
+Bruce Nuclear Generating Station,nuclear_plant,44.325,-81.599,CA,80,"One of the largest operating nuclear generating stations in the world, in Ontario.",https://en.wikipedia.org/wiki/Bruce_Nuclear_Generating_Station
+La Hague reprocessing plant,nuclear_plant,49.678,-1.879,FR,85,Nuclear fuel reprocessing plant on the Cotentin peninsula in Normandy.,https://en.wikipedia.org/wiki/La_Hague_site
+Ghawar Field,oil_field,25.4,49.6,SA,95,"The largest conventional oil field in the world, in eastern Saudi Arabia.",https://en.wikipedia.org/wiki/Ghawar_Field
+Ras Tanura,oil_field,26.64,50.16,SA,90,Saudi Aramco's main oil export terminal and refinery on the Persian Gulf.,https://en.wikipedia.org/wiki/Ras_Tanura
+Abqaiq,oil_field,25.94,49.68,SA,92,"The world's largest crude oil stabilisation plant, operated by Saudi Aramco.",https://en.wikipedia.org/wiki/Abqaiq
+TSMC Fab 12 Hsinchu,tech_giant,24.774,121.012,TW,96,"Chip fabs of TSMC in Hsinchu Science Park, maker of most of the world's advanced semiconductors.",https://en.wikipedia.org/wiki/TSMC
+ASML Veldhoven,tech_giant,51.407,5.416,NL,92,"Headquarters of ASML, the only maker of extreme ultraviolet lithography machines.",https://en.wikipedia.org/wiki/ASML_Holding
+Data Center Alley Ashburn,data_center,39.04,-77.49,US,85,"Loudoun County, Virginia: the largest concentration of data centres in the world.,https://en.wikipedia.org/wiki/Ashburn",_Virginia
+Bank for International Settlements,financial_hub,47.548,7.592,CH,85,"The central bank of central banks, in Basel.",https://en.wikipedia.org/wiki/Bank_for_International_Settlements
+SWIFT Headquarters,financial_hub,50.7286,4.4889,BE,85,"Headquarters of SWIFT, the interbank messaging network, in La Hulpe, Belgium.",https://en.wikipedia.org/wiki/SWIFT

@@ -516,6 +516,13 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 'is_adjacent': is_adjacent,
             })
 
+        # Far away (or locked rare POI): it can always be unlocked straight away with real money
+        # (1 € = 1000 HEX; the HEX is credited then spent on this hex — economy/payments.py)
+        if not is_first and not is_adjacent:
+            from terra_domini.apps.economy.payments import territory_eur_price
+            eur = territory_eur_price(buy_cost)
+            options.append({'method': 'euro', 'label': f'UNLOCK NOW ({eur} €)', 'eur': eur, 'cost': buy_cost, 'available': True})
+
         return Response({
             'status': 'claimable',
             'h3_index': h3_index,
