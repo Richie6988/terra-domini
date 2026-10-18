@@ -205,7 +205,8 @@ class Command(BaseCommand):
             self._auto_resolve()
 
         if options['demo']:
-            self._create_demo_events()
+            # Invented headlines are not allowed (RULE 1). Real events: `manage.py world_events`.
+            self.stdout.write(self.style.WARNING('--demo is disabled (no fake events). Use: manage.py world_events'))
             return
 
         api_key = options['api_key'] or getattr(settings, 'NEWSAPI_KEY', '')

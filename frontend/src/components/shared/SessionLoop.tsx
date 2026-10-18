@@ -27,12 +27,14 @@ interface LoopStatus {
 const NUDGE_ICON: Record<string, string> = {
   under_attack: 'swords', territory_lost: 'flag_red', harvest_full: 'wheat', harvest_ready: 'wheat',
   battle_result: 'trophy', missions_claimable: 'daily_task', first_claim: 'pin', can_expand: 'castle',
+  event_hold: 'event_ticket', event_open: 'event_ticket',
 }
 const NUDGE_COLOR: Record<string, string> = {
   under_attack: '#ef4444', territory_lost: '#ef4444', harvest_full: '#f59e0b', harvest_ready: '#34d058',
   battle_result: '#8b5cf6', missions_claimable: '#f5a623', first_claim: '#3b9bff', can_expand: '#3b9bff',
+  event_hold: '#d946ef', event_open: '#d946ef',
 }
-const URGENT = new Set(['under_attack', 'harvest_full', 'battle_result', 'territory_lost'])
+const URGENT = new Set(['under_attack', 'harvest_full', 'battle_result', 'territory_lost', 'event_hold'])
 
 const fmtIn = (iso?: string) => {
   if (!iso) return ''

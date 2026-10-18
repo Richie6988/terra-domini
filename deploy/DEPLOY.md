@@ -58,7 +58,7 @@ export DJANGO_SETTINGS_MODULE=terra_domini.settings.prod
 ../.venv/bin/python manage.py collectstatic --noinput
 ../.venv/bin/python manage.py seed_shop                           # boutique (sinon vide)
 ../.venv/bin/python manage.py seed_bots --count 20 --claim 5      # 20 bots + alliance Hexod Founders
-../.venv/bin/python manage.py fetch_news --demo                   # événements
+../.venv/bin/python manage.py world_events                       # vrais événements (sport, géopolitique) sur les hexagones POI
 ../.venv/bin/python manage.py import_hexod_db                     # base unique HEXOD : 1745 POI + territoires res 8
 ../.venv/bin/python manage.py createsuperuser                     # TON compte admin (email + mot de passe fort)
 ../.venv/bin/python manage.py verify_admin                        # marque le staff comme e-mail vérifié
@@ -91,7 +91,7 @@ Ouvre `https://TONDOMAINE` → écran de connexion HEXOD. PaintIt continue de to
 sudo crontab -u hexod /home/hexod/terra-domini/deploy/hexod.cron
 sudo crontab -u hexod -l
 ```
-Raids de bots toutes les 2 h, production de ressources quotidienne, news du jour, sauvegarde SQLite chaque nuit (14 jours).
+Raids de bots toutes les 2 h, production de ressources quotidienne, vrais événements chaque heure, sauvegarde SQLite chaque nuit (14 jours).
 
 ## 8. Vérifications
 - `https://TONDOMAINE` s'affiche, inscription → e-mail reçu → connexion OK.

@@ -81,13 +81,18 @@ def territory_rates(player) -> dict:
     rows = list(Territory.objects.filter(owner=player).values_list('h3_index', 'rarity', 'is_shiny'))
     owned = {h for h, _, _ in rows}
     mult = BEGINNER_MULT if is_beginner(player) else 1
+    try:   # live real-world event on the hex (apps/events/world_events.py) → ×EVENT_MULT
+        from terra_domini.apps.events.world_events import live_event_hexes, EVENT_MULT
+        hot = live_event_hexes() & owned
+    except Exception:
+        hot, EVENT_MULT = set(), 1
     out = {}
     for h, rarity, shiny in rows:
         try:
             connected = any(n in owned for n in k_ring(h, 1) if n != h)
         except Exception:
             connected = False
-        out[h] = territory_hex_per_day(rarity, shiny, connected) * mult
+        out[h] = territory_hex_per_day(rarity, shiny, connected) * mult * (EVENT_MULT if h in hot else 1)
     return out
 
 

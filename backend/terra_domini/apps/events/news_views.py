@@ -16,6 +16,21 @@ from rest_framework.response import Response
 from terra_domini.apps.events.news_models import NewsEvent, NewsEventRegistration
 
 
+def _holder_id(event):
+    if not getattr(event, 'h3_index', ''):
+        return None
+    from terra_domini.apps.territories.models import Territory
+    return Territory.objects.filter(h3_index=event.h3_index).values_list('owner_id', flat=True).first()
+
+
+def _holder(event):
+    hid = _holder_id(event)
+    if not hid:
+        return None
+    from terra_domini.apps.accounts.models import Player
+    return Player.objects.filter(id=hid).values_list('username', flat=True).first()
+
+
 def _serialize_event(event, player=None):
     """Serialize a NewsEvent for the frontend."""
     reg = None
@@ -43,6 +58,10 @@ def _serialize_event(event, player=None):
         'time_remaining': event.time_remaining,
         'is_active': event.is_active,
         'published_at': event.published_at.isoformat(),
+        # World event on a hex: hold it when it ends to win (apps/events/world_events.py)
+        'event_kind': getattr(event, 'event_kind', ''), 'h3_index': getattr(event, 'h3_index', ''),
+        'poi_name': getattr(event, 'poi_name', ''), 'holder': _holder(event),
+        'i_hold': bool(player and player.is_authenticated and _holder_id(event) == player.id),
         # Player-specific
         'my_registered': reg is not None,
         'my_result': reg.result if reg else None,
@@ -56,8 +75,13 @@ def _serialize_event(event, player=None):
 def list_news_events(request):
     """GET /api/events/news/ — active + upcoming events."""
     now = timezone.now()
-    # Auto-expire old events
-    NewsEvent.objects.filter(ends_at__lt=now, status='live').update(status='ended')
+    # Pay holders of ended hex events, then expire the rest
+    try:
+        from terra_domini.apps.events.world_events import resolve
+        resolve()
+    except Exception:
+        pass
+    NewsEvent.objects.filter(ends_at__lt=now, status='live', h3_index='').update(status='ended')
 
     events = NewsEvent.objects.filter(
         status__in=['live', 'upcoming'],

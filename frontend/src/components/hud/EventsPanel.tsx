@@ -44,6 +44,7 @@ interface NewsEventData {
   registered_count: number; time_remaining: number; is_active: boolean
   starts_at: string; ends_at: string; published_at: string
   my_registered: boolean; my_result: string | null
+  event_kind?: string; h3_index?: string; poi_name?: string; holder?: string | null; i_hold?: boolean
   my_hex_earned: number; my_serial: number | null
 }
 
@@ -145,8 +146,8 @@ export function EventsPanel({ onClose }: Props) {
               <div className="hx-empty">
                 <IconSVG id="news" size={48} />
                 <div className="hx-empty__title">NO LIVE EVENTS</div>
-                <div style={body}>New events spawn from world news. Check back soon.</div>
-                {player?.is_staff && <code style={{ fontFamily: mono, fontSize: 11, color: 'var(--hx-text-2)', textTransform: 'none' }}>python manage.py fetch_news --demo</code>}
+                <div style={body}>Real matches and strategic points in the news appear here every hour. Hold their hex when the event ends to win the bounty.</div>
+                {player?.is_staff && <code style={{ fontFamily: mono, fontSize: 11, color: 'var(--hx-text-2)', textTransform: 'none' }}>python manage.py world_events</code>}
               </div>
             )}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))', gap: 10 }}>
@@ -193,18 +194,28 @@ export function EventsPanel({ onClose }: Props) {
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     <span className="hx-chip" style={{ fontFamily: mono, fontSize: 11, color: remaining < 3600 ? '#f87171' : '#fdba74' }}><Clock size={11} /> {formatTime(remaining)}</span>
                     <span className="hx-chip" style={{ color: '#fbbf24' }}><IconSVG id="hex_coin" size={12} /> +{ev.hex_reward} REWARD</span>
-                    <span className="hx-chip"><Users size={11} /> {ev.registered_count}/{ev.max_participants}</span>
+                    {ev.h3_index
+                      ? <span className="hx-chip" style={{ color: ev.i_hold ? '#86efac' : ev.holder ? '#fca5a5' : 'var(--hx-text-2)' }}>
+                          {ev.i_hold ? 'YOU HOLD IT' : ev.holder ? `HELD BY ${ev.holder.toUpperCase()}` : 'UNCLAIMED'}</span>
+                      : <span className="hx-chip"><Users size={11} /> {ev.registered_count}/{ev.max_participants}</span>}
+                    {ev.h3_index && <span className="hx-chip" style={{ color: '#f0abfc' }}>x3 PRODUCTION</span>}
                   </div>
-                  <div className="hx-progress"><div className="hx-progress__fill" style={{ width: `${pctFull}%` }} /></div>
+                  {!ev.h3_index && <div className="hx-progress"><div className="hx-progress__fill" style={{ width: `${pctFull}%` }} /></div>}
 
-                  <button
+                  {ev.h3_index ? (
+                    <button className={ev.i_hold ? 'btn-game btn-game-green' : 'btn-game btn-game-gold'}
+                      onClick={() => { window.dispatchEvent(new CustomEvent('terra:flyto', { detail: { lat: ev.latitude, lon: ev.longitude, zoom: 15 } })); onClose() }}
+                      style={{ width: '100%', fontSize: 12, letterSpacing: 1 }}>
+                      {ev.i_hold ? 'DEFEND IT UNTIL THE END' : ev.holder ? 'GO ATTACK IT' : 'GO CLAIM IT'} · {ev.poi_name}
+                    </button>
+                  ) : <button
                     onClick={() => handleRegister(ev)}
                     disabled={ev.my_registered}
                     className={ev.my_registered ? 'btn-game btn-game-glass' : 'btn-game btn-game-gold'}
                     style={{ width: '100%', fontSize: 10, letterSpacing: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
                   >
                     {ev.my_registered ? <><Check size={14} /> REGISTERED</> : <>REGISTER · {ev.registration_cost === 0 ? 'FREE' : <><IconSVG id="hex_coin" size={13} />{ev.registration_cost}</>}</>}
-                  </button>
+                  </button>}
                 </div>
               )
             })}

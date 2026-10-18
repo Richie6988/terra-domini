@@ -56,6 +56,12 @@ class NewsEvent(models.Model):
     max_participants = models.IntegerField(default=500)
     registration_cost = models.IntegerField(default=25)  # HEX coins
 
+    # ── World events on the map (2026-10-18): real event pinned to a POI hex ──
+    event_kind = models.CharField(max_length=20, blank=True, default='')   # sport | music | geopolitics | science
+    h3_index = models.CharField(max_length=20, blank=True, default='', db_index=True)
+    poi_name = models.CharField(max_length=300, blank=True, default='')
+    winner = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='events_won')
+
     # ── Timing ──
     starts_at = models.DateTimeField()
     ends_at = models.DateTimeField()

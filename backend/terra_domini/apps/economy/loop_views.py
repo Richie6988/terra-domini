@@ -176,6 +176,22 @@ def loop_status(request):
             'body': f'+{sum(m.reward_tdc for m in claimable)} HEX waiting.',
             'cta': {'label': 'CLAIM', 'panel': 'tasks'},
         })
+    try:   # real-world events (apps/events/world_events.py): yours to defend, or the hottest one to grab
+        from terra_domini.apps.events.news_models import NewsEvent
+        live = list(NewsEvent.objects.filter(starts_at__lte=now, ends_at__gt=now).exclude(h3_index='').order_by('-hex_reward')[:20])
+        mine = set(Territory.objects.filter(owner=player, h3_index__in=[e.h3_index for e in live]).values_list('h3_index', flat=True))
+        for e in [e for e in live if e.h3_index in mine][:2]:
+            nudges.append({'id': f'event-{e.id}', 'type': 'event_hold', 'priority': 85,
+                           'title': f'Live event on your {e.poi_name}!',
+                           'body': f'x3 production · hold it {_fmt_left(e.ends_at - now)} more to win {e.hex_reward} HEX.',
+                           'cta': {'label': 'EVENTS', 'panel': 'events'}})
+        top = next((e for e in live if e.h3_index not in mine), None)
+        if top:
+            nudges.append({'id': f'event-{top.id}', 'type': 'event_open', 'priority': 45,
+                           'title': top.headline[:80], 'body': f'{top.poi_name}: hold it at the end → {top.hex_reward} HEX ({_fmt_left(top.ends_at - now)} left).',
+                           'cta': {'label': 'SEE', 'panel': 'events'}})
+    except Exception:
+        pass
     if owned == 0:
         nudges.append({
             'id': 'first-claim', 'type': 'first_claim', 'priority': 95,
