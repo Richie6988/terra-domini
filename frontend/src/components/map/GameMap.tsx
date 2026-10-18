@@ -34,10 +34,8 @@ interface GameMapProps {
 
 /** Mini preview gradients for the map-style picker */
 const TILE_SWATCH: Record<string, string> = {
-  dark: 'linear-gradient(135deg,#0b1220 0%,#1e293b 60%,#334155 100%)',
-  light: 'linear-gradient(135deg,#f2efe9 0%,#cfe6b8 55%,#aad3df 100%)',
+  game: 'linear-gradient(135deg,#1d3b6e 0%,#2f6f8f 45%,#5fae6b 100%)',
   satellite: 'linear-gradient(135deg,#14321f 0%,#2f4f2a 50%,#5b6b3c 100%)',
-  topo: 'linear-gradient(135deg,#e8eccf 0%,#c5d1a0 55%,#9caf7a 100%)',
 }
 
 /** POI category → iconBank id (categories without a dedicated icon) */
@@ -53,21 +51,16 @@ const POI_RARITY_COLOR: Record<string, string> = {
 // No API key needed (Carto basemaps now require one on production domains → "API KEY REQUIRED" tiles)
 const OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
 const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
+// Two ambiances (owner 2026-10-18): a stylised game board (OSM recoloured in CSS: .hx-tiles-game) and real satellite imagery
+const ZOOM_MIN = 5, ZOOM_MAX = 16
 const TILES: Record<string, { label: string; url: string; maxZoom: number; overlay?: string; className?: string; attribution: string }> = {
-  light: { label: 'Map', url: OSM_URL, maxZoom: 19, attribution: OSM_ATTR },
-  dark: { label: 'Dark', url: OSM_URL, maxZoom: 19, className: 'hx-tiles-dark', attribution: OSM_ATTR },
+  game: { label: 'Game', url: OSM_URL, maxZoom: ZOOM_MAX, className: 'hx-tiles-game', attribution: OSM_ATTR },
   satellite: {
     label: 'Satellite',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    maxZoom: 18,
+    maxZoom: ZOOM_MAX,
     overlay: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
     attribution: 'Tiles &copy; Esri',
-  },
-  topo: {
-    label: 'Topo',
-    url: 'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
-    maxZoom: 17,
-    attribution: OSM_ATTR + ', &copy; OpenTopoMap',
   },
 }
 const tileLayerFor = (cfg: typeof TILES[string]) =>
@@ -86,11 +79,11 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
   const mapTheme = useStore(s => s.mapTheme)
   const setMapTheme = useStore(s => s.setMapTheme)
-  const tile = (mapTheme in TILES ? mapTheme : 'light') as keyof typeof TILES
-  // One-time switch to OpenStreetMap for players who had the old Carto default saved
+  const tile = (mapTheme in TILES ? mapTheme : 'game') as keyof typeof TILES   // old saved styles (light/dark/topo) → game
+  // One-time switch to the game ambiance for players who had an old map style saved
   useEffect(() => {
     try {
-      if (!localStorage.getItem('hx_tiles_osm')) { localStorage.setItem('hx_tiles_osm', '1'); setMapTheme('light' as any) }
+      if (!localStorage.getItem('hx_tiles_game')) { localStorage.setItem('hx_tiles_game', '1'); setMapTheme('game' as any) }
     } catch { /* ignore */ }
   }, [setMapTheme])
   const setTile = (t: keyof typeof TILES) => setMapTheme(t as any)
@@ -121,7 +114,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
     const map = L.map(containerRef.current, {
       center: [48.8566, 2.3522], zoom: (typeof window !== 'undefined' && window.innerWidth < 480) ? 14 : 13,
-      zoomControl: false, attributionControl: true, minZoom: 3,  // OSM attribution required; zoom<3 = useless world strip
+      zoomControl: false, attributionControl: true, minZoom: ZOOM_MIN, maxZoom: ZOOM_MAX,  // country view → street view
       // ── SMOOTH ZOOM CONFIG ──
       // zoomSnap: 0 = fractional zoom = smooth continuous zoom on touchpad/wheel
       // SVG renderer (default) = polygons scale via CSS transform during zoom = GPU-free
@@ -495,7 +488,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
   return (
     <div style={{ position: 'absolute', inset: 0 }}>
-      <div ref={containerRef} style={{ width: '100%', height: '100%',  }} />
+      <div ref={containerRef} className={`hx-map--${tile}`} style={{ width: '100%', height: '100%' }} />
 
 
 

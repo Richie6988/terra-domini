@@ -120,6 +120,9 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
     return () => { alive = false }
   }, [t.h3_index, player?.id, isFree, optsTry])
 
+  // Not enough HEX: the shop sells HEX packs (real money only ever buys HEX)
+  const openShop = () => { onClose(); setTimeout(() => useStore.getState().setActivePanel('shop'), 100) }
+
   const handleClaim = useCallback(async (method: string) => {
     if (claiming || !t.h3_index) return
     setClaiming(true)
@@ -337,29 +340,26 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
                 <span>LOCKED{claimOpts?.locked_reason ? ` — ${String(claimOpts.locked_reason).toUpperCase()}` : ''}</span>
               </div>
             )}
-            {isFree && player && claimOpts?.options?.filter((o: any) => o.method === 'euro').map((opt: any) => (
-              <button key="euro" onClick={() => {
-                setClaiming(true)
-                api.post('/shop/hex-checkout/', { territory_h3: t.h3_index })
-                  .then(r => { window.location.href = r.data.url })
-                  .catch((e: any) => { toast.error(e?.response?.data?.error || 'Payment unavailable'); setClaiming(false) })
-              }} disabled={claiming} className="btn-game btn-game-gold"
-                title={`${opt.cost} HEX, paid by card: the HEX is credited and spent on this territory`}
+            {isFree && player && claimOpts?.options?.filter((o: any) => o.method === 'unlock').map((opt: any) => (
+              <button key="unlock" onClick={() => opt.available ? handleClaim('unlock') : openShop()} disabled={claiming}
+                className="btn-game btn-game-gold"
+                title={opt.available ? `Unlock this place now for ${opt.cost} HEX` : 'Not enough HEX: open the shop to get more'}
                 style={{ flex: '1 1 140px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 13 }}>
-                <IconSVG id="hex_coin" size={16} />{claiming ? '...' : `UNLOCK NOW · ${opt.eur} €`}
+                <IconSVG id="hex_coin" size={16} />{claiming ? '...' : opt.available ? `UNLOCK NOW · ${opt.cost.toLocaleString()} HEX` : `GET HEX · ${opt.cost.toLocaleString()} NEEDED`}
               </button>
             ))}
-            {isFree && player && !claimOpts?.locked && claimOpts?.options?.filter((o: any) => o.method !== 'euro').map((opt: any) => (
-              <button key={opt.method} onClick={() => handleClaim(opt.method)} disabled={claiming || !opt.available}
+            {isFree && player && !claimOpts?.locked && claimOpts?.options?.filter((o: any) => o.method !== 'unlock').map((opt: any) => (
+              <button key={opt.method} onClick={() => (opt.method === 'buy' && !opt.available ? openShop() : handleClaim(opt.method))}
+                disabled={claiming || (!opt.available && opt.method !== 'buy')}
                 className={`btn-game ${opt.method === 'free' ? 'btn-game-green' : opt.method === 'buy' ? 'btn-game-gold' : 'btn-game-blue'}`}
                 style={{
                   flex: '1 1 140px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                   fontSize: 13, letterSpacing: 0.5,
-                  opacity: (claiming || !opt.available) ? 0.5 : 1,
-                  cursor: claiming ? 'wait' : opt.available ? 'pointer' : 'not-allowed',
+                  opacity: (claiming || (!opt.available && opt.method !== 'buy')) ? 0.5 : 1,
+                  cursor: claiming ? 'wait' : (opt.available || opt.method === 'buy') ? 'pointer' : 'not-allowed',
                 }}>
                 {opt.method === 'free' ? <Crown size={15} /> : opt.method === 'buy' ? <IconSVG id="hex_coin" size={16} /> : <Compass size={15} />}
-                {claiming ? '...' : opt.method === 'free' ? 'FREE CLAIM' : opt.method === 'buy' ? `BUY · ${opt.cost} HEX` : `EXPLORE · ${fmtHours(opt.hours)}`}
+                {claiming ? '...' : opt.method === 'free' ? 'FREE CLAIM' : opt.method === 'buy' ? (opt.available ? `BUY · ${opt.cost} HEX` : `GET HEX · ${opt.cost} NEEDED`) : `EXPLORE · ${fmtHours(opt.hours)}`}
               </button>
             ))}
             {isFree && player && !claimOpts && !optsError && (

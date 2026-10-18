@@ -80,7 +80,7 @@ interface UIState {
 
 // ─── Settings Slice (persisted user preferences that ACTUALLY affect the game) ──
 
-export type MapTheme = 'dark' | 'light' | 'satellite' | 'topo'
+export type MapTheme = 'game' | 'satellite'
 export type Language = 'en' | 'fr' | 'es' | 'de'
 
 interface SettingsState {
@@ -234,7 +234,7 @@ export const useStore = create<Store>()(
       masterSound: true,
       musicEnabled: true,
       sfxEnabled: true,
-      mapTheme: 'light',  // OpenStreetMap by default
+      mapTheme: 'game',  // stylised game map by default; 'satellite' = real imagery
       notificationsEnabled: true,
       language: 'en',
       setMasterSound: (v) => set({ masterSound: v }),

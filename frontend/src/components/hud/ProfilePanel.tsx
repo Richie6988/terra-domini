@@ -231,7 +231,7 @@ function PreferencesTab() {
   return (
     <div style={{ display:'flex',flexDirection:'column',gap:14 }}>
       <div style={sBox}><div style={lbl}>SOUND</div><Tog l="Master sound" v={sound} f={setSound}/><Tog l="Music" v={music} f={setMusic}/><Tog l="Sound effects" v={sfx} f={setSfx}/></div>
-      <div style={sBox}><div style={lbl}>MAP THEME</div><div style={{ display:'flex',gap:6,flexWrap:'wrap' }}>{[{id:'dark',n:'DARK'},{id:'light',n:'LIGHT'},{id:'satellite',n:'SAT'},{id:'topo',n:'TOPO'}].map(t=>(
+      <div style={sBox}><div style={lbl}>MAP THEME</div><div style={{ display:'flex',gap:6,flexWrap:'wrap' }}>{[{id:'game',n:'GAME'},{id:'satellite',n:'SATELLITE'}].map(t=>(
         <button key={t.id} onClick={()=>setMapTheme(t.id as any)} style={{ flex:'1 1 45%',padding:'10px 8px',minHeight:42,borderRadius:10,cursor:'pointer',fontSize: 11,fontWeight:700,letterSpacing:0.5,fontFamily:'var(--font-heading)',background:mapTheme===t.id?'rgba(0,153,204,0.15)':'rgba(255,255,255,0.04)',border:`2px solid ${mapTheme===t.id?'#0099cc':'rgba(255,255,255,0.08)'}`,color:mapTheme===t.id?'#0099cc':'rgba(255,255,255,0.65)' }}>{t.n}</button>
       ))}</div></div>
       <div style={sBox}><div style={lbl}>NOTIFICATIONS</div><Tog l="Push notifications" v={notifs} f={setNotifs}/></div>

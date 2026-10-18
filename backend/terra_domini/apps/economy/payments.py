@@ -58,26 +58,6 @@ def _pack(pack_id):
     return next((p for p in B.HEX_PACKS if p['id'] == pack_id), None)
 
 
-def territory_eur_price(hex_cost: int) -> int:
-    """Whole euros that cover a territory's HEX price at the peg (min 1 €)."""
-    import math
-    return max(1, math.ceil(hex_cost / B.HEX_PER_EUR))
-
-
-def _territory_pack(user, h3_index):
-    """Pack that unlocks one free hex far from the player's kingdom (same price rules as BUY)."""
-    import h3
-    from terra_domini.apps.territories.models import Territory
-    t = Territory.objects.filter(h3_index=h3_index).first()
-    if t and t.owner_id:
-        return None
-    owned = Territory.objects.filter(owner=user).count()
-    adjacent = Territory.objects.filter(h3_index__in=list(set(h3.grid_disk(h3_index, 1)) - {h3_index}), owner=user).exists()
-    cost = B.buy_cost(owned, adjacent or owned == 0, (t.rarity if t else 'common'))
-    eur = territory_eur_price(cost)
-    return {'id': f'territory:{h3_index}', 'eur': eur, 'hex': eur * B.HEX_PER_EUR, 'bonus': 0, 'territory': h3_index, 'cost': cost}
-
-
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def hex_packs(request):
@@ -93,10 +73,12 @@ def hex_packs(request):
 @permission_classes([IsAuthenticated])
 def hex_checkout(request):
     from terra_domini.apps.blockchain.service import PurchaseOrder
-    h3_index = request.data.get('territory_h3')
-    pack = _territory_pack(request.user, h3_index) if h3_index else _pack(request.data.get('pack_id'))
+    # Real money only buys HEX packs; everything in the game (territories, unlocks, boosts) is paid in HEX
+    if request.data.get('territory_h3'):
+        return Response({'error': 'Territories are paid in HEX. Buy a HEX pack, then unlock the territory.'}, status=400)
+    pack = _pack(request.data.get('pack_id'))
     if not pack:
-        return Response({'error': 'This territory is no longer free' if h3_index else 'Unknown pack'}, status=400)
+        return Response({'error': 'Unknown pack'}, status=400)
     stripe = _stripe()
     if not stripe:
         reason = payments_status()

@@ -223,8 +223,13 @@ img { pointer-events: none; -webkit-user-drag: none; }
 @media (max-width: 640px) {
   .leaflet-bottom.leaflet-right { bottom: calc(83px + env(safe-area-inset-bottom)); }
 }
-/* "Dark" map style = OpenStreetMap tiles tinted (no API key) */
-.hx-tiles-dark { filter: invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.55); }
+/* "Game" ambiance = OpenStreetMap recoloured as a night strategy board (no API key): dark land, blue water, green parks,
+   so the coloured hexes and tokens pop. Vignette on the container. */
+.hx-tiles-game { filter: invert(1) hue-rotate(195deg) saturate(2.4) brightness(1.1) contrast(0.85); }
+.hx-map--game::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 250;  /* above tiles (200), under hexes (400) */
+  background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(4,10,30,0.55) 100%); }
+.hx-map--satellite::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 250;  /* above tiles (200), under hexes (400) */
+  background: radial-gradient(ellipse at 50% 45%, transparent 60%, rgba(0,0,0,0.45) 100%); }
 /* Leaflet controls stay inside map, don't escape stacking context */
 .leaflet-control-container { z-index: 50 !important; }
 

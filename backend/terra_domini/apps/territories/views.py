@@ -524,12 +524,12 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 'is_adjacent': is_adjacent, 'slots': slots, 'running': running,
             })
 
-        # Far away (or locked rare POI): it can always be unlocked straight away with real money
-        # (1 € = 1000 HEX; the HEX is credited then spent on this hex — economy/payments.py)
-        if not is_first and not is_adjacent:
-            from terra_domini.apps.economy.payments import territory_eur_price
-            eur = territory_eur_price(buy_cost)
-            options.append({'method': 'euro', 'label': f'UNLOCK NOW ({eur} €)', 'eur': eur, 'cost': buy_cost, 'available': True})
+        # Locked rare POI far away: unlock it now with HEX (every in-app purchase is in HEX; real money only buys HEX)
+        if locked:
+            from terra_domini.apps.economy.balance import UNLOCK_PREMIUM
+            cost = int(round(buy_cost * UNLOCK_PREMIUM))
+            options.append({'method': 'unlock', 'label': f'UNLOCK NOW ({cost} HEX)', 'cost': cost,
+                            'available': balance >= cost, 'balance': balance})
 
         return Response({
             'status': 'claimable',
@@ -615,7 +615,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
 
         # ── Rare POI lock ──────────────────────────────────────────────
         is_rare_poi = territory.is_landmark or (territory.rarity or 'common') in ('legendary', 'mythic')
-        if is_rare_poi and not is_first and not is_adjacent:
+        if is_rare_poi and not is_first and not is_adjacent and method != 'unlock':
             influence = getattr(stats, 'influence_points', 0) or 0
             if influence < 50:
                 return Response({
@@ -630,9 +630,11 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             if not is_first:
                 return Response({'error': 'Free claim is only for your first territory.'}, status=403)
 
-        elif method == 'buy':
-            from terra_domini.apps.economy.balance import buy_cost as _buy_cost, consume_purchased_first
+        elif method in ('buy', 'unlock'):
+            from terra_domini.apps.economy.balance import buy_cost as _buy_cost, consume_purchased_first, UNLOCK_PREMIUM
             cost = _buy_cost(owned_count, is_adjacent or is_first, territory.rarity or 'common')
+            if method == 'unlock':   # instant unlock of a locked rare place, paid in HEX
+                cost = int(round(cost * UNLOCK_PREMIUM))
             player_obj = P.objects.get(id=request.user.id)
             if float(player_obj.tdc_in_game) < cost:
                 return Response({
@@ -711,7 +713,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 })
 
         else:
-            return Response({'error': f'Unknown method: {method}. Use free, buy, or explore.'}, status=400)
+            return Response({'error': f'Unknown method: {method}. Use free, buy, unlock or explore.'}, status=400)
 
         # ── Claim ─────────────────────────────────────────────────────────
         territory.owner = request.user

@@ -28,6 +28,7 @@ BEGINNER_MULT = 4            # (time-based, so buying a zone never lowers the ra
 BUY_BASE = 120
 BUY_GROWTH = 1.22            # per territory already owned
 NON_ADJACENT_MULT = 2.5
+UNLOCK_PREMIUM = 1.5         # instant unlock of a locked rare place far from your land (HEX only)
 RARITY_PRICE_MULT = {
     'common': 1, 'uncommon': 1.6, 'rare': 3, 'epic': 7, 'legendary': 18, 'mythic': 50,
 }
