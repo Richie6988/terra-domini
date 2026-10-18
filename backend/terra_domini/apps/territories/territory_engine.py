@@ -250,6 +250,7 @@ def generate_territory(h3_index: str, lat: float, lon: float, poi_category: str 
 
     # Biome from biome_engine (precise, deterministic, Köppen-based)
     from terra_domini.apps.territories.biome_engine import assign_biome, BIOME_PRODUCTION
+    from terra_domini.apps.territories.terrain_rules import territory_type_for
     biome = assign_biome(lat, lon, poi_category, '')
 
     # Roll rarity (influenced by biome + neighbor POIs)
@@ -270,7 +271,7 @@ def generate_territory(h3_index: str, lat: float, lon: float, poi_category: str 
                 h3_resolution  = h3.get_resolution(h3_index),
                 center_lat     = geo[0],
                 center_lon     = geo[1],
-                territory_type = biome,
+                territory_type = territory_type_for(biome),
                 biome          = biome,
                 rarity         = rarity,
                 is_shiny       = is_shiny,

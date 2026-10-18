@@ -9265,6 +9265,7 @@
    "image": "196_Tokyo_0.jpg",
    "token_id": 100196,
    "aliases": "Greater Tokyo Area",
+   "population": 36954512,
    "rarity": "uncommon",
    "score": 63.6,
    "on_map": true
@@ -18267,6 +18268,7 @@
    "image": "1652_Astana_0.jpg",
    "token_id": 101652,
    "aliases": "Astana",
+   "population": 1622245,
    "rarity": "common",
    "score": 48.7,
    "on_map": true
@@ -32039,6 +32041,7 @@
    "image": "CI131_Shiraz_1.jpg",
    "token_id": 100311,
    "aliases": "Shiraz",
+   "population": 1565572,
    "rarity": "uncommon",
    "score": 61.9,
    "on_map": true
@@ -36180,6 +36183,7 @@
    "image": "",
    "token_id": 100355,
    "aliases": "Hiroshima Peace Museum, Hiroshima Peace Park, Hiroshima",
+   "population": 1199391,
    "rarity": "uncommon",
    "score": 61.9,
    "on_map": true
@@ -39457,6 +39461,7 @@
    "image": "",
    "token_id": 100888,
    "aliases": "Kraków",
+   "population": 804237,
    "rarity": "common",
    "score": 60.4,
    "on_map": true
@@ -42127,6 +42132,7 @@
    "image": "",
    "token_id": 101051,
    "aliases": "Seoul metropolitan area",
+   "population": 26000000,
    "rarity": "uncommon",
    "score": 63.2,
    "on_map": true
@@ -43027,6 +43033,7 @@
    "image": "",
    "token_id": 101008,
    "aliases": "Kyiv",
+   "population": 2952301,
    "rarity": "uncommon",
    "score": 63.2,
    "on_map": true
@@ -47596,6 +47603,7 @@
    "image": "",
    "token_id": 100298,
    "aliases": "Hong Kong",
+   "population": 7500000,
    "rarity": "common",
    "score": 0.0,
    "on_map": true
@@ -55026,6 +55034,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Kano",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "legendary",
    "score": null,
@@ -55056,6 +55065,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Ibadan",
    "image": "CI3_Ibadan_0.jpg",
    "token_id": null,
+   "population": 4300000,
    "aliases": "",
    "rarity": "legendary",
    "score": null,
@@ -55086,6 +55096,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Port_Harcourt",
    "image": "CI5_Port Harcourt_0.jpg",
    "token_id": null,
+   "population": 3480000,
    "aliases": "",
    "rarity": "epic",
    "score": null,
@@ -55116,6 +55127,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Benin_City",
    "image": "CI6_Benin City_0.jpg",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "epic",
    "score": null,
@@ -55146,6 +55158,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Kaduna",
    "image": "",
    "token_id": null,
+   "population": 760084,
    "aliases": "",
    "rarity": "epic",
    "score": null,
@@ -55176,6 +55189,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Maiduguri",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "epic",
    "score": null,
@@ -55206,6 +55220,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Zaria",
    "image": "",
    "token_id": null,
+   "population": 736000,
    "aliases": "",
    "rarity": "epic",
    "score": null,
@@ -55236,6 +55251,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Jos",
    "image": "",
    "token_id": null,
+   "population": 900000,
    "aliases": "",
    "rarity": "epic",
    "score": null,
@@ -55266,6 +55282,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Alexandria",
    "image": "",
    "token_id": null,
+   "population": 6100000,
    "aliases": "",
    "rarity": "epic",
    "score": null,
@@ -55296,6 +55313,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Giza",
    "image": "",
    "token_id": null,
+   "population": 4458135,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55326,6 +55344,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Shubra_El_Kheima",
    "image": "CI14_Shubra El Kheima_1.jpg",
    "token_id": null,
+   "population": 1161514,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55356,6 +55375,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Port_Said",
    "image": "",
    "token_id": null,
+   "population": 790000,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55386,6 +55406,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Suez",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55416,6 +55437,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Mansoura",
    "image": "",
    "token_id": null,
+   "population": 600000,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55446,6 +55468,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Tanta",
    "image": "",
    "token_id": null,
+   "population": 530000,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55476,6 +55499,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Asyut",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55506,6 +55530,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Durban",
    "image": "CI25_Durban_0.jpg",
    "token_id": null,
+   "population": 4200000,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55536,6 +55561,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Pretoria",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55566,6 +55592,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Port_Elizabeth",
    "image": "CI27_Gqeberha_0.jpg",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55596,6 +55623,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Dire_Dawa",
    "image": "",
    "token_id": null,
+   "population": 440000,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55626,6 +55654,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Mekelle",
    "image": "",
    "token_id": null,
+   "population": 61000,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55656,6 +55685,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Gondar",
    "image": "",
    "token_id": null,
+   "population": 443156,
    "aliases": "",
    "rarity": "rare",
    "score": null,
@@ -55686,6 +55716,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Rabat",
    "image": "CI36_Rabat_0.jpg",
    "token_id": null,
+   "population": 515619,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -55716,6 +55747,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Fes",
    "image": "CI37_Fez, Morocco_3.jpg",
    "token_id": null,
+   "population": 1256000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -55746,6 +55778,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Algiers",
    "image": "",
    "token_id": null,
+   "population": 4325000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -55776,6 +55809,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Oran",
    "image": "",
    "token_id": null,
+   "population": 803329,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -55806,6 +55840,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Constantine",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -55836,6 +55871,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Kumasi",
    "image": "",
    "token_id": null,
+   "population": 443981,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -55866,6 +55902,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Guangzhou-Shenzhen",
    "image": "",
    "token_id": null,
+   "population": 1797722,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -55896,6 +55933,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Shanghai-Changzhou",
    "image": "",
    "token_id": null,
+   "population": 1797722,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -55926,6 +55964,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Hangzhou-Shaoxing",
    "image": "",
    "token_id": null,
+   "population": 13866009,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -55956,6 +55995,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Shantou-Jieyang",
    "image": "",
    "token_id": null,
+   "population": 13866009,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -55986,6 +56026,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Nanjing",
    "image": "",
    "token_id": null,
+   "population": 9423400,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56016,6 +56057,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Xi'an",
    "image": "",
    "token_id": null,
+   "population": 12950000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56046,6 +56088,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Shenyang-Fushun",
    "image": "",
    "token_id": null,
+   "population": 12950000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56076,6 +56119,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Zhengzhou",
    "image": "",
    "token_id": null,
+   "population": 12600000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56106,6 +56150,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Quanzhou",
    "image": "",
    "token_id": null,
+   "population": 8782285,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56136,6 +56181,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Xiamen-Zhangzhou",
    "image": "",
    "token_id": null,
+   "population": 8782285,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56166,6 +56212,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Hefei",
    "image": "",
    "token_id": null,
+   "population": 9369881,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56196,6 +56243,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Qingdao",
    "image": "CI61_Qingdao_2.jpg",
    "token_id": null,
+   "population": 7172451,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56226,6 +56274,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Taiyuan",
    "image": "",
    "token_id": null,
+   "population": 5390957,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56256,6 +56305,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Dalian",
    "image": "",
    "token_id": null,
+   "population": 7450785,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56286,6 +56336,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Harbin",
    "image": "",
    "token_id": null,
+   "population": 10009854,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56316,6 +56367,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Bangalore",
    "image": "",
    "token_id": null,
+   "population": 8400000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56346,6 +56398,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Chennai",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56376,6 +56429,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Hyderabad",
    "image": "",
    "token_id": null,
+   "population": 6900000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56406,6 +56460,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Ahmedabad",
    "image": "",
    "token_id": null,
+   "population": 5570585,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56436,6 +56491,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Pune",
    "image": "",
    "token_id": null,
+   "population": 7200000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56466,6 +56522,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Surat",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56496,6 +56553,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Lucknow",
    "image": "",
    "token_id": null,
+   "population": 2800000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56526,6 +56584,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Jaipur",
    "image": "",
    "token_id": null,
+   "population": 3100000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56556,6 +56615,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Kanpur",
    "image": "",
    "token_id": null,
+   "population": 5000000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56586,6 +56646,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Nagpur",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56616,6 +56677,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Indore",
    "image": "",
    "token_id": null,
+   "population": 5560000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56646,6 +56708,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Patna",
    "image": "",
    "token_id": null,
+   "population": 2350000,
    "aliases": "",
    "rarity": "uncommon",
    "score": null,
@@ -56676,6 +56739,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Varanasi",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -56706,6 +56770,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Bhopal",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -56736,6 +56801,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Ludhiana",
    "image": "",
    "token_id": null,
+   "population": 1618879,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -56766,6 +56832,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Vadodara",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -56796,6 +56863,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Coimbatore",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -56826,6 +56894,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Bandung",
    "image": "",
    "token_id": null,
+   "population": 16500,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -56856,6 +56925,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Surabaya",
    "image": "",
    "token_id": null,
+   "population": 2874314,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -56886,6 +56956,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Medan",
    "image": "",
    "token_id": null,
+   "population": 2435252,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -56916,6 +56987,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Semarang",
    "image": "",
    "token_id": null,
+   "population": 1555984,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -56946,6 +57018,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Palembang",
    "image": "",
    "token_id": null,
+   "population": 1668848,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -56976,6 +57049,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Makassar",
    "image": "",
    "token_id": null,
+   "population": 1474000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57006,6 +57080,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Malang",
    "image": "",
    "token_id": null,
+   "population": 820043,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57036,6 +57111,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Batam",
    "image": "",
    "token_id": null,
+   "population": 1196396,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57066,6 +57142,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Denpasar",
    "image": "",
    "token_id": null,
+   "population": 725314,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57096,6 +57173,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Faisalabad",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57126,6 +57204,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Rawalpindi-Islamabad",
    "image": "CI98_Islamabad–Rawalpindi metropolitan area_0.jpg",
    "token_id": null,
+   "population": 5700000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57156,6 +57235,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Gujranwala",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57186,6 +57266,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Multan",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57216,6 +57297,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Peshawar",
    "image": "",
    "token_id": null,
+   "population": 1900000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57246,6 +57328,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Sialkot",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57276,6 +57359,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Sargodha",
    "image": "CI103_Sargodha_0.jpg",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57306,6 +57390,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Chittagong",
    "image": "",
    "token_id": null,
+   "population": 9200000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57336,6 +57421,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Khulna",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57366,6 +57452,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Sylhet",
    "image": "",
    "token_id": null,
+   "population": 1033000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57396,6 +57483,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Osaka-Kobe-Kyoto",
    "image": "CI109_Keihanshin_2.jpg",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57426,6 +57514,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Nagoya",
    "image": "",
    "token_id": null,
+   "population": 2300000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57456,6 +57545,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Fukuoka",
    "image": "CI111_Fukuoka_0.jpg",
    "token_id": null,
+   "population": 2500000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57486,6 +57576,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Sapporo",
    "image": "CI112_Sapporo_0.jpg",
    "token_id": null,
+   "population": 1959750,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57516,6 +57607,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Sendai",
    "image": "CI113_Sendai_0.jpg",
    "token_id": null,
+   "population": 1098335,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57546,6 +57638,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Davao",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57576,6 +57669,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Cebu",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57606,6 +57700,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Da_Nang",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57636,6 +57731,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Busan-Ulsan",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57666,6 +57762,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Daegu",
    "image": "",
    "token_id": null,
+   "population": 5000000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57696,6 +57793,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Mashhad",
    "image": "CI127_Mashhad_1.jpg",
    "token_id": null,
+   "population": 3400000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57726,6 +57824,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Isfahan",
    "image": "",
    "token_id": null,
+   "population": 2238000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57756,6 +57855,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Karaj",
    "image": "",
    "token_id": null,
+   "population": 1970000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57786,6 +57886,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Tabriz",
    "image": "",
    "token_id": null,
+   "population": 1700000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57816,6 +57917,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Basra",
    "image": "CI133_Basra_0.jpg",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57846,6 +57948,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Mosul",
    "image": "CI134_Mosul_0.jpg",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57876,6 +57979,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Jeddah",
    "image": "CI136_Jeddah_0.jpg",
    "token_id": null,
+   "population": 3751722,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57906,6 +58010,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Mecca",
    "image": "CI137_Mecca_0.jpg",
    "token_id": null,
+   "population": 2400000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57936,6 +58041,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Medina",
    "image": "CI138_Medina_1.jpg",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57966,6 +58072,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Ankara",
    "image": "CI140_Ankara_0.jpg",
    "token_id": null,
+   "population": 5300000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -57996,6 +58103,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Izmir",
    "image": "",
    "token_id": null,
+   "population": 4504184,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58026,6 +58134,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Saint_Petersburg",
    "image": "",
    "token_id": null,
+   "population": 5601911,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58056,6 +58165,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Novosibirsk",
    "image": "",
    "token_id": null,
+   "population": 1633595,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58086,6 +58196,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Yekaterinburg",
    "image": "",
    "token_id": null,
+   "population": 1500000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58116,6 +58227,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Kazan",
    "image": "",
    "token_id": null,
+   "population": 1300000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58146,6 +58258,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Nizhny_Novgorod",
    "image": "",
    "token_id": null,
+   "population": 1200000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58176,6 +58289,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Rostov-on-Don",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58206,6 +58320,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Hamburg",
    "image": "CI150_Hamburg_3.jpg",
    "token_id": null,
+   "population": 1900000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58236,6 +58351,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Munich",
    "image": "",
    "token_id": null,
+   "population": 1604384,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58266,6 +58382,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Frankfurt",
    "image": "",
    "token_id": null,
+   "population": 2700000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58296,6 +58413,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Birmingham",
    "image": "",
    "token_id": null,
+   "population": 1200000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58326,6 +58444,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Manchester",
    "image": "CI156_Manchester_0.jpg",
    "token_id": null,
+   "population": 589000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58356,6 +58475,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Glasgow",
    "image": "",
    "token_id": null,
+   "population": 632350,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58386,6 +58506,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Marseille",
    "image": "CI159_Marseille_1.jpg",
    "token_id": null,
+   "population": 1900957,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58416,6 +58537,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Lyon",
    "image": "",
    "token_id": null,
+   "population": 520774,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58446,6 +58568,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Milan",
    "image": "CI162_Milan_4.jpg",
    "token_id": null,
+   "population": 1360000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58476,6 +58599,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Naples",
    "image": "",
    "token_id": null,
+   "population": 908082,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58506,6 +58630,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Valencia",
    "image": "CI166_Valencia_2.jpg",
    "token_id": null,
+   "population": 824340,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58536,6 +58661,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Kharkiv",
    "image": "",
    "token_id": null,
+   "population": 1421125,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58566,6 +58692,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Odesa",
    "image": "",
    "token_id": null,
+   "population": 1010537,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58596,6 +58723,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/%C5%81%C3%B3d%C5%BA",
    "image": "",
    "token_id": null,
+   "population": 645693,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58626,6 +58754,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Cluj-Napoca",
    "image": "",
    "token_id": null,
+   "population": 411379,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58656,6 +58785,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Rotterdam",
    "image": "",
    "token_id": null,
+   "population": 2700000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58686,6 +58816,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Antwerp",
    "image": "",
    "token_id": null,
+   "population": 565039,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58716,6 +58847,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Phoenix",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58746,6 +58878,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Philadelphia",
    "image": "",
    "token_id": null,
+   "population": 1600000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58776,6 +58909,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/San_Antonio",
    "image": "",
    "token_id": null,
+   "population": 1430000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58806,6 +58940,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/San_Diego",
    "image": "",
    "token_id": null,
+   "population": 1400000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58836,6 +58971,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Dallas",
    "image": "",
    "token_id": null,
+   "population": 1300000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58866,6 +59002,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/San_Jose",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58896,6 +59033,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Austin",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58926,6 +59064,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Jacksonville",
    "image": "",
    "token_id": null,
+   "population": 949611,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58956,6 +59095,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Fort_Worth",
    "image": "",
    "token_id": null,
+   "population": 1008156,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -58986,6 +59126,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Columbus",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59016,6 +59157,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Charlotte",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59046,6 +59188,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Indianapolis",
    "image": "",
    "token_id": null,
+   "population": 887642,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59076,6 +59219,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/San_Francisco",
    "image": "",
    "token_id": null,
+   "population": 827526,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59106,6 +59250,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Seattle",
    "image": "CI196_Seattle_0.jpg",
    "token_id": null,
+   "population": 780995,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59136,6 +59281,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Oklahoma_City",
    "image": "",
    "token_id": null,
+   "population": 681054,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59166,6 +59312,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Nashville",
    "image": "",
    "token_id": null,
+   "population": 689447,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59196,6 +59343,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/El_Paso",
    "image": "",
    "token_id": null,
+   "population": 678815,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59226,6 +59374,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Detroit",
    "image": "CI201_Detroit_3.jpg",
    "token_id": null,
+   "population": 639111,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59256,6 +59405,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Boston",
    "image": "CI202_Boston_0.jpg",
    "token_id": null,
+   "population": 675647,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59286,6 +59436,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Memphis",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59316,6 +59467,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Portland",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59346,6 +59498,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Louisville",
    "image": "CI206_Louisville, Kentucky_3.jpg",
    "token_id": null,
+   "population": 782969,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59376,6 +59529,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Baltimore",
    "image": "",
    "token_id": null,
+   "population": 585708,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59406,6 +59560,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Milwaukee",
    "image": "",
    "token_id": null,
+   "population": 577222,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59436,6 +59591,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Albuquerque",
    "image": "",
    "token_id": null,
+   "population": 1162523,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59466,6 +59622,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Tucson",
    "image": "",
    "token_id": null,
+   "population": 542630,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59496,6 +59653,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Fresno",
    "image": "",
    "token_id": null,
+   "population": 542107,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59526,6 +59684,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Mesa",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59556,6 +59715,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Sacramento",
    "image": "",
    "token_id": null,
+   "population": 524943,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59586,6 +59746,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Atlanta",
    "image": "",
    "token_id": null,
+   "population": 498715,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59616,6 +59777,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Kansas_City",
    "image": "",
    "token_id": null,
+   "population": 2200000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59646,6 +59808,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Colorado_Springs",
    "image": "",
    "token_id": null,
+   "population": 478961,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59676,6 +59839,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Omaha",
    "image": "",
    "token_id": null,
+   "population": 486051,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59706,6 +59870,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Raleigh",
    "image": "",
    "token_id": null,
+   "population": 467665,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59736,6 +59901,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Miami",
    "image": "CI219_Miami_2.jpg",
    "token_id": null,
+   "population": 442241,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59766,6 +59932,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Virginia_Beach",
    "image": "",
    "token_id": null,
+   "population": 459470,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59796,6 +59963,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Oakland",
    "image": "",
    "token_id": null,
+   "population": 440646,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59826,6 +59994,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Minneapolis",
    "image": "",
    "token_id": null,
+   "population": 429954,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59856,6 +60025,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Tulsa",
    "image": "",
    "token_id": null,
+   "population": 413066,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59886,6 +60056,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Arlington",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59916,6 +60087,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Guadalajara",
    "image": "",
    "token_id": null,
+   "population": 1385629,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59946,6 +60118,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Monterrey",
    "image": "",
    "token_id": null,
+   "population": 5322117,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -59976,6 +60149,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Puebla",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60006,6 +60180,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Tijuana",
    "image": "",
    "token_id": null,
+   "population": 1810645,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60036,6 +60211,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Ciudad_Ju%C3%A1rez",
    "image": "",
    "token_id": null,
+   "population": 2500000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60066,6 +60242,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Le%C3%B3n",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60096,6 +60273,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Vancouver",
    "image": "",
    "token_id": null,
+   "population": 2600000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60126,6 +60304,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Calgary",
    "image": "CI235_Calgary_0.jpg",
    "token_id": null,
+   "population": 1306784,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60156,6 +60335,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Edmonton",
    "image": "CI236_Edmonton_0.jpg",
    "token_id": null,
+   "population": 1010899,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60186,6 +60366,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Ottawa-Gatineau",
    "image": "",
    "token_id": null,
+   "population": 1000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60216,6 +60397,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Belo_Horizonte",
    "image": "",
    "token_id": null,
+   "population": 2400000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60246,6 +60428,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Bras%C3%ADlia",
    "image": "",
    "token_id": null,
+   "population": 2800000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60276,6 +60459,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Recife",
    "image": "",
    "token_id": null,
+   "population": 3726974,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60306,6 +60490,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Fortaleza",
    "image": "",
    "token_id": null,
+   "population": 2500000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60336,6 +60521,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Porto_Alegre",
    "image": "",
    "token_id": null,
+   "population": 1400000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60366,6 +60552,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Salvador",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60396,6 +60583,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Curitiba",
    "image": "",
    "token_id": null,
+   "population": 1829225,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60426,6 +60614,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Campinas",
    "image": "",
    "token_id": null,
+   "population": 1185977,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60456,6 +60645,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Goi%C3%A2nia",
    "image": "",
    "token_id": null,
+   "population": 1536097,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60486,6 +60676,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Bel%C3%A9m",
    "image": "",
    "token_id": null,
+   "population": 1398531,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60516,6 +60707,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Manaus",
    "image": "",
    "token_id": null,
+   "population": 2279686,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60546,6 +60738,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Natal",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60576,6 +60769,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Jo%C3%A3o_Pessoa",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60606,6 +60800,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Macei%C3%B3",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60636,6 +60831,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Joinville",
    "image": "",
    "token_id": null,
+   "population": 597658,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60666,6 +60862,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Florian%C3%B3polis",
    "image": "",
    "token_id": null,
+   "population": 537211,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60696,6 +60893,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Guarulhos",
    "image": "",
    "token_id": null,
+   "population": 1345364,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60726,6 +60924,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Aracaju",
    "image": "",
    "token_id": null,
+   "population": 664908,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60756,6 +60955,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/C%C3%B3rdoba",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60786,6 +60986,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Rosario",
    "image": "",
    "token_id": null,
+   "population": 1750000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60816,6 +61017,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Mendoza",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60846,6 +61048,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/San_Miguel_de_Tucum%C3%A1n",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60876,6 +61079,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Cali",
    "image": "",
    "token_id": null,
+   "population": 2280522,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60906,6 +61110,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Valpara%C3%ADso",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60936,6 +61141,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Santiago_de_Cuba",
    "image": "",
    "token_id": null,
+   "population": 507167,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60966,6 +61172,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Holgu%C3%ADn",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -60996,6 +61203,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Camag%C3%BCey",
    "image": "",
    "token_id": null,
+   "population": 333000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61026,6 +61234,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Guant%C3%A1namo",
    "image": "CI274_Guantánamo_1.jpg",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61056,6 +61265,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Santo_Domingo",
    "image": "",
    "token_id": null,
+   "population": 1029110,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61086,6 +61296,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Santiago_de_los_Caballeros",
    "image": "",
    "token_id": null,
+   "population": 771748,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61116,6 +61327,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Brisbane",
    "image": "",
    "token_id": null,
+   "population": 2800000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61146,6 +61358,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Perth",
    "image": "",
    "token_id": null,
+   "population": 2300000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61176,6 +61389,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Adelaide",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61206,6 +61420,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Gold_Coast",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61236,6 +61451,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Canberra",
    "image": "",
    "token_id": null,
+   "population": 473855,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61266,6 +61482,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Newcastle",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61296,6 +61513,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Wollongong",
    "image": "",
    "token_id": null,
+   "population": 302739,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61326,6 +61544,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Hobart",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61356,6 +61575,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Darwin",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61386,6 +61606,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Christchurch",
    "image": "",
    "token_id": null,
+   "population": 407800,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61416,6 +61637,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Doha",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61446,6 +61668,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Jerusalem",
    "image": "CI301_Jerusalem_0.jpg",
    "token_id": null,
+   "population": 1050153,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61476,6 +61699,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Male",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61506,6 +61730,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Kaohsiung",
    "image": "",
    "token_id": null,
+   "population": 2720000,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61536,6 +61761,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/San_Juan",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -61566,6 +61792,7 @@
    "wiki_url": "https://en.wikipedia.org/wiki/Kingston",
    "image": "",
    "token_id": null,
+   "population": 0,
    "aliases": "",
    "rarity": "common",
    "score": null,
@@ -110172,6 +110399,2896 @@
    "image": "N4532_Wikipedia, the free encyclopedia_1.jpg",
    "needs_review": "text does not describe an organism (scraped wrong article?)",
    "rarity": "epic"
+  }
+ ],
+ "cities": [
+  {
+   "name": "Tokyo",
+   "lat": 35.6897,
+   "lon": 139.6922,
+   "population": 36954512,
+   "capital": true,
+   "radius_km": 30
+  },
+  {
+   "name": "Delhi",
+   "lat": 28.6139,
+   "lon": 77.209,
+   "population": 32000000,
+   "capital": true,
+   "radius_km": 30
+  },
+  {
+   "name": "Shanghai",
+   "lat": 31.2304,
+   "lon": 121.4737,
+   "population": 28500000,
+   "capital": false,
+   "radius_km": 29.7
+  },
+  {
+   "name": "Seoul",
+   "lat": 37.566,
+   "lon": 126.978,
+   "population": 26000000,
+   "capital": true,
+   "radius_km": 28.5
+  },
+  {
+   "name": "Dhaka",
+   "lat": 23.8103,
+   "lon": 90.4125,
+   "population": 22500000,
+   "capital": true,
+   "radius_km": 26.7
+  },
+  {
+   "name": "São Paulo",
+   "lat": -23.5505,
+   "lon": -46.6333,
+   "population": 22400000,
+   "capital": false,
+   "radius_km": 26.7
+  },
+  {
+   "name": "Mexico City",
+   "lat": 19.4326,
+   "lon": -99.1332,
+   "population": 22000000,
+   "capital": true,
+   "radius_km": 26.5
+  },
+  {
+   "name": "Cairo",
+   "lat": 30.0444,
+   "lon": 31.2357,
+   "population": 21800000,
+   "capital": true,
+   "radius_km": 26.3
+  },
+  {
+   "name": "Beijing",
+   "lat": 39.9042,
+   "lon": 116.4074,
+   "population": 21500000,
+   "capital": true,
+   "radius_km": 26.2
+  },
+  {
+   "name": "Mumbai",
+   "lat": 19.076,
+   "lon": 72.8777,
+   "population": 21300000,
+   "capital": false,
+   "radius_km": 26.1
+  },
+  {
+   "name": "New York",
+   "lat": 40.7128,
+   "lon": -74.006,
+   "population": 19500000,
+   "capital": false,
+   "radius_km": 25.1
+  },
+  {
+   "name": "Osaka",
+   "lat": 34.6937,
+   "lon": 135.5023,
+   "population": 19000000,
+   "capital": false,
+   "radius_km": 24.8
+  },
+  {
+   "name": "Chongqing",
+   "lat": 29.563,
+   "lon": 106.5516,
+   "population": 17000000,
+   "capital": false,
+   "radius_km": 23.6
+  },
+  {
+   "name": "Karachi",
+   "lat": 24.8607,
+   "lon": 67.0011,
+   "population": 16800000,
+   "capital": false,
+   "radius_km": 23.5
+  },
+  {
+   "name": "Kinshasa",
+   "lat": -4.4419,
+   "lon": 15.2663,
+   "population": 16300000,
+   "capital": true,
+   "radius_km": 23.2
+  },
+  {
+   "name": "Lagos",
+   "lat": 6.5244,
+   "lon": 3.3792,
+   "population": 15900000,
+   "capital": false,
+   "radius_km": 22.9
+  },
+  {
+   "name": "Istanbul",
+   "lat": 41.0082,
+   "lon": 28.9784,
+   "population": 15600000,
+   "capital": false,
+   "radius_km": 22.7
+  },
+  {
+   "name": "Buenos Aires",
+   "lat": -34.6037,
+   "lon": -58.3816,
+   "population": 15400000,
+   "capital": true,
+   "radius_km": 22.6
+  },
+  {
+   "name": "Kolkata",
+   "lat": 22.5726,
+   "lon": 88.3639,
+   "population": 15100000,
+   "capital": false,
+   "radius_km": 22.4
+  },
+  {
+   "name": "Manila",
+   "lat": 14.5995,
+   "lon": 120.9842,
+   "population": 14400000,
+   "capital": true,
+   "radius_km": 22.0
+  },
+  {
+   "name": "Guangzhou",
+   "lat": 23.1291,
+   "lon": 113.2644,
+   "population": 14200000,
+   "capital": false,
+   "radius_km": 21.8
+  },
+  {
+   "name": "Tianjin",
+   "lat": 39.3434,
+   "lon": 117.3616,
+   "population": 13800000,
+   "capital": false,
+   "radius_km": 21.6
+  },
+  {
+   "name": "Lahore",
+   "lat": 31.5204,
+   "lon": 74.3587,
+   "population": 13500000,
+   "capital": false,
+   "radius_km": 21.4
+  },
+  {
+   "name": "Rio de Janeiro",
+   "lat": -22.9068,
+   "lon": -43.1729,
+   "population": 13600000,
+   "capital": false,
+   "radius_km": 21.4
+  },
+  {
+   "name": "Bangalore",
+   "lat": 12.9716,
+   "lon": 77.5946,
+   "population": 13200000,
+   "capital": false,
+   "radius_km": 21.2
+  },
+  {
+   "name": "Xi'an",
+   "lat": 34.2611,
+   "lon": 108.9422,
+   "population": 12950000,
+   "capital": false,
+   "radius_km": 21.0
+  },
+  {
+   "name": "Shenzhen",
+   "lat": 22.5431,
+   "lon": 114.0579,
+   "population": 12800000,
+   "capital": false,
+   "radius_km": 20.9
+  },
+  {
+   "name": "Zhengzhou",
+   "lat": 34.764,
+   "lon": 113.684,
+   "population": 12600000,
+   "capital": false,
+   "radius_km": 20.7
+  },
+  {
+   "name": "Moscow",
+   "lat": 55.7558,
+   "lon": 37.6173,
+   "population": 12600000,
+   "capital": true,
+   "radius_km": 20.7
+  },
+  {
+   "name": "Los Angeles",
+   "lat": 34.0522,
+   "lon": -118.2437,
+   "population": 12500000,
+   "capital": false,
+   "radius_km": 20.7
+  },
+  {
+   "name": "Chennai",
+   "lat": 13.0827,
+   "lon": 80.2707,
+   "population": 11500000,
+   "capital": false,
+   "radius_km": 20.0
+  },
+  {
+   "name": "Bogotá",
+   "lat": 4.711,
+   "lon": -74.0721,
+   "population": 11300000,
+   "capital": true,
+   "radius_km": 19.8
+  },
+  {
+   "name": "Paris",
+   "lat": 48.8566,
+   "lon": 2.3522,
+   "population": 11200000,
+   "capital": true,
+   "radius_km": 19.7
+  },
+  {
+   "name": "Jakarta",
+   "lat": -6.2088,
+   "lon": 106.8456,
+   "population": 11000000,
+   "capital": true,
+   "radius_km": 19.6
+  },
+  {
+   "name": "Lima",
+   "lat": -12.0464,
+   "lon": -77.0428,
+   "population": 11000000,
+   "capital": true,
+   "radius_km": 19.6
+  },
+  {
+   "name": "Bangkok",
+   "lat": 13.7563,
+   "lon": 100.5018,
+   "population": 10900000,
+   "capital": true,
+   "radius_km": 19.5
+  },
+  {
+   "name": "Hyderabad",
+   "lat": 17.385,
+   "lon": 78.4867,
+   "population": 10500000,
+   "capital": false,
+   "radius_km": 19.2
+  },
+  {
+   "name": "Harbin",
+   "lat": 45.7576,
+   "lon": 126.6409,
+   "population": 10009854,
+   "capital": false,
+   "radius_km": 18.8
+  },
+  {
+   "name": "Johannesburg",
+   "lat": -26.2041,
+   "lon": 28.0473,
+   "population": 10000000,
+   "capital": false,
+   "radius_km": 18.8
+  },
+  {
+   "name": "London",
+   "lat": 51.5074,
+   "lon": -0.1278,
+   "population": 9600000,
+   "capital": true,
+   "radius_km": 18.5
+  },
+  {
+   "name": "Nagoya",
+   "lat": 35.1815,
+   "lon": 136.9066,
+   "population": 9500000,
+   "capital": false,
+   "radius_km": 18.4
+  },
+  {
+   "name": "Chengdu",
+   "lat": 30.5728,
+   "lon": 104.0668,
+   "population": 9500000,
+   "capital": false,
+   "radius_km": 18.4
+  },
+  {
+   "name": "Nanjing",
+   "lat": 32.0608,
+   "lon": 118.7789,
+   "population": 9423400,
+   "capital": false,
+   "radius_km": 18.3
+  },
+  {
+   "name": "Hefei",
+   "lat": 31.8206,
+   "lon": 117.2273,
+   "population": 9369881,
+   "capital": false,
+   "radius_km": 18.3
+  },
+  {
+   "name": "Tehran",
+   "lat": 35.6892,
+   "lon": 51.389,
+   "population": 9400000,
+   "capital": true,
+   "radius_km": 18.3
+  },
+  {
+   "name": "Chicago",
+   "lat": 41.8781,
+   "lon": -87.6298,
+   "population": 9400000,
+   "capital": false,
+   "radius_km": 18.3
+  },
+  {
+   "name": "Chittagong",
+   "lat": 22.335,
+   "lon": 91.8325,
+   "population": 9200000,
+   "capital": false,
+   "radius_km": 18.2
+  },
+  {
+   "name": "Ho Chi Minh City",
+   "lat": 10.8231,
+   "lon": 106.6297,
+   "population": 9300000,
+   "capital": false,
+   "radius_km": 18.2
+  },
+  {
+   "name": "Luanda",
+   "lat": -8.839,
+   "lon": 13.2894,
+   "population": 9000000,
+   "capital": true,
+   "radius_km": 18.0
+  },
+  {
+   "name": "Wuhan",
+   "lat": 30.5928,
+   "lon": 114.3055,
+   "population": 8900000,
+   "capital": false,
+   "radius_km": 17.9
+  },
+  {
+   "name": "Quanzhou",
+   "lat": 24.8744,
+   "lon": 118.6757,
+   "population": 8782285,
+   "capital": false,
+   "radius_km": 17.8
+  },
+  {
+   "name": "Kuala Lumpur",
+   "lat": 3.139,
+   "lon": 101.6869,
+   "population": 8600000,
+   "capital": true,
+   "radius_km": 17.7
+  },
+  {
+   "name": "Dallas",
+   "lat": 32.7767,
+   "lon": -96.797,
+   "population": 7900000,
+   "capital": false,
+   "radius_km": 17.1
+  },
+  {
+   "name": "Riyadh",
+   "lat": 24.7136,
+   "lon": 46.6753,
+   "population": 7700000,
+   "capital": true,
+   "radius_km": 16.9
+  },
+  {
+   "name": "Baghdad",
+   "lat": 33.3152,
+   "lon": 44.3661,
+   "population": 7700000,
+   "capital": true,
+   "radius_km": 16.9
+  },
+  {
+   "name": "Hong Kong",
+   "lat": 22.3193,
+   "lon": 114.1694,
+   "population": 7500000,
+   "capital": false,
+   "radius_km": 16.7
+  },
+  {
+   "name": "Dalian",
+   "lat": 38.9,
+   "lon": 121.6,
+   "population": 7450785,
+   "capital": false,
+   "radius_km": 16.6
+  },
+  {
+   "name": "Dar es Salaam",
+   "lat": -6.7924,
+   "lon": 39.2083,
+   "population": 7400000,
+   "capital": false,
+   "radius_km": 16.6
+  },
+  {
+   "name": "Houston",
+   "lat": 29.7604,
+   "lon": -95.3698,
+   "population": 7300000,
+   "capital": false,
+   "radius_km": 16.5
+  },
+  {
+   "name": "Qingdao",
+   "lat": 36.0669,
+   "lon": 120.3827,
+   "population": 7172451,
+   "capital": false,
+   "radius_km": 16.4
+  },
+  {
+   "name": "Pune",
+   "lat": 18.5211,
+   "lon": 73.8553,
+   "population": 7200000,
+   "capital": false,
+   "radius_km": 16.4
+  },
+  {
+   "name": "Santiago",
+   "lat": -33.4489,
+   "lon": -70.6693,
+   "population": 7100000,
+   "capital": true,
+   "radius_km": 16.3
+  },
+  {
+   "name": "Taipei",
+   "lat": 25.033,
+   "lon": 121.5654,
+   "population": 7000000,
+   "capital": true,
+   "radius_km": 16.2
+  },
+  {
+   "name": "Madrid",
+   "lat": 40.4168,
+   "lon": -3.7038,
+   "population": 6700000,
+   "capital": true,
+   "radius_km": 15.9
+  },
+  {
+   "name": "Toronto",
+   "lat": 43.6532,
+   "lon": -79.3832,
+   "population": 6400000,
+   "capital": false,
+   "radius_km": 15.6
+  },
+  {
+   "name": "Washington",
+   "lat": 38.9072,
+   "lon": -77.0369,
+   "population": 6300000,
+   "capital": true,
+   "radius_km": 15.5
+  },
+  {
+   "name": "Khartoum",
+   "lat": 15.5007,
+   "lon": 32.5599,
+   "population": 6300000,
+   "capital": true,
+   "radius_km": 15.5
+  },
+  {
+   "name": "Philadelphia",
+   "lat": 39.9526,
+   "lon": -75.1652,
+   "population": 6200000,
+   "capital": false,
+   "radius_km": 15.4
+  },
+  {
+   "name": "Atlanta",
+   "lat": 33.749,
+   "lon": -84.388,
+   "population": 6200000,
+   "capital": false,
+   "radius_km": 15.4
+  },
+  {
+   "name": "Alexandria",
+   "lat": 31.1975,
+   "lon": 29.8925,
+   "population": 6100000,
+   "capital": false,
+   "radius_km": 15.3
+  },
+  {
+   "name": "Miami",
+   "lat": 25.7617,
+   "lon": -80.1918,
+   "population": 6100000,
+   "capital": false,
+   "radius_km": 15.3
+  },
+  {
+   "name": "Belo Horizonte",
+   "lat": -19.9167,
+   "lon": -43.9345,
+   "population": 6000000,
+   "capital": false,
+   "radius_km": 15.2
+  },
+  {
+   "name": "Singapore",
+   "lat": 1.3521,
+   "lon": 103.8198,
+   "population": 5900000,
+   "capital": true,
+   "radius_km": 15.1
+  },
+  {
+   "name": "Islamabad–Rawalpindi metropolitan area",
+   "lat": 33.6484,
+   "lon": 73.0664,
+   "population": 5700000,
+   "capital": false,
+   "radius_km": 14.9
+  },
+  {
+   "name": "Ankara",
+   "lat": 39.9334,
+   "lon": 32.8597,
+   "population": 5700000,
+   "capital": true,
+   "radius_km": 14.9
+  },
+  {
+   "name": "Ahmedabad",
+   "lat": 23.0225,
+   "lon": 72.5714,
+   "population": 5570585,
+   "capital": false,
+   "radius_km": 14.8
+  },
+  {
+   "name": "Indore",
+   "lat": 22.7186,
+   "lon": 75.855,
+   "population": 5560000,
+   "capital": false,
+   "radius_km": 14.8
+  },
+  {
+   "name": "Saint Petersburg",
+   "lat": 59.9375,
+   "lon": 30.3086,
+   "population": 5601911,
+   "capital": false,
+   "radius_km": 14.8
+  },
+  {
+   "name": "Barcelona",
+   "lat": 41.3851,
+   "lon": 2.1734,
+   "population": 5600000,
+   "capital": false,
+   "radius_km": 14.8
+  },
+  {
+   "name": "Abidjan",
+   "lat": 5.36,
+   "lon": -4.0083,
+   "population": 5600000,
+   "capital": false,
+   "radius_km": 14.8
+  },
+  {
+   "name": "Taiyuan",
+   "lat": 37.8704,
+   "lon": 112.5497,
+   "population": 5390957,
+   "capital": false,
+   "radius_km": 14.6
+  },
+  {
+   "name": "Addis Ababa",
+   "lat": 9.03,
+   "lon": 38.74,
+   "population": 5400000,
+   "capital": true,
+   "radius_km": 14.6
+  },
+  {
+   "name": "Accra",
+   "lat": 5.6037,
+   "lon": -0.187,
+   "population": 5400000,
+   "capital": true,
+   "radius_km": 14.6
+  },
+  {
+   "name": "Monterrey",
+   "lat": 25.6844,
+   "lon": -100.3181,
+   "population": 5322117,
+   "capital": false,
+   "radius_km": 14.5
+  },
+  {
+   "name": "Hanoi",
+   "lat": 21.0278,
+   "lon": 105.8342,
+   "population": 5300000,
+   "capital": true,
+   "radius_km": 14.5
+  },
+  {
+   "name": "Sydney",
+   "lat": -33.8688,
+   "lon": 151.2093,
+   "population": 5300000,
+   "capital": false,
+   "radius_km": 14.5
+  },
+  {
+   "name": "Ruhr (Essen)",
+   "lat": 51.4556,
+   "lon": 7.0116,
+   "population": 5100000,
+   "capital": false,
+   "radius_km": 14.3
+  },
+  {
+   "name": "Nairobi",
+   "lat": -1.2921,
+   "lon": 36.8219,
+   "population": 5100000,
+   "capital": true,
+   "radius_km": 14.3
+  },
+  {
+   "name": "Melbourne",
+   "lat": -37.8136,
+   "lon": 144.9631,
+   "population": 5100000,
+   "capital": false,
+   "radius_km": 14.3
+  },
+  {
+   "name": "Kanpur",
+   "lat": 26.4499,
+   "lon": 80.3319,
+   "population": 5000000,
+   "capital": false,
+   "radius_km": 14.2
+  },
+  {
+   "name": "Daegu",
+   "lat": 35.8717,
+   "lon": 128.6017,
+   "population": 5000000,
+   "capital": false,
+   "radius_km": 14.2
+  },
+  {
+   "name": "Boston",
+   "lat": 42.3601,
+   "lon": -71.0589,
+   "population": 4900000,
+   "capital": false,
+   "radius_km": 14.1
+  },
+  {
+   "name": "Phoenix",
+   "lat": 33.4484,
+   "lon": -112.074,
+   "population": 4900000,
+   "capital": false,
+   "radius_km": 14.1
+  },
+  {
+   "name": "Cape Town",
+   "lat": -33.9249,
+   "lon": 18.4241,
+   "population": 4800000,
+   "capital": false,
+   "radius_km": 14.0
+  },
+  {
+   "name": "Brasília",
+   "lat": -15.7939,
+   "lon": -47.8828,
+   "population": 4800000,
+   "capital": true,
+   "radius_km": 14.0
+  },
+  {
+   "name": "San Francisco",
+   "lat": 37.7749,
+   "lon": -122.4194,
+   "population": 4700000,
+   "capital": false,
+   "radius_km": 13.8
+  },
+  {
+   "name": "Jeddah",
+   "lat": 21.4858,
+   "lon": 39.1925,
+   "population": 4700000,
+   "capital": false,
+   "radius_km": 13.8
+  },
+  {
+   "name": "Kabul",
+   "lat": 34.5553,
+   "lon": 69.2075,
+   "population": 4600000,
+   "capital": true,
+   "radius_km": 13.7
+  },
+  {
+   "name": "Giza",
+   "lat": 29.987,
+   "lon": 31.2118,
+   "population": 4458135,
+   "capital": false,
+   "radius_km": 13.6
+  },
+  {
+   "name": "Izmir",
+   "lat": 38.4244,
+   "lon": 27.1322,
+   "population": 4504184,
+   "capital": false,
+   "radius_km": 13.6
+  },
+  {
+   "name": "Berlin",
+   "lat": 52.52,
+   "lon": 13.405,
+   "population": 4500000,
+   "capital": true,
+   "radius_km": 13.6
+  },
+  {
+   "name": "Ibadan",
+   "lat": 7.3964,
+   "lon": 3.9167,
+   "population": 4300000,
+   "capital": false,
+   "radius_km": 13.4
+  },
+  {
+   "name": "Algiers",
+   "lat": 36.7325,
+   "lon": 3.0872,
+   "population": 4325000,
+   "capital": false,
+   "radius_km": 13.4
+  },
+  {
+   "name": "Detroit",
+   "lat": 42.3314,
+   "lon": -83.0458,
+   "population": 4300000,
+   "capital": false,
+   "radius_km": 13.4
+  },
+  {
+   "name": "Montreal",
+   "lat": 45.5017,
+   "lon": -73.5673,
+   "population": 4300000,
+   "capital": false,
+   "radius_km": 13.4
+  },
+  {
+   "name": "Milan",
+   "lat": 45.4642,
+   "lon": 9.19,
+   "population": 4300000,
+   "capital": false,
+   "radius_km": 13.4
+  },
+  {
+   "name": "Rome",
+   "lat": 41.9028,
+   "lon": 12.4964,
+   "population": 4300000,
+   "capital": true,
+   "radius_km": 13.4
+  },
+  {
+   "name": "Amman",
+   "lat": 31.9454,
+   "lon": 35.9284,
+   "population": 4300000,
+   "capital": true,
+   "radius_km": 13.4
+  },
+  {
+   "name": "Casablanca",
+   "lat": 33.5731,
+   "lon": -7.5898,
+   "population": 4300000,
+   "capital": false,
+   "radius_km": 13.4
+  },
+  {
+   "name": "Durban",
+   "lat": -29.883,
+   "lon": 31.05,
+   "population": 4200000,
+   "capital": false,
+   "radius_km": 13.2
+  },
+  {
+   "name": "Tel Aviv",
+   "lat": 32.0853,
+   "lon": 34.7818,
+   "population": 4200000,
+   "capital": false,
+   "radius_km": 13.2
+  },
+  {
+   "name": "Seattle",
+   "lat": 47.6062,
+   "lon": -122.3321,
+   "population": 4000000,
+   "capital": false,
+   "radius_km": 13.0
+  },
+  {
+   "name": "Jeddah",
+   "lat": 21.5433,
+   "lon": 39.1728,
+   "population": 3751722,
+   "capital": false,
+   "radius_km": 12.7
+  },
+  {
+   "name": "Recife",
+   "lat": -8.05,
+   "lon": -34.9,
+   "population": 3726974,
+   "capital": false,
+   "radius_km": 12.7
+  },
+  {
+   "name": "Abuja",
+   "lat": 9.0765,
+   "lon": 7.3986,
+   "population": 3800000,
+   "capital": true,
+   "radius_km": 12.7
+  },
+  {
+   "name": "Athens",
+   "lat": 37.9838,
+   "lon": 23.7275,
+   "population": 3600000,
+   "capital": true,
+   "radius_km": 12.5
+  },
+  {
+   "name": "Dubai",
+   "lat": 25.2048,
+   "lon": 55.2708,
+   "population": 3600000,
+   "capital": false,
+   "radius_km": 12.5
+  },
+  {
+   "name": "Kyiv",
+   "lat": 50.4501,
+   "lon": 30.5234,
+   "population": 3500000,
+   "capital": true,
+   "radius_km": 12.4
+  },
+  {
+   "name": "Dakar",
+   "lat": 14.7167,
+   "lon": -17.4677,
+   "population": 3500000,
+   "capital": true,
+   "radius_km": 12.4
+  },
+  {
+   "name": "Port Harcourt",
+   "lat": 4.8242,
+   "lon": 7.0336,
+   "population": 3480000,
+   "capital": false,
+   "radius_km": 12.3
+  },
+  {
+   "name": "Mashhad",
+   "lat": 36.3264,
+   "lon": 59.5433,
+   "population": 3400000,
+   "capital": false,
+   "radius_km": 12.2
+  },
+  {
+   "name": "Hamburg",
+   "lat": 53.5511,
+   "lon": 9.9937,
+   "population": 3300000,
+   "capital": false,
+   "radius_km": 12.1
+  },
+  {
+   "name": "Jaipur",
+   "lat": 26.915,
+   "lon": 75.82,
+   "population": 3100000,
+   "capital": false,
+   "radius_km": 11.8
+  },
+  {
+   "name": "Naples",
+   "lat": 40.8518,
+   "lon": 14.2681,
+   "population": 3100000,
+   "capital": false,
+   "radius_km": 11.8
+  },
+  {
+   "name": "Warsaw",
+   "lat": 52.2297,
+   "lon": 21.0122,
+   "population": 3100000,
+   "capital": true,
+   "radius_km": 11.8
+  },
+  {
+   "name": "Kuwait City",
+   "lat": 29.3759,
+   "lon": 47.9774,
+   "population": 3100000,
+   "capital": true,
+   "radius_km": 11.8
+  },
+  {
+   "name": "Pyongyang",
+   "lat": 39.0392,
+   "lon": 125.7625,
+   "population": 3100000,
+   "capital": true,
+   "radius_km": 11.8
+  },
+  {
+   "name": "Budapest",
+   "lat": 47.4979,
+   "lon": 19.0402,
+   "population": 3000000,
+   "capital": true,
+   "radius_km": 11.7
+  },
+  {
+   "name": "Guatemala City",
+   "lat": 14.6349,
+   "lon": -90.5069,
+   "population": 3000000,
+   "capital": true,
+   "radius_km": 11.7
+  },
+  {
+   "name": "Surabaya",
+   "lat": -7.2458,
+   "lon": 112.7378,
+   "population": 2874314,
+   "capital": false,
+   "radius_km": 11.5
+  },
+  {
+   "name": "Munich",
+   "lat": 48.1351,
+   "lon": 11.582,
+   "population": 2900000,
+   "capital": false,
+   "radius_km": 11.5
+  },
+  {
+   "name": "Vienna",
+   "lat": 48.2082,
+   "lon": 16.3738,
+   "population": 2900000,
+   "capital": true,
+   "radius_km": 11.5
+  },
+  {
+   "name": "Lisbon",
+   "lat": 38.7223,
+   "lon": -9.1393,
+   "population": 2900000,
+   "capital": true,
+   "radius_km": 11.5
+  },
+  {
+   "name": "Caracas",
+   "lat": 10.4806,
+   "lon": -66.9036,
+   "population": 2900000,
+   "capital": true,
+   "radius_km": 11.5
+  },
+  {
+   "name": "Tashkent",
+   "lat": 41.2995,
+   "lon": 69.2401,
+   "population": 2900000,
+   "capital": true,
+   "radius_km": 11.5
+  },
+  {
+   "name": "Lucknow",
+   "lat": 26.85,
+   "lon": 80.95,
+   "population": 2800000,
+   "capital": false,
+   "radius_km": 11.4
+  },
+  {
+   "name": "Brisbane",
+   "lat": -27.4678,
+   "lon": 153.0281,
+   "population": 2800000,
+   "capital": false,
+   "radius_km": 11.4
+  },
+  {
+   "name": "Manchester",
+   "lat": 53.4808,
+   "lon": -2.2426,
+   "population": 2800000,
+   "capital": false,
+   "radius_km": 11.4
+  },
+  {
+   "name": "Frankfurt",
+   "lat": 50.1106,
+   "lon": 8.6822,
+   "population": 2700000,
+   "capital": false,
+   "radius_km": 11.2
+  },
+  {
+   "name": "Rotterdam",
+   "lat": 51.92,
+   "lon": 4.48,
+   "population": 2700000,
+   "capital": false,
+   "radius_km": 11.2
+  },
+  {
+   "name": "Kaohsiung",
+   "lat": 22.615,
+   "lon": 120.2975,
+   "population": 2720000,
+   "capital": false,
+   "radius_km": 11.2
+  },
+  {
+   "name": "Vancouver",
+   "lat": 49.2827,
+   "lon": -123.1207,
+   "population": 2700000,
+   "capital": false,
+   "radius_km": 11.2
+  },
+  {
+   "name": "Prague",
+   "lat": 50.0755,
+   "lon": 14.4378,
+   "population": 2700000,
+   "capital": true,
+   "radius_km": 11.2
+  },
+  {
+   "name": "Tunis",
+   "lat": 36.8065,
+   "lon": 10.1815,
+   "population": 2700000,
+   "capital": true,
+   "radius_km": 11.2
+  },
+  {
+   "name": "Birmingham",
+   "lat": 52.4862,
+   "lon": -1.8904,
+   "population": 2600000,
+   "capital": false,
+   "radius_km": 11.1
+  },
+  {
+   "name": "Damascus",
+   "lat": 33.5138,
+   "lon": 36.2765,
+   "population": 2600000,
+   "capital": true,
+   "radius_km": 11.1
+  },
+  {
+   "name": "Fukuoka",
+   "lat": 33.59,
+   "lon": 130.4017,
+   "population": 2500000,
+   "capital": false,
+   "radius_km": 10.9
+  },
+  {
+   "name": "Ciudad Juárez",
+   "lat": 31.745,
+   "lon": -106.485,
+   "population": 2500000,
+   "capital": false,
+   "radius_km": 10.9
+  },
+  {
+   "name": "Fortaleza",
+   "lat": -3.7275,
+   "lon": -38.5275,
+   "population": 2500000,
+   "capital": false,
+   "radius_km": 10.9
+  },
+  {
+   "name": "Amsterdam",
+   "lat": 52.3676,
+   "lon": 4.9041,
+   "population": 2500000,
+   "capital": true,
+   "radius_km": 10.9
+  },
+  {
+   "name": "Medan",
+   "lat": 3.5894,
+   "lon": 98.6739,
+   "population": 2435252,
+   "capital": false,
+   "radius_km": 10.8
+  },
+  {
+   "name": "Patna",
+   "lat": 25.5939,
+   "lon": 85.1375,
+   "population": 2350000,
+   "capital": false,
+   "radius_km": 10.7
+  },
+  {
+   "name": "Mecca",
+   "lat": 21.4225,
+   "lon": 39.8233,
+   "population": 2400000,
+   "capital": false,
+   "radius_km": 10.7
+  },
+  {
+   "name": "Stockholm",
+   "lat": 59.3293,
+   "lon": 18.0686,
+   "population": 2400000,
+   "capital": true,
+   "radius_km": 10.7
+  },
+  {
+   "name": "Doha",
+   "lat": 25.2854,
+   "lon": 51.531,
+   "population": 2400000,
+   "capital": true,
+   "radius_km": 10.7
+  },
+  {
+   "name": "Beirut",
+   "lat": 33.8938,
+   "lon": 35.5018,
+   "population": 2400000,
+   "capital": true,
+   "radius_km": 10.7
+  },
+  {
+   "name": "Cali",
+   "lat": 3.4206,
+   "lon": -76.5222,
+   "population": 2280522,
+   "capital": false,
+   "radius_km": 10.6
+  },
+  {
+   "name": "Perth",
+   "lat": -31.9558,
+   "lon": 115.8597,
+   "population": 2300000,
+   "capital": false,
+   "radius_km": 10.6
+  },
+  {
+   "name": "Bucharest",
+   "lat": 44.4268,
+   "lon": 26.1025,
+   "population": 2300000,
+   "capital": true,
+   "radius_km": 10.6
+  },
+  {
+   "name": "Lyon",
+   "lat": 45.764,
+   "lon": 4.8357,
+   "population": 2300000,
+   "capital": false,
+   "radius_km": 10.6
+  },
+  {
+   "name": "Isfahan",
+   "lat": 32.6653,
+   "lon": 51.6703,
+   "population": 2238000,
+   "capital": false,
+   "radius_km": 10.5
+  },
+  {
+   "name": "Manaus",
+   "lat": -3.1189,
+   "lon": -60.0217,
+   "population": 2279686,
+   "capital": false,
+   "radius_km": 10.5
+  },
+  {
+   "name": "Kansas City metropolitan area",
+   "lat": 39.1,
+   "lon": -94.58,
+   "population": 2200000,
+   "capital": false,
+   "radius_km": 10.4
+  },
+  {
+   "name": "Almaty",
+   "lat": 43.222,
+   "lon": 76.8512,
+   "population": 2200000,
+   "capital": false,
+   "radius_km": 10.4
+  },
+  {
+   "name": "Cologne",
+   "lat": 50.9375,
+   "lon": 6.9603,
+   "population": 2100000,
+   "capital": false,
+   "radius_km": 10.2
+  },
+  {
+   "name": "Brussels",
+   "lat": 50.8503,
+   "lon": 4.3517,
+   "population": 2100000,
+   "capital": true,
+   "radius_km": 10.2
+  },
+  {
+   "name": "Copenhagen",
+   "lat": 55.6761,
+   "lon": 12.5683,
+   "population": 2100000,
+   "capital": true,
+   "radius_km": 10.2
+  },
+  {
+   "name": "Havana",
+   "lat": 23.1136,
+   "lon": -82.3666,
+   "population": 2100000,
+   "capital": true,
+   "radius_km": 10.2
+  },
+  {
+   "name": "Dublin",
+   "lat": 53.3498,
+   "lon": -6.2603,
+   "population": 2000000,
+   "capital": true,
+   "radius_km": 10.1
+  },
+  {
+   "name": "Minsk",
+   "lat": 53.9006,
+   "lon": 27.559,
+   "population": 2000000,
+   "capital": true,
+   "radius_km": 10.1
+  },
+  {
+   "name": "Kinshasa",
+   "lat": -4.3219,
+   "lon": 15.3119,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Accra",
+   "lat": 5.55,
+   "lon": -0.2,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Baku",
+   "lat": 40.3756,
+   "lon": 49.8325,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Nur-Sultan",
+   "lat": 51.133,
+   "lon": 71.433,
+   "population": 1622245,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Sanaa",
+   "lat": 15.3483,
+   "lon": 44.2064,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Ulaanbaatar",
+   "lat": 47.9219,
+   "lon": 106.9153,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Phnom Penh",
+   "lat": 11.5694,
+   "lon": 104.9211,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Bamako",
+   "lat": 12.6392,
+   "lon": -8.0028,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Ouagadougou",
+   "lat": 12.3686,
+   "lon": -1.5275,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Muscat",
+   "lat": 23.5889,
+   "lon": 58.4083,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Kigali",
+   "lat": -1.9525,
+   "lon": 30.115,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Vaduz",
+   "lat": 47.1406,
+   "lon": 9.5222,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Port Louis",
+   "lat": -20.1644,
+   "lon": 57.5042,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Vilnius",
+   "lat": 54.6872,
+   "lon": 25.28,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Yerevan",
+   "lat": 40.1814,
+   "lon": 44.5144,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Naypyidaw",
+   "lat": 19.7475,
+   "lon": 96.115,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Asmara",
+   "lat": 15.3358,
+   "lon": 38.9411,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Reykjavik",
+   "lat": 64.1458,
+   "lon": -21.9425,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Tallinn",
+   "lat": 59.4372,
+   "lon": 24.7453,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Port-au-Prince",
+   "lat": 18.5364,
+   "lon": -72.3464,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Georgetown Guyana",
+   "lat": 6.8011,
+   "lon": -58.155,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Manama",
+   "lat": 26.2233,
+   "lon": 50.5875,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Dushanbe",
+   "lat": 38.5367,
+   "lon": 68.78,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Conakry",
+   "lat": 9.5092,
+   "lon": -13.7122,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Antananarivo",
+   "lat": -18.91,
+   "lon": 47.525,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Vientiane",
+   "lat": 17.98,
+   "lon": 102.63,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Yamoussoukro",
+   "lat": 6.8161,
+   "lon": -5.2742,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Mbabane",
+   "lat": -26.317,
+   "lon": 31.133,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Managua",
+   "lat": 12.1364,
+   "lon": -86.2514,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Bujumbura",
+   "lat": -3.383,
+   "lon": 29.367,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Maseru",
+   "lat": -29.31,
+   "lon": 27.48,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Banjul",
+   "lat": 13.4542,
+   "lon": -16.5753,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Belmopan",
+   "lat": 17.2522,
+   "lon": -88.7639,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Palikir",
+   "lat": 6.9172,
+   "lon": 158.1589,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Ngerulmud",
+   "lat": 7.5006,
+   "lon": 134.6242,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Apia",
+   "lat": -13.833,
+   "lon": -171.767,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Bangui",
+   "lat": 4.361,
+   "lon": 18.556,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Bissau",
+   "lat": 11.863,
+   "lon": -15.597,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Dili",
+   "lat": -8.56,
+   "lon": 125.579,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Honiara",
+   "lat": -9.432,
+   "lon": 160.052,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Kingstown",
+   "lat": 13.158,
+   "lon": -61.225,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Lilongwe",
+   "lat": -13.967,
+   "lon": 33.787,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Lomé",
+   "lat": 6.136,
+   "lon": 1.222,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Majuro",
+   "lat": 7.1,
+   "lon": 171.383,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Monrovia",
+   "lat": 6.3,
+   "lon": -10.797,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Moroni",
+   "lat": -11.702,
+   "lon": 43.255,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Niamey",
+   "lat": 13.512,
+   "lon": 2.125,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Port Moresby",
+   "lat": -9.443,
+   "lon": 147.18,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Suva",
+   "lat": -18.141,
+   "lon": 178.441,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "São Tomé",
+   "lat": 0.337,
+   "lon": 6.731,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Tarawa",
+   "lat": 1.328,
+   "lon": 172.979,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Wellington",
+   "lat": -41.286,
+   "lon": 174.776,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Asunción",
+   "lat": -25.286,
+   "lon": -57.646,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Kampala",
+   "lat": 0.347,
+   "lon": 32.583,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Khartoum",
+   "lat": 15.598,
+   "lon": 32.534,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Kingston",
+   "lat": 17.998,
+   "lon": -76.793,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Montevideo",
+   "lat": -34.901,
+   "lon": -56.165,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Oslo",
+   "lat": 59.913,
+   "lon": 10.752,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Port of Spain",
+   "lat": 10.652,
+   "lon": -61.519,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "San Salvador",
+   "lat": 13.692,
+   "lon": -89.218,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Belgrade",
+   "lat": 44.804,
+   "lon": 20.465,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Kathmandu",
+   "lat": 27.7,
+   "lon": 85.316,
+   "population": 0,
+   "capital": true,
+   "radius_km": 10
+  },
+  {
+   "name": "Sapporo",
+   "lat": 43.0619,
+   "lon": 141.3544,
+   "population": 1959750,
+   "capital": false,
+   "radius_km": 10.0
+  },
+  {
+   "name": "Karaj",
+   "lat": 35.8292,
+   "lon": 50.9675,
+   "population": 1970000,
+   "capital": false,
+   "radius_km": 10.0
+  },
+  {
+   "name": "Peshawar",
+   "lat": 34.0144,
+   "lon": 71.5675,
+   "population": 1900000,
+   "capital": false,
+   "radius_km": 9.9
+  },
+  {
+   "name": "Marseille",
+   "lat": 43.2964,
+   "lon": 5.37,
+   "population": 1900957,
+   "capital": false,
+   "radius_km": 9.9
+  },
+  {
+   "name": "Rabat",
+   "lat": 34.0209,
+   "lon": -6.8416,
+   "population": 1900000,
+   "capital": true,
+   "radius_km": 9.9
+  },
+  {
+   "name": "Curitiba",
+   "lat": -25.4297,
+   "lon": -49.2711,
+   "population": 1829225,
+   "capital": false,
+   "radius_km": 9.8
+  },
+  {
+   "name": "Tijuana",
+   "lat": 32.525,
+   "lon": -117.0333,
+   "population": 1810645,
+   "capital": false,
+   "radius_km": 9.7
+  },
+  {
+   "name": "Rosario",
+   "lat": -32.9575,
+   "lon": -60.6394,
+   "population": 1750000,
+   "capital": false,
+   "radius_km": 9.6
+  },
+  {
+   "name": "Palembang",
+   "lat": -2.9861,
+   "lon": 104.7556,
+   "population": 1668848,
+   "capital": false,
+   "radius_km": 9.5
+  },
+  {
+   "name": "Tabriz",
+   "lat": 38.067,
+   "lon": 46.3,
+   "population": 1700000,
+   "capital": false,
+   "radius_km": 9.5
+  },
+  {
+   "name": "Porto",
+   "lat": 41.1579,
+   "lon": -8.6291,
+   "population": 1700000,
+   "capital": false,
+   "radius_km": 9.5
+  },
+  {
+   "name": "Auckland",
+   "lat": -36.8485,
+   "lon": 174.7633,
+   "population": 1700000,
+   "capital": false,
+   "radius_km": 9.5
+  },
+  {
+   "name": "Ludhiana",
+   "lat": 30.91,
+   "lon": 75.85,
+   "population": 1618879,
+   "capital": false,
+   "radius_km": 9.4
+  },
+  {
+   "name": "Novosibirsk",
+   "lat": 55.05,
+   "lon": 82.95,
+   "population": 1633595,
+   "capital": false,
+   "radius_km": 9.4
+  },
+  {
+   "name": "Semarang",
+   "lat": -6.99,
+   "lon": 110.4225,
+   "population": 1555984,
+   "capital": false,
+   "radius_km": 9.2
+  },
+  {
+   "name": "Goiânia",
+   "lat": -16.667,
+   "lon": -49.25,
+   "population": 1536097,
+   "capital": false,
+   "radius_km": 9.2
+  },
+  {
+   "name": "Makassar",
+   "lat": -5.1331,
+   "lon": 119.4136,
+   "population": 1474000,
+   "capital": false,
+   "radius_km": 9.1
+  },
+  {
+   "name": "Yekaterinburg",
+   "lat": 56.8356,
+   "lon": 60.6128,
+   "population": 1500000,
+   "capital": false,
+   "radius_km": 9.1
+  },
+  {
+   "name": "Helsinki",
+   "lat": 60.1699,
+   "lon": 24.9384,
+   "population": 1500000,
+   "capital": true,
+   "radius_km": 9.1
+  },
+  {
+   "name": "Lille",
+   "lat": 50.6292,
+   "lon": 3.0573,
+   "population": 1500000,
+   "capital": false,
+   "radius_km": 9.1
+  },
+  {
+   "name": "Abu Dhabi",
+   "lat": 24.4539,
+   "lon": 54.3773,
+   "population": 1500000,
+   "capital": true,
+   "radius_km": 9.1
+  },
+  {
+   "name": "Kharkiv",
+   "lat": 49.9925,
+   "lon": 36.2311,
+   "population": 1421125,
+   "capital": false,
+   "radius_km": 9.0
+  },
+  {
+   "name": "San Antonio",
+   "lat": 29.425,
+   "lon": -98.4939,
+   "population": 1430000,
+   "capital": false,
+   "radius_km": 9.0
+  },
+  {
+   "name": "San Diego",
+   "lat": 32.715,
+   "lon": -117.1625,
+   "population": 1400000,
+   "capital": false,
+   "radius_km": 8.9
+  },
+  {
+   "name": "Guadalajara",
+   "lat": 20.6767,
+   "lon": -103.3475,
+   "population": 1385629,
+   "capital": false,
+   "radius_km": 8.9
+  },
+  {
+   "name": "Porto Alegre",
+   "lat": -30.0331,
+   "lon": -51.23,
+   "population": 1400000,
+   "capital": false,
+   "radius_km": 8.9
+  },
+  {
+   "name": "Belém",
+   "lat": -1.4558,
+   "lon": -48.5039,
+   "population": 1398531,
+   "capital": false,
+   "radius_km": 8.9
+  },
+  {
+   "name": "Ottawa",
+   "lat": 45.4215,
+   "lon": -75.6972,
+   "population": 1400000,
+   "capital": true,
+   "radius_km": 8.9
+  },
+  {
+   "name": "Zurich",
+   "lat": 47.3769,
+   "lon": 8.5417,
+   "population": 1400000,
+   "capital": false,
+   "radius_km": 8.9
+  },
+  {
+   "name": "Toulouse",
+   "lat": 43.6047,
+   "lon": 1.4442,
+   "population": 1400000,
+   "capital": false,
+   "radius_km": 8.9
+  },
+  {
+   "name": "Guarulhos",
+   "lat": -23.4628,
+   "lon": -46.5328,
+   "population": 1345364,
+   "capital": false,
+   "radius_km": 8.8
+  },
+  {
+   "name": "Kazan",
+   "lat": 55.7964,
+   "lon": 49.1089,
+   "population": 1300000,
+   "capital": false,
+   "radius_km": 8.7
+  },
+  {
+   "name": "Calgary",
+   "lat": 51.05,
+   "lon": -114.07,
+   "population": 1306784,
+   "capital": false,
+   "radius_km": 8.7
+  },
+  {
+   "name": "Bordeaux",
+   "lat": 44.8378,
+   "lon": -0.5792,
+   "population": 1300000,
+   "capital": false,
+   "radius_km": 8.7
+  },
+  {
+   "name": "Fez, Morocco",
+   "lat": 34.0433,
+   "lon": -5.0033,
+   "population": 1256000,
+   "capital": false,
+   "radius_km": 8.6
+  },
+  {
+   "name": "Batam",
+   "lat": 1.13,
+   "lon": 104.0531,
+   "population": 1196396,
+   "capital": false,
+   "radius_km": 8.5
+  },
+  {
+   "name": "Nizhny Novgorod",
+   "lat": 56.3269,
+   "lon": 44.0075,
+   "population": 1200000,
+   "capital": false,
+   "radius_km": 8.5
+  },
+  {
+   "name": "Jerusalem",
+   "lat": 31.7683,
+   "lon": 35.2137,
+   "population": 1200000,
+   "capital": true,
+   "radius_km": 8.5
+  },
+  {
+   "name": "Shubra El Kheima",
+   "lat": 30.1286,
+   "lon": 31.2422,
+   "population": 1161514,
+   "capital": false,
+   "radius_km": 8.4
+  },
+  {
+   "name": ", New Mexico",
+   "lat": 35.0844,
+   "lon": -106.6503,
+   "population": 1162523,
+   "capital": false,
+   "radius_km": 8.4
+  },
+  {
+   "name": "Campinas",
+   "lat": -22.9058,
+   "lon": -47.0608,
+   "population": 1185977,
+   "capital": false,
+   "radius_km": 8.4
+  },
+  {
+   "name": "Sendai",
+   "lat": 38.2682,
+   "lon": 140.8694,
+   "population": 1098335,
+   "capital": false,
+   "radius_km": 8.2
+  },
+  {
+   "name": "Sylhet",
+   "lat": 24.9,
+   "lon": 91.867,
+   "population": 1033000,
+   "capital": false,
+   "radius_km": 8.1
+  },
+  {
+   "name": "Santo Domingo",
+   "lat": 18.4625,
+   "lon": -69.9361,
+   "population": 1029110,
+   "capital": false,
+   "radius_km": 8.1
+  },
+  {
+   "name": "Odesa",
+   "lat": 46.4857,
+   "lon": 30.7434,
+   "population": 1010537,
+   "capital": false,
+   "radius_km": 8.0
+  },
+  {
+   "name": "Fort Worth, Texas",
+   "lat": 32.7564,
+   "lon": -97.3325,
+   "population": 1008156,
+   "capital": false,
+   "radius_km": 8.0
+  },
+  {
+   "name": "Edmonton",
+   "lat": 53.5344,
+   "lon": -113.4903,
+   "population": 1010899,
+   "capital": false,
+   "radius_km": 8.0
+  },
+  {
+   "name": "Nice",
+   "lat": 43.7102,
+   "lon": 7.262,
+   "population": 1000000,
+   "capital": false,
+   "radius_km": 8.0
+  },
+  {
+   "name": ", Florida",
+   "lat": 30.2722,
+   "lon": -81.5944,
+   "population": 949611,
+   "capital": false,
+   "radius_km": 7.9
+  },
+  {
+   "name": "Jos",
+   "lat": 9.9167,
+   "lon": 8.8903,
+   "population": 900000,
+   "capital": false,
+   "radius_km": 7.7
+  },
+  {
+   "name": "Indianapolis",
+   "lat": 39.7686,
+   "lon": -86.1581,
+   "population": 887642,
+   "capital": false,
+   "radius_km": 7.7
+  },
+  {
+   "name": "Oran",
+   "lat": 35.6969,
+   "lon": -0.6331,
+   "population": 803329,
+   "capital": false,
+   "radius_km": 7.5
+  },
+  {
+   "name": "Malang",
+   "lat": -7.98,
+   "lon": 112.62,
+   "population": 820043,
+   "capital": false,
+   "radius_km": 7.5
+  },
+  {
+   "name": "Valencia",
+   "lat": 39.47,
+   "lon": -0.3764,
+   "population": 824340,
+   "capital": false,
+   "radius_km": 7.5
+  },
+  {
+   "name": "Kaduna",
+   "lat": 10.517,
+   "lon": 7.433,
+   "population": 760084,
+   "capital": false,
+   "radius_km": 7.4
+  },
+  {
+   "name": "Port Said",
+   "lat": 31.2625,
+   "lon": 32.3061,
+   "population": 790000,
+   "capital": false,
+   "radius_km": 7.4
+  },
+  {
+   "name": ", Kentucky",
+   "lat": 38.2561,
+   "lon": -85.7514,
+   "population": 782969,
+   "capital": false,
+   "radius_km": 7.4
+  },
+  {
+   "name": "Santiago de los Caballeros",
+   "lat": 19.4572,
+   "lon": -70.6889,
+   "population": 771748,
+   "capital": false,
+   "radius_km": 7.4
+  },
+  {
+   "name": "Zaria",
+   "lat": 11.067,
+   "lon": 7.7,
+   "population": 736000,
+   "capital": false,
+   "radius_km": 7.3
+  },
+  {
+   "name": "Denpasar",
+   "lat": -8.6717,
+   "lon": 115.2339,
+   "population": 725314,
+   "capital": false,
+   "radius_km": 7.3
+  },
+  {
+   "name": ", Tennessee",
+   "lat": 36.1622,
+   "lon": -86.7744,
+   "population": 689447,
+   "capital": false,
+   "radius_km": 7.2
+  },
+  {
+   "name": "Oklahoma City",
+   "lat": 35.4686,
+   "lon": -97.5214,
+   "population": 681054,
+   "capital": false,
+   "radius_km": 7.1
+  },
+  {
+   "name": "Aracaju",
+   "lat": -10.9167,
+   "lon": -37.05,
+   "population": 664908,
+   "capital": false,
+   "radius_km": 7.1
+  },
+  {
+   "name": "Glasgow",
+   "lat": 55.8611,
+   "lon": -4.25,
+   "population": 632350,
+   "capital": false,
+   "radius_km": 7.0
+  },
+  {
+   "name": "Łódź",
+   "lat": 51.7769,
+   "lon": 19.4547,
+   "population": 645693,
+   "capital": false,
+   "radius_km": 7.0
+  },
+  {
+   "name": ", Egypt",
+   "lat": 31.05,
+   "lon": 31.3833,
+   "population": 600000,
+   "capital": false,
+   "radius_km": 6.9
+  },
+  {
+   "name": "Joinville",
+   "lat": -26.3204,
+   "lon": -48.8437,
+   "population": 597658,
+   "capital": false,
+   "radius_km": 6.9
+  },
+  {
+   "name": "Geneva",
+   "lat": 46.2044,
+   "lon": 6.1432,
+   "population": 600000,
+   "capital": false,
+   "radius_km": 6.9
+  },
+  {
+   "name": "Antwerp",
+   "lat": 51.2178,
+   "lon": 4.4003,
+   "population": 565039,
+   "capital": false,
+   "radius_km": 6.8
+  },
+  {
+   "name": "Baltimore",
+   "lat": 39.2894,
+   "lon": -76.6153,
+   "population": 585708,
+   "capital": false,
+   "radius_km": 6.8
+  },
+  {
+   "name": "Milwaukee",
+   "lat": 43.05,
+   "lon": -87.95,
+   "population": 577222,
+   "capital": false,
+   "radius_km": 6.8
+  },
+  {
+   "name": ", Arizona",
+   "lat": 32.2217,
+   "lon": -110.9264,
+   "population": 542630,
+   "capital": false,
+   "radius_km": 6.7
+  },
+  {
+   "name": ", California",
+   "lat": 36.75,
+   "lon": -119.767,
+   "population": 542107,
+   "capital": false,
+   "radius_km": 6.7
+  },
+  {
+   "name": "Florianópolis",
+   "lat": -27.6122,
+   "lon": -48.4853,
+   "population": 537211,
+   "capital": false,
+   "radius_km": 6.7
+  },
+  {
+   "name": "Tanta",
+   "lat": 30.783,
+   "lon": 31.0,
+   "population": 530000,
+   "capital": false,
+   "radius_km": 6.6
+  },
+  {
+   "name": ", California",
+   "lat": 38.5817,
+   "lon": -121.4944,
+   "population": 524943,
+   "capital": false,
+   "radius_km": 6.6
+  },
+  {
+   "name": "Santiago de Cuba",
+   "lat": 20.0217,
+   "lon": -75.8294,
+   "population": 507167,
+   "capital": false,
+   "radius_km": 6.6
+  },
+  {
+   "name": "Colorado Springs, Colorado",
+   "lat": 38.8339,
+   "lon": -104.8214,
+   "population": 478961,
+   "capital": false,
+   "radius_km": 6.5
+  },
+  {
+   "name": ", Nebraska",
+   "lat": 41.2586,
+   "lon": -95.9375,
+   "population": 486051,
+   "capital": false,
+   "radius_km": 6.5
+  },
+  {
+   "name": ", North Carolina",
+   "lat": 35.8542,
+   "lon": -78.7619,
+   "population": 467665,
+   "capital": false,
+   "radius_km": 6.4
+  },
+  {
+   "name": "Virginia Beach, Virginia",
+   "lat": 36.85,
+   "lon": -75.9778,
+   "population": 459470,
+   "capital": false,
+   "radius_km": 6.4
+  },
+  {
+   "name": "Canberra",
+   "lat": -35.2931,
+   "lon": 149.1269,
+   "population": 473855,
+   "capital": false,
+   "radius_km": 6.4
+  },
+  {
+   "name": "Dire Dawa",
+   "lat": 9.6,
+   "lon": 41.867,
+   "population": 440000,
+   "capital": false,
+   "radius_km": 6.3
+  },
+  {
+   "name": "Gondar",
+   "lat": 12.6075,
+   "lon": 37.4592,
+   "population": 443156,
+   "capital": false,
+   "radius_km": 6.3
+  },
+  {
+   "name": "Kumasi",
+   "lat": 6.7,
+   "lon": -1.625,
+   "population": 443981,
+   "capital": false,
+   "radius_km": 6.3
+  },
+  {
+   "name": ", California",
+   "lat": 37.8044,
+   "lon": -122.2708,
+   "population": 440646,
+   "capital": false,
+   "radius_km": 6.3
+  },
+  {
+   "name": "Minneapolis",
+   "lat": 44.9819,
+   "lon": -93.2692,
+   "population": 429954,
+   "capital": false,
+   "radius_km": 6.3
+  },
+  {
+   "name": "Cluj-Napoca",
+   "lat": 46.767,
+   "lon": 23.583,
+   "population": 411379,
+   "capital": false,
+   "radius_km": 6.2
+  },
+  {
+   "name": ", Oklahoma",
+   "lat": 36.1314,
+   "lon": -95.9372,
+   "population": 413066,
+   "capital": false,
+   "radius_km": 6.2
+  },
+  {
+   "name": "Christchurch",
+   "lat": -43.5311,
+   "lon": 172.6361,
+   "population": 407800,
+   "capital": false,
+   "radius_km": 6.2
+  },
+  {
+   "name": "Bern",
+   "lat": 46.948,
+   "lon": 7.4474,
+   "population": 420000,
+   "capital": true,
+   "radius_km": 6.2
+  },
+  {
+   "name": "Benin City",
+   "lat": 6.3333,
+   "lon": 5.6222,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Maiduguri",
+   "lat": 11.8372,
+   "lon": 13.1542,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Suez",
+   "lat": 29.967,
+   "lon": 32.55,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Asyut",
+   "lat": 27.183,
+   "lon": 31.167,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Pretoria",
+   "lat": -25.7461,
+   "lon": 28.1881,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Gqeberha",
+   "lat": -33.9581,
+   "lon": 25.6,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Surat",
+   "lat": 21.205,
+   "lon": 72.84,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Nagpur",
+   "lat": 21.1498,
+   "lon": 79.0806,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Varanasi",
+   "lat": 25.3189,
+   "lon": 83.0128,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Bhopal",
+   "lat": 23.2599,
+   "lon": 77.4126,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Vadodara",
+   "lat": 22.3,
+   "lon": 73.2,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Coimbatore",
+   "lat": 11.0008,
+   "lon": 76.9633,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Faisalabad",
+   "lat": 31.4167,
+   "lon": 73.0911,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Gujranwala",
+   "lat": 32.1567,
+   "lon": 74.19,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Multan",
+   "lat": 30.1978,
+   "lon": 71.4697,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Sialkot",
+   "lat": 32.4925,
+   "lon": 74.5311,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Sargodha",
+   "lat": 32.0836,
+   "lon": 72.6711,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Khulna",
+   "lat": 22.82,
+   "lon": 89.55,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Keihanshin",
+   "lat": 34.833,
+   "lon": 135.5,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Cebu",
+   "lat": 10.32,
+   "lon": 123.75,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Da Nang",
+   "lat": 16.0694,
+   "lon": 108.2097,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Basra",
+   "lat": 30.515,
+   "lon": 47.81,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Mosul",
+   "lat": 36.34,
+   "lon": 43.13,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Medina",
+   "lat": 24.47,
+   "lon": 39.61,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Rostov-on-Don",
+   "lat": 47.2225,
+   "lon": 39.71,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Puebla",
+   "lat": 19.0,
+   "lon": -97.883,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Maceió",
+   "lat": -9.6658,
+   "lon": -35.735,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "San Miguel de Tucumán",
+   "lat": -26.817,
+   "lon": -65.217,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Valparaíso",
+   "lat": -33.0461,
+   "lon": -71.6197,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Holguín",
+   "lat": 20.8869,
+   "lon": -76.2592,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Guantánamo",
+   "lat": 20.1367,
+   "lon": -75.2139,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Adelaide",
+   "lat": -34.9275,
+   "lon": 138.6,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Hobart",
+   "lat": -42.8806,
+   "lon": 147.325,
+   "population": 0,
+   "capital": false,
+   "radius_km": 6
+  },
+  {
+   "name": "Camagüey",
+   "lat": 21.3839,
+   "lon": -77.9075,
+   "population": 333000,
+   "capital": false,
+   "radius_km": 5.9
+  },
+  {
+   "name": "Wollongong",
+   "lat": -34.4272,
+   "lon": 150.8939,
+   "population": 302739,
+   "capital": false,
+   "radius_km": 5.8
+  },
+  {
+   "name": "Mekelle",
+   "lat": 13.4969,
+   "lon": 39.4769,
+   "population": 61000,
+   "capital": false,
+   "radius_km": 4.2
+  },
+  {
+   "name": "Bandung",
+   "lat": -6.9218,
+   "lon": 107.6071,
+   "population": 16500,
+   "capital": false,
+   "radius_km": 3.6
+  },
+  {
+   "name": "National Capital Region (Canada)",
+   "lat": 45.5897,
+   "lon": -75.8472,
+   "population": 1000,
+   "capital": false,
+   "radius_km": 3.2
   }
  ]
 }

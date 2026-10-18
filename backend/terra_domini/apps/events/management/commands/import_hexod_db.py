@@ -122,6 +122,20 @@ class Command(BaseCommand):
             for i in range(0, removed, 500):
                 Territory.objects.filter(id__in=legacy_ids[i:i + 500]).delete()
 
+        # ── Terrain of every territory from the DB rules (cities → urban, regions, industrial sites) ──
+        from terra_domini.apps.territories.terrain_rules import terrain, territory_type_for
+        poi_cat = dict(UnifiedPOI.objects.filter(is_active=True).exclude(h3_index='').values_list('h3_index', 'category'))
+        changed = []
+        for t in Territory.objects.exclude(center_lat__isnull=True).only('id', 'h3_index', 'center_lat', 'center_lon', 'biome', 'territory_type'):
+            cat = poi_cat.get(t.h3_index, '')
+            biome = terrain(round(t.center_lat, 4), round(t.center_lon, 4), cat)[0]
+            ttype = 'landmark' if cat and biome == 'landmark' else territory_type_for(biome)
+            if t.biome != biome or t.territory_type != ttype:
+                t.biome, t.territory_type = biome, ttype
+                changed.append(t)
+        Territory.objects.bulk_update(changed, ['biome', 'territory_type'], batch_size=500)
+
+        self.stdout.write(self.style.SUCCESS(f'terrain: {len(changed)} territories re-classified'))
         self.stdout.write(self.style.SUCCESS(
             f'HEXOD DB v{db.get("version")}: {len(rows)} POIs imported ({deactivated} legacy deactivated) · '
             f'territories {created} created / {updated} updated · {removed} legacy POI territories removed · '

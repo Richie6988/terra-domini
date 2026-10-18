@@ -222,8 +222,12 @@ def assign_biome(lat: float, lon: float, poi_category: str = '', territory_type:
     if territory_type == 'urban':
         return 'urban'
 
-    # 3. Algorithme géographique
-    return _geo_biome(lat, lon)
+    # 3. Terrain rules from the HEXOD master DB (cities, regions, industrial sites) — terrain_rules.py
+    try:
+        from terra_domini.apps.territories.terrain_rules import terrain
+        return terrain(round(lat, 4), round(lon, 4), poi_category or '')[0]
+    except Exception:
+        return _geo_biome(lat, lon)
 
 
 def _geo_biome(lat: float, lon: float) -> str:
@@ -313,9 +317,9 @@ def _geo_biome(lat: float, lon: float) -> str:
 
     # ── Forêt tempérée ─────────────────────────────────────────────────────
     if 45 < lat < 65:
-        # Europe de l'ouest
+        # Europe de l'ouest: mostly farmland below 55° (Beauce, Po plain…), forests further north
         if -10 < lon < 30:
-            return 'forest'
+            return 'forest' if lat > 55 else 'rural'
         # Amérique du Nord (nord-est)
         if -90 < lon < -60:
             return 'forest'

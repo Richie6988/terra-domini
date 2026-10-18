@@ -498,6 +498,18 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 - Lesson: wordninja shreds Latin names ("Sagitta ria latif oli a") — only accept splits made of frequent English words,
   never split the first word or the species epithet, glue rare runs back.
 
+## 11d. NORTH STAR + SYSTEMS (2026-10-18) — read docs/GAME_DESIGN.md first
+- **Pitch**: Risk on the real map x Panini album x MPG office leagues. 30 min/day, free, no pay-to-win.
+- **Album (Codex)**: numbered cards (#001) — Rare places, Biomes (222 regions), Resources (34), Creatures (4,401). `GET /api/codex/cards/`.
+- **Resources**: `economy/resources.py` — each territory produces its DB region's resources (+ its POI resource x4) into the harvest stock; `PlayerResource`.
+- **Safari**: creature hides in 1 of 19 real hexes around your land, 4 scans (ring distance), 5 hunts/day. `POST /api/safari/probe/`. Never send `target_h3` before the end.
+- **Token**: front = DB texts (title/description/fun fact) via `GET /api/codex/territory/<h3>/`; back = sober engraved metal with real deed data. No random hash, no invented serials.
+- **Payments**: `economy/payments.py` — Stripe Checkout packs, peg 1 € = 1000 HEX = 1 HEX Coin; far/locked hexes: `claim-options` method `euro` (HEX credited then spent on the hex). Fulfil is idempotent (confirm + webhook). Needs STRIPE_SECRET_KEY / STRIPE_WEBHOOK_SECRET in .env.prod (webhook URL /api/webhooks/stripe/, event checkout.session.completed).
+- **Events**: `events/world_events.py` + `manage.py world_events` (hourly cron): TheSportsDB fixtures on stadium/city POIs, GDELT news on strategic points. Live hex x3; holder at the end wins. `fetch_news --demo` is disabled (invented headlines = RULE 1).
+- **Strategic points**: `data/hexod_db/sources/strategic_points.csv` (own rarity ladder). **Cities**: `major_cities.csv` + city extract → `cities` in hexod_db.json.
+- **Terrain**: `territories/terrain_rules.py` — POI > urban core (3+5·√pop km) > industrial site (6 km) > suburbs > DB region keywords > old lat/lon heuristic. `import_hexod_db` re-classifies all territories.
+- **Map**: `PoiOverviewLayer` (POIs readable when zoomed out: legendary from continent view), `ExplorationLayer` (explorations greyed + countdown).
+
 ## 12. KNOWN ISSUES PIPELINE (updated 2026-10-17)
 
 ### Fixed 2026-10-17 (10-agent audit)

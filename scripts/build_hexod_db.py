@@ -219,6 +219,28 @@ def fix_glued(text, protect=()):
     return re.sub(r'\s{2,}', ' ', s).strip()
 
 
+_POP_RX = [
+    re.compile(r'population[^.]{0,60}?(?:of|was|is|at|about|approximately|around|over|nearly|estimated|stand)\D{0,25}?([\d][\d.,]*)\s*(million|billion)?', re.I),
+    re.compile(r'([\d][\d.,]*)\s*(million)?\s*(?:inhabitants|residents|people)', re.I),
+]
+
+
+def parse_population(text):
+    """First population figure of a city article ('… population of about 8.9 million …') → int, else 0."""
+    for rx in _POP_RX:
+        for m in rx.finditer(text or ''):
+            num = m.group(1).rstrip('.,').replace(',', '')
+            try:
+                v = float(num)
+            except ValueError:
+                continue
+            if m.group(2):
+                v *= 1_000_000 if m.group(2).lower() == 'million' else 1_000_000_000
+            if 1_000 <= v <= 60_000_000 and not (1800 <= v <= 2100 and not m.group(2)):   # skip years
+                return int(v)
+    return 0
+
+
 def first_paragraph(raw):
     raw = clean(raw)
     if not raw:
@@ -279,6 +301,40 @@ def h3cell(lat, lon):
         return h3.latlng_to_cell(lat, lon, H3_RES)
     except Exception:
         return ''
+
+
+def city_index(pois):
+    """Urban areas for terrain rules: cities (population from their article) + capitals / trade nodes of the POI list.
+    radius_km = urban core: 3 + 5·√(population in millions), capitals ≥ 10 km, unknown population 6 km."""
+    out = []
+    for p in pois:
+        if p.get('lat') is None or p.get('lon') is None:
+            continue
+        is_city = p['kind'] == 'city' or p.get('game_category') in ('capital_city', 'trade_node')
+        if not is_city:
+            continue
+        pop = p.get('population') or 0
+        capital = p.get('game_category') == 'capital_city'
+        r = 3 + 5 * math.sqrt(pop / 1e6) if pop else 6
+        if capital:
+            r = max(r, 10)
+        out.append({'name': p['name'], 'lat': round(p['lat'], 4), 'lon': round(p['lon'], 4), 'population': pop,
+                    'capital': capital, 'radius_km': round(min(r, 30), 1)})
+    mc = SRC / 'major_cities.csv'   # curated metro areas (the extracts miss Paris, New York, Rome…)
+    if mc.exists():
+        with open(mc, newline='', encoding='utf-8') as f:
+            for r in csv.DictReader(f):
+                pop = int(r['metro_population'] or 0)
+                rad = 3 + 5 * math.sqrt(pop / 1e6)
+                out.append({'name': r['name'], 'lat': float(r['lat']), 'lon': float(r['lon']), 'population': pop,
+                            'capital': r['capital'] == '1', 'radius_km': round(min(rad, 30), 1)})
+    out.sort(key=lambda c: -c['radius_km'])
+    kept = []
+    for c in out:   # same agglomeration listed twice → keep the biggest
+        if any(abs(c['lat'] - k['lat']) < 0.05 and abs(c['lon'] - k['lon']) < 0.07 for k in kept):
+            continue
+        kept.append(c)
+    return kept
 
 
 # ── build ─────────────────────────────────────────────────────────────────────
@@ -478,6 +534,8 @@ def main():
             }
             if kind == 'city' and (lat is None or lon is None):
                 issues.append(f"city {name}: no coordinates (codex only)")
+            if kind == 'city':
+                p['population'] = parse_population(clean(r['paragraphs']))
             add_poi(p)
 
     # ── rarity (per family, combined score) ──
@@ -550,7 +608,7 @@ def main():
 def write(cats, resources, biomes, biome_res, pois, creatures, backlog, issues, merged):
     OUT.mkdir(parents=True, exist_ok=True)
     data = {'version': 1, 'h3_resolution': H3_RES, 'categories': cats, 'resources': resources, 'biomes': biomes,
-            'biome_resources': biome_res, 'pois': pois, 'creatures': creatures}
+            'biome_resources': biome_res, 'pois': pois, 'creatures': creatures, 'cities': city_index(pois)}
     (OUT / 'hexod_db.json').write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')
 
     wb = openpyxl.Workbook()
