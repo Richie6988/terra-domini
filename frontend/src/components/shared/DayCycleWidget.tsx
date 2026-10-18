@@ -75,7 +75,7 @@ export function DayCycleWidget() {
   return (
     <div style={{
       display: 'flex', alignItems: 'center', gap: 8,
-      padding: '4px 10px', borderRadius: 20, marginTop: 44,
+      padding: '4px 10px', borderRadius: 20,
       boxShadow: '0 4px 14px rgba(0,0,0,0.4)',
       background: flash
         ? 'linear-gradient(90deg, rgba(121,80,242,0.15), rgba(121,80,242,0.05))'

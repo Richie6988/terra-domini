@@ -8,7 +8,7 @@
  *
  * API: GET /safari/active/ · POST /safari/spawn/ · POST /safari/probe/ {h3} · POST /safari/abandon/
  */
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
 import toast from 'react-hot-toast'
@@ -41,10 +41,12 @@ function HuntGrid({ t, onProbe, busy }: { t: Target; onProbe: (h3: string) => vo
   const D = 46                     // centre-to-centre distance
   const r = D / Math.sqrt(3) - 1.5 // pointy-top hex radius
   const pos = (i: number, j: number) => [(i - j / 2) * D, j * D * Math.sqrt(3) / 2]
-  const pts = t.grid.map(g => pos(g.i, g.j))
+  const grid = t.grid || []
+  if (!grid.length) return null
+  const pts = grid.map(g => pos(g.i, g.j))
   const minX = Math.min(...pts.map(p => p[0])) - r - 4, maxX = Math.max(...pts.map(p => p[0])) + r + 4
   const minY = Math.min(...pts.map(p => p[1])) - r - 4, maxY = Math.max(...pts.map(p => p[1])) + r + 4
-  const probed = new Map(t.probes.map(p => [p.h3, p.ring]))
+  const probed = new Map((t.probes || []).map(p => [p.h3, p.ring]))
   const done = t.status !== 'active'
   const hexPath = (x: number, y: number) => Array.from({ length: 6 }, (_, k) => {
     const a = Math.PI / 180 * (60 * k - 90)
@@ -53,7 +55,7 @@ function HuntGrid({ t, onProbe, busy }: { t: Target; onProbe: (h3: string) => vo
   return (
     <svg viewBox={`${minX} ${minY} ${maxX - minX} ${maxY - minY}`} style={{ width: '100%', maxWidth: 360, display: 'block', margin: '0 auto', touchAction: 'manipulation' }}
       role="grid" aria-label="Hunting ground: tap a hex to scan it">
-      {t.grid.map((g, k) => {
+      {grid.map((g, k) => {
         const [x, y] = pts[k]
         const ring = probed.get(g.h3)
         const isTarget = done && t.target_h3 === g.h3
@@ -85,7 +87,13 @@ export function DailyHuntPanel({ onClose }: Props) {
     queryKey: ['safari-active'],
     queryFn: () => api.get('/safari/active/').then(r => r.data),
   })
-  const active: Target | null = data?.target || null
+  // A hunt from the old GPS version has no hunting ground: drop it instead of crashing
+  const raw = data?.target || null
+  const legacy = !!raw && !(Array.isArray(raw.grid) && raw.grid.length)
+  useEffect(() => {
+    if (legacy) api.post('/safari/abandon/').finally(() => qc.setQueryData(['safari-active'], { target: null }))
+  }, [legacy])
+  const active: Target | null = legacy ? null : raw
   const t = active || last
 
   const spawn = useMutation({

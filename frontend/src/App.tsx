@@ -223,7 +223,8 @@ function GameScreen() {
       </ErrorBoundary>
 
       {/* Day cycle timer — auto-processes kingdoms */}
-      <div style={{ position: 'fixed', top: 68, right: 16, zIndex: 900 }}>
+      {/* Positioned by .hx-daycycle (index.css): sits right under the HEX balance, clear of the mobile GOD MODE pill */}
+      <div className="hx-daycycle">
         <DayCycleWidget />
       </div>
 

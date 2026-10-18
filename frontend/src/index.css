@@ -994,6 +994,11 @@ html {
   .hx-card, .hx-tab, .hx-icon-btn, .hx-close { transition: none !important; }
 }
 
+/* Day cycle pill (App.tsx): under the HEX balance. It used to be a top:68 wrapper pushed down by a 44px margin,
+   whose invisible top half swallowed clicks on the "Open wallet" HUD segment. */
+.hx-daycycle { position: fixed; top: 112px; right: 16px; z-index: 900; }
+@media (max-width: 640px) { .hx-daycycle { top: 130px; right: 8px; } }
+
 /* GlassPanel: full-screen sheet on phones */
 @media (max-width: 640px) {
   .hx-glass-panel {

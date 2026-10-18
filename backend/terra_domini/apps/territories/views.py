@@ -1222,6 +1222,9 @@ class SafariViewSet(viewsets.GenericViewSet):
         target = SafariTarget.objects.filter(
             player=request.user, status='active'
         ).first()
+        if target and not target.center_h3:   # hunt from the old GPS version: no hunting ground → expire it
+            target.status = 'expired'; target.save(update_fields=['status'])
+            target = None
         if not target:
             return Response({'target': None, 'message': 'No active hunt. Spawn a new target!'})
         return Response({'target': _target_payload(target)})
