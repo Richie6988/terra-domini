@@ -178,9 +178,25 @@ UNIT_STATS = {
     'artillery': {'atk': 35,  'def': 4,   'cost_materials': 300, 'terrain_bonus': {}},
     'air':       {'atk': 25,  'def': 6,   'cost_materials': 500, 'terrain_bonus': {'mountain': 0.7}},
     'naval':     {'atk': 20,  'def': 15,  'cost_materials': 400, 'terrain_bonus': {'coastal': 1.5}},
+    # recruitment.UNIT_DEFS names these 'aerial' and 'spy' — without them recruited units fought with 0 attack
+    'aerial':    {'atk': 25,  'def': 6,   'cost_materials': 250, 'terrain_bonus': {'mountain': 0.7}},
+    'spy':       {'atk': 5,   'def': 3,   'cost_materials': 150, 'terrain_bonus': {}},
 }
 
 DEFENSE_TIER_MULTIPLIER = {1: 1.0, 2: 1.3, 3: 1.7, 4: 2.2, 5: 3.0}
+SURPRISE_ATK_MULT = 0.85  # surprise attack: half timer (less time for the defender to reinforce), -15% attack
+
+
+def active_boost_pct(player_id, boost_type: str) -> float:
+    """Best active shop boost of this type for a player, as a % capped at MAX_MILITARY_BOOST_PCT."""
+    if not player_id:
+        return 0.0
+    from django.db.models import Q
+    from terra_domini.apps.economy.models import ActiveBoost
+    vals = ActiveBoost.objects.filter(player_id=player_id, boost_type=boost_type).filter(
+        Q(expires_at__isnull=True) | Q(expires_at__gt=timezone.now())).values_list('boost_value', flat=True)
+    best = max(vals, default=1.0)
+    return max(0.0, min((float(best) - 1.0) * 100.0, GAME_CFG['MAX_MILITARY_BOOST_PCT']))
 
 
 class CombatEngine:
@@ -247,6 +263,12 @@ class CombatEngine:
             for p in attackers
         )
         def_power = cls.calculate_defense_power(territory, defender_units)
+        if battle.battle_type == Battle.BattleType.SURPRISE:
+            atk_power *= SURPRISE_ATK_MULT  # resolves 2x faster, troops fight below full strength
+        # Shop boosts (2X Army Power / 2X Defense) — capped like every paid military boost
+        commander = attackers.filter(is_commander=True).first()
+        atk_power *= 1 + active_boost_pct(commander.player_id if commander else None, 'atk_multiplier') / 100.0
+        def_power *= 1 + active_boost_pct(battle.defender_id, 'def_multiplier') / 100.0
 
         # Randomness factor ±10% (skill over brute force, but not deterministic)
         import random
@@ -332,7 +354,7 @@ class CombatEngine:
         for unit_type, count in units.items():
             player_units = MilitaryUnit.objects.filter(
                 player=attacker, unit_type=unit_type,
-                status=MilitaryUnit.UnitStatus.GARRISON
+                status=MilitaryUnit.UnitStatus.GARRISON, territory__isnull=True,
             ).first()
             if not player_units or player_units.count < count:
                 return False, f"Insufficient {unit_type} units", None
@@ -362,7 +384,7 @@ class CombatEngine:
         for unit_type, count in units.items():
             stack = MilitaryUnit.objects.filter(
                 player=attacker, unit_type=unit_type,
-                status=MilitaryUnit.UnitStatus.GARRISON, count__gte=count,
+                status=MilitaryUnit.UnitStatus.GARRISON, count__gte=count, territory__isnull=True,
             ).first()
             stack.count -= count
             stack.save(update_fields=['count'])

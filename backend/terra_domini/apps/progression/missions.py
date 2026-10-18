@@ -14,6 +14,13 @@ def ensure_today_missions(player):
     if qs.exists():
         return qs
     templates = list(MissionTemplate.objects.filter(is_active=True))
+    # Stage-appropriate: a brand-new player (0-1 zone, no army) can't "launch 2 attacks" today
+    try:
+        from terra_domini.apps.territories.models import Territory
+        if Territory.objects.filter(owner=player).count() < 2:
+            templates = [t for t in templates if t.mission_type != 'win_battles'] or templates
+    except Exception:
+        pass
     random.shuffle(templates)
     for tmpl in templates[:3]:
         target = random.randint(tmpl.target_min, tmpl.target_max)

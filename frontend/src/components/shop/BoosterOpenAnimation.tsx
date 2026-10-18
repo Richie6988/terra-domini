@@ -9,6 +9,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import * as THREE from 'three'
+import { cellToLatLng } from 'h3-js'
 import { IconSVG } from '../shared/iconBank'
 import { createTokenFace2D, randomBiomeImage } from '../shared/hexodTokenFace'
 import type { TierKey } from '../shared/hexodTokenFace'
@@ -66,7 +67,7 @@ function layoutTargets(n: number, aspect: number) {
   const scale = pitch / 0.92
   return Array.from({ length: n }, (_, i) => {
     const r = Math.floor(i / cols), inRow = Math.min(cols, n - r * cols), c = i - r * cols
-    return { x: (c - (inRow - 1) / 2) * pitch, y: 0.45 + ((rows - 1) / 2 - r) * pitch, scale }
+    return { x: (c - (inRow - 1) / 2) * pitch, y: (aspect < 0.8 ? 0.95 : 0.45) + ((rows - 1) / 2 - r) * pitch, scale }
   })
 }
 
@@ -87,19 +88,23 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
     ren.setSize(w,h); ren.setPixelRatio(Math.min(devicePixelRatio,2))
     ren.toneMapping = THREE.ACESFilmicToneMapping; ren.toneMappingExposure = 1.2
     el.appendChild(ren.domElement)
-    sc.add(new THREE.AmbientLight(0x223344, 0.5))
+    sc.add(new THREE.AmbientLight(0xffffff, 0.9))
     const kl = new THREE.DirectionalLight(0xffffff,1.5); kl.position.set(3,4,5); sc.add(kl)
     const rl = new THREE.PointLight(0xf59e0b,2,10); rl.position.set(-2,-1,3); sc.add(rl)
 
     const pk = new THREE.Group()
     const bx = new THREE.BoxGeometry(1.2,1.6,0.3)
-    const bm = new THREE.MeshStandardMaterial({ color:0x1a1200, metalness:0.9, roughness:0.2, emissive:0xf59e0b, emissiveIntensity:0.05 })
+    // Saturated cartoon pack, coloured by pack tier (was a near-black metal box)
+    const pn = (packName || '').toUpperCase()
+    const packCol = pn.includes('LEGEND') ? 0xf5a70b : pn.includes('RARE') ? 0x8b5cf6 : 0x1e90ff
+    const bm = new THREE.MeshStandardMaterial({ color:packCol, metalness:0.25, roughness:0.45, emissive:packCol, emissiveIntensity:0.12 })
     pk.add(new THREE.Mesh(bx, bm))
-    const em = new THREE.LineBasicMaterial({ color:0xf59e0b, transparent:true, opacity:0.6 })
+    const em = new THREE.LineBasicMaterial({ color:0x0b1828, transparent:true, opacity:0.9 })
     pk.add(new THREE.LineSegments(new THREE.EdgesGeometry(bx), em))
     const lc = document.createElement('canvas'); lc.width=256; lc.height=64
-    const lx = lc.getContext('2d')!; lx.fillStyle='#F59E0B'; lx.font='bold 28px Orbitron, sans-serif'; lx.textAlign='center'
-    lx.fillText('HEXOD',128,35); lx.font='14px Orbitron, sans-serif'; lx.fillStyle='#F59E0B80'
+    const lx = lc.getContext('2d')!; lx.fillStyle='#ffffff'; lx.font='bold 30px "Lilita One", Orbitron, sans-serif'; lx.textAlign='center'
+    lx.strokeStyle='#0b1828'; lx.lineWidth=5; lx.strokeText('HEXOD',128,35)
+    lx.fillText('HEXOD',128,35); lx.font='15px "Lilita One", Orbitron, sans-serif'; lx.fillStyle='#ffffffd0'
     lx.fillText(packName?.toUpperCase()||'BOOSTER PACK',128,55)
     const lb = new THREE.Mesh(new THREE.PlaneGeometry(1,0.3), new THREE.MeshBasicMaterial({ map:new THREE.CanvasTexture(lc), transparent:true }))
     lb.position.z=0.16; pk.add(lb); sc.add(pk)
@@ -112,7 +117,7 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
     const st: any = { sc,cam,ren,pk,bm,em,rl,cms:[] as THREE.Mesh[],prt:null,phase:'pack',fl:new Set<number>() }
     sRef.current = st; const ck = new THREE.Clock()
     const loop = () => { st._r=requestAnimationFrame(loop); const t=ck.getElapsedTime()
-      if(st.phase==='pack'){pk.rotation.y=Math.sin(t*0.5)*0.3;pk.rotation.x=Math.sin(t*0.7)*0.05;pk.position.y=Math.sin(t*1.2)*0.08;bm.emissiveIntensity=0.03+Math.sin(t*2)*0.03;em.opacity=0.4+Math.sin(t*3)*0.3;rl.position.x=Math.sin(t)*3;rl.position.z=Math.cos(t)*3+2}
+      if(st.phase==='pack'){pk.rotation.y=Math.sin(t*0.5)*0.3;pk.rotation.x=Math.sin(t*0.7)*0.05;pk.position.y=Math.sin(t*1.2)*0.08;bm.emissiveIntensity=0.1+Math.sin(t*2)*0.06;rl.position.x=Math.sin(t)*3;rl.position.z=Math.cos(t)*3+2}
       if(st.phase==='explode'){pk.scale.multiplyScalar(0.92);pk.rotation.y+=0.3;pk.rotation.z+=0.1;if(st.prt){const pp=st.prt.pts.geometry.attributes.position;for(let i=0;i<pp.count;i++){pp.array[i*3]+=st.prt.v[i*3]*0.016;pp.array[i*3+1]+=st.prt.v[i*3+1]*0.016;pp.array[i*3+2]+=st.prt.v[i*3+2]*0.016}pp.needsUpdate=true;st.prt.m.opacity*=0.98}}
       if(st.phase==='reveal'||st.phase==='done'){st.cms.forEach((m:any,i:number)=>{if(!m._tgt)return;m.position.lerp(m._tgt,0.06);const ry=st.fl.has(i)?0:Math.PI;m.rotation.y+=(ry-m.rotation.y)*0.1})}
       ren.render(sc,cam) }
@@ -136,8 +141,10 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
       cards.forEach((card,i)=>{
         const geo=new THREE.PlaneGeometry(0.7,0.7)
         const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:mkCardTex(card),metalness:0.1,roughness:0.5}))
-        const back=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:mkBackTex(card.rarity),metalness:0.3,roughness:0.4,side:THREE.BackSide}))
-        back.rotation.y=Math.PI;mesh.add(back);mesh.position.set(0,0,0);mesh.rotation.y=Math.PI
+        // Back = separate plane turned away (FrontSide). It was BackSide, so it z-fought the face and the
+        // revealed cards showed a mirrored 'HEXOD' back instead of the territory.
+        const back=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:mkBackTex(card.rarity),metalness:0.3,roughness:0.4,side:THREE.FrontSide}))
+        back.rotation.y=Math.PI;back.position.z=-0.002;mesh.add(back);mesh.position.set(0,0,0);mesh.rotation.y=Math.PI
         mesh.scale.setScalar(L[i].scale)
         ;(mesh as any)._tgt=new THREE.Vector3(L[i].x,L[i].y,0)
         if(['rare','epic','legendary','mythic'].includes(card.rarity)){
@@ -209,7 +216,19 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
                 <span key={r} style={{padding:'3px 10px',borderRadius:999,fontSize: 11,fontWeight:700,letterSpacing:0.5,fontFamily:orb,color:RC[r],background:`${RC[r]}18`,border:`2px solid ${RC[r]}44`}}>{n} × {(RL[r]||r).toUpperCase()}</span>
               ))}
             </div>
-            <div style={{fontSize: 11,color:'rgba(255,255,255,0.55)',letterSpacing:0.5,fontFamily:"'Share Tech Mono', monospace"}}>{cards.length} TOKENS REVEALED</div>
+            <div style={{fontSize:13,color:'#fff',letterSpacing:0.5,fontFamily:orb,textShadow:'0 2px 0 rgba(0,0,0,0.45)'}}>{cards.length} TERRITORIES ADDED TO YOUR EMPIRE</div>
+            <div style={{display:'flex',flexDirection:'column',gap:6,width:'100%',maxHeight:170,overflowY:'auto'}}>
+              {cards.map(c=>(
+                <button key={c.h3_index} onClick={()=>{try{const [lat,lon]=cellToLatLng(c.h3_index);window.dispatchEvent(new CustomEvent('terra:flyto',{detail:{lat,lon,zoom:15}}))}catch{};onClose()}}
+                  style={{display:'flex',alignItems:'center',gap:8,width:'100%',padding:'7px 10px',borderRadius:10,cursor:'pointer',textAlign:'left',
+                    background:'rgba(255,255,255,0.06)',border:`2px solid ${RC[c.rarity]||'#9CA3AF'}55`,color:'#e2e8f0',fontSize:12,fontFamily:'var(--font-body)'}}>
+                  <span style={{width:10,height:10,borderRadius:3,background:RC[c.rarity]||'#9CA3AF',flexShrink:0,border:'1.5px solid #0b1828'}} />
+                  <span style={{flex:1,minWidth:0,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{c.poi_name||`Zone ${c.h3_index.slice(0,8)}`}</span>
+                  <span style={{fontSize:10,color:RC[c.rarity],fontFamily:orb}}>{(RL[c.rarity]||c.rarity||'').toUpperCase()}</span>
+                  <span style={{fontSize:10,color:'#fbbf24',fontFamily:orb}}>SEE</span>
+                </button>
+              ))}
+            </div>
           </>) : (
             <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',letterSpacing:0.5,fontFamily:orb}}>THIS PACK WAS EMPTY</div>
           )}

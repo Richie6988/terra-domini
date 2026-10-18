@@ -21,6 +21,16 @@ interface Mission {
   id: string; title: string; icon: string; target: number; current: number;
   progress_pct: number; reward_tdc: number; reward_xp: number;
   completed: boolean; claimed: boolean;
+  type?: string; description?: string;
+}
+
+// Where each mission is done — every unfinished mission gets a GO button (no dead ends)
+const MISSION_GO: Record<string, { label: string; panel?: string; hint?: string }> = {
+  claim:       { label: 'GO', hint: 'Tap an empty hex next to your land, then BUY or EXPLORE.' },
+  spend_tdc:   { label: 'GO', hint: 'Buy a hex next to your land, or recruit troops in Military.' },
+  produce:     { label: 'GO', hint: 'Tap HARVEST (left side) when your stock has HEX in it.' },
+  win_battles: { label: 'GO', panel: 'combat' },
+  recruit:     { label: 'GO', panel: 'combat' },
 }
 
 export function TaskCenter({ onClose }: Props) {
@@ -62,7 +72,8 @@ export function TaskCenter({ onClose }: Props) {
     onSuccess: (_, missionId) => {
       const m = missions.find(t => t.id === missionId)
       toast.success(`+${m?.reward_tdc || 0} HEX earned!`)
-      qc.invalidateQueries({ queryKey: ['daily-missions'] })
+      // Balance in the top HUD + the "reward to claim" nudge come from loop-status
+      ;['daily-missions', 'loop-status', 'wallet'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
     },
     onError: () => toast.error('Failed to claim reward'),
   })
@@ -178,7 +189,10 @@ export function TaskCenter({ onClose }: Props) {
                 filter: isClaimed ? 'grayscale(0.5)' : undefined,
               }}><EmojiIcon emoji={task.icon} size={26} /></span>
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#e2e8f0', letterSpacing: 0.5, marginBottom: 6 }}>{task.title}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0', letterSpacing: 0.5, marginBottom: task.description && !isClaimed ? 2 : 6 }}>{task.title}</div>
+                {task.description && !isClaimed && (
+                  <div style={{ fontSize: 12, color: 'var(--hx-text-2)', fontFamily: 'var(--font-body)', fontWeight: 600, textTransform: 'none', letterSpacing: 0, marginBottom: 6 }}>{task.description}</div>
+                )}
                 <div className="hx-progress">
                   <div className="hx-progress__fill" style={{ width: `${taskPct}%` }} />
                 </div>
@@ -194,6 +208,15 @@ export function TaskCenter({ onClose }: Props) {
                 )}
                 {isClaimed && (
                   <span className="hx-chip" style={{ color: '#22c55e', borderColor: 'rgba(34,197,94,0.4)' }}><Check size={12} /> DONE</span>
+                )}
+                {!isDone && task.type && MISSION_GO[task.type] && (
+                  <button className="btn-game btn-game-blue" style={{ padding: '7px 16px', fontSize: 12 }}
+                    onClick={() => {
+                      const go = MISSION_GO[task.type!]
+                      if (go.panel) { useStore.getState().setActivePanel(go.panel as any); return }
+                      onClose()
+                      if (go.hint) toast(go.hint, { duration: 5000 })
+                    }}>{MISSION_GO[task.type].label}</button>
                 )}
               </div>
             </div>

@@ -8,7 +8,7 @@
  * Step 4: Watch resources tick (dopamine moment)
  * Step 5: Reveal coins (HEX Coin) earned, CTA to explore
  */
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { territoryApi } from '../../services/api'
 import { useStore } from '../../store'
@@ -16,6 +16,8 @@ import { latLngToCell } from 'h3-js'
 import { EmojiIcon } from '../shared/emojiIcons'
 import { IconSVG } from '../shared/iconBank'
 import { ChevronRight } from 'lucide-react'
+import { useLoopStatus, useLoopActions } from '../shared/SessionLoop'
+import { useQueryClient } from '@tanstack/react-query'
 
 // ─── Tutorial Store ───────────────────────────────────────────────────────────
 
@@ -235,7 +237,7 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     id: 1,
     emoji: 'sparkles',
     title: 'Glowing zones are special',
-    body: 'Coloured hexes are Points of Interest (POI). The brighter they glow, the more they yield. Grey zones are free to claim.',
+    body: 'Every spot on the map is a zone. Empty ground is free to take, red zones belong to other players, and glowing zones are rare places that yield more.',
     action: 'Got it',
     hint: 'hex-unclaimed',
   },
@@ -243,15 +245,15 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     id: 2,
     emoji: 'flag_red',
     title: 'Claim your first zone!',
-    body: 'Tap any grey zone on the map, then press "Claim Zone". It\'s yours immediately. Go ahead!',
+    body: 'Tap any empty spot on the map, then press FREE CLAIM. Your first zone costs nothing and is yours immediately.',
     action: 'Claim my first zone',
     requiresClaim: true,
   },
   {
     id: 3,
     emoji: 'lightning',
-    title: "You're already earning HEX Coin!",
-    body: 'Your zone produces resources and HEX Coin every 24 hours, even while you sleep. The more zones you own, the more you earn.',
+    title: "Your zone is producing HEX!",
+    body: 'It fills your HARVEST stock, even while you are away. Come back and tap HARVEST to collect. The stock holds 8 hours of production, so check in a few times a day.',
     action: "What's next?",
     hint: 'production-rates',
   },
@@ -259,8 +261,8 @@ const TUTORIAL_STEPS: TutorialStep[] = [
     id: 4,
     emoji: 'daily_task',
     title: 'Your daily missions await',
-    body: 'Every day, 3 missions guide and reward you. The button at the bottom left opens them: it is your daily roadmap!',
-    action: 'Explore the map!',
+    body: 'Every day, 3 missions tell you what to do next and pay HEX. Tap the MISSIONS button to see them and claim your rewards.',
+    action: 'Show my missions',
     hint: 'tdc-balance',
   },
 ]
@@ -276,6 +278,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
   const [gpsError, setGpsError] = useState('')
   const [claimWaiting, setClaimWaiting] = useState(false)
   const player = useStore(s => s.player)
+  const qc = useQueryClient()
 
   // Check if tutorial should run
   useEffect(() => {
@@ -294,6 +297,11 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
       const finalState = { ...state, hasCompleted: true, isActive: false }
       saveTutorialState(finalState)
       onComplete()
+      // Last step CTA = "Show my missions": land the player on their daily roadmap
+      import('./OnboardingHotspots').then(m => m.hideHotspots())
+      // +100 HEX tutorial reward is granted server-side: refresh the HUD balance shortly after
+      setTimeout(() => qc.invalidateQueries({ queryKey: ['loop-status'] }), 1500)
+      useStore.getState().setActivePanel('tasks' as any)
 
       // Grant tutorial completion reward
       if (player) {
@@ -313,6 +321,7 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
     }
     setState(newState)
     saveTutorialState(newState)
+    setGpsError('')
 
     // Step 4 → show the interface hotspots
     if (nextStep === 4) {
@@ -320,28 +329,62 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
         import('./OnboardingHotspots').then(m => m.showTutorialHotspots())
       }, 600)
     }
-  }, [state, player, onComplete])
+  }, [state, player, onComplete, qc])
 
   const handleGPS = useCallback(() => {
     setGpsLoading(true)
     setGpsError('')
-
+    let settled = false
+    const fallback = (msg: string) => {
+      if (settled) return
+      settled = true
+      setGpsLoading(false)
+      setGpsError(msg)
+      setTimeout(advanceStep, 1200)
+    }
+    // The browser never answers while its permission prompt is ignored — don't leave the player stuck
+    const guard = setTimeout(() => fallback('No location yet — starting near you based on your connection.'), 6000)
+    if (!navigator.geolocation) { clearTimeout(guard); fallback('Location unavailable — starting near you based on your connection.'); return }
     navigator.geolocation.getCurrentPosition(
       (pos) => {
+        if (settled) return
+        settled = true
+        clearTimeout(guard)
         setGpsLoading(false)
         onMapCenter?.(pos.coords.latitude, pos.coords.longitude)
         advanceStep()
       },
-      (err) => {
-        setGpsLoading(false)
-        setGpsError('Location access denied. We\'ll use Paris as default.')
-        // Default to Paris
-        onMapCenter?.(48.8566, 2.3522)
-        setTimeout(advanceStep, 1500)
-      },
+      () => { clearTimeout(guard); fallback('Location off — starting near you based on your connection.') },
       { timeout: 8000, maximumAge: 60000 }
     )
   }, [advanceStep, onMapCenter])
+
+  // Claim step: wait for a real claim (never auto-advance on a timer — that would lie "you're earning")
+  const claimTimers = useRef<number[]>([])
+  useEffect(() => () => { claimTimers.current.forEach(id => { clearInterval(id); clearTimeout(id) }) }, [])
+  useEffect(() => {
+    if (!claimWaiting) return
+    let done = false
+    const finish = () => {
+      if (done) return
+      done = true
+      setClaimWaiting(false)
+      window.dispatchEvent(new CustomEvent('hexod:tutorial:hide-arrow'))
+      advanceStep()
+    }
+    // Let the claim celebration play before the next card covers it
+    const onCelebrated = () => finish()
+    window.addEventListener('hexod:claim-celebrated', onCelebrated)
+    const poll = window.setInterval(() => {
+      const mine = useStore.getState().myTerritories
+      if (mine && mine.size > 0 && !done) {
+        clearInterval(poll)
+        claimTimers.current.push(window.setTimeout(finish, 7000))   // fallback if no celebration event
+      }
+    }, 1000)
+    claimTimers.current.push(poll)
+    return () => { clearInterval(poll); window.removeEventListener('hexod:claim-celebrated', onCelebrated) }
+  }, [claimWaiting, advanceStep])
 
   const handleAction = useCallback(() => {
     if (currentStep.requiresGPS) {
@@ -356,22 +399,6 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
           detail: { lat: loc.lat, lon: loc.lon }
         }))
       }).catch(() => {})
-      // Check if player has claimed any territory
-      const checkClaimed = setInterval(() => {
-        const myTerritories = useStore.getState().myTerritories
-        if (myTerritories && myTerritories.size > 0) {
-          clearInterval(checkClaimed)
-          setClaimWaiting(false)
-          window.dispatchEvent(new CustomEvent('hexod:tutorial:hide-arrow'))
-          advanceStep()
-        }
-      }, 2000)
-      setTimeout(() => {
-        clearInterval(checkClaimed)
-        setClaimWaiting(false)
-        window.dispatchEvent(new CustomEvent('hexod:tutorial:hide-arrow'))
-        advanceStep()
-      }, 60000)
       return
     }
     advanceStep()
@@ -402,12 +429,14 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
         {/* Claim waiting: NO overlay at all — just a small floating pill at bottom */}
         {claimWaiting && (
           <motion.div
-            initial={{ y: 40, opacity: 0 }}
+            initial={{ y: -40, opacity: 0 }}
             animate={{ y: 0, opacity: 1 }}
             style={{
-              position: 'fixed', bottom: 100, left: '50%', transform: 'translateX(-50%)',
+              // below the top HUD; on phones also below the MISSIONS button (top-left column)
+              position: 'fixed', top: typeof window !== 'undefined' && window.innerWidth < 600 ? 172 : 96, left: 0, right: 0, margin: '0 auto',
+              width: 'fit-content', maxWidth: 'calc(100vw - 24px)', boxSizing: 'border-box',
               zIndex: 10001, pointerEvents: 'auto',
-              padding: '12px 24px', borderRadius: 40,
+              padding: '10px 12px 10px 18px', borderRadius: 40,
               background: 'linear-gradient(180deg, #3b6fe0, #2148b0)',
               border: '3px solid #0f2266',
               boxShadow: '0 5px 0 #0f2266',
@@ -416,8 +445,8 @@ export function OnboardingTutorial({ onComplete, onMapCenter }: OnboardingTutori
           >
             <motion.span animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 1.5, repeat: Infinity }}
               style={{ display: 'flex' }}><IconSVG id="target" size={22} /></motion.span>
-            <span style={{ fontSize: 16, color: '#fff', fontFamily: 'var(--font-heading)', letterSpacing: 0.5, textTransform: 'uppercase', textShadow: '0 2px 0 rgba(0,0,0,0.45)' }}>
-              TAP ANY ZONE TO CLAIM — IT'S FREE!
+            <span style={{ fontSize: 15, lineHeight: 1.2, color: '#fff', fontFamily: 'var(--font-heading)', letterSpacing: 0.5, textTransform: 'uppercase', textShadow: '0 2px 0 rgba(0,0,0,0.45)' }}>
+              Tap an empty spot, then FREE CLAIM
             </span>
             <button onClick={onComplete} style={{
               background: 'rgba(255,255,255,0.18)', border: '2px solid rgba(255,255,255,0.35)',
@@ -584,13 +613,20 @@ interface WakeUpDigestProps {
 }
 
 export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismiss }: WakeUpDigestProps) {
+  // Live harvest stock (source of truth) — nothing is credited while away, it waits in the stock
+  const { data: loop } = useLoopStatus()
+  const { collect } = useLoopActions()
+  const pending = loop?.harvest?.pending ?? Math.round(newTDC || 0)
+  const lost = loop?.harvest?.lost ?? 0
   const totalResources = Object.values(resources).reduce((a, b) => a + b, 0)
+  const showResources = totalResources > 0 && Math.round(totalResources) !== Math.round(newTDC || 0)
 
   const h = Math.round(offlineHours)
   const items: DigestItem[] = [
     { icon: 'alarm', text: `You were away for ${h < 1 ? 'less than an hour' : h === 1 ? '1 hour' : `${h} hours`}`, color: '#dbe8ff' },
-    ...(totalResources > 0 ? [{ icon: 'box', text: 'Resources gathered while you were away', value: `+${totalResources.toLocaleString()}`, color: '#4ade80' }] : []),
-    ...(newTDC > 0 ? [{ icon: 'hex_coin', text: 'HEX earned offline', value: `+${parseFloat(String(newTDC ?? 0)).toFixed(0)} HEX`, color: '#F59E0B' }] : []),
+    ...(showResources ? [{ icon: 'box', text: 'Resources gathered while you were away', value: `+${totalResources.toLocaleString()}`, color: '#4ade80' }] : []),
+    ...(pending > 0 ? [{ icon: 'wheat', text: loop?.harvest?.is_full ? 'Harvest stock is FULL' : 'HEX waiting in your harvest', value: `+${pending.toLocaleString()} HEX`, color: '#F59E0B' }] : []),
+    ...(lost > 0 ? [{ icon: 'alarm', text: 'Lost — the stock was full', value: `-${lost.toLocaleString()} HEX`, color: '#fca5a5' }] : []),
     ...battles.map(b => ({
       icon: b.won ? 'trophy' : 'skull',
       text: b.won ? `Victory: ${b.territory} captured!` : `Defense failed: ${b.territory} lost`,
@@ -666,10 +702,16 @@ export function WakeUpDigest({ offlineHours, resources, battles, newTDC, onDismi
         </div>
 
         <div style={{ padding: '0 24px 24px' }}>
-          <button className="btn-game btn-game-green" onClick={onDismiss}
+          <button className="btn-game btn-game-green" disabled={collect.isPending}
+            onClick={() => { if (pending > 0) collect.mutate(undefined, { onSettled: onDismiss }); else onDismiss() }}
             style={{ width: '100%', minHeight: 54, fontSize: 20, fontFamily: 'var(--font-heading)', fontWeight: 400, letterSpacing: 0.5, borderRadius: 16, border: '3px solid #064e3b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-            Resume Command <ChevronRight size={18} strokeWidth={3} />
+            {pending > 0 ? `Collect +${pending.toLocaleString()} HEX` : 'Back to the map'} <ChevronRight size={18} strokeWidth={3} />
           </button>
+          {lost > 0 && (
+            <div style={{ marginTop: 10, textAlign: 'center', fontSize: 13, fontWeight: 700, color: '#ffe3a3', fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0 }}>
+              Tip: turn on alerts so you know when your stock is full.
+            </div>
+          )}
         </div>
       </div>
     </motion.div>

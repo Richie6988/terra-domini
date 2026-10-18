@@ -121,6 +121,32 @@ class BattleViewSet(viewsets.GenericViewSet):
             'message': f"Attack launched! Battle resolves in {hours:.1f}h.",
         }, status=201)
 
+    @action(detail=False, methods=['GET'], url_path='preview')
+    def preview(self, request):
+        """GET /api/combat/preview/?target_h3= — real numbers the server will use (defense, timer, per-unit attack).
+        Lets the attack screen show an honest win chance instead of a made-up simulation."""
+        from terra_domini.apps.territories.models import Territory
+        from terra_domini.apps.combat.engine import UNIT_STATS, SURPRISE_ATK_MULT, active_boost_pct
+        try:
+            t = Territory.objects.select_related('owner').get(h3_index=request.query_params.get('target_h3', ''))
+        except Territory.DoesNotExist:
+            return Response({'error': 'Territory not found'}, status=404)
+        ok, reason = CombatEngine.can_attack(request.user, t)
+        timer = CombatEngine._get_battle_timer(t)
+        atk_b = 1 + active_boost_pct(request.user.id, 'atk_multiplier') / 100.0
+        def_b = 1 + active_boost_pct(t.owner_id, 'def_multiplier') / 100.0
+        return Response({
+            'can_attack': ok, 'reason': reason,
+            'owner': t.owner.username if t.owner else None,
+            'defense_power': round(CombatEngine.calculate_defense_power(t, {}) * def_b, 1),
+            'defense_points': t.defense_points, 'max_defense_points': t.max_defense_points,
+            'atk_per_unit': {k: round(v['atk'] * v['terrain_bonus'].get(t.territory_type, 1.0) * atk_b, 2) for k, v in UNIT_STATS.items()},
+            'atk_boost_pct': round((atk_b - 1) * 100), 'def_boost_pct': round((def_b - 1) * 100),
+            'timer_seconds': {'conquest': timer, 'surprise': timer // 2},
+            'surprise_atk_mult': SURPRISE_ATK_MULT,
+            'roll_spread': 0.1,
+        })
+
     @action(detail=False, methods=['POST'], url_path='reinforce')
     def reinforce(self, request):
         """POST /api/combat/reinforce/ {battle_id} — defender spends HEX to add defense before resolution."""
@@ -147,7 +173,10 @@ class BattleViewSet(viewsets.GenericViewSet):
             t.save(update_fields=['defense_points'])
         B.consume_purchased_first(p, B.REINFORCE_COST)
         track(request.user, 'spend_tdc', B.REINFORCE_COST)
-        return Response({'ok': True, 'defense_points': t.defense_points, 'max': cap, 'cost': B.REINFORCE_COST})
+        hold = _hold_chance(battle, t)
+        return Response({'ok': True, 'defense_points': t.defense_points, 'max': cap, 'cost': B.REINFORCE_COST,
+                         'hold_chance': hold,
+                         'message': f'Defenses {int(t.defense_points)}/{int(cap)} — {round(hold * 100)}% chance to hold.'})
 
     @action(detail=False, methods=['GET'], url_path='active')
     def active_battles(self, request):
@@ -167,7 +196,8 @@ class BattleViewSet(viewsets.GenericViewSet):
         CombatEngine.resolve_due(incoming)
         battles = incoming.filter(status__in=ACTIVE_STATUSES).select_related(
             'target_territory', 'defender').prefetch_related('participants__player').order_by('resolves_at')
-        data = [_battle_row(b) for b in battles]
+        data = [{**_battle_row(b), 'hold_chance': _hold_chance(b, b.target_territory),
+                 'defense_points': b.target_territory.defense_points} for b in battles]
         return Response({'incoming': data, 'count': len(data)})
 
     @action(detail=True, methods=['GET'], url_path='detail')
@@ -185,12 +215,43 @@ class BattleViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['GET'], url_path='history')
     def history(self, request):
-        """GET /api/combat/history/ — resolved battles"""
-        battles = Battle.objects.filter(
-            participants__player=request.user,
+        """GET /api/combat/history/ — resolved battles, as attacker AND as defender (bot raids included)."""
+        from django.db.models import Q
+        mine = Battle.objects.filter(Q(participants__player=request.user) | Q(defender=request.user)).distinct()
+        CombatEngine.resolve_due(mine)
+        battles = mine.filter(
             status__in=[Battle.BattleStatus.COMPLETED, Battle.BattleStatus.CANCELLED],
-        ).select_related('target_territory', 'defender').order_by('-completed_at')[:50]
-        return Response({'history': [_battle_row(b) for b in battles]})
+        ).select_related('target_territory', 'defender').prefetch_related('participants__player').order_by('-completed_at')[:50]
+        rows = []
+        for b in battles:
+            row = _battle_row(b)
+            row['role'] = 'defender' if b.defender_id == request.user.id else 'attacker'
+            row['won'] = (b.winner == row['role'])
+            row['completed_at'] = b.completed_at.isoformat() if b.completed_at else None
+            rows.append(row)
+        return Response({'history': rows})
+
+
+def _hold_chance(battle, territory) -> float:
+    """Defender's chance to win with current defenses (same ±10% rolls as resolve_battle)."""
+    from terra_domini.apps.combat.engine import SURPRISE_ATK_MULT
+    atk = sum(CombatEngine.calculate_attack_power(p.units_deployed, territory.territory_type)
+              for p in battle.participants.filter(side=BattleParticipant.Side.ATTACKER))
+    if battle.battle_type == Battle.BattleType.SURPRISE:
+        atk *= SURPRISE_ATK_MULT
+    from terra_domini.apps.combat.engine import active_boost_pct
+    commander = battle.participants.filter(is_commander=True).first()
+    atk *= 1 + active_boost_pct(commander.player_id if commander else None, 'atk_multiplier') / 100.0
+    dfn = CombatEngine.calculate_defense_power(territory, {}) * (1 + active_boost_pct(battle.defender_id, 'def_multiplier') / 100.0)
+    if atk <= 0:
+        return 1.0
+    n, held = 40, 0
+    for i in range(n):
+        x = 0.9 + 0.2 * (i + 0.5) / n
+        for j in range(n):
+            if atk * x <= dfn * (0.9 + 0.2 * (j + 0.5) / n):
+                held += 1
+    return round(held / (n * n), 3)
 
 
 ACTIVE_STATUSES = [Battle.BattleStatus.PREPARING, Battle.BattleStatus.ACTIVE, Battle.BattleStatus.RESOLVING]
@@ -213,4 +274,7 @@ def _battle_row(b):
         'hours_remaining': max(0, round((b.resolves_at - timezone.now()).total_seconds() / 3600, 1)),
         'winner': b.winner or None,
         'territory_captured': b.territory_captured,
+        'units_lost': (commander.units_lost if commander else None) or {},
+        'units_survived': (commander.units_survived if commander else None) or {},
+        'defender_casualties': b.defender_casualties or {},
     }

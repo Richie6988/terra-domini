@@ -20,6 +20,8 @@ HEX_PER_DAY = {
 SHINY_MULT = 1.5
 KINGDOM_MULT = 1.15          # territory connected to a kingdom (cluster ≥ 2)
 STORAGE_CAP_HOURS = 8        # stock full after 8h → come back 3x/day for 100%
+BEGINNER_DAYS = 3            # new accounts produce faster so the first sessions visibly fill the stock
+BEGINNER_MULT = 4            # (time-based, so buying a zone never lowers the rate)
 
 # ── Territory prices ─────────────────────────────────────────────────────────
 BUY_BASE = 120
@@ -62,7 +64,16 @@ def player_hex_per_day(player) -> float:
         except Exception:
             connected = False
         total += territory_hex_per_day(rarity, shiny, connected)
+    if is_beginner(player):
+        total *= BEGINNER_MULT
     return round(total, 2)
+
+
+def is_beginner(player) -> bool:
+    from datetime import timedelta
+    from django.utils import timezone
+    joined = getattr(player, 'date_joined', None)
+    return bool(joined) and timezone.now() - joined < timedelta(days=BEGINNER_DAYS)
 
 
 def buy_cost(owned_count: int, adjacent: bool, rarity: str = 'common') -> int:

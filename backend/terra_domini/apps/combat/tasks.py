@@ -53,6 +53,7 @@ def bot_raids(probability: float = 0.2):
         t = random.choice(targets)
         defense = CombatEngine.calculate_defense_power(t, {})
         infantry = max(5, int(defense / 10 * random.uniform(0.8, 1.3)))  # roughly even: reinforcing matters
-        CombatEngine.npc_attack(random.choice(bots), t, {'infantry': infantry})
+        # 'conquest': a lost raid really costs the hex (a 'raid' type never captures, so the nudge would be an empty threat)
+        CombatEngine.npc_attack(random.choice(bots), t, {'infantry': infantry}, battle_type='conquest')
         raids += 1
     return {'raids': raids}

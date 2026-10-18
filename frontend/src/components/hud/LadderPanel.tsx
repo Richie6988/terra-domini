@@ -7,7 +7,7 @@ import { useQuery } from '@tanstack/react-query'
 import { GlassPanel } from '../shared/GlassPanel'
 import { MiniIcon, StatusDot } from '../shared/MiniIcons'
 import { api } from '../../services/api'
-import { usePlayer } from '../../store'
+import { usePlayer, useStore } from '../../store'
 import { IconSVG, ICON_BANK } from '../shared/iconBank'
 
 
@@ -56,27 +56,40 @@ export function LadderPanel({ onClose }: Props) {
   const [tab, setTab] = useState<Tab>('global')
   const player = usePlayer()
 
-  // Fetch real leaderboard from backend ('nearby' is served by /leaderboard/regional/; no alliance ladder yet)
+  const center = useStore(s => s.mapCenter)
+  // Live ranking by HEX/day from the territory table (/leaderboard/global/ used a stale territory count and
+  // ranked by HEX balance, so a player with 18 hexes showed "4 TERR" and #21). Nearby = 500 km around the map.
   const { data: lbData, isLoading } = useQuery({
-    queryKey: ['leaderboard', tab],
-    queryFn: () => api.get(`/leaderboard/${tab === 'nearby' ? 'regional' : tab}/`).then(r => r.data).catch(() => null),
+    queryKey: ['ladder-live', tab, tab === 'nearby' ? center.map(c => c.toFixed(1)).join(',') : ''],
+    queryFn: () => api.get(tab === 'nearby'
+      ? `/territories-geo/ladder/?scope=nearby&lat=${center[0]}&lon=${center[1]}&radius_km=500`
+      : '/territories-geo/ladder/?scope=global').then(r => r.data).catch(() => null),
     staleTime: 30000,
     enabled: tab !== 'alliance',
   })
+  // Alliance names + avatars only
+  const { data: meta } = useQuery({
+    queryKey: ['leaderboard', 'global'],
+    queryFn: () => api.get('/leaderboard/global/').then(r => r.data).catch(() => null),
+    staleTime: 60000,
+    enabled: tab !== 'alliance',
+  })
+  const metaBy: Record<string, any> = Object.fromEntries((meta?.entries || []).map((e: any) => [e.username, e]))
 
   const rawEntries = lbData?.entries || []
-  const hasHexPerDay = rawEntries.some((e: any) => e.hex_per_day != null)
+  const hasHexPerDay = true
+  const myId = String(player?.id || '').replace(/-/g, '')
   const entries = rawEntries.map((e: any, i: number) => ({
     rank: e.rank || i + 1,
-    username: e.username || e.display_name,
+    username: e.username,
     territories: e.territories || 0,
-    hex_per_day: e.hex_per_day || e.score || 0,
-    isYou: e.is_me || e.id === String(player?.id),
-    avatar_emoji: e.avatar_emoji || '',
-    alliance: e.alliance || null,
+    hex_per_day: Math.round(e.daily_income || 0),
+    isYou: e.is_me || (!!myId && String(e.player_id).replace(/-/g, '') === myId),
+    avatar_emoji: metaBy[e.username]?.avatar_emoji || '',
+    alliance: metaBy[e.username]?.alliance || null,
     battles_won: e.battles_won,
   }))
-  const meRank = lbData?.me_rank ?? entries.find((p: any) => p.isYou)?.rank
+  const meRank = entries.find((p: any) => p.isYou)?.rank
   const me = entries.find((p: any) => p.isYou)
   const valueLabel = hasHexPerDay ? 'HEX/D' : 'SCORE'
   const podium = entries.slice(0, 3)
@@ -85,19 +98,19 @@ export function LadderPanel({ onClose }: Props) {
 
   return (
     <GlassPanel title="LADDER" onClose={onClose} accent="#8b5cf6"
-      icon={<IconSVG id="trophy" size={24} />} subtitle="Commander rankings by score">
+      icon={<IconSVG id="trophy" size={24} />} subtitle="Ranked by HEX per day from your territories">
       {/* Your rank */}
       {tab !== 'alliance' && me && (
         <div className="hx-card hx-card--accent" style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
           <div className="hx-stat">
-            <span className="hx-stat__label">YOUR RANK</span>
-            <span className="hx-stat__value hx-stat__value--accent">#{meRank ?? '-'}</span>
+            <span className="hx-stat__label" style={{ color: '#fff' }}>YOUR RANK</span>
+            <span className="hx-stat__value" style={{ color: '#fff', textShadow: '0 2px 0 rgba(0,0,0,0.45)' }}>#{meRank ?? '-'}</span>
           </div>
-          <div style={{ flex: 1, fontSize: 10, color: 'var(--hx-text-3)', letterSpacing: 1 }}>
+          <div style={{ flex: 1, fontSize: 11, color: 'rgba(255,255,255,0.85)', letterSpacing: 0.5 }}>
             OF {entries.length} RANKED PLAYERS
           </div>
           <div className="hx-stat" style={{ textAlign: 'right' }}>
-            <span className="hx-stat__label">{valueLabel}</span>
+            <span className="hx-stat__label" style={{ color: '#fff' }}>{valueLabel}</span>
             <span className="hx-stat__value">{Number(me.hex_per_day).toLocaleString()}</span>
           </div>
         </div>

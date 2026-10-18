@@ -463,9 +463,9 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 ## 11b. GAME LOOP & ECONOMY (owner, 2026-10-17) — `economy/balance.py` is the single source of truth
 
 - **5-minute session + FOMO**: territories fill a HEX stock capped at 8h (`STORAGE_CAP_HOURS`). Nothing is credited
-- **Starter boost**: accounts younger than `BEGINNER_DAYS` (3) produce x`BEGINNER_MULT` (4) — time-based so buying a zone never lowers the rate.
   automatically (daily cron no longer credits HEX). `GET /api/loop/status/` (harvest, streak check-in, missions, nudges)
   and `POST /api/loop/collect/`. Overflow is lost and reported (`lost`).
+- **Starter boost**: accounts younger than `BEGINNER_DAYS` (3) produce x`BEGINNER_MULT` (4) — time-based so buying a zone never lowers the rate.
 - **Pace (fast)**: HEX/day common 60 → mythic 3000; buy cost `120 × 1.22^(owned-1)` (×2.5 non-adjacent, × rarity price).
 - **Rarity scarcity**: world share caps (legendary 1%, epic 4%, rare 10%) in `territory_engine._apply_scarcity`.
 - **Missions**: templates seeded (progression/0002); `progression/missions.track(player, type, n)` hooks in claim, buy,

@@ -4,7 +4,8 @@
  * Opened from dock "Empire" button.
  */
 import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
 import { Crown, Swords, BarChart3, MapPin, Timer } from 'lucide-react'
 import { GlassPanel } from '../shared/GlassPanel'
 import { api } from '../../services/api'
@@ -185,6 +186,19 @@ function MilitaryTab() {
   const totalAtk = armyData?.force?.attack ?? UNITS.reduce((s, u) => s + u.atk * ownedCount(units[u.name.toLowerCase()]), 0)
   const totalDef = armyData?.force?.defense ?? UNITS.reduce((s, u) => s + u.def * ownedCount(units[u.name.toLowerCase()]), 0)
   const setActivePanel = useStore(s => s.setActivePanel)
+  const qc = useQueryClient()
+  const [collecting, setCollecting] = useState(false)
+  const readyCount = training.filter((t: any) => t.done).reduce((a: number, t: any) => a + (t.quantity || 0), 0)
+  const collect = async () => {
+    setCollecting(true)
+    try {
+      const r = await api.post('/combat/collect/')
+      if (r.data?.total_collected > 0) toast.success(`${r.data.total_collected} units joined your army`)
+      else toast.error('No training complete yet')
+      qc.invalidateQueries({ queryKey: ['my-army'] })
+    } catch (e: any) { toast.error(e?.response?.data?.error || 'Collection failed') }
+    finally { setCollecting(false) }
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -192,10 +206,10 @@ function MilitaryTab() {
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
         {[{ l: 'TOTAL ATTACK', v: totalAtk, c: '#ef4444', I: Swords }, { l: 'TOTAL DEFENSE', v: totalDef, c: '#3b82f6', I: Crown }].map(st => (
           <div key={st.l} className="hx-card hx-card--accent" style={{ ['--accent' as any]: st.c, display: 'flex', alignItems: 'center', gap: 12 }}>
-            {st.l === 'TOTAL ATTACK' ? <Swords size={22} color={st.c} /> : <IconSVG id="ui_shield" size={24} />}
+            {st.l === 'TOTAL ATTACK' ? <Swords size={24} color="#fff" style={{ filter: 'drop-shadow(0 2px 0 rgba(0,0,0,0.35))' }} /> : <IconSVG id="ui_shield" size={26} />}
             <div className="hx-stat">
-              <span className="hx-stat__label">{st.l}</span>
-              <span className="hx-stat__value hx-stat__value--accent">{isLoading ? '—' : fmt(st.v)}</span>
+              <span className="hx-stat__label" style={{ color: 'rgba(255,255,255,0.9)' }}>{st.l}</span>
+              <span className="hx-stat__value" style={{ color: '#fff' }}>{isLoading ? '—' : fmt(st.v)}</span>
             </div>
           </div>
         ))}
@@ -204,7 +218,14 @@ function MilitaryTab() {
       {/* Active training */}
       {training.length > 0 && (
         <div className="hx-card" style={{ ['--accent' as any]: '#F59E0B' }}>
-          <div className="hx-section-title" style={{ marginTop: 0 }}>TRAINING IN PROGRESS ({training.length})</div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div className="hx-section-title" style={{ marginTop: 0, flex: 1 }}>{readyCount > 0 ? 'TRAINING DONE' : `TRAINING IN PROGRESS (${training.length})`}</div>
+            {readyCount > 0 && (
+              <button onClick={collect} disabled={collecting} className="btn-game btn-game-green" style={{ padding: '8px 14px', fontSize: 11, marginBottom: 10 }}>
+                {collecting ? '...' : `COLLECT ${readyCount}`}
+              </button>
+            )}
+          </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {training.map((t: any, i: number) => {
               const start = Date.parse(t.started_at), end = Date.parse(t.completes_at)

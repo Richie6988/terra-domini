@@ -124,7 +124,7 @@ export function HexodTopHUD() {
           <div className="hxh-name">{player.display_name || player.username}</div>
           <div className="hxh-chips">
             <span className="hxh-chip" title="Territories owned">
-              <IconSVG id="ui_kingdom" size={14} />{hexCount}<small>HEX</small>
+              <IconSVG id="ui_kingdom" size={14} />{hexCount}<small>{hexCount === 1 ? 'ZONE' : 'ZONES'}</small>
             </span>
             {rank != null && (
               <span className="hxh-chip hxh-rank" title="Commander rank" style={{ borderColor: `${color}55` }}>
@@ -212,8 +212,8 @@ export function MissionsButton() {
       <style>{HUD_CSS}</style>
       <span className="hxh-missions__hex"><IconSVG id="daily_task" size={30} /></span>
       <span style={{ display: 'flex', flexDirection: 'column', gap: 3, textAlign: 'left' }}>
-        <span style={{ fontFamily: 'var(--font-heading)', fontSize: 12, fontWeight: 900, letterSpacing: 2, color: '#fbbf24', textShadow: '0 1px 0 rgba(0,0,0,0.6)' }}>MISSIONS</span>
-        <span style={{ fontFamily: 'var(--font-heading)', fontSize: 9, letterSpacing: 1.5, color: 'rgba(255,255,255,0.6)' }}>DAILY REWARDS</span>
+        <span style={{ fontFamily: 'var(--font-heading)', fontSize: 15, fontWeight: 400, letterSpacing: 0.5, color: '#fbbf24', textShadow: '0 2px 0 rgba(0,0,0,0.6)' }}>MISSIONS</span>
+        <span style={{ fontFamily: 'var(--font-heading)', fontSize: 10, letterSpacing: 0.5, color: 'rgba(255,255,255,0.85)' }}>DAILY REWARDS</span>
       </span>
       {claimable > 0 && <span className="hxh-missions__badge">{claimable}</span>}
     </button>

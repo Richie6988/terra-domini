@@ -45,6 +45,8 @@ class ProgressionViewSet(viewsets.GenericViewSet):
                 {
                     'id': str(m.id),
                     'title': m.title,
+                    'type': m.template.mission_type,
+                    'description': m.template.description,
                     'icon': m.template.icon_emoji,
                     'target': m.target_count,
                     'current': m.current_count,
@@ -282,9 +284,12 @@ def offline_summary(request):
         from terra_domini.apps.territories.models import Territory
         terr_count = Territory.objects.filter(owner=player).count()
 
-        # Estimate offline earnings (avg 10 credits/territory/tick, 288 ticks/day)
-        daily_rate = terr_count * 10 * 288
-        new_tdc = round(daily_rate * (offline_h / 24) * 0.4, 2)  # 40% offline rate
+        # Real numbers only (RULE 1): nothing is credited offline — production waits in the
+        # harvest stock (capped), so report what is actually waiting / was lost.
+        from terra_domini.apps.economy.loop_views import _harvest
+        from terra_domini.apps.accounts.models import Player
+        h = _harvest(Player.objects.get(id=player.id), now)
+        new_tdc = h['pending']
 
         # Update last_login
         player.__class__.objects.filter(id=player.id).update(last_login=now)
@@ -292,6 +297,8 @@ def offline_summary(request):
         return Response({
             'offline_hours': round(offline_h, 1),
             'new_tdc': new_tdc,
+            'harvest_pending': h['pending'],
+            'harvest_lost': h['lost'],
             'territories': terr_count,
             'battles': [],
         })

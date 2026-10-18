@@ -1,68 +1,60 @@
 /**
- * AttackPanel — Combat RISK avancé.
- * Simulation Monte Carlo des probabilités.
- * Sélection tactique : type d'attaque + unités.
- * Dés animés avec résolution réaliste.
+ * AttackPanel — launch an attack on an enemy hex.
+ * Real data only: your garrison from /api/combat/my-army/, the target's defense, terrain bonus and timer from
+ * /api/combat/preview/. The win chance is computed from the exact server formula
+ * (attack power x U(0.9,1.1) vs defense power x U(0.9,1.1), see combat/engine.resolve_battle).
+ * Battles resolve server-side after the timer; the result lands in Military > History and the session nudges.
  */
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
+import { createPortal } from 'react-dom'
 import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query'
 import { StaminaBar } from './StaminaBar'
 import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
-import { usePlayer } from '../../store'
+import { useStore } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import toast from 'react-hot-toast'
-import { Clock, Minus, Plus, ArrowRight, RotateCcw, Info } from 'lucide-react'
+import { Clock, Minus, Plus, ArrowRight, Info, Swords } from 'lucide-react'
 import { IconSVG } from '../shared/iconBank'
 import type { TerritoryLight } from '../../types'
 
-// ─── Monte Carlo combat simulation ────────────────────────────────────────
-function rollDie(): number { return Math.floor(Math.random() * 6) + 1 }
-
-function simulateBattle(atkUnits: number, defUnits: number, nSims = 500): number {
-  let atkWins = 0
-  for (let i = 0; i < nSims; i++) {
-    let atk = atkUnits, def = defUnits
-    while (atk > 0 && def > 0) {
-      const atkDice = Array.from({ length: Math.min(3, atk) }, rollDie).sort((a,b) => b-a)
-      const defDice = Array.from({ length: Math.min(2, def) }, rollDie).sort((a,b) => b-a)
-      for (let j = 0; j < Math.min(atkDice.length, defDice.length); j++) {
-        if (atkDice[j] > defDice[j]) def--; else atk--
-      }
-    }
-    if (atk > 0) atkWins++
-  }
-  return atkWins / nSims
-}
-
-// ─── Die component ─────────────────────────────────────────────────────────
-function Die({ value, color, delay = 0 }: { value: number; color: string; delay?: number }) {
-  const DOTS: Record<number, [number,number][]> = {
-    1: [[50,50]],
-    2: [[25,25],[75,75]],
-    3: [[25,25],[50,50],[75,75]],
-    4: [[25,25],[75,25],[25,75],[75,75]],
-    5: [[25,25],[75,25],[50,50],[25,75],[75,75]],
-    6: [[25,25],[75,25],[25,50],[75,50],[25,75],[75,75]],
-  }
-  return (
-    <motion.div initial={{ rotateX: 180, opacity: 0 }} animate={{ rotateX: 0, opacity: 1 }}
-      transition={{ delay, type: 'spring', stiffness: 200 }}
-      style={{ width: 44, height: 44, background: color === 'red' ? 'rgba(239,68,68,0.2)' : 'rgba(59,130,246,0.2)', border: `2px solid ${color === 'red' ? '#EF4444' : '#3B82F6'}`, borderRadius: 8, position: 'relative', boxShadow: `0 0 12px ${color === 'red' ? '#EF444440' : '#3B82F640'}` }}>
-      {(DOTS[value] || []).map(([x,y], i) => (
-        <div key={i} style={{ position: 'absolute', width: 8, height: 8, borderRadius: '50%', background: color === 'red' ? '#EF4444' : '#3B82F6', left: `${x}%`, top: `${y}%`, transform: 'translate(-50%,-50%)' }} />
-      ))}
-    </motion.div>
-  )
-}
-
-// ─── Attack type definitions ───────────────────────────────────────────────
 const ATTACK_TYPES = [
-  { id: 'conquest',  label: 'Conquest',  iconId: 'swords',  color: '#EF4444', desc: 'Full invasion — captures territory on win. Slow but decisive.',   timer: '4h+',  riskMult: 1.0 },
-  { id: 'raid',      label: 'Raid',      iconId: 'tornado',  color: '#F59E0B', desc: 'Steals resources without capturing. Fast, lower losses.',          timer: '4h+',  riskMult: 0.7 },
-  { id: 'surprise',  label: 'Surprise',  iconId: 'moon',  color: '#8B5CF6', desc: 'Night strike — ignores some defenses. Higher risk, higher reward.', timer: '2h+', riskMult: 1.3 },
-  { id: 'siege',     label: 'Siege',     iconId: 'castle',  color: '#6382FF', desc: 'Reduces fortifications without capturing. Weakens for next attack.', timer: '4h+', riskMult: 0.5 },
+  { id: 'conquest', label: 'Conquest', iconId: 'swords', color: '#EF4444', desc: 'Full strength. Win and the hex becomes yours.' },
+  { id: 'surprise', label: 'Surprise', iconId: 'moon',   color: '#8B5CF6', desc: 'Resolves twice as fast (less time for them to reinforce), but your troops fight at 85%. Captures on win.' },
 ]
+
+const UNIT_META: Record<string, { name: string; icon: string }> = {
+  infantry: { name: 'Infantry', icon: 'swords' }, cavalry: { name: 'Cavalry', icon: 'horse' },
+  artillery: { name: 'Artillery', icon: 'bomb' }, aerial: { name: 'Aerial', icon: 'plane' },
+  naval: { name: 'Naval', icon: 'ship' }, spy: { name: 'Spy', icon: 'spy' },
+}
+
+interface Preview {
+  can_attack: boolean; reason: string; owner: string | null
+  defense_power: number; defense_points: number; max_defense_points: number
+  atk_per_unit: Record<string, number>; timer_seconds: Record<string, number>
+  surprise_atk_mult: number; roll_spread: number
+}
+
+/** P(A*x > D*y) with x, y ~ U(1-s, 1+s) — same rolls as the server. */
+function winChance(A: number, D: number, s: number): number {
+  if (A <= 0) return 0
+  if (D <= 0) return 1
+  const N = 80; let wins = 0
+  for (let i = 0; i < N; i++) {
+    const x = 1 - s + (2 * s) * (i + 0.5) / N
+    for (let j = 0; j < N; j++) {
+      const y = 1 - s + (2 * s) * (j + 0.5) / N
+      if (A * x > D * y) wins++
+    }
+  }
+  return wins / (N * N)
+}
+
+function fmtDur(sec: number) {
+  const h = Math.floor(sec / 3600), m = Math.round((sec % 3600) / 60)
+  return h > 0 ? (m ? `${h}h ${m}m` : `${h}h`) : `${m}m`
+}
 
 interface Props {
   target: TerritoryLight
@@ -70,208 +62,196 @@ interface Props {
 }
 
 export function AttackPanel({ target, onClose }: Props) {
-  const player   = usePlayer()
-  const qc       = useQueryClient()
+  const qc = useQueryClient()
+  const setActivePanel = useStore(s => s.setActivePanel)
+  const [atkType, setAtkType] = useState('conquest')
+  const [units, setUnits] = useState<Record<string, number>>({})
+  const [launched, setLaunched] = useState<{ msg: string; ends: string; sent: number; prob: number } | null>(null)
+  const initDone = useRef(false)
 
-  const [atkType, setAtkType]   = useState('conquest')
-  const [units, setUnits]       = useState({ infantry: 50, cavalry: 0, artillery: 0, naval: 0 })
-  const [phase, setPhase]       = useState<'setup' | 'rolling' | 'result'>('setup')
-  const [atkDice, setAtkDice]   = useState<number[]>([])
-  const [defDice, setDefDice]   = useState<number[]>([])
-  const [outcome, setOutcome]   = useState<'win' | 'loss' | 'draw' | 'launched' | null>(null)
-  const [launchMsg, setLaunchMsg] = useState('')
-  const [winProb, setWinProb]   = useState(0.5)
+  const { data: army, isLoading: armyLoading } = useQuery<any>({
+    queryKey: ['my-army'],
+    queryFn: () => api.get('/combat/my-army/').then(r => r.data),
+    staleTime: 10000,
+  })
+  const { data: pv, isLoading: pvLoading } = useQuery<Preview>({
+    queryKey: ['combat-preview', target.h3_index],
+    queryFn: () => api.get(`/combat/preview/?target_h3=${target.h3_index}`).then(r => r.data),
+    staleTime: 5000,
+  })
 
-  const typeConf  = ATTACK_TYPES.find(t => t.id === atkType)!
-  const totalUnits = Object.values(units).reduce((a,b) => a+b, 0)
+  const owned: Record<string, number> = useMemo(() => {
+    const o: Record<string, number> = {}
+    Object.entries(army?.units || {}).forEach(([k, u]: [string, any]) => { if ((u?.owned || 0) > 0) o[k] = u.owned })
+    return o
+  }, [army])
+  const ownedTypes = Object.keys(owned)
+  const totalOwned = ownedTypes.reduce((a, k) => a + owned[k], 0)
 
-  // Recalculate win probability when units change
-  useEffect(() => {
-    const defUnits = Math.max(10, (target.defense_tier ?? 0) * 25 + 20)
-    const prob = simulateBattle(totalUnits, defUnits) * typeConf.riskMult
-    setWinProb(Math.min(0.95, Math.max(0.05, prob)))
-  }, [units, atkType, target.defense_tier])
+  // Default: send everything you have (players can trim it down)
+  useEffect(() => { if (army && !initDone.current) { initDone.current = true; setUnits({ ...owned }) } }, [army]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const typeConf = ATTACK_TYPES.find(t => t.id === atkType)!
+  const totalUnits = Object.values(units).reduce((a, b) => a + (b || 0), 0)
+  const atkPower = pv ? Object.entries(units).reduce((a, [k, n]) => a + (pv.atk_per_unit[k] || 0) * (n || 0), 0)
+    * (atkType === 'surprise' ? pv.surprise_atk_mult : 1) : 0
+  const prob = pv ? winChance(atkPower, pv.defense_power, pv.roll_spread) : 0
+  const probColor = prob >= 0.65 ? '#22c55e' : prob >= 0.35 ? '#F59E0B' : '#EF4444'
+  const timer = pv?.timer_seconds?.[atkType] ?? 0
+  // Smallest infantry count that wins at least 90% of the time — the actionable hint when odds are bad
+  const infAtk = pv?.atk_per_unit?.infantry || 0
+  const needInf = pv && infAtk > 0 ? Math.ceil((pv.defense_power * 1.1 / 0.9) / (infAtk * (atkType === 'surprise' ? pv.surprise_atk_mult : 1))) : 0
 
   const attackMut = useMutation({
     mutationFn: () => api.post('/combat/attack/', {
       target_h3: target.h3_index,
       attack_type: atkType,
-      units,
+      units: Object.fromEntries(Object.entries(units).filter(([, n]) => n > 0)),
     }),
     onSuccess: (res) => {
-      // Battles resolve server-side after a timer — no instant outcome to show
-      setLaunchMsg(res.data?.message || 'Attack launched!')
-      setOutcome('launched')
-      setPhase('result')
+      setLaunched({ msg: res.data?.message || 'Attack launched!', ends: res.data?.ends_at, sent: totalUnits, prob })
       qc.invalidateQueries({ queryKey: ['battles-active'] })
       qc.invalidateQueries({ queryKey: ['my-army'] })
+      qc.invalidateQueries({ queryKey: ['loop-status'] })
     },
     onError: (e: any) => {
       const data = e.response?.data
-      if (e.response?.status === 429 && data?.next_slot_label) {
-        toast.error(`No slots — next in ${data.next_slot_label}`, { duration: 5000 })
-      } else {
-        toast.error(data?.error || 'Attack failed')
-      }
+      if (e.response?.status === 429 && data?.next_slot_label) toast.error(`No attack slots left — next in ${data.next_slot_label}`, { duration: 5000 })
+      else toast.error(data?.error || 'Attack failed')
     },
   })
 
-  const probColor = winProb >= 0.65 ? '#22c55e' : winProb >= 0.4 ? '#F59E0B' : '#EF4444'
+  const blocked = pv && !pv.can_attack
+  const step = (k: string, d: number) => setUnits(p => ({ ...p, [k]: Math.min(owned[k] || 0, Math.max(0, (p[k] || 0) + d)) }))
 
-  return (
+  // Portal to <body>: rendered from GameMap, the panel otherwise sits under the HUD's stacking context on phones
+  return createPortal(
     <GlassPanel title="ATTACK" onClose={onClose} accent="#dc2626" width={560}
       icon={<IconSVG id="target" size={24} />} subtitle={target.place_name || 'Enemy zone'}>
       {/* Target info */}
       <div className="hx-card" style={{ marginBottom: 14, display: 'flex', alignItems: 'center', gap: 12 }}>
         <IconSVG id="flag_red" size={40} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800, letterSpacing: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{target.place_name || 'ENEMY ZONE'}</div>
+          <div style={{ fontSize: 13, color: '#e2e8f0', fontWeight: 800, letterSpacing: 0.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{target.place_name || 'ENEMY ZONE'}</div>
           <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-            <span className="hx-chip">OWNER <span style={{ color: '#e2e8f0' }}>{target.owner_username ?? 'Unknown'}</span></span>
-            {target.defense_tier > 0 && <span className="hx-chip hx-chip--accent">DEFENSE TIER {target.defense_tier}</span>}
+            <span className="hx-chip">OWNER <span style={{ color: '#e2e8f0' }}>{pv?.owner ?? target.owner_username ?? 'Unknown'}</span></span>
+            <span className="hx-chip" style={{ color: '#93c5fd' }}><IconSVG id="ui_shield" size={12} /> DEFENSE {pv ? Math.round(pv.defense_power) : '…'}</span>
           </div>
         </div>
       </div>
 
-      <div>
-        <AnimatePresence mode="wait">
-
-          {/* SETUP */}
-          {phase === 'setup' && (
-            <motion.div key="setup" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-
-              {/* Attack type */}
-              <div className="hx-section-title">ATTACK TYPE</div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))', gap: 8, marginBottom: 18 }}>
-                {ATTACK_TYPES.map(t => (
-                  <button key={t.id} onClick={() => setAtkType(t.id)}
-                    aria-pressed={atkType === t.id}
-                    className="hx-card hx-card--interactive"
-                    style={{ ['--accent' as any]: t.color, padding: 12, borderColor: atkType === t.id ? t.color : undefined, background: atkType === t.id ? `linear-gradient(180deg, ${t.color}26, ${t.color}08)` : undefined, boxShadow: atkType === t.id ? `0 0 16px ${t.color}30` : undefined, textAlign: 'left', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                    <IconSVG id={t.iconId} size={34} />
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 1.5, color: atkType === t.id ? '#fff' : '#e2e8f0' }}>{t.label}</div>
-                      <div style={{ fontSize: 11, color: 'var(--hx-text-2)', marginTop: 4, lineHeight: 1.4, fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0 }}>{t.desc}</div>
-                      <span className="hx-chip" style={{ marginTop: 8, color: t.color }}><Clock size={11} /> {t.timer}</span>
-                    </div>
-                  </button>
-                ))}
+      <AnimatePresence mode="wait">
+        {!launched && (
+          <motion.div key="setup" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            {blocked && (
+              <div className="hx-card" style={{ marginBottom: 14, borderColor: '#f59e0b', color: '#fde68a', fontSize: 12 }}>
+                You can't attack this hex right now: {pv!.reason}.
               </div>
+            )}
 
-              {/* Units */}
-              <div className="hx-section-title">DEPLOY FORCES</div>
-              {[
-                { key: 'infantry', emoji: 'swords', name: 'Infantry', max: 999 },
-                { key: 'cavalry',  emoji: 'horse', name: 'Cavalry',  max: 999 },
-                { key: 'artillery',emoji: 'bomb', name: 'Artillery',max: 999 },
-              ].map(u => (
-                <div key={u.key} className="hx-card" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, padding: '8px 12px' }}>
-                  <IconSVG id={u.emoji} size={30} />
-                  <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: 1.5, color: '#e2e8f0', flex: 1 }}>{u.name}</span>
-                  <button onClick={() => setUnits(p => ({ ...p, [u.key]: Math.max(0, (p[u.key as keyof typeof p] ?? 0) - 10) }))}
-                    aria-label={`Remove 10 ${u.name}`} className="hx-icon-btn"><Minus size={16} /></button>
-                  <span style={{ minWidth: 48, textAlign: 'center', fontFamily: "'Share Tech Mono', monospace", color: '#e2e8f0', fontSize: 18 }}>
-                    {units[u.key as keyof typeof units]}
-                  </span>
-                  <button onClick={() => setUnits(p => ({ ...p, [u.key]: (p[u.key as keyof typeof p] ?? 0) + 10 }))}
-                    aria-label={`Add 10 ${u.name}`} className="hx-icon-btn" style={{ color: '#f87171', borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.12)' }}><Plus size={16} /></button>
-                </div>
+            {/* Attack type */}
+            <div className="hx-section-title">ATTACK TYPE</div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 220px), 1fr))', gap: 8, marginBottom: 18 }}>
+              {ATTACK_TYPES.map(t => (
+                <button key={t.id} onClick={() => setAtkType(t.id)} aria-pressed={atkType === t.id}
+                  className="hx-card hx-card--interactive"
+                  style={{ ['--accent' as any]: t.color, padding: 12, borderColor: atkType === t.id ? t.color : undefined, background: atkType === t.id ? `linear-gradient(180deg, ${t.color}40, ${t.color}14)` : undefined, textAlign: 'left', display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                  <IconSVG id={t.iconId} size={34} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: 0.5, color: '#fff' }}>{t.label}</div>
+                    <div style={{ fontSize: 11, color: 'var(--hx-text-2)', marginTop: 4, lineHeight: 1.4, fontFamily: 'var(--font-body)', textTransform: 'none', letterSpacing: 0 }}>{t.desc}</div>
+                    <span className="hx-chip" style={{ marginTop: 8, color: t.color }}><Clock size={11} /> {pv ? `Resolves in ${fmtDur(pv.timer_seconds[t.id] || 0)}` : '…'}</span>
+                  </div>
+                </button>
               ))}
+            </div>
 
-              {/* Win probability */}
+            {/* Units — only what you actually own */}
+            <div className="hx-section-title">DEPLOY FORCES</div>
+            {armyLoading && <div className="hx-skeleton" style={{ height: 56, borderRadius: 12, marginBottom: 8 }} />}
+            {!armyLoading && totalOwned === 0 && (
+              <div className="hx-empty" style={{ marginBottom: 12 }}>
+                <Swords size={32} color="#f87171" />
+                <div className="hx-empty__title">NO TROOPS READY</div>
+                <div>Recruit units in Military, wait for training, then collect them.</div>
+                <button className="btn-game btn-game-red" onClick={() => { onClose(); setActivePanel('combat') }} style={{ marginTop: 6 }}>OPEN MILITARY</button>
+              </div>
+            )}
+            {ownedTypes.map(k => (
+              <div key={k} className="hx-card" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8, padding: '8px 12px' }}>
+                <IconSVG id={UNIT_META[k]?.icon || 'swords'} size={30} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 700, letterSpacing: 0.5, color: '#e2e8f0' }}>{UNIT_META[k]?.name || k}</div>
+                  <div style={{ fontSize: 10, color: 'var(--hx-text-3)' }}>{owned[k]} available · {pv ? `${pv.atk_per_unit[k] ?? 0} atk each` : ''}</div>
+                </div>
+                <button onClick={() => step(k, -1)} aria-label={`Remove 1 ${k}`} className="hx-icon-btn"><Minus size={16} /></button>
+                <span style={{ minWidth: 40, textAlign: 'center', fontFamily: 'var(--font-mono)', color: '#e2e8f0', fontSize: 18 }}>{units[k] || 0}</span>
+                <button onClick={() => step(k, +1)} aria-label={`Add 1 ${k}`} className="hx-icon-btn" style={{ color: '#f87171', borderColor: 'rgba(239,68,68,0.4)', background: 'rgba(239,68,68,0.12)' }}><Plus size={16} /></button>
+              </div>
+            ))}
+
+            {/* Win chance — exact server formula */}
+            {totalOwned > 0 && (
               <div className="hx-card" style={{ marginTop: 14, marginBottom: 16 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, gap: 8 }}>
                   <div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--hx-text-2)' }}>
-                      WIN CHANCE <span className="hx-chip" style={{ color: '#fbbf24', borderColor: 'rgba(251,191,36,0.4)' }}>ESTIMATE</span>
-                    </div>
-                    <div style={{ fontSize: 9, color: 'var(--hx-text-3)', marginTop: 4 }}>{totalUnits} UNITS DEPLOYED</div>
+                    <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--hx-text-2)' }}>WIN CHANCE</div>
+                    <div style={{ fontSize: 11, color: 'var(--hx-text-3)', marginTop: 4 }}>Your attack {Math.round(atkPower)} vs defense {pv ? Math.round(pv.defense_power) : '…'}</div>
                   </div>
-                  <span style={{ fontSize: 28, color: probColor, fontFamily: "'Share Tech Mono', monospace" }}>~{(winProb * 100).toFixed(0)}%</span>
+                  <span style={{ fontSize: 28, color: probColor, fontFamily: 'var(--font-mono)' }}>{pvLoading ? '…' : `${Math.round(prob * 100)}%`}</span>
                 </div>
-                <div style={{ height: 8, background: 'rgba(255,255,255,0.08)', borderRadius: 4, overflow: 'hidden', marginBottom: 6 }}>
-                  <motion.div animate={{ width: `${winProb * 100}%` }} transition={{ type: 'spring' }}
-                    style={{ height: '100%', background: `linear-gradient(90deg, ${probColor}, ${probColor}88)`, borderRadius: 4 }} />
+                <div className="hx-progress" style={{ ['--accent' as any]: probColor }}>
+                  <div className="hx-progress__fill" style={{ width: `${prob * 100}%` }} />
                 </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 10, color: probColor }}>Attack {(winProb * 100).toFixed(0)}%</span>
-                  <span style={{ fontSize: 10, color: 'var(--hx-text-3)' }}>Defense {((1 - winProb) * 100).toFixed(0)}%</span>
-                </div>
-                <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginTop: 10, fontSize: 11, lineHeight: 1.4, color: 'var(--hx-text-3)', fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0 }}>
+                {prob < 0.9 && needInf > 0 && (
+                  <div style={{ fontSize: 11, color: '#fde68a', marginTop: 8 }}>About {needInf} infantry would make this a sure win.</div>
+                )}
+                <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginTop: 10, fontSize: 11, lineHeight: 1.4, color: 'var(--hx-text-3)', fontFamily: 'var(--font-body)', textTransform: 'none', letterSpacing: 0 }}>
                   <Info size={13} style={{ flexShrink: 0, marginTop: 1 }} />
-                  Client-side dice simulation for guidance only. The server resolves the real battle after the timer.
+                  Each side rolls ±10%. The defender can reinforce before the timer ends. Survivors come back to your army; losers lose 30–60% of the units sent.
                 </div>
               </div>
+            )}
 
-              <button onClick={() => attackMut.mutate()} disabled={attackMut.isPending || totalUnits === 0}
-                className="btn-game btn-game-red"
-                style={{ width: '100%', padding: '15px', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-                <IconSVG id={typeConf.iconId} size={20} />
-                {attackMut.isPending ? 'Launching…' : `LAUNCH ${(typeConf.label || "").toUpperCase()}`}
+            <button onClick={() => attackMut.mutate()} disabled={attackMut.isPending || totalUnits === 0 || !!blocked}
+              className="btn-game btn-game-red"
+              style={{ width: '100%', padding: '15px', fontSize: 13, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+              <IconSVG id={typeConf.iconId} size={20} />
+              {attackMut.isPending ? 'Launching…' : `LAUNCH ${typeConf.label.toUpperCase()} · ${totalUnits} UNITS`}
+            </button>
+            <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center' }}>
+              <StaminaBar />
+            </div>
+          </motion.div>
+        )}
+
+        {launched && (
+          <motion.div key="result" initial={{ scale: 0.85, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} style={{ textAlign: 'center', paddingTop: 20 }}>
+            <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.6 }} style={{ marginBottom: 14, display: 'flex', justifyContent: 'center' }}>
+              <IconSVG id="swords" size={84} />
+            </motion.div>
+            <div style={{ fontFamily: 'var(--font-heading)', fontSize: 24, letterSpacing: 0.5, color: '#fff', textShadow: '0 2px 0 rgba(0,0,0,0.5)', marginBottom: 8 }}>ATTACK LAUNCHED</div>
+            <div style={{ fontSize: 13, color: 'var(--hx-text-2)', marginBottom: 6, lineHeight: 1.5 }}>
+              {launched.sent} units marching on {target.place_name || 'the enemy hex'}.
+            </div>
+            <div className="hx-chip" style={{ color: '#fbbf24', fontSize: 12, marginBottom: 16 }}>
+              <Clock size={12} /> Result {launched.ends ? `at ${new Date(launched.ends).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : `in ${fmtDur(timer)}`}
+            </div>
+            <div style={{ fontSize: 12, color: 'var(--hx-text-3)', marginBottom: 20, lineHeight: 1.5 }}>
+              Your win chance was {Math.round(launched.prob * 100)}%. You'll get a notice when it resolves; the outcome is kept in Military &gt; History.
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button onClick={() => { onClose(); setActivePanel('combat') }}
+                className="btn-game btn-game-glass" style={{ flex: 1 }}>MILITARY</button>
+              <button onClick={onClose}
+                className="btn-game btn-game-green" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+                BACK TO MAP <ArrowRight size={14} />
               </button>
-              <div style={{ marginTop: 10, display: 'flex', justifyContent: 'center' }}>
-                <StaminaBar />
-              </div>
-            </motion.div>
-          )}
-
-          {/* ROLLING DICE */}
-          {phase === 'rolling' && (
-            <motion.div key="rolling" initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', minHeight: 300, gap: 24 }}>
-              <div style={{ fontSize: 14, color: 'rgba(255,255,255,0.35)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>Rolling dice…</div>
-              <div>
-                <div style={{ fontSize: 11, color: '#EF4444', textAlign: 'center', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Attacker</div>
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                  {atkDice.map((v, i) => <Die key={i} value={v} color="red" delay={i * 0.1} />)}
-                </div>
-              </div>
-              <div style={{ fontSize: 20, color: 'rgba(255,255,255,0.3)' }}>vs</div>
-              <div>
-                <div style={{ fontSize: 11, color: '#3B82F6', textAlign: 'center', marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Defender</div>
-                <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                  {defDice.map((v, i) => <Die key={i} value={v} color="blue" delay={0.3 + i * 0.1} />)}
-                </div>
-              </div>
-            </motion.div>
-          )}
-
-          {/* RESULT */}
-          {phase === 'result' && outcome && (
-            <motion.div key="result" initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
-              style={{ textAlign: 'center', paddingTop: 30 }}>
-              <motion.div animate={{ scale: [1, 1.2, 1] }} transition={{ duration: 0.6 }}
-                style={{ marginBottom: 14, display: 'flex', justifyContent: 'center', filter: 'drop-shadow(0 0 18px rgba(220,38,38,0.45))' }}>
-                <IconSVG id={outcome === 'launched' ? 'swords' : outcome === 'win' ? 'trophy' : outcome === 'loss' ? 'skull' : 'scales'} size={84} />
-              </motion.div>
-              <div style={{ fontSize: 22, fontWeight: 900, letterSpacing: 3, color: outcome === 'launched' ? '#f87171' : outcome === 'win' ? '#22c55e' : outcome === 'loss' ? '#EF4444' : '#F59E0B', marginBottom: 8 }}>
-                {outcome === 'launched' ? 'ATTACK LAUNCHED' : outcome === 'win' ? 'VICTORY!' : outcome === 'loss' ? 'DEFEATED' : 'STANDOFF'}
-              </div>
-              <div style={{ fontSize: 13, color: 'var(--hx-text-2)', marginBottom: 24, lineHeight: 1.6, fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0 }}>
-                {outcome === 'launched'
-                  ? launchMsg
-                  : outcome === 'win'
-                  ? atkType === 'conquest'
-                    ? `${target.place_name || 'Territory'} is now under your control!`
-                    : 'Raid successful — resources plundered!'
-                  : outcome === 'loss'
-                    ? 'Your forces were repelled. Reinforce and try again.'
-                    : 'Both sides withdrew. The territory remains contested.'}
-              </div>
-              <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => { setPhase('setup'); setOutcome(null) }}
-                  className="btn-game btn-game-glass" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                  <RotateCcw size={14} /> ATTACK AGAIN
-                </button>
-                <button onClick={onClose}
-                  className="btn-game btn-game-green" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-                  BACK TO MAP <ArrowRight size={14} />
-                </button>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-    </GlassPanel>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </GlassPanel>,
+    document.body,
   )
 }

@@ -3,7 +3,7 @@
  * Opens Token3DViewer (Richard's holographic 3D token) as the PRIMARY experience.
  * Territory info panel overlaid on the left.
  */
-import { useMemo, useState, useCallback, useEffect } from 'react'
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { Token3DViewer } from '../shared/Token3DViewer'
@@ -54,6 +54,11 @@ const BIOME_RES: Record<string, { res:string; icon:string; amount:number }[]> = 
 const BIOME_RES_MAPPED = BIOME_RES
 
 
+const fmtHours = (h: number) => {
+  const m = Math.round((Number(h) || 0) * 60)
+  return m >= 60 ? `${Math.floor(m / 60)}h${m % 60 ? ` ${m % 60}m` : ''}` : `${Math.max(1, m)} min`
+}
+
 /* ── Main HexCard ────────────────────────────────────────── */
 export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = false }:{
   territory:any; onClose:()=>void; onRequestClaim?:()=>void; isNewClaim?: boolean
@@ -91,17 +96,23 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
 
   // Claim options from backend
   const [claimOpts, setClaimOpts] = useState<any>(null)
+  const [optsError, setOptsError] = useState(false)
+  const [optsTry, setOptsTry] = useState(0)
   const [claiming, setClaiming] = useState(false)
   const [celebrating, setCelebrating] = useState(false)
+  const [bonusHex, setBonusHex] = useState(0)
 
-  // Fetch claim options when card opens
+  // Fetch claim options for THIS hex (re-runs when the player switches hex or the profile loads late —
+  // a [] dependency left a stale/missing option set and fell back to a FREE claim that the server refuses)
   useEffect(() => {
-    if (t.h3_index && player && isFree) {
-      api.get(`/territories/claim-options/?h3_index=${t.h3_index}`).then(r => {
-        setClaimOpts(r.data)
-      }).catch(() => {})
-    }
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+    setClaimOpts(null); setOptsError(false)
+    if (!t.h3_index || !player?.id || !isFree) return
+    let alive = true
+    api.get(`/territories/claim-options/?h3_index=${t.h3_index}`)
+      .then(r => { if (alive) setClaimOpts(r.data) })
+      .catch(() => { if (alive) setOptsError(true) })
+    return () => { alive = false }
+  }, [t.h3_index, player?.id, isFree, optsTry])
 
   const handleClaim = useCallback(async (method: string) => {
     if (claiming || !t.h3_index) return
@@ -113,17 +124,27 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
         lat: t.center_lat ?? t.lat,
         lon: t.center_lon ?? t.lon,
       })
-      if (res.data.status === 'exploration_started') {
-        toast.success(`Exploration started! ${res.data.hours_required}h remaining`)
+      if (res.data.status === 'exploration_started' || res.data.status === 'in_progress') {
+        // Exploration is NOT a claim yet: no local ownership, no celebration (RULE 1)
+        const secs = Number(res.data.eta_seconds ?? (res.data.hours_required || 0) * 3600)
+        const left = secs >= 3600 ? `${Math.floor(secs / 3600)}h ${Math.round((secs % 3600) / 60)}m` : `${Math.max(1, Math.round(secs / 60))} min`
+        toast.success(res.data.status === 'in_progress'
+          ? `Still exploring — ${left} left. Come back to finish the claim.`
+          : `Exploration started — ${left}. Come back to finish the claim.`, { duration: 5000 })
+        qc.invalidateQueries({ queryKey: ['pending-claims'] })
         setClaiming(false)
+        onClose()
         return
       }
       const owned = { ...t, owner_id: player?.id, owner_username: player?.username }
       useStore.getState().setTerritories([owned as any])
-      qc.invalidateQueries({ queryKey: ['player'] })
-      qc.invalidateQueries({ queryKey: ['wallet'] })
-      qc.invalidateQueries({ queryKey: ['kingdoms'] })
-      qc.invalidateQueries({ queryKey: ['my-territories'] })
+      if (typeof res.data.balance === 'number') {
+        const s = useStore.getState()
+        s.setBalance({ ...(s.balance || {}), in_game: res.data.balance } as any)
+      }
+      setBonusHex(Number(res.data.bonus_hex) || 0)
+      ;['player', 'wallet', 'kingdoms', 'my-territories', 'loop-status', 'daily-missions', 'pending-claims']
+        .forEach(k => qc.invalidateQueries({ queryKey: [k] }))
       play('claim')
       setCelebrating(true)
     } catch (err: any) {
@@ -135,6 +156,17 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
     }
   }, [claiming, t, player])
 
+
+  // Stable callback: ClaimCelebration restarts its animation whenever onComplete changes identity,
+  // so an inline arrow (new on every re-render after the claim invalidations) meant it never finished.
+  const doneRef = useRef<() => void>(() => {})
+  doneRef.current = () => {
+    setCelebrating(false)
+    if (bonusHex > 0) toast.success(`+${bonusHex} HEX starter bonus`, { duration: 4000 })
+    window.dispatchEvent(new CustomEvent('hexod:claim-celebrated'))
+    onClose()
+  }
+  const onCelebrated = useCallback(() => doneRef.current(), [])
 
   // For owned territories, wrap as kingdom-like shape for OwnedTerritoryHub
   const asKingdom = useMemo(() => ({
@@ -164,7 +196,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
     {isOwned && <OwnedTerritoryHub kingdom={asKingdom as any} onClose={onClose} />}
 
     {/* NON-OWNED hex (free or enemy): keep Token3D as primary for claim flow */}
-    {!isOwned && createPortal(
+    {!isOwned && !celebrating && createPortal(
     <Token3DViewer
       visible={true}
       onClose={onClose}
@@ -177,7 +209,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
       maxSupply={cfg.serieMax}
       edition="GENESIS"
       biome={(biome || 'rural').toUpperCase()}
-      power={t.poi_geo_score || Math.floor(Math.random() * 50) + 50}
+      power={t.poi_geo_score || 50}
       rarity={rarity === 'mythic' ? 99 : rarity === 'legendary' ? 95 : rarity === 'epic' ? 85 : rarity === 'rare' ? 70 : rarity === 'uncommon' ? 50 : 30}
       infoPanel={
         <div style={{
@@ -185,11 +217,11 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
           position: 'relative', overflow: 'hidden',
           width: 'min(600px, calc(100vw - 24px))', boxSizing: 'border-box',
           padding: '14px 16px 16px', borderRadius: 18,
-          background: `radial-gradient(120% 90% at 0% 0%, ${cfg.c}22 0%, transparent 55%), linear-gradient(180deg, rgba(14,26,44,0.97), rgba(6,12,24,0.98))`,
-          backdropFilter: 'blur(30px) saturate(1.2)',
-          border: `1.5px solid ${cfg.c}aa`,
-          boxShadow: `0 18px 50px rgba(0,0,0,0.6), 0 0 ${Math.max(12, cfg.glow)}px ${cfg.c}44, inset 0 1px 0 rgba(255,255,255,0.08)`,
-          fontFamily: "'Orbitron', system-ui, sans-serif",
+          // UI kit v2 (cartoon): royal-blue panel, dark outline, 3D bottom shadow, no neon glow
+          background: 'linear-gradient(180deg, #2f5fd0 0%, #1e3c8f 100%)',
+          border: '3px solid #0f2266',
+          boxShadow: '0 6px 0 #0f2266, 0 18px 40px rgba(0,0,0,0.45), inset 0 2px 0 rgba(255,255,255,0.18)',
+          fontFamily: 'var(--font-heading)',
           display: 'flex', flexDirection: 'column', gap: 12,
         }}>
           {/* Rarity foil strip */}
@@ -205,7 +237,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 fontSize: cfg.grade.length > 1 ? 13 : 16, fontWeight: 900, color: cfg.accent }}>{cfg.grade}</div>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 16, fontWeight: 900, color: '#fff', letterSpacing: 1.5,
+              <div style={{ fontSize: 20, fontWeight: 400, color: '#fff', letterSpacing: 0.5, textShadow: '0 2px 0 rgba(0,0,0,0.45)',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {cardName.toUpperCase()}
               </div>
@@ -230,22 +262,43 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
             ].map(st => (
               <div key={st.label} style={{
                 padding: '8px 10px', borderRadius: 10, minWidth: 0,
-                background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
-                boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)',
+                background: 'rgba(8,20,60,0.45)', border: '2px solid rgba(15,34,102,0.7)',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: 'rgba(255,255,255,0.5)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, letterSpacing: 0.5, color: '#b9cdf5' }}>
                   {st.icon}{st.label}
                 </div>
                 <div style={{
                   marginTop: 4, color: st.color, lineHeight: 1.1,
-                  fontFamily: st.text ? "'Orbitron', sans-serif" : "'Share Tech Mono', monospace",
-                  fontSize: st.text ? 12 : 19, fontWeight: st.text ? 800 : 400,
+                  fontFamily: 'var(--font-heading)', textShadow: '0 2px 0 rgba(0,0,0,0.35)',
+                  fontSize: st.text ? 14 : 20, fontWeight: 400,
                   overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
                 }}>{st.value}</div>
-                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)', letterSpacing: 1, marginTop: 2 }}>{st.unit}</div>
+                <div style={{ fontSize: 10, color: '#b9cdf5', letterSpacing: 0.5, marginTop: 2 }}>{st.unit}</div>
               </div>
             ))}
           </div>
+
+          {/* Plain-language context: why this price, what explore means, what you can afford */}
+          {isFree && player && claimOpts && !claimOpts.locked && (() => {
+            const buy = claimOpts.options?.find((o: any) => o.method === 'buy')
+            const exp = claimOpts.options?.find((o: any) => o.method === 'explore')
+            const bal = Math.floor(Number(buy?.balance ?? claimOpts.balance ?? 0))
+            const lines: string[] = []
+            if (claimOpts.is_first) lines.push('Your first zone is free. It starts filling your HARVEST stock right away.')
+            else {
+              lines.push(claimOpts.is_adjacent
+                ? 'Next to your kingdom: best price.'
+                : 'Not touching your kingdom: costs more and explores slower. Pick a hex next to your land to save.')
+              if (buy && !buy.available) lines.push(`You have ${bal.toLocaleString()} HEX: ${Math.ceil(buy.cost - bal).toLocaleString()} more needed. Collect your harvest or claim mission rewards.`)
+              if (exp) lines.push(`Explore is free but takes ${fmtHours(exp.hours)}. Come back after that and tap EXPLORE again to take the zone.`)
+            }
+            return (
+              <div style={{ fontSize: 12, lineHeight: 1.45, color: '#dbe8ff', fontWeight: 600, fontFamily: 'var(--font-body)', textTransform: 'none', letterSpacing: 0,
+                padding: '8px 10px', borderRadius: 10, background: 'rgba(8,20,60,0.45)', border: '2px solid rgba(15,34,102,0.7)' }}>
+                {lines.map((l, i) => <div key={i}>{l}</div>)}
+              </div>
+            )
+          })()}
 
           {/* Actions — based on claim options */}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -254,7 +307,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 minHeight: 44, padding: '8px 14px', borderRadius: 12,
                 background: 'rgba(255,255,255,0.05)', border: '1px dashed rgba(255,255,255,0.18)',
-                color: 'rgba(255,255,255,0.65)', fontSize: 10, fontWeight: 700, letterSpacing: 1.2, textAlign: 'center',
+                color: 'rgba(255,255,255,0.65)', fontSize: 12, fontWeight: 700, letterSpacing: 0.5, textAlign: 'center',
               }}>
                 <Lock size={14} />
                 <span>LOCKED{claimOpts?.locked_reason ? ` — ${String(claimOpts.locked_reason).toUpperCase()}` : ''}</span>
@@ -265,27 +318,30 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
                 className={`btn-game ${opt.method === 'free' ? 'btn-game-green' : opt.method === 'buy' ? 'btn-game-gold' : 'btn-game-blue'}`}
                 style={{
                   flex: '1 1 140px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                  fontSize: 11, letterSpacing: 1.5,
+                  fontSize: 13, letterSpacing: 0.5,
                   opacity: (claiming || !opt.available) ? 0.5 : 1,
                   cursor: claiming ? 'wait' : opt.available ? 'pointer' : 'not-allowed',
                 }}>
                 {opt.method === 'free' ? <Crown size={15} /> : opt.method === 'buy' ? <IconSVG id="hex_coin" size={16} /> : <Compass size={15} />}
-                {claiming ? '...' : opt.method === 'free' ? 'FREE CLAIM' : opt.method === 'buy' ? `BUY · ${opt.cost} HEX` : `EXPLORE ${opt.hours}h`}
+                {claiming ? '...' : opt.method === 'free' ? 'FREE CLAIM' : opt.method === 'buy' ? `BUY · ${opt.cost} HEX` : `EXPLORE · ${fmtHours(opt.hours)}`}
               </button>
             ))}
-            {isFree && player && !claimOpts && (
-              <button onClick={() => handleClaim('free')} disabled={claiming} className="btn-game btn-game-green" style={{
-                flex: 1, minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 11, letterSpacing: 1.5,
-              }}><Crown size={15} />CLAIM</button>
+            {isFree && player && !claimOpts && !optsError && (
+              <div className="hx-skeleton" style={{ flex: 1, minHeight: 44, borderRadius: 12 }} aria-label="Loading claim options" />
+            )}
+            {isFree && player && optsError && (
+              <button onClick={() => setOptsTry(n => n + 1)} className="btn-game btn-game-blue" style={{
+                flex: 1, minHeight: 44, fontSize: 12, letterSpacing: 0.5,
+              }}>COULD NOT LOAD PRICES — RETRY</button>
             )}
             {isEnemy && (
               <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('combat'), 100) }} className="btn-game btn-game-red" style={{
-                flex: 1, minHeight: 46, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 12, letterSpacing: 2,
+                flex: 1, minHeight: 46, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10, fontSize: 14, letterSpacing: 0.5,
               }}><Swords size={17} />ATTACK</button>
             )}
             {isOwned && (
               <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('kingdom'), 100) }} className="btn-game btn-game-blue" style={{
-                flex: 1, minHeight: 44, fontSize: 11, letterSpacing: 1.5,
+                flex: 1, minHeight: 44, fontSize: 13, letterSpacing: 0.5,
               }}>KINGDOM</button>
             )}
           </div>
@@ -299,7 +355,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, isNewClaim = fal
       visible={celebrating}
       territoryName={cardName.toUpperCase()}
       rarity={rarity}
-      onComplete={() => { setCelebrating(false); onClose() }}
+      onComplete={onCelebrated}
     />,
     document.body
   )}

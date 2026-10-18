@@ -218,6 +218,7 @@ def collect_training(request):
             player=player,
             unit_type=q.unit_type,
             status='garrison',
+            territory=None,  # free army pool (territory garrisons are separate stacks)
             defaults={'count': 0},
         )
         unit.count += q.quantity
@@ -257,7 +258,7 @@ def assign_to_kingdom(request):
 
     # Check available units
     try:
-        unit = MilitaryUnit.objects.get(player=player, unit_type=unit_type, status='garrison')
+        unit = MilitaryUnit.objects.get(player=player, unit_type=unit_type, status='garrison', territory=None)
     except MilitaryUnit.DoesNotExist:
         return Response({'error': f'No {unit_type} units available'}, status=400)
 

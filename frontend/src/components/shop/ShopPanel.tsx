@@ -27,13 +27,12 @@ const RARITY_COLOR: Record<string,string> = {
 }
 
 const CATS = [
-  { id:'boosters',  label:'Boosters',  iconId:'gift',        color:'#cc8800' },
-  { id:'attack',    label:'Attack',    iconId:'swords',      color:'#dc2626' },
-  { id:'defense',   label:'Defense',   iconId:'ui_shield',   color:'#3b82f6' },
-  { id:'resources', label:'Resources', iconId:'pickaxe',     color:'#cc8800' },
-  { id:'chance',    label:'Chance',    iconId:'clover',      color:'#22c55e' },
-  { id:'influence', label:'Influence', iconId:'megaphone',   color:'#a855f7' },
-  { id:'customize', label:'Customize', iconId:'palette',     color:'#ec4899' },
+  { id:'boosters',   label:'Boosters', iconId:'gift',      color:'#cc8800' },
+  { id:'attack',     label:'Attack',   iconId:'swords',    color:'#dc2626' },
+  { id:'defense',    label:'Defense',  iconId:'ui_shield', color:'#3b82f6' },
+  { id:'economy',    label:'Economy',  iconId:'pickaxe',   color:'#cc8800' },
+  { id:'collection', label:'Chance',   iconId:'clover',    color:'#22c55e' },
+  { id:'social',     label:'Social',   iconId:'megaphone', color:'#a855f7' },
 ]
 
 // ═══ SHOP CATALOG — ported from main_prototype.html ═══
@@ -46,44 +45,26 @@ const BOOSTERS = [
     desc:'5 free territories\n1 Legendary guaranteed', code:'booster_legendary' },
 ]
 
-const SHOP_ITEMS: Record<string, Array<{id:string; name:string; desc:string; price:number; icon:string; code:string}>> = {
-  attack: [
-    { id:'a1', name:'2X TERRITORY MINT SPEED',  desc:'Double your territory minting speed for 24 hours',         price:150, icon:'swords', code:'atk_2x_army' },
-    { id:'a2', name:'DISTANT TERRITORY UNLOCK', desc:'Mint territories outside your adjacent zone (1 use)',       price:300, icon:'target', code:'atk_distant' },
-    { id:'a3', name:'2X ARMY POWER',            desc:'Double army strength in all combats for 24 hours',          price:250, icon:'muscle', code:'atk_2x_army' },
-    { id:'a4', name:'BLITZ MODE',               desc:'Instant deployment — skip all training time for 12h',       price:400, icon:'lightning', code:'atk_blitz' },
-  ],
-  defense: [
-    { id:'d1', name:'72H KINGDOM SHIELD',       desc:'Full protection from attacks on one kingdom',              price:500, icon:'ui_shield', code:'def_shield_72h' },
-    { id:'d2', name:'2X DEFENSE RATING',        desc:'Double all defense values for 48 hours',                   price:350, icon:'castle', code:'def_2x_defense' },
-    { id:'d3', name:'ANTI-NUCLEAR SHIELD',      desc:'Protect against nuclear strikes for 7 days',               price:800, icon:'nuclear', code:'def_anti_nuke' },
-    { id:'d4', name:'INFLUENCE RESISTANCE',     desc:'Block influence attacks for 72 hours',                     price:200, icon:'brain', code:'def_influence_resist' },
-  ],
-  resources: [
-    { id:'r1', name:'2X EXTRACTION RATE',       desc:'Double all resource extraction for 24 hours',              price:200, icon:'pickaxe', code:'eco_2x_extraction' },
-    { id:'r2', name:'ENERGY EFFICIENCY',        desc:'-50% energy consumption for 48 hours',                     price:180, icon:'lightning', code:'eco_energy' },
-    { id:'r3', name:'RARE DROP BONUS',          desc:'+50% chance for rare resource drops (24h)',                 price:350, icon:'gem', code:'eco_rare_drop' },
-    { id:'r4', name:'TRADE ADVANTAGE',          desc:'-10% fees on all marketplace trades for 72h',              price:250, icon:'chart_up', code:'eco_trade_advantage' },
-  ],
-  chance: [
-    { id:'c1', name:'+CARD RARITY',             desc:'Increase card rarity probability by 25% for 24h',          price:300, icon:'cards', code:'col_rarity' },
-    { id:'c2', name:'+EVENT MINT PROB',          desc:'Better odds in all event card draws for 24h',              price:250, icon:'safari_radar', code:'col_luck' },
-    { id:'c3', name:'SAFARI HINTS (2H)',         desc:'Extra clues and thermal overlay during safaris',           price:100, icon:'crystal_ball', code:'col_safari_hints' },
-    { id:'c4', name:'LUCK BOOSTER',             desc:'+15% chance rating across all activities (48h)',            price:400, icon:'clover', code:'col_luck' },
-  ],
-  influence: [
-    { id:'i1', name:'GLOBAL MESSAGE',           desc:'Send 1 message visible to all online players',             price:50,  icon:'megaphone', code:'soc_global_msg' },
-    { id:'i2', name:'EXTENDED VISION',          desc:'See +5 hex further for territory conquest (24h)',           price:200, icon:'observatory', code:'soc_extended_vision' },
-    { id:'i3', name:'BRAG MODE',                desc:'Display double empire size — access reserved areas (24h)', price:350, icon:'theater', code:'soc_brag' },
-    { id:'i4', name:'RESERVED ACCESS',          desc:'Enter elite zones for advanced tokens and events',         price:600, icon:'crown', code:'soc_vip' },
-  ],
-  customize: [
-    { id:'x1', name:'AVATAR SKINS',             desc:'Premium avatar frames, effects, and animations',           price:250, icon:'picture', code:'custom_flag' },
-    { id:'x2', name:'FLAG & EMBLEM',            desc:'Custom kingdom flag and player emblem',                     price:150, icon:'flag_black', code:'custom_flag' },
-    { id:'x3', name:'KINGDOM COLORS',           desc:'Custom hex colors on the global map',                      price:200, icon:'palette', code:'border_color' },
-    { id:'x4', name:'MEDIA EMBEDDING',          desc:'Embed images/video on your hex territories',               price:300, icon:'camera', code:'custom_flag' },
-    { id:'x5', name:'LIVE STREAM SPACE',        desc:'Create a live streaming zone on your territory',            price:500, icon:'tv', code:'custom_flag' },
-  ],
+// Icons per server item code (catalog = /api/shop/catalog/, seeded by `manage.py seed_shop`)
+const CODE_ICON: Record<string,string> = {
+  atk_2x_army:'muscle', atk_blitz:'lightning', atk_distant:'target', atk_mint_speed:'swords',
+  def_shield_72h:'ui_shield', def_2x_defense:'castle', def_anti_nuke:'nuclear', def_influence_resist:'brain',
+  eco_2x_extraction:'pickaxe', eco_energy:'lightning', eco_rare_drop:'gem', eco_trade_advantage:'chart_up',
+  col_rarity:'cards', col_luck:'clover', col_safari_hints:'crystal_ball', col_safari_1h:'safari_radar',
+  soc_global_msg:'megaphone', soc_extended_vision:'observatory', soc_brag:'theater', soc_vip:'crown',
+}
+
+const MAX_MILITARY_BOOST_PCT = 25 // mirrors GAME.MAX_MILITARY_BOOST_PCT (combat.engine.active_boost_pct)
+
+/** What the item really does — derived from its server effect, never a marketing line the game doesn't honour. */
+function honestDesc(item: any): string {
+  const dur = formatDuration(item.effect_duration_seconds || 0)
+  if (item.effect_type === 'atk_multiplier' || item.effect_type === 'def_multiplier') {
+    const pct = Math.min((Number(item.effect_value) - 1) * 100, MAX_MILITARY_BOOST_PCT)
+    return `+${pct}% ${item.effect_type === 'atk_multiplier' ? 'attack in battles you launch' : 'defense on all your territories'} for ${dur}.`
+  }
+  if (item.effect_type === 'shield') return `Nobody can attack your territories for up to ${dur} (max 12h of shield per day).`
+  return item.description || ''
 }
 
 const EFFECT_LABEL: Record<string,string> = {
@@ -147,6 +128,13 @@ export function ShopPanel({ onClose }: Props) {
     player?.tdc_in_game ?? 0
   )) || 0
 
+  const { data: catalog = [], isLoading: catLoading } = useQuery<any[]>({
+    queryKey: ['shop-catalog'],
+    queryFn: () => api.get('/shop/catalog/').then(r => r.data),
+    staleTime: 60000,
+  })
+  const priceOf = (code: string, fallback: number) => Number(catalog.find((i: any) => i.code === code)?.price_tdc ?? fallback)
+
   const { data: activeBoosts = [] } = useQuery<any[]>({
     queryKey: ['active-boosts'],
     queryFn: () => api.get('/shop/active-boosts/').then(r => r.data).catch(() => []),
@@ -161,11 +149,12 @@ export function ShopPanel({ onClose }: Props) {
         if (res.data?.booster) {
           setBoosterResult({ cards: res.data.booster.cards, itemName })
         } else {
-          toast.success(`${itemName} purchased!`)
+          toast.success(res.data?.message && res.data.message !== 'Purchase complete!' ? res.data.message : `${itemName} purchased!`, { duration: 5000 })
         }
         qc.invalidateQueries({ queryKey: ['player'] })
         qc.invalidateQueries({ queryKey: ['wallet-me'] })
         qc.invalidateQueries({ queryKey: ['active-boosts'] })
+        if (res.data?.booster) ['kingdoms', 'loop-status', 'my-territories', 'territories-mine'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
       })
       .catch((e: any) => toast.error(e?.response?.data?.error || 'Purchase failed'))
   }
@@ -212,8 +201,8 @@ export function ShopPanel({ onClose }: Props) {
           <div style={{ display:'flex', alignItems:'center', gap:12, minWidth:0 }}>
             <IconSVG id="hex_coin" size={36} />
             <div className="hx-stat">
-              <span className="hx-stat__label">HEX BALANCE</span>
-              <span className="hx-stat__value hx-stat__value--accent" style={{ fontSize:26 }}>{Math.floor(hexBalance).toLocaleString()}</span>
+              <span className="hx-stat__label" style={{ color:'#fff', textShadow:'0 1px 0 rgba(0,0,0,0.45)' }}>HEX BALANCE</span>
+              <span className="hx-stat__value" style={{ fontSize:26, color:'#fff', textShadow:'0 2px 0 rgba(0,0,0,0.45)' }}>{Math.floor(hexBalance).toLocaleString()}</span>
             </div>
           </div>
           <button className="btn-game btn-game-glass" style={{ fontSize: 11, padding:'10px 14px', flexShrink:0 }}
@@ -266,7 +255,8 @@ export function ShopPanel({ onClose }: Props) {
             <span className="hx-chip hx-chip--accent" title="Packs with random content can't be bought with purchased HEX">EARNED HEX ONLY</span>
           </div>
           <div className="shop-packs">
-            {BOOSTERS.map((b, i) => {
+            {BOOSTERS.map((b0, i) => {
+              const b = { ...b0, price: priceOf(b0.code, b0.price) }
               const canAfford = hexBalance >= b.price
               return (
                 <div key={b.id} className="shop-pack hx-rise" style={{
@@ -306,47 +296,57 @@ export function ShopPanel({ onClose }: Props) {
           </div>
         </div>
 
-        {/* ═══ ALL ITEM CATEGORIES — one-pager ═══ */}
-        {CATS.filter(c => c.id !== 'boosters').map(c => (
-          SHOP_ITEMS[c.id] && (
+        {/* ═══ ALL ITEM CATEGORIES — from the server catalog ═══ */}
+        {catLoading && [0, 1, 2].map(i => <div key={i} className="hx-skeleton" style={{ height: 66, borderRadius: 12, marginBottom: 8 }} />)}
+        {CATS.filter(c => c.id !== 'boosters').map(c => {
+          const items = catalog.filter((it: any) => it.category === c.id)
+            .sort((a: any, b: any) => Number(!!b.implemented) - Number(!!a.implemented) || a.price_tdc - b.price_tdc)
+          if (!items.length) return null
+          return (
             <div key={c.id} id={`shop-${c.id}`} style={{ marginBottom:22, ['--accent' as any]: c.color, scrollMarginTop:56 }}>
               <div className="hx-section-title">
                 <IconSVG id={c.iconId} size={16} /> {c.label.toUpperCase()}
               </div>
               <div style={{ display:'flex', flexDirection:'column', gap:8 }}>
-            {SHOP_ITEMS[c.id].map((item, i) => {
-              const canAfford = hexBalance >= item.price
+            {items.map((item: any, i: number) => {
+              const price = Number(item.price_tdc) || 0
+              const canAfford = hexBalance >= price
+              const live = !!item.implemented
               return (
-              <div key={item.id} className="hx-card shop-row hx-rise" style={{ animationDelay:`${i*40}ms`, padding:'10px 12px' }}>
+              <div key={item.code} className="hx-card shop-row hx-rise" style={{ animationDelay:`${i*40}ms`, padding:'10px 12px', opacity: live ? 1 : 0.6 }}>
                 <div style={{ width:46, height:46, borderRadius:12, flexShrink:0, display:'flex', alignItems:'center', justifyContent:'center',
                   background:`linear-gradient(160deg, ${c.color}30, ${c.color}0a)`, border:`2px solid ${c.color}40` }}>
-                  <IconSVG id={item.icon} size={32} />
+                  <IconSVG id={CODE_ICON[item.code] || c.iconId} size={32} />
                 </div>
                 <div style={{ flex:1, minWidth:0 }}>
                   <div style={{ fontSize:11, fontWeight:900, color:'#e2e8f0', letterSpacing:0.5, fontFamily:'var(--font-heading)', lineHeight:1.3 }}>
-                    {item.name}
+                    {String(item.name || item.code).toUpperCase()}
                   </div>
-                  <div className="shop-row__desc" style={{ fontSize:11, color:'rgba(226,232,240,0.6)', marginTop:4, lineHeight:1.4, textTransform:'none', fontFamily:'system-ui', letterSpacing:0 }}>
-                    {item.desc}
+                  <div style={{ fontSize:11, color:'rgba(226,232,240,0.7)', marginTop:4, lineHeight:1.4, textTransform:'none', fontFamily:'var(--font-body)', letterSpacing:0 }}>
+                    {honestDesc(item)}
                   </div>
                 </div>
                 <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:6, flexShrink:0 }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:4, fontSize:15, fontWeight:900, color:'#fde68a', fontFamily:"'Share Tech Mono', monospace" }}>
-                    <IconSVG id="hex_coin" size={16} />{item.price}
-                  </div>
-                  <button onClick={() => handleBuy(item.name, item.code, item.price)}
-                    className={canAfford ? 'btn-game btn-game-gold' : 'btn-game btn-game-glass'}
-                    aria-label={`Buy ${item.name}`}
-                    style={{ fontSize: 11, padding:'8px 16px', minHeight:36, opacity: canAfford ? 1 : 0.55 }}>
-                    BUY
-                  </button>
+                  {live ? (<>
+                    <div style={{ display:'flex', alignItems:'center', gap:4, fontSize:15, fontWeight:900, color:'#fde68a', fontFamily:'var(--font-mono)' }}>
+                      <IconSVG id="hex_coin" size={16} />{price.toLocaleString()}
+                    </div>
+                    <button onClick={() => handleBuy(item.name, item.code, price)}
+                      className={canAfford ? 'btn-game btn-game-gold' : 'btn-game btn-game-glass'}
+                      aria-label={`Buy ${item.name}`}
+                      style={{ fontSize: 11, padding:'8px 16px', minHeight:36, opacity: canAfford ? 1 : 0.55 }}>
+                      BUY
+                    </button>
+                  </>) : (
+                    <span className="hx-chip" title="This effect is not in the game yet, so it can't be bought">SOON</span>
+                  )}
                 </div>
               </div>
             )})}
           </div>
             </div>
           )
-        ))}
+        })}
 
         {/* Buy HEX CTA */}
         <div className="hx-card hx-card--accent" style={{ marginTop:8, ['--accent' as any]:'#a855f7',

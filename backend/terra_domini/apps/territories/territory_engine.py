@@ -173,7 +173,7 @@ def seed_poi_territories():
 
                 fields = {
                     'h3_index':       hx,
-                    'h3_resolution':  7,
+                    'h3_resolution':  h3.get_resolution(hx),
                     'center_lat':     geo[0],
                     'center_lon':     geo[1],
                     'territory_type': biome,
@@ -267,7 +267,7 @@ def generate_territory(h3_index: str, lat: float, lon: float, poi_category: str 
         with transaction.atomic():
             t = Territory.objects.create(
                 h3_index       = h3_index,
-                h3_resolution  = 7,
+                h3_resolution  = h3.get_resolution(h3_index),
                 center_lat     = geo[0],
                 center_lon     = geo[1],
                 territory_type = biome,

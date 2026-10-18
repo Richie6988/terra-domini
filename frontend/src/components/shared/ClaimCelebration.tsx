@@ -13,7 +13,7 @@ interface Props {
 }
 
 const RARITY_CONFIG: Record<string, { color: string; particles: number; label: string }> = {
-  common:    { color: '#9CA3AF', particles: 40,  label: 'TERRITORY CLAIMED' },
+  common:    { color: '#34d058', particles: 40,  label: 'TERRITORY CLAIMED' },
   uncommon:  { color: '#10B981', particles: 60,  label: 'UNCOMMON CAPTURED!' },
   rare:      { color: '#3B82F6', particles: 80,  label: 'RARE DISCOVERY!' },
   epic:      { color: '#8B5CF6', particles: 120, label: 'EPIC CONQUEST!' },
@@ -159,7 +159,9 @@ export function ClaimCelebration({ visible, territoryName, rarity, onComplete }:
           <div style={{
             fontSize: 14, fontWeight: 900, letterSpacing: 6,
             color: cfg.color,
-            textShadow: `0 0 30px ${cfg.color}88, 0 0 60px ${cfg.color}44`,
+            // dark outline so the label reads on the light map too
+            WebkitTextStroke: '1px rgba(0,0,0,0.55)',
+            textShadow: `0 2px 0 rgba(0,0,0,0.6), 0 0 30px ${cfg.color}88`,
           }}>
             {cfg.label}
           </div>

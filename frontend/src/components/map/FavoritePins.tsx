@@ -113,7 +113,8 @@ export function FavoritePinsPanel({ onNavigate, currentLat, currentLon, currentZ
   }, [addPin, pins.length, setPickingFavorite])
 
   return (
-    <div style={{ position: 'absolute', bottom: 90, left: 12, zIndex: 500 }}>
+    // Phones: the HARVEST button owns the bottom-left corner (index.css), so sit just to its right
+    <div style={{ position: 'absolute', bottom: window.innerWidth < 600 ? 112 : 90, left: window.innerWidth < 600 ? 216 : 12, zIndex: 500 }}>
       {/* Toggle button */}
       <button
         onClick={() => setOpen(!open)}

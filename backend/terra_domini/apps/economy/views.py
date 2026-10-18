@@ -364,7 +364,10 @@ class ShopViewSet(viewsets.GenericViewSet):
         """GET /api/shop/catalog/ — All available items."""
         items = ShopItem.objects.filter(is_active=True).order_by('category', 'price_tdc')
         from terra_domini.apps.economy.serializers import ShopItemSerializer
-        return Response(ShopItemSerializer(items, many=True).data)
+        data = ShopItemSerializer(items, many=True).data
+        for row in data:  # 'implemented': the item actually does something when bought (others are not sold)
+            row['implemented'] = row.get('effect_type') in IMPLEMENTED_EFFECTS
+        return Response(data)
 
     @action(detail=False, methods=['POST'], url_path='purchase')
     def purchase(self, request):
@@ -430,6 +433,14 @@ class ShopViewSet(viewsets.GenericViewSet):
 
         if not item.is_available():
             return Response({'error': 'Item not available'}, status=410)
+        if item.effect_type not in IMPLEMENTED_EFFECTS:
+            # Never take HEX for an effect the game doesn't apply yet
+            return Response({'error': f'{item.name} is not available yet.'}, status=410)
+        if item.effect_type == 'shield':
+            today = timezone.now().date()
+            used = player.daily_shield_hours_used if player.shield_reset_date == today else 0.0
+            if _game('SHIELD_MAX_HOURS_PER_DAY', 12) - used <= 0:
+                return Response({'error': 'Daily shield limit reached — try again tomorrow.'}, status=429)
 
         total_cost = item.price_tdc * quantity
 
@@ -475,7 +486,14 @@ class ShopViewSet(viewsets.GenericViewSet):
             )
 
             # Apply effect
-            _apply_item_effect(player, item, quantity, territory_h3)
+            effect_note = _apply_item_effect(player, item, quantity, territory_h3)
+
+            booster_result = None
+            if item.effect_type == 'booster_pack':
+                booster_result = _open_booster_pack(item_code, player)
+                if booster_result.get('short'):
+                    transaction.set_rollback(True)
+                    return Response({'error': 'Not enough free territories left to fill this pack right now. You were not charged.'}, status=409)
 
             # Update sold count
             item.__class__.objects.filter(id=item.id).update(
@@ -487,13 +505,8 @@ class ShopViewSet(viewsets.GenericViewSet):
         from terra_domini.apps.progression.missions import track
         track(player, 'spend_tdc', int(total_cost))
 
-        # Booster pack — ajouter les cartes tirées dans la réponse
-        booster_result = None
-        if item.effect_type == 'booster_pack':
-            booster_result = _open_booster_pack(item_code, player)
-
         resp = {
-            'message': 'Purchase complete!',
+            'message': effect_note or 'Purchase complete!',
             'item': item_code,
             'quantity': quantity,
             'tdc_spent': float(total_cost),
@@ -721,6 +734,10 @@ class AdCampaignViewSet(viewsets.GenericViewSet):
 
 # ─── Item effect application ──────────────────────────────────────────────────
 
+# Effects the game really applies. Everything else in the catalog is shown as "coming soon" and cannot be bought.
+IMPLEMENTED_EFFECTS = {'booster_pack', 'shield', 'atk_multiplier', 'def_multiplier', 'border_color', 'hex_bonus'}
+
+
 def _apply_item_effect(player, item, quantity, territory_h3=None):
     """Apply the game effect of a purchased item."""
     from datetime import timedelta
@@ -744,6 +761,8 @@ def _apply_item_effect(player, item, quantity, territory_h3=None):
                 shield_until=new_shield_until,
                 daily_shield_hours_used=player.daily_shield_hours_used + actual_hours,
             )
+            capped = ' (daily shield cap)' if actual_hours < duration_hours else ''
+            return f'Shield up for {actual_hours:g}h{capped} — none of your territories can be attacked until then.'
 
     elif item.effect_type == 'military_boost':
         duration = timedelta(seconds=item.effect_duration_seconds * quantity)
@@ -765,7 +784,16 @@ def _apply_item_effect(player, item, quantity, territory_h3=None):
             expires_at=timezone.now() + duration,
         )
 
-    elif item.effect_type in ('atk_multiplier', 'def_multiplier', 'production_multiplier',
+    elif item.effect_type in ('atk_multiplier', 'def_multiplier'):
+        # Applied in combat.engine.resolve_battle, capped at MAX_MILITARY_BOOST_PCT (anti pay-to-win)
+        duration = timedelta(seconds=item.effect_duration_seconds * max(quantity, 1))
+        ActiveBoost.objects.create(player=player, item=item, boost_type=item.effect_type,
+                                   boost_value=item.effect_value, expires_at=timezone.now() + duration)
+        pct = min((item.effect_value - 1) * 100, _game('MAX_MILITARY_BOOST_PCT', 25))
+        side = 'attack' if item.effect_type == 'atk_multiplier' else 'defense'
+        return f'+{pct:g}% {side} in every battle for {round(duration.total_seconds() / 3600):g}h.'
+
+    elif item.effect_type in ('production_multiplier',
                                'double_attack', 'stealth_once', 'build_speed', 'build_cost_reduction'):
         duration = timedelta(seconds=item.effect_duration_seconds * max(quantity, 1))
         expires = (timezone.now() + duration) if duration.total_seconds() > 0 else None
@@ -854,20 +882,23 @@ def _open_booster_pack(item_code: str, player=None) -> dict:
     g = PACK_GUARANTEE.get(item_code)
     if g and not any(order.index(r) >= order.index(g) for r in rolls):
         rolls[-1] = g
+    taken = set()
     for rarity in rolls:
         # Only FREE territories (never someone else's); fall back to lower rarities if none left
         card = None
         for r in order[:order.index(rarity) + 1][::-1]:
-            qs = Territory.objects.filter(rarity=r, owner__isnull=True)
+            qs = Territory.objects.filter(rarity=r, owner__isnull=True).exclude(h3_index__in=taken)
             card = (qs.filter(is_landmark=True).order_by('?').first() or qs.order_by('?').first())
             if card:
                 break
         if not card:
             continue
+        taken.add(card.h3_index)
         if player is not None:
             card.owner = player
             card.captured_at = timezone.now()
             card.save(update_fields=['owner', 'captured_at'])
         cards.append({'h3_index': card.h3_index, 'poi_name': card.poi_name, 'territory_type': card.territory_type,
                       'biome': card.biome, 'is_shiny': card.is_shiny, 'rarity': card.rarity})
-    return {'cards': cards, 'count': len(cards)}
+    met = not g or any(order.index(c['rarity'] or 'common') >= order.index(g) for c in cards)
+    return {'cards': cards, 'count': len(cards), 'short': len(cards) < count or not met}

@@ -122,42 +122,21 @@ export function hideHotspots() {
   window.dispatchEvent(new CustomEvent('hexod:hotspot:hide'))
 }
 
-/** Predefined hotspots for the tutorial */
+/** Predefined hotspots for the tutorial — anchored on the real elements (hard-coded x/y pointed at the wrong buttons) */
 export function showTutorialHotspots() {
-  const W = window.innerWidth, H = window.innerHeight
-  showHotspots([
-    {
-      id: 'missions-btn',
-      x: 38, y: H - 84,
-      r: 32,
-      label: 'Daily Missions',
-      tip: 'Your daily objectives. Start here every day.',
-      tipDir: 'right',
-    },
-    {
-      id: 'poi-filter',
-      x: 34, y: 60,
-      r: 28,
-      label: 'POI Filters',
-      tip: 'Filter special zones by type or rarity.',
-      tipDir: 'right',
-    },
-    {
-      id: 'my-territories',
-      x: 34, y: 110,
-      r: 28,
-      label: 'My Zones',
-      tip: 'Quick access to all your territories. Click one to fly there.',
-      tipDir: 'right',
-    },
-    {
-      id: 'bottom-nav',
-      x: W / 2, y: H - 40,
-      r: 120,
-      label: 'Navigation',
-      tip: 'Combat, Alliance, Profile, Crypto: it is all here.',
-      tipDir: 'top',
-    },
-  ])
+  const spot = (sel: string, id: string, label: string, tip: string, tipDir: Hotspot['tipDir'], rMax = 70): Hotspot | null => {
+    const el = document.querySelector(sel) as HTMLElement | null
+    if (!el) return null
+    const b = el.getBoundingClientRect()
+    if (!b.width || !b.height) return null
+    return { id, x: b.left + b.width / 2, y: b.top + b.height / 2, r: Math.min(rMax, Math.max(b.width, b.height) / 2 + 6), label, tip, tipDir }
+  }
+  const narrow = window.innerWidth < 600
+  const spots = [
+    spot('.hxh-missions', 'missions-btn', 'Missions', '3 goals a day that pay HEX. Start here every session.', narrow ? 'bottom' : 'right', 60),
+    spot('.hx-harvest', 'harvest-btn', 'Harvest', 'Your zones fill this stock. Tap it to collect your HEX.', narrow ? 'bottom' : 'right', 80),
+  ].filter(Boolean) as Hotspot[]
+  if (!spots.length) return
+  showHotspots(spots)
   setTimeout(hideHotspots, 8000)
 }

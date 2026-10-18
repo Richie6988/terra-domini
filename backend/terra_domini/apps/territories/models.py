@@ -606,8 +606,13 @@ class SafariTarget(models.Model):
     def spawn_for_player(cls, player, base_lat=None, base_lon=None):
         """Assign a random creature near the player's location."""
         import random, h3
-        creature = random.choice(cls.CREATURES)
-        cid, cname, rarity, reward = creature
+        from terra_domini.apps.events.hexod_db import pick_creature, CAPTURE_REWARD
+        real = pick_creature()  # real species from the HEXOD master DB
+        if real:
+            cid, cname, rarity = real['uid'][:30], real['name'][:100], real['rarity']
+            reward = CAPTURE_REWARD.get(rarity, 50)
+        else:
+            cid, cname, rarity, reward = random.choice(cls.CREATURES)
 
         # Spawn 200m-2km from player
         lat = (base_lat or 48.8566) + random.uniform(-0.015, 0.015)

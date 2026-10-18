@@ -19,7 +19,7 @@ interface Nudge {
 }
 interface LoopStatus {
   balance: number; earned_balance: number
-  harvest: { rate_per_day: number; pending: number; cap_amount: number; cap_hours: number; fill_pct: number; is_full: boolean; full_at: string; lost: number }
+  harvest: { rate_per_day: number; pending: number; cap_amount: number; cap_hours: number; fill_pct: number; is_full: boolean; full_at: string; lost: number; beginner_mult?: number; beginner_until?: string | null }
   streak: { current: number; reward_today: number }
   nudges: Nudge[]
 }
@@ -52,7 +52,7 @@ export function useLoopStatus() {
   })
 }
 
-function useLoopActions() {
+export function useLoopActions() {
   const qc = useQueryClient()
   const syncBalance = (v: number) => {
     const s = useStore.getState()
@@ -99,6 +99,9 @@ export function HarvestButton() {
   const pct = Math.min(100, Math.max(0, ((Date.now() - startMs) / capMs) * 100))
   const pending = Math.floor((h.cap_amount * pct) / 100)
   const full = pct >= 100
+  // Low-rate first zone: the counter sits at +0 for a while — say when the next whole HEX lands
+  const exact = (h.cap_amount * pct) / 100
+  const nextHexMin = h.rate_per_day > 0 ? Math.ceil(((1 - (exact % 1)) / h.rate_per_day) * 1440) : 0
 
   return (
     <button
@@ -114,7 +117,12 @@ export function HarvestButton() {
         <span className="hx-progress" style={{ ['--accent' as any]: full ? '#f59e0b' : '#34d058', height: 10 }}>
           <span className="hx-progress__fill" style={{ width: `${pct}%` }} />
         </span>
-        <span className="hx-harvest__sub">{full ? `${(h.lost || 0).toLocaleString()} HEX lost so far` : `Full in ${fmtIn(h.full_at)} · ${Math.round(h.rate_per_day).toLocaleString()}/day`}</span>
+        <span className="hx-harvest__sub">{full
+          ? `${(h.lost || 0).toLocaleString()} HEX lost so far`
+          : pending < 1
+            ? `First HEX in ${nextHexMin} min · ${Math.round(h.rate_per_day).toLocaleString()}/day`
+            : `Full in ${fmtIn(h.full_at)} · ${Math.round(h.rate_per_day).toLocaleString()}/day`}
+          {(h.beginner_mult ?? 1) > 1 && h.beginner_until ? ` · x${h.beginner_mult} starter boost ${fmtIn(h.beginner_until)}` : ''}</span>
       </span>
     </button>
   )
@@ -124,6 +132,7 @@ export function NudgeStack() {
   const { data } = useLoopStatus()
   const { collect, reinforce } = useLoopActions()
   const setActivePanel = useStore(s => s.setActivePanel)
+  const ownsLand = useStore(s => (s.myTerritories?.size ?? 0) > 0)
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
   const notified = useRef<Set<string>>(new Set())
   const [perm, setPerm] = useState<string>(typeof Notification !== 'undefined' ? Notification.permission : 'unsupported')
@@ -150,7 +159,7 @@ export function NudgeStack() {
     else if (n.cta.panel) setActivePanel(n.cta.panel as any)
   }
 
-  if (!nudges.length) return null
+  if (!nudges.length && !(perm === 'default' && ownsLand)) return null
   return (
     <div className="hx-nudges">
       <AnimatePresence initial={false}>
@@ -171,7 +180,7 @@ export function NudgeStack() {
           </motion.div>
         ))}
       </AnimatePresence>
-      {perm === 'default' && (
+      {perm === 'default' && ownsLand && (
         <button className="hx-nudge__alerts" onClick={() => Notification.requestPermission().then(setPerm)}>
           Turn on alerts — know when you're attacked
         </button>

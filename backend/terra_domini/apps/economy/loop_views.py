@@ -42,6 +42,8 @@ def _harvest(player, now):
         'is_full': elapsed_h >= B.STORAGE_CAP_HOURS and rate > 0,
         'full_at': (last + timedelta(hours=B.STORAGE_CAP_HOURS)).isoformat(),
         'lost': int(lost),
+        'beginner_mult': B.BEGINNER_MULT if B.is_beginner(player) else 1,
+        'beginner_until': (player.date_joined + timedelta(days=B.BEGINNER_DAYS)).isoformat() if B.is_beginner(player) else None,
     }
 
 
@@ -75,6 +77,11 @@ def loop_status(request):
 
     streak = _streak(player)
     player.refresh_from_db(fields=['tdc_in_game', 'hex_purchased_balance'])
+    if B.player_hex_per_day(player) <= 0:
+        # No land → no stock. Keep the clock at "now" so the first zone starts from an empty stock
+        # (otherwise a player who claims days after signing up gets an instant, unearned full stock).
+        Player.objects.filter(id=player.id).update(harvest_last_at=now)
+        player.harvest_last_at = now
     harvest = _harvest(player, now)
     owned = Territory.objects.filter(owner=player).count()
 

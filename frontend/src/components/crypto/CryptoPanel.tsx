@@ -46,9 +46,9 @@ function WalletCard({ wallet, onConvert, onWithdraw, onCashOut }: any) {
       <div className="hx-card hx-card--accent" style={{ ['--accent' as any]: '#fbbf24', padding: '16px 18px', display: 'flex', alignItems: 'center', gap: 14 }}>
         <IconSVG id="hex_coin" size={48} />
         <div className="hx-stat" style={{ flex: 1 }}>
-          <span className="hx-stat__label">IN-GAME BALANCE · HEX COIN</span>
-          <span className="hx-stat__value hx-stat__value--accent" style={{ fontSize: 28 }}>{Math.floor(inGame).toLocaleString()}</span>
-          <span style={{ fontSize: 11, color: 'var(--hx-text-3)', textTransform: 'none', fontFamily: 'system-ui', letterSpacing: 0 }}>Spend in the Shop, Marketplace and Auctions</span>
+          <span className="hx-stat__label" style={{ color: '#fff', textShadow: '0 1px 0 rgba(0,0,0,0.45)' }}>IN-GAME BALANCE · HEX COIN</span>
+          <span className="hx-stat__value" style={{ fontSize: 28, color: '#fff', textShadow: '0 2px 0 rgba(0,0,0,0.45)' }}>{wallet ? Math.floor(inGame).toLocaleString() : '—'}</span>
+          <span style={{ fontSize: 11, color: '#3b2a00', textTransform: 'none', fontFamily: 'var(--font-body)', fontWeight: 800, letterSpacing: 0 }}>Spend in the Shop, Marketplace and Auctions</span>
         </div>
       </div>
 
@@ -80,7 +80,7 @@ function WalletCard({ wallet, onConvert, onWithdraw, onCashOut }: any) {
           </div>
         )}
         <div style={{ marginTop: 12, fontSize: 11, color: 'rgba(255,255,255,0.45)', lineHeight: 1.6, textAlign: 'center', textTransform: 'none', fontFamily: 'system-ui', letterSpacing: 0 }}>
-          HEX earned = crypto equivalent of your HEX Coin purchases · Withdraw to a Polygon wallet after KYC
+          Cash out turns HEX Coin you earned by playing into HEX tokens (5% burned, min 1,000). Purchased HEX Coin stays in-game. Withdraw tokens to a Polygon wallet after KYC.
         </div>
       </div>
     </div>
@@ -117,7 +117,7 @@ function ConvertModal({ wallet, onClose }: { wallet: any; onClose: () => void })
   )
 }
 
-function CashOutModal({ onClose }: { onClose: () => void }) {
+function CashOutModal({ wallet, onClose }: { wallet: any; onClose: () => void }) {
   const [amount, setAmount] = useState('1000')
   const qc = useQueryClient()
   const { data: loop } = useQuery<any>({ queryKey: ['loop-status'], queryFn: () => api.get('/loop/status/').then(r => r.data) })
@@ -125,11 +125,15 @@ function CashOutModal({ onClose }: { onClose: () => void }) {
     mutationFn: () => api.post('/wallet/cash-out/', { amount_hex: parseFloat(amount) }),
     onSuccess: (r) => {
       toast.success(`+${r.data.tdi_received?.toFixed(2)} HEX token (${r.data.hex_burned} HEX burned)`)
-      ;['wallet', 'loop-status'].forEach(k => qc.invalidateQueries({ queryKey: [k] })); onClose()
+      ;['wallet', 'loop-status', 'wallet-tx', 'player', 'wallet-me'].forEach(k => qc.invalidateQueries({ queryKey: [k] })); onClose()
     },
     onError: (e: any) => toast.error(e.response?.data?.error || 'Cash-out failed'),
   })
   const amt = parseFloat(amount) || 0
+  const earned = Math.floor(loop?.earned_balance ?? 0)
+  const price = Number(wallet?.tdi_price_usd) || 0
+  const tokens = price > 0 ? (amt * 0.95 * 0.001) / price : 0
+  const problem = !loop ? '' : amt < 1000 ? 'Minimum is 1,000 HEX Coin.' : amt > earned ? `You only have ${earned.toLocaleString()} earned HEX Coin.` : ''
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,5,15,0.6)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
       <motion.div initial={{ y: 300 }} animate={{ y: 0 }} style={{ background: 'var(--hx-panel)', borderRadius: '22px 22px 0 0', padding: 24, width: '100%', maxWidth: 440, border: '3px solid var(--hx-line-strong)', boxShadow: '0 -6px 0 var(--hx-ink)', ['--accent' as any]: '#f5a623' }}>
@@ -138,13 +142,21 @@ function CashOutModal({ onClose }: { onClose: () => void }) {
           Only HEX Coin earned by playing can be cashed out (purchased HEX can't). 5% is burned. Minimum 1,000.
           Earned balance: <b style={{ color: '#fde68a' }}>{Math.floor(loop?.earned_balance ?? 0).toLocaleString()}</b>
         </div>
-        <input type="number" min={1000} value={amount} onChange={e => setAmount(e.target.value)} className="hx-input" aria-label="Amount of HEX Coin to cash out" style={{ fontSize: 18, marginBottom: 10 }} />
-        <div style={{ fontSize: 13, color: '#fff', marginBottom: 16, fontFamily: 'var(--font-heading)' }}>
-          Burned: {(amt * 0.05).toFixed(0)} · Converted: {(amt * 0.95).toFixed(0)} HEX Coin → HEX token at market price
+        <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
+          <input type="number" min={1000} value={amount} onChange={e => setAmount(e.target.value)} className="hx-input" aria-label="Amount of HEX Coin to cash out" style={{ fontSize: 18, flex: 1 }} />
+          <button onClick={() => setAmount(String(earned))} disabled={earned < 1000} className="btn-game btn-game-glass" style={{ minHeight: 44, fontSize: 11 }}>MAX</button>
         </div>
+        <div className="hx-card" style={{ marginBottom: 12, padding: '10px 12px', fontSize: 12, color: 'var(--hx-text-2)', display: 'flex', flexDirection: 'column', gap: 4 }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Burned (5%)</span><span style={{ color: '#fca5a5' }}>-{Math.round(amt * 0.05).toLocaleString()} HEX Coin</span></div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-heading)', fontSize: 14, color: '#fff' }}>
+            <span>You receive</span><span style={{ color: '#d8b4fe' }}>{price > 0 ? `≈ ${tokens.toLocaleString(undefined, { maximumFractionDigits: 2 })} HEX token` : 'HEX token at market price'}</span>
+          </div>
+          <div style={{ fontSize: 11, color: 'var(--hx-text-3)' }}>≈ ${(amt * 0.95 * 0.001).toFixed(2)}{price > 0 ? ` at 1 HEX token = $${price.toFixed(4)}` : ''}. Final amount uses the price at confirmation.</div>
+        </div>
+        {problem && <div style={{ fontSize: 12, color: '#fde68a', marginBottom: 10 }}>{problem}</div>}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
           <button onClick={onClose} className="btn-game btn-game-glass" style={{ minHeight: 44 }}>CANCEL</button>
-          <button onClick={() => mut.mutate()} disabled={mut.isPending || amt < 1000} className="btn-game btn-game-gold" style={{ minHeight: 44 }}>
+          <button onClick={() => mut.mutate()} disabled={mut.isPending || !!problem || amt < 1000} className="btn-game btn-game-gold" style={{ minHeight: 44 }}>
             {mut.isPending ? 'CASHING OUT…' : 'CASH OUT'}
           </button>
         </div>
@@ -330,7 +342,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
                 <div key={i} style={{ padding: '10px 0', borderBottom: '2px solid rgba(255,255,255,0.06)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <div>
                     <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.7)', fontWeight: 700, fontFamily: 'var(--font-heading)', letterSpacing:0.5 }}>{(tx.type || "").replace(/_/g, ' ').toUpperCase()}</div>
-                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.45)', marginTop: 2 }}>{new Date(tx.date).toLocaleDateString()}</div>
+                    <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.55)', marginTop: 2 }}>{new Date(tx.date).toLocaleDateString()}{tx.note ? ` · ${tx.note}` : ''}</div>
                   </div>
                   <div style={{ fontSize: 12, fontWeight: 900, fontFamily: "'Share Tech Mono', monospace", color: TX_COLORS[tx.type] ?? '#e2e8f0' }}>
                     {tx.amount > 0 ? '+' : ''}{parseFloat(tx.amount).toFixed(4)} HEX
@@ -361,7 +373,7 @@ export function CryptoPanel({ onClose }: { onClose: () => void }) {
       </GlassPanel>
 
       {showConvert && <ConvertModal wallet={wallet} onClose={() => setShowConvert(false)} />}
-      {showCashOut && <CashOutModal onClose={() => setShowCashOut(false)} />}
+      {showCashOut && <CashOutModal wallet={wallet} onClose={() => setShowCashOut(false)} />}
 
       {showWithdraw && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,5,15,0.75)', backdropFilter: 'blur(6px)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>

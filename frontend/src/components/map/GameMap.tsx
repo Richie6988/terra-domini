@@ -534,6 +534,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       <AnimatePresence>
         {selectedHex && selectedTerritory && (
           <HexCard
+            key={selectedTerritory.h3_index || selectedHex}
             territory={selectedTerritory}
             onClose={() => { setSelectedHex(null); setSelectedTerritoryState(null); selectedLayerRef.current?.clearLayers() }}
           />

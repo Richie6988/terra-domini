@@ -502,8 +502,9 @@ class TerritoryViewSet(viewsets.ModelViewSet):
 
         options = []
         if is_first:
+            # First zone: one obvious choice (showing a 120 HEX price next to FREE only confused new players)
             options.append({'method': 'free', 'label': 'CLAIM (FREE)', 'cost': 0, 'available': True})
-        if not locked:
+        elif not locked:
             options.append({
                 'method': 'buy', 'label': f'BUY ({buy_cost} ◆)',
                 'cost': buy_cost, 'available': balance >= buy_cost,
@@ -522,6 +523,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             'is_adjacent': is_adjacent,
             'locked': locked,
             'locked_reason': 'Need adjacent territory or 50+ influence' if locked else None,
+            'balance': balance,
             'options': options,
         })
 
@@ -565,10 +567,16 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 lat, lon = h3.cell_to_latlng(h3_index)
             except Exception:
                 lat, lon = 0.0, 0.0
-            territory = Territory.objects.create(
+            # Same generator as the hex card preview, so biome/rarity don't change on claim
+            try:
+                from terra_domini.apps.territories.territory_engine import generate_territory
+                generate_territory(h3_index, lat, lon)
+            except Exception:
+                pass
+            territory = Territory.objects.filter(h3_index=h3_index).first() or Territory.objects.create(
                 h3_index=h3_index, h3_resolution=8,
                 center_lat=lat, center_lon=lon,
-                territory_type='urban',
+                territory_type='rural',
             )
 
         from terra_domini.apps.accounts.models import PlayerStats, Player as P
@@ -652,6 +660,10 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                         'h3_index': h3_index,
                     })
             else:
+                # Re-check right before starting: a concurrent finishing request (progress bar auto-complete
+                # + a manual tap) used to claim the hex AND start a brand-new exploration of it.
+                if Territory.objects.filter(h3_index=h3_index, owner__isnull=False).exists():
+                    return Response({'error': 'This territory was just claimed.'}, status=409)
                 # Start new exploration
                 claim = PendingClaim.objects.create(
                     player=request.user,
@@ -680,6 +692,12 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         territory.owner = request.user
         territory.captured_at = timezone.now()
         territory.save(update_fields=['owner', 'captured_at'])
+        # The hex is taken: any exploration still running on it (ours or another player's) is void
+        try:
+            from terra_domini.apps.territories.models import PendingClaim as _PC
+            _PC.objects.filter(h3_index=h3_index, status='in_progress').update(status='cancelled')
+        except Exception:
+            pass
         from terra_domini.apps.progression.missions import track
         track(request.user, 'claim')
 
@@ -753,9 +771,12 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         except Exception:
             pass
 
+        bonus_hex = 100 if (method == 'free' and is_first) else 0
         return Response({
             'success': True,
             'h3_index': h3_index,
+            'bonus_hex': bonus_hex,
+            'balance': float(P.objects.filter(id=request.user.id).values_list('tdc_in_game', flat=True).first() or 0),
             'territory_type': territory.territory_type,
             'resources': {
                 'energy': territory.resource_energy,
@@ -1160,6 +1181,14 @@ from rest_framework.views import APIView
 from terra_domini.apps.territories.models import SafariTarget, SafariCapture
 import math
 
+def _creature_info(uid):
+    """Codex details of a real species from the HEXOD master DB (empty for legacy targets)."""
+    from terra_domini.apps.events.hexod_db import creature
+    c = creature(uid) or {}
+    return {'creature_category': c.get('codex_category', ''), 'creature_description': c.get('description', ''),
+            'creature_wiki_url': c.get('wiki_url', '')}
+
+
 class SafariViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
 
@@ -1174,7 +1203,7 @@ class SafariViewSet(viewsets.GenericViewSet):
         return Response({'target': {
             'id': str(target.id),
             'creature_id': target.creature_id,
-            'creature_name': target.creature_name,
+            'creature_name': target.creature_name, **_creature_info(target.creature_id),
             'rarity': target.rarity,
             'hex_reward': target.hex_reward,
             'hint': target.hint,
@@ -1197,7 +1226,7 @@ class SafariViewSet(viewsets.GenericViewSet):
             'target': {
                 'id': str(target.id),
                 'creature_id': target.creature_id,
-                'creature_name': target.creature_name,
+                'creature_name': target.creature_name, **_creature_info(target.creature_id),
                 'rarity': target.rarity,
                 'hex_reward': target.hex_reward,
                 'hint': target.hint,

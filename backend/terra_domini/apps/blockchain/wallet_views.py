@@ -131,6 +131,9 @@ class WalletViewSet(viewsets.GenericViewSet):
             wallet = _ensure_wallet(player)
             Player.objects.filter(id=player.id).update(tdc_in_game=F('tdc_in_game') - amount)
             type(wallet).objects.filter(pk=wallet.pk).update(tdi_balance=F('tdi_balance') + tdi)
+            TDITransaction.objects.create(  # so it shows in Wallet > Details history
+                player=player, tx_type='cash_out', amount_tdi=tdi,
+                note=f'Cash-out {amount:.0f} HEX Coin ({burned:.0f} burned) -> {tdi:.4f} HEX token')
         return Response({'success': True, 'hex_spent': float(amount), 'hex_burned': float(burned),
                          'tdi_received': float(tdi), 'tdi_price_usd': float(tdi_price)})
 
