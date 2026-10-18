@@ -237,7 +237,18 @@ def map_pois(request):
     from terra_domini.apps.territories.models import Territory
     owners = dict(Territory.objects.filter(h3_index__in=[p['h3_index'] for p in rows], owner__isnull=False)
                   .values_list('h3_index', 'owner__username'))
-    return Response({'zoom': z, 'pois': [{
+    # Area counters: every active POI of the view grouped by an H3 cell sized for the zoom
+    import h3 as _h3
+    res = 1 if z <= 4 else 2 if z <= 6 else 3 if z <= 9 else 4
+    allq = UnifiedPOI.objects.filter(is_active=True, latitude__range=(s, n))
+    allq = allq.filter(longitude__range=(w, e)) if w <= e else allq
+    groups = {}
+    for la, lo, rar in allq.values_list('latitude', 'longitude', 'rarity')[:20000]:
+        cell = _h3.latlng_to_cell(la, lo, res)
+        g = groups.setdefault(cell, [0, 0.0, 0.0, {}])
+        g[0] += 1; g[1] += la; g[2] += lo; g[3][rar] = g[3].get(rar, 0) + 1
+    clusters = [{'cell': c, 'count': g[0], 'lat': g[1] / g[0], 'lon': g[2] / g[0], 'by_rarity': g[3]} for c, g in groups.items()]
+    return Response({'zoom': z, 'cluster_res': res, 'clusters': clusters, 'pois': [{
         'name': p['name'], 'category': p['category'], 'rarity': p['rarity'], 'lat': p['latitude'], 'lon': p['longitude'],
         'h3_index': p['h3_index'], 'owner': owners.get(p['h3_index']),
     } for p in rows]})

@@ -10,6 +10,7 @@ import L from 'leaflet'
 import { useLeafletLayer } from '../ui/Utils'
 import { api } from '../../services/api'
 import { iconFor } from '../shared/poiIcons'
+import { latLngToCell } from 'h3-js'
 
 const RARITY_COLOR: Record<string, string> = {
   common: '#9CA3AF', uncommon: '#10B981', rare: '#3B82F6', epic: '#8B5CF6', legendary: '#F59E0B', mythic: '#EC4899',
@@ -34,6 +35,9 @@ export function PoiOverviewLayer({ map, zoom, center }: { map: L.Map | null; zoo
         layer.clearLayers()
         const showNames = zoom >= 6
         const placed: { x: number; y: number; r: number }[] = []   // rarest first: later ones yield
+        // Area counters: total POIs per zone; the zone's first (rarest) marker carries the "+N" badge
+        const clusters = new Map<string, any>((data.clusters || []).map((c: any) => [c.cell, c]))
+        const badged = new Set<string>()
         for (const p of data.pois || []) {
           const pt = map.latLngToContainerPoint([p.lat, p.lon])
           const r0 = (SIZE[p.rarity] || 22) / 2 + 6
@@ -47,13 +51,32 @@ export function PoiOverviewLayer({ map, zoom, center }: { map: L.Map | null; zoo
           const owned = p.owner ? `<span class="hx-poi__owner">${esc(p.owner)}</span>` : ''
           const label = keepLabel && (showNames || p.rarity === 'legendary' || p.rarity === 'mythic')
             ? `<span class="hx-poi__name">${esc(p.name)}</span>${owned}` : ''
+          let badge = ''
+          try {
+            const cell = latLngToCell(p.lat, p.lon, data.cluster_res)
+            const cl = clusters.get(cell)
+            if (cl && !badged.has(cell) && cl.count > 1) { badged.add(cell); badge = `<span class="hx-poi__count">+${cl.count - 1}</span>` }
+          } catch { /* ignore */ }
           const icon = L.divIcon({
             className: 'hx-poi',
-            html: `<div class="hx-poi__pin" style="--c:${col};width:${sz}px;height:${sz}px"><div class="hx-poi__ico">${svg}</div></div>${label}`,
+            html: `<div class="hx-poi__pin" style="--c:${col};width:${sz}px;height:${sz}px"><div class="hx-poi__ico">${svg}</div></div>${badge}${label}`,
             iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2],
           })
           const m = L.marker([p.lat, p.lon], { icon, zIndexOffset: 500 + (sz * 10), keyboard: false, title: p.name })
           m.on('click', () => map.flyTo([p.lat, p.lon], 15, { duration: 1.2 }))
+          layer.addLayer(m)
+        }
+        // Zones with POIs but no visible marker yet: a counter bubble (tap → zoom into the zone)
+        for (const cl of clusters.values()) {
+          if (badged.has(cl.cell) || cl.count < 3) continue
+          const pt = map.latLngToContainerPoint([cl.lat, cl.lon])
+          if (placed.some(q => Math.hypot(q.x - pt.x, q.y - pt.y) < q.r + 26)) continue   // never over a marker
+          placed.push({ x: pt.x, y: pt.y, r: 24 })
+          const d = cl.count >= 100 ? 44 : cl.count >= 20 ? 36 : 30
+          const icon = L.divIcon({ className: 'hx-poi', iconSize: [d, d], iconAnchor: [d / 2, d / 2],
+            html: `<div class="hx-poi__cluster" style="width:${d}px;height:${d}px">${cl.count}</div>` })
+          const m = L.marker([cl.lat, cl.lon], { icon, zIndexOffset: 300, keyboard: false, title: `${cl.count} points of interest` })
+          m.on('click', () => map.flyTo([cl.lat, cl.lon], Math.min(zoom + 3, 15), { duration: 1 }))
           layer.addLayer(m)
         }
       })
