@@ -118,8 +118,9 @@ class NewsEventRegistration(models.Model):
 
 
 class EventCard(models.Model):
-    """News token (2026-10-18): the player who holds a world event's hex when it ends wins its card.
-    One card per event and winner — a dated, numbered collectible of the real headline."""
+    """News token (2026-10-18): only 10 numbered editions per event (x/10). #1 goes to the player holding the event's
+    hex when it ends; the others are drawn among the players who bought a ticket (luck potion = more chances).
+    Sellable to collectors on the market (events/card_market_views.py)."""
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='event_cards')
     event = models.ForeignKey(NewsEvent, null=True, on_delete=models.SET_NULL, related_name='cards')
@@ -134,6 +135,11 @@ class EventCard(models.Model):
     source_url = models.URLField(max_length=512, blank=True, default='')
     event_date = models.DateField()
     won_at = models.DateTimeField(auto_now_add=True)
+    # Only EDITIONS tokens per event: #1 to the hex holder, the rest drawn among the paid tickets (world_events.draw)
+    serial = models.IntegerField(default=1)
+    max_supply = models.IntegerField(default=10)
+    price_hex = models.IntegerField(null=True, blank=True)        # on sale in the market when set
+    listed_at = models.DateTimeField(null=True, blank=True)
 
     class Meta:
         db_table = 'event_cards'

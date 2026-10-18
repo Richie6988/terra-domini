@@ -329,6 +329,7 @@ def codex_cards(request):
         'uid': str(e.id), 'name': e.headline, 'rarity': e.rarity, 'category': e.kind or 'news', 'event_date': e.event_date.isoformat(),
         'h3_index': e.h3_index, 'lat': e.latitude, 'lon': e.longitude, 'location': e.location_name,
         'image_url': e.image_url, 'wiki_url': e.source_url, 'owned': True, 'no': n,
+        'serial': e.serial, 'max_supply': e.max_supply, 'price': e.price_hex,     # x/10 edition, on sale if price
     } for n, e in enumerate(EventCard.objects.filter(player=player).order_by('event_date'), 1)]
 
     return Response({

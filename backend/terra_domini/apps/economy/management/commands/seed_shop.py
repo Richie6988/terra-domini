@@ -33,7 +33,7 @@ ITEMS = [
     {'code': 'eco_trade_advantage', 'name': 'Trade Advantage', 'category': 'economy', 'price_tdc': 300, 'description': '-20% marketplace royalty on your purchases for 72h', 'effect_type': 'trade_discount', 'effect_value': 0.8, 'duration': 259200},
 
     # Collection bonuses
-    {'code': 'col_luck', 'name': 'Luck Potion', 'category': 'collection', 'price_tdc': 250, 'description': '+15 luck for events for 48h', 'effect_type': 'luck_boost', 'effect_value': 15.0, 'duration': 172800},
+    {'code': 'col_luck', 'name': 'Luck Potion', 'category': 'collection', 'price_tdc': 250, 'description': '2.5x chances to win an event token in the draws for 48h', 'effect_type': 'luck_boost', 'effect_value': 15.0, 'duration': 172800},
     {'code': 'col_rarity', 'name': '+Card Rarity', 'category': 'collection', 'price_tdc': 400, 'description': 'Next 5 safari captures pay the next rarity tier reward', 'effect_type': 'rarity_boost', 'effect_value': 1.0, 'duration': 0},
     {'code': 'col_safari_1h', 'name': '1H Continuous Safari', 'category': 'collection', 'price_tdc': 300, 'description': 'No daily safari hunt limit for 1h', 'effect_type': 'safari_continuous', 'effect_value': 1.0, 'duration': 3600},
     {'code': 'col_safari_hints', 'name': 'Safari Hints', 'category': 'collection', 'price_tdc': 150, 'description': '+2 scans on your next safari hunt', 'effect_type': 'safari_hints', 'effect_value': 1.0, 'duration': 0},

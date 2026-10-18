@@ -89,6 +89,7 @@ from terra_domini.apps.economy.auction_views import auctions_list, auction_bid
 from terra_domini.apps.economy.lottery_views import lottery_status, lottery_play
 from terra_domini.apps.economy.pickup_views import pickups_in_view, pickup_collect
 from terra_domini.apps.economy.map_resources import map_resources, map_states
+from terra_domini.apps.events import card_market_views as event_cards
 from terra_domini.apps.territories.kingdom_views import kingdom_overview, kingdom_upgrade, daily_draft
 from terra_domini.apps.combat.recruitment import (
     my_army as combat_my_army,
@@ -166,6 +167,10 @@ urlpatterns = [
     path('api/lottery/play/', lottery_play, name='lottery_play'),
     path('api/auctions/', auctions_list, name='auctions_list'),
     path('api/auctions/<str:auction_id>/bid/', auction_bid, name='auction_bid'),
+    path('api/event-cards/market/',              event_cards.market, name='event_cards_market'),
+    path('api/event-cards/<uuid:card_id>/sell/',   event_cards.sell,   name='event_cards_sell'),
+    path('api/event-cards/<uuid:card_id>/delist/', event_cards.delist, name='event_cards_delist'),
+    path('api/event-cards/<uuid:card_id>/buy/',    event_cards.buy,    name='event_cards_buy'),
     path('api/combat/draft/',    daily_draft,      name='combat_draft'),
     path('api/kingdom/<str:h3_index>/overview/', kingdom_overview, name='kingdom_overview'),
     path('api/kingdom/<str:h3_index>/upgrade/',  kingdom_upgrade,  name='kingdom_upgrade'),

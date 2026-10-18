@@ -164,8 +164,54 @@ def live_event_hexes() -> set:
                .values_list('h3_index', flat=True))
 
 
+EDITIONS = 10            # only 10 numbered tokens per event (owner 2026-10-18)
+
+
+def ticket_weight(luck: int) -> float:
+    """Chances of one ticket in the draw: luck potion (+15 luck) = 2.5x."""
+    return 1 + max(0, luck) / 10
+
+
+def _card(ev, player_id, serial):
+    from terra_domini.apps.events.news_models import EventCard
+    return EventCard.objects.get_or_create(player_id=player_id, event=ev, defaults=dict(
+        headline=ev.headline[:300], kind=ev.event_kind or '', location_name=(ev.poi_name or ev.location_name or '')[:200],
+        h3_index=ev.h3_index, latitude=ev.latitude, longitude=ev.longitude, rarity=ev.rarity or 'rare',
+        image_url=(ev.image_url or '')[:512], source_url=(ev.source_url or '')[:512], event_date=ev.ends_at.date(),
+        serial=serial, max_supply=EDITIONS))
+
+
+def draw(ev, holder_id=None) -> list:
+    """The 10 editions: #1 to the hex holder, the rest drawn among the ticket holders, weighted by luck."""
+    import random
+    regs = list(ev.registrations.filter(result='pending'))
+    pool = [r for r in regs if r.player_id != holder_id]
+    winners = []
+    serial = 1
+    if holder_id:
+        _card(ev, holder_id, 1)
+        serial = 2
+    while pool and serial <= EDITIONS:
+        r = random.choices(pool, weights=[ticket_weight(x.luck_bonus) for x in pool])[0]
+        pool.remove(r)
+        r.result, r.token_serial = 'won', serial
+        r.save(update_fields=['result', 'token_serial'])
+        _card(ev, r.player_id, serial)
+        winners.append((r.player_id, serial))
+        serial += 1
+    for r in pool:
+        r.result = 'lost'
+        r.save(update_fields=['result'])
+    for r in regs:
+        if r.player_id == holder_id:
+            r.result, r.token_serial = 'won', 1
+            r.save(update_fields=['result', 'token_serial'])
+    return winners
+
+
 def resolve() -> int:
-    """Ended events: the hex holder wins the bounty. Upcoming → live when they start."""
+    """Ended events: the hex holder wins the bounty and edition #1; editions #2-10 are drawn among the tickets.
+    Upcoming → live when they start."""
     from terra_domini.apps.accounts.models import Player
     from terra_domini.apps.events.news_models import NewsEvent
     from terra_domini.apps.territories.models import Territory
@@ -178,14 +224,8 @@ def resolve() -> int:
             if owner_id:
                 Player.objects.filter(id=owner_id).update(tdc_in_game=F('tdc_in_game') + ev.hex_reward)
                 ev.winner_id = owner_id
-                ev.status = NewsEvent.Status.ENDED
-                from terra_domini.apps.events.news_models import EventCard   # the news token goes to the album
-                EventCard.objects.get_or_create(player_id=owner_id, event=ev, defaults=dict(
-                    headline=ev.headline[:300], kind=ev.event_kind or '', location_name=(ev.poi_name or ev.location_name or '')[:200],
-                    h3_index=ev.h3_index, latitude=ev.latitude, longitude=ev.longitude, rarity=ev.rarity or 'rare',
-                    image_url=(ev.image_url or '')[:512], source_url=(ev.source_url or '')[:512], event_date=ev.ends_at.date()))
-            else:
-                ev.status = NewsEvent.Status.EXPIRED
+            draw(ev, owner_id)
+            ev.status = NewsEvent.Status.ENDED if owner_id or ev.registrations.exists() else NewsEvent.Status.EXPIRED
             ev.save(update_fields=['winner', 'status'])
         done += 1
     return done

@@ -67,7 +67,25 @@ def _serialize_event(event, player=None):
         'my_result': reg.result if reg else None,
         'my_hex_earned': reg.hex_earned if reg else 0,
         'my_serial': reg.token_serial if reg else None,
+        # Draw of the 10 numbered tokens (world_events.draw): tickets, my luck, my chance to get one
+        **_draw_info(event, reg, player),
     }
+
+
+def _draw_info(event, reg, player):
+    from terra_domini.apps.events.world_events import EDITIONS, ticket_weight
+    lucks = list(event.registrations.values_list('luck_bonus', flat=True))
+    slots = EDITIONS - (1 if getattr(event, 'h3_index', '') else 0)      # #1 is the hex holder's
+    chance = None
+    if reg:
+        total = sum(ticket_weight(l) for l in lucks) or 1
+        chance = round(min(1.0, slots * ticket_weight(reg.luck_bonus) / total) * 100)
+    potion = 0
+    if player and player.is_authenticated:
+        from terra_domini.apps.economy import balance as B
+        potion = int(B.boost_mult(player, 'luck_boost')) if B.has_boost(player, 'luck_boost') else 0
+    return {'editions': EDITIONS, 'draw_slots': slots, 'tickets': len(lucks),
+            'my_luck': reg.luck_bonus if reg else potion, 'my_chance': chance, 'luck_potion_active': bool(potion)}
 
 
 @api_view(['GET'])
@@ -112,25 +130,27 @@ def register_for_event(request, event_id):
     if NewsEventRegistration.objects.filter(event=event, player=request.user).exists():
         return Response({'error': 'Already registered'}, status=400)
 
-    # Check balance
+    # A ticket for the draw of the 10 numbered tokens — random content: paid with HEX earned in game only
+    from decimal import Decimal
+    from django.db.models import F
+    from terra_domini.apps.accounts.models import Player
+    from terra_domini.apps.economy import balance as B
     player = request.user
-    balance = float(getattr(player, 'tdc_in_game', 0) or 0)
     cost = event.registration_cost
-    if balance < cost:
-        return Response({'error': f'Insufficient balance. Need {cost} HEX'}, status=400)
-
-    # Deduct cost
+    if cost > 0 and B.spendable_earned(player) < Decimal(cost):
+        return Response({'error': f'Tickets are paid with HEX earned in game ({float(B.spendable_earned(player)):,.0f} earned).'}, status=402)
     if cost > 0:
-        player.tdc_in_game = balance - cost
-        player.save(update_fields=['tdc_in_game'])
-
-    NewsEventRegistration.objects.create(event=event, player=player)
+        Player.objects.filter(id=player.id).update(tdc_in_game=F('tdc_in_game') - cost)
+        player.refresh_from_db(fields=['tdc_in_game'])
+    luck = int(B.boost_mult(player, 'luck_boost')) if B.has_boost(player, 'luck_boost') else 0   # shop Luck Potion
+    NewsEventRegistration.objects.create(event=event, player=player, luck_bonus=luck)
 
     return Response({
         'success': True,
-        'message': f'Registered for {event.headline[:50]}',
-        'cost': cost,
+        'message': f'Ticket bought for {event.headline[:50]}',
+        'cost': cost, 'luck': luck,
         'remaining_balance': float(player.tdc_in_game),
+        'event': _serialize_event(event, player),
     })
 
 

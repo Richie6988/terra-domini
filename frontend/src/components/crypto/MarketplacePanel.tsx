@@ -367,9 +367,71 @@ function MySalesTab({ onSell }: { onSell?: () => void }) {
   )
 }
 
+/* ── Event tokens: only 10 numbered editions per event (GET/POST /api/event-cards/…) ── */
+function EventTokensTab() {
+  const qc = useQueryClient()
+  const [prices, setPrices] = useState<Record<string, string>>({})
+  const { data, isLoading } = useQuery({ queryKey: ['event-cards-market'], queryFn: () => api.get('/event-cards/market/').then(r => r.data), staleTime: 15000 })
+  const refresh = () => { qc.invalidateQueries({ queryKey: ['event-cards-market'] }); qc.invalidateQueries({ queryKey: ['player'] }) }
+  const act = async (url: string, body?: any, ok?: string) => {
+    try {
+      const { data: r } = await api.post(url, body)
+      if (r.balance != null) { const st = useStore.getState(); st.setBalance({ ...(st.balance || {}), in_game: r.balance } as any) }
+      if (ok) toast.success(ok)
+      refresh()
+    } catch (e: any) { toast.error(e?.response?.data?.error || 'Failed') }
+  }
+  if (isLoading) return <Spinner />
+  const row = (c: any, right: React.ReactNode) => {
+    const rc = RARITY_C[c.rarity] || '#9CA3AF'
+    return (
+      <div key={c.id} className="hx-rise" style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '10px 12px', borderRadius: 12,
+        background: `linear-gradient(90deg, ${rc}14, rgba(255,255,255,0.03) 45%)`, border: `2px solid ${rc}33`, borderLeft: `4px solid ${rc}` }}>
+        <div style={{ width: 52, height: 52, borderRadius: 10, flexShrink: 0, overflow: 'hidden', position: 'relative', background: `${rc}22`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          {c.image_url ? <img src={c.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <IconSVG id={c.kind || 'news'} size={30} />}
+          <span style={{ position: 'absolute', bottom: 0, left: 0, right: 0, textAlign: 'center', fontSize: 10, fontWeight: 900,
+                         background: 'rgba(0,0,0,0.7)', color: '#fde68a', fontFamily: "'Share Tech Mono', monospace" }}>{c.serial}/{c.max_supply}</span>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#e2e8f0', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{c.headline}</div>
+          <div style={{ display: 'flex', gap: 5, marginTop: 4, alignItems: 'center', flexWrap: 'wrap' }}>
+            <RarityBadge rarity={c.rarity} />
+            <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.45)' }}>{c.event_date} · {c.location}{c.seller && !c.mine ? ` · by ${c.seller}` : ''}</span>
+          </div>
+        </div>
+        <div style={{ textAlign: 'right', flexShrink: 0 }}>{right}</div>
+      </div>
+    )
+  }
+  const listings = (data?.listings || []).filter((c: any) => !c.mine)
+  const mine = data?.mine || []
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div style={{ fontSize: 11, color: 'var(--hx-text-3)', marginBottom: 2 }}>Only 10 numbered tokens exist per real event. Win them in Events (hold the hex or get lucky in the draw), trade them here.</div>
+      {listings.length === 0 && <Empty icon="news" msg="NO EVENT TOKEN ON SALE" sub="Be the first: win one in Events, then list it here." />}
+      {listings.map((c: any) => row(c, <>
+        <PriceTag price={c.price} />
+        <button onClick={() => act(`/event-cards/${c.id}/buy/`, undefined, `Token ${c.serial}/${c.max_supply} is yours`)} className="btn-game btn-game-gold"
+                style={{ display: 'block', marginTop: 8, marginLeft: 'auto', padding: '8px 16px', fontSize: 11 }}>BUY</button>
+      </>))}
+      {mine.length > 0 && <div style={{ fontSize: 9, letterSpacing: 1.5, fontWeight: 700, color: 'var(--hx-text-3)', marginTop: 10 }}>MY EVENT TOKENS</div>}
+      {mine.map((c: any) => row(c, c.price
+        ? <><PriceTag price={c.price} /><button onClick={() => act(`/event-cards/${c.id}/delist/`)} className="hx-chip" style={{ display: 'block', marginTop: 6, marginLeft: 'auto', cursor: 'pointer' }}>WITHDRAW</button></>
+        : <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+            <input type="number" min={100} placeholder="Price" value={prices[c.id] || ''} onChange={e => setPrices(p => ({ ...p, [c.id]: e.target.value }))}
+                   style={{ width: 90, padding: '7px 8px', borderRadius: 8, border: '1px solid var(--hx-line)', background: 'rgba(0,0,0,0.3)', color: '#fde68a', fontFamily: "'Share Tech Mono', monospace" }} />
+            <button onClick={() => act(`/event-cards/${c.id}/sell/`, { price: Number(prices[c.id]) }, 'Listed')} disabled={!prices[c.id]}
+                    className="btn-game btn-game-green" style={{ padding: '8px 12px', fontSize: 10 }}>SELL</button>
+          </div>))}
+    </div>
+  )
+}
+
 /* ── Main Panel ───────────────────────────────────────────── */
 const TABS = [
   { id: 'explore', label: 'Explore' },
+  { id: 'events', label: 'Event tokens' },
   { id: 'my-nfts', label: 'My NFTs' },
   { id: 'my-sales', label: 'My Sales' },
 ]
@@ -409,6 +471,7 @@ export function MarketplacePanel({ onClose }: { onClose: () => void }) {
             exit={{ opacity: 0 }} transition={{ duration: 0.12 }}
             style={{ paddingBottom: 40 }}>
             {tab === 'explore'&& <ExplorerTab onSell={() => setTab('my-nfts')} />}
+            {tab === 'events' && <EventTokensTab />}
             {tab === 'my-nfts'&& <MyNFTsTab />}
             {tab === 'my-sales' && <MySalesTab onSell={() => setTab('my-nfts')} />}
           </motion.div>

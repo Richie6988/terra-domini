@@ -46,6 +46,7 @@ interface NewsEventData {
   my_registered: boolean; my_result: string | null
   event_kind?: string; h3_index?: string; poi_name?: string; holder?: string | null; i_hold?: boolean
   my_hex_earned: number; my_serial: number | null
+  editions?: number; draw_slots?: number; tickets?: number; my_luck?: number; my_chance?: number | null; luck_potion_active?: boolean
 }
 
 interface MyResultData {
@@ -97,8 +98,8 @@ export function EventsPanel({ onClose }: Props) {
   const handleRegister = async (ev: NewsEventData) => {
     if (ev.my_registered) return
     try {
-      await api.post(`/events/news/${ev.id}/register/`)
-      toast.success(`Registered for ${ev.headline.slice(0, 40)}! Cost: ${ev.registration_cost} HEX`)
+      const { data: r } = await api.post(`/events/news/${ev.id}/register/`)
+      toast.success(`Ticket bought — ${r.event?.my_chance ?? '?'}% chance to get one of the ${ev.editions || 10} tokens`)
       refetchEvents()
     } catch (e: any) {
       toast.error(e?.response?.data?.error || 'Registration failed')
@@ -173,8 +174,8 @@ export function EventsPanel({ onClose }: Props) {
                       tokenName={ev.headline.split(' — ')[0]?.slice(0, 20) || 'EVENT'}
                       iconId={ev.category || 'news'}
                       imageSrc={ev.image_url}
-                      serial={ev.registered_count + 1}
-                      maxSupply={ev.max_participants}
+                      serial={ev.my_serial || ev.editions || 10}
+                      maxSupply={ev.editions || 10}
                       size={64}
                     />
                     <div style={{ flex: 1, minWidth: 0 }}>
@@ -202,20 +203,34 @@ export function EventsPanel({ onClose }: Props) {
                   </div>
                   {!ev.h3_index && <div className="hx-progress"><div className="hx-progress__fill" style={{ width: `${pctFull}%` }} /></div>}
 
-                  {ev.h3_index ? (
-                    <button className={ev.i_hold ? 'btn-game btn-game-green' : 'btn-game btn-game-gold'}
+                  {/* Only 10 numbered tokens: #1 to the hex holder, the others drawn among the tickets */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', borderRadius: 10,
+                                background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)' }}>
+                    <div style={{ flex: 1, fontSize: 10, color: 'var(--hx-text-2)', lineHeight: 1.45, ...body }}>
+                      <b style={{ color: '#fbbf24', fontFamily: mono, fontSize: 12 }}>{ev.editions || 10} TOKENS ONLY</b> · {ev.tickets ?? ev.registered_count} tickets
+                      <br />{ev.h3_index ? `#1 to the holder, ${ev.draw_slots ?? 9} drawn at the end` : `${ev.draw_slots ?? 10} drawn at the end`} · resell them to collectors
+                    </div>
+                    {ev.my_registered
+                      ? <span className="hx-chip" style={{ color: '#86efac' }}><Check size={11} /> {ev.my_chance != null ? `${ev.my_chance}% CHANCE` : 'TICKET'}</span>
+                      : <button onClick={() => handleRegister(ev)} className="btn-game btn-game-gold"
+                                style={{ padding: '8px 10px', fontSize: 10, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          TICKET · {ev.registration_cost === 0 ? 'FREE' : <><IconSVG id="hex_coin" size={12} />{ev.registration_cost}</>}
+                        </button>}
+                  </div>
+                  <div style={{ fontSize: 10, color: ev.luck_potion_active ? '#86efac' : 'var(--hx-text-3)', display: 'flex', alignItems: 'center', gap: 6, ...body }}>
+                    {ev.luck_potion_active
+                      ? <>Luck potion active: x2.5 chances on your tickets</>
+                      : <>Luck potion: x2.5 chances <button onClick={() => { onClose(); useStore.getState().setActivePanel('shop') }}
+                          className="hx-chip" style={{ cursor: 'pointer' }}>GET ONE</button></>}
+                  </div>
+
+                  {ev.h3_index && (
+                    <button className={ev.i_hold ? 'btn-game btn-game-green' : 'btn-game btn-game-red'}
                       onClick={() => { window.dispatchEvent(new CustomEvent('terra:flyto', { detail: { lat: ev.latitude, lon: ev.longitude, zoom: 15 } })); onClose() }}
-                      style={{ width: '100%', fontSize: 12, letterSpacing: 1 }}>
-                      {ev.i_hold ? 'DEFEND IT UNTIL THE END' : ev.holder ? 'GO ATTACK IT' : 'GO CLAIM IT'} · {ev.poi_name}
+                      style={{ width: '100%', fontSize: 11, letterSpacing: 1 }}>
+                      {ev.i_hold ? 'DEFEND IT: TOKEN #1 IS YOURS' : ev.holder ? 'ATTACK IT FOR TOKEN #1' : 'CLAIM IT FOR TOKEN #1'} · {ev.poi_name}
                     </button>
-                  ) : <button
-                    onClick={() => handleRegister(ev)}
-                    disabled={ev.my_registered}
-                    className={ev.my_registered ? 'btn-game btn-game-glass' : 'btn-game btn-game-gold'}
-                    style={{ width: '100%', fontSize: 10, letterSpacing: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}
-                  >
-                    {ev.my_registered ? <><Check size={14} /> REGISTERED</> : <>REGISTER · {ev.registration_cost === 0 ? 'FREE' : <><IconSVG id="hex_coin" size={13} />{ev.registration_cost}</>}</>}
-                  </button>}
+                  )}
                 </div>
               )
             })}

@@ -745,7 +745,7 @@ class AdCampaignViewSet(viewsets.GenericViewSet):
 # Effects the game really applies. Everything else in the catalog is shown as "coming soon" and cannot be bought.
 IMPLEMENTED_EFFECTS = {'booster_pack', 'shield', 'atk_multiplier', 'def_multiplier', 'border_color', 'hex_bonus',
                       'explore_slots', 'explore_speed', 'claim_instant', 'distant_attack', 'resource_multiplier',
-                      'rare_chance', 'trade_discount', 'safari_continuous', 'safari_hints', 'rarity_boost'}
+                      'rare_chance', 'trade_discount', 'safari_continuous', 'safari_hints', 'rarity_boost', 'luck_boost'}
 
 TIMED_EFFECT_TEXT = {   # read by: territories claim, combat.can_attack, resources, booster odds, marketplace buy, safari
     'claim_instant': 'Explorations finish in seconds',
@@ -754,6 +754,7 @@ TIMED_EFFECT_TEXT = {   # read by: territories claim, combat.can_attack, resourc
     'rare_chance': 'Booster rare+ odds x{v:g}',
     'trade_discount': 'Marketplace royalty -{pct:g}% on your purchases',
     'safari_continuous': 'No daily safari limit',
+    'luck_boost': '+{v:g} luck: 2.5x chances in event token draws',
 }
 CHARGE_EFFECTS = {'safari_hints': (1, '+2 scans on your next {n} safari hunt(s)'),
                   'rarity_boost': (5, 'Your next {n} safari captures pay the next rarity tier')}
