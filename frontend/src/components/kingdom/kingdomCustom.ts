@@ -34,3 +34,25 @@ export function useSaveKingdomCustom() {
     return r.data
   }
 }
+
+/** Settings saved by the old localStorage-only form (never reached the server): used to pre-fill the form once. */
+export function legacyLocalCustom(): KingdomCustom {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i) || ''
+      if (!k.startsWith('hx_kingdom_')) continue
+      const v = JSON.parse(localStorage.getItem(k) || '{}')
+      if (v && (v.name || v.fillColor || v.borderColor)) return v
+    }
+  } catch { /* ignore */ }
+  return {}
+}
+
+/** Server values first, legacy local values for the empty fields. */
+export function withLegacy(server: KingdomCustom): KingdomCustom {
+  const legacy = legacyLocalCustom()
+  return {
+    name: server.name || legacy.name, fillColor: server.fillColor || legacy.fillColor,
+    borderColor: server.borderColor || legacy.borderColor, imageUrl: server.imageUrl || legacy.imageUrl,
+  }
+}

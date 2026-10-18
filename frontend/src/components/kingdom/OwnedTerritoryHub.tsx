@@ -11,7 +11,7 @@
  * → opens Token3D), so it's still a featured experience — just no longer
  * the landing screen.
  */
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
@@ -21,7 +21,7 @@ import { IconSVG } from '../shared/iconBank'
 import { Token3DViewer } from '../shared/Token3DViewer'
 import { TokenHexPreview } from '../shared/TokenHexPreview'
 import { api } from '../../services/api'
-import { useServerKingdomCustom, useSaveKingdomCustom } from './kingdomCustom'
+import { useServerKingdomCustom, useSaveKingdomCustom, withLegacy } from './kingdomCustom'
 import { usePlayer } from '../../store'
 import { Crown, LayoutGrid, Palette, Lock, MapPin } from 'lucide-react'
 
@@ -208,13 +208,20 @@ function GalleryTab({ kingdom, tokens, onToken3D }: {
 // ════════════════════════════════════════════════════════════════
 function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[] }) {
   const anchor: string | undefined = kingdom.h3_indexes?.[0] || tokens[0]?.h3_index
-  const cust = useServerKingdomCustom(anchor)
+  const server = useServerKingdomCustom(anchor)
+  const cust = withLegacy(server)
   const saveKingdom = useSaveKingdomCustom()
   const [name, setName] = useState(cust.name || 'My Kingdom')
   const [fillColor, setFillColor] = useState(cust.fillColor || TIER_COLOR[Math.min(kingdom.tier || 1, 6)])
   const [borderColor, setBorderColor] = useState(cust.borderColor || TIER_COLOR[Math.min(kingdom.tier || 1, 6)])
   const [imageUrl, setImageUrl] = useState(cust.imageUrl || '')
   const [saving, setSaving] = useState(false)
+  useEffect(() => {   // server data can arrive after the first render
+    if (cust.name) setName(cust.name)
+    if (cust.fillColor) setFillColor(cust.fillColor)
+    if (cust.borderColor) setBorderColor(cust.borderColor)
+    if (cust.imageUrl) setImageUrl(cust.imageUrl)
+  }, [cust.name, cust.fillColor, cust.borderColor, cust.imageUrl])
 
   const minTerritoriesForEmbed = 3
   const embedUnlocked = (kingdom.size || tokens.length) >= minTerritoriesForEmbed

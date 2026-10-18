@@ -11,7 +11,7 @@ import { GlassPanel } from '../shared/GlassPanel'
 import { ResourceIconSVG, IconSVG } from '../shared/iconBank'
 import { SkillTreeView } from './SkillTreeView'
 import { useKingdomStore } from '../../store/kingdomStore'
-import { useServerKingdomCustom, useSaveKingdomCustom } from './kingdomCustom'
+import { useServerKingdomCustom, useSaveKingdomCustom, withLegacy } from './kingdomCustom'
 import { useStore, usePlayer } from '../../store'
 import { api } from '../../services/api'
 import { EmojiIcon } from '../shared/emojiIcons'
@@ -53,7 +53,8 @@ interface Props { onClose: () => void }
 // ── Kingdom Customization UI ──
 function CustomizationBlock({ kingdom }: { kingdom: Kingdom }) {
   const anchor = kingdom.capitalHex || kingdom.territories[0]
-  const cust = useServerKingdomCustom(anchor)
+  const server = useServerKingdomCustom(anchor)
+  const cust = withLegacy(server)
   const save = useSaveKingdomCustom()
   const [name, setName] = useState(cust.name || kingdom.name)
   const [fillColor, setFillColor] = useState(cust.fillColor || kingdom.color)
@@ -61,6 +62,12 @@ function CustomizationBlock({ kingdom }: { kingdom: Kingdom }) {
   const [imageUrl, setImageUrl] = useState(cust.imageUrl || '')
   const [showDiaporama, setShowDiaporama] = useState(false)
   const [saving, setSaving] = useState(false)
+  useEffect(() => {   // server data can arrive after the first render
+    if (cust.name) setName(cust.name)
+    if (cust.fillColor) setFillColor(cust.fillColor)
+    if (cust.borderColor) setBorderColor(cust.borderColor)
+    if (cust.imageUrl) setImageUrl(cust.imageUrl)
+  }, [cust.name, cust.fillColor, cust.borderColor, cust.imageUrl])
 
   const saveCustomization = async () => {
     if (!anchor) return
