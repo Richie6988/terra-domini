@@ -1,4 +1,5 @@
 from django.urls import path
+from terra_domini.apps.admin_gm.token_views import GMTokenListView, GMTokenMetaView, GMTokenDetailView
 from terra_domini.apps.admin_gm.views import (
     GMDashboardView, GMPlayerListView, GMPlayerActionView,
     GMTowerView, GMPOIView, GMBroadcastView, GMEconomyView, GMLogsView,
@@ -16,5 +17,8 @@ urlpatterns = [
     path('economy/',            GMEconomyView.as_view(),      name='gm_economy'),
     path('ticker/',             GMTickerView.as_view(),       name='gm_ticker'),
     path('bots/',               GMBotView.as_view(),          name='gm_bots'),
+    path('tokens/',             GMTokenListView.as_view(),    name='gm_tokens'),
+    path('tokens/meta/',        GMTokenMetaView.as_view(),    name='gm_tokens_meta'),
+    path('tokens/<uuid:poi_id>/', GMTokenDetailView.as_view(), name='gm_token_detail'),
     path('feedback/',           GMFeedbackView.as_view(),     name='gm_feedback'),
 ]

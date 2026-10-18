@@ -8,11 +8,13 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { IconSVG } from '../components/shared/iconBank'
 import { api } from '../services/api'
 import toast from 'react-hot-toast'
+import { TokenEditor } from './admin/TokenEditor'
 
-type Tab = 'command' | 'players' | 'bots' | 'ticker' | 'feedback' | 'economy'
+type Tab = 'command' | 'tokens' | 'players' | 'bots' | 'ticker' | 'feedback' | 'economy'
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'command',  label: 'COMMAND',  icon: 'target' },
+  { id: 'tokens',   label: 'TOKENS',   icon: 'gem' },
   { id: 'players',  label: 'PLAYERS',  icon: 'people' },
   { id: 'bots',     label: 'BOTS',     icon: 'robot' },
   { id: 'ticker',   label: 'TICKER',   icon: 'megaphone' },
@@ -521,7 +523,7 @@ export default function AdminPanel() {
       background: 'linear-gradient(180deg, #4fa6f5 0%, #2f6fe0 35%, #1f4fbf 100%)',
       color: '#fff', padding: '20px 16px 40px', ['--accent' as any]: '#ffd23f', letterSpacing: 0.3,
     }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      <div style={{ maxWidth: tab === 'tokens' ? 1400 : 1100, margin: '0 auto' }}>
       {/* Header */}
       <div style={{
         display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 14, marginBottom: 16,
@@ -569,6 +571,7 @@ export default function AdminPanel() {
       {/* Tab content */}
       <div>
         {tab === 'command'  && <CommandTab />}
+        {tab === 'tokens'   && <TokenEditor />}
         {tab === 'players'  && <PlayersTab />}
         {tab === 'bots'     && <BotsTab />}
         {tab === 'ticker'   && <TickerTab />}

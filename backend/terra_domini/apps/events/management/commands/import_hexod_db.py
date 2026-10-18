@@ -50,9 +50,12 @@ class Command(BaseCommand):
             raise CommandError(f'expected H3 resolution 8, got {res}')
         pois = [p for p in db['pois'] if p.get('on_map') and p.get('h3_r8')]
 
-        # One POI per hex on the map — keep the rarest
+        # One POI per hex on the map — keep the rarest (admin-edited tokens keep their own territory)
+        admin_uids = set(UnifiedPOI.objects.filter(source='admin').exclude(db_uid='').values_list('db_uid', flat=True))
         best = {}
         for p in pois:
+            if p['uid'] in admin_uids:
+                continue
             cur = best.get(p['h3_r8'])
             if cur is None or RANK.get(p['rarity'], 0) > RANK.get(cur['rarity'], 0):
                 best[p['h3_r8']] = p
@@ -64,9 +67,13 @@ class Command(BaseCommand):
 
         with transaction.atomic():
             # ── UnifiedPOI (bulk_create bypasses save(), which forces res 7 and category rarity) ──
+            # Admin-edited tokens (source='admin', token editor) win over the spreadsheet: never overwritten
+            edited = set(UnifiedPOI.objects.filter(source='admin').exclude(db_uid='').values_list('db_uid', flat=True))
             UnifiedPOI.objects.filter(source='hexod_db').delete()
             rows = []
             for p in pois:
+                if p['uid'] in edited:
+                    continue
                 cfg = POI_VISUAL.get(p['game_category'], {})
                 rarity = p['rarity']
                 rows.append(UnifiedPOI(
@@ -79,14 +86,14 @@ class Command(BaseCommand):
                     description=p.get('description') or p.get('title') or '',
                     real_output=(p.get('title') or '')[:200],
                     wiki_url=p['wiki_url'] if len(p.get('wiki_url') or '') <= 200 else '', fun_fact=_fun_fact(p),
-                    is_active=True, is_featured=p.get('quality') == 'premium', verified=True, source='hexod_db',
+                    is_active=True, is_featured=p.get('quality') == 'premium', verified=True, source='hexod_db', db_uid=p['uid'][:60],
                     token_id=p.get('token_id') or None, visitors_per_year=int(p.get('visitors_per_year') or 0),
                     geopolitical_score=int(p.get('geopolitical_score') or 0),
                 ))
             UnifiedPOI.objects.bulk_create(rows, batch_size=500)
             deactivated = 0
             if not opts['keep_legacy']:
-                deactivated = UnifiedPOI.objects.exclude(source='hexod_db').filter(is_active=True).update(is_active=False)
+                deactivated = UnifiedPOI.objects.exclude(source__in=['hexod_db', 'admin']).filter(is_active=True).update(is_active=False)
 
             # ── Territories (res 8) ──
             existing = {t.h3_index: t for t in Territory.objects.filter(h3_index__in=list(best))}

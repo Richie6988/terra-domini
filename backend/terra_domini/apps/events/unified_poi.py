@@ -222,6 +222,11 @@ class UnifiedPOI(models.Model):
     token_id         = models.BigIntegerField(null=True, blank=True)
     visitors_per_year= models.IntegerField(default=0)
     geopolitical_score = models.IntegerField(default=0)
+    # ── Data governance (admin token editor, 2026-10-18) ──
+    db_uid       = models.CharField(max_length=60, blank=True, default='', db_index=True)   # HEXOD master DB uid
+    image_url    = models.URLField(max_length=500, blank=True, default='')
+    validated_by = models.ForeignKey('accounts.Player', null=True, blank=True, on_delete=models.SET_NULL, related_name='validated_pois')
+    validated_at = models.DateTimeField(null=True, blank=True)
     class Meta:
         db_table = 'unified_poi'
         ordering = ['-is_featured', '-bonus_pct', 'name']
