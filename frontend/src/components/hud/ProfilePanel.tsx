@@ -1,6 +1,6 @@
 /**
  * ProfilePanel — Player profile management.
- * 3 tabs: Commander (edit profile), Achievements (badges), Preferences (settings).
+ * 3 tabs: Commander (live stats from /players/me/profile-stats/ + profile editor), Achievements, Preferences (sound, map).
  */
 import { useState, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
@@ -10,7 +10,7 @@ import { GlassPanel } from '../shared/GlassPanel'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
 import { EmojiIcon, emojiToIcon } from '../shared/emojiIcons'
-import { Check, AlertTriangle, LogOut, Trash2 } from 'lucide-react'
+import { Check, AlertTriangle, LogOut, Trash2, Trophy, Flame, Pencil, Swords, Shield, Crown, Sparkles } from 'lucide-react'
 import { IconSVG } from '../shared/iconBank'
 
 interface Props { onClose: () => void }
@@ -36,6 +36,8 @@ function CommanderTab() {
   const [avatarBg, setAvatarBg] = useState((player as any)?.avatar_color || '#0099cc')
   const [email, setEmail] = useState(player?.email || '')
   const [saving, setSaving] = useState(false)
+  const [editing, setEditing] = useState(false)
+  const { data: st } = useQuery({ queryKey: ['profile-stats'], queryFn: () => api.get('/players/me/profile-stats/').then(r => r.data), staleTime: 30000 })
   const save = useCallback(async () => {
     setSaving(true)
     try {
@@ -64,13 +66,21 @@ function CommanderTab() {
           <div style={{ fontSize: 20, fontWeight: 900, color: '#fff', letterSpacing:0.5 }}>{name || player.display_name || player.username}</div>
           <div style={{ fontSize: 11, color: 'rgba(226,232,240,0.55)', marginTop: 3, textTransform: 'none', fontFamily: "'Share Tech Mono', monospace" }}>@{player.username}</div>
           <div style={{ display: 'flex', gap: 6, marginTop: 10, flexWrap: 'wrap' }}>
-            <span className="hx-chip" style={{ color: '#7dd3fc' }}>RANK {(player as any).commander_rank ?? 1}</span>
-            <span className="hx-chip" style={{ color: '#7dd3fc' }}><IconSVG id="castle" size={14} /> {(player as any).stats?.territories_owned || 0} TERRITORIES</span>
-            <span className="hx-chip" style={{ color: '#fde68a' }}><IconSVG id="hex_coin" size={14} /> {Math.floor(parseFloat(String((player as any).tdc_in_game || 0)) || 0).toLocaleString()} HEX</span>
+            {st && <span className="hx-chip" style={{ color: '#fde68a' }}><Trophy size={12} /> #{st.rank.position} OF {st.rank.players}</span>}
+            {st && <span className="hx-chip" style={{ color: '#fb923c' }}><Flame size={12} /> {st.streak.current} DAY STREAK</span>}
+            {st?.joined && <span className="hx-chip">SINCE {new Date(st.joined).toLocaleDateString(undefined, { month: 'short', year: 'numeric' }).toUpperCase()}</span>}
           </div>
         </div>
       </div>
 
+      {st && <ProfileStats st={st} />}
+
+      <button onClick={() => setEditing(e => !e)} className="btn-game btn-game-glass"
+              style={{ width: '100%', minHeight: 42, fontSize: 11, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <Pencil size={13} /> {editing ? 'CLOSE EDITOR' : 'EDIT NAME, AVATAR, EMAIL'}
+      </button>
+
+      {editing && <>
       {/* Display name */}
       <div style={sBox}>
         <div style={lbl}>DISPLAY NAME</div>
@@ -130,6 +140,7 @@ function CommanderTab() {
         width: '100%', fontSize: 12, letterSpacing:0.5, minHeight: 46,
         opacity: saving ? 0.6 : 1,
       }}>{saving ? 'SAVING...' : 'SAVE CHANGES'}</button>
+      </>}
 
       {/* Admin Panel — staff only */}
       {(player as any)?.is_staff && (
@@ -155,6 +166,64 @@ function CommanderTab() {
         }}><Trash2 size={14} /> DELETE ACCOUNT <span className="hx-chip" style={{ padding: '2px 6px' }}>SOON</span></button>
       </div>
     </div>
+  )
+}
+
+/** Every number comes from GET /api/players/me/profile-stats/ (live game data). */
+function ProfileStats({ st }: { st: any }) {
+  const mono = "'Share Tech Mono', monospace"
+  const r = st.record
+  const fights = r.attacks_won + r.attacks_lost + r.defenses_won + r.defenses_lost
+  const winPct = fights ? Math.round(((r.attacks_won + r.defenses_won) / fights) * 100) : null
+  const go = (panel: any) => useStore.getState().setActivePanel(panel)
+  const Tile = ({ icon, label, value, sub, color, onClick }: any) => (
+    <button onClick={onClick} className="hx-card" style={{ textAlign: 'left', cursor: onClick ? 'pointer' : 'default', padding: 12, display: 'flex', flexDirection: 'column', gap: 4, color: 'inherit' }}>
+      <span style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 9, letterSpacing: 1.5, fontWeight: 700, color }}>{icon}{label}</span>
+      <span style={{ fontFamily: mono, fontSize: 22, fontWeight: 900, color: '#f1f5f9', lineHeight: 1 }}>{value}</span>
+      <span style={{ fontSize: 10, color: 'var(--hx-text-3)', textTransform: 'none', letterSpacing: 0 }}>{sub}</span>
+    </button>
+  )
+  return (
+    <>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 8 }}>
+        <Tile icon={<Crown size={12} />} label="EMPIRE" color="#fbbf24" value={st.empire.territories}
+              sub={`${st.empire.kingdoms} kingdoms · biggest ${st.empire.largest_kingdom} hexes`} onClick={() => go('empire')} />
+        <Tile icon={<IconSVG id="hex_coin" size={12} />} label="INCOME" color="#fde68a" value={Math.round(st.empire.hex_per_day).toLocaleString()}
+              sub="HEX per day" onClick={() => go('empire')} />
+        <Tile icon={<Swords size={12} />} label="ARMY" color="#f87171" value={st.army.units}
+              sub={`ATK ${st.army.attack} · DEF ${st.army.defense}`} onClick={() => go('combat')} />
+        <Tile icon={<Sparkles size={12} />} label="COLLECTION" color="#c084fc" value={st.collection.landmarks + st.collection.event_tokens}
+              sub={`${st.collection.landmarks} landmarks · ${st.collection.event_tokens} event tokens`} onClick={() => go('codex')} />
+      </div>
+
+      <div style={sBox}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <div style={lbl}>BATTLE RECORD</div>
+          {winPct != null && <span style={{ fontFamily: mono, fontSize: 18, fontWeight: 900, color: winPct >= 50 ? '#4ade80' : '#f87171' }}>{winPct}% WINS</span>}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, textAlign: 'center' }}>
+          {[['ATTACKS WON', r.attacks_won, '#4ade80'], ['ATTACKS LOST', r.attacks_lost, '#f87171'],
+            ['DEFENSES HELD', r.defenses_won, '#60a5fa'], ['HEXES LOST', r.defenses_lost, '#fb923c']].map(([l, v, c]: any) => (
+            <div key={l}><div style={{ fontFamily: mono, fontSize: 20, fontWeight: 900, color: c }}>{v}</div>
+              <div style={{ fontSize: 8, letterSpacing: 1, color: 'var(--hx-text-3)', fontWeight: 700 }}>{l}</div></div>
+          ))}
+        </div>
+        <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 8, textTransform: 'none', letterSpacing: 0 }}>
+          {r.territories_captured} territories conquered · {r.units_lost} units lost in battle
+        </div>
+        {st.recent_battles.length > 0 && <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 10 }}>
+          {st.recent_battles.map((b: any) => (
+            <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 11, padding: '6px 8px', borderRadius: 8,
+                                     background: b.won ? 'rgba(74,222,128,0.07)' : 'rgba(248,113,113,0.07)' }}>
+              {b.role === 'attack' ? <Swords size={13} color="#f87171" /> : <Shield size={13} color="#60a5fa" />}
+              <span style={{ flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', textTransform: 'none', letterSpacing: 0 }}>
+                {b.role === 'attack' ? 'Attacked' : 'Defended'} {b.place} <span style={{ color: 'var(--hx-text-3)' }}>vs {b.opponent}</span></span>
+              <b style={{ color: b.won ? '#4ade80' : '#f87171', fontSize: 10 }}>{b.won ? (b.captured ? 'CAPTURED' : 'WON') : 'LOST'}</b>
+            </div>
+          ))}
+        </div>}
+      </div>
+    </>
   )
 }
 
@@ -213,12 +282,8 @@ function PreferencesTab() {
   const setMusic = useStore(s => s.setMusicEnabled)
   const sfx = useStore(s => s.sfxEnabled)
   const setSfx = useStore(s => s.setSfxEnabled)
-  const notifs = useStore(s => s.notificationsEnabled)
-  const setNotifs = useStore(s => s.setNotificationsEnabled)
   const mapTheme = useStore(s => s.mapTheme)
   const setMapTheme = useStore(s => s.setMapTheme)
-  const lang = useStore(s => s.language)
-  const setLang = useStore(s => s.setLanguage)
 
   const Tog=({l,v,f}:{l:string,v:boolean,f:(b:boolean)=>void})=>(
     <div style={{ display:'flex',justifyContent:'space-between',alignItems:'center',padding:'8px 0' }}>
@@ -234,8 +299,6 @@ function PreferencesTab() {
       <div style={sBox}><div style={lbl}>MAP THEME</div><div style={{ display:'flex',gap:6,flexWrap:'wrap' }}>{[{id:'game',n:'GAME'},{id:'satellite',n:'SATELLITE'}].map(t=>(
         <button key={t.id} onClick={()=>setMapTheme(t.id as any)} style={{ flex:'1 1 45%',padding:'10px 8px',minHeight:42,borderRadius:10,cursor:'pointer',fontSize: 11,fontWeight:700,letterSpacing:0.5,fontFamily:'var(--font-heading)',background:mapTheme===t.id?'rgba(0,153,204,0.15)':'rgba(255,255,255,0.04)',border:`2px solid ${mapTheme===t.id?'#0099cc':'rgba(255,255,255,0.08)'}`,color:mapTheme===t.id?'#0099cc':'rgba(255,255,255,0.65)' }}>{t.n}</button>
       ))}</div></div>
-      <div style={sBox}><div style={lbl}>NOTIFICATIONS</div><Tog l="Push notifications" v={notifs} f={setNotifs}/></div>
-      <div style={sBox}><div style={lbl}>LANGUAGE</div><select value={lang} onChange={e=>setLang(e.target.value as any)} aria-label="Language" style={{ ...inputSt, cursor:'pointer', colorScheme:'dark' }}><option value="en">English</option><option value="fr">Français</option><option value="es">Español</option><option value="de">Deutsch</option></select></div>
     </div>
   )
 }

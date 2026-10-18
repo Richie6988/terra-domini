@@ -90,6 +90,7 @@ from terra_domini.apps.economy.lottery_views import lottery_status, lottery_play
 from terra_domini.apps.economy.pickup_views import pickups_in_view, pickup_collect
 from terra_domini.apps.economy.map_resources import map_resources, map_states
 from terra_domini.apps.events import card_market_views as event_cards
+from terra_domini.apps.accounts.profile_views import profile_stats
 from terra_domini.apps.territories.kingdom_views import kingdom_overview, kingdom_upgrade, daily_draft
 from terra_domini.apps.combat.recruitment import (
     my_army as combat_my_army,
@@ -167,6 +168,7 @@ urlpatterns = [
     path('api/lottery/play/', lottery_play, name='lottery_play'),
     path('api/auctions/', auctions_list, name='auctions_list'),
     path('api/auctions/<str:auction_id>/bid/', auction_bid, name='auction_bid'),
+    path('api/players/me/profile-stats/',       profile_stats,      name='profile_stats'),
     path('api/event-cards/market/',              event_cards.market, name='event_cards_market'),
     path('api/event-cards/<uuid:card_id>/sell/',   event_cards.sell,   name='event_cards_sell'),
     path('api/event-cards/<uuid:card_id>/delist/', event_cards.delist, name='event_cards_delist'),
