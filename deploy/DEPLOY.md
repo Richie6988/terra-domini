@@ -59,6 +59,7 @@ export DJANGO_SETTINGS_MODULE=terra_domini.settings.prod
 ../.venv/bin/python manage.py seed_shop                           # boutique (sinon vide)
 ../.venv/bin/python manage.py seed_bots --count 20 --claim 5      # 20 bots + alliance Hexod Founders
 ../.venv/bin/python manage.py fetch_news --demo                   # événements
+../.venv/bin/python manage.py import_hexod_db                     # base unique HEXOD : 1745 POI + territoires res 8
 ../.venv/bin/python manage.py createsuperuser                     # TON compte admin (email + mot de passe fort)
 ../.venv/bin/python manage.py verify_admin                        # marque le staff comme e-mail vérifié
 exit                                                              # retour root
@@ -108,6 +109,7 @@ cd terra-domini && git pull
 cd backend && export DJANGO_SETTINGS_MODULE=terra_domini.settings.prod
 ../.venv/bin/python manage.py migrate
 ../.venv/bin/python manage.py collectstatic --noinput
+../.venv/bin/python manage.py import_hexod_db      # idempotent : ne touche jamais aux propriétaires
 exit
 sudo systemctl restart hexod
 ```

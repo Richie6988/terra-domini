@@ -463,6 +463,7 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 ## 11b. GAME LOOP & ECONOMY (owner, 2026-10-17) — `economy/balance.py` is the single source of truth
 
 - **5-minute session + FOMO**: territories fill a HEX stock capped at 8h (`STORAGE_CAP_HOURS`). Nothing is credited
+- **Starter boost**: accounts younger than `BEGINNER_DAYS` (3) produce x`BEGINNER_MULT` (4) — time-based so buying a zone never lowers the rate.
   automatically (daily cron no longer credits HEX). `GET /api/loop/status/` (harvest, streak check-in, missions, nudges)
   and `POST /api/loop/collect/`. Overflow is lost and reported (`lost`).
 - **Pace (fast)**: HEX/day common 60 → mythic 3000; buy cost `120 × 1.22^(owned-1)` (×2.5 non-adjacent, × rarity price).
@@ -476,6 +477,23 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
   territories with the advertised guarantee. Run `python manage.py seed_shop` once (catalog was empty).
 - Frontend mirror: `services/balance.ts`; HUD: `components/shared/SessionLoop.tsx` (HarvestButton, NudgeStack,
   opt-in browser notifications).
+
+## 11c. HEXOD MASTER DATABASE (2026-10-18) — one source for POIs, creatures, biomes, resources
+
+- Sources (owner spreadsheets, never edit by hand): `data/hexod_db/sources/*.xlsx` (+ `backend/terra_domini_pois.csv` legacy seed).
+- Build: `python scripts/build_hexod_db.py` (needs `openpyxl wordninja`) → `data/hexod_db/HEXOD_MASTER_DB.xlsx`
+  (sheets README, POI, CREATURE, CATEGORY, BIOME, BIOME_RESOURCE, RESOURCE, UNLOCATED, MERGED_DUPLICATES, ISSUES)
+  and `data/hexod_db/hexod_db.json` (what the game reads).
+- Rarity = combined score (visitors + geopolitical + rare fact + premium), then quotas legendary 1% / epic 4% / rare 10% / uncommon 25%.
+- POIs are located at **H3 res 8** (the map grid). Duplicates on the same cell are merged (`aliases`, sheet MERGED_DUPLICATES).
+  Countries are codex-only (no hex); cities go on the map as `trade_node`.
+- Load into the game DB: `manage.py import_hexod_db` (idempotent). Replaces `UnifiedPOI(source='hexod_db')` with bulk_create
+  (UnifiedPOI.save() would force res 7 and the category rarity), deactivates other POIs unless `--keep-legacy`,
+  upserts res-8 POI territories without touching owners, removes unowned legacy POI territories at res 7/10.
+- Creatures: read at runtime by `apps/events/hexod_db.py`; Safari spawns real species (rarity-weighted, `needs_review` excluded)
+  and returns `creature_description/category/wiki_url`. Texts are cleaned scrapes: 622 creatures flagged `needs_review`.
+- Lesson: wordninja shreds Latin names ("Sagitta ria latif oli a") — only accept splits made of frequent English words,
+  never split the first word or the species epithet, glue rare runs back.
 
 ## 12. KNOWN ISSUES PIPELINE (updated 2026-10-17)
 
