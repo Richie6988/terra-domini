@@ -225,3 +225,34 @@ class PlayerResource(models.Model):
     class Meta:
         db_table = 'player_resources'
         unique_together = ['player', 'resource_id']
+
+
+class DailyAuction(models.Model):
+    """10 auctions a day on a random rare+ place card nobody owns (owner 2026-10-18).
+    Bids are escrowed in HEX: a new top bid refunds the previous one. The winner gets the territory (its card)."""
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    territory = models.ForeignKey('territories.Territory', on_delete=models.CASCADE, related_name='auctions')
+    starts_at = models.DateTimeField()
+    ends_at = models.DateTimeField(db_index=True)
+    start_price = models.IntegerField()
+    current_bid = models.IntegerField(default=0)
+    top_bidder = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.SET_NULL, related_name='auctions_leading')
+    bid_count = models.IntegerField(default=0)
+    status = models.CharField(max_length=12, default='live', db_index=True)   # live / won / unsold
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'daily_auctions'
+        ordering = ['ends_at']
+
+
+class AuctionBid(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    auction = models.ForeignKey(DailyAuction, on_delete=models.CASCADE, related_name='bids')
+    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='auction_bids')
+    amount = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'auction_bids'
+        ordering = ['-created_at']

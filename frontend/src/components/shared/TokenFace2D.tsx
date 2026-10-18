@@ -17,7 +17,7 @@
  */
 import { useEffect, useRef } from 'react'
 import { createTokenFace2D, type TierKey } from './hexodTokenFace'
-import { getIcon } from './iconBank'
+import { iconFor } from './poiIcons'
 
 export interface TokenFace2DProps {
   tier?: TierKey
@@ -78,7 +78,7 @@ export function TokenFace2D({
     canvas.width = pixelSize
     canvas.height = pixelSize
 
-    const iconSvg = iconId ? getIcon(iconId) : ''
+    const iconSvg = iconId ? iconFor(iconId) : ''   // POI categories (world_heritage…) map to their icon
 
     const cleanup = createTokenFace2D(canvas, {
       tier,

@@ -1,20 +1,19 @@
 /**
- * AuctionPanel — Rare token auctions (eBay-style).
- * Third daily game mode: rare++ edition unique tokens.
- * Live bidding + chat + countdown timer + snipe protection.
- * Currency: HEX Coin.
+ * AuctionPanel — 10 auctions a day on random rare+ place cards nobody owns (GET /api/auctions/).
+ * Bids are real and escrowed in HEX (POST /api/auctions/<id>/bid/): an outbid player is refunded at once,
+ * a bid in the last 2 minutes extends the auction, the winner gets the territory and its card.
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
 import { GlassPanel } from '../shared/GlassPanel'
 import { IconSVG } from '../shared/iconBank'
-import { TokenHexPreview } from '../shared/TokenHexPreview'
-import { Token3DViewer } from '../shared/Token3DViewer'
+import { TokenFace2D } from '../shared/TokenFace2D'
+import { Token3DViewer, RARITY_TIER } from '../shared/Token3DViewer'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
-import { Clock, ChevronLeft, Lock } from 'lucide-react'
+import { Clock, ChevronLeft } from 'lucide-react'
 import { ICON_BANK } from '../shared/iconBank'
 import { useStore } from '../../store'
 
@@ -34,6 +33,14 @@ interface Auction {
   edition: string
   serial: number
   maxSupply: number
+  h3: string
+  imageSrc: string
+  minBid: number
+  youLead: boolean
+  bids: { player: string; amount: number; at: string }[]
+  status: string
+  hexPerDay: number
+  country: string
 }
 
 interface ChatMsg {
@@ -45,38 +52,8 @@ interface ChatMsg {
 }
 
 const RARITY_COLORS: Record<string, string> = {
-  epic: '#8b5cf6', legendary: '#f59e0b', mythic: '#ef4444',
+  rare: '#3b82f6', epic: '#8b5cf6', legendary: '#f59e0b', mythic: '#ef4444',
 }
-
-// Mock auctions
-const MOCK_AUCTIONS: Auction[] = [
-  {
-    id: 'auc1', tokenName: 'CRIMSON DRAGON', tokenIcon: 'volcano', rarity: 'mythic',
-    category: 'FANTASTIC', catColor: '#8b5cf6', currentBid: 12500, bidCount: 47,
-    topBidder: 'NEXUS_LORD', endsAt: new Date(Date.now() + 2 * 3600000).toISOString(),
-    edition: 'UNIQUE', serial: 1, maxSupply: 1,
-  },
-  {
-    id: 'auc2', tokenName: 'GOLDEN TEMPLE', tokenIcon: 'temple', rarity: 'legendary',
-    category: 'PLACES', catColor: '#3b82f6', currentBid: 4200, bidCount: 23,
-    topBidder: 'JADE_EMPRESS', endsAt: new Date(Date.now() + 5 * 3600000).toISOString(),
-    edition: 'LIMITED', serial: 3, maxSupply: 10,
-  },
-  {
-    id: 'auc3', tokenName: 'ANCIENT FOSSIL', tokenIcon: 'mountain', rarity: 'epic',
-    category: 'NATURE', catColor: '#22c55e', currentBid: 1800, bidCount: 12,
-    topBidder: 'STORM_KING', endsAt: new Date(Date.now() + 12 * 3600000).toISOString(),
-    edition: 'RARE', serial: 7, maxSupply: 50,
-  },
-]
-
-const MOCK_CHAT: ChatMsg[] = [
-  { user: 'NEXUS_LORD', text: 'BID: 12,500 HEX', time: '2min ago', isBid: true },
-  { user: 'JADE_EMPRESS', text: 'Nice try ', time: '3min ago' },
-  { user: 'STORM_KING', text: 'BID: 11,000 HEX', time: '5min ago', isBid: true },
-  { user: 'COMMANDER', text: 'This dragon is mine!', time: '8min ago' },
-  { user: 'NEXUS_LORD', text: 'BID: 10,500 HEX', time: '12min ago', isBid: true },
-]
 
 function formatCountdown(endsAt: string): string {
   const diff = new Date(endsAt).getTime() - Date.now()
@@ -88,29 +65,23 @@ function formatCountdown(endsAt: string): string {
 }
 
 export function AuctionPanel({ onClose }: Props) {
-  const { data: auctionData } = useQuery({
+  const qc = useQueryClient()
+  const { data: auctions = [] } = useQuery<Auction[]>({
     queryKey: ['auctions'],
-    queryFn: () => api.get('/marketplace/listings/?type=auction').then(r => {
-      const listings = r.data?.results || r.data?.listings || []
-      // Map marketplace listings to auction format
-      return listings.filter((l: any) => l.auction_end).map((l: any) => ({
-        id: l.id, tokenName: l.territory_name || 'Unknown Token',
-        tokenIcon: l.icon_id || 'mystery', rarity: l.rarity || 'rare',
-        category: l.category || 'PLACES', catColor: '#3b82f6',
-        currentBid: l.current_bid || l.price || 0, bidCount: l.bid_count || 0,
-        topBidder: l.top_bidder || '---', endsAt: l.auction_end,
-        edition: l.edition || 'STANDARD', serial: l.serial || 1, maxSupply: l.max_supply || 1,
-      }))
-    }).catch(() => []),
-    staleTime: 15000,
+    queryFn: () => api.get('/auctions/').then(r => (r.data?.auctions || []).map((l: any) => ({
+      id: l.id, tokenName: l.name, tokenIcon: l.category || 'monument', rarity: l.rarity, category: l.category || 'PLACE',
+      catColor: RARITY_COLORS[l.rarity] || '#3b82f6', currentBid: l.current_bid, bidCount: l.bid_count,
+      topBidder: l.top_bidder || '—', endsAt: l.ends_at, edition: 'DAILY AUCTION', serial: 1, maxSupply: 1,
+      h3: l.h3_index, imageSrc: l.image_url || '', minBid: l.min_bid, youLead: l.you_lead, bids: l.bids || [],
+      status: l.status, hexPerDay: l.hex_per_day, country: l.country_code || '',
+    }))),
+    refetchInterval: 15000,
   })
 
-  const [auctions, setAuctions] = useState<Auction[]>([])
-  useEffect(() => {
-    if (auctionData && auctionData.length > 0) setAuctions(auctionData)
-  }, [auctionData])
-
-  const [selected, setSelected] = useState<Auction | null>(null)
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const selected = auctions.find(a => a.id === selectedId) || null
+  const setSelected = (a: Auction | null) => setSelectedId(a?.id || null)
+  const [bidding, setBidding] = useState(false)
   const [bidAmount, setBidAmount] = useState('')
   const [chatMsg, setChatMsg] = useState('')
   const [chat, setChat] = useState<ChatMsg[]>([])
@@ -185,23 +156,22 @@ export function AuctionPanel({ onClose }: Props) {
     return () => clearInterval(i)
   }, [auctions])
 
-  const handleBid = useCallback(() => {
-    const amt = parseInt(bidAmount)
-    if (!selected || !amt || amt <= selected.currentBid) {
-      toast.error(`Bid must exceed ${selected?.currentBid.toLocaleString()} HEX`)
-      return
-    }
-    // Update auction state locally (mock — real would go through WebSocket/API)
-    setAuctions(prev => prev.map(a => a.id === selected.id ? {
-      ...a, currentBid: amt, totalBids: a.bidCount + 1,
-    } : a))
-    setSelected(prev => prev ? { ...prev, currentBid: amt, totalBids: prev.bidCount + 1 } : null)
-    setChat(prev => [{
-      user: 'YOU', text: `BID: ${amt.toLocaleString()} HEX`, time: 'now', isBid: true,
-    }, ...prev])
-    toast.success(`Bid placed: ${amt.toLocaleString()} HEX`)
-    setBidAmount('')
-  }, [bidAmount, selected])
+  const handleBid = useCallback(async () => {
+    if (!selected) return
+    const amt = parseInt(bidAmount) || selected.minBid
+    setBidding(true)
+    try {
+      const r = await api.post(`/auctions/${selected.id}/bid/`, { amount: amt })
+      toast.success(r.data?.message || `You lead with ${amt.toLocaleString()} HEX`)
+      if (wsRef.current?.readyState === WebSocket.OPEN) wsRef.current.send(JSON.stringify({ type: 'bid', amount: amt }))
+      setBidAmount('')
+      ;['auctions', 'player', 'wallet', 'loop-status'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
+    } catch (e: any) {
+      const d = e?.response?.data
+      toast.error(d?.error || 'Bid failed')
+      if (d?.shop) { onClose(); setTimeout(() => useStore.getState().setActivePanel('shop'), 100) }
+    } finally { setBidding(false) }
+  }, [bidAmount, selected, qc, onClose])
 
   const handleChat = useCallback(() => {
     if (!chatMsg.trim()) return
@@ -229,7 +199,8 @@ export function AuctionPanel({ onClose }: Props) {
         <div>
           <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
             <span className="hx-chip hx-chip--accent">{auctions.length} ACTIVE</span>
-            <span className="hx-chip">RARE+ EDITIONS ONLY</span>
+            <span className="hx-chip">10 RARE CARDS A DAY</span>
+            <span className="hx-chip">HEX ESCROW · OUTBID = REFUNDED</span>
           </div>
 
           {auctions.length === 0 && (
@@ -237,7 +208,7 @@ export function AuctionPanel({ onClose }: Props) {
               <div style={{ filter: 'drop-shadow(0 0 16px rgba(245,158,11,0.35))' }}><IconSVG id="auction_gavel" size={64} /></div>
               <div className="hx-empty__title">NO ACTIVE AUCTIONS</div>
               <div style={{ maxWidth: 380, lineHeight: 1.6, fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0, fontSize: 12 }}>
-                Rare, epic and legendary tokens appear here when a player lists them with an auction timer.
+                10 rare place cards go under the hammer every day. Come back after midnight (UTC) for the next batch.
                 Fixed-price listings live in the marketplace.
               </div>
               <button className="btn-game btn-game-gold" style={{ marginTop: 6 }}
@@ -264,19 +235,21 @@ export function AuctionPanel({ onClose }: Props) {
                   textAlign: 'left', width: '100%', color: '#e2e8f0',
                 }}
               >
-                <TokenHexPreview iconId={a.tokenIcon} rarity={a.rarity || 'rare'} catColor={a.catColor || '#f59e0b'} size={56} />
+                <TokenFace2D tokenName={a.tokenName} category={a.category} iconId={a.tokenIcon} imageSrc={a.imageSrc} rarity={a.rarity}
+                  tier={RARITY_TIER[a.rarity] || 'SILVER'} hexPerDay={a.hexPerDay} country={a.country} edition="AUCTION" size={72} />
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.tokenName}</div>
                   <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
                     <span className="hx-chip hx-chip--accent">{(a.rarity || '').toUpperCase()}</span>
                     <span className="hx-chip">{a.edition}</span>
                   </div>
-                  <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 6 }}>{a.bidCount} BIDS · TOP {a.topBidder}</div>
+                  <div style={{ fontSize: 10, color: a.youLead ? '#22c55e' : 'var(--hx-text-3)', marginTop: 6 }}>
+                    {a.status === 'won' ? `SOLD TO ${a.topBidder}` : a.youLead ? 'YOU LEAD' : `${a.bidCount} BIDS · TOP ${a.topBidder}`}</div>
                 </div>
                 <div style={{ textAlign: 'right', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>
-                  <div style={{ fontSize: 9, letterSpacing: 1.5, color: 'var(--hx-text-3)' }}>CURRENT BID</div>
+                  <div style={{ fontSize: 9, letterSpacing: 1.5, color: 'var(--hx-text-3)' }}>{a.currentBid ? 'CURRENT BID' : 'STARTS AT'}</div>
                   <div style={{ fontSize: 20, color: '#fbbf24', fontFamily: "'Share Tech Mono', monospace", display: 'flex', alignItems: 'center', gap: 5 }}>
-                    <IconSVG id="hex_coin" size={16} />{a.currentBid.toLocaleString()}
+                    <IconSVG id="hex_coin" size={16} />{(a.currentBid || a.minBid).toLocaleString()}
                   </div>
                   <span className="hx-chip" style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 11, color: ended ? '#f87171' : '#38bdf8' }}>
                     <Clock size={11} /> {countdowns[a.id] || '...'}
@@ -303,7 +276,9 @@ export function AuctionPanel({ onClose }: Props) {
               border: `1.5px solid ${RARITY_COLORS[selected.rarity]}30`,
               cursor: 'pointer',
             }} onClick={() => setShow3D(true)}>
-              <TokenHexPreview iconId={selected.tokenIcon} rarity={selected.rarity || 'rare'} catColor={selected.catColor || '#cc8800'} size={64} />
+              <TokenFace2D tokenName={selected.tokenName} category={selected.category} iconId={selected.tokenIcon} imageSrc={selected.imageSrc}
+                rarity={selected.rarity} tier={RARITY_TIER[selected.rarity] || 'SILVER'} hexPerDay={selected.hexPerDay} country={selected.country}
+                edition="AUCTION" size={116} style={{ margin: '0 auto' }} />
               <div style={{ fontSize: 9, fontWeight: 900, color: '#e2e8f0', marginTop: 6, fontFamily: "'Orbitron', system-ui, sans-serif" }}>
                 {selected.tokenName}
               </div>
@@ -358,7 +333,7 @@ export function AuctionPanel({ onClose }: Props) {
                 <input
                   type="number" value={bidAmount}
                   onChange={e => setBidAmount(e.target.value)}
-                  placeholder={`Min: ${(selected.currentBid + 100).toLocaleString()}`}
+                  placeholder={`Min: ${selected.minBid.toLocaleString()}`}
                   style={{
                     flex: 1, padding: '10px 12px', borderRadius: 10,
                     background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)',
@@ -366,16 +341,24 @@ export function AuctionPanel({ onClose }: Props) {
                     fontFamily: "'Share Tech Mono', monospace",
                   }}
                 />
-                {/* Bids are not persisted server-side yet (WS only broadcasts) — no fake success */}
-                <button onClick={handleBid} disabled aria-disabled="true" className="btn-game btn-game-gold" style={{
-                  padding: '10px 14px', fontSize: 10, display: 'inline-flex', alignItems: 'center', gap: 6,
-                }}>
-                  <Lock size={13} /> BID <span className="hx-chip" style={{ padding: '1px 6px' }}>SOON</span>
+                <button onClick={handleBid} disabled={bidding || selected.youLead || selected.status !== 'live' || countdowns[selected.id] === 'ENDED'}
+                  className="btn-game btn-game-gold" style={{ padding: '10px 14px', fontSize: 10, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                  <IconSVG id="hex_coin" size={14} />{bidding ? '...' : selected.youLead ? 'YOU LEAD' : `BID ${(parseInt(bidAmount) || selected.minBid).toLocaleString()}`}
                 </button>
               </div>
               <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 6, fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0 }}>
-                Bidding is not live yet: bids are not recorded on the server.
+                Your bid is held in HEX; if someone outbids you, it comes straight back. The winner owns this place and its card
+                (+{selected.hexPerDay.toLocaleString()} HEX/day). A bid in the last 2 minutes adds 2 minutes.
               </div>
+              {selected.bids.length > 0 && (
+                <div style={{ marginTop: 8, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                  {selected.bids.slice(0, 5).map((b, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: i === 0 ? '#fbbf24' : 'var(--hx-text-3)' }}>
+                      <span>{b.player}</span><span style={{ fontFamily: "'Share Tech Mono', monospace" }}>{b.amount.toLocaleString()} HEX</span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -462,9 +445,9 @@ export function AuctionPanel({ onClose }: Props) {
           category={selected.category}
           catColor={selected.catColor}
           iconId={selected.tokenIcon}
-          tier={selected.rarity === 'mythic' ? 'EMERALD' : selected.rarity === 'legendary' ? 'GOLD' : 'SILVER'}
-          serial={selected.serial}
-          maxSupply={selected.maxSupply}
+          rarityKey={selected.rarity}
+          imageSrc={selected.imageSrc}
+          h3Index={selected.h3}
           edition={selected.edition}
         />,
         document.body
