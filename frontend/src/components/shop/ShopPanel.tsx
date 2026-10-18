@@ -440,7 +440,7 @@ function HexPacks() {
             <IconSVG id="hex_coin" size={30 + i * 4} />
             <span style={{ fontFamily: 'var(--font-heading)', fontSize: 18, color: '#fff', textShadow: '0 2px 0 rgba(0,0,0,0.45)' }}>{p.total.toLocaleString()}</span>
             <span style={{ fontSize: 11, color: p.bonus ? '#86efac' : 'var(--hx-text-3)', fontWeight: 800 }}>{p.bonus ? `+${p.bonus.toLocaleString()} BONUS` : 'HEX'}</span>
-            <button className="btn-game btn-game-gold" disabled={!!busy || !data.card_payments} onClick={() => buy(p.id)}
+            <button className="btn-game btn-game-gold" disabled={!!busy} onClick={() => buy(p.id)}
               style={{ width: '100%', minHeight: 40, fontSize: 14 }}>{busy === p.id ? '…' : `${p.eur} €`}</button>
           </div>
         ))}
@@ -448,7 +448,9 @@ function HexPacks() {
       <div style={{ fontSize: 11, color: 'var(--hx-text-3)', marginTop: 8, textTransform: 'none' }}>
         {data.card_payments
           ? 'Secure card payment by Stripe. HEX are credited as soon as the payment is confirmed. Bought HEX buy territories, troops and boosts (not random packs, not cash-out).'
-          : 'Card payments open soon on this server.'}
+          : data.payments_status === 'no_library'
+            ? 'Card payments are not set up on this server yet (payment library missing — admin: pip install -r backend/requirements.txt, then restart).'
+            : 'Card payments are not set up on this server yet (admin: add STRIPE_SECRET_KEY and STRIPE_WEBHOOK_SECRET to .env.prod, then restart).'}
       </div>
     </div>
   )

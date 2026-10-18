@@ -30,6 +30,18 @@ from terra_domini.apps.economy import balance as B
 logger = logging.getLogger('terra_domini.payments')
 
 
+def payments_status() -> str:
+    """'ok' | 'no_library' | 'no_key' — why card payments are (not) available on this server."""
+    key = getattr(settings, 'STRIPE_SECRET_KEY', '') or ''
+    try:
+        import stripe  # noqa: F401
+    except ImportError:
+        return 'no_library'
+    if not key or 'placeholder' in key:
+        return 'no_key'
+    return 'ok'
+
+
 def _stripe():
     key = getattr(settings, 'STRIPE_SECRET_KEY', '') or ''
     if not key or 'placeholder' in key:
@@ -73,6 +85,7 @@ def hex_packs(request):
         'packs': [{**p, 'total': p['hex'] + p['bonus']} for p in B.HEX_PACKS],
         'hex_per_eur': B.HEX_PER_EUR, 'hex_per_coin': B.HEX_PER_COIN,
         'card_payments': _stripe() is not None,
+        'payments_status': payments_status(),
     })
 
 
@@ -86,7 +99,10 @@ def hex_checkout(request):
         return Response({'error': 'This territory is no longer free' if h3_index else 'Unknown pack'}, status=400)
     stripe = _stripe()
     if not stripe:
-        return Response({'error': 'Card payments are not open yet on this server.'}, status=503)
+        reason = payments_status()
+        msg = {'no_library': 'Card payments: the payment library is not installed on the server (pip install -r backend/requirements.txt).',
+               'no_key': 'Card payments: the server has no Stripe key yet (STRIPE_SECRET_KEY in .env.prod).'}.get(reason, 'Card payments are not open yet.')
+        return Response({'error': msg, 'payments_status': reason}, status=503)
     site = (getattr(settings, 'SITE_URL', '') or request.build_absolute_uri('/')).rstrip('/')
     total = pack['hex'] + pack['bonus']
     try:
