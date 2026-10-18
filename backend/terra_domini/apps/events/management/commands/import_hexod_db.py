@@ -122,6 +122,28 @@ class Command(BaseCommand):
             for i in range(0, removed, 500):
                 Territory.objects.filter(id__in=legacy_ids[i:i + 500]).delete()
 
+        # ── Owned hexes at another resolution (old seeds, res 10) → moved to their res-8 cell (the map grid) ──
+        moved = 0
+        with transaction.atomic():
+            for t in list(Territory.objects.filter(owner__isnull=False).only('id', 'h3_index', 'owner_id', 'captured_at')):
+                try:
+                    res = h3.get_resolution(t.h3_index)
+                except Exception:
+                    continue
+                if res == 8:
+                    continue
+                parent = h3.cell_to_parent(t.h3_index, 8) if res > 8 else None
+                if parent:
+                    cell = Territory.objects.filter(h3_index=parent).first()
+                    if cell is None:
+                        lat, lon = h3.cell_to_latlng(parent)
+                        cell = Territory.objects.create(h3_index=parent, h3_resolution=8, center_lat=lat, center_lon=lon)
+                    if not cell.owner_id:
+                        cell.owner_id, cell.captured_at = t.owner_id, t.captured_at
+                        cell.save(update_fields=['owner', 'captured_at'])
+                t.delete()
+                moved += 1
+
         # ── Terrain of every territory from the DB rules (cities → urban, regions, industrial sites) ──
         from terra_domini.apps.territories.terrain_rules import terrain, territory_type_for
         poi_cat = dict(UnifiedPOI.objects.filter(is_active=True).exclude(h3_index='').values_list('h3_index', 'category'))
@@ -135,7 +157,7 @@ class Command(BaseCommand):
                 changed.append(t)
         Territory.objects.bulk_update(changed, ['biome', 'territory_type'], batch_size=500)
 
-        self.stdout.write(self.style.SUCCESS(f'terrain: {len(changed)} territories re-classified'))
+        self.stdout.write(self.style.SUCCESS(f'terrain: {len(changed)} territories re-classified · {moved} owned off-grid hexes moved to res 8'))
         self.stdout.write(self.style.SUCCESS(
             f'HEXOD DB v{db.get("version")}: {len(rows)} POIs imported ({deactivated} legacy deactivated) · '
             f'territories {created} created / {updated} updated · {removed} legacy POI territories removed · '
