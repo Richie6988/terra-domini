@@ -78,6 +78,8 @@ class Player(AbstractBaseUser, PermissionsMixin):
     hex_purchased_balance = models.DecimalField(max_digits=20, decimal_places=6, default=0)
     # Harvest loop: production accumulates since this time, capped (economy/balance.py)
     harvest_last_at = models.DateTimeField(null=True, blank=True)
+    # Daily draft of free troops (territories/upgrades.py)
+    last_draft_at = models.DateTimeField(null=True, blank=True)
     total_tdc_spent = models.DecimalField(max_digits=20, decimal_places=6, default=0)
     total_tdc_earned_ads = models.DecimalField(max_digits=20, decimal_places=6, default=0)
 

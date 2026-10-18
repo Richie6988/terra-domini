@@ -79,9 +79,11 @@ def player_resource_rates(player) -> dict:
     rows = list(Territory.objects.filter(owner=player).values_list('h3_index', 'center_lat', 'center_lon', 'rarity'))
     cats = dict(UnifiedPOI.objects.filter(h3_index__in=[r[0] for r in rows], is_active=True).values_list('h3_index', 'category'))
     mult = (B.BEGINNER_MULT if B.is_beginner(player) else 1) * B.boost_mult(player, 'resource_multiplier')   # shop '2X Extraction'
+    from terra_domini.apps.territories.upgrades import hex_multipliers
+    edu = hex_multipliers(player.id, 'education')                     # kingdom Education upgrade: +5 % per level
     total = {}
     for h, lat, lon, rarity in rows:
-        for rid, v in territory_resource_rates(lat, lon, rarity, cats.get(h, ''), mult).items():
+        for rid, v in territory_resource_rates(lat, lon, rarity, cats.get(h, ''), mult * edu.get(h, 1)).items():
             total[rid] = total.get(rid, 0) + v
     return {k: round(v, 2) for k, v in total.items()}
 

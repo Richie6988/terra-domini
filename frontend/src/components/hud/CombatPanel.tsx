@@ -11,7 +11,9 @@ import { GlassPanel } from '../shared/GlassPanel'
 import { IconSVG } from '../shared/iconBank'
 import toast from 'react-hot-toast'
 import { openBattle } from '../combat/BattleFaceOff'
-import { Swords, Shield, Users, Hourglass, History, Clock } from 'lucide-react'
+import { Swords, Shield, Users, Hourglass, History, Clock, Flag } from 'lucide-react'
+import { celebrate } from '../shared/Celebrate'
+import { playSound } from '../../hooks/useSound'
 
 interface UnitDef {
   name: string; icon: string; atk: number; def: number; cost: number
@@ -31,6 +33,7 @@ interface ArmyData {
   training: TrainingItem[]
   force: { attack: number; defense: number }
   stations?: Station[]
+  draft?: { base: number; kingdoms: number; barracks: number; total: number; territories: number; available: boolean }
 }
 
 const TABS = [
@@ -134,6 +137,29 @@ export function CombatPanel({ onClose }: Props) {
           </div>
         ))}
       </div>
+
+      {/* Daily draft — Risk reinforcements */}
+      {army?.draft && (
+        <div className="hx-card" style={{ marginBottom: 12, display: 'flex', alignItems: 'center', gap: 12,
+          ...(army.draft.available ? { borderColor: 'rgba(52,211,153,0.45)', background: 'linear-gradient(160deg, rgba(52,211,153,0.14), rgba(52,211,153,0.03))' } : {}) }}>
+          <span style={{ color: '#34d399', width: 36, height: 36, borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(52,211,153,0.12)' }}><Flag size={18} /></span>
+          <div style={{ flex: 1 }}>
+            <div style={{ ...label, color: '#34d399' }}>DAILY DRAFT · {army.draft.total} FREE INFANTRY</div>
+            <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 2 }}>
+              {army.draft.base} from {army.draft.territories} territories{army.draft.kingdoms ? ` · +${army.draft.kingdoms} kingdom size` : ''}{army.draft.barracks ? ` · +${army.draft.barracks} barracks` : ''}
+            </div>
+          </div>
+          {army.draft.available
+            ? <button className="btn-game btn-game-green" style={{ padding: '8px 14px', fontSize: 10 }} onClick={async () => {
+                try {
+                  const { data: r } = await api.post('/combat/draft/')
+                  playSound('bonus'); celebrate('small', `+${r.drafted} infantry`)
+                  qc.invalidateQueries({ queryKey: ['my-army'] })
+                } catch (e: any) { toast.error(e?.response?.data?.error || 'Draft failed') }
+              }}>DRAFT</button>
+            : <span className="hx-chip">TOMORROW</span>}
+        </div>
+      )}
 
       <BattlesNow />
 

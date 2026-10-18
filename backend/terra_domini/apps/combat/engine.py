@@ -238,7 +238,8 @@ class CombatEngine:
         morale_factor = 1.0  # TODO: pull from actual unit records
 
         boost_pct = min(boost_pct, GAME_CFG['MAX_MILITARY_BOOST_PCT']) / 100.0
-        total = (base_defense + unit_defense * morale_factor) * (1 + boost_pct)
+        from terra_domini.apps.territories.upgrades import walls_mult   # kingdom Walls upgrade: +15 % per level
+        total = (base_defense + unit_defense * morale_factor) * (1 + boost_pct) * walls_mult(territory)
         return total
 
     @staticmethod
@@ -314,12 +315,13 @@ class CombatEngine:
         attacker_wins = effective_atk > effective_def
         winner = 'attacker' if attacker_wins else 'defender'
 
-        # Calculate casualties (losers take 30-50%, winners take 10-20%)
+        # Casualties: a winning attacker loses 10-20 %; a beaten attacker loses ALL the troops it engaged
+        # (owner 2026-10-18: "if defeated in an attack you lose all engaged troops")
         if attacker_wins:
             atk_casualty_rate = random.uniform(0.10, 0.20)
             def_casualty_rate = random.uniform(0.30, 0.50)
         else:
-            atk_casualty_rate = random.uniform(0.30, 0.60)
+            atk_casualty_rate = 1.0
             def_casualty_rate = random.uniform(0.10, 0.25)
 
         atk_casualties = cls._apply_casualties(attacker_units, atk_casualty_rate)

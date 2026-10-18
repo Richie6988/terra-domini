@@ -142,7 +142,13 @@ def my_army(request):
         'training': training,
         'force': {'attack': total_atk, 'defense': total_def},
         'stations': _stations(player),
+        'draft': {**_draft(player)},
     })
+
+
+def _draft(player) -> dict:
+    from terra_domini.apps.territories.upgrades import draft_size, draft_available
+    return {**draft_size(player), 'available': draft_available(player)}
 
 
 def _stations(player) -> list:

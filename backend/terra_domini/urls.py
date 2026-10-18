@@ -89,6 +89,7 @@ from terra_domini.apps.economy.auction_views import auctions_list, auction_bid
 from terra_domini.apps.economy.lottery_views import lottery_status, lottery_play
 from terra_domini.apps.economy.pickup_views import pickups_in_view, pickup_collect
 from terra_domini.apps.economy.map_resources import map_resources, map_states
+from terra_domini.apps.territories.kingdom_views import kingdom_overview, kingdom_upgrade, daily_draft
 from terra_domini.apps.combat.recruitment import (
     my_army as combat_my_army,
     recruit as combat_recruit,
@@ -165,6 +166,9 @@ urlpatterns = [
     path('api/lottery/play/', lottery_play, name='lottery_play'),
     path('api/auctions/', auctions_list, name='auctions_list'),
     path('api/auctions/<str:auction_id>/bid/', auction_bid, name='auction_bid'),
+    path('api/combat/draft/',    daily_draft,      name='combat_draft'),
+    path('api/kingdom/<str:h3_index>/overview/', kingdom_overview, name='kingdom_overview'),
+    path('api/kingdom/<str:h3_index>/upgrade/',  kingdom_upgrade,  name='kingdom_upgrade'),
     path('api/combat/my-army/',  combat_my_army,   name='combat_my_army'),
     path('api/combat/recruit/',  combat_recruit,   name='combat_recruit'),
     path('api/combat/collect/',  combat_collect,   name='combat_collect'),

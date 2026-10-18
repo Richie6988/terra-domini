@@ -22,8 +22,9 @@ import { Token3DViewer } from '../shared/Token3DViewer'
 import { TokenHexPreview } from '../shared/TokenHexPreview'
 import { api } from '../../services/api'
 import { useServerKingdomCustom, useSaveKingdomCustom, withLegacy } from './kingdomCustom'
-import { usePlayer } from '../../store'
-import { Crown, LayoutGrid, Palette, Lock, MapPin } from 'lucide-react'
+import { usePlayer, useStore } from '../../store'
+import { Crown, LayoutGrid, Palette, Lock, MapPin, Swords } from 'lucide-react'
+import { KingdomArmyTab } from './KingdomArmyTab'
 
 interface Kingdom {
   cluster_id?: string
@@ -53,7 +54,7 @@ interface TokenInfo {
 
 interface Props {
   kingdom: Kingdom
-  initialTab?: 'gallery' | 'customize' | 'kingdom'
+  initialTab?: Tab
   onClose: () => void
 }
 
@@ -66,8 +67,10 @@ const TIER_COLOR: Record<number, string> = {
   1: '#94a3b8', 2: '#22c55e', 3: '#3b82f6', 4: '#8b5cf6', 5: '#f59e0b', 6: '#ef4444',
 }
 
-const TABS: Array<{ id: 'gallery' | 'customize' | 'kingdom'; label: string; Icon: typeof Crown }> = [
+type Tab = 'gallery' | 'army' | 'customize' | 'kingdom'
+const TABS: Array<{ id: Tab; label: string; Icon: typeof Crown }> = [
   { id: 'gallery',   label: 'GALLERY',   Icon: LayoutGrid },
+  { id: 'army',      label: 'ARMY',      Icon: Swords },
   { id: 'customize', label: 'CUSTOMIZE', Icon: Palette },
   { id: 'kingdom',   label: 'KINGDOM',   Icon: Crown },
 ]
@@ -508,7 +511,7 @@ const statValue = (color: string): React.CSSProperties => ({
 // MAIN COMPONENT
 // ════════════════════════════════════════════════════════════════
 export function OwnedTerritoryHub({ kingdom, initialTab = 'gallery', onClose }: Props) {
-  const [tab, setTab] = useState<'gallery' | 'customize' | 'kingdom'>(initialTab)
+  const [tab, setTab] = useState<Tab>(initialTab)
   const [token3D, setToken3D] = useState<TokenInfo | null>(null)
   const player = usePlayer()
 
@@ -583,6 +586,8 @@ export function OwnedTerritoryHub({ kingdom, initialTab = 'gallery', onClose }: 
             transition={{ duration: 0.18 }}
           >
             {tab === 'gallery'   && <GalleryTab kingdom={kingdom} tokens={tokens} onToken3D={setToken3D} />}
+            {tab === 'army'      && <KingdomArmyTab h3={tokens[0]?.h3_index || ''}
+                                      onOpenMilitary={() => { onClose(); useStore.getState().setActivePanel('combat') }} />}
             {tab === 'customize' && <CustomizeTab kingdom={kingdom} tokens={tokens} />}
             {tab === 'kingdom'   && <KingdomTab kingdom={kingdom} tokens={tokens} />}
           </motion.div>

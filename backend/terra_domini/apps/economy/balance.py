@@ -167,6 +167,8 @@ def territory_rates(player) -> dict:
         hot = live_event_hexes() & owned
     except Exception:
         hot, EVENT_MULT = set(), 1
+    from terra_domini.apps.territories.upgrades import hex_multipliers
+    sci = hex_multipliers(player.id, 'science')                      # kingdom Science upgrade: +5 % per level
     out = {}
     for h, rarity, shiny in rows:
         try:
@@ -174,7 +176,7 @@ def territory_rates(player) -> dict:
         except Exception:
             connected = False
         y = hex_yield(h, *geo[h], rarity, cats.get(h, ''))['mult']      # resources on the hex (oil, gold…) ± variation
-        out[h] = round(territory_hex_per_day(rarity, shiny, connected) * y * mult * (EVENT_MULT if h in hot else 1), 1)
+        out[h] = round(territory_hex_per_day(rarity, shiny, connected) * y * mult * (EVENT_MULT if h in hot else 1) * sci.get(h, 1), 1)
     return out
 
 
