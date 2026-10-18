@@ -19,6 +19,7 @@ import { OnboardingHotspots } from './components/onboarding/OnboardingHotspots'
 import { NewsTicker } from './components/shared/NewsTicker'
 import { HexodTopHUD, MissionsButton } from './components/shared/HexodTopHUD'
 import { HarvestButton, NudgeStack } from './components/shared/SessionLoop'
+import { BattleFaceOffHost } from './components/combat/BattleFaceOff'
 import { HexodDock } from './components/shared/HexodDock'
 import { RadarWidget } from './components/shared/RadarWidget'
 import { IconSVG } from './components/shared/iconBank'
@@ -252,6 +253,7 @@ function GameScreen() {
       <MissionsButton />
       <HarvestButton />
       <NudgeStack />
+      <BattleFaceOffHost />
 
       {/* Side panels — triggered by HexodDock */}
       <AnimatePresence>

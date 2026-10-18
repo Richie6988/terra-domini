@@ -10,6 +10,7 @@ import { usePlayer } from '../../store'
 import { GlassPanel } from '../shared/GlassPanel'
 import { IconSVG } from '../shared/iconBank'
 import toast from 'react-hot-toast'
+import { openBattle } from '../combat/BattleFaceOff'
 import { Swords, Shield, Users, Hourglass, History, Clock } from 'lucide-react'
 
 interface UnitDef {
@@ -21,15 +22,21 @@ interface TrainingItem {
   id: string; unit_type: string; quantity: number
   started_at: string; completes_at: string; remaining_seconds: number; done: boolean
 }
+interface Station {
+  h3: string; name: string; size: number; kind: 'kingdom' | 'territory'; rarity: string
+  units: Record<string, number>; defense: number; hexes: string[]
+}
 interface ArmyData {
-  units: Record<string, UnitDef>
+  units: Record<string, UnitDef & { available?: number }>
   training: TrainingItem[]
   force: { attack: number; defense: number }
+  stations?: Station[]
 }
 
 const TABS = [
   { id: 'recruit', label: 'RECRUIT',  iconId: 'swords' },
   { id: 'train',   label: 'TRAINING', iconId: 'gear' },
+  { id: 'forces',  label: 'FORCES',   iconId: 'shield' },
   { id: 'history', label: 'HISTORY',  iconId: 'chart_bar' },
 ]
 
@@ -145,7 +152,7 @@ export function CombatPanel({ onClose }: Props) {
       <div className="hx-tabs" role="tablist">
         {TABS.map(t => (
           <button key={t.id} role="tab" className="hx-tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}>
-            {t.id === 'recruit' ? <Swords size={14} /> : t.id === 'train' ? <Hourglass size={14} /> : <History size={14} />}
+            {t.id === 'recruit' ? <Swords size={14} /> : t.id === 'train' ? <Hourglass size={14} /> : t.id === 'forces' ? <Shield size={14} /> : <History size={14} />}
             {t.label}
             {t.id === 'train' && training.length > 0 && <span className="hx-chip hx-chip--accent" style={{ padding: '1px 6px', ...(readyTraining.length ? { background: '#22c55e', borderColor: '#14532d' } : {}) }}>{readyTraining.length || activeTraining.length}</span>}
           </button>
@@ -301,6 +308,7 @@ export function CombatPanel({ onClose }: Props) {
       )}
 
       {/* ═══ HISTORY TAB ═══ */}
+      {tab === 'forces' && <ForcesTab army={army} />}
       {tab === 'history' && <BattleHistory />}
     </GlassPanel>
   )
@@ -382,25 +390,14 @@ function leftLabel(iso: string): string {
 
 /** Live battles: attacks you launched (outgoing) and attacks on your hexes (incoming, with REINFORCE). */
 function BattlesNow() {
-  const qc = useQueryClient()
   const [, force] = useState(0)
   useEffect(() => { const iv = setInterval(() => force(n => n + 1), 1000); return () => clearInterval(iv) }, [])
   const { data: out } = useQuery<any>({ queryKey: ['battles-active'], queryFn: () => api.get('/combat/active/').then(r => r.data), refetchInterval: 20000 })
   const { data: inc } = useQuery<any>({ queryKey: ['battles-incoming'], queryFn: () => api.get('/combat/incoming/').then(r => r.data), refetchInterval: 20000 })
-  const [busy, setBusy] = useState<string | null>(null)
   const outgoing: any[] = out?.battles || []
   const incoming: any[] = inc?.incoming || []
   if (!outgoing.length && !incoming.length) return null
   const name = (b: any) => b.target && b.target !== b.target_h3 ? b.target : `Zone ${String(b.target_h3).slice(0, 8)}`
-  const reinforce = async (id: string) => {
-    setBusy(id)
-    try {
-      const r = await api.post('/combat/reinforce/', { battle_id: id })
-      toast.success(r.data?.message || 'Reinforced')
-      ;['battles-incoming', 'loop-status', 'player'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
-    } catch (e: any) { toast.error(e?.response?.data?.error || 'Reinforce failed') }
-    finally { setBusy(null) }
-  }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 14 }}>
       {incoming.map(b => {
@@ -416,8 +413,8 @@ function BattlesNow() {
                   {b.attacker || 'Enemy'} · falls in {leftLabel(b.ends_at)} · <span style={{ color: col }}>{hold}% chance to hold</span>
                 </div>
               </div>
-              <button onClick={() => reinforce(b.id)} disabled={busy === b.id || hold >= 100} className="btn-game btn-game-gold" style={{ padding: '8px 10px', fontSize: 10, flexShrink: 0 }}>
-                {hold >= 100 ? 'SAFE' : busy === b.id ? '...' : 'REINFORCE 80'}
+              <button onClick={() => openBattle(b.id)} className="btn-game btn-game-red" style={{ padding: '8px 10px', fontSize: 10, flexShrink: 0 }}>
+                DEFEND
               </button>
             </div>
           </div>
@@ -433,10 +430,86 @@ function BattlesNow() {
                 vs {b.defender} · {sumUnits(b.units)} units · result in {leftLabel(b.ends_at)}
               </div>
             </div>
-            <Clock size={16} color="#fbbf24" />
+            <button onClick={() => openBattle(b.id)} className="btn-game btn-game-glass" style={{ padding: '8px 10px', fontSize: 10, flexShrink: 0 }}>WAR ROOM</button>
           </div>
         </div>
       ))}
+    </div>
+  )
+}
+
+/** Station free troops on a kingdom (defends every hex of it) or a lone territory; recall them anytime.
+ *  Stationed troops defend automatically but cannot attack. */
+function ForcesTab({ army }: { army?: ArmyData }) {
+  const qc = useQueryClient()
+  const [pick, setPick] = useState<Record<string, { type: string; n: number }>>({})
+  const [busy, setBusy] = useState<string | null>(null)
+  const units = army?.units || {}
+  const free = Object.entries(units).filter(([, u]) => (u.available || 0) > 0)
+  const stations = army?.stations || []
+  const refresh = () => ['my-army', 'battles-incoming'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
+  const call = async (key: string, url: string, body: any, ok: string) => {
+    setBusy(key)
+    try { await api.post(url, body); toast.success(ok); refresh() }
+    catch (e: any) { toast.error(e?.response?.data?.error || 'Failed') }
+    finally { setBusy(null) }
+  }
+  const mono = "'Share Tech Mono', monospace"
+  if (!stations.length) return <div className="hx-card" style={{ fontSize: 12, color: 'var(--hx-text-2)' }}>Claim a territory to station troops.</div>
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+      <div className="hx-card" style={{ fontSize: 11, color: 'var(--hx-text-2)', lineHeight: 1.5 }}>
+        <b style={{ color: '#fff' }}>FREE ARMY</b> — {free.length ? free.map(([k, u]) => `${u.available} ${u.name}`).join(' · ') : 'none (recruit or recall troops)'}
+        <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 4 }}>Troops stationed in a kingdom defend all of its hexes. Free troops attack, or join a defense from the war room.</div>
+      </div>
+      {stations.map(st => {
+        const p = pick[st.h3] || { type: free[0]?.[0] || '', n: 1 }
+        const max = units[p.type]?.available || 0
+        return (
+          <div key={st.h3} className="hx-card" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+              <Shield size={16} color="#60a5fa" />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontFamily: 'var(--font-heading)', fontSize: 12, color: '#fff', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{st.name}</div>
+                <div style={{ fontSize: 10, color: 'var(--hx-text-3)', textTransform: 'uppercase', letterSpacing: 1 }}>
+                  {st.kind === 'kingdom' ? `Kingdom · ${st.size} hexes` : 'Territory'} · {st.rarity}
+                </div>
+              </div>
+              <span style={{ fontFamily: mono, fontSize: 14, color: '#60a5fa' }}>DEF {st.defense}</span>
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+              {Object.entries(st.units).filter(([, n]) => n > 0).map(([k, n]) => (
+                <span key={k} className="hx-chip" style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11 }}>
+                  <IconSVG id={units[k]?.icon || 'swords'} size={16} /> {n}
+                  <button title="Recall 1" disabled={busy === st.h3 + k}
+                    onClick={() => call(st.h3 + k, '/combat/unassign/', { h3: st.h3, unit_type: k, count: 1 }, `1 ${k} back to the free army`)}
+                    style={{ marginLeft: 2, background: 'none', border: 'none', color: '#fca5a5', cursor: 'pointer', fontSize: 12 }}>-1</button>
+                  <button title="Recall all" disabled={busy === st.h3 + k}
+                    onClick={() => call(st.h3 + k, '/combat/unassign/', { h3: st.h3, unit_type: k, count: n }, `${n} ${k} back to the free army`)}
+                    style={{ background: 'none', border: 'none', color: '#fca5a5', cursor: 'pointer', fontSize: 10 }}>ALL</button>
+                </span>
+              ))}
+              {!Object.values(st.units).some(n => n > 0) && <span style={{ fontSize: 11, color: '#f59e0b' }}>Undefended — walls only</span>}
+            </div>
+            {free.length > 0 && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <select value={p.type} onChange={e => setPick(x => ({ ...x, [st.h3]: { type: e.target.value, n: 1 } }))}
+                  style={{ flex: 1, background: 'rgba(255,255,255,0.06)', color: '#fff', border: '1px solid var(--hx-line)', borderRadius: 8, padding: '6px 8px', fontSize: 11 }}>
+                  {free.map(([k, u]) => <option key={k} value={k}>{u.name} ({u.available})</option>)}
+                </select>
+                <input type="number" min={1} max={max} value={p.n}
+                  onChange={e => setPick(x => ({ ...x, [st.h3]: { ...p, n: Math.max(1, Math.min(max, Number(e.target.value) || 1)) } }))}
+                  style={{ width: 56, background: 'rgba(255,255,255,0.06)', color: '#fff', border: '1px solid var(--hx-line)', borderRadius: 8, padding: '6px', fontSize: 11, fontFamily: mono }} />
+                <button className="btn-game btn-game-green" disabled={!p.type || busy === st.h3}
+                  style={{ padding: '7px 10px', fontSize: 10 }}
+                  onClick={() => call(st.h3, '/combat/assign/', { kingdom_h3: st.h3, unit_type: p.type, count: Math.min(p.n, max) }, `${Math.min(p.n, max)} ${p.type} stationed in ${st.name}`)}>
+                  STATION
+                </button>
+              </div>
+            )}
+          </div>
+        )
+      })}
     </div>
   )
 }

@@ -90,6 +90,7 @@ from terra_domini.apps.combat.recruitment import (
     recruit as combat_recruit,
     collect_training as combat_collect,
     assign_to_kingdom as combat_assign,
+    unassign_units as combat_unassign,
 )
 from terra_domini.apps.economy.views import ShopViewSet, StripeWebhookView, AdCampaignViewSet
 from terra_domini.apps.alliances.views import AllianceViewSet, DiplomacyViewSet
@@ -154,6 +155,7 @@ urlpatterns = [
     path('api/combat/recruit/',  combat_recruit,   name='combat_recruit'),
     path('api/combat/collect/',  combat_collect,   name='combat_collect'),
     path('api/combat/assign/',   combat_assign,    name='combat_assign'),
+    path('api/combat/unassign/', combat_unassign,  name='combat_unassign'),
 
     # ── News Events (live news → geolocalized tokens) ─────────────────────
     path('api/events/news/', news_events_list, name='news_events_list'),

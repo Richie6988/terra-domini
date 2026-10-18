@@ -374,6 +374,23 @@ class CombatEngine:
                 g.count = 0
             g.save(update_fields=['count'])
 
+        # Reserve units the defender sent during the battle window take their share; survivors go home
+        for d in defenders:
+            lost, back = {}, {}
+            for ut, n in (d.units_deployed or {}).items():
+                total = defender_units.get(ut, 0)
+                lost[ut] = min(n, round(def_casualties.get(ut, 0) * n / total)) if total else 0
+                back[ut] = n - lost[ut]
+            d.units_lost, d.units_survived = lost, back
+            d.save(update_fields=['units_lost', 'units_survived'])
+            for ut, n in back.items():
+                if n > 0:
+                    pool, _ = MilitaryUnit.objects.get_or_create(
+                        player_id=d.player_id, unit_type=ut, status=MilitaryUnit.UnitStatus.GARRISON,
+                        territory=None, defaults={'count': 0})
+                    pool.count += n
+                    pool.save(update_fields=['count'])
+
         cls._apply_battle_outcome(battle, territory, outcome)
 
         logger.info(

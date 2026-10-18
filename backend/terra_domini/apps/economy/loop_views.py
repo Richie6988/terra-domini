@@ -137,7 +137,7 @@ def loop_status(request):
             'title': 'Your territory is under attack!',
             'body': body, 'hold_chance': hold,
             'ends_at': b.resolves_at.isoformat(), 'battle_id': str(b.id),
-            'cta': {'label': f'REINFORCE ({B.REINFORCE_COST})', 'action': 'reinforce'},
+            'cta': {'label': 'DEFEND', 'action': 'reinforce'},   # opens the war room (troops, walls, bonus)
         })
     for b in lost_recent:
         nudges.append({

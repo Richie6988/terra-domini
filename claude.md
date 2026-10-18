@@ -512,6 +512,8 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 - **Rarity pays**: HEX/day 60/130/360/900/2400/6000, resources x1/1.6/3/6/12/25 (yield grows faster than price). Megacities floored at rare/epic by metro population in the builder.
 - **Shop boosts** = `ActiveBoost` rows read by the game via `balance.has_boost / boost_mult / use_charge` (charge boosts: boost_value = uses left). Blitz (explore ~36 s), Distant Strike (attack range 10 hexes otherwise, `combat.can_attack`), 2X Extraction, Rare Drop (booster odds), Trade Advantage (royalty), Safari continuous / hints (+2 scans) / +Card Rarity (next-tier reward). Anything not in `IMPLEMENTED_EFFECTS` shows SOON and cannot be bought.
 - **DB builder**: rare_fact repeated on ≥3 tokens = template → blanked. Curated rows with notes `DUPLICATE OF <uid>` are dropped.
+- **Battles (war room)**: `GET /api/combat/<id>/faceoff/` (both sides, powers, walls, hold chance, defender actions) → `components/combat/BattleFaceOff.tsx`, opened anywhere with `openBattle(id)`. Defender window: `POST /combat/defend/` (free troops join; survivors return after resolution), `/combat/reinforce/` (walls), 2X Defense via `/shop/purchase/`.
+- **Forces**: `my-army` returns `available` (free units — only these attack) and `stations` (kingdoms + lone territories with stationed units). `POST /combat/assign/` {kingdom_h3,unit_type,count} / `/combat/unassign/` {h3,...}. Military > FORCES tab.
 
 ## 12. KNOWN ISSUES PIPELINE (updated 2026-10-17)
 

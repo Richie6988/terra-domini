@@ -17,6 +17,7 @@ import toast from 'react-hot-toast'
 import { Clock, Minus, Plus, ArrowRight, Info, Swords } from 'lucide-react'
 import { IconSVG } from '../shared/iconBank'
 import type { TerritoryLight } from '../../types'
+import { openBattle } from '../combat/BattleFaceOff'
 import { playSound } from '../../hooks/useSound'
 
 const ATTACK_TYPES = [
@@ -67,7 +68,7 @@ export function AttackPanel({ target, onClose }: Props) {
   const setActivePanel = useStore(s => s.setActivePanel)
   const [atkType, setAtkType] = useState('conquest')
   const [units, setUnits] = useState<Record<string, number>>({})
-  const [launched, setLaunched] = useState<{ msg: string; ends: string; sent: number; prob: number } | null>(null)
+  const [launched, setLaunched] = useState<{ msg: string; ends: string; sent: number; prob: number; id?: string } | null>(null)
   const initDone = useRef(false)
 
   const { data: army, isLoading: armyLoading } = useQuery<any>({
@@ -83,7 +84,7 @@ export function AttackPanel({ target, onClose }: Props) {
 
   const owned: Record<string, number> = useMemo(() => {
     const o: Record<string, number> = {}
-    Object.entries(army?.units || {}).forEach(([k, u]: [string, any]) => { if ((u?.owned || 0) > 0) o[k] = u.owned })
+    Object.entries(army?.units || {}).forEach(([k, u]: [string, any]) => { const n = u?.available ?? u?.owned ?? 0; if (n > 0) o[k] = n })   // stationed units defend, they don't attack
     return o
   }, [army])
   const ownedTypes = Object.keys(owned)
@@ -111,7 +112,7 @@ export function AttackPanel({ target, onClose }: Props) {
     }),
     onSuccess: (res) => {
       playSound('battle')
-      setLaunched({ msg: res.data?.message || 'Attack launched!', ends: res.data?.ends_at, sent: totalUnits, prob })
+      setLaunched({ msg: res.data?.message || 'Attack launched!', ends: res.data?.ends_at, sent: totalUnits, prob, id: res.data?.battle_id })
       qc.invalidateQueries({ queryKey: ['battles-active'] })
       qc.invalidateQueries({ queryKey: ['my-army'] })
       qc.invalidateQueries({ queryKey: ['loop-status'] })
@@ -243,8 +244,8 @@ export function AttackPanel({ target, onClose }: Props) {
               Your win chance was {Math.round(launched.prob * 100)}%. You'll get a notice when it resolves; the outcome is kept in Military &gt; History.
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
-              <button onClick={() => { onClose(); setActivePanel('combat') }}
-                className="btn-game btn-game-glass" style={{ flex: 1 }}>MILITARY</button>
+              <button onClick={() => { const id = launched.id; onClose(); if (id) openBattle(id); else setActivePanel('combat') }}
+                className="btn-game btn-game-red" style={{ flex: 1 }}>WAR ROOM</button>
               <button onClick={onClose}
                 className="btn-game btn-game-green" style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
                 BACK TO MAP <ArrowRight size={14} />

@@ -103,6 +103,8 @@ def my_army(request):
         total=models.Sum('count')
     )
     unit_map = {u['unit_type']: u['total'] for u in units}
+    reserve = {u['unit_type']: u['total'] for u in MilitaryUnit.objects.filter(player=player, territory__isnull=True)
+               .values('unit_type').annotate(total=models.Sum('count'))}
 
     # Training queues
     queues = TrainingQueue.objects.filter(player=player, collected=False).order_by('completes_at')
@@ -126,6 +128,7 @@ def my_army(request):
         defs[k] = {
             **v,
             'owned': unit_map.get(k, 0),
+            'available': reserve.get(k, 0),   # not stationed: can attack or be sent to defend
             'effective_train_seconds': v['admin_train_seconds'] if is_admin else v['train_seconds'],
             'train_parallel': 1 if is_admin else B_TRAIN_PARALLEL,
         }
@@ -138,7 +141,44 @@ def my_army(request):
         'units': defs,
         'training': training,
         'force': {'attack': total_atk, 'defense': total_def},
+        'stations': _stations(player),
     })
+
+
+def _stations(player) -> list:
+    """Where forces can be stationed: each connected kingdom (2+ hexes) and each lone territory.
+    Units stationed on any hex of a kingdom defend every hex of it (combat.engine.kingdom_garrisons)."""
+    from terra_domini.apps.combat.engine import MilitaryUnit
+    from terra_domini.apps.territories.models import Territory
+    from terra_domini.utils.h3_compat import k_ring
+    rows = {h: (cn or poi or name, rarity) for h, cn, poi, name, rarity in Territory.objects.filter(owner=player)
+            .values_list('h3_index', 'custom_name', 'poi_name', 'place_name', 'rarity')}
+    gar = {}
+    for h, ut, c in MilitaryUnit.objects.filter(player=player, territory__isnull=False, count__gt=0) \
+            .values_list('territory__h3_index', 'unit_type', 'count'):
+        gar.setdefault(h, {})[ut] = gar.get(h, {}).get(ut, 0) + c
+    seen, out = set(), []
+    order = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
+    for h in rows:
+        if h in seen:
+            continue
+        comp, todo = {h}, [h]
+        while todo:
+            for n in k_ring(todo.pop(), 1):
+                if n in rows and n not in comp:
+                    comp.add(n); todo.append(n)
+        seen |= comp
+        units = {}
+        for c in comp:
+            for ut, n in gar.get(c, {}).items():
+                units[ut] = units.get(ut, 0) + n
+        anchor = max(comp, key=lambda c: (order.index(rows[c][1]) if rows[c][1] in order else 0, c in gar))
+        out.append({'h3': anchor, 'name': rows[anchor][0] or f'Zone {anchor[:8]}', 'size': len(comp),
+                    'kind': 'kingdom' if len(comp) > 1 else 'territory', 'rarity': rows[anchor][1],
+                    'units': units, 'defense': sum(UNIT_DEFS[k]['def'] * v for k, v in units.items() if k in UNIT_DEFS),
+                    'hexes': sorted(comp)})
+    out.sort(key=lambda s: (-s['size'], -s['defense']))
+    return out[:40]
 
 
 @api_view(['POST'])
@@ -287,3 +327,34 @@ def assign_to_kingdom(request):
         'atk_added': udef['atk'] * count,
         'def_added': udef['def'] * count,
     })
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def unassign_units(request):
+    """POST /api/combat/unassign/ {h3, unit_type, count} — bring stationed units back to the free army
+    (from any hex of the kingdom that contains h3)."""
+    from terra_domini.apps.combat.engine import MilitaryUnit
+    from terra_domini.apps.territories.models import Territory
+    from django.db import transaction
+    player = request.user
+    unit_type, count = request.data.get('unit_type', ''), int(request.data.get('count', 1) or 1)
+    station = next((s for s in _stations(player) if request.data.get('h3') in s['hexes']), None)
+    if not station or unit_type not in UNIT_DEFS or count < 1:
+        return Response({'error': 'Nothing stationed there'}, status=404)
+    with transaction.atomic():
+        left = count
+        for g in MilitaryUnit.objects.select_for_update().filter(player=player, unit_type=unit_type, count__gt=0,
+                                                                  territory__h3_index__in=station['hexes']):
+            take = min(left, g.count)
+            g.count -= take; g.save(update_fields=['count'])
+            left -= take
+            if not left:
+                break
+        moved = count - left
+        if not moved:
+            return Response({'error': f'No {unit_type} stationed there'}, status=400)
+        pool, _ = MilitaryUnit.objects.get_or_create(player=player, unit_type=unit_type, territory=None,
+                                                     status='garrison', defaults={'count': 0})
+        pool.count += moved; pool.save(update_fields=['count'])
+    return Response({'success': True, 'moved': moved, 'unit_type': unit_type})

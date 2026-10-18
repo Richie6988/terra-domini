@@ -213,6 +213,61 @@ class BattleViewSet(viewsets.GenericViewSet):
 
         return Response({**_battle_row(battle), 'combat_log': battle.combat_log})
 
+    @action(detail=True, methods=['GET'], url_path='faceoff')
+    def faceoff(self, request, pk=None):
+        """GET /api/combat/<id>/faceoff/ — both sides face to face: forces, powers, walls, hold chance, timer,
+        and what the defender can still do before the battle resolves."""
+        try:
+            battle = Battle.objects.select_related('target_territory', 'defender').get(id=pk)
+        except (Battle.DoesNotExist, ValueError, Exception):
+            return Response({'error': 'Battle not found'}, status=404)
+        is_def = battle.defender_id == request.user.id
+        if not is_def and not battle.participants.filter(player=request.user).exists():
+            return Response({'error': 'Not authorized'}, status=403)
+        CombatEngine.resolve_due(Battle.objects.filter(id=battle.id))
+        battle.refresh_from_db()
+        return Response(_faceoff(battle, request.user))
+
+    @action(detail=False, methods=['POST'], url_path='defend')
+    def defend(self, request):
+        """POST /api/combat/defend/ {battle_id, units:{type:n}} — defender sends free (unstationed) units
+        into the battle before it resolves. Survivors come back afterwards."""
+        from django.db import transaction
+        try:
+            battle = Battle.objects.select_related('target_territory').get(
+                id=request.data.get('battle_id'), defender=request.user, status=Battle.BattleStatus.ACTIVE)
+        except (Battle.DoesNotExist, ValueError, Exception):
+            return Response({'error': 'No active attack on your territory with this id'}, status=404)
+        if battle.resolves_at <= timezone.now():
+            return Response({'error': 'Too late — the battle is resolving'}, status=409)
+        units = {k: int(v) for k, v in (request.data.get('units') or {}).items() if int(v or 0) > 0}
+        if not units:
+            return Response({'error': 'Select at least one unit'}, status=400)
+        with transaction.atomic():
+            stacks = {}
+            for ut, n in units.items():
+                st = MilitaryUnit.objects.select_for_update().filter(
+                    player=request.user, unit_type=ut, territory__isnull=True,
+                    status=MilitaryUnit.UnitStatus.GARRISON, count__gte=n).first()
+                if not st:
+                    return Response({'error': f'Not enough free {ut}'}, status=400)
+                stacks[ut] = st
+            for ut, n in units.items():
+                stacks[ut].count -= n
+                stacks[ut].save(update_fields=['count'])
+            part = battle.participants.filter(player=request.user, side=BattleParticipant.Side.DEFENDER).first()
+            if part:
+                merged = dict(part.units_deployed or {})
+                for ut, n in units.items():
+                    merged[ut] = merged.get(ut, 0) + n
+                part.units_deployed = merged
+                part.save(update_fields=['units_deployed'])
+            else:
+                BattleParticipant.objects.create(battle=battle, player=request.user, side=BattleParticipant.Side.DEFENDER,
+                                                 units_deployed=units)
+        data = _faceoff(battle, request.user)
+        return Response({**data, 'message': f"{sum(units.values())} units joined the defense — {round(data['hold_chance'] * 100)}% to hold."})
+
     @action(detail=False, methods=['GET'], url_path='history')
     def history(self, request):
         """GET /api/combat/history/ — resolved battles, as attacker AND as defender (bot raids included)."""
@@ -278,3 +333,58 @@ def _battle_row(b):
         'units_survived': (commander.units_survived if commander else None) or {},
         'defender_casualties': b.defender_casualties or {},
     }
+
+
+def _side_power(units, territory, attack):
+    from terra_domini.apps.combat.engine import UNIT_STATS
+    out = []
+    for ut, n in sorted(units.items(), key=lambda x: -x[1]):
+        st = UNIT_STATS.get(ut, {})
+        per = st.get('atk' if attack else 'def', 0) * (st.get('terrain_bonus', {}).get(territory.territory_type, 1.0) if attack else 1)
+        out.append({'type': ut, 'count': n, 'power': round(per * n, 1)})
+    return out
+
+
+def _faceoff(battle, viewer):
+    """Face-to-face payload, from the same numbers resolve_battle uses."""
+    from terra_domini.apps.combat.engine import SURPRISE_ATK_MULT, active_boost_pct
+    from terra_domini.apps.economy import balance as B
+    from terra_domini.apps.economy.models import ShopItem
+    t = battle.target_territory
+    atk_parts = list(battle.participants.filter(side=BattleParticipant.Side.ATTACKER).select_related('player'))
+    def_parts = list(battle.participants.filter(side=BattleParticipant.Side.DEFENDER).select_related('player'))
+    atk_units = CombatEngine._aggregate_units(atk_parts)
+    garrison = CombatEngine.garrison_dict(t)
+    sent = CombatEngine._aggregate_units(def_parts)
+    commander = next((p for p in atk_parts if p.is_commander), None)
+    atk_boost = active_boost_pct(commander.player_id if commander else None, 'atk_multiplier')
+    def_boost = active_boost_pct(battle.defender_id, 'def_multiplier')
+    atk = sum(CombatEngine.calculate_attack_power(p.units_deployed, t.territory_type) for p in atk_parts)
+    if battle.battle_type == Battle.BattleType.SURPRISE:
+        atk *= SURPRISE_ATK_MULT
+    atk *= 1 + atk_boost / 100.0
+    dfn = CombatEngine.calculate_defense_power(t, CombatEngine.defender_units(battle, t)) * (1 + def_boost / 100.0)
+    is_def = battle.defender_id == viewer.id
+    out = {
+        **_battle_row(battle),
+        'role': 'defender' if is_def else 'attacker',
+        'seconds_left': max(0, int((battle.resolves_at - timezone.now()).total_seconds())),
+        'territory': {'h3': t.h3_index, 'name': t.place_name or t.poi_name or t.h3_index[:10], 'rarity': t.rarity,
+                      'terrain': t.territory_type},
+        'attack': {'players': [p.player.username for p in atk_parts], 'units': _side_power(atk_units, t, True),
+                   'power': round(atk, 1), 'boost_pct': round(atk_boost), 'surprise': battle.battle_type == Battle.BattleType.SURPRISE},
+        'defense': {'player': battle.defender.username if battle.defender else None,
+                    'garrison': _side_power(garrison, t, False), 'sent': _side_power(sent, t, False),
+                    'walls': round(t.defense_points or 0), 'walls_max': round((t.max_defense_points or 100) * 2),
+                    'power': round(dfn, 1), 'boost_pct': round(def_boost)},
+        'hold_chance': _hold_chance(battle, t) if battle.status in ACTIVE_STATUSES else (1.0 if battle.winner == 'defender' else 0.0),
+    }
+    if is_def and battle.status == Battle.BattleStatus.ACTIVE:
+        free = {m.unit_type: m.count for m in MilitaryUnit.objects.filter(player=viewer, territory__isnull=True, count__gt=0)}
+        item = ShopItem.objects.filter(effect_type='def_multiplier', is_active=True).order_by('price_tdc').first()
+        out['actions'] = {
+            'reserve': free,
+            'reinforce_cost': B.REINFORCE_COST, 'reinforce_defense': B.REINFORCE_DEFENSE,
+            'boost_item': {'code': item.code, 'name': item.name, 'price': float(item.price_tdc)} if item and not def_boost else None,
+        }
+    return out

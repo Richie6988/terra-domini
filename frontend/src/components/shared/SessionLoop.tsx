@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
 import { IconSVG } from './iconBank'
+import { openBattle } from '../combat/BattleFaceOff'
 import { playSound } from '../../hooks/useSound'
 
 interface Nudge {
@@ -215,7 +216,7 @@ export function NudgeStack() {
   const run = (n: Nudge) => {
     if (!n.cta) return
     if (n.cta.action === 'collect') collect.mutate()
-    else if (n.cta.action === 'reinforce' && n.battle_id) reinforce.mutate(n.battle_id)
+    else if (n.cta.action === 'reinforce' && n.battle_id) openBattle(n.battle_id)   // war room: troops, walls, bonus
     else if (n.cta.panel) setActivePanel(n.cta.panel as any)
   }
 
