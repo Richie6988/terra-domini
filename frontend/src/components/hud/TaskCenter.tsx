@@ -69,9 +69,12 @@ export function TaskCenter({ onClose }: Props) {
   // Claim mission
   const claimMut = useMutation({
     mutationFn: (missionId: string) => api.post(`/progression/${missionId}/claim-mission/`),
-    onSuccess: (_, missionId) => {
+    onSuccess: (res: any, missionId) => {
       const m = missions.find(t => t.id === missionId)
       toast.success(`+${m?.reward_tdc || 0} HEX earned!`)
+      const b = res?.data?.daily_bonus
+      if (b) toast.success(`3/3 missions! Bonus +${b.hex} HEX${b.item ? ` + ${b.item} for 24h` : ''}`, { duration: 6000 })
+      if (typeof res?.data?.balance === 'number') { const st = useStore.getState(); st.setBalance({ ...(st.balance || {}), in_game: res.data.balance } as any) }
       // Balance in the top HUD + the "reward to claim" nudge come from loop-status
       ;['daily-missions', 'loop-status', 'wallet'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
     },
@@ -146,8 +149,20 @@ export function TaskCenter({ onClose }: Props) {
 
       {/* Overall progress */}
       {missions.length > 0 && (
-        <div className="hx-progress" style={{ height: 8, marginBottom: 16, ['--accent' as any]: pct >= 100 ? '#22c55e' : '#f5a524' }}>
+        <div className="hx-progress" style={{ height: 8, marginBottom: 10, ['--accent' as any]: pct >= 100 ? '#22c55e' : '#f5a524' }}>
           <div className="hx-progress__fill" style={{ width: `${pct}%` }} />
+        </div>
+      )}
+      {missionData?.daily_bonus && (
+        <div className="hx-card" style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, padding: '10px 12px',
+          borderColor: missionData.daily_bonus.claimed ? '#22c55e' : '#f5a524', textTransform: 'none' }}>
+          <IconSVG id="gift" size={28} />
+          <div style={{ flex: 1, fontSize: 13, fontWeight: 800 }}>
+            {missionData.daily_bonus.claimed
+              ? 'Daily bonus collected — see you tomorrow!'
+              : `Claim all 3 missions: +${missionData.daily_bonus.hex} HEX + ${missionData.daily_bonus.item}`}
+          </div>
+          <span className="hx-chip">{claimed}/3</span>
         </div>
       )}
 

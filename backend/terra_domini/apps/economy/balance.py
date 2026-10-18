@@ -71,6 +71,11 @@ def explore_speed_mult(player) -> float:
     return max(0.25, min(vals)) if vals else 1.0
 
 
+# ── Daily missions: all 3 claimed → bonus chest ──
+DAILY_ALL_MISSIONS_HEX = 300
+DAILY_ALL_MISSIONS_ITEM = 'explore_slot'     # free Extra Explorer for 24h
+
+
 # ── Crypto ───────────────────────────────────────────────────────────────────
 CONVERT_BURN_PCT = Decimal('0.05')   # 5% of HEX burned when converting to the token
 # Fixed peg (owner, 2026-10-18): 1 € = 1000 HEX = 1 HEX Coin (on-chain token). Bought in the shop directly;

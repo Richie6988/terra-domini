@@ -132,6 +132,18 @@ export function HarvestButton() {
       toast.success(`Day ${data.streak.current} streak! +${data.streak.reward_today} HEX`, { duration: 4000 })
     }
   }, [data?.streak?.reward_today])
+  // Same button = back to my main kingdom (owner 2026-10-18): collect if there is stock, and fly home
+  const player = useStore(st => st.player)
+  const { data: kd } = useQuery<any>({
+    queryKey: ['kingdoms', player?.id],
+    queryFn: () => api.get('/territories-geo/kingdoms/').then(r => r.data),
+    staleTime: 30000, enabled: !!player,
+  })
+  const goHome = () => {
+    const ks = kd?.kingdoms || []
+    const main = ks.find((k: any) => k.is_main) || ks[0]
+    if (main?.centroid_lat) window.dispatchEvent(new CustomEvent('terra:flyto', { detail: { lat: main.centroid_lat, lon: main.centroid_lon, zoom: 14 } }))
+  }
   if (!data || !data.harvest.rate_per_day) return null
 
   // Live estimate between polls (server stays the source of truth on collect)
@@ -148,13 +160,15 @@ export function HarvestButton() {
   return (
     <button
       className={`hx-harvest ${full ? 'is-full' : ''}`}
-      onClick={() => collect.mutate()}
-      disabled={collect.isPending || pending <= 0}
-      aria-label={`Collect ${pending} HEX`}
+      onClick={() => { if (pending > 0) collect.mutate(); goHome() }}
+      disabled={collect.isPending}
+      aria-label={pending > 0 ? `Collect ${pending} HEX and go to my kingdom` : 'Go to my kingdom'}
+      title="Collect and fly back to your kingdom"
     >
       <span className="hx-harvest__icon"><IconSVG id="wheat" size={30} /></span>
       <span className="hx-harvest__body">
-        <span className="hx-harvest__label">{full ? 'STOCK FULL!' : 'HARVEST'}</span>
+        <span className="hx-harvest__label">{full ? 'STOCK FULL!' : 'HARVEST'}
+          <span style={{ marginLeft: 6, opacity: 0.85, display: 'inline-flex', verticalAlign: 'middle' }}><IconSVG id="castle" size={14} /></span></span>
         <span className="hx-harvest__value">+{pending.toLocaleString()}</span>
         <span className="hx-progress" style={{ ['--accent' as any]: full ? '#f59e0b' : '#34d058', height: 10 }}>
           <span className="hx-progress__fill" style={{ width: `${pct}%` }} />

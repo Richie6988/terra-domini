@@ -4,6 +4,7 @@ from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.views import APIView
+from datetime import timedelta
 from django.utils import timezone
 from terra_domini.apps.progression.models import (
     PlayerStreak, PlayerDailyMission, Achievement,
@@ -38,7 +39,8 @@ class ProgressionViewSet(viewsets.GenericViewSet):
     def daily_missions(self, request):
         """Get today's 3 daily missions. Auto-generates if none exist for today."""
         from terra_domini.apps.progression.missions import ensure_today_missions
-        missions = ensure_today_missions(request.user).order_by('is_completed')
+        from terra_domini.apps.economy import balance as _B
+        missions = list(ensure_today_missions(request.user).order_by('is_completed'))
 
         return Response({
             'missions': [
@@ -59,6 +61,8 @@ class ProgressionViewSet(viewsets.GenericViewSet):
                 for m in missions
             ],
             'all_complete': all(m.is_completed for m in missions),
+            'daily_bonus': {'hex': _B.DAILY_ALL_MISSIONS_HEX, 'item': 'Extra Explorer (24h)',
+                            'claimed': bool(missions) and all(m.is_claimed for m in missions)},
             'total_tdc_available': sum(m.reward_tdc for m in missions if not m.is_claimed),
         })
 
@@ -82,10 +86,26 @@ class ProgressionViewSet(viewsets.GenericViewSet):
         mission.claimed_at = timezone.now()
         mission.save(update_fields=['is_claimed', 'claimed_at'])
 
+        # 3/3 of the day claimed → bonus chest (only the claim that completes the set pays it)
+        bonus = None
+        today = PlayerDailyMission.objects.filter(player=request.user, date=mission.date)
+        if today.count() >= 3 and not today.filter(is_claimed=False).exists():
+            from terra_domini.apps.economy import balance as B
+            from terra_domini.apps.economy.models import ShopItem, ActiveBoost
+            Player.objects.filter(id=request.user.id).update(tdc_in_game=F('tdc_in_game') + B.DAILY_ALL_MISSIONS_HEX)
+            item = ShopItem.objects.filter(code=B.DAILY_ALL_MISSIONS_ITEM).first()
+            if item:
+                ActiveBoost.objects.create(player=request.user, item=item, boost_type=item.effect_type, boost_value=item.effect_value,
+                                           expires_at=timezone.now() + timedelta(seconds=item.effect_duration_seconds or 86400))
+            bonus = {'hex': B.DAILY_ALL_MISSIONS_HEX, 'item': item.name if item else None}
+
+        bal = Player.objects.filter(id=request.user.id).values_list('tdc_in_game', flat=True).first()
         return Response({
             'claimed': True,
             'tdc_earned': mission.reward_tdc,
             'xp_earned': mission.reward_xp,
+            'daily_bonus': bonus,
+            'balance': float(bal or 0),
         })
 
     @action(detail=False, methods=['GET', 'POST'], url_path='daily-spin')
