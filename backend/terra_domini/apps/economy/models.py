@@ -211,3 +211,17 @@ class AdCampaign(models.Model):
             and self.spent_eur < self.budget_eur
             and (not self.ends_at or now < self.ends_at)
         )
+
+
+class PlayerResource(models.Model):
+    """Stock of a resource card (HEXOD master DB resource id: 'oil', 'gold', 'cereals'...).
+    Produced daily by owned territories (economy/resources.py) and collected with the harvest."""
+    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='resource_stock')
+    resource_id = models.CharField(max_length=40)
+    amount = models.FloatField(default=0)
+    total_produced = models.FloatField(default=0)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'player_resources'
+        unique_together = ['player', 'resource_id']

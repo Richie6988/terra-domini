@@ -29,6 +29,17 @@ def _fmt_left(delta):
     return f'{mins // 60}h {mins % 60:02d}m' if mins >= 60 else f'{mins} min'
 
 
+def _resources(player, stored_h):
+    """Resource cards produced into the same stock as HEX (collected together)."""
+    from terra_domini.apps.economy import resources as R
+    rates = R.player_resource_rates(player)
+    pend = R.pending(rates, stored_h)
+    meta = R.resources()
+    return sorted(({'id': k, 'name': meta.get(k, {}).get('name', k), 'category': meta.get(k, {}).get('category', ''),
+                    'rate_per_day': v, 'pending': pend.get(k, 0)} for k, v in rates.items()),
+                  key=lambda r: -r['rate_per_day'])
+
+
 def _harvest(player, now):
     rate = B.player_hex_per_day(player)
     last = player.harvest_last_at or now
@@ -46,6 +57,7 @@ def _harvest(player, now):
         'is_full': elapsed_h >= B.STORAGE_CAP_HOURS and rate > 0,
         'full_at': (last + timedelta(hours=B.STORAGE_CAP_HOURS)).isoformat(),
         'lost': int(lost),
+        'resources': _resources(player, stored_h),
         'beginner_mult': B.BEGINNER_MULT if B.is_beginner(player) else 1,
         'beginner_until': (player.date_joined + timedelta(days=B.BEGINNER_DAYS)).isoformat() if B.is_beginner(player) else None,
     }
@@ -208,9 +220,72 @@ def loop_collect(request):
                              'harvest': h, 'message': 'Nothing to collect yet.'})
         Player.objects.filter(id=player.id).update(
             tdc_in_game=F('tdc_in_game') + h['pending'], harvest_last_at=now)
+        from terra_domini.apps.economy import resources as R
+        R.credit(player, {r['id']: r['pending'] for r in h['resources']})
     track(player, 'produce')
     player.refresh_from_db(fields=['tdc_in_game', 'harvest_last_at'])
     return Response({
         'collected': h['pending'], 'lost': h['lost'], 'balance': float(player.tdc_in_game),
+        'resources_collected': {r['id']: r['pending'] for r in h['resources'] if r['pending'] > 0},
         'harvest': _harvest(player, now),
+    })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def codex_cards(request):
+    """GET /api/codex/cards/ — the three card families of the HEXOD master DB, with what the player holds.
+    rare: landmark POIs rare+ (plus any POI the player owns) · biomes: DB regions · resources: DB resources."""
+    from terra_domini.apps.economy import resources as R
+    from terra_domini.apps.economy.models import PlayerResource
+    from terra_domini.apps.events import hexod_db
+    from terra_domini.apps.territories.models import Territory
+
+    db = hexod_db.load()
+    player = request.user
+    owned = set(Territory.objects.filter(owner=player).values_list('h3_index', flat=True))
+    rare = []
+    for p in db.get('pois', []):
+        if not p.get('on_map'):
+            continue
+        mine = p.get('h3_r8') in owned
+        if p['rarity'] not in ('rare', 'epic', 'legendary', 'mythic') and not mine:
+            continue
+        rare.append({
+            'uid': p['uid'], 'name': p['name'], 'rarity': p['rarity'], 'category': p.get('codex_category') or '',
+            'game_category': p.get('game_category'), 'h3_index': p.get('h3_r8'), 'lat': p.get('lat'), 'lon': p.get('lon'),
+            'country_code': p.get('country_code') or '', 'description': (p.get('description') or '')[:400],
+            'fun_fact': p.get('fun_fact_1') or '', 'wiki_url': p.get('wiki_url') or '', 'owned': mine,
+        })
+    order = {'mythic': 0, 'legendary': 1, 'epic': 2, 'rare': 3, 'uncommon': 4, 'common': 5}
+    rare.sort(key=lambda c: (not c['owned'], order.get(c['rarity'], 9), c['name']))
+
+    mine_b = R.player_biomes(player)
+    meta = R.resources()
+    biomes = [{
+        'id': b['id'], 'name': b['name'], 'continent': b['continent'], 'type': b['type'],
+        'resources': [{'id': r, 'name': meta[r]['name']} for r in b['resource_ids']],
+        'center': [round((b['lat_min'] + b['lat_max']) / 2, 2), round((b['lon_min'] + b['lon_max']) / 2, 2)],
+        'territories': mine_b.get(b['id'], 0), 'owned': b['id'] in mine_b,
+    } for b in R.biomes()]
+    biomes.sort(key=lambda b: (not b['owned'], b['continent'], b['name']))
+
+    rates = R.player_resource_rates(player)
+    stock = {r.resource_id: r for r in PlayerResource.objects.filter(player=player)}
+    res = [{
+        'id': rid, 'name': r['name'], 'category': r.get('category', ''), 'rarity': r.get('rarity', ''),
+        'strategic_use': r.get('strategic_use', ''), 'rate_per_day': rates.get(rid, 0),
+        'amount': round(stock[rid].amount, 1) if rid in stock else 0,
+        'total_produced': round(stock[rid].total_produced, 1) if rid in stock else 0,
+        'owned': rid in rates or rid in stock,
+    } for rid, r in meta.items()]
+    res.sort(key=lambda r: (not r['owned'], -r['rate_per_day'], r['name']))
+
+    return Response({
+        'rare': rare, 'biomes': biomes, 'resources': res,
+        'summary': {
+            'rare': {'owned': sum(c['owned'] for c in rare), 'total': sum(1 for c in rare if c['rarity'] in order and order[c['rarity']] <= 3)},
+            'biomes': {'owned': len(mine_b), 'total': len(biomes)},
+            'resources': {'owned': sum(r['owned'] for r in res), 'total': len(res)},
+        },
     })

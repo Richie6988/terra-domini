@@ -39,47 +39,49 @@ class TrainingQueue(models.Model):
 
 
 # ═══ UNIT DEFINITIONS ════════════════════════════════════════════
+# train_seconds mirrors economy/balance.TRAIN_SECONDS (per unit; TRAIN_PARALLEL units train at once)
+from terra_domini.apps.economy.balance import TRAIN_PARALLEL as B_TRAIN_PARALLEL
 
 UNIT_DEFS = {
     'infantry': {
         'name': 'Infantry', 'icon': 'swords',
         'atk': 10, 'def': 12, 'cost': 50,
-        'train_seconds': 3600,       # 1 hour
+        'train_seconds': 180,
         'admin_train_seconds': 60,   # 1 min for admin
         'desc': 'Balanced ground troops. Strong in urban and forest terrain.',
     },
     'cavalry': {
         'name': 'Cavalry', 'icon': 'horse',
         'atk': 18, 'def': 8, 'cost': 120,
-        'train_seconds': 7200,       # 2 hours
+        'train_seconds': 360,
         'admin_train_seconds': 120,
         'desc': 'Fast attack unit. Excels in rural and coastal biomes.',
     },
     'artillery': {
         'name': 'Artillery', 'icon': 'bomb',
         'atk': 35, 'def': 4, 'cost': 300,
-        'train_seconds': 14400,      # 4 hours
+        'train_seconds': 720,
         'admin_train_seconds': 180,
         'desc': 'Heavy damage dealer. Slow but devastating firepower.',
     },
     'aerial': {
         'name': 'Aerial', 'icon': 'plane',
         'atk': 25, 'def': 6, 'cost': 250,
-        'train_seconds': 10800,      # 3 hours
+        'train_seconds': 600,
         'admin_train_seconds': 150,
         'desc': 'Air support unit. Ignores terrain penalties.',
     },
     'naval': {
         'name': 'Naval', 'icon': 'ship',
         'atk': 20, 'def': 15, 'cost': 200,
-        'train_seconds': 7200,       # 2 hours
+        'train_seconds': 480,
         'admin_train_seconds': 120,
         'desc': 'Maritime forces. Dominant on coastal territories.',
     },
     'spy': {
         'name': 'Spy', 'icon': 'spy',
         'atk': 5, 'def': 3, 'cost': 150,
-        'train_seconds': 5400,       # 1.5 hours
+        'train_seconds': 300,
         'admin_train_seconds': 90,
         'desc': 'Infiltration agent. Reveals enemy defenses before attack.',
     },
@@ -125,6 +127,7 @@ def my_army(request):
             **v,
             'owned': unit_map.get(k, 0),
             'effective_train_seconds': v['admin_train_seconds'] if is_admin else v['train_seconds'],
+            'train_parallel': 1 if is_admin else B_TRAIN_PARALLEL,
         }
 
     # Kingdom force totals
@@ -175,8 +178,8 @@ def recruit(request):
     track(player, 'spend_tdc', total_cost)
 
     # Training time: admin gets fast-track
-    train_s = udef['admin_train_seconds'] if player.is_staff else udef['train_seconds']
-    train_total = train_s * quantity
+    from terra_domini.apps.economy.balance import train_seconds
+    train_total = train_seconds(unit_type, quantity) // 12 if player.is_staff else train_seconds(unit_type, quantity)  # staff: fast-track QA
     now = timezone.now()
 
     tq = TrainingQueue.objects.create(

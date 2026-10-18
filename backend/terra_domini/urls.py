@@ -75,7 +75,7 @@ from terra_domini.apps.events.poi_views import UnifiedPOIViewSet
 from terra_domini.apps.territories.trade_views import ResourceTradeViewSet
 
 from terra_domini.apps.combat.views import BattleViewSet
-from terra_domini.apps.economy.loop_views import loop_status, loop_collect
+from terra_domini.apps.economy.loop_views import loop_status, loop_collect, codex_cards
 from terra_domini.apps.combat.recruitment import (
     my_army as combat_my_army,
     recruit as combat_recruit,
@@ -135,6 +135,7 @@ urlpatterns = [
     # ── Military Recruitment ──────────────────────────────────────────
     path('api/loop/status/',   loop_status,   name='loop_status'),
     path('api/loop/collect/',  loop_collect,  name='loop_collect'),
+    path('api/codex/cards/',   codex_cards,   name='codex_cards'),
     path('api/combat/my-army/',  combat_my_army,   name='combat_my_army'),
     path('api/combat/recruit/',  combat_recruit,   name='combat_recruit'),
     path('api/combat/collect/',  combat_collect,   name='combat_collect'),

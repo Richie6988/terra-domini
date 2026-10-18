@@ -138,7 +138,7 @@ class BattleViewSet(viewsets.GenericViewSet):
         return Response({
             'can_attack': ok, 'reason': reason,
             'owner': t.owner.username if t.owner else None,
-            'defense_power': round(CombatEngine.calculate_defense_power(t, {}) * def_b, 1),
+            'defense_power': round(CombatEngine.calculate_defense_power(t, CombatEngine.garrison_dict(t)) * def_b, 1),
             'defense_points': t.defense_points, 'max_defense_points': t.max_defense_points,
             'atk_per_unit': {k: round(v['atk'] * v['terrain_bonus'].get(t.territory_type, 1.0) * atk_b, 2) for k, v in UNIT_STATS.items()},
             'atk_boost_pct': round((atk_b - 1) * 100), 'def_boost_pct': round((def_b - 1) * 100),
@@ -242,7 +242,7 @@ def _hold_chance(battle, territory) -> float:
     from terra_domini.apps.combat.engine import active_boost_pct
     commander = battle.participants.filter(is_commander=True).first()
     atk *= 1 + active_boost_pct(commander.player_id if commander else None, 'atk_multiplier') / 100.0
-    dfn = CombatEngine.calculate_defense_power(territory, {}) * (1 + active_boost_pct(battle.defender_id, 'def_multiplier') / 100.0)
+    dfn = CombatEngine.calculate_defense_power(territory, CombatEngine.defender_units(battle, territory)) * (1 + active_boost_pct(battle.defender_id, 'def_multiplier') / 100.0)
     if atk <= 0:
         return 1.0
     n, held = 40, 0

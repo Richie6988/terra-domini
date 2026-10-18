@@ -13,7 +13,7 @@ logger = logging.getLogger('terra_domini.combat')
 
 # Safe fallback — works even without GAME in settings (Codespace dev)
 GAME_CFG = getattr(settings, 'GAME', {
-    'BATTLE_TIMER': {'HEX': 14400, 'DISTRICT': 43200, 'CITY': 86400, 'CAPITAL': 259200},
+    'BATTLE_TIMER': {'HEX': 14400, 'DISTRICT': 21600, 'CITY': 43200, 'CAPITAL': 259200},
     'MAX_MILITARY_BOOST_PCT': 25,
     'SHIELD_MAX_HOURS_PER_DAY': 12,
     'BEGINNER_PROTECTION_DAYS': 7,
@@ -241,6 +241,38 @@ class CombatEngine:
         total = (base_defense + unit_defense * morale_factor) * (1 + boost_pct)
         return total
 
+    @staticmethod
+    def kingdom_garrisons(territory):
+        """Garrison stacks that defend this hex: units assigned to any hex of the same connected kingdom."""
+        if not territory.owner_id:
+            return []
+        from terra_domini.apps.territories.models import Territory
+        from terra_domini.utils.h3_compat import k_ring
+        owned = set(Territory.objects.filter(owner_id=territory.owner_id).values_list('h3_index', flat=True))
+        kingdom, todo = {territory.h3_index}, [territory.h3_index]
+        while todo:
+            for n in k_ring(todo.pop(), 1):
+                if n in owned and n not in kingdom:
+                    kingdom.add(n); todo.append(n)
+        return list(MilitaryUnit.objects.filter(
+            player_id=territory.owner_id, status=MilitaryUnit.UnitStatus.GARRISON,
+            territory__h3_index__in=kingdom, count__gt=0))
+
+    @classmethod
+    def garrison_dict(cls, territory) -> dict:
+        out = {}
+        for g in cls.kingdom_garrisons(territory):
+            out[g.unit_type] = out.get(g.unit_type, 0) + g.count
+        return out
+
+    @classmethod
+    def defender_units(cls, battle, territory) -> dict:
+        """Defending forces = reinforcement participants + the kingdom's garrisons."""
+        units = cls._aggregate_units(battle.participants.filter(side=BattleParticipant.Side.DEFENDER))
+        for g in cls.kingdom_garrisons(territory):
+            units[g.unit_type] = units.get(g.unit_type, 0) + g.count
+        return units
+
     @classmethod
     def resolve_battle(cls, battle: Battle) -> dict:
         """
@@ -255,7 +287,8 @@ class CombatEngine:
 
         # Aggregate forces
         attacker_units = cls._aggregate_units(attackers)
-        defender_units = cls._aggregate_units(defenders)
+        defender_units = cls.defender_units(battle, territory)
+        garrisons = cls.kingdom_garrisons(territory)
 
         # Calculate powers
         atk_power = sum(
@@ -325,6 +358,21 @@ class CombatEngine:
             'atk_power': effective_atk,
             'def_power': effective_def,
         }
+
+        # Garrisons take the defender casualties (proportionally per unit type); on capture,
+        # the stack stationed on the lost hex retreats to the defender's free army pool.
+        for g in garrisons:
+            total = defender_units.get(g.unit_type, 0)
+            lost = round(def_casualties.get(g.unit_type, 0) * g.count / total) if total else 0
+            g.count = max(0, g.count - lost)
+            if outcome['territory_captured'] and g.territory_id == territory.id and g.count:
+                pool, _ = MilitaryUnit.objects.get_or_create(
+                    player_id=g.player_id, unit_type=g.unit_type, status=MilitaryUnit.UnitStatus.GARRISON,
+                    territory=None, defaults={'count': 0})
+                pool.count += g.count
+                pool.save(update_fields=['count'])
+                g.count = 0
+            g.save(update_fields=['count'])
 
         cls._apply_battle_outcome(battle, territory, outcome)
 

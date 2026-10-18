@@ -39,6 +39,16 @@ RARITY_ORDER = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
 REINFORCE_COST = 80          # HEX per reinforcement
 REINFORCE_DEFENSE = 60       # defense points added (capped at 2× max)
 
+# ── Army training (fast, Clash-style: minutes, barracks train TRAIN_PARALLEL units at once) ──
+TRAIN_SECONDS = {'infantry': 180, 'cavalry': 360, 'spy': 300, 'naval': 480, 'aerial': 600, 'artillery': 720}
+TRAIN_PARALLEL = 5
+
+
+def train_seconds(unit_type: str, quantity: int) -> int:
+    import math
+    return TRAIN_SECONDS.get(unit_type, 300) * math.ceil(max(1, quantity) / TRAIN_PARALLEL)
+
+
 # ── Crypto ───────────────────────────────────────────────────────────────────
 CONVERT_BURN_PCT = Decimal('0.05')   # 5% of HEX burned when converting to the token
 
@@ -52,21 +62,26 @@ def territory_hex_per_day(rarity: str, is_shiny: bool = False, connected: bool =
     return v
 
 
-def player_hex_per_day(player) -> float:
+def territory_rates(player) -> dict:
+    """HEX/day of each owned territory (h3 → rate), starter boost included.
+    The ONLY production formula: harvest, Empire and Ladder all read it."""
     from terra_domini.apps.territories.models import Territory
     from terra_domini.utils.h3_compat import k_ring
     rows = list(Territory.objects.filter(owner=player).values_list('h3_index', 'rarity', 'is_shiny'))
     owned = {h for h, _, _ in rows}
-    total = 0.0
+    mult = BEGINNER_MULT if is_beginner(player) else 1
+    out = {}
     for h, rarity, shiny in rows:
         try:
             connected = any(n in owned for n in k_ring(h, 1) if n != h)
         except Exception:
             connected = False
-        total += territory_hex_per_day(rarity, shiny, connected)
-    if is_beginner(player):
-        total *= BEGINNER_MULT
-    return round(total, 2)
+        out[h] = territory_hex_per_day(rarity, shiny, connected) * mult
+    return out
+
+
+def player_hex_per_day(player) -> float:
+    return round(sum(territory_rates(player).values()), 2)
 
 
 def is_beginner(player) -> bool:

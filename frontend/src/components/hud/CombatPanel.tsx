@@ -215,7 +215,7 @@ export function CombatPanel({ onClose }: Props) {
 
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                   <span className="hx-chip"><IconSVG id="hex_coin" size={12} /> {u.cost} HEX / UNIT</span>
-                  <span className="hx-chip"><Clock size={11} /> {formatDuration(u.effective_train_seconds)} / UNIT</span>
+                  <span className="hx-chip"><Clock size={11} /> {formatDuration(u.effective_train_seconds)} · {(u as any).train_parallel || 1} AT ONCE</span>
                 </div>
 
                 {/* Quantity + recruit button */}

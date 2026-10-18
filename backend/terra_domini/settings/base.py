@@ -313,8 +313,8 @@ GAME = {
     'BEGINNER_PROTECTION_DAYS': 7,         # No PvP for new players
     'BATTLE_TIMER': {
         'HEX': 4 * 3600,                   # 4h
-        'DISTRICT': 12 * 3600,             # 12h
-        'CITY': 24 * 3600,                 # 24h
+        'DISTRICT': 6 * 3600,              # 6h (urban hexes; was 12h — too slow for short sessions)
+        'CITY': 12 * 3600,                 # 12h
         'CAPITAL': 72 * 3600,              # 72h
     },
     'MAX_ALLIANCE_SQUAD': 5,

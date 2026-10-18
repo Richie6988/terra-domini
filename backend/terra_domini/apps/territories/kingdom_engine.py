@@ -150,6 +150,8 @@ def recompute_kingdoms(player) -> list[dict]:
         # Delete orphaned clusters
         TerritoryCluster.objects.filter(player=player).exclude(cluster_id__in=new_cluster_ids).delete()
 
+        from terra_domini.apps.economy.balance import territory_rates
+        rates = territory_rates(player)   # same numbers as the harvest
         for i, (component, cluster_id) in enumerate(zip(components, component_cluster_ids)):
             is_main = (i == 0)
             agg = _aggregate_resources(component)
@@ -161,12 +163,7 @@ def recompute_kingdoms(player) -> list[dict]:
             centroid_lon = sum(lons) / len(lons)
 
             # Real harvest rate (economy/balance.py) — was resource_credits × 288 (cosmetic)
-            from terra_domini.apps.economy.balance import territory_hex_per_day
-            from terra_domini.apps.territories.models import Territory as _T
-            tdc24 = round(sum(
-                territory_hex_per_day(r, s, len(component) > 1)
-                for r, s in _T.objects.filter(h3_index__in=list(component)).values_list('rarity', 'is_shiny')
-            ), 2)
+            tdc24 = round(sum(rates.get(h, 0) for h in component), 2)
             size = len(component)
             tier = min(6, size // 3)
 

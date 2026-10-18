@@ -19,7 +19,7 @@ interface Nudge {
 }
 interface LoopStatus {
   balance: number; earned_balance: number
-  harvest: { rate_per_day: number; pending: number; cap_amount: number; cap_hours: number; fill_pct: number; is_full: boolean; full_at: string; lost: number; beginner_mult?: number; beginner_until?: string | null }
+  harvest: { rate_per_day: number; pending: number; cap_amount: number; cap_hours: number; fill_pct: number; is_full: boolean; full_at: string; lost: number; resources?: { id: string; name: string; rate_per_day: number; pending: number }[]; beginner_mult?: number; beginner_until?: string | null }
   streak: { current: number; reward_today: number }
   nudges: Nudge[]
 }
@@ -52,17 +52,35 @@ export function useLoopStatus() {
   })
 }
 
+/** Keeps the local owned-hex set equal to the server's (boosters, conquests and raids change it server-side). */
+export function useOwnedSync() {
+  const { data } = useLoopStatus()
+  const size = useStore(s => s.myTerritories?.size ?? 0)
+  const server = (data as any)?.territories as number | undefined
+  useEffect(() => {
+    if (server === undefined || server === size) return
+    api.get('/territories-geo/mine/').then(r => {
+      const list = r.data?.territories || []
+      useStore.getState().setTerritories(list)
+      useStore.setState({ myTerritories: new Set(list.map((t: any) => t.h3_index)) })
+    }).catch(() => {})
+  }, [server, size])
+  return server ?? size
+}
+
 export function useLoopActions() {
   const qc = useQueryClient()
   const syncBalance = (v: number) => {
     const s = useStore.getState()
     s.setBalance({ ...(s.balance || {}), in_game: v } as any)
   }
-  const refresh = () => ['loop-status', 'daily-missions', 'wallet', 'kingdoms', 'my-army'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
+  const refresh = () => ['loop-status', 'daily-missions', 'wallet', 'kingdoms', 'my-army', 'codex-cards'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
   const collect = useMutation({
     mutationFn: () => api.post('/loop/collect/').then(r => r.data),
     onSuccess: (d: any) => {
-      if (d.collected > 0) toast.success(`+${d.collected.toLocaleString()} HEX collected`)
+      const res = Object.entries((d.resources_collected || {}) as Record<string, number>).sort((a, b) => b[1] - a[1])
+      const resTxt = res.length ? ` · ${res.slice(0, 3).map(([k, v]) => `+${Math.floor(v)} ${k}`).join(', ')}${res.length > 3 ? ` +${res.length - 3} more` : ''}` : ''
+      if (d.collected > 0) toast.success(`+${d.collected.toLocaleString()} HEX collected${resTxt}`, { duration: 4000 })
       else toast(d.message || 'Nothing to collect yet')
       if (d.lost > 0) toast.error(`${d.lost.toLocaleString()} HEX lost — your stock was full. Come back sooner!`, { duration: 5000 })
       syncBalance(d.balance); refresh()
@@ -122,6 +140,7 @@ export function HarvestButton() {
           : pending < 1
             ? `First HEX in ${nextHexMin} min · ${Math.round(h.rate_per_day).toLocaleString()}/day`
             : `Full in ${fmtIn(h.full_at)} · ${Math.round(h.rate_per_day).toLocaleString()}/day`}
+          {(h.resources?.length ?? 0) > 0 ? ` · +${h.resources!.length} resources` : ''}
           {(h.beginner_mult ?? 1) > 1 && h.beginner_until ? ` · x${h.beginner_mult} starter boost ${fmtIn(h.beginner_until)}` : ''}</span>
       </span>
     </button>

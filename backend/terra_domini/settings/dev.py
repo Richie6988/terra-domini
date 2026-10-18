@@ -204,8 +204,8 @@ GAME = {
     'BEGINNER_PROTECTION_DAYS': 7,
     'BATTLE_TIMER': {
         'HEX': 4 * 3600,
-        'DISTRICT': 12 * 3600,
-        'CITY': 24 * 3600,
+        'DISTRICT': 6 * 3600,              # 6h (urban hexes; was 12h — too slow for short sessions)
+        'CITY': 12 * 3600,                 # 12h
         'CAPITAL': 72 * 3600,
     },
     'MAX_ALLIANCE_SQUAD': 5,

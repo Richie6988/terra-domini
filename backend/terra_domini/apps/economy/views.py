@@ -883,14 +883,53 @@ def _open_booster_pack(item_code: str, player=None) -> dict:
     if g and not any(order.index(r) >= order.index(g) for r in rolls):
         rolls[-1] = g
     taken = set()
+    # Cards land where they help: commons/uncommons on free hexes touching the kingdom (kingdom bonus),
+    # rarer cards on the nearest free territory of that rarity (landmarks are real places, they can't move).
+    owned, frontier, home = set(), [], None
+    if player is not None:
+        from terra_domini.utils.h3_compat import k_ring
+        rows = list(Territory.objects.filter(owner=player).values_list('h3_index', 'center_lat', 'center_lon'))
+        owned = {h for h, _, _ in rows}
+        pts = [(la, lo) for _, la, lo in rows if la is not None and lo is not None]
+        if pts:
+            home = (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts))
+        ring = {n for h in owned for n in k_ring(h, 1)} - owned
+        busy = set(Territory.objects.filter(h3_index__in=list(ring), owner__isnull=False).values_list('h3_index', flat=True))
+        frontier = [h for h in ring if h not in busy]
+        random.shuffle(frontier)
+
+    def _nearest(qs):
+        if home is None:
+            return qs.filter(is_landmark=True).order_by('?').first() or qs.order_by('?').first()
+        lat, lon = home
+        for d in (0.5, 2, 8, 30, 180):
+            cand = list(qs.filter(center_lat__range=(lat - d, lat + d), center_lon__range=(lon - d * 1.5, lon + d * 1.5))[:200])
+            if cand:
+                cand.sort(key=lambda t: (t.center_lat - lat) ** 2 + (t.center_lon - lon) ** 2)
+                return random.choice(cand[:5])
+        return qs.order_by('?').first()
+
     for rarity in rolls:
-        # Only FREE territories (never someone else's); fall back to lower rarities if none left
         card = None
-        for r in order[:order.index(rarity) + 1][::-1]:
-            qs = Territory.objects.filter(rarity=r, owner__isnull=True).exclude(h3_index__in=taken)
-            card = (qs.filter(is_landmark=True).order_by('?').first() or qs.order_by('?').first())
-            if card:
-                break
+        if rarity in ('common', 'uncommon') and frontier:
+            hx = frontier.pop()
+            try:
+                import h3
+                from terra_domini.apps.territories.territory_engine import generate_territory
+                la, lo = h3.cell_to_latlng(hx)
+                generate_territory(hx, la, lo)
+                card = Territory.objects.filter(h3_index=hx, owner__isnull=True).first()
+                if card and card.rarity != rarity:
+                    card.rarity = rarity
+                    card.save(update_fields=['rarity'])
+            except Exception:
+                card = None
+        # Only FREE territories (never someone else's); fall back to lower rarities if none left
+        if not card:
+            for r in order[:order.index(rarity) + 1][::-1]:
+                card = _nearest(Territory.objects.filter(rarity=r, owner__isnull=True).exclude(h3_index__in=taken))
+                if card:
+                    break
         if not card:
             continue
         taken.add(card.h3_index)

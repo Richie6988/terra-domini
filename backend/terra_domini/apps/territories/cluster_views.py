@@ -169,7 +169,8 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
     @action(detail=False, methods=['GET'], url_path='income')
     def income(self, request):
         clusters = recompute_clusters(request.user)
-        total_tdc = sum(float(tdc_per_24h(len(c))) for c in clusters)
+        from terra_domini.apps.economy.balance import player_hex_per_day
+        total_tdc = player_hex_per_day(request.user)
         total_tdi = sum(float(tdi_per_24h(len(c))) for c in clusters)
         total_zones = sum(len(c) for c in clusters)
         return Response({
@@ -416,6 +417,12 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
             is_me = str(uid) == str(request.user.id) if request.user.is_authenticated else False
             max_rar_rank = max_rar_rank or 1
 
+            try:   # live production (economy/balance.py), not the stale per-hex tdc_per_day column
+                from terra_domini.apps.economy.balance import player_hex_per_day
+                from terra_domini.apps.accounts.models import Player as _P
+                daily_income = player_hex_per_day(_P.objects.get(id=uid))
+            except Exception:
+                pass
             result.append({
                 'rank':          i + 1,
                 'player_id':     str(uid),

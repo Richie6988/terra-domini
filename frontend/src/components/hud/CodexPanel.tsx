@@ -18,12 +18,16 @@ import { useStore } from '../../store'
 import { api } from '../../services/api'
 import toast from 'react-hot-toast'
 import { Search, ChevronLeft, Lock, Box } from 'lucide-react'
+import { CodexCards, type CardFamily } from './CodexCards'
 
 interface Props { onClose: () => void }
 
 // Category tabs matching prototype structure — using iconBank IDs, no emojis
 const CODEX_TABS = [
   { id: 'overview',  label: 'Overview',    iconId: 'chart_bar' },
+  { id: 'rare',      label: 'Rare cards',  iconId: 'gem' },
+  { id: 'biomes',    label: 'Biomes',      iconId: 'globe' },
+  { id: 'resources', label: 'Resources',   iconId: 'pickaxe' },
   { id: 'favorites', label: 'Favorites',   iconId: 'medal' },
 ]
 
@@ -208,13 +212,18 @@ export function CodexPanel({ onClose }: Props) {
         <input
           className="hx-input"
           value={filter} onChange={e => setFilter(e.target.value)}
-          placeholder="Filter categories..."
+          placeholder={tab === 'overview' || tab === 'favorites' ? "Filter categories..." : "Search cards..."}
           aria-label="Filter categories"
           style={{ paddingLeft: 36 }}
         />
       </div>
 
       <AnimatePresence mode="wait">
+        {(tab === 'rare' || tab === 'biomes' || tab === 'resources') && (
+          <motion.div key={tab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+            <CodexCards family={tab as CardFamily} filter={filter} />
+          </motion.div>
+        )}
         {/* ═══ OVERVIEW TAB — shows ALL 57 categories ═══ */}
         {tab === 'overview' && (
           <motion.div key="overview" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
