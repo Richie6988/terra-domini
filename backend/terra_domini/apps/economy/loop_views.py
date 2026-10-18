@@ -376,38 +376,87 @@ def _place_description(t, terr, region, rates, meta) -> str:
 
 
 def satellite_tile_url(lat, lon, z=15) -> str:
-    """Same-origin satellite tile (proxied, cached) centred on the hex — ~1 km wide at z15, the size of a hex."""
+    """Same-origin sharp satellite picture centred on the hex (see satellite_card)."""
+    import h3 as h3lib
+    return f'/api/tiles/satcard/{h3lib.latlng_to_cell(lat, lon, 8)}.jpg'
+
+
+def _esri_tile(z, x, y):
+    """One Esri World Imagery tile (bytes), cached on disk; None when unavailable."""
+    from terra_domini.apps.territories.landcover import CACHE
+    import urllib.request
+    f = CACHE / 'sat' / str(z) / str(x) / f'{y}.jpg'
+    if f.exists():
+        return f.read_bytes() or None
+    try:
+        req = urllib.request.Request(f'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                                     headers={'User-Agent': 'HEXOD/1.0 (https://hexod.paintit.click)'})
+        with urllib.request.urlopen(req, timeout=8) as r:
+            data = r.read()
+    except Exception:
+        return None
+    f.parent.mkdir(parents=True, exist_ok=True)
+    f.write_bytes(data)
+    return data
+
+
+@api_view(['GET'])
+@permission_classes([])
+def satellite_card(request, h3_index):
+    """GET /api/tiles/satcard/<h3>.jpg — 640×640 satellite picture of the hex, sharp: a 3×3 mosaic of zoom-16 tiles
+    cropped on the hex centre (one zoom-15 tile stretched on the card was blurry). Cached on disk."""
+    import io
     import math
-    n = 2 ** z
-    x = int((lon + 180) / 360 * n)
-    lr = math.radians(max(-85.05, min(85.05, lat)))
-    y = int((1 - math.log(math.tan(lr) + 1 / math.cos(lr)) / math.pi) / 2 * n)
-    return f'/api/tiles/sat/{z}/{x}/{y}.jpg'
+    import h3 as h3lib
+    from django.http import HttpResponse
+    from PIL import Image
+    from terra_domini.apps.territories.landcover import CACHE
+    try:
+        lat, lon = h3lib.cell_to_latlng(h3_index)
+    except Exception:
+        return HttpResponse(status=400)
+    out = CACHE / 'satcard' / f'{h3_index}.jpg'
+    if not out.exists():
+        z, n = 16, 2 ** 16
+        fx = (lon + 180) / 360 * n
+        lr = math.radians(max(-85.05, min(85.05, lat)))
+        fy = (1 - math.log(math.tan(lr) + 1 / math.cos(lr)) / math.pi) / 2 * n
+        cx, cy = int(fx), int(fy)
+        canvas = Image.new('RGB', (768, 768), (12, 30, 60))
+        got = 0
+        for dx in (-1, 0, 1):
+            for dy in (-1, 0, 1):
+                data = _esri_tile(z, (cx + dx) % n, cy + dy)
+                if data:
+                    try:
+                        canvas.paste(Image.open(io.BytesIO(data)).convert('RGB'), ((dx + 1) * 256, (dy + 1) * 256))
+                        got += 1
+                    except Exception:
+                        pass
+        if not got:
+            return HttpResponse(status=502)
+        px, py = 256 + (fx - cx) * 256, 256 + (fy - cy) * 256       # hex centre in the mosaic
+        half = 320
+        left, top = int(max(0, min(768 - 2 * half, px - half))), int(max(0, min(768 - 2 * half, py - half)))
+        out.parent.mkdir(parents=True, exist_ok=True)
+        canvas.crop((left, top, left + 2 * half, top + 2 * half)).save(out, 'JPEG', quality=86)
+    resp = HttpResponse(out.read_bytes(), content_type='image/jpeg')
+    resp['Cache-Control'] = 'public, max-age=2592000'
+    return resp
 
 
 @api_view(['GET'])
 @permission_classes([])
 def satellite_tile(request, z, x, y):
-    """GET /api/tiles/sat/<z>/<x>/<y>.jpg — Esri World Imagery tile, fetched server-side and cached on disk so the
-    token canvas (WebGL texture) can use it without cross-origin issues."""
+    """GET /api/tiles/sat/<z>/<x>/<y>.jpg — one Esri World Imagery tile, same-origin and cached (canvas-safe)."""
     from django.http import HttpResponse
-    from terra_domini.apps.territories.landcover import CACHE
-    import urllib.request
     z, x, y = int(z), int(x), int(y)
     if not (0 <= z <= 18 and 0 <= x < 2 ** z and 0 <= y < 2 ** z):
         return HttpResponse(status=400)
-    f = CACHE / 'sat' / str(z) / str(x) / f'{y}.jpg'
-    if not f.exists():
-        try:
-            req = urllib.request.Request(f'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-                                         headers={'User-Agent': 'HEXOD/1.0 (https://hexod.paintit.click)'})
-            with urllib.request.urlopen(req, timeout=8) as r:
-                data = r.read()
-        except Exception:
-            return HttpResponse(status=502)
-        f.parent.mkdir(parents=True, exist_ok=True)
-        f.write_bytes(data)
-    resp = HttpResponse(f.read_bytes(), content_type='image/jpeg')
+    data = _esri_tile(z, x, y)
+    if not data:
+        return HttpResponse(status=502)
+    resp = HttpResponse(data, content_type='image/jpeg')
     resp['Cache-Control'] = 'public, max-age=2592000'
     return resp
 

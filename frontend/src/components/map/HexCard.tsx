@@ -247,13 +247,6 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
 
           {/* Header: grade emblem + name + chips */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-            <div style={{ position: 'relative', width: 34, height: 34, flexShrink: 0 }}>
-              <svg width="34" height="34" viewBox="0 0 24 24" style={{ position: 'absolute', inset: 0, filter: `drop-shadow(0 0 6px ${cfg.c}88)` }}>
-                <path d="M12 1.5 21.1 6.75v10.5L12 22.5 2.9 17.25V6.75z" fill={`${cfg.c}26`} stroke={cfg.c} strokeWidth="1.2" />
-              </svg>
-              <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: cfg.grade.length > 1 ? 13 : 16, fontWeight: 900, color: cfg.accent }}>{cfg.grade}</div>
-            </div>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 16, fontWeight: 400, color: '#fff', letterSpacing: 0.5, textShadow: '0 2px 0 rgba(0,0,0,0.45)',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

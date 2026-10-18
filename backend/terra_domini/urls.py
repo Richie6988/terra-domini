@@ -83,7 +83,7 @@ from terra_domini.apps.events.poi_views import UnifiedPOIViewSet, map_pois
 from terra_domini.apps.territories.trade_views import ResourceTradeViewSet
 
 from terra_domini.apps.combat.views import BattleViewSet
-from terra_domini.apps.economy.loop_views import loop_status, loop_collect, codex_cards, territory_card, satellite_tile
+from terra_domini.apps.economy.loop_views import loop_status, loop_collect, codex_cards, territory_card, satellite_tile, satellite_card
 from terra_domini.apps.economy.payments import hex_packs, hex_checkout, hex_checkout_confirm
 from terra_domini.apps.economy.auction_views import auctions_list, auction_bid
 from terra_domini.apps.economy.lottery_views import lottery_status, lottery_play
@@ -158,6 +158,7 @@ urlpatterns = [
     path('api/shop/hex-checkout/confirm/',  hex_checkout_confirm, name='hex_checkout_confirm'),
     path('api/codex/territory/<str:h3_index>/', territory_card, name='territory_card'),
     path('api/tiles/sat/<int:z>/<int:x>/<int:y>.jpg', satellite_tile, name='satellite_tile'),
+    path('api/tiles/satcard/<str:h3_index>.jpg', satellite_card, name='satellite_card'),
     path('api/pickups/', pickups_in_view, name='pickups_in_view'),
     path('api/pickups/collect/', pickup_collect, name='pickup_collect'),
     path('api/lottery/', lottery_status, name='lottery_status'),
