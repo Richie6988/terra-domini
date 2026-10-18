@@ -312,7 +312,8 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
                 ? 'Next to your kingdom: best price.'
                 : 'Not touching your kingdom: costs more and explores slower. Pick a hex next to your land to save.')
               if (buy && !buy.available) lines.push(`You have ${bal.toLocaleString()} HEX: ${Math.ceil(buy.cost - bal).toLocaleString()} more needed. Collect your harvest or claim mission rewards.`)
-              if (exp) lines.push(`Explore is free but takes ${fmtHours(exp.hours)}. Come back after that and tap EXPLORE again to take the zone.`)
+              if (exp && exp.available) lines.push(`Explore is free but takes ${fmtHours(exp.hours)}. Come back after that and tap EXPLORE again to take the zone.`)
+              if (exp && !exp.available) lines.push(`You already have ${exp.running} exploration${exp.running > 1 ? 's' : ''} running (${exp.slots} at a time). Wait for it, or get an Extra Explorer in the Shop.`)
             }
             return (
               <div style={{ fontSize: 12, lineHeight: 1.45, color: '#dbe8ff', fontWeight: 600, fontFamily: 'var(--font-body)', textTransform: 'none', letterSpacing: 0,

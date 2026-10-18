@@ -490,7 +490,11 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         # Costs
         from terra_domini.apps.economy.balance import buy_cost as _buy_cost
         buy_cost = _buy_cost(owned_count, is_adjacent or is_first, (territory.rarity if territory else 'common'))
-        explore_hours = round(1.0 * (1.2 ** min(owned_count, 50)) * (1 if is_adjacent or is_first else 2), 1)
+        from terra_domini.apps.economy.balance import explore_slots, explore_speed_mult
+        from terra_domini.apps.territories.models import PendingClaim as _PC
+        explore_hours = round(1.0 * (1.2 ** min(owned_count, 50)) * (1 if is_adjacent or is_first else 2) * explore_speed_mult(request.user), 1)
+        slots = explore_slots(request.user)
+        running = _PC.objects.filter(player=request.user, method='explore', status='in_progress').count()
         player_obj = P.objects.get(id=request.user.id)
         balance = float(player_obj.tdc_in_game)
 
@@ -513,8 +517,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             })
             options.append({
                 'method': 'explore', 'label': f'EXPLORE ({explore_hours}h)',
-                'hours': explore_hours, 'available': True,
-                'is_adjacent': is_adjacent,
+                'hours': explore_hours, 'available': running < slots,
+                'is_adjacent': is_adjacent, 'slots': slots, 'running': running,
             })
 
         # Far away (or locked rare POI): it can always be unlocked straight away with real money
@@ -641,8 +645,9 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             track(request.user, 'spend_tdc', cost)
 
         elif method == 'explore':
+            from terra_domini.apps.economy.balance import explore_slots, explore_speed_mult
             base_hours = 1.0 * (1.2 ** min(owned_count, 50))
-            hours = base_hours if is_adjacent or is_first else base_hours * 2
+            hours = (base_hours if is_adjacent or is_first else base_hours * 2) * explore_speed_mult(request.user)
             
             # Check if already exploring this hex
             from terra_domini.apps.territories.models import PendingClaim
@@ -672,6 +677,12 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 # + a manual tap) used to claim the hex AND start a brand-new exploration of it.
                 if Territory.objects.filter(h3_index=h3_index, owner__isnull=False).exists():
                     return Response({'error': 'This territory was just claimed.'}, status=409)
+                slots = explore_slots(request.user)
+                running = PendingClaim.objects.filter(player=request.user, method='explore', status='in_progress').count()
+                if running >= slots:
+                    return Response({'error': f'{running} exploration{"s" if running > 1 else ""} already running ({slots} at a time). '
+                                              f'Finish it, or get an extra exploration slot in the Shop.',
+                                     'slots': slots, 'running': running, 'shop_item': 'explore_slot'}, status=409)
                 # Start new exploration
                 claim = PendingClaim.objects.create(
                     player=request.user,

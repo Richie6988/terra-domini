@@ -17,7 +17,8 @@ ITEMS = [
     {'code': 'atk_2x_army', 'name': '2X Army Power', 'category': 'attack', 'price_tdc': 300, 'description': 'Double army ATK for 24h', 'effect_type': 'atk_multiplier', 'effect_value': 2.0, 'duration': 86400},
     {'code': 'atk_blitz', 'name': 'Blitz Mode', 'category': 'attack', 'price_tdc': 150, 'description': 'Instant territory claims for 1h', 'effect_type': 'claim_instant', 'effect_value': 1.0, 'duration': 3600},
     {'code': 'atk_distant', 'name': 'Distant Strike', 'category': 'attack', 'price_tdc': 200, 'description': 'Attack non-adjacent territories for 12h', 'effect_type': 'distant_attack', 'effect_value': 1.0, 'duration': 43200},
-    {'code': 'atk_mint_speed', 'name': '2X Mint Speed', 'category': 'attack', 'price_tdc': 250, 'description': 'Exploration timers halved for 24h', 'effect_type': 'explore_speed', 'effect_value': 0.5, 'duration': 86400},
+    {'code': 'atk_mint_speed', 'name': '2X Explore Speed', 'category': 'attack', 'price_tdc': 250, 'description': 'New explorations take half the time for 24h', 'effect_type': 'explore_speed', 'effect_value': 0.5, 'duration': 86400},
+    {'code': 'explore_slot', 'name': 'Extra Explorer', 'category': 'attack', 'price_tdc': 300, 'description': '+1 exploration in parallel for 24h (max 3)', 'effect_type': 'explore_slots', 'effect_value': 1.0, 'duration': 86400},
 
     # Defense bonuses
     {'code': 'def_shield_72h', 'name': '72H Shield', 'category': 'defense', 'price_tdc': 400, 'description': 'Territory immune to attacks for 72h', 'effect_type': 'shield', 'effect_value': 1.0, 'duration': 259200},

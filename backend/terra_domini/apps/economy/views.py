@@ -743,7 +743,8 @@ class AdCampaignViewSet(viewsets.GenericViewSet):
 # ─── Item effect application ──────────────────────────────────────────────────
 
 # Effects the game really applies. Everything else in the catalog is shown as "coming soon" and cannot be bought.
-IMPLEMENTED_EFFECTS = {'booster_pack', 'shield', 'atk_multiplier', 'def_multiplier', 'border_color', 'hex_bonus'}
+IMPLEMENTED_EFFECTS = {'booster_pack', 'shield', 'atk_multiplier', 'def_multiplier', 'border_color', 'hex_bonus',
+                      'explore_slots', 'explore_speed'}
 
 
 def _apply_item_effect(player, item, quantity, territory_h3=None):
@@ -800,6 +801,16 @@ def _apply_item_effect(player, item, quantity, territory_h3=None):
         pct = min((item.effect_value - 1) * 100, _game('MAX_MILITARY_BOOST_PCT', 25))
         side = 'attack' if item.effect_type == 'atk_multiplier' else 'defense'
         return f'+{pct:g}% {side} in every battle for {round(duration.total_seconds() / 3600):g}h.'
+
+    elif item.effect_type in ('explore_slots', 'explore_speed'):
+        # Read by economy/balance.explore_slots / explore_speed_mult when an exploration starts
+        duration = timedelta(seconds=item.effect_duration_seconds * max(quantity, 1))
+        ActiveBoost.objects.create(player=player, item=item, boost_type=item.effect_type,
+                                   boost_value=item.effect_value, expires_at=timezone.now() + duration)
+        hours = round(duration.total_seconds() / 3600)
+        if item.effect_type == 'explore_slots':
+            return f'+{item.effect_value:g} exploration in parallel for {hours}h.'
+        return f'Exploration timers x{item.effect_value:g} for {hours}h (new explorations).'
 
     elif item.effect_type in ('production_multiplier',
                                'double_attack', 'stealth_once', 'build_speed', 'build_cost_reduction'):

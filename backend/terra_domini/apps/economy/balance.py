@@ -49,6 +49,28 @@ def train_seconds(unit_type: str, quantity: int) -> int:
     return TRAIN_SECONDS.get(unit_type, 300) * math.ceil(max(1, quantity) / TRAIN_PARALLEL)
 
 
+# ── Explorations in parallel (shop: 'explore_slots' +1 for 24h, 'explore_speed' halves timers) ──
+EXPLORE_SLOTS_BASE = 1
+EXPLORE_SLOTS_MAX = 3
+
+
+def _boost_values(player, boost_type):
+    from django.db.models import Q
+    from django.utils import timezone
+    from terra_domini.apps.economy.models import ActiveBoost
+    return list(ActiveBoost.objects.filter(player=player, boost_type=boost_type)
+                .filter(Q(expires_at__isnull=True) | Q(expires_at__gt=timezone.now())).values_list('boost_value', flat=True))
+
+
+def explore_slots(player) -> int:
+    return min(EXPLORE_SLOTS_MAX, EXPLORE_SLOTS_BASE + int(sum(_boost_values(player, 'explore_slots'))))
+
+
+def explore_speed_mult(player) -> float:
+    vals = _boost_values(player, 'explore_speed')
+    return max(0.25, min(vals)) if vals else 1.0
+
+
 # ── Crypto ───────────────────────────────────────────────────────────────────
 CONVERT_BURN_PCT = Decimal('0.05')   # 5% of HEX burned when converting to the token
 # Fixed peg (owner, 2026-10-18): 1 € = 1000 HEX = 1 HEX Coin (on-chain token). Bought in the shop directly;
