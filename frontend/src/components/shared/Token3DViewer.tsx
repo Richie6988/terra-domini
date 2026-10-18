@@ -120,7 +120,10 @@ export function Token3DViewer(props: Token3DProps) {
       }}
       style={{
         position: 'fixed', inset: 0, zIndex: 2000,
-        background: 'radial-gradient(ellipse at center, rgba(5,10,20,0.95), rgba(0,0,0,0.98))',
+        // Opaque studio backdrop: soft spotlight behind the token, deep vignette at the edges,
+        // and the game underneath blurred so the token is the only thing that reads.
+        background: 'radial-gradient(ellipse 60% 55% at 50% 46%, rgba(34,46,74,0.97) 0%, rgba(10,15,28,0.985) 55%, rgba(0,0,0,0.995) 100%)',
+        backdropFilter: 'blur(10px)', WebkitBackdropFilter: 'blur(10px)',
         display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
       }}
     >
@@ -153,6 +156,16 @@ export function Token3DViewer(props: Token3DProps) {
         ref={containerRef}
         style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, zIndex: 1 }}
       />
+
+      {!infoPanel && (
+        <div style={{
+          position: 'absolute', bottom: 22, left: 0, right: 0, textAlign: 'center', zIndex: 4,
+          pointerEvents: 'none', fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700,
+          color: 'rgba(255,255,255,0.45)', letterSpacing: 0.5,
+        }}>
+          Drag to rotate
+        </div>
+      )}
 
       {infoPanel && (
         <div style={{

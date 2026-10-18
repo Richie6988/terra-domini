@@ -321,12 +321,30 @@ export function drawTokenFront(
   if (anim.cardImg && anim.cardImg.complete && anim.cardImg.naturalWidth > 0) {
     ctx.drawImage(anim.cardImg, boxX, imageY, boxW, imageH)
   } else {
-    // Placeholder: catColor gradient
-    const pg = ctx.createLinearGradient(boxX, imageY, boxX + boxW, imageY + imageH)
-    pg.addColorStop(0, state.catColor + '40')
-    pg.addColorStop(1, '#0a0a0a')
+    // Placeholder art (no photo / photo failed): deep category-tinted plate,
+    // hex lattice and the category icon large in the centre — reads as intentional art.
+    ctx.shadowBlur = 0
+    ctx.beginPath(); ctx.rect(boxX, imageY, boxW, imageH); ctx.clip()
+    const pg = ctx.createRadialGradient(c, imageY + imageH * 0.45, 0, c, imageY + imageH * 0.45, boxW * 0.62)
+    pg.addColorStop(0, state.catColor)
+    pg.addColorStop(0.45, tier.carbon)
+    pg.addColorStop(1, '#030303')
     ctx.fillStyle = pg
     ctx.fillRect(boxX, imageY, boxW, imageH)
+    ctx.globalAlpha = 0.55
+    ctx.fillStyle = '#000'
+    ctx.fillRect(boxX, imageY, boxW, imageH)
+    ctx.globalAlpha = 0.16
+    ctx.strokeStyle = tier.metal
+    ctx.lineWidth = Math.max(1, s * 0.0012)
+    const hr = s * 0.03
+    for (let row = 0, y = imageY; y < imageY + imageH + hr; row++, y += hr * 1.5) {
+      for (let x = boxX + (row % 2 ? hr * 0.866 : 0); x < boxX + boxW + hr; x += hr * 1.732) {
+        drawHex(ctx, x, y, hr); ctx.stroke()
+      }
+    }
+    ctx.globalAlpha = 1
+    if (state.iconSvg) drawSVGIcon(ctx, c, imageY + imageH * 0.42, imageH * 0.5, state.iconSvg, state.catColor, tier.metal)
   }
   ctx.restore()
 

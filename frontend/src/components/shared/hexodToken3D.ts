@@ -1,15 +1,21 @@
 /**
  * hexodToken3D.ts
  *
- * 3D holographic token viewer — direct port of
- * read_only_templates/token_3Dviewer_admin_overlay.html.
+ * 3D collectible token viewer. Started as a port of
+ * read_only_templates/token_3Dviewer_admin_overlay.html, re-lit (2026-10) after owner
+ * feedback ("eclairage illisible, on ne voit pas l'objet precieux"):
+ *   - studio environment reflections (PMREM of a small dark softbox studio) so metal actually reads as metal
+ *   - key / rim / fill directional lights + slowly turning studio so light streaks glide over the metal
+ *   - ACES tone mapping at exposure ~1 and sRGB face textures (no more washed-out face)
+ *   - raised bevelled hex bezel in the tier metal (BRONZE/SILVER/GOLD/EMERALD/DIAMOND),
+ *     gem inlays + iridescence + sparkles on rare tiers
+ *   - halo behind the token and a light pool under it for a clear silhouette
+ *   - reveal (spin + overshoot + shockwave), idle sway/bob, drag-to-rotate with inertia, wheel zoom
+ *   - face texture drawn ONCE (re-drawn on font/image load), not every 4th frame
  *
- * Uses the shared drawTokenFront + helpers from hexodTokenFace.ts so
- * the 2D preview and 3D viewer share the exact same front-face rendering
- * code (single source of truth).
+ * Uses the shared drawTokenFront from hexodTokenFace.ts so 2D and 3D share the face rendering.
  */
 import * as THREE from 'three'
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import {
   TIERS, type TierKey, drawHex, drawTokenFront,
 } from './hexodTokenFace'
@@ -17,16 +23,29 @@ import {
 export { TIERS, type TierKey }
 
 // ═══════════════════════════════════════════════════════════════
-// CONFIG — from gold standard
+// CONFIG
 // ═══════════════════════════════════════════════════════════════
 const CONFIG = {
   textureSize: 2048,
+  textureSizeMobile: 1536,
   cardThickness: 0.14,
-  anisotropy: 16,
+  faceRadius: 1.5,
+  bezelOuter: 1.6,
+  bezelInner: 1.49,
   maxPixelRatio: 2.0,
-  rotationSpeed: 0.002,
-  zoomDamping: 0.08,
-  zoomSpeed: 0.6,
+  fov: 30,
+}
+
+/** Physically-based look per tier (rim metal, gloss, gems, sparkles). */
+const TIER_LOOK: Record<TierKey, {
+  rim: string; rimRough: number; rimMetal: number; rimIri: number; faceIri: number;
+  halo: string; gems: string | null; sparkles: number; envI: number
+}> = {
+  BRONZE:  { rim: '#c47a3c', rimRough: 0.30, rimMetal: 1,    rimIri: 0,    faceIri: 0,    halo: '#ff9a4a', gems: null,      sparkles: 0,  envI: 1.2 },
+  SILVER:  { rim: '#e3e8ee', rimRough: 0.2,  rimMetal: 0.92,  rimIri: 0,    faceIri: 0,    halo: '#b8d4ff', gems: null,      sparkles: 6,  envI: 1.3 },
+  GOLD:    { rim: '#ffc85a', rimRough: 0.14, rimMetal: 1,    rimIri: 0,    faceIri: 0,    halo: '#ffcf4a', gems: null,      sparkles: 14, envI: 1.4 },
+  EMERALD: { rim: '#ffd27a', rimRough: 0.12, rimMetal: 1,    rimIri: 0.35, faceIri: 0,    halo: '#3dff9a', gems: '#16c96b', sparkles: 22, envI: 1.5 },
+  DIAMOND: { rim: '#eef8ff', rimRough: 0.14, rimMetal: 0.72, rimIri: 1.0,  faceIri: 0.3,  halo: '#9be8ff', gems: '#e8fbff', sparkles: 36, envI: 2.2 },
 }
 
 export interface TokenViewerProps {
@@ -51,11 +70,87 @@ interface ViewerHandle {
   dispose: () => void
 }
 
+/** Pointy-top hexagon (matches drawHex in hexodTokenFace). */
+function hexPath(target: THREE.Shape | THREE.Path, r: number) {
+  for (let i = 0; i < 6; i++) {
+    const a = (i * Math.PI) / 3 + Math.PI / 2
+    const x = r * Math.cos(a), y = r * Math.sin(a)
+    if (i === 0) target.moveTo(x, y); else target.lineTo(x, y)
+  }
+  target.closePath()
+}
+
+/** Soft radial gradient sprite texture (white core, transparent edge). */
+function radialTexture(stops: Array<[number, string]>, size = 256): THREE.CanvasTexture {
+  const cv = document.createElement('canvas')
+  cv.width = cv.height = size
+  const x = cv.getContext('2d')!
+  const g = x.createRadialGradient(size / 2, size / 2, 0, size / 2, size / 2, size / 2)
+  stops.forEach(([o, c]) => g.addColorStop(o, c))
+  x.fillStyle = g
+  x.fillRect(0, 0, size, size)
+  const t = new THREE.CanvasTexture(cv)
+  t.colorSpace = THREE.SRGBColorSpace
+  return t
+}
+
+/** 4-point star glint texture for sparkles. */
+function starTexture(size = 128): THREE.CanvasTexture {
+  const cv = document.createElement('canvas')
+  cv.width = cv.height = size
+  const x = cv.getContext('2d')!
+  const c = size / 2
+  const core = x.createRadialGradient(c, c, 0, c, c, c * 0.35)
+  core.addColorStop(0, 'rgba(255,255,255,1)')
+  core.addColorStop(1, 'rgba(255,255,255,0)')
+  x.fillStyle = core
+  x.fillRect(0, 0, size, size)
+  x.globalCompositeOperation = 'lighter'
+  for (const [w, h] of [[size, size * 0.06], [size * 0.06, size]]) {
+    const g = x.createRadialGradient(c, c, 0, c, c, c)
+    g.addColorStop(0, 'rgba(255,255,255,0.95)')
+    g.addColorStop(1, 'rgba(255,255,255,0)')
+    x.fillStyle = g
+    x.fillRect(c - w / 2, c - h / 2, w, h)
+  }
+  const t = new THREE.CanvasTexture(cv)
+  t.colorSpace = THREE.SRGBColorSpace
+  return t
+}
+
+/**
+ * Tiny product-photo studio used only to bake reflections: dark room + bright softboxes,
+ * so polished metal shows crisp light streaks instead of flat grey.
+ */
+function buildStudio(): THREE.Scene {
+  const sc = new THREE.Scene()
+  const room = new THREE.Mesh(
+    new THREE.BoxGeometry(20, 20, 20),
+    new THREE.MeshBasicMaterial({ color: 0x0e1117, side: THREE.BackSide }),
+  )
+  sc.add(room)
+  const box = (w: number, h: number, color: THREE.Color, x: number, y: number, z: number) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ color, side: THREE.DoubleSide }))
+    m.position.set(x, y, z)
+    m.lookAt(0, 0, 0)
+    sc.add(m)
+  }
+  box(12, 4, new THREE.Color(6, 6, 6), 0, 8, 3)             // top softbox
+  box(2.2, 10, new THREE.Color(5, 4.4, 3.6), 8, 0, 4)       // warm right strip
+  box(2.2, 10, new THREE.Color(3.2, 4.2, 6), -8, 1, 3)      // cool left strip
+  box(6, 2, new THREE.Color(1.4, 1.4, 1.5), 0, -5, 8)       // low front fill
+  box(4, 4, new THREE.Color(1.3, 1.3, 1.4), 4, 3, 9)        // key reflector
+  box(8, 4, new THREE.Color(1.2, 1.5, 2.2), 0, 2, -9)       // back rim
+  return sc
+}
+
+const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
+const easeOutBack = (t: number) => { const k = 1.6; return 1 + (k + 1) * Math.pow(t - 1, 3) + k * Math.pow(t - 1, 2) }
+
 // ═══════════════════════════════════════════════════════════════
 // MAIN FUNCTION
 // ═══════════════════════════════════════════════════════════════
 export function createTokenViewer(container: HTMLElement, initial: TokenViewerProps = {}): ViewerHandle {
-  // State holders for parameters (mutable via update)
   const state = {
     tier: TIERS[initial.tier || 'BRONZE'],
     category: initial.category || 'TERRITORY',
@@ -72,41 +167,58 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     iconSvg: initial.iconSvg || '',
     imageSrc: initial.imageSrc || '',
   }
+  const tierKey = (): TierKey =>
+    (Object.keys(TIERS) as TierKey[]).find(k => TIERS[k] === state.tier) || 'BRONZE'
 
-  // ─── THREE.js setup ──────────────────────────────────────
+  const reducedMotion = typeof window.matchMedia === 'function'
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches
+
+  // ─── Renderer / scene / camera ───────────────────────────
+  const W = () => Math.max(1, container.clientWidth)
+  const H = () => Math.max(1, container.clientHeight)
   const scene = new THREE.Scene()
-  const camera = new THREE.PerspectiveCamera(28, container.clientWidth / container.clientHeight, 0.1, 100)
-  camera.position.set(0, 0, 9)
+  const camera = new THREE.PerspectiveCamera(CONFIG.fov, W() / H(), 0.1, 100)
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true, powerPreference: 'high-performance' })
-  renderer.setSize(container.clientWidth, container.clientHeight)
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, CONFIG.maxPixelRatio))
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, CONFIG.maxPixelRatio))
+  renderer.setSize(W(), H())
   renderer.toneMapping = THREE.ACESFilmicToneMapping
-  renderer.toneMappingExposure = 2.2
+  renderer.toneMappingExposure = 1.05
   renderer.outputColorSpace = THREE.SRGBColorSpace
+  renderer.setClearColor(0x000000, 0)
   container.appendChild(renderer.domElement)
-  renderer.domElement.style.cursor = 'grab'
+  const canvasEl = renderer.domElement
+  canvasEl.style.cursor = 'grab'
+  canvasEl.style.touchAction = 'none'
+  canvasEl.style.display = 'block'
 
-  // Lights — bright front illumination
-  scene.add(new THREE.AmbientLight(0xffffff, 3.0))
-  const keyLight = new THREE.PointLight(0xffffff, 4.0, 25)
-  keyLight.position.set(3, 3, 6); scene.add(keyLight)
-  const frontLight = new THREE.PointLight(0xffffff, 3.0, 20)
-  frontLight.position.set(0, 0, 8); scene.add(frontLight)
-  const rim = new THREE.PointLight(0xffffff, 2.5, 18)
-  rim.position.set(-5, -5, 4); scene.add(rim)
-  const fillLight = new THREE.PointLight(0x8888ff, 1.5, 15)
-  fillLight.position.set(-4, 2, 3); scene.add(fillLight)
-  const topLight = new THREE.PointLight(0xffffff, 1.5, 12)
-  topLight.position.set(0, 6, 4); scene.add(topLight)
+  // Studio reflections — this is what makes the metal read as metal.
+  const pmrem = new THREE.PMREMGenerator(renderer)
+  const room = buildStudio()
+  const envTex = pmrem.fromScene(room, 0.02).texture
+  scene.environment = envTex
+  room.traverse(o => {
+    const m = o as THREE.Mesh
+    if (m.geometry) m.geometry.dispose()
+    if (m.material) (Array.isArray(m.material) ? m.material : [m.material]).forEach(mm => mm.dispose())
+  })
 
-  // Image
+  // Lights: warm key, cool + warm rims from behind, soft fill, low hemisphere ambient.
+  scene.add(new THREE.HemisphereLight(0xdfe8ff, 0x1a1208, 0.35))
+  const key = new THREE.DirectionalLight(0xfff0dc, 2.4)
+  key.position.set(3.5, 4, 6); scene.add(key)
+  const rimL = new THREE.DirectionalLight(0x9cc8ff, 3.0)
+  rimL.position.set(-5, 3, -4); scene.add(rimL)
+  const rimR = new THREE.DirectionalLight(0xffd7a8, 2.0)
+  rimR.position.set(5, -2, -3); scene.add(rimR)
+  const fill = new THREE.DirectionalLight(0xffffff, 0.6)
+  fill.position.set(-4, -1, 5); scene.add(fill)
+
+  // ─── Face / back canvases ────────────────────────────────
   const cardImg = new Image()
   cardImg.crossOrigin = 'anonymous'
-  if (state.imageSrc) cardImg.src = state.imageSrc
 
-  // Canvases
-  const s = CONFIG.textureSize
+  const s = Math.min(window.innerWidth, window.innerHeight) < 700 ? CONFIG.textureSizeMobile : CONFIG.textureSize
   const c = s / 2
   const frontCanvas = document.createElement('canvas')
   frontCanvas.width = s; frontCanvas.height = s
@@ -115,64 +227,147 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
   const fCtx = frontCanvas.getContext('2d')!
   const bCtx = backCanvas.getContext('2d')!
 
-  // Textures
+  const maxAniso = renderer.capabilities.getMaxAnisotropy()
   const fTex = new THREE.CanvasTexture(frontCanvas)
-  fTex.rotation = Math.PI / 2; fTex.center.set(0.5, 0.5); fTex.anisotropy = CONFIG.anisotropy
+  fTex.rotation = Math.PI / 2; fTex.center.set(0.5, 0.5); fTex.anisotropy = maxAniso
+  fTex.colorSpace = THREE.SRGBColorSpace
   const bTex = new THREE.CanvasTexture(backCanvas)
-  bTex.rotation = -Math.PI / 2; bTex.center.set(0.5, 0.5); bTex.repeat.set(-1, -1); bTex.anisotropy = CONFIG.anisotropy
+  bTex.rotation = -Math.PI / 2; bTex.center.set(0.5, 0.5); bTex.repeat.set(-1, -1); bTex.anisotropy = maxAniso
+  bTex.colorSpace = THREE.SRGBColorSpace
 
-  // Materials — BRIGHT front face, metallic edges
+  // ─── Materials ───────────────────────────────────────────
+  // Glossy printed face: dielectric + clearcoat, with a little emissive so it is always legible.
   const fMat = new THREE.MeshPhysicalMaterial({
-    map: fTex, roughness: 0.15, metalness: 0.35,
-    clearcoat: 0.8, clearcoatRoughness: 0.05, reflectivity: 0.8,
-    emissive: 0x222222, emissiveIntensity: 0.3,
+    map: fTex, emissiveMap: fTex, emissive: 0xffffff, emissiveIntensity: 0.42,
+    roughness: 0.55, metalness: 0.0, specularIntensity: 0.3,
+    clearcoat: 0.45, clearcoatRoughness: 0.14,
+    envMapIntensity: 0.22,
   })
   const bMat = new THREE.MeshPhysicalMaterial({
-    map: bTex, clearcoat: 1, roughness: 0.01, metalness: 0.9,
-    emissive: new THREE.Color(state.tier.metal), emissiveIntensity: 0.08,
-    clearcoatRoughness: 0.01, reflectivity: 1.0,
+    map: bTex, emissiveMap: bTex, emissive: 0xffffff, emissiveIntensity: 0.3,
+    roughness: 0.3, metalness: 0.35,
+    clearcoat: 1.0, clearcoatRoughness: 0.04,
+    envMapIntensity: 0.9,
   })
-  const sMat = new THREE.MeshPhysicalMaterial({
-    metalness: 1.0, roughness: 0.0,
-    emissive: new THREE.Color(state.tier.metal), emissiveIntensity: 0.25,
-    clearcoat: 1.0, clearcoatRoughness: 0.0, reflectivity: 1.0,
+  // Edge groove between the two bezel lips (darker engraved metal).
+  const sMat = new THREE.MeshPhysicalMaterial({ metalness: 1.0, roughness: 0.35 })
+  // Raised bezel in tier metal.
+  const rimMat = new THREE.MeshPhysicalMaterial({
+    metalness: 1.0, roughness: 0.2, clearcoat: 0.6, clearcoatRoughness: 0.08,
+    iridescenceIOR: 1.5, iridescenceThicknessRange: [180, 620],
+  })
+  const gemMat = new THREE.MeshPhysicalMaterial({
+    metalness: 0.0, roughness: 0.02, ior: 2.4, flatShading: true,
+    clearcoat: 1, clearcoatRoughness: 0, envMapIntensity: 3.0,
+    iridescence: 0.6, iridescenceIOR: 1.8, specularIntensity: 1,
   })
 
-  const geo = new THREE.CylinderGeometry(1.5, 1.5, CONFIG.cardThickness, 6)
-  geo.rotateX(Math.PI / 2)
+  // ─── Geometry ────────────────────────────────────────────
   const card = new THREE.Group()
-  const cardMesh = new THREE.Mesh(geo, [sMat, fMat, bMat])
-  card.add(cardMesh)
-  scene.add(card)
+  const pivot = new THREE.Group() // bob + entry scale live here; card gets rotation
+  pivot.add(card)
+  scene.add(pivot)
 
-  let entryProgress = 0
-  card.rotation.y = -Math.PI
-  card.scale.set(0, 0, 0)
+  const geo = new THREE.CylinderGeometry(CONFIG.faceRadius, CONFIG.faceRadius, CONFIG.cardThickness, 6)
+  geo.rotateX(Math.PI / 2)
+  card.add(new THREE.Mesh(geo, [sMat, fMat, bMat]))
 
-  // Controls
-  const controls = new OrbitControls(camera, renderer.domElement)
-  controls.enableDamping = true
-  controls.dampingFactor = CONFIG.zoomDamping
-  controls.zoomSpeed = CONFIG.zoomSpeed
-  controls.minDistance = 4
-  controls.maxDistance = 15
-  controls.enablePan = false
-  controls.rotateSpeed = 0.5
+  const lip = 0.05
+  const bezelDepth = CONFIG.cardThickness + lip * 2
+  const bezelShape = new THREE.Shape(); hexPath(bezelShape, CONFIG.bezelOuter)
+  const bezelHole = new THREE.Path(); hexPath(bezelHole, CONFIG.bezelInner)
+  bezelShape.holes.push(bezelHole)
+  const bezelGeo = new THREE.ExtrudeGeometry(bezelShape, {
+    depth: bezelDepth, bevelEnabled: true, bevelThickness: 0.035, bevelSize: 0.03, bevelSegments: 5, curveSegments: 1,
+  })
+  bezelGeo.translate(0, 0, -bezelDepth / 2)
+  bezelGeo.computeVertexNormals()
+  card.add(new THREE.Mesh(bezelGeo, rimMat))
 
-  // Animation state
-  let shineOffset = -2000
-  let holoAngle = 0
-  let frameCount = 0
+  // Gem inlays at the six bezel corners (EMERALD / DIAMOND)
+  const gemGeo = new THREE.OctahedronGeometry(0.075, 0)
+  gemGeo.scale(1, 1, 0.6)
+  const gems = new THREE.Group()
+  for (const side of [1, -1]) {
+    for (let i = 0; i < 6; i++) {
+      const a = (i * Math.PI) / 3 + Math.PI / 2
+      const r = (CONFIG.bezelOuter + CONFIG.bezelInner) / 2
+      const m = new THREE.Mesh(gemGeo, gemMat)
+      m.position.set(r * Math.cos(a), r * Math.sin(a), side * (bezelDepth / 2 + 0.03))
+      m.rotation.z = a
+      gems.add(m)
+    }
+  }
+  card.add(gems)
+
+  // Halo behind + light pool under the token (do not rotate with it)
+  const haloTex = radialTexture([[0, 'rgba(255,255,255,0.9)'], [0.42, 'rgba(255,255,255,0.5)'], [0.7, 'rgba(255,255,255,0.14)'], [1, 'rgba(255,255,255,0)']])
+  const haloMat = new THREE.SpriteMaterial({ map: haloTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 })
+  const halo = new THREE.Sprite(haloMat)
+  halo.scale.set(7.2, 7.2, 1)
+  halo.position.set(0, 0, -1.6)
+  scene.add(halo)
+
+  const poolMat = new THREE.MeshBasicMaterial({ map: haloTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 })
+  const pool = new THREE.Mesh(new THREE.PlaneGeometry(4.2, 4.2), poolMat)
+  pool.rotation.x = -Math.PI / 2
+  pool.scale.set(1, 0.5, 1)
+  pool.position.set(0, -2.15, 0)
+  scene.add(pool)
+
+  // Reveal shockwave ring
+  const ringTex = radialTexture([[0, 'rgba(255,255,255,0)'], [0.72, 'rgba(255,255,255,0)'], [0.86, 'rgba(255,255,255,0.9)'], [1, 'rgba(255,255,255,0)']])
+  const ringMat = new THREE.SpriteMaterial({ map: ringTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 })
+  const ring = new THREE.Sprite(ringMat)
+  ring.position.set(0, 0, -0.3)
+  scene.add(ring)
+
+  // Sparkles (count by tier)
+  const starTex = starTexture()
+  const sparkles: Array<{ sp: THREE.Sprite; phase: number; speed: number; size: number }> = []
+  const sparkleGroup = new THREE.Group()
+  scene.add(sparkleGroup)
+  function buildSparkles(n: number) {
+    sparkles.splice(0).forEach(o => { sparkleGroup.remove(o.sp); o.sp.material.dispose() })
+    for (let i = 0; i < n; i++) {
+      const m = new THREE.SpriteMaterial({ map: starTex, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, opacity: 0 })
+      const sp = new THREE.Sprite(m)
+      const a = Math.random() * Math.PI * 2
+      const r = 1.55 + Math.random() * 0.75
+      sp.position.set(Math.cos(a) * r, Math.sin(a) * r, (Math.random() - 0.3) * 1.2)
+      sparkleGroup.add(sp)
+      sparkles.push({ sp, phase: Math.random() * Math.PI * 2, speed: 0.6 + Math.random() * 1.4, size: 0.12 + Math.random() * 0.22 })
+    }
+  }
+
+  function applyTierLook() {
+    const L = TIER_LOOK[tierKey()]
+    rimMat.color.set(L.rim)
+    rimMat.roughness = L.rimRough
+    rimMat.metalness = L.rimMetal
+    rimMat.iridescence = L.rimIri
+    rimMat.envMapIntensity = L.envI
+    sMat.color.set(L.rim).multiplyScalar(0.55)
+    fMat.iridescence = L.faceIri
+    fMat.iridescenceIOR = 1.45
+    fMat.iridescenceThicknessRange = [200, 700]
+    gems.visible = !!L.gems
+    if (L.gems) gemMat.color.set(L.gems)
+    haloMat.color.set(L.halo)
+    poolMat.color.set(L.halo)
+    ringMat.color.set(L.halo)
+    buildSparkles(reducedMotion ? 0 : L.sparkles)
+    sparkles.forEach(o => o.sp.material.color.set(L.halo).lerp(new THREE.Color('#ffffff'), 0.6))
+    rimMat.needsUpdate = true
+    fMat.needsUpdate = true
+  }
 
   // ═══════════════════════════════════════════════════════════
-  // drawFront — port of gold standard
-  // ═══════════════════════════════════════════════════════════
-  // ═══════════════════════════════════════════════════════════
-  // drawFront — delegates to shared drawTokenFront from hexodTokenFace
+  // drawFront — shared drawTokenFront (static: drawn once, re-drawn on data/font/image change)
   // ═══════════════════════════════════════════════════════════
   function drawFront() {
     drawTokenFront(fCtx, s, {
-      tier: (Object.keys(TIERS) as Array<keyof typeof TIERS>).find(k => TIERS[k] === state.tier) || 'BRONZE',
+      tier: tierKey(),
       category: state.category,
       catId: state.catId,
       catColor: state.catColor,
@@ -186,8 +381,8 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
       date: state.date,
       iconSvg: state.iconSvg,
     }, {
-      shineOffset,
-      holoAngle,
+      shineOffset: s * 0.15,
+      holoAngle: Math.PI * 0.33,
       cardImg,
     }, { enableFilmGrain: true })
     fTex.needsUpdate = true
@@ -368,59 +563,164 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     bTex.needsUpdate = true
   }
 
-  // Initial draws
+  // ─── Initial draws ───────────────────────────────────────
+  let disposed = false
+  applyTierLook()
   drawFront()
   drawBack()
-  if (!cardImg.complete && state.imageSrc) {
-    cardImg.onload = () => drawFront()
+  cardImg.onload = () => { if (!disposed) drawFront() }
+  if (state.imageSrc) cardImg.src = state.imageSrc
+  // Canvas text needs the (bundled) font loaded, otherwise it falls back to a system font.
+  try {
+    const fonts = (document as Document & { fonts?: FontFaceSet }).fonts
+    if (fonts) {
+      Promise.all([fonts.load(`900 ${Math.round(s * 0.047)}px Orbitron`), fonts.ready])
+        .then(() => { if (!disposed) { drawFront(); drawBack() } })
+        .catch(() => {})
+    }
+  } catch { /* ignore */ }
+
+  // ─── Framing: fit the token in both portrait and landscape ─
+  let zoom = 1
+  function frame() {
+    const aspect = W() / H()
+    camera.aspect = aspect
+    const t = Math.tan(THREE.MathUtils.degToRad(CONFIG.fov / 2))
+    const needH = 2.2    // half-height incl. light pool + bob
+    const needW = aspect < 1 ? 1.62 : 1.9  // half-width (flat sides ~1.39) + sway margin
+    const dist = Math.max(needH / t, needW / (t * aspect))
+    camera.position.set(0, 0.05, dist * zoom)
+    camera.lookAt(0, -0.1, 0)
+    camera.updateProjectionMatrix()
+    renderer.setSize(W(), H())
   }
+  frame()
+
+  // ─── Interaction: drag rotates the object (lights stay fixed, so reflections sweep) ─
+  let dragging = false
+  let lastX = 0, lastY = 0
+  let userY = 0, userX = 0     // user offsets (radians)
+  let velY = 0, velX = 0
+  let lastInteract = -10
+  const now = () => performance.now() / 1000
+
+  const onDown = (e: PointerEvent) => {
+    dragging = true
+    lastX = e.clientX; lastY = e.clientY
+    velY = velX = 0
+    lastInteract = now()
+    canvasEl.style.cursor = 'grabbing'
+    try { canvasEl.setPointerCapture(e.pointerId) } catch { /* ignore */ }
+  }
+  const onMove = (e: PointerEvent) => {
+    if (!dragging) return
+    const dx = e.clientX - lastX, dy = e.clientY - lastY
+    lastX = e.clientX; lastY = e.clientY
+    const k = 0.0105
+    userY += dx * k; userX += dy * k
+    userX = THREE.MathUtils.clamp(userX, -0.9, 0.9)
+    velY = dx * k; velX = dy * k
+    lastInteract = now()
+  }
+  const onUp = (e: PointerEvent) => {
+    dragging = false
+    canvasEl.style.cursor = 'grab'
+    lastInteract = now()
+    try { canvasEl.releasePointerCapture(e.pointerId) } catch { /* ignore */ }
+  }
+  const onWheel = (e: WheelEvent) => {
+    e.preventDefault()
+    zoom = THREE.MathUtils.clamp(zoom * (1 + Math.sign(e.deltaY) * 0.08), 0.72, 1.45)
+    frame()
+  }
+  canvasEl.addEventListener('pointerdown', onDown)
+  canvasEl.addEventListener('pointermove', onMove)
+  canvasEl.addEventListener('pointerup', onUp)
+  canvasEl.addEventListener('pointercancel', onUp)
+  canvasEl.addEventListener('wheel', onWheel, { passive: false })
 
   // ═══════════════════════════════════════════════════════════
-  // Animation loop — from gold standard
+  // Animation loop (time-based)
   // ═══════════════════════════════════════════════════════════
+  const ENTRY = reducedMotion ? 0.35 : 1.6
+  const t0 = now()
+  let prev = t0
   let animId = 0
+  pivot.scale.setScalar(0.001)
+
   function animate() {
     animId = requestAnimationFrame(animate)
+    const tn = now()
+    const dt = Math.min(0.05, tn - prev)
+    prev = tn
+    const t = tn - t0
 
-    if (entryProgress < 1) {
-      entryProgress += 0.008
-      const ease = 1 - Math.pow(1 - entryProgress, 3)
-      card.scale.set(ease, ease, ease)
-      card.rotation.y = -Math.PI + ease * Math.PI
-    } else {
-      card.rotation.y += CONFIG.rotationSpeed
+    // Reveal: spin in with a slight overshoot, shockwave ring, halo fades in
+    const e = Math.min(1, t / ENTRY)
+    const sc = reducedMotion ? e : easeOutBack(e)
+    pivot.scale.setScalar(Math.max(0.001, sc))
+    const entrySpin = reducedMotion ? 0 : (1 - easeOutCubic(e)) * -Math.PI * 2.0
+
+    const r = Math.max(0, (t - ENTRY * 0.55) / 0.9)
+    if (r > 0 && r < 1) {
+      ring.scale.setScalar(2.6 + r * 5.5)
+      ringMat.opacity = (1 - r) * 0.7
+    } else ringMat.opacity = 0
+
+    const haloIn = Math.min(1, t / (ENTRY * 0.9))
+    haloMat.opacity = haloIn * (0.42 + Math.sin(t * 1.3) * 0.05)
+    poolMat.opacity = haloIn * 0.42
+
+    // Inertia + ease back to front after a pause
+    if (!dragging) {
+      userY += velY; userX += velX
+      velY *= 0.92; velX *= 0.92
+      if (tn - lastInteract > 3.5) {
+        const targetY = Math.round(userY / (Math.PI * 2)) * Math.PI * 2
+        userY += (targetY - userY) * Math.min(1, dt * 1.6)
+        userX += (0 - userX) * Math.min(1, dt * 1.6)
+      }
     }
 
-    // Shimmer update every 4th frame
-    frameCount++
-    if (frameCount % 4 === 0) {
-      shineOffset += 25
-      if (shineOffset > 3500) shineOffset = -1500
-      holoAngle += 0.03
-      drawFront()
-    }
+    // Idle presentation: gentle sway + tilt + bob (face stays readable)
+    const amp = reducedMotion ? 0 : 1
+    const swayY = Math.sin(t * 0.55) * 0.42 * amp
+    const swayX = (Math.sin(t * 0.41) * 0.1 - 0.06) * amp
+    card.rotation.y = entrySpin + swayY + userY
+    card.rotation.x = swayX + userX
+    card.rotation.z = Math.sin(t * 0.33) * 0.025 * amp
+    pivot.position.y = Math.sin(t * 1.1) * 0.06 * amp
+    halo.position.y = pivot.position.y
 
-    controls.update()
+    // Slowly turn the studio so light streaks glide across the metal and the glossy face
+    scene.environmentRotation.y = Math.sin(t * 0.35) * 0.45 * amp
+    scene.environmentRotation.x = Math.sin(t * 0.23) * 0.1 * amp
+
+    // Sparkles twinkle
+    for (const o of sparkles) {
+      const v = Math.max(0, Math.sin(t * o.speed * 2 + o.phase))
+      const tw = Math.pow(v, 6) * haloIn
+      o.sp.material.opacity = tw
+      o.sp.scale.setScalar(o.size * (0.4 + tw))
+    }
+    sparkleGroup.rotation.z = t * 0.05
+    sparkleGroup.position.y = pivot.position.y
+
     renderer.render(scene, camera)
   }
   animate()
 
   // Resize
-  const onResize = () => {
-    camera.aspect = container.clientWidth / container.clientHeight
-    camera.updateProjectionMatrix()
-    renderer.setSize(container.clientWidth, container.clientHeight)
-  }
+  const onResize = () => frame()
   window.addEventListener('resize', onResize)
+  let ro: ResizeObserver | null = null
+  if (typeof ResizeObserver !== 'undefined') { ro = new ResizeObserver(onResize); ro.observe(container) }
 
   // ─── Public API ──────────────────────────────────────────
   return {
     update(p: Partial<TokenViewerProps>) {
-      if (p.tier !== undefined) {
-        state.tier = TIERS[p.tier]
-        bMat.emissive = new THREE.Color(state.tier.metal)
-        sMat.emissive = new THREE.Color(state.tier.metal)
-      }
+      let tierChanged = false
+      if (p.tier !== undefined && TIERS[p.tier] !== state.tier) { state.tier = TIERS[p.tier]; tierChanged = true }
       if (p.category !== undefined) state.category = p.category
       if (p.catId !== undefined) state.catId = p.catId
       if (p.catColor !== undefined) state.catColor = p.catColor
@@ -433,25 +733,32 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
       if (p.owner !== undefined) state.owner = p.owner
       if (p.date !== undefined) state.date = p.date
       if (p.iconSvg !== undefined) state.iconSvg = p.iconSvg
-      if (p.imageSrc !== undefined && p.imageSrc !== cardImg.src) {
+      if (p.imageSrc !== undefined && p.imageSrc && p.imageSrc !== state.imageSrc) {
         state.imageSrc = p.imageSrc
         cardImg.src = p.imageSrc
       }
+      if (tierChanged) applyTierLook()
       drawFront()
       drawBack()
     },
     dispose() {
+      disposed = true
       cancelAnimationFrame(animId)
       window.removeEventListener('resize', onResize)
-      controls.dispose()
+      ro?.disconnect()
+      canvasEl.removeEventListener('pointerdown', onDown)
+      canvasEl.removeEventListener('pointermove', onMove)
+      canvasEl.removeEventListener('pointerup', onUp)
+      canvasEl.removeEventListener('pointercancel', onUp)
+      canvasEl.removeEventListener('wheel', onWheel)
+      cardImg.onload = null
+      sparkles.splice(0).forEach(o => o.sp.material.dispose())
+      ;[geo, bezelGeo, gemGeo, pool.geometry].forEach(g => g.dispose())
+      ;[fMat, bMat, sMat, rimMat, gemMat, haloMat, poolMat, ringMat].forEach(m => m.dispose())
+      ;[fTex, bTex, haloTex, ringTex, starTex, envTex].forEach(tx => tx.dispose())
+      pmrem.dispose()
       renderer.dispose()
-      geo.dispose()
-      fMat.dispose()
-      bMat.dispose()
-      sMat.dispose()
-      fTex.dispose()
-      bTex.dispose()
-      if (container.contains(renderer.domElement)) container.removeChild(renderer.domElement)
+      if (container.contains(canvasEl)) container.removeChild(canvasEl)
     },
   }
 }
