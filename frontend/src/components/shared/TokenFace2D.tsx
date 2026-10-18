@@ -38,6 +38,13 @@ export interface TokenFace2DProps {
   onClick?: () => void
   style?: React.CSSProperties
   clipToHex?: boolean       // default true — clip to hexagon shape
+  // Face data (same as the 3D token)
+  rarity?: string
+  hexPerDay?: number
+  region?: string
+  country?: string
+  terrain?: string
+  tokenNo?: string
 }
 
 export function TokenFace2D({
@@ -59,6 +66,7 @@ export function TokenFace2D({
   onClick,
   style,
   clipToHex = true,
+  rarity, hexPerDay, region, country, terrain, tokenNo,
 }: TokenFace2DProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -88,10 +96,12 @@ export function TokenFace2D({
       iconSvg,
       imageSrc: imageSrc || '',   // no random stock photo: the face draws a designed plate until the real picture exists
       clipToHex,
+      rarity, hexPerDay, region, country, terrain, tokenNo,
     })
 
     return cleanup
-  }, [tier, category, catId, catColor, biome, tokenName, description, edition, serial, maxSupply, owner, date, iconId, imageSrc, size, clipToHex])
+  }, [tier, category, catId, catColor, biome, tokenName, description, edition, serial, maxSupply, owner, date, iconId, imageSrc, size, clipToHex,
+      rarity, hexPerDay, region, country, terrain, tokenNo])
 
   return (
     <canvas

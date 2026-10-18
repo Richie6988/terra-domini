@@ -15,7 +15,7 @@ import { api } from '../../services/api'
 import { iconFor } from './poiIcons'
 
 // Game rarity → metal of the token (rare is no longer bronze like a common)
-const RARITY_TIER: Record<string, TierKey> = {
+export const RARITY_TIER: Record<string, TierKey> = {
   common: 'BRONZE', uncommon: 'BRONZE', rare: 'SILVER', epic: 'GOLD', legendary: 'EMERALD', mythic: 'DIAMOND',
 }
 const label = (v?: string, d = '') => (v || d).replace(/_/g, ' ').toUpperCase()
@@ -43,6 +43,8 @@ export interface Token3DProps {
   h3Index?: string
   /** Game rarity ('common'…'mythic'): picks the metal tier when `tier` is not given */
   rarityKey?: string
+  /** Face data when there is no territory to fetch (album pieces: creatures, biomes, events…) */
+  face?: { country?: string; terrain?: string; tokenNo?: string; hexPerDay?: number; region?: string }
   /** @deprecated — kept for back-compat, unused */
   power?: number
   /** @deprecated — kept for back-compat, unused */
@@ -57,7 +59,7 @@ export function Token3DViewer(props: Token3DProps) {
     tokenName, category, catColor, iconId,
     tier, serial, maxSupply, edition, biome,
     description, imageSrc, owner, date,
-    infoPanel, h3Index, rarityKey,
+    infoPanel, h3Index, rarityKey, face,
   } = props
   const tierKey: TierKey = tier || RARITY_TIER[rarityKey || ''] || 'BRONZE'
 
@@ -91,6 +93,7 @@ export function Token3DViewer(props: Token3DProps) {
       date: date || '',
       iconSvg,
       imageSrc: imageSrc || '',   // no random stock photo: the face draws a designed plate until the real picture exists
+      ...(face || {}),
     }
     viewerRef.current = createTokenViewer(containerRef.current, initialProps)
     setMounted(true)

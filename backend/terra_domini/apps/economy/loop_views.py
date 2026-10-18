@@ -271,6 +271,7 @@ def codex_cards(request):
             'game_category': p.get('game_category'), 'h3_index': p.get('h3_r8'), 'lat': p.get('lat'), 'lon': p.get('lon'),
             'country_code': p.get('country_code') or '', 'description': (p.get('description') or '')[:400],
             'fun_fact': p.get('fun_fact_1') or '', 'wiki_url': p.get('wiki_url') or '', 'owned': mine, 'no': no,
+            'image_url': p.get('image_url') or '', 'terrain': p.get('game_category') or '',
         })
     order = {'mythic': 0, 'legendary': 1, 'epic': 2, 'rare': 3, 'uncommon': 4, 'common': 5}
     rare.sort(key=lambda c: (not c['owned'], order.get(c['rarity'], 9), c['name']))
@@ -307,7 +308,8 @@ def codex_cards(request):
         if c['uid'] in caught:
             creatures.append({'uid': c['uid'], 'no': no, 'name': c['name'], 'rarity': c.get('rarity', 'common'),
                               'category': c.get('codex_category') or 'animal', 'description': c.get('description', ''),
-                              'wiki_url': c.get('wiki_url', ''), 'count': caught[c['uid']], 'owned': True})
+                              'wiki_url': c.get('wiki_url', ''), 'count': caught[c['uid']], 'owned': True,
+                              'image_url': c.get('image_url', '')})
     by_cat = Counter(c['category'] for c in creatures)
 
     # History album: retrospective tokens (history_event POIs) — own the hex to own the card
