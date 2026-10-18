@@ -17,6 +17,7 @@ import { KingdomBorderLayer } from './KingdomBorderLayer'
 import { PoiOverviewLayer } from './PoiOverviewLayer'
 import { CoinPickupLayer } from './CoinPickupLayer'
 import { ResourceIconLayer } from './ResourceIconLayer'
+import { HexStateLayer } from './HexStateLayer'
 import { iconIdFor } from '../shared/poiIcons'
 import { ExplorationLayer } from './ExplorationLayer'
 import { OwnedTerritoryHub } from '../kingdom/OwnedTerritoryHub'
@@ -547,6 +548,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       <KingdomBorderLayer map={mapRef.current} zoom={zoom} onKingdomClick={setSelectedKingdom} />
       <PoiOverviewLayer map={mapRef.current} zoom={zoom} center={center} />
+      <HexStateLayer map={mapRef.current} zoom={zoom} center={center} />
       <ResourceIconLayer map={mapRef.current} zoom={zoom} center={center} />
       <CoinPickupLayer map={mapRef.current} zoom={zoom} center={center} />
       <ExplorationLayer map={mapRef.current} />

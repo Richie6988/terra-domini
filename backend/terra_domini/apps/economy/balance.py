@@ -25,9 +25,9 @@ BEGINNER_DAYS = 3            # new accounts produce faster so the first sessions
 BEGINNER_MULT = 4            # (time-based, so buying a zone never lowers the rate)
 
 # ── Territory prices ─────────────────────────────────────────────────────────
-BUY_BASE = 120
-BUY_GROWTH = 1.22            # per territory already owned
-NON_ADJACENT_MULT = 2.5
+BUY_BASE = 1000              # a plain territory costs ~1000 HEX; only special criteria raise it (owner 2026-10-18)
+BUY_GROWTH = 1.0             # no exponential growth with the number of zones owned
+NON_ADJACENT_MULT = 1.5      # far from your kingdom
 UNLOCK_PREMIUM = 1.5         # instant unlock of a locked rare place far from your land (HEX only)
 RARITY_PRICE_MULT = {
     'common': 1, 'uncommon': 1.6, 'rare': 3, 'epic': 7, 'legendary': 18, 'mythic': 50,
