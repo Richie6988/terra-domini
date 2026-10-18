@@ -12,6 +12,7 @@ PY=$APP/.venv/bin/python
 AS="sudo -u hexod -H env DJANGO_SETTINGS_MODULE=terra_domini.settings.prod"
 
 echo "== 1/6 code"
+chown -R hexod: "$APP"   # a pull done as root leaves root-owned files that block the next one
 sudo -u hexod -H git -C "$APP" pull --ff-only
 
 echo "== 2/6 python packages"
