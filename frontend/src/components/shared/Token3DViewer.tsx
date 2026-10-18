@@ -131,12 +131,13 @@ export function Token3DViewer(props: Token3DProps) {
       viewerRef.current.update({
         rarity: d.rarity, hexPerDay: d.hex_per_day, region: d.region?.name || '', country: d.country_code || '',
         terrain: d.terrain || '', tokenNo: d.token_id ? String(d.token_id) : '', cellId: d.h3_index,
+        edition: d.edition_label || 'GENESIS',
       })
       viewerRef.current.update({ back: {
         h3Index: d.h3_index, lat: d.lat, lon: d.lon, rarity: d.rarity, owner: d.owner, capturedAt: d.captured_at,
         hexPerDay: d.hex_per_day, region: d.region?.name ?? null, continent: d.region?.continent ?? null,
         resources: (d.resources || []).map((r: any) => ({ name: r.name, perDay: r.per_day })),
-        tokenId: d.token_id ?? null, minted: !!d.minted,
+        tokenId: d.token_id ?? null, minted: !!d.minted, edition: d.edition || 1,
       } })
     }).catch(() => {})
     return () => { alive = false }

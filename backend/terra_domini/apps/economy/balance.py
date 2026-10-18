@@ -71,6 +71,16 @@ def explore_speed_mult(player) -> float:
     return max(0.25, min(vals)) if vals else 1.0
 
 
+# ── Card editions (a conquered place card is re-issued) ──
+def edition_value_mult(version: int) -> float:
+    """Value of a place card relative to a single-edition card: 1 / number of editions issued."""
+    return round(1 / max(1, int(version or 1)), 3)
+
+
+def edition_label(version: int) -> str:
+    return 'GENESIS' if int(version or 1) <= 1 else f'EDITION {int(version)}'
+
+
 # ── Daily missions: all 3 claimed → bonus chest ──
 DAILY_ALL_MISSIONS_HEX = 300
 DAILY_ALL_MISSIONS_ITEM = 'explore_slot'     # free Extra Explorer for 24h

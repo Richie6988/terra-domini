@@ -88,6 +88,7 @@ export interface TokenBack {
   resources: { name: string; perDay: number }[]
   tokenId: number | null
   minted: boolean
+  edition?: number
 }
 
 interface ViewerHandle {
@@ -498,7 +499,8 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     engrave(`${b.rarity.toUpperCase()} · ${Math.round(b.hexPerDay).toLocaleString()} HEX A DAY`, s * 0.635, s * 0.032)
     if (b.resources.length) engrave(b.resources.slice(0, 3).map(r => r.name.toUpperCase()).join(' · '), s * 0.68, s * 0.024, 700)
     rule(s * 0.725, s * 0.2)
-    engrave(b.minted && b.tokenId ? `MINTED · TOKEN ${b.tokenId}` : 'NOT MINTED', s * 0.77, s * 0.024, 700)
+    const ed = b.edition && b.edition > 1 ? `EDITION ${b.edition} · VALUE 1/${b.edition}` : 'GENESIS EDITION'
+    engrave(`${ed} · ${b.minted && b.tokenId ? `TOKEN ${b.tokenId}` : 'NOT MINTED'}`, s * 0.77, s * 0.024, 700)
     engrave(b.h3Index, s * 0.81, s * 0.026, 700, '"Roboto Mono", "Courier New", monospace')
 
     bTex.needsUpdate = true

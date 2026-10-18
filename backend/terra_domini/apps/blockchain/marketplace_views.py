@@ -103,10 +103,16 @@ class MarketplaceListingsView(APIView):
             cols = [d[0] for d in c.description]
             rows = [dict(zip(cols, r)) for r in c.fetchall()]
 
-        # Inject rarity_rank for frontend sorting
+        # Inject rarity_rank for frontend sorting + card edition (conquered place cards are re-issued)
+        from terra_domini.apps.territories.models import Territory
+        from terra_domini.apps.economy.balance import edition_label, edition_value_mult
+        versions = dict(Territory.objects.filter(h3_index__in=[r.get('h3_index') for r in rows if r.get('h3_index')])
+                        .values_list('h3_index', 'nft_version'))
         for row in rows:
             row['rarity_rank'] = RARITY_ORDER.get(row.get('rarity', 'common'), 0)
             row['is_shiny'] = bool(row.get('is_shiny', 0))
+            v = versions.get(row.get('h3_index'), 1) or 1
+            row['edition'], row['edition_label'], row['edition_value_mult'] = v, edition_label(v), edition_value_mult(v)
 
         # Stats
         with connection.cursor() as c:

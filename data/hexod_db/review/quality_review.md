@@ -1,116 +1,136 @@
 # HEXOD token quality review
 
-Generated 2026-10-18T17:22Z by TOKEN REVIEWER. Scope: 1950 POIs in hexod_db.json; curated_tokens.csv (0 rows).
+Updated 2026-10-18T17:32Z by TOKEN REVIEWER (round 2). Scope: rebuilt hexod_db.json (1,799 POIs) + curated_tokens.csv (125 update rows).
 
 ## Summary
-- Findings: 94 (P1 63, P2 22, P3 9)
-- Rarity: legendary 26, epic 69, rare 130, uncommon 298, common 1427
-- Sources: legacy_seed 752, tokens_db 561, wiki_extract 244, city 219, country 153, strategic 21
-- Category anomaly 351 (18%), control_tower 43 (many monuments), empty title 1389, no coords 46, no country 616
+- Round-1 findings re-checked: 94 -> FIXED 70, STILL OPEN 24, WONTFIX 0
+- Round-2 findings sent (status SENT): 21
+- Rarity now: legendary 33, epic 73, rare 113, uncommon 265, common 1,315
+- Builder: 151 truncated wiki names dropped (169 remain), same-place merge within 2 km (misses same-name pairs at 2-40 km), anomaly 351 -> 264, cities ranked by population
+- Creator quality: 125/125 rows have curated_by+curated_at, 124 have notes, 28 flagged TO VERIFY; facts sampled are accurate and sourced from Wikipedia; no invented facts found. Every row says IMAGE TO SOURCE (network blocked), so image_url is empty everywhere.
 
-## Top problems
-1. 244 wiki_extract tokens with truncated names
-2. World icons rated common/uncommon/rare, categories control_tower
-3. Duplicates beyond same-H3 (legacy vs tokens_db, ~80 pairs)
-4. Scraped/glued text on 136 tokens_db tokens
-5. City rarity broken, cities without coordinates
-6. Wrong country/coords/category (Mekong, McArthur, Nile Dam, Hwange)
+## Judgement on creator choices
+- Rarity overrides coherent (Eiffel/Taj/Pyramid/Colosseum/Everest/Fuji/Mecca/Great Barrier Reef legendary; Camp Lemonnier demoted to rare; Starbase epic).
+- Coordinates: McArthur River moved to Saskatchewan (57.7625,-105.052) plausible, flagged TO VERIFY; GERD OK; Mekong renamed Mekong Delta (identity change creates a new triple duplicate).
+- world_heritage is used as a generic monument slug (Berlin Wall, Sarajevo, Eiffel, Statue of Liberty, Golden Gate): acceptable but documented; a monument slug would be cleaner.
+- Hwange kept as coal_mine though it is a power station.
 
-## Findings (status SENT unless noted)
+## Findings
 
-| Batch | Pri | uid | name | problem | status |
-|---|---|---|---|---|---|
-| 1 | P1 | poi-100094 | SpaceX Starbase | category missile_site -> space_center; title "Rocket launcher" -> "Starship Launch Site"; description too long, trim to 2 sentences | SENT |
-| 1 | P1 | poi-100142 | Berlin Wall | category ancient_wonder is wrong for a 1961-89 barrier; use monument/historic-event slug | SENT |
-| 1 | P1 | poi-100300 | Borobudur | description is a restoration sentence, not a description; write "9th-century Mahayana Buddhist temple in Central Java, the largest in the world." | SENT |
-| 1 | P1 | poi-100571 | Havana Vieja | description starts with fortress construction detail, rewrite as place description | SENT |
-| 1 | P1 | poi-100851 | Loire Valley | description is a UNESCO date sentence with glued "2000,UNESCOadded"; rewrite | SENT |
-| 1 | P1 | poi-100870 | Summer Palace | description is about Longevity Hill height, rewrite as imperial garden description; fun_fact_1 glued "1998,UNESCOincluded" | SENT |
-| 1 | P1 | poi-100928 | Cusco | description glued "wasconqueredin"; fun_fact_3 glued "Siteby UNESCOwith"; rewrite | SENT |
-| 1 | P1 | poi-100940 | Camp Lemonnier | rarity legendary -> rare/uncommon (US base, not world-icon); description is about troop leave rules, rewrite; duplicate of legacy-djibouticamplemonnier (1 km) | SENT |
-| 1 | P2 | poi-101282 | Bab-el-Mandeb | description is a sea-level geology sentence; rewrite as chokepoint (Red Sea / Gulf of Aden strait, ~29 km wide); glued "100,000 years,eustatic" | SENT |
-| 1 | P1 | legacy-straitofhormuz | Strait of Hormuz | LEGENDARY duplicate of poi-101284 Hormuz Strait (rare) and legacy-hormuzstraitqeshmisland (epic); keep ONE token, merge others as aliases; unify rarity | SENT |
-| 1 | P1 | city-ci2 | Kano | LEGENDARY with lat/lon None, empty description: not placeable; set coords (12.0022, 8.5920) and a description or drop rarity | SENT |
-| 1 | P1 | city-ci3 | Ibadan | LEGENDARY city; description contains IPA/"Listen" junk; rarity inflated by population score (compare Tokyo/Paris which are uncommon). Recompute city rarity or cap | SENT |
-| 1 | P2 | poi-100035 | Notre-Dame Paris | name -> "Notre-Dame de Paris"; drop city suffix; check wiki_url | SENT |
-| 1 | P1 | poi-100107 | Louvre Paris | name -> "Louvre Museum"; DUPLICATE of legacy-louvremuseumparis (150 m, uncommon): merge as alias | SENT |
-| 1 | P2 | poi-100071 | Pompeii | duplicate of legacy-pompeiiruins (350 m): merge alias | SENT |
-| 1 | P3 | poi-100008 | Versailles Palace | name -> "Palace of Versailles"; verify wiki_url target | SENT |
-| 1 | P2 | poi-100028 | (country cards) | Country tokens (United States, China, Japan...) carry game_category international_org and are legendary/epic with no hex: acceptable codex-only but category should be "country"; descriptions are raw scrape (IPA, parentheses) | SENT |
-| 2 | P1 | poi-100204 | Eiffel Tower | rarity rare is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | poi-100203 | Taj Mahal | rarity rare is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | poi-100208 | Great Pyramid | rarity rare is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | legacy-colosseumrome | Colosseum Rome | rarity rare is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | legacy-statueofliberty | Statue of Liberty | rarity rare is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | legacy-meccamasjidalharam | Mecca Masjid al-Haram | rarity uncommon is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | poi-100187 | Mount Everest | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | poi-102755 | Mount Fuji | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | poi-100919 | Kilimanjaro | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | poi-100221 | Burj Khalifa | rarity uncommon is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | legacy-greatbarrierreefcoralsea | Great Barrier Reef | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | poi-100161 | Galapagos Islands | rarity uncommon is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | poi-100080 | Angel Falls | rarity uncommon is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | poi-100296 | Niagara Falls | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | legacy-serengetinationalpark | Serengeti | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | legacy-alhambragranada | Alhambra Granada | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | legacy-potalapalacelhasa | Potala Palace | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | legacy-buckinghampalace | Buckingham Palace | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | legacy-montsaintmichel | Mont Saint-Michel | rarity uncommon is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | poi-100795 | Easter Island | rarity uncommon is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | SENT |
-| 2 | P1 | poi-100203 | Taj Mahal | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | SENT |
-| 2 | P1 | poi-100208 | Great Pyramid | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | SENT |
-| 2 | P1 | poi-100212 | Athens acropolis | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | SENT |
-| 2 | P1 | poi-100215 | Sydney Opera | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | SENT |
-| 2 | P1 | poi-101087 | White House | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | SENT |
-| 2 | P1 | poi-100096 | Brandenburg Gate | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | SENT |
-| 2 | P1 | legacy-colosseumrome | Colosseum Rome | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | SENT |
-| 2 | P1 | legacy-statueofliberty | Statue of Liberty | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | SENT |
-| 2 | P1 | legacy-goldengatebridge | Golden Gate Bridge | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | SENT |
-| 2 | P1 | legacy-christtheredeemerrio | Christ the Redeemer | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | SENT |
-| 2 | P1 | poi-100208 | Great Pyramid | duplicate of legacy-greatpyramidofgiza (30 m): merge; description is about tallest structure height, glued "Builtc.2600 BCover" | SENT |
-| 2 | P1 | poi-100203 | Taj Mahal | description is about first ceremony in 1632, rewrite as mausoleum description; fun_fact_3 glued "whitemarbleinlaid withsemi-precious" | SENT |
-| 2 | P1 | poi-100204 | Eiffel Tower | description glued "tall,about ... thetallest"; rewrite | SENT |
-| 2 | P1 | poi-100212 | Athens acropolis | name -> "Acropolis of Athens"; description is about Cyclopean wall; remove Greek script from fun_fact_3; dup with wiki-101462 ACROPOLIS | SENT |
-| 2 | P2 | poi-100215 | Sydney Opera | name -> "Sydney Opera House"; fun_fact_1 glued "thepremier,Joseph" | SENT |
-| 2 | P3 | poi-100094 | Airports | airports (Heathrow, Changi, Dubai, Incheon, Cairo, Denver...) are control_tower: acceptable only if no airport slug exists; if one exists switch; none should exceed rare | SENT |
-| 3 | P1 | poi-100064 | Grand Canyon | description starts with Devanagari "विशाल" instead of "Vast"; name duplicates poi? (lowercase duplicate "grand canyon" in names) | SENT |
-| 3 | P2 | poi-100188 | Vatican Museums | description is a visitor stat; fun_fact_1 glued "display,and"; coordinates (41.9064,12.4544) ok; dup Sistine Chapel within 370 m is legit but check H3 merge | SENT |
-| 3 | P2 | poi-100228 | Toledo Spain | name -> "Toledo"; description is municipality area (232.1 km2) - not descriptive; epic seems high | SENT |
-| 3 | P1 | poi-100173 | Yosemite National | name truncated -> "Yosemite National Park"; description glued "Serviceand", "fourcounties" | SENT |
-| 3 | P1 | poi-100918 | Borneo | coords 0.0,114.0 are island centroid (OK) but description contains IPA "/ˈbɔːrnioʊ/" and glued "thethird-largestisland"; country MY wrong (shared MY/ID/BN) | SENT |
-| 3 | P2 | poi-100223 | Ephesus | description is UNESCO date only; fun_fact_1 glued "Arzawa,by Attican" | SENT |
-| 3 | P2 | poi-100240 | Luxor Temple | glued "UNESCOWorld Heritage Listin 1979" | SENT |
-| 3 | P2 | poi-100303 | Baalbek | description is "history dates back 11,000 years" - dubious claim, verify; duplicate legacy-baalbektemples (890 m) | SENT |
-| 3 | P2 | poi-100304 | Jiuzhaigou | description is an altitude statement, rewrite | SENT |
-| 3 | P2 | poi-100377 | Camp Nou | description is about 1954 construction; glued "stadium,Camp de Les Corts" | SENT |
-| 3 | P2 | poi-100479 | Old Trafford | description is about Newton Heath; lat/lon have 12 decimals (53.463055555556) round to 5 | SENT |
-| 3 | P2 | poi-100581 | San Siro | fun_fact_3 duplicates description ("Stadio Giuseppe Meazza,commonly known"); glued "afootballstadium" | SENT |
-| 3 | P2 | poi-100774 | Sarajevo Assassination | category ancient_wonder wrong; glued "Austro-Hungarianthrone" | SENT |
-| 3 | P3 | poi-100553 | Woodstock Festival | category ancient_wonder wrong; verify position (41.7,-74.88 is Bethel, correct site)  | SENT |
-| 3 | P2 | poi-100360 | Yalta Conference | category ancient_wonder wrong; description is military context; glued "Poland,Romania" | SENT |
-| 3 | P2 | poi-101120 | Chernobyl Disaster | category ancient_wonder wrong; lat/lon 51.38972,30.09917 ok; should be nuclear/history | SENT |
-| 3 | P1 | poi-101281 | Nile Dam | name -> "Grand Ethiopian Renaissance Dam"; coords 11.21,35.09 ok (Ethiopia) but country_code SD wrong -> ET; category chokepoint wrong -> mega_dam; dup legacy-niledamnegotiationsau (Sudan coords) | SENT |
-| 3 | P1 | poi-101285 | Mekong River | country TH but coords (10.19,106.75) are Vietnam delta; category chokepoint wrong -> freshwater; dup legacy-mekongrivergoldentriangle | SENT |
-| 3 | P1 | poi-101304 | McArthur River | country CA but coords (-15.9,136.667) are Northern Territory, Australia -> AU; category uranium_mine wrong (zinc-lead mine; the uranium McArthur River is in Saskatchewan 57.77,-105.05) | SENT |
-| 3 | P1 | poi-100313 | Vandenberg SFB | description about 5th Armored Division 1942 is irrelevant; title "Starship Launch Frontier" is false (Falcon 9/Vandenberg); rewrite | SENT |
-| 3 | P1 | legacy-zimbabwehwangepowerstation | Zimbabwe Hwange Power Station | category nuclear_plant wrong: it is a coal plant (use power_plant/industry); description repeats; rarity rare too high | SENT |
-| 3 | P3 | poi-100051 | Diego Garcia | country_code IO unlike others (BIOT); acceptable but confirm field convention; rarity epic ok | SENT |
-| 3 | P3 | poi-100091 | Bermuda Triangle | country_code "--" ; rarity rare ok; centre (25,-71) is open sea: fine for anomaly zone but flag | SENT |
-| 3 | P1 | legacy-cheyennemountainnorad | Cheyenne Mountain NORAD | duplicate of poi-100557 Cheyenne Mountain (rare, 2 km apart, coords differ): merge, use one rarity (epic) | SENT |
-| 3 | P1 | strat-ghawarfield | Ghawar Field | triplicate: strat-ghawarfield (epic), legacy-ghawaroilfield (rare), same field; merge, keep epic | SENT |
-| 3 | P2 | strat-tsmcfab12hsinchu | TSMC Fab 12 Hsinchu | duplicate of legacy-tsmchsinchuhq (rare, anomaly, 1.2 km); merge, category tech_giant | SENT |
-| 3 | P2 | poi-100863 | Cape Canaveral | overlaps with legacy-kennedyspacecenter (rare, 12 km); description is naming trivia; decide one token or distinct roles | SENT |
-| 3 | P3 | poi-100475 | Pergamon Museum | description is construction dates; museum has been closed for renovation: add note; ok rarity | SENT |
-| 3 | P2 | legacy-dimonanuclearresearchcenter | Dimona Nuclear Research Center | epic with no wiki_url; add https://en.wikipedia.org/wiki/Negev_Nuclear_Research_Center | SENT |
-| 3 | P3 | poi-101301 | Luxembourg City | rarity rare and offshore_haven: city is not an icon; description is Mercer survey trivia | SENT |
-| 4 | P1 | wiki_extract(244) | El, Hong, Te, Al, Tate, Li, Mesa, Baja... | 244 wiki_extract tokens have truncated one-word names (first token of the title), all common + anomaly; examples: "Hong" (Hong Kong), "Te" (Te Papa/Wellington), "Alhambra", "Tate", "Euronext". Re-extract full titles or drop; no country, no title, no description | SENT |
-| 4 | P1 | legacy_seed(752) | all legacy tokens | 752 legacy tokens have no title; 537 have no wiki_url; many are near-duplicates of tokens_db (list sent: Louvre, Pompeii, Hampi, Byblos, Masai Mara, Table Mountain, Cusco, Wadi Rum, Huang Shan...). Dedup by name+distance<2 km, not only same H3 r8 cell | SENT |
-| 4 | P1 | anomaly(351) | category anomaly | 351 tokens (18%) are anomaly: 244 wiki_extract, 82 legacy (TSMC, ASML, Intel, Micron, Samsung chip fabs -> tech_giant), 25 tokens_db (Sahara Desert, Movile Cave -> desert/cave_system, Tunguska). Recategorise | SENT |
-| 4 | P1 | tokens_db(136) | glued/scraped text | 136 tokens_db tokens have glued words, IPA, coordinates in fun facts, non-Latin scripts (16 rare, 10 epic, 3 legendary listed in batches 1-3). Run a rewrite pass: description = 1-2 own sentences | SENT |
-| 4 | P1 | city(31) | cities without coordinates/with empty description | 31 city tokens have lat/lon None (Kano, Constantine, Davao, Phoenix, San Jose, composite "Guangzhou-Shenzhen"...), 15 empty descriptions; composite regions ("Southeastern Maritime Industrial Region") are not places | SENT |
-| 4 | P1 | city(Nigeria) | Nigerian cities epic | Port Harcourt, Benin City, Kaduna, Maiduguri, Zaria, Jos are EPIC and Kano/Ibadan LEGENDARY while Paris/London/Tokyo are uncommon: city ranking is broken (sort/score error); recompute city rarity by population rank globally | SENT |
-| 4 | P1 | rarity quotas | rarity scoring | Quota legendary 1% yields 26 tokens but 4 are countries/cities no hex; Taj/Eiffel/Pyramid/Everest/Fuji are below Camp Lemonnier, SpaceX, CIA Langley. Add manual fame override list (curated) | SENT |
-| 4 | P2 | rare_fact | boilerplate | Strategic tokens use 5 boilerplate rare_fact templates (46+45+41+32+25) - not true facts. Replace or blank | SENT |
-| 4 | P3 | wiki_url | percent-encoding | wiki_url contains %27/%C3%BC (valid) but names "Musee d'Orsay" should be "Musee d'Orsay -> Musee d'Orsay (Musee d Orsay)" ok; real issue: names with city suffix (Notre-Dame Paris, Toledo Spain, Colosseum Rome, Wembley Stadium London) | SENT |
-| 4 | P2 | curated_tokens.csv | data governance | curated_tokens.csv has header only (0 rows): no curated_by/curated_at/notes yet. Every fix batch must add rows with curated_by, curated_at, notes; list TO VERIFY items in notes | SENT |
-| 4 | P3 | image | image coverage | image is a local filename (no https URLs): 1320 tokens have none. OK if served locally; confirm path convention | SENT |
+| Pri | uid | name | problem | status |
+|---|---|---|---|---|
+| P1 | poi-100094 | SpaceX Starbase | category missile_site -> space_center; title "Rocket launcher" -> "Starship Launch Site"; description too long, trim to 2 sentences | FIXED |
+| P1 | poi-100142 | Berlin Wall | category ancient_wonder is wrong for a 1961-89 barrier; use monument/historic-event slug | FIXED |
+| P1 | poi-100300 | Borobudur | description is a restoration sentence, not a description; write "9th-century Mahayana Buddhist temple in Central Java, the largest in the world." | FIXED |
+| P1 | poi-100571 | Havana Vieja | description starts with fortress construction detail, rewrite as place description | FIXED |
+| P1 | poi-100851 | Loire Valley | description is a UNESCO date sentence with glued "2000,UNESCOadded"; rewrite | FIXED |
+| P1 | poi-100870 | Summer Palace | description is about Longevity Hill height, rewrite as imperial garden description; fun_fact_1 glued "1998,UNESCOincluded" | FIXED |
+| P1 | poi-100928 | Cusco | description glued "wasconqueredin"; fun_fact_3 glued "Siteby UNESCOwith"; rewrite | FIXED |
+| P1 | poi-100940 | Camp Lemonnier | rarity legendary -> rare/uncommon (US base, not world-icon); description is about troop leave rules, rewrite; duplicate of legacy-djibouticamplemonnier (1 km) | FIXED |
+| P2 | poi-101282 | Bab-el-Mandeb | description is a sea-level geology sentence; rewrite as chokepoint (Red Sea / Gulf of Aden strait, ~29 km wide); glued "100,000 years,eustatic" | FIXED |
+| P1 | legacy-straitofhormuz | Strait of Hormuz | LEGENDARY duplicate of poi-101284 Hormuz Strait (rare) and legacy-hormuzstraitqeshmisland (epic); keep ONE token, merge others as aliases; unify rarity // R2: poi-101284 (23 km away) not merged, legacy text "21M bbl oil/day. Iran can close it" kept | STILL OPEN |
+| P1 | city-ci2 | Kano | LEGENDARY with lat/lon None, empty description: not placeable; set coords (12.0022, 8.5920) and a description or drop rarity // R2: still no coords, no description | STILL OPEN |
+| P1 | city-ci3 | Ibadan | LEGENDARY city; description contains IPA/"Listen" junk; rarity inflated by population score (compare Tokyo/Paris which are uncommon). Recompute city rarity or cap // R2: rarity ok (uncommon) but description still IPA/Listen junk | STILL OPEN |
+| P2 | poi-100035 | Notre-Dame Paris | name -> "Notre-Dame de Paris"; drop city suffix; check wiki_url | FIXED |
+| P1 | poi-100107 | Louvre Paris | name -> "Louvre Museum"; DUPLICATE of legacy-louvremuseumparis (150 m, uncommon): merge as alias | FIXED |
+| P2 | poi-100071 | Pompeii | duplicate of legacy-pompeiiruins (350 m): merge alias | FIXED |
+| P3 | poi-100008 | Versailles Palace | name -> "Palace of Versailles"; verify wiki_url target | FIXED |
+| P2 | country-* | (country cards) | Country tokens (United States, China, Japan...) carry game_category international_org and are legendary/epic with no hex: acceptable codex-only but category should be "country"; descriptions are raw scrape (IPA, parentheses) // R2: country tokens still international_org | STILL OPEN |
+| P1 | poi-100204 | Eiffel Tower | rarity rare is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | poi-100203 | Taj Mahal | rarity rare is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | poi-100208 | Great Pyramid | rarity rare is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | legacy-colosseumrome | Colosseum Rome | rarity rare is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | legacy-statueofliberty | Statue of Liberty | rarity rare is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | legacy-meccamasjidalharam | Mecca Masjid al-Haram | rarity uncommon is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | poi-100187 | Mount Everest | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | poi-102755 | Mount Fuji | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | poi-100919 | Kilimanjaro | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | poi-100221 | Burj Khalifa | rarity uncommon is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | legacy-greatbarrierreefcoralsea | Great Barrier Reef | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | poi-100161 | Galapagos Islands | rarity uncommon is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | poi-100080 | Angel Falls | rarity uncommon is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | poi-100296 | Niagara Falls | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | legacy-serengetinationalpark | Serengeti | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | legacy-alhambragranada | Alhambra Granada | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | legacy-potalapalacelhasa | Potala Palace | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | legacy-buckinghampalace | Buckingham Palace | rarity common is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | legacy-montsaintmichel | Mont Saint-Michel | rarity uncommon is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | poi-100795 | Easter Island | rarity uncommon is far too low for a world-icon; raise to epic or legendary (suggested: legendary for Eiffel, Taj, Pyramid, Colosseum, Everest, Mecca, Fuji, Great Barrier Reef; epic for the rest) | FIXED |
+| P1 | poi-100203 | Taj Mahal | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | FIXED |
+| P1 | poi-100208 | Great Pyramid | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | FIXED |
+| P1 | poi-100212 | Athens acropolis | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | FIXED |
+| P1 | poi-100215 | Sydney Opera | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | FIXED |
+| P1 | poi-101087 | White House | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | FIXED |
+| P1 | poi-100096 | Brandenburg Gate | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | FIXED |
+| P1 | legacy-colosseumrome | Colosseum Rome | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | FIXED |
+| P1 | legacy-statueofliberty | Statue of Liberty | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | FIXED |
+| P1 | legacy-goldengatebridge | Golden Gate Bridge | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | FIXED |
+| P1 | legacy-christtheredeemerrio | Christ the Redeemer | category control_tower is wrong (title often reads "Control tower"/"Skyline Dominating Icon"); use monument/world_heritage/royal_palace as fits; keep control_tower for real towers (CN Tower, Skytree, Taipei 101) and airports only | FIXED |
+| P1 | poi-100208 | Great Pyramid | duplicate of legacy-greatpyramidofgiza (30 m): merge; description is about tallest structure height, glued "Builtc.2600 BCover" | FIXED |
+| P1 | poi-100203 | Taj Mahal | description is about first ceremony in 1632, rewrite as mausoleum description; fun_fact_3 glued "whitemarbleinlaid withsemi-precious" | FIXED |
+| P1 | poi-100204 | Eiffel Tower | description glued "tall,about ... thetallest"; rewrite | FIXED |
+| P1 | poi-100212 | Athens acropolis | name -> "Acropolis of Athens"; description is about Cyclopean wall; remove Greek script from fun_fact_3; dup with wiki-101462 ACROPOLIS | FIXED |
+| P2 | poi-100215 | Sydney Opera | name -> "Sydney Opera House"; fun_fact_1 glued "thepremier,Joseph" | FIXED |
+| P3 | airports(control_tower) | Airports | airports (Heathrow, Changi, Dubai, Incheon, Cairo, Denver...) are control_tower: acceptable only if no airport slug exists; if one exists switch; none should exceed rare // R2: airports: not checked/changed | STILL OPEN |
+| P1 | poi-100064 | Grand Canyon | description starts with Devanagari "विशाल" instead of "Vast"; name duplicates poi? (lowercase duplicate "grand canyon" in names) | FIXED |
+| P2 | poi-100188 | Vatican Museums | description is a visitor stat; fun_fact_1 glued "display,and"; coordinates (41.9064,12.4544) ok; dup Sistine Chapel within 370 m is legit but check H3 merge | FIXED |
+| P2 | poi-100228 | Toledo Spain | name -> "Toledo"; description is municipality area (232.1 km2) - not descriptive; epic seems high // R2: name still "Toledo Spain"; legacy-toledomedievalcity not merged | STILL OPEN |
+| P1 | poi-100173 | Yosemite National | name truncated -> "Yosemite National Park"; description glued "Serviceand", "fourcounties" | FIXED |
+| P1 | poi-100918 | Borneo | coords 0.0,114.0 are island centroid (OK) but description contains IPA "/ˈbɔːrnioʊ/" and glued "thethird-largestisland"; country MY wrong (shared MY/ID/BN) // R2: FIXED; note country now ID (island shared), acceptable | FIXED |
+| P2 | poi-100223 | Ephesus | description is UNESCO date only; fun_fact_1 glued "Arzawa,by Attican" | FIXED |
+| P2 | poi-100240 | Luxor Temple | glued "UNESCOWorld Heritage Listin 1979" | FIXED |
+| P2 | poi-100303 | Baalbek | description is "history dates back 11,000 years" - dubious claim, verify; duplicate legacy-baalbektemples (890 m) | FIXED |
+| P2 | poi-100304 | Jiuzhaigou | description is an altitude statement, rewrite | FIXED |
+| P2 | poi-100377 | Camp Nou | description is about 1954 construction; glued "stadium,Camp de Les Corts" | FIXED |
+| P2 | poi-100479 | Old Trafford | description is about Newton Heath; lat/lon have 12 decimals (53.463055555556) round to 5 | FIXED |
+| P2 | poi-100581 | San Siro | fun_fact_3 duplicates description ("Stadio Giuseppe Meazza,commonly known"); glued "afootballstadium" | FIXED |
+| P2 | poi-100774 | Sarajevo Assassination | category ancient_wonder wrong; glued "Austro-Hungarianthrone" | FIXED |
+| P3 | poi-100553 | Woodstock Festival | category ancient_wonder wrong; verify position (41.7,-74.88 is Bethel, correct site)  // R2: category still ancient_wonder | STILL OPEN |
+| P2 | poi-100360 | Yalta Conference | category ancient_wonder wrong; description is military context; glued "Poland,Romania" // R2: not curated: category ancient_wonder, description military context | STILL OPEN |
+| P2 | poi-101120 | Chernobyl Disaster | category ancient_wonder wrong; lat/lon 51.38972,30.09917 ok; should be nuclear/history // R2: not curated: category ancient_wonder, description glued ("10 kmexclusion zonewas") | STILL OPEN |
+| P1 | poi-101281 | Nile Dam | name -> "Grand Ethiopian Renaissance Dam"; coords 11.21,35.09 ok (Ethiopia) but country_code SD wrong -> ET; category chokepoint wrong -> mega_dam; dup legacy-niledamnegotiationsau (Sudan coords) | FIXED |
+| P1 | poi-101285 | Mekong River | country TH but coords (10.19,106.75) are Vietnam delta; category chokepoint wrong -> freshwater; dup legacy-mekongrivergoldentriangle | FIXED |
+| P1 | poi-101304 | McArthur River | country CA but coords (-15.9,136.667) are Northern Territory, Australia -> AU; category uranium_mine wrong (zinc-lead mine; the uranium McArthur River is in Saskatchewan 57.77,-105.05) | FIXED |
+| P1 | poi-100313 | Vandenberg SFB | description about 5th Armored Division 1942 is irrelevant; title "Starship Launch Frontier" is false (Falcon 9/Vandenberg); rewrite | FIXED |
+| P1 | legacy-zimbabwehwangepowerstation | Zimbabwe Hwange Power Station | category nuclear_plant wrong: it is a coal plant (use power_plant/industry); description repeats; rarity rare too high // R2: FIXED category coal_mine (power station, P3: prefer power slug) | FIXED |
+| P3 | poi-100051 | Diego Garcia | country_code IO unlike others (BIOT); acceptable but confirm field convention; rarity epic ok // R2: not changed (country IO) | STILL OPEN |
+| P3 | poi-100091 | Bermuda Triangle | country_code "--" ; rarity rare ok; centre (25,-71) is open sea: fine for anomaly zone but flag // R2: not changed (country --) | STILL OPEN |
+| P1 | legacy-cheyennemountainnorad | Cheyenne Mountain NORAD | duplicate of poi-100557 Cheyenne Mountain (rare, 2 km apart, coords differ): merge, use one rarity (epic) // R2: poi-100557 (3 km off, wrong coords) not merged | STILL OPEN |
+| P1 | strat-ghawarfield | Ghawar Field | triplicate: strat-ghawarfield (epic), legacy-ghawaroilfield (rare), same field; merge, keep epic // R2: legacy-ghawaroilfield (42 km) not merged | STILL OPEN |
+| P2 | strat-tsmcfab12hsinchu | TSMC Fab 12 Hsinchu | duplicate of legacy-tsmchsinchuhq (rare, anomaly, 1.2 km); merge, category tech_giant | FIXED |
+| P2 | poi-100863 | Cape Canaveral | overlaps with legacy-kennedyspacecenter (rare, 12 km); description is naming trivia; decide one token or distinct roles // R2: KSC (legacy-kennedyspacecenter) vs Cape Canaveral still both present | STILL OPEN |
+| P3 | poi-100475 | Pergamon Museum | description is construction dates; museum has been closed for renovation: add note; ok rarity // R2: not curated (text still construction dates) | STILL OPEN |
+| P2 | legacy-dimonanuclearresearchcenter | Dimona Nuclear Research Center | epic with no wiki_url; add https://en.wikipedia.org/wiki/Negev_Nuclear_Research_Center | FIXED |
+| P3 | poi-101301 | Luxembourg City | rarity rare and offshore_haven: city is not an icon; description is Mercer survey trivia // R2: not curated | STILL OPEN |
+| P1 | wiki_extract(244) | El, Hong, Te, Al, Tate, Li, Mesa, Baja... | 244 wiki_extract tokens have truncated one-word names (first token of the title), all common + anomaly; examples: "Hong" (Hong Kong), "Te" (Te Papa/Wellington), "Alhambra", "Tate", "Euronext". Re-extract full titles or drop; no country, no title, no description // R2: 169 remain, many still one-word (South, Pearl, Mount, Malta, Faroe...) | STILL OPEN |
+| P1 | legacy_seed(752) | all legacy tokens | 752 legacy tokens have no title; 537 have no wiki_url; many are near-duplicates of tokens_db (list sent: Louvre, Pompeii, Hampi, Byblos, Masai Mara, Table Mountain, Cusco, Wadi Rum, Huang Shan...). Dedup by name+distance<2 km, not only same H3 r8 cell // R2: 11 rare+ legacy still without title/wiki; 676 legacy left | STILL OPEN |
+| P1 | anomaly(351) | category anomaly | 351 tokens (18%) are anomaly: 244 wiki_extract, 82 legacy (TSMC, ASML, Intel, Micron, Samsung chip fabs -> tech_giant), 25 tokens_db (Sahara Desert, Movile Cave -> desert/cave_system, Tunguska). Recategorise // R2: 264 remain (169 wiki_extract, 70 legacy incl. orgs/industrial, 25 tokens_db natural sites) | STILL OPEN |
+| P1 | tokens_db(136) | glued/scraped text | 136 tokens_db tokens have glued words, IPA, coordinates in fun facts, non-Latin scripts (16 rare, 10 epic, 3 legendary listed in batches 1-3). Run a rewrite pass: description = 1-2 own sentences // R2: rare+ still glued: Sanxingdui, Karnak, Bodh Gaya, Lofoten, Masai Mara, Babylon, Meiji, Mammoth Cave, Jokhang, Rijksmuseum, Luxembourg | STILL OPEN |
+| P1 | city(31) | cities without coordinates/with empty description | 31 city tokens have lat/lon None (Kano, Constantine, Davao, Phoenix, San Jose, composite "Guangzhou-Shenzhen"...), 15 empty descriptions; composite regions ("Southeastern Maritime Industrial Region") are not places // R2: 31 cities still without coords | STILL OPEN |
+| P1 | city(Nigeria) | Nigerian cities epic | Port Harcourt, Benin City, Kaduna, Maiduguri, Zaria, Jos are EPIC and Kano/Ibadan LEGENDARY while Paris/London/Tokyo are uncommon: city ranking is broken (sort/score error); recompute city rarity by population rank globally // R2: now ranked by population; Nigerian cities <= uncommon. NEW: Xi an legendary, Seoul metropolitan area legendary, Nanjing/Hefei/Harbin epic while Tokyo/Cairo/London uncommon | FIXED |
+| P1 | rarity quotas | rarity scoring | Quota legendary 1% yields 26 tokens but 4 are countries/cities no hex; Taj/Eiffel/Pyramid/Everest/Fuji are below Camp Lemonnier, SpaceX, CIA Langley. Add manual fame override list (curated) // R2: fame overrides applied (Eiffel, Taj, Pyramid, Colosseum, Everest, Fuji, Mecca legendary) | FIXED |
+| P2 | rare_fact | boilerplate | Strategic tokens use 5 boilerplate rare_fact templates (46+45+41+32+25) - not true facts. Replace or blank // R2: 187 tokens_db tokens (49 rare, 25 epic) still carry 5 boilerplate rare_fact templates | STILL OPEN |
+| P3 | wiki_url | percent-encoding | wiki_url contains %27/%C3%BC (valid) but names "Musee d'Orsay" should be "Musee d'Orsay -> Musee d'Orsay (Musee d Orsay)" ok; real issue: names with city suffix (Notre-Dame Paris, Toledo Spain, Colosseum Rome, Wembley Stadium London) // R2: suffix names remain (Toledo Spain, Colosseum Rome) | STILL OPEN |
+| P2 | curated_tokens.csv | data governance | curated_tokens.csv has header only (0 rows): no curated_by/curated_at/notes yet. Every fix batch must add rows with curated_by, curated_at, notes; list TO VERIFY items in notes | FIXED |
+| P3 | image | image coverage | image is a local filename (no https URLs): 1320 tokens have none. OK if served locally; confirm path convention // R2: unchanged (convention not stated) | STILL OPEN |
+| P1 | poi-101284 | Hormuz Strait | P1: merge into legacy-straitofhormuz (23 km, same strait); rewrite legacy description "21M bbl oil/day. Iran can close it" into 1-2 neutral sentences | SENT |
+| P1 | poi-100557 | Cheyenne Mountain | P1: merge into legacy-cheyennemountainnorad; its coords (38.737,-104.881) are ~3 km off the complex (38.744,-104.846): drop them | SENT |
+| P1 | legacy-ghawaroilfield | Ghawar Oil Field | P1: same field as strat-ghawarfield (42 km apart, so the 2 km rule misses it); merge, keep epic | SENT |
+| P1 | poi-101285 | Mekong Delta | P1: now 3 Mekong Delta tokens (poi-101285 rare, poi-102129 common, legacy-mekongdeltavietnam common): keep one, others aliases; rarity rare is high for a delta | SENT |
+| P1 | legacy-kennedyspacecenter | Kennedy Space Center | P1: vs poi-100863 Cape Canaveral (12 km): keep both only if roles differ (KSC = NASA, Canaveral = Space Force); give KSC a title/wiki_url | SENT |
+| P1 | legacy-niledamnegotiationsau | Nile Dam Negotiations AU | P1: rare, chokepoint, no title, coords in Sudan; topic duplicates GERD poi-101281: drop or merge | SENT |
+| P1 | legacy-suezcanalauthorityhq | Suez Canal Authority HQ | P1: rare, no title; subsumed by poi-100042 Suez Canal; merge or demote to common | SENT |
+| P1 | legacy-mekongrivergoldentriangle | Mekong River Golden Triangle | P1: rare, no title, category chokepoint wrong (use cult/border or nature slug); add title+description | SENT |
+| P1 | legacy-gchqcheltenham | GCHQ Cheltenham | P1: epic with no title and one-line legacy joke text; same for legacy-interpollyon, legacy-mssbeijing, legacy-mossadhqherzliya, legacy-nsafortmeade (all epic, no title, no wiki_url except GCHQ/NSA). Give title, 1-2 factual sentences, wiki_url, 3 facts; MSS "China CIA+FBI combined" is opinion, soften; Mossad "location secret until 2015" TO VERIFY | SENT |
+| P1 | legacy-brucenucleargeneratingstation | Bruce Nuclear / Satish Dhawan ISRO / Wenchang Space Launch | P1: rare legacy without title/wiki_url: add title, description, wiki_url | SENT |
+| P1 | city-ci123 | Seoul metropolitan area | P1: LEGENDARY city token with IPA and Korean script; composite regions (Seoul metropolitan area, Islamabad-Rawalpindi metropolitan area, Guangzhou-Shenzhen...) are not places: replace by the core city (Seoul) or drop | SENT |
+| P1 | city-ci143 | Saint Petersburg / Pune / Indore / Chittagong | P1: rare/epic cities with IPA, Cyrillic/Bengali scripts, "ⓘ" in descriptions; rewrite 1-2 sentences each | SENT |
+| P1 | cities ranking | Xi an legendary, Nanjing/Hefei/Harbin/Quanzhou/Zhengzhou/Chittagong epic | P1: population ranking still skewed: Tokyo, Cairo, London are uncommon while Hefei/Quanzhou are epic. Rank over the full world city list or cap city rarity at rare; capitals and megacities (Tokyo, Delhi, Shanghai, Sao Paulo, Mexico City, Cairo, New York, London, Paris) should be at least rare | SENT |
+| P1 | city-ci2 | Kano / Ibadan | P1: Kano still no coords (12.0022, 8.5920) and no description; Ibadan description still has IPA | SENT |
+| P1 | merge rule | name-aware dedup | P1: builder 2 km merge missed same-name pairs at 0.3-3 km: Dunhuang Mogao/Dunhuang Silk Road (0.35), Masai Mara/Maasai Mara NR (1.9), Cusco/Cusco Historic Center (2.1), Huangshan/Huangshan Yellow Mountain, Grand Canyon/Grand Canyon Arizona (2.95), Dolomites/Dolomites UNESCO Alps (2.8), Toledo/Toledo Medieval City, Havana Vieja/Havana Malecon, Easter Island/Rano Raraku/Ahu Tongariki. Merge when names share a significant word and distance < 5 km (areal sites < 10 km) | SENT |
+| P1 | rare_fact | boilerplate | P1: 187 tokens_db tokens (49 rare, 25 epic, 1 legendary) have one of 5 boilerplate rare_fact templates ("Strategic value makes this one of fewer than 100 sites of true civilisation-level importance" on Knossos...). Not facts: blank them or write a real rare_fact | SENT |
+| P1 | anomaly | recategorise anomaly | P1: 264 anomaly left; legacy ones that are orgs/industry: African Union HQ, ECOWAS HQ, IAEA, ICC, WHO, WTO -> international_org; ArcelorMittal, AstraZeneca, Bayer, Novartis, J&J, POSCO, Magnitogorsk -> industry/tech_giant; desalination plants -> infrastructure; natural sites (Arches, Bryce Canyon Hoodoos, Cliffs of Moher, Death Valley, Dead Sea, Giant's Causeway, Sahara Desert, Lake Natron, Monument Valley, Mariana Trench) -> canyon/desert/freshwater/ocean as fits. On-map rare+ anomaly is only Bermuda Triangle (ok) | SENT |
+| P1 | wiki_extract | truncated names | P1: 169 wiki_extract tokens remain; ~40 still <=5 chars or a fragment (South, Pearl, Mount x3, Malta, Faroe, Three, Empty, Coral, Drake, White...). Drop or restore full titles | SENT |
+| P2 | poi-100358 | Karnak Temple + rare text junk | P2: glued/scraped text on rare+: Karnak (description), Sanxingdui (fun_fact_1 UNESCOlist; fun_fact_2 is raw coordinates "30°59′35″N"), Bodh Gaya, Lofoten Islands, Masai Mara, Babylon, Meiji Shrine (kanji), Mammoth Cave, Jokhang, Rijksmuseum, Luxembourg City, Pergamon Museum | SENT |
+| P2 | poi-100360 | Yalta Conference / Chernobyl Disaster / Woodstock | P2: still category ancient_wonder; use the same convention as Berlin Wall/Sarajevo (world_heritage) or a new history slug; Yalta and Chernobyl descriptions still glued scrape (not curated) | SENT |
+| P3 | poi-100228 | Toledo Spain | P3: rename "Toledo"; Dimona, Hwange (power slug), Diego Garcia/Bermuda country code convention | SENT |

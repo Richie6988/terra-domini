@@ -530,7 +530,12 @@ class CombatEngine:
             territory.captured_at = timezone.now()
             territory.previous_owner = prev_owner
             territory.defense_points = int(territory.max_defense_points * 0.3)  # Captured at 30% defense
-            territory.save(update_fields=['owner', 'captured_at', 'previous_owner', 'defense_points'])
+            fields = ['owner', 'captured_at', 'previous_owner', 'defense_points']
+            if territory.poi_name or territory.is_landmark:
+                # Conquering a place card issues a new edition: more copies in circulation → each edition is worth less
+                territory.nft_version = (territory.nft_version or 1) + 1
+                fields.append('nft_version')
+            territory.save(update_fields=fields)
 
             # No ownership-history model exists — Battle (territory_captured) + previous_owner are the record
             logger.info(f"Territory {territory.h3_index} conquered by {attacker_participant.player_id} from {getattr(prev_owner, 'id', None)}")

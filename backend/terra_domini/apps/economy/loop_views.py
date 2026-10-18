@@ -358,6 +358,8 @@ def territory_card(request, h3_index):
     region = R.biome_for(round(lat, 3), round(lon, 3))
     return Response({
         'h3_index': h3_index, 'lat': round(lat, 4), 'lon': round(lon, 4),
+        'edition': (t.nft_version if t else 1) or 1, 'edition_label': B.edition_label(t.nft_version if t else 1),
+        'edition_value_mult': B.edition_value_mult(t.nft_version if t else 1),
         'terrain': (t.territory_type if t else '') or '', 'country_code': (t.country_code if t else '') or poi.get('country_code', '') or '',
         'rarity': rarity, 'is_shiny': bool(t and t.is_shiny),
         'owner': t.owner.username if t and t.owner_id else None,
