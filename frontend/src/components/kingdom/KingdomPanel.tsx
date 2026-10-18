@@ -11,6 +11,7 @@ import { GlassPanel } from '../shared/GlassPanel'
 import { ResourceIconSVG, IconSVG } from '../shared/iconBank'
 import { SkillTreeView } from './SkillTreeView'
 import { useKingdomStore } from '../../store/kingdomStore'
+import { useServerKingdomCustom, useSaveKingdomCustom } from './kingdomCustom'
 import { useStore, usePlayer } from '../../store'
 import { api } from '../../services/api'
 import { EmojiIcon } from '../shared/emojiIcons'
@@ -49,32 +50,27 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
 
 interface Props { onClose: () => void }
 
-// ── Kingdom Customization Hook ──
-function useKingdomCustomization(kingdomId: string) {
-  const key = `hx_kingdom_${kingdomId}`
-  const load = (): { name?: string; fillColor?: string; borderColor?: string; imageUrl?: string } => {
-    try { return JSON.parse(localStorage.getItem(key) || '{}') } catch { return {} }
-  }
-  const [cust, setCust] = useState(load)
-  const save = (next: typeof cust) => {
-    setCust(next)
-    try { localStorage.setItem(key, JSON.stringify(next)) } catch {}
-  }
-  return [cust, save] as const
-}
-
 // ── Kingdom Customization UI ──
 function CustomizationBlock({ kingdom }: { kingdom: Kingdom }) {
-  const [cust, setCust] = useKingdomCustomization(kingdom.id)
+  const anchor = kingdom.capitalHex || kingdom.territories[0]
+  const cust = useServerKingdomCustom(anchor)
+  const save = useSaveKingdomCustom()
   const [name, setName] = useState(cust.name || kingdom.name)
   const [fillColor, setFillColor] = useState(cust.fillColor || kingdom.color)
   const [borderColor, setBorderColor] = useState(cust.borderColor || kingdom.color)
   const [imageUrl, setImageUrl] = useState(cust.imageUrl || '')
   const [showDiaporama, setShowDiaporama] = useState(false)
+  const [saving, setSaving] = useState(false)
 
-  const saveCustomization = () => {
-    setCust({ name, fillColor, borderColor, imageUrl })
-    toast.success(`${name} customized!`)
+  const saveCustomization = async () => {
+    if (!anchor) return
+    setSaving(true)
+    try {
+      const r = await save(anchor, { name, fillColor, borderColor, imageUrl })
+      toast.success(`${name} saved — ${r.applied} territor${r.applied > 1 ? 'ies' : 'y'} updated on the map`)
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || 'Could not save')
+    } finally { setSaving(false) }
   }
 
   return (
@@ -101,8 +97,8 @@ function CustomizationBlock({ kingdom }: { kingdom: Kingdom }) {
       </div>
 
       <div style={{ display: 'flex', gap: 10 }}>
-        <button onClick={saveCustomization} className="btn-game btn-game-gold" style={{ flex: 1, minHeight: 42, fontSize: 10, letterSpacing: 2 }}>
-          SAVE
+        <button onClick={saveCustomization} disabled={saving} className="btn-game btn-game-gold" style={{ flex: 1, minHeight: 42, fontSize: 10, letterSpacing: 2 }}>
+          {saving ? 'SAVING…' : 'SAVE'}
         </button>
         <button onClick={() => setShowDiaporama(v => !v)} className="btn-game btn-game-glass" style={{ flex: 1, minHeight: 42, fontSize: 10, letterSpacing: 2 }}>
           {showDiaporama ? 'HIDE TOKENS' : 'VIEW TOKENS'}
@@ -143,7 +139,7 @@ function OverviewTab({ kingdom, onProcessDay }: { kingdom: Kingdom; onProcessDay
     return sum + prog.completed
   }, 0)
   const maxSkills = SKILL_BRANCHES.reduce((sum, b) => sum + b.skills.length, 0)
-  const [cust] = useKingdomCustomization(kingdom.id)
+  const cust = useServerKingdomCustom(kingdom.capitalHex || kingdom.territories[0])
   const displayName = cust.name || kingdom.name
   const displayColor = cust.fillColor || kingdom.color
 

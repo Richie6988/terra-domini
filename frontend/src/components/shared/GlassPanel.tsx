@@ -4,6 +4,7 @@
  * Bold, game-like aesthetic with depth and contrast.
  */
 import { useEffect } from 'react'
+import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
 
 interface GlassPanelProps {
@@ -28,7 +29,9 @@ export function GlassPanel({
     return () => window.removeEventListener('keydown', onKey)
   }, [onClose])
 
-  return (
+  // Portal to <body>: a panel mounted inside the map (OwnedTerritoryHub from a hex click) otherwise inherits the
+  // map wrapper's z-index:1 stacking context and ends up UNDER the dock and top HUD (z 900).
+  return createPortal(
     <>
       {/* Backdrop */}
       <motion.div
@@ -54,6 +57,8 @@ export function GlassPanel({
         style={{
           position: 'fixed', inset: 0, zIndex: 1001,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
+          // Keep the panel inside the free area between the top HUD (+ GOD MODE pill) and the bottom dock
+          padding: 'var(--hx-safe-top) 0 var(--hx-safe-bottom)', boxSizing: 'border-box',
           pointerEvents: 'none',
         }}
       >
@@ -61,7 +66,7 @@ export function GlassPanel({
           ['--accent' as any]: accent,
           width: width || '92vw',
           maxWidth: 960,
-          maxHeight: '92vh',
+          maxHeight: '100%',
           pointerEvents: 'auto',
           background: 'var(--hx-panel)',
           border: '3px solid var(--hx-line-strong)',
@@ -129,6 +134,7 @@ export function GlassPanel({
         </div>
         </div>
       </motion.div>
-    </>
+    </>,
+    document.body,
   )
 }

@@ -17,12 +17,12 @@ const fmt = (s: number) => {
 
 export function ExplorationLayer({ map }: { map: L.Map | null }) {
   const layer = useLeafletLayer(map)
-  const { claims } = usePendingClaims()
+  const { claims, completeClaim } = usePendingClaims()
 
   useEffect(() => {
     if (!layer) return
     layer.clearLayers()
-    const timers: { el: () => HTMLElement | null; end: number }[] = []
+    const timers: { el: () => HTMLElement | null; end: number; id: number; done?: boolean }[] = []
     for (const c of claims) {
       if (c.method !== 'explore' || !c.h3_index) continue
       let pts: [number, number][], center: [number, number]
@@ -40,12 +40,16 @@ export function ExplorationLayer({ map }: { map: L.Map | null }) {
         icon: L.divIcon({ className: 'hx-exp', iconSize: [90, 34], iconAnchor: [45, 17],
           html: `<div class="hx-exp__label">EXPLORING</div><div class="hx-exp__time" id="${id}">${fmt((end - Date.now()) / 1000)}</div>` }),
       }))
-      timers.push({ el: () => document.getElementById(id), end })
+      timers.push({ el: () => document.getElementById(id), end, id: c.id })
     }
     if (!timers.length) return
-    const t = setInterval(() => timers.forEach(x => { const el = x.el(); if (el) el.textContent = fmt((x.end - Date.now()) / 1000) }), 1000)
+    const t = setInterval(() => timers.forEach(x => {
+      const left = (x.end - Date.now()) / 1000
+      const el = x.el(); if (el) el.textContent = fmt(left)
+      if (left <= 0 && !x.done) { x.done = true; completeClaim(x.id) }   // finish the claim (server checks the time)
+    }), 1000)
     return () => clearInterval(t)
-  }, [layer, claims])
+  }, [layer, claims, completeClaim])
 
   return null
 }

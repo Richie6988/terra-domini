@@ -22,8 +22,6 @@ import { HarvestButton, NudgeStack } from './components/shared/SessionLoop'
 import { HexodDock } from './components/shared/HexodDock'
 import { RadarWidget } from './components/shared/RadarWidget'
 import { IconSVG } from './components/shared/iconBank'
-import { ClaimProgressBar } from './components/shared/ClaimProgressBar'
-import { usePendingClaims } from './hooks/usePendingClaims'
 import { DayCycleWidget } from './components/shared/DayCycleWidget'
 import { LoadingGlobe } from './components/shared/LoadingGlobe'
 
@@ -132,7 +130,6 @@ function GameScreen() {
     }
   }, [accessToken])
   const setActivePanel       = useStore((s) => s.setActivePanel)
-  const { claims, completeClaim } = usePendingClaims()
   // Dev-only: /?nointro skips the 3D globe (QA screenshots)
   const [mapLoaded, setMapLoaded] = useState(() => import.meta.env.DEV && new URLSearchParams(location.search).has('nointro'))
   // Stable callback — an inline arrow re-ran LoadingGlobe's effect (and restarted the intro) on every App render
@@ -248,17 +245,7 @@ function GameScreen() {
       {/* Radar widget — bottom-right */}
       <RadarWidget />
 
-      {/* Pending territory claims — floating progress bars */}
-      {claims.length > 0 && (
-        <div style={{
-          position: 'fixed', top: 80, right: 12, zIndex: 900,
-          display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 220,
-        }}>
-          {claims.slice(0, 3).map(c => (
-            <ClaimProgressBar key={c.id} claim={c} compact onComplete={() => completeClaim(c.id)} />
-          ))}
-        </div>
-      )}
+      {/* Explorations: countdown drawn inside the hex on the map (ExplorationLayer), which also finishes them */}
 
       {/* Missions — left side below HUD */}
       <MissionsButton />

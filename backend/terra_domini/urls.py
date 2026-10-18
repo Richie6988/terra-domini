@@ -33,14 +33,22 @@ def news_ticker(request):
     except Exception:
         pass
 
-    # Fallback — static news
-    return Response([
-        {'type': 'update',  'title': 'SEASON 1 LIVE',       'text': 'Capture territories, build kingdoms, trade NFTs on Polygon.'},
-        {'type': 'event',   'title': 'LIVE EVENTS',          'text': 'News-based tokens generated daily — register in Events panel.'},
-        {'type': 'alert',   'title': 'SAFARI ACTIVE',        'text': 'Track and capture rare creatures. One hunt per day!'},
-        {'type': 'market',  'title': 'HEX ECONOMY',          'text': 'Trade territories on the marketplace. Build your empire.'},
-        {'type': 'community','title': 'HEXOD FOUNDERS',      'text': 'Join the founding alliance — recruit in Alliance panel.'},
-    ])
+    # Live real-world events on the map (apps/events/world_events.py), then the accurate basics
+    items = []
+    try:
+        from django.utils import timezone as _tz
+        from terra_domini.apps.events.news_models import NewsEvent
+        now = _tz.now()
+        for e in NewsEvent.objects.filter(starts_at__lte=now, ends_at__gt=now).exclude(h3_index='').order_by('-hex_reward')[:6]:
+            items.append({'type': 'event', 'title': (e.event_kind or 'event').upper(),
+                          'text': f'{e.headline[:90]} — hold {e.poi_name} to win {e.hex_reward} HEX'})
+    except Exception:
+        pass
+    items += [
+        {'type': 'update', 'title': 'HARVEST', 'text': 'Your stock fills for 8h — collect it 3 times a day or production is lost.'},
+        {'type': 'alert',  'title': 'SAFARI',  'text': '5 hunts a day: real species hide around your land. Fill your album.'},
+    ]
+    return Response(items)
 
 # Mail
 from terra_domini.apps.mail.views import inbox as mail_inbox, mark_read as mail_mark_read

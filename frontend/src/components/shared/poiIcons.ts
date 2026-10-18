@@ -14,6 +14,7 @@ export const ICON_ALIAS: Record<string, string> = {
   mega_dam: 'infrastructure', agri_megafarm: 'farm', research_station: 'science', particle_collider: 'science',
   internet_cable: 'tech', data_center: 'tech', casino_resort: 'treasure', offshore_haven: 'money_bag',
   secret_facility: 'conspiracy', oligarch_asset: 'treasure', media_hq: 'news', alliance_hq: 'diplomacy',
+  anomaly: 'mystery',
 }
 /** Icon id for a POI category (falls back to the category itself) */
 export const iconIdFor = (id?: string) => { const k = (id || '').toLowerCase(); return ICON_ALIAS[k] || k || 'city' }

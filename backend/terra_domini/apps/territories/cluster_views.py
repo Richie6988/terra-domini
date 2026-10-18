@@ -1,7 +1,7 @@
 """
 Territory cluster + customization + income endpoints.
 GET  /api/territories/clusters/     — player's clusters + unlock tiers
-POST /api/territories/customize/    — update territory customization
+POST /api/territories-geo/customize/ — update territory / kingdom customization
 GET  /api/territories/income/       — TDC income projection
 GET  /api/territories/overlay/      — map overlay events for viewport
 """
@@ -156,15 +156,42 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
                 'needed': needed,
             }, status=403)
 
+        import re as _re
+        def _color(v):
+            return v if isinstance(v, str) and _re.fullmatch(r'#[0-9a-fA-F]{6}', v) else None
+        name = str(request.data.get('display_name', '') or '').strip()[:30]
+        border, fill = _color(request.data.get('border_color')), _color(request.data.get('fill_color'))
+        embed_url = str(request.data.get('embed_url', '') or '').strip()
+        if embed_url and not embed_url.startswith('https://'):
+            return Response({'error': 'Image URL must start with https://'}, status=400)
+
         cust, _ = TerritoryCustomization.objects.get_or_create(territory=territory)
-        for field in ('display_name', 'flag_emoji', 'border_color', 'fill_color',
-                      'embed_type', 'embed_url', 'embed_title', 'ad_advertiser'):
+        cust.display_name = name or cust.display_name
+        if border: cust.border_color = border
+        if fill: cust.fill_color = fill
+        for field in ('flag_emoji', 'embed_type', 'embed_title', 'ad_advertiser'):
             if field in request.data:
                 setattr(cust, field, request.data[field])
+        if 'embed_url' in request.data:
+            cust.embed_url = embed_url
         cust.unlocked_tier = tier
         cust.save()
 
-        return Response({'success': True, 'tier': tier, 'embed_type': cust.embed_type})
+        # Kingdom-wide: every hex of the connected kingdom carries the name and colours (the map reads them)
+        applied = 1
+        if request.data.get('scope') == 'kingdom':
+            upd = {}
+            if name: upd['custom_name'] = name
+            if border: upd['border_color'] = border
+            if fill: upd['fill_color'] = fill
+            if upd:
+                applied = Territory.objects.filter(owner=request.user, h3_index__in=list(my_cluster)).update(**upd)
+            TerritoryCustomization.objects.filter(territory__owner=request.user, territory__h3_index__in=list(my_cluster)) \
+                .exclude(territory=territory).update(embed_type=cust.embed_type, embed_url=cust.embed_url)
+
+        return Response({'success': True, 'tier': tier, 'embed_type': cust.embed_type, 'applied': applied,
+                         'name': cust.display_name, 'border_color': cust.border_color, 'fill_color': cust.fill_color,
+                         'embed_url': cust.embed_url})
 
     @action(detail=False, methods=['GET'], url_path='income')
     def income(self, request):

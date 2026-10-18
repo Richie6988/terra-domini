@@ -15,6 +15,7 @@ import { AttackPanel } from '../hud/AttackPanel'
 import { injectGlowFilter, makeHexPolygon, injectHexAnimations, getVisibleHexes, getHexBoundary } from './HexLayer'
 import { KingdomBorderLayer } from './KingdomBorderLayer'
 import { PoiOverviewLayer } from './PoiOverviewLayer'
+import { iconIdFor } from '../shared/poiIcons'
 import { ExplorationLayer } from './ExplorationLayer'
 import { OwnedTerritoryHub } from '../kingdom/OwnedTerritoryHub'
 import { KingdomDetailOverlay } from '../kingdom/KingdomDetailOverlay'
@@ -410,7 +411,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       const ta = t as any
       if ((ta.poi_name || ta.is_landmark) && (ta.center_lat || ta.lat)) {
         const ringCol = POI_RARITY_COLOR[ta.rarity] || POI_CAT_COLORS[ta.poi_category] || '#6366f1'
-        const iconKey = ta.poi_icon || POI_ICON_ALIAS[ta.poi_category] || ta.poi_category || 'landmark'
+        const iconKey = ta.poi_icon || POI_ICON_ALIAS[ta.poi_category] || iconIdFor(ta.poi_category || ta.territory_type || 'landmark')
         // Static iconBank SVG (trusted, not player-controlled)
         const svg = getIcon(String(iconKey).toLowerCase()).replace('<svg ', '<svg width="100%" height="100%" ')
         const icon = L.divIcon({

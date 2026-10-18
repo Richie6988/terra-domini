@@ -178,6 +178,8 @@ export function NudgeStack() {
   const [dismissed, setDismissed] = useState<Set<string>>(new Set())
   const notified = useRef<Set<string>>(new Set())
   const [perm, setPerm] = useState<string>(typeof Notification !== 'undefined' ? Notification.permission : 'unsupported')
+  const [alertsHidden, setAlertsHidden] = useState(() => { try { return localStorage.getItem('hx_alerts_hidden') === '1' } catch { return false } })
+  const askAlerts = perm === 'default' && ownsLand && !alertsHidden
 
   // Harvest nudges are shown by HarvestButton itself (still used for background notifications below)
   const nudges = (data?.nudges || []).filter(n => !dismissed.has(n.id) && !n.type.startsWith('harvest')).slice(0, 3)
@@ -201,7 +203,7 @@ export function NudgeStack() {
     else if (n.cta.panel) setActivePanel(n.cta.panel as any)
   }
 
-  if (!nudges.length && !(perm === 'default' && ownsLand)) return null
+  if (!nudges.length && !askAlerts) return null
   return (
     <div className="hx-nudges">
       <AnimatePresence initial={false}>
@@ -222,10 +224,14 @@ export function NudgeStack() {
           </motion.div>
         ))}
       </AnimatePresence>
-      {perm === 'default' && ownsLand && (
-        <button className="hx-nudge__alerts" onClick={() => Notification.requestPermission().then(setPerm)}>
-          Turn on alerts — know when you're attacked
-        </button>
+      {askAlerts && (
+        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+          <button className="hx-nudge__alerts" onClick={() => Notification.requestPermission().then(setPerm)}>
+            Turn on alerts — know when you're attacked
+          </button>
+          <button className="hx-nudge__x" aria-label="Hide" style={{ position: 'static' }}
+            onClick={() => { setAlertsHidden(true); try { localStorage.setItem('hx_alerts_hidden', '1') } catch { /* ignore */ } }}>×</button>
+        </div>
       )}
     </div>
   )

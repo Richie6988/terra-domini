@@ -139,7 +139,10 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
     if (!kingdoms.length) return
 
     kingdoms.forEach(k => {
-      const color = TIER_COLOR[Math.min(k.tier, 6)]
+      // Player customisation (server) first, tier colour otherwise
+      const color = (k as any).border_color || TIER_COLOR[Math.min(k.tier, 6)]
+      const fill = (k as any).fill_color || color
+      const kname: string = ((k as any).name || '').replace(/[&<>"']/g, (c: string) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' } as any)[c])
       const isMain = k.is_main
 
       if (zoom >= 10 && k.h3_indexes?.length) {
@@ -148,8 +151,8 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
           try {
             const pts = cellToBoundary(hx) as [number, number][]
             const poly = L.polygon(pts as L.LatLngTuple[], {
-              fillColor: color,
-              fillOpacity: isMain ? 0.07 : 0.04,
+              fillColor: fill,
+              fillOpacity: (k as any).fill_color ? 0.28 : (isMain ? 0.07 : 0.04),
               color: 'transparent', weight: 0,
               interactive: true,
             })
@@ -221,7 +224,7 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
             <span style="font-family:'Share Tech Mono',monospace;font-size:${compact ? 13 : 15}px;font-weight:700;color:#fff;line-height:1">${k.size}</span>
             ${compact ? '' : `<span style="width:1px;height:14px;background:rgba(255,255,255,0.18)"></span>
             ${isMain ? crown : ''}
-            <span style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:800;letter-spacing:1.5px;color:${isMain ? '#FCD34D' : 'rgba(255,255,255,0.8)'}">${isMain ? 'MAIN' : 'KINGDOM'}</span>`}
+            <span style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:800;letter-spacing:1.5px;color:${isMain ? '#FCD34D' : 'rgba(255,255,255,0.8)'}">${kname || (isMain ? 'MAIN' : 'KINGDOM')}</span>`}
           </div>`,
           className: 'td-kingdom-badge',
           iconSize: [0, 0],
@@ -240,7 +243,7 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
 
         marker.bindTooltip(
           `<div style="font-size:11px;line-height:1.5;font-family:system-ui,sans-serif;letter-spacing:0">
-            <strong style="color:${color};font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:0.5px">${isMain ? 'Main Kingdom' : `Kingdom (${k.size})`}</strong><br/>
+            <strong style="color:${color};font-family:'Orbitron',sans-serif;font-size:12px;letter-spacing:0.5px">${kname || (isMain ? 'Main Kingdom' : `Kingdom (${k.size})`)}</strong><br/>
             <span style="color:rgba(255,255,255,0.75)">Tier ${k.tier} · ${k.size} territories</span>
             ${k.tdc_per_24h ? `<br/><span style="color:#34D399;font-family:'Share Tech Mono',monospace">+${Math.round(k.tdc_per_24h).toLocaleString()} HEX/day</span>` : ''}
             ${k.size <= 1 ? '<br/><span style="color:#F87171;font-size:10px"> Isolated — skills frozen</span>' : ''}

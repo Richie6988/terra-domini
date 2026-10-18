@@ -63,6 +63,9 @@ export function Token3DViewer(props: Token3DProps) {
   const tierKey: TierKey = tier || RARITY_TIER[rarityKey || ''] || 'BRONZE'
 
   const containerRef = useRef<HTMLDivElement>(null)
+  // Height of the info sheet: the 3D stage stops above it so the sheet never hides the token
+  const infoRef = useRef<HTMLDivElement>(null)
+  const [infoH, setInfoH] = useState(0)
   const viewerRef = useRef<ReturnType<typeof createTokenViewer> | null>(null)
   const [mounted, setMounted] = useState(false)
   // Stable fallback image — generated once, doesn't change on re-render
@@ -140,6 +143,15 @@ export function Token3DViewer(props: Token3DProps) {
     return () => window.removeEventListener('keydown', handler)
   }, [visible])
 
+  useEffect(() => {
+    const el = infoRef.current
+    if (!visible || !el || typeof ResizeObserver === 'undefined') { setInfoH(el?.offsetHeight || 0); return }
+    const ro = new ResizeObserver(() => setInfoH(el.offsetHeight))
+    ro.observe(el)
+    setInfoH(el.offsetHeight)
+    return () => ro.disconnect()
+  }, [visible, !!infoPanel])
+
   if (!visible) return null
 
   return (
@@ -186,7 +198,8 @@ export function Token3DViewer(props: Token3DProps) {
 
       <div
         ref={containerRef}
-        style={{ width: '100%', height: '100%', position: 'absolute', inset: 0, zIndex: 1 }}
+        // With an info sheet the stage ends 12px above it (sheet sits at bottom: 30); hexodToken3D refits on resize
+        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: infoPanel && infoH ? infoH + 42 : 0, zIndex: 1 }}
       />
 
       {!infoPanel && (
@@ -200,9 +213,11 @@ export function Token3DViewer(props: Token3DProps) {
       )}
 
       {infoPanel && (
-        <div style={{
-          position: 'absolute', bottom: 30, left: '50%', transform: 'translateX(-50%)',
-          zIndex: 5, pointerEvents: 'auto',
+        <div ref={infoRef} style={{
+          position: 'absolute', bottom: 22, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 5, pointerEvents: 'auto', paddingBottom: 8,
+          // cap the sheet so the token always keeps ~40% of the screen; extra sheet content scrolls
+          maxHeight: '52vh', overflowY: 'auto', borderRadius: 18,
         }}>
           {infoPanel}
         </div>

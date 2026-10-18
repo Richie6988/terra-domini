@@ -96,7 +96,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 res_nourriture, res_eau, res_stabilite, res_acier, res_composants,
                 res_main_oeuvre, res_silicium, res_terres_rares, res_uranium, res_gaz,
                 center_lat, center_lon, country_code, place_name, landmark_name, nft_version,
-                custom_name, custom_emoji, border_color
+                custom_name, custom_emoji, border_color, fill_color
                 FROM territories WHERE h3_index IN ({_ph})""", hex_ids)
             cols = [d[0] for d in _c.description]
             for row in _c.fetchall():
@@ -187,6 +187,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 'custom_name': raw.get('custom_name') or (getattr(t,'custom_name',None) if t else None),
                 'custom_emoji': getattr(t, 'custom_emoji', None) if t else None,
                 'border_color': raw.get('border_color') or (getattr(t,'border_color',None) if t else None),
+                'fill_color': raw.get('fill_color') or (getattr(t,'fill_color',None) if t else None),
                 # POI — hex identity when POI present
                 'poi_name': poi.get('name'),
                 'poi_category': poi.get('category'),

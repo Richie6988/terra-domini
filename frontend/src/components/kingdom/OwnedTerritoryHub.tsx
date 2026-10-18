@@ -21,6 +21,7 @@ import { IconSVG } from '../shared/iconBank'
 import { Token3DViewer } from '../shared/Token3DViewer'
 import { TokenHexPreview } from '../shared/TokenHexPreview'
 import { api } from '../../services/api'
+import { useServerKingdomCustom, useSaveKingdomCustom } from './kingdomCustom'
 import { usePlayer } from '../../store'
 import { Crown, LayoutGrid, Palette, Lock, MapPin } from 'lucide-react'
 
@@ -111,22 +112,6 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
       </div>
     </label>
   )
-}
-
-// ════════════════════════════════════════════════════════════════
-// Customization hook (localStorage-backed)
-// ════════════════════════════════════════════════════════════════
-function useKingdomCustomization(kingdomId: string) {
-  const key = `hx_kingdom_${kingdomId}`
-  const load = (): { name?: string; fillColor?: string; borderColor?: string; imageUrl?: string } => {
-    try { return JSON.parse(localStorage.getItem(key) || '{}') } catch { return {} }
-  }
-  const [cust, setCust] = useState(load)
-  const save = (next: typeof cust) => {
-    setCust(next)
-    try { localStorage.setItem(key, JSON.stringify(next)) } catch {}
-  }
-  return [cust, save] as const
 }
 
 // ════════════════════════════════════════════════════════════════
@@ -222,8 +207,9 @@ function GalleryTab({ kingdom, tokens, onToken3D }: {
 // CUSTOMIZE TAB — name, colors, embed, diaporama
 // ════════════════════════════════════════════════════════════════
 function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[] }) {
-  const kId = kingdom.cluster_id || kingdom.id || 'kingdom'
-  const [cust, setCust] = useKingdomCustomization(kId)
+  const anchor: string | undefined = kingdom.h3_indexes?.[0] || tokens[0]?.h3_index
+  const cust = useServerKingdomCustom(anchor)
+  const saveKingdom = useSaveKingdomCustom()
   const [name, setName] = useState(cust.name || 'My Kingdom')
   const [fillColor, setFillColor] = useState(cust.fillColor || TIER_COLOR[Math.min(kingdom.tier || 1, 6)])
   const [borderColor, setBorderColor] = useState(cust.borderColor || TIER_COLOR[Math.min(kingdom.tier || 1, 6)])
@@ -234,32 +220,14 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
   const embedUnlocked = (kingdom.size || tokens.length) >= minTerritoriesForEmbed
 
   const handleSave = async () => {
+    if (!anchor) return
     setSaving(true)
-    // Local save (immediate feedback)
-    setCust({ name, fillColor, borderColor, imageUrl })
-
-    // Remote save (best-effort — backend supports per-territory customization)
-    if (tokens.length > 0 && tokens[0].h3_index) {
-      try {
-        await api.post('/territories/customize/', {
-          h3_index: tokens[0].h3_index,
-          display_name: name,
-          border_color: borderColor,
-          fill_color: fillColor,
-          embed_type: imageUrl ? 'image' : 'none',
-          embed_url: imageUrl,
-          embed_title: name,
-        })
-      } catch (err: any) {
-        // Non-blocking: local save already done. Only warn if it's a tier lock.
-        const msg = err?.response?.data?.error
-        if (msg && /requires/.test(msg)) {
-          toast(msg, { icon: 'i' })
-        }
-      }
-    }
-    toast.success(`${name} saved!`)
-    setSaving(false)
+    try {
+      const r = await saveKingdom(anchor, { name, fillColor, borderColor, imageUrl: embedUnlocked ? imageUrl : '' })
+      toast.success(`${name} saved — ${r.applied} territor${r.applied > 1 ? 'ies' : 'y'} updated on the map`)
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || 'Could not save')
+    } finally { setSaving(false) }
   }
 
   return (

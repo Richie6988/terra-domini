@@ -169,11 +169,13 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
   } else if (isOwn) {
     // OWN territory: fill only, NO per-hex border
     // The KingdomBorderLayer draws the unified outer border
-    fill = '#00FF87'
+    fill = ta.fill_color || '#00FF87'   // kingdom colour chosen by the player (customize, scope=kingdom)
     stroke = 'transparent'
     dash = ''
 
-    if (poiVisible) {
+    if (ta.fill_color) {
+      fillOp = 0.38; weight = 0; cls = 'td-hex-own-custom'
+    } else if (poiVisible) {
       fillOp = 0.30; weight = 0
       cls = rarity === 'mythic'? 'td-own-mythic'
           : rarity === 'legendary' ? 'td-own-legendary'

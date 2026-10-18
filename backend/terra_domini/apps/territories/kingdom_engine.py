@@ -192,8 +192,15 @@ def recompute_kingdoms(player) -> list[dict]:
                 )
             )
 
+            # Player customisation (cluster_views.customize, scope=kingdom) — stored on the hexes
+            from terra_domini.apps.territories.models import Territory as _T, TerritoryCustomization as _TC
+            cust_rows = list(_T.objects.filter(h3_index__in=list(component)).exclude(custom_name__isnull=True, border_color__isnull=True, fill_color__isnull=True)
+                             .values_list('custom_name', 'border_color', 'fill_color')[:50])
+            pick = lambda i: next((r[i] for r in cust_rows if r[i]), None)
+            embed = _TC.objects.filter(territory__h3_index__in=list(component)).exclude(embed_url='').values_list('embed_url', flat=True).first()
             result.append({
                 'cluster_id': cluster_id,
+                'name': pick(0), 'border_color': pick(1), 'fill_color': pick(2), 'embed_url': embed or None,
                 'size': size,
                 'is_main': is_main,
                 'tier': tier,
