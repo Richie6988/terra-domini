@@ -83,6 +83,7 @@ export interface TokenFaceProps {
   terrain?: string       // urban / rural / mountain … (territory type)
   tokenNo?: string       // token id or album number
   cellId?: string        // H3 cell
+  pictos?: string[]      // raw SVGs: category · terrain · main resource — what makes this token unique (original design)
 }
 
 export interface FrontAnim {
@@ -312,7 +313,7 @@ export function drawTokenFront(
     for (let row = 0, y = 0; y < s + hr; row++, y += hr * 1.5)
       for (let x = row % 2 ? hr * 0.866 : 0; x < s + hr; x += hr * 1.732) { drawHex(ctx, x, y, hr); ctx.stroke() }
     ctx.globalAlpha = 1
-    if (state.iconSvg) drawSVGIcon(ctx, c, s * 0.38, s * 0.24, state.iconSvg, state.catColor, tier.metal)
+    if (state.iconSvg && !(state.pictos || []).length) drawSVGIcon(ctx, c, s * 0.38, s * 0.24, state.iconSvg, state.catColor, tier.metal)
   }
 
   // ── Legibility: dark veil top (header) and bottom (name + stats), picture stays bright in the middle ──
@@ -328,7 +329,7 @@ export function drawTokenFront(
   const hr2 = s * 0.5
   const holo = ctx.createLinearGradient(c + Math.cos(anim.holoAngle) * hr2, c + Math.sin(anim.holoAngle) * hr2,
     c - Math.cos(anim.holoAngle) * hr2, c - Math.sin(anim.holoAngle) * hr2)
-  const foil = ['legendary', 'mythic', 'epic'].includes(rarity) ? 0.14 : 0.06
+  const foil = ['legendary', 'mythic'].includes(rarity) ? 0.2 : rarity === 'epic' ? 0.15 : rarity === 'rare' ? 0.1 : 0.05
   holo.addColorStop(0, `rgba(255,0,140,${foil})`); holo.addColorStop(0.33, `rgba(255,230,0,${foil})`)
   holo.addColorStop(0.66, `rgba(0,220,255,${foil})`); holo.addColorStop(1, `rgba(170,0,255,${foil})`)
   ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = holo; ctx.fillRect(0, 0, s, s)
@@ -347,10 +348,36 @@ export function drawTokenFront(
   ctx.save(); ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = gloss
   ctx.fillRect(c - ribW / 2, ribY - ribH / 2, ribW, ribH / 2); ctx.restore()
   outlined(ctx, nice(rarity || tier.id), c, ribY + s * 0.002, s * 0.036, '#ffffff', { maxW: ribW * 0.84, stroke: 0.16 })
-  ctx.save(); ctx.font = `800 ${s * 0.026}px Nunito, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+  // Metal sweep (original design): the tier's metal with a moving white shine — category, side texts
+  const sw = s * 0.5, so = (anim.shineOffset * 2) % (s * 1.6) - s * 0.3
+  const sweep = ctx.createLinearGradient(so, 0, so + sw, 0)
+  sweep.addColorStop(0, tier.metal); sweep.addColorStop(0.45, '#ffffff'); sweep.addColorStop(0.55, '#ffffff'); sweep.addColorStop(1, tier.metal)
+  ctx.save(); ctx.font = `900 ${s * 0.027}px Orbitron, Nunito, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
   ;(ctx as any).letterSpacing = `${(s * 0.004).toFixed(1)}px`
-  ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = s * 0.012
-  ctx.fillStyle = '#e8edff'; ctx.fillText(nice(state.category).slice(0, 26), c, s * 0.198)
+  ctx.lineWidth = s * 0.006; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(nice(state.category).slice(0, 24), c, s * 0.198)
+  ctx.shadowColor = tier.metal; ctx.shadowBlur = s * 0.02
+  ctx.fillStyle = sweep; ctx.fillText(nice(state.category).slice(0, 24), c, s * 0.198)
+  ctx.restore()
+
+  // Tier badge: metal hexagon with the tier's letter (B · S · G · E · D)
+  const bx = c + s * 0.255, by = s * 0.235, br = s * 0.036
+  ctx.save(); ctx.shadowBlur = s * 0.03; ctx.shadowColor = tier.metal
+  ctx.fillStyle = tier.carbon; drawHex(ctx, bx, by, br); ctx.fill()
+  ctx.strokeStyle = tier.metal; ctx.lineWidth = s * 0.005; ctx.stroke(); ctx.restore()
+  outlined(ctx, tier.id[0], bx, by + s * 0.002, s * 0.034, tier.title, { font: 'Orbitron, sans-serif', stroke: 0.1 })
+
+  // Picto row: category · terrain · resource, glowing hexes in the category colour (each token its own mix)
+  const pictos = (state.pictos || []).filter(Boolean).slice(0, 3)
+  if (pictos.length) {
+    const ps = s * 0.078, gap = s * 0.026, total = pictos.length * ps + (pictos.length - 1) * gap
+    pictos.forEach((svg, i) => drawSVGIcon(ctx, c - total / 2 + ps / 2 + i * (ps + gap), s * 0.272, ps, svg, state.catColor || rc, tier.metal))
+  }
+
+  // Side texts (original design): TIER on the left, number on the right, vertical, in metal
+  ctx.save(); ctx.font = `900 ${s * 0.03}px Orbitron, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+  ctx.shadowBlur = s * 0.015; ctx.shadowColor = tier.metal; ctx.fillStyle = sweep
+  ctx.save(); ctx.translate(c - s * 0.392, s * 0.43); ctx.rotate(-Math.PI / 2); ctx.fillText(tier.id, 0, 0); ctx.restore()
+  if (state.tokenNo) { ctx.save(); ctx.translate(c + s * 0.392, s * 0.43); ctx.rotate(Math.PI / 2); ctx.fillText(`No ${state.tokenNo}`, 0, 0); ctx.restore() }
   ctx.restore()
 
   // ── Name: the hero, up to 2 lines, auto-fit ──
@@ -414,7 +441,7 @@ export function drawTokenFront(
   const issued = issuedLabel(state.date)
   const line1 = [issued ? `ISSUED ${issued}` : '', state.edition ? nice(state.edition) : ''].filter(Boolean).join(' · ')
   if (line1) outlined(ctx, line1, c, s * 0.792, s * 0.024, tier.metal, { font: 'Nunito, sans-serif', weight: 900, maxW: s * 0.6, stroke: 0.2 })
-  if (state.tokenNo) outlined(ctx, `No ${state.tokenNo}`, c, s * 0.836, s * 0.028, '#ffffff', { font: '"Roboto Mono", "Courier New", monospace', weight: 700, maxW: s * 0.42, stroke: 0.2 })
+  if (state.cellId) outlined(ctx, `CELL ${state.cellId}`, c, s * 0.834, s * 0.019, tier.metal, { font: '"Roboto Mono", "Courier New", monospace', weight: 700, maxW: s * 0.42, stroke: 0.25 })
 
   if (opts.enableFilmGrain !== false) {
     ctx.save(); ctx.globalAlpha = 0.012

@@ -13,6 +13,9 @@ import { createTokenViewer, type TokenViewerProps, type TierKey, TIERS } from '.
 import { getIcon } from './iconBank'
 import { api } from '../../services/api'
 import { iconFor } from './poiIcons'
+import { RES_ICON } from './resourceIcons'
+
+const TERRAIN_ICON: Record<string, string> = { lake: 'water_drop', ice: 'glacier', farmland: 'wheat', grassland: 'sprout', wetland: 'leaf', water: 'ocean', arctic: 'tundra' }
 
 // Game rarity → metal of the token (rare is no longer bronze like a common)
 export const RARITY_TIER: Record<string, TierKey> = {
@@ -136,6 +139,9 @@ export function Token3DViewer(props: Token3DProps) {
       // Picture: the token's Wikipedia photo, else the real satellite view of its hex (never a stock photo)
       if (d.image_url || d.satellite_url) viewerRef.current.update({ imageSrc: d.image_url || d.satellite_url })
       viewerRef.current.update({
+        // Pictos that make this token unique: category · terrain · its first resource
+        pictos: [iconFor(d.poi_category || iconId || ''), getIcon(TERRAIN_ICON[d.terrain] || d.terrain || 'globe'),
+                 d.resources?.[0] ? getIcon(RES_ICON[d.resources[0].id] || 'box') : ''].filter(Boolean),
         rarity: d.rarity, hexPerDay: d.hex_per_day, region: d.region?.name || '', country: d.country_code || '',
         terrain: d.terrain || '', tokenNo: d.token_id ? String(d.token_id) : '', cellId: d.h3_index,
         edition: d.edition_label || 'GENESIS', date: d.issued_at || '',

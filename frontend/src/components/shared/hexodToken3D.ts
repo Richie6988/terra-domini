@@ -73,6 +73,7 @@ export interface TokenViewerProps {
   terrain?: string
   tokenNo?: string
   cellId?: string
+  pictos?: string[]
 }
 
 export interface TokenBack {
@@ -200,6 +201,7 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     back: initial.back || null as TokenBack | null,
     rarity: initial.rarity || '', hexPerDay: initial.hexPerDay || 0, region: initial.region || '', country: initial.country || '',
     terrain: initial.terrain || '', tokenNo: initial.tokenNo || '', cellId: initial.cellId || '',
+    pictos: initial.pictos || [] as string[],
   }
   const tierKey = (): TierKey =>
     (Object.keys(TIERS) as TierKey[]).find(k => TIERS[k] === state.tier) || 'BRONZE'
@@ -415,7 +417,7 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
       date: state.date,
       iconSvg: state.iconSvg,
       rarity: state.rarity, hexPerDay: state.hexPerDay, region: state.region, country: state.country,
-      terrain: state.terrain, tokenNo: state.tokenNo, cellId: state.cellId,
+      terrain: state.terrain, tokenNo: state.tokenNo, cellId: state.cellId, pictos: state.pictos,
     }, {
       shineOffset: s * 0.15,
       holoAngle: Math.PI * 0.33,
@@ -679,6 +681,7 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
       if (p.back !== undefined) state.back = p.back
       for (const k of ['rarity', 'region', 'country', 'terrain', 'tokenNo', 'cellId'] as const) if (p[k] !== undefined) state[k] = p[k] as string
       if (p.hexPerDay !== undefined) state.hexPerDay = p.hexPerDay
+      if (p.pictos !== undefined) state.pictos = p.pictos
       if (p.imageSrc !== undefined && p.imageSrc && p.imageSrc !== state.imageSrc) {
         state.imageSrc = p.imageSrc
         cardImg.src = p.imageSrc
