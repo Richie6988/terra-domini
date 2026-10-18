@@ -65,6 +65,14 @@ export interface TokenViewerProps {
   imageSrc?: string
   /** Real territory data printed on the back (GET /api/codex/territory/<h3>/). */
   back?: TokenBack | null
+  // Face data (rarity ribbon, stats row, footer)
+  rarity?: string
+  hexPerDay?: number
+  region?: string
+  country?: string
+  terrain?: string
+  tokenNo?: string
+  cellId?: string
 }
 
 export interface TokenBack {
@@ -189,6 +197,8 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     iconSvg: initial.iconSvg || '',
     imageSrc: initial.imageSrc || '',
     back: initial.back || null as TokenBack | null,
+    rarity: initial.rarity || '', hexPerDay: initial.hexPerDay || 0, region: initial.region || '', country: initial.country || '',
+    terrain: initial.terrain || '', tokenNo: initial.tokenNo || '', cellId: initial.cellId || '',
   }
   const tierKey = (): TierKey =>
     (Object.keys(TIERS) as TierKey[]).find(k => TIERS[k] === state.tier) || 'BRONZE'
@@ -403,6 +413,8 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
       owner: state.owner,
       date: state.date,
       iconSvg: state.iconSvg,
+      rarity: state.rarity, hexPerDay: state.hexPerDay, region: state.region, country: state.country,
+      terrain: state.terrain, tokenNo: state.tokenNo, cellId: state.cellId,
     }, {
       shineOffset: s * 0.15,
       holoAngle: Math.PI * 0.33,
@@ -663,6 +675,8 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
       if (p.date !== undefined) state.date = p.date
       if (p.iconSvg !== undefined) state.iconSvg = p.iconSvg
       if (p.back !== undefined) state.back = p.back
+      for (const k of ['rarity', 'region', 'country', 'terrain', 'tokenNo', 'cellId'] as const) if (p[k] !== undefined) state[k] = p[k] as string
+      if (p.hexPerDay !== undefined) state.hexPerDay = p.hexPerDay
       if (p.imageSrc !== undefined && p.imageSrc && p.imageSrc !== state.imageSrc) {
         state.imageSrc = p.imageSrc
         cardImg.src = p.imageSrc

@@ -347,7 +347,7 @@ def territory_card(request, h3_index):
         return Response({'error': 'Invalid hex'}, status=400)
     t = Territory.objects.select_related('owner').filter(h3_index=h3_index).first()
     poi = UnifiedPOI.objects.filter(h3_index=h3_index, is_active=True).values(
-        'name', 'category', 'token_id', 'real_output', 'description', 'fun_fact', 'wiki_url', 'image_url', 'rarity').first() or {}
+        'name', 'category', 'token_id', 'real_output', 'description', 'fun_fact', 'wiki_url', 'image_url', 'rarity', 'country_code').first() or {}
     rarity = (t.rarity if t else None) or 'common'
     connected = False
     if t and t.owner_id:
@@ -358,6 +358,7 @@ def territory_card(request, h3_index):
     region = R.biome_for(round(lat, 3), round(lon, 3))
     return Response({
         'h3_index': h3_index, 'lat': round(lat, 4), 'lon': round(lon, 4),
+        'terrain': (t.territory_type if t else '') or '', 'country_code': (t.country_code if t else '') or poi.get('country_code', '') or '',
         'rarity': rarity, 'is_shiny': bool(t and t.is_shiny),
         'owner': t.owner.username if t and t.owner_id else None,
         'captured_at': t.captured_at.date().isoformat() if t and t.captured_at else None,
