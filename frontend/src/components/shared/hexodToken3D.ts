@@ -164,21 +164,11 @@ function buildStudio(): THREE.Scene {
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 const easeOutBack = (t: number) => { const k = 1.6; return 1 + (k + 1) * Math.pow(t - 1, 3) + k * Math.pow(t - 1, 2) }
 
-function hexA(hex: string, a: number) {
-  const n = parseInt(hex.replace('#', '').slice(0, 6), 16)
-  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`
-}
 function shade(hex: string, k: number) {
   const n = parseInt(hex.replace('#', '').slice(0, 6), 16)
   const ch = (v: number) => Math.max(0, Math.min(255, Math.round(v * k))).toString(16).padStart(2, '0')
   return `#${ch((n >> 16) & 255)}${ch((n >> 8) & 255)}${ch(n & 255)}`
 }
-function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
-  ctx.beginPath()
-  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r)
-  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath()
-}
-
 // ═══════════════════════════════════════════════════════════════
 // MAIN FUNCTION
 // ═══════════════════════════════════════════════════════════════
@@ -423,125 +413,81 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
 
 
   // ═══════════════════════════════════════════════════════════
-  // drawBack — the territory DEED: real data only (owner, region, production,
-  // resources, coordinates, H3 cell, mint status). Nothing random, nothing invented.
+  // drawBack — sober engraved jewel (owner 2026-10-18): brushed tier metal, text cut into the metal,
+  // no colours. Real data only: place, coordinates, region, owner, production, H3 cell, mint status.
   // ═══════════════════════════════════════════════════════════
   function drawBack() {
     const tier = state.tier
     const metal = tier.metal
-    const accent = state.catColor
     const b = state.back
     const R = s * 0.47
 
-    // Base: tier carbon with a soft radial light so the plate never reads as a black hole
-    const base = bCtx.createRadialGradient(c, c * 0.8, s * 0.05, c, c, s * 0.62)
-    base.addColorStop(0, shade(tier.carbon, 2.6))
-    base.addColorStop(1, tier.carbon)
-    bCtx.fillStyle = base
+    // Brushed metal plate
+    const g = bCtx.createLinearGradient(0, 0, s, s)
+    g.addColorStop(0, shade(metal, 1.25)); g.addColorStop(0.45, shade(metal, 0.82))
+    g.addColorStop(0.55, shade(metal, 1.05)); g.addColorStop(1, shade(metal, 0.62))
+    bCtx.fillStyle = g
     bCtx.fillRect(0, 0, s, s)
-
-    // Carbon weave inside the plate
     bCtx.save()
     drawHex(bCtx, c, c, R); bCtx.clip()
-    bCtx.strokeStyle = 'rgba(255,255,255,0.035)'
-    bCtx.lineWidth = 1
-    const step = s * 0.01
-    for (let i = -s; i < s * 2; i += step) {
-      bCtx.beginPath(); bCtx.moveTo(i, 0); bCtx.lineTo(i + s * 0.5, s); bCtx.stroke()
-      bCtx.beginPath(); bCtx.moveTo(i, 0); bCtx.lineTo(i - s * 0.5, s); bCtx.stroke()
-    }
-    // Faint world grid: latitude bands behind the text, marker at the real latitude
-    if (b) {
-      bCtx.strokeStyle = hexA(metal, 0.10); bCtx.lineWidth = 2
-      for (let la = -60; la <= 60; la += 30) {
-        const y = c - (la / 90) * R; bCtx.beginPath(); bCtx.moveTo(0, y); bCtx.lineTo(s, y); bCtx.stroke()
-      }
-      const my = c - (b.lat / 90) * R, mx = c + (b.lon / 180) * R
-      bCtx.fillStyle = hexA(accent, 0.35)
-      drawHex(bCtx, mx, my, s * 0.03); bCtx.fill()
+    for (let y = 0; y < s; y += 2) {           // brushing: fine horizontal streaks, deterministic
+      const k = Math.sin(y * 12.9898) * 43758.5453
+      const a = (k - Math.floor(k)) * 0.07
+      bCtx.fillStyle = (y % 4 === 0) ? `rgba(255,255,255,${a})` : `rgba(0,0,0,${a})`
+      bCtx.fillRect(0, y, s, 1)
     }
     bCtx.restore()
 
-    // Metal frame
-    bCtx.strokeStyle = metal; bCtx.lineWidth = s * 0.035
-    bCtx.shadowColor = metal; bCtx.shadowBlur = 30
-    drawHex(bCtx, c, c, s * 0.49); bCtx.stroke()
-    bCtx.shadowBlur = 0
-    bCtx.globalAlpha = 0.5; bCtx.lineWidth = 3
-    drawHex(bCtx, c, c, s * 0.452); bCtx.stroke()
-    bCtx.globalAlpha = 1
-
-    const text = (str: string, x: number, y: number, size: number, color: string, weight = 900, glow = 0) => {
-      bCtx.font = `${weight} ${size}px "Lilita One", Orbitron, sans-serif`
-      bCtx.textAlign = 'center'; bCtx.textBaseline = 'middle'
-      // dark outline = readable on every metal
-      bCtx.lineJoin = 'round'; bCtx.lineWidth = size * 0.16; bCtx.strokeStyle = 'rgba(0,0,0,0.75)'
-      bCtx.strokeText(str, x, y)
-      if (glow) { bCtx.shadowColor = color; bCtx.shadowBlur = glow }
-      bCtx.fillStyle = color; bCtx.fillText(str, x, y)
-      bCtx.shadowBlur = 0
+    // Bevelled rim: engraved double line
+    const groove = (r: number, w: number) => {
+      bCtx.lineWidth = w
+      bCtx.strokeStyle = 'rgba(0,0,0,0.45)'; drawHex(bCtx, c, c - 1.5, r); bCtx.stroke()
+      bCtx.strokeStyle = 'rgba(255,255,255,0.35)'; drawHex(bCtx, c, c + 1.5, r); bCtx.stroke()
     }
-    const fit = (str: string, size: number, maxW: number) => {
-      bCtx.font = `900 ${size}px "Lilita One", Orbitron, sans-serif`
+    groove(s * 0.455, 4); groove(s * 0.43, 2)
+
+    // Engraved text: dark cut + light lower lip + metal floor
+    const engrave = (str: string, y: number, size: number, weight = 800, font = '"Lilita One", Orbitron, sans-serif', maxW = s * 0.62) => {
+      bCtx.font = `${weight} ${size}px ${font}`
       const w = bCtx.measureText(str).width
-      return w > maxW ? size * maxW / w : size
+      if (w > maxW) { size = size * maxW / w; bCtx.font = `${weight} ${size}px ${font}` }
+      bCtx.textAlign = 'center'; bCtx.textBaseline = 'middle'
+      const o = Math.max(1.5, size * 0.045)
+      bCtx.fillStyle = 'rgba(255,255,255,0.55)'; bCtx.fillText(str, c, y + o)
+      bCtx.fillStyle = 'rgba(0,0,0,0.7)'; bCtx.fillText(str, c, y - o * 0.6)
+      bCtx.fillStyle = shade(metal, 0.5); bCtx.fillText(str, c, y)
+    }
+    const rule = (y: number, half: number) => {
+      bCtx.lineWidth = 2
+      bCtx.strokeStyle = 'rgba(0,0,0,0.4)'; bCtx.beginPath(); bCtx.moveTo(c - half, y - 1); bCtx.lineTo(c + half, y - 1); bCtx.stroke()
+      bCtx.strokeStyle = 'rgba(255,255,255,0.4)'; bCtx.beginPath(); bCtx.moveTo(c - half, y + 1); bCtx.lineTo(c + half, y + 1); bCtx.stroke()
     }
 
-    // Title
-    text('TERRITORY DEED', c, s * 0.12, s * 0.038, metal, 900, 18)
+    // Hallmark: small engraved hex with the tier
+    bCtx.lineWidth = 3
+    bCtx.strokeStyle = 'rgba(0,0,0,0.5)'; drawHex(bCtx, c, s * 0.155 - 1.5, s * 0.045); bCtx.stroke()
+    bCtx.strokeStyle = 'rgba(255,255,255,0.4)'; drawHex(bCtx, c, s * 0.155 + 1.5, s * 0.045); bCtx.stroke()
+    engrave('H', s * 0.157, s * 0.05)
+    engrave(`HEXOD · ${tier.id}`, s * 0.235, s * 0.026, 800)
 
-    // Rarity badge (hex medallion)
-    const rr = s * 0.065, ry = s * 0.21
-    const med = bCtx.createRadialGradient(c - rr * 0.3, ry - rr * 0.3, 0, c, ry, rr)
-    med.addColorStop(0, '#ffffff'); med.addColorStop(0.35, accent); med.addColorStop(1, shade(accent, 0.45))
-    bCtx.fillStyle = med; bCtx.shadowColor = accent; bCtx.shadowBlur = 40
-    drawHex(bCtx, c, ry, rr); bCtx.fill(); bCtx.shadowBlur = 0
-    bCtx.strokeStyle = metal; bCtx.lineWidth = s * 0.008; drawHex(bCtx, c, ry, rr); bCtx.stroke()
-    const rar = (b?.rarity || 'common').toUpperCase()
-    text(rar.slice(0, 1), c, ry + s * 0.004, s * 0.062, '#ffffff')
-    text(rar, c, ry + rr + s * 0.03, s * 0.032, accent, 900, 10)
-
+    engrave(state.tokenName, s * 0.315, s * 0.058)
     if (!b) {
-      text('HEXOD', c, c + s * 0.05, s * 0.07, metal, 900, 30)
+      rule(s * 0.38, s * 0.16)
+      engrave('TERRITORY DEED', s * 0.44, s * 0.03)
       bTex.needsUpdate = true
       return
     }
-
-    // Rows: label (left) · value (right), inside a rounded panel
-    const px = c - s * 0.3, pw = s * 0.6, py = s * 0.335, rowH = s * 0.048
-    const rows: [string, string, string?][] = [
-      ['OWNER', b.owner ? b.owner.toUpperCase() : 'UNCLAIMED', b.owner ? '#ffffff' : '#6ee7b7'],
-      ['REGION', (b.region || 'UNCHARTED').toUpperCase()],
-      ['PRODUCES', `+${Math.round(b.hexPerDay).toLocaleString()} HEX / DAY`, '#fcd34d'],
-      ...b.resources.slice(0, 3).map(r => ['', `+${r.perDay >= 10 ? Math.round(r.perDay) : r.perDay.toFixed(1)} ${r.name.toUpperCase()} / DAY`, '#93c5fd'] as [string, string, string]),
-      ['COORDS', `${Math.abs(b.lat).toFixed(3)}°${b.lat >= 0 ? 'N' : 'S'}  ${Math.abs(b.lon).toFixed(3)}°${b.lon >= 0 ? 'E' : 'W'}`],
-      ['SINCE', b.capturedAt || '—'],
-    ]
-    const ph = rows.length * rowH + s * 0.03
-    bCtx.fillStyle = 'rgba(0,0,0,0.42)'
-    bCtx.strokeStyle = hexA(metal, 0.55); bCtx.lineWidth = 3
-    roundRect(bCtx, px, py, pw, ph, s * 0.02); bCtx.fill(); bCtx.stroke()
-    rows.forEach(([label, value, color], i) => {
-      const y = py + s * 0.015 + rowH * (i + 0.5)
-      if (label) {
-        bCtx.font = `800 ${s * 0.024}px Nunito, sans-serif`
-        bCtx.textAlign = 'left'; bCtx.textBaseline = 'middle'
-        bCtx.fillStyle = hexA(metal, 0.95); bCtx.fillText(label, px + s * 0.025, y)
-      }
-      const size = fit(value, s * 0.03, pw * 0.66)
-      bCtx.font = `900 ${size}px "Lilita One", Orbitron, sans-serif`
-      bCtx.textAlign = 'right'
-      bCtx.lineWidth = size * 0.14; bCtx.strokeStyle = 'rgba(0,0,0,0.7)'
-      bCtx.strokeText(value, px + pw - s * 0.025, y)
-      bCtx.fillStyle = color || '#e5e7eb'; bCtx.fillText(value, px + pw - s * 0.025, y)
-    })
-
-    // Footer: mint status + the H3 cell (the token's real unique id)
-    const fy = py + ph + s * 0.04
-    text(b.minted && b.tokenId ? `MINTED · TOKEN #${b.tokenId}` : 'NOT MINTED YET', c, fy, s * 0.03, b.minted ? '#fcd34d' : hexA('#ffffff', 0.7), 900)
-    bCtx.font = `700 ${s * 0.022}px "Roboto Mono", "Courier New", monospace`
-    bCtx.textAlign = 'center'; bCtx.fillStyle = hexA(metal, 0.85)
-    bCtx.fillText(`CELL ${b.h3Index}`, c, fy + s * 0.038)
+    const ns = `${Math.abs(b.lat).toFixed(4)}° ${b.lat >= 0 ? 'N' : 'S'}   ${Math.abs(b.lon).toFixed(4)}° ${b.lon >= 0 ? 'E' : 'W'}`
+    engrave(ns, s * 0.375, s * 0.03, 700, '"Roboto Mono", "Courier New", monospace')
+    if (b.region) engrave(b.region.toUpperCase(), s * 0.425, s * 0.03)
+    rule(s * 0.47, s * 0.2)
+    engrave(b.owner ? `HELD BY ${b.owner.toUpperCase()}` : 'UNCLAIMED', s * 0.525, s * 0.038)
+    if (b.capturedAt) engrave(`SINCE ${b.capturedAt}`, s * 0.575, s * 0.026, 700)
+    engrave(`${b.rarity.toUpperCase()} · ${Math.round(b.hexPerDay).toLocaleString()} HEX A DAY`, s * 0.635, s * 0.032)
+    if (b.resources.length) engrave(b.resources.slice(0, 3).map(r => r.name.toUpperCase()).join(' · '), s * 0.68, s * 0.024, 700)
+    rule(s * 0.725, s * 0.2)
+    engrave(b.minted && b.tokenId ? `MINTED · TOKEN ${b.tokenId}` : 'NOT MINTED', s * 0.77, s * 0.024, 700)
+    engrave(b.h3Index, s * 0.81, s * 0.026, 700, '"Roboto Mono", "Courier New", monospace')
 
     bTex.needsUpdate = true
   }

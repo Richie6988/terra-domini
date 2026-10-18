@@ -1189,6 +1189,22 @@ def _creature_info(uid):
             'creature_wiki_url': c.get('wiki_url', '')}
 
 
+SAFARI_HUNTS_PER_DAY = 5
+
+
+def _target_payload(target, reveal=False):
+    d = {
+        'id': str(target.id), 'creature_id': target.creature_id, 'creature_name': target.creature_name,
+        **_creature_info(target.creature_id), 'rarity': target.rarity, 'hex_reward': target.hex_reward,
+        'hint': target.hint, 'status': target.status, 'assigned_at': target.assigned_at.isoformat(),
+        'center_h3': target.center_h3, 'tries_left': target.tries_left, 'probes': target.probes,
+        'grid': target.grid() if target.center_h3 else [],
+    }
+    if reveal:
+        d['target_h3'] = target.target_h3
+    return d
+
+
 class SafariViewSet(viewsets.GenericViewSet):
     permission_classes = [IsAuthenticated]
 
@@ -1200,15 +1216,7 @@ class SafariViewSet(viewsets.GenericViewSet):
         ).first()
         if not target:
             return Response({'target': None, 'message': 'No active hunt. Spawn a new target!'})
-        return Response({'target': {
-            'id': str(target.id),
-            'creature_id': target.creature_id,
-            'creature_name': target.creature_name, **_creature_info(target.creature_id),
-            'rarity': target.rarity,
-            'hex_reward': target.hex_reward,
-            'hint': target.hint,
-            'assigned_at': target.assigned_at.isoformat(),
-        }})
+        return Response({'target': _target_payload(target)})
 
     @action(detail=False, methods=['POST'], url_path='spawn')
     def spawn_target(self, request):
@@ -1218,21 +1226,62 @@ class SafariViewSet(viewsets.GenericViewSet):
         if active > 0:
             return Response({'error': 'You already have an active target. Capture or abandon it first.'}, status=400)
 
+        from django.utils import timezone
+        today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+        done = SafariTarget.objects.filter(player=request.user, assigned_at__gte=today).count()
+        if done >= SAFARI_HUNTS_PER_DAY:
+            return Response({'error': f'{SAFARI_HUNTS_PER_DAY} hunts a day — new tracks tomorrow.'}, status=429)
         lat = float(request.data.get('lat', 48.8566))
         lon = float(request.data.get('lon', 2.3522))
 
         target = SafariTarget.spawn_for_player(request.user, base_lat=lat, base_lon=lon)
-        return Response({
-            'target': {
-                'id': str(target.id),
-                'creature_id': target.creature_id,
-                'creature_name': target.creature_name, **_creature_info(target.creature_id),
-                'rarity': target.rarity,
-                'hex_reward': target.hex_reward,
-                'hint': target.hint,
-            },
-            'message': f'{target.creature_name} detected! Follow the radar.'
-        })
+        return Response({'target': _target_payload(target),
+                         'message': f'{target.creature_name} is hiding near your territory! {target.tries_left} scans.'})
+
+    @action(detail=False, methods=['POST'], url_path='probe')
+    def probe(self, request):
+        """POST /api/safari/probe/ {h3} — scan one hex of the hunting ground.
+        Found → captured (HEX + card in the album). Missed → ring distance (1 = next to it). No tries left → it flees."""
+        import h3 as h3lib
+        from django.db import transaction
+        from django.db.models import F
+        from django.utils import timezone
+        from terra_domini.apps.accounts.models import Player
+        cell = request.data.get('h3', '')
+        with transaction.atomic():
+            target = SafariTarget.objects.select_for_update().filter(player=request.user, status='active').first()
+            if not target or not target.center_h3:
+                return Response({'error': 'No active hunt'}, status=404)
+            if cell not in {g['h3'] for g in target.grid()}:
+                return Response({'error': 'That hex is outside the hunting ground'}, status=400)
+            if any(p['h3'] == cell for p in target.probes):
+                return Response({'error': 'Already scanned'}, status=400)
+            if cell == target.target_h3:
+                target.status = 'captured'; target.captured_at = timezone.now(); target.distance_at_capture = 0
+                target.probes = target.probes + [{'h3': cell, 'ring': 0}]
+                target.save()
+                SafariCapture.objects.create(player=request.user, creature_id=target.creature_id,
+                                             creature_name=target.creature_name, rarity=target.rarity,
+                                             hex_earned=target.hex_reward, capture_lat=target.target_lat, capture_lon=target.target_lon)
+                Player.objects.filter(id=request.user.id).update(tdc_in_game=F('tdc_in_game') + target.hex_reward)
+                try:
+                    from terra_domini.apps.progression.missions import track
+                    track(request.user, 'safari')
+                except Exception:
+                    pass
+                return Response({'result': 'captured', 'target': _target_payload(target, reveal=True),
+                                 'hex_earned': target.hex_reward,
+                                 'message': f'{target.creature_name} captured! +{target.hex_reward} HEX · new card in your album'})
+            ring = h3lib.grid_distance(cell, target.target_h3)
+            target.probes = target.probes + [{'h3': cell, 'ring': ring}]
+            target.tries_left -= 1
+            if target.tries_left <= 0:
+                target.status = 'expired'
+            target.save()
+            fled = target.status == 'expired'
+            return Response({'result': 'fled' if fled else 'miss', 'ring': ring,
+                             'target': _target_payload(target, reveal=fled),
+                             'message': f'{target.creature_name} fled!' if fled else ('Very close!' if ring == 1 else 'Not here — colder.')})
 
     @action(detail=False, methods=['POST'], url_path='track')
     def track_target(self, request):

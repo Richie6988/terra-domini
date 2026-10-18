@@ -28,6 +28,7 @@ const CODEX_TABS = [
   { id: 'rare',      label: 'Rare cards',  iconId: 'gem' },
   { id: 'biomes',    label: 'Biomes',      iconId: 'globe' },
   { id: 'resources', label: 'Resources',   iconId: 'pickaxe' },
+  { id: 'creatures', label: 'Creatures',   iconId: 'dinosaur' },
   { id: 'favorites', label: 'Favorites',   iconId: 'medal' },
 ]
 
@@ -193,7 +194,7 @@ export function CodexPanel({ onClose }: Props) {
   const selectedTokenData = selectedToken ? allTokens.find(t => t.id === selectedToken) : null
 
   return (
-    <GlassPanel title="TOKEN CODEX" onClose={onClose} accent="#7950f2"
+    <GlassPanel title="ALBUM" onClose={onClose} accent="#7950f2"
       icon={<IconSVG id="museum" size={24} />} subtitle={`${allTokens.length} categories · collect them all`}>
       {/* Tabs (Overview + Favorites only — claude.md §12) */}
       <div className="hx-tabs" role="tablist">
@@ -219,7 +220,7 @@ export function CodexPanel({ onClose }: Props) {
       </div>
 
       <AnimatePresence mode="wait">
-        {(tab === 'rare' || tab === 'biomes' || tab === 'resources') && (
+        {(tab === 'rare' || tab === 'biomes' || tab === 'resources' || tab === 'creatures') && (
           <motion.div key={tab} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             <CodexCards family={tab as CardFamily} filter={filter} />
           </motion.div>

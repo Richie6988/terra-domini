@@ -589,7 +589,10 @@ class SafariTarget(models.Model):
     hex_reward = models.IntegerField(default=100)
     target_lat = models.FloatField()
     target_lon = models.FloatField()
-    target_h3 = models.CharField(max_length=24, blank=True)
+    target_h3 = models.CharField(max_length=24, blank=True)       # hidden cell (never sent to the client)
+    center_h3 = models.CharField(max_length=24, blank=True, default='')   # centre of the 19-cell hunting ground
+    tries_left = models.IntegerField(default=4)
+    probes = models.JSONField(default=list, blank=True)           # [{h3, ring}]
     hint = models.TextField(blank=True)
     status = models.CharField(max_length=12, default='active', choices=[
         ('active', 'Active'), ('captured', 'Captured'), ('expired', 'Expired'),
@@ -602,9 +605,13 @@ class SafariTarget(models.Model):
         db_table = 'safari_targets'
         ordering = ['-assigned_at']
 
+    GRID_K = 2          # hunting ground = centre + 2 rings = 19 real hexes
+    TRIES = 4
+
     @classmethod
     def spawn_for_player(cls, player, base_lat=None, base_lon=None):
-        """Assign a random creature near the player's location."""
+        """A real species (HEXOD master DB) hides in one of the 19 hexes around one of the player's
+        territories (or the map position sent by the client when the player has no land)."""
         import random, h3
         from terra_domini.apps.events.hexod_db import pick_creature, CAPTURE_REWARD
         real = pick_creature()  # real species from the HEXOD master DB
@@ -613,30 +620,30 @@ class SafariTarget(models.Model):
             reward = CAPTURE_REWARD.get(rarity, 50)
         else:
             cid, cname, rarity, reward = random.choice(cls.CREATURES)
-
-        # Spawn 200m-2km from player
-        lat = (base_lat or 48.8566) + random.uniform(-0.015, 0.015)
-        lon = (base_lon or 2.3522) + random.uniform(-0.015, 0.015)
-        h3_index = h3.latlng_to_cell(lat, lon, 8)
-
-        hints = [
-            f'Traces detected heading {random.choice(["north", "south", "east", "west"])}.',
-            f'A {cname} was spotted near water sources.',
-            f'Thermal signature detected — creature is {random.choice(["resting", "moving", "hunting"])}.',
-            f'Biome analysis suggests {random.choice(["forest", "mountain", "coastal", "urban"])} habitat.',
-        ]
-
+        from terra_domini.apps.territories.models import Territory
+        owned = list(Territory.objects.filter(owner=player).values_list('h3_index', flat=True)[:200])
+        owned = [h for h in owned if h3.get_resolution(h) == 8]
+        if owned:
+            center = random.choice(owned)
+        else:
+            center = h3.latlng_to_cell(base_lat if base_lat is not None else 48.8566,
+                                       base_lon if base_lon is not None else 2.3522, 8)
+        target = random.choice([c for c in h3.grid_disk(center, cls.GRID_K) if c != center])
+        lat, lon = h3.cell_to_latlng(target)
         return cls.objects.create(
-            player=player,
-            creature_id=cid,
-            creature_name=cname,
-            rarity=rarity,
-            hex_reward=reward,
-            target_lat=lat,
-            target_lon=lon,
-            target_h3=h3_index,
-            hint=random.choice(hints),
+            player=player, creature_id=cid, creature_name=cname, rarity=rarity, hex_reward=reward,
+            target_lat=lat, target_lon=lon, target_h3=target, center_h3=center, tries_left=cls.TRIES, probes=[],
+            hint=f'Spotted around your territory. {cls.TRIES} scans to find which hex it hides in.',
         )
+
+    def grid(self):
+        """The 19 cells with local coordinates for drawing (target not revealed)."""
+        import h3
+        out = []
+        for c in h3.grid_disk(self.center_h3, self.GRID_K):
+            i, j = h3.cell_to_local_ij(self.center_h3, c)
+            out.append({'h3': c, 'i': i, 'j': j})
+        return out
 
 
 class SafariCapture(models.Model):

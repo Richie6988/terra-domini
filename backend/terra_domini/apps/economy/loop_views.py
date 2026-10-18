@@ -245,9 +245,8 @@ def codex_cards(request):
     player = request.user
     owned = set(Territory.objects.filter(owner=player).values_list('h3_index', flat=True))
     rare = []
-    for p in db.get('pois', []):
-        if not p.get('on_map'):
-            continue
+    on_map = [p for p in db.get('pois', []) if p.get('on_map')]
+    for no, p in enumerate(on_map, 1):   # album number = position in the master DB
         mine = p.get('h3_r8') in owned
         if p['rarity'] not in ('rare', 'epic', 'legendary', 'mythic') and not mine:
             continue
@@ -255,7 +254,7 @@ def codex_cards(request):
             'uid': p['uid'], 'name': p['name'], 'rarity': p['rarity'], 'category': p.get('codex_category') or '',
             'game_category': p.get('game_category'), 'h3_index': p.get('h3_r8'), 'lat': p.get('lat'), 'lon': p.get('lon'),
             'country_code': p.get('country_code') or '', 'description': (p.get('description') or '')[:400],
-            'fun_fact': p.get('fun_fact_1') or '', 'wiki_url': p.get('wiki_url') or '', 'owned': mine,
+            'fun_fact': p.get('fun_fact_1') or '', 'wiki_url': p.get('wiki_url') or '', 'owned': mine, 'no': no,
         })
     order = {'mythic': 0, 'legendary': 1, 'epic': 2, 'rare': 3, 'uncommon': 4, 'common': 5}
     rare.sort(key=lambda c: (not c['owned'], order.get(c['rarity'], 9), c['name']))
@@ -266,8 +265,8 @@ def codex_cards(request):
         'id': b['id'], 'name': b['name'], 'continent': b['continent'], 'type': b['type'],
         'resources': [{'id': r, 'name': meta[r]['name']} for r in b['resource_ids']],
         'center': [round((b['lat_min'] + b['lat_max']) / 2, 2), round((b['lon_min'] + b['lon_max']) / 2, 2)],
-        'territories': mine_b.get(b['id'], 0), 'owned': b['id'] in mine_b,
-    } for b in R.biomes()]
+        'territories': mine_b.get(b['id'], 0), 'owned': b['id'] in mine_b, 'no': n,
+    } for n, b in enumerate(R.biomes(), 1)]
     biomes.sort(key=lambda b: (not b['owned'], b['continent'], b['name']))
 
     rates = R.player_resource_rates(player)
@@ -277,16 +276,32 @@ def codex_cards(request):
         'strategic_use': r.get('strategic_use', ''), 'rate_per_day': rates.get(rid, 0),
         'amount': round(stock[rid].amount, 1) if rid in stock else 0,
         'total_produced': round(stock[rid].total_produced, 1) if rid in stock else 0,
-        'owned': rid in rates or rid in stock,
-    } for rid, r in meta.items()]
+        'owned': rid in rates or rid in stock, 'no': n,
+    } for n, (rid, r) in enumerate(meta.items(), 1)]
     res.sort(key=lambda r: (not r['owned'], -r['rate_per_day'], r['name']))
 
+    # Creatures album: every capture is a card (numbered like the DB); counts per family for the empty slots
+    from terra_domini.apps.territories.models import SafariCapture
+    from collections import Counter
+    creatures_db = db.get('creatures', [])
+    totals = Counter(c.get('codex_category') or 'animal' for c in creatures_db)
+    caught = Counter(SafariCapture.objects.filter(player=player).values_list('creature_id', flat=True))
+    creatures = []
+    for no, c in enumerate(creatures_db, 1):
+        if c['uid'] in caught:
+            creatures.append({'uid': c['uid'], 'no': no, 'name': c['name'], 'rarity': c.get('rarity', 'common'),
+                              'category': c.get('codex_category') or 'animal', 'description': c.get('description', ''),
+                              'wiki_url': c.get('wiki_url', ''), 'count': caught[c['uid']], 'owned': True})
+    by_cat = Counter(c['category'] for c in creatures)
+
     return Response({
-        'rare': rare, 'biomes': biomes, 'resources': res,
+        'rare': rare, 'biomes': biomes, 'resources': res, 'creatures': creatures,
+        'creature_families': [{'id': k, 'total': v, 'owned': by_cat.get(k, 0)} for k, v in totals.most_common()],
         'summary': {
             'rare': {'owned': sum(c['owned'] for c in rare), 'total': sum(1 for c in rare if c['rarity'] in order and order[c['rarity']] <= 3)},
             'biomes': {'owned': len(mine_b), 'total': len(biomes)},
             'resources': {'owned': sum(r['owned'] for r in res), 'total': len(res)},
+            'creatures': {'owned': len(creatures), 'total': len(creatures_db)},
         },
     })
 
@@ -306,7 +321,8 @@ def territory_card(request, h3_index):
     except Exception:
         return Response({'error': 'Invalid hex'}, status=400)
     t = Territory.objects.select_related('owner').filter(h3_index=h3_index).first()
-    poi = UnifiedPOI.objects.filter(h3_index=h3_index, is_active=True).values('name', 'category', 'token_id').first() or {}
+    poi = UnifiedPOI.objects.filter(h3_index=h3_index, is_active=True).values(
+        'name', 'category', 'token_id', 'real_output', 'description', 'fun_fact', 'wiki_url').first() or {}
     rarity = (t.rarity if t else None) or 'common'
     connected = False
     if t and t.owner_id:
@@ -325,6 +341,9 @@ def territory_card(request, h3_index):
         'region': {'id': region['id'], 'name': region['name'], 'continent': region['continent']} if region else None,
         'resources': sorted(({'id': k, 'name': meta[k]['name'], 'per_day': round(v, 1)} for k, v in rates.items()),
                             key=lambda r: -r['per_day']),
-        'poi_name': poi.get('name'), 'token_id': (t.token_id if t else None) or poi.get('token_id'),
+        'poi_name': poi.get('name'), 'poi_category': poi.get('category'), 'token_id': (t.token_id if t else None) or poi.get('token_id'),
+        # Front of the token: texts from the HEXOD master DB
+        'title': poi.get('real_output') or '', 'description': poi.get('description') or '',
+        'fun_fact': (poi.get('fun_fact') or '').split('\n')[0], 'wiki_url': poi.get('wiki_url') or '',
         'minted': bool(t and t.token_minted_at),
     })
