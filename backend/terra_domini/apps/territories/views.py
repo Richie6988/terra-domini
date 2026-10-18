@@ -1256,7 +1256,12 @@ class SafariViewSet(viewsets.GenericViewSet):
         lat = float(request.data.get('lat', 48.8566))
         lon = float(request.data.get('lon', 2.3522))
 
-        target = SafariTarget.spawn_for_player(request.user, base_lat=lat, base_lon=lon)
+        try:
+            target = SafariTarget.spawn_for_player(request.user, base_lat=lat, base_lon=lon)
+        except Exception as e:   # e.g. migrations not applied on this server (safari grid columns missing)
+            import logging
+            logging.getLogger('terra_domini.safari').exception('safari spawn failed')
+            return Response({'error': f'Safari is not ready on this server ({type(e).__name__}). An admin must run the migrations.'}, status=503)
         return Response({'target': _target_payload(target),
                          'message': f'{target.creature_name} is hiding near your territory! {target.tries_left} scans.'})
 

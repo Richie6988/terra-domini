@@ -100,7 +100,8 @@ export function DailyHuntPanel({ onClose }: Props) {
   const spawn = useMutation({
     mutationFn: () => api.post('/safari/spawn/', { lat: center?.[0], lon: center?.[1] }).then(r => r.data),
     onSuccess: d => { playSound('explore'); setLast(null); toast.success(d.message); qc.setQueryData(['safari-active'], { target: d.target }) },
-    onError: (e: any) => toast.error(e?.response?.data?.error || 'No tracks found'),
+    onError: (e: any) => toast.error(e?.response?.data?.error
+      || (e?.response?.status >= 500 ? 'Safari is unavailable on the server (update pending?) — try again later' : 'Could not start a hunt')),
   })
   const probe = useMutation({
     mutationFn: (h3: string) => api.post('/safari/probe/', { h3 }).then(r => r.data),
