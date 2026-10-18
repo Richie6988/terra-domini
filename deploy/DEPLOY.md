@@ -102,17 +102,13 @@ Raids de bots toutes les 2 h, production de ressources quotidienne, vrais évén
 ---
 
 ## Mises à jour (à chaque nouvelle version)
+Une seule commande, en root, depuis n'importe quel dossier :
 ```bash
-sudo -iu hexod
-cd terra-domini && git pull
-.venv/bin/pip install -r backend/requirements.txt
-cd backend && export DJANGO_SETTINGS_MODULE=terra_domini.settings.prod
-../.venv/bin/python manage.py migrate
-../.venv/bin/python manage.py collectstatic --noinput
-../.venv/bin/python manage.py import_hexod_db      # idempotent : ne touche jamais aux propriétaires
-exit
-sudo systemctl restart hexod
+sudo bash /home/hexod/terra-domini/deploy/update.sh          # code + migrations (base de PROD) + données jeu + cron + redémarrage
+sudo bash /home/hexod/terra-domini/deploy/update.sh --data   # idem + photos Wikipédia / bases ouvertes en arrière-plan (~1 h)
+tail -f /home/hexod/data/data_refresh.log                    # suivre le rafraîchissement des données
 ```
+Ne lance pas `manage.py` à la main sans `DJANGO_SETTINGS_MODULE=terra_domini.settings.prod` : sinon il touche la base de dev.
 
 ## Plus tard (montée en charge)
 - **Redis** : `apt install redis-server`, `REDIS_HOST=127.0.0.1` dans `.env.prod`, puis `-w 3` dans `hexod.service`

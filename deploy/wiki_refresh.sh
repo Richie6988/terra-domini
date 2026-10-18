@@ -24,7 +24,6 @@ fi
 $PY scripts/wiki_enrich.py "$@"
 $PY scripts/build_hexod_db.py
 (cd backend && DJANGO_SETTINGS_MODULE=terra_domini.settings.prod ../$PY manage.py import_hexod_db)
-grep -q '^HEXOD_DB_JSON=' .env.prod 2>/dev/null || echo "!! add HEXOD_DB_JSON=$DATA/hexod_db.json to .env.prod, then restart the site"
-echo
-echo "Share the Wikipedia data with the repo (dev + agents see the pictures):"
-echo "  git add data/hexod_db/sources/wiki_enrich.csv && git commit -m 'Wikipedia enrichment' && git push"
+# the site reads the refreshed DB from there (added once), then reloads its worker (gunicorn runs as hexod)
+grep -q '^HEXOD_DB_JSON=' .env.prod 2>/dev/null || echo "HEXOD_DB_JSON=$DATA/hexod_db.json" >> .env.prod
+pkill -HUP -f "gunicorn terra_domini" && echo "site reloaded with the new token data" || echo "restart the site to load the new token data"
