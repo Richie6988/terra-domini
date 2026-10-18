@@ -783,7 +783,21 @@ def main():
         if not c['codex_category']:
             near = Counter(x['codex_category'] for x in creatures[max(0, i - 15):i + 16] if x['codex_category'])
             c['codex_category'] = near.most_common(1)[0][0] if near else 'animal'
-    for c in creatures:   # Wikipedia picture for the Safari / Codex card
+    # Open databases (scripts/fetch_external.py, run on the VPS): iNaturalist photo when Wikipedia has none, fossil sites
+    photos, fossils = {}, {}
+    for fname, store in (('creature_photos.csv', photos), ('fossil_sites.csv', fossils)):
+        if (SRC / fname).exists():
+            with open(SRC / fname, newline='', encoding='utf-8') as fh:
+                store.update({r['uid']: r for r in csv.DictReader(fh)})
+    for c in creatures:
+        ph, fo = photos.get(c['uid']), fossils.get(c['uid'])
+        if ph and ph.get('photo_url'):
+            c['image_url'] = ph['photo_url']
+            c['image_credit'] = f"{ph.get('attribution', '')} · iNaturalist".strip(' ·')
+        if fo and int(fo.get('occurrences') or 0):
+            c['fossil_count'] = int(fo['occurrences'])
+            c['fossil_sites'] = json.loads(fo.get('sites') or '[]')
+    for c in creatures:   # Wikipedia picture for the Safari / Codex card (beats iNaturalist)
         w = wiki.get(wiki_title(c.get('wiki_url')))
         if w and str(w.get('exists')) == '1' and w.get('image_url'):
             c['image_url'] = w['image_url']

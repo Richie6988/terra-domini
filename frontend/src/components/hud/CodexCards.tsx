@@ -200,7 +200,12 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
             <div className="hx-section-title" style={{ margin: 0 }}>{open.name}</div>
             <button className="hx-nudge__x" aria-label="Close card" onClick={() => setOpen(null)}>×</button>
           </div>
-          {family === 'creatures' && <p style={{ fontSize: 13, lineHeight: 1.45, margin: '8px 0' }}>{open.description}</p>}
+          {family === 'creatures' && <>
+            <p style={{ fontSize: 13, lineHeight: 1.45, margin: '8px 0' }}>{open.description}</p>
+            {open.fossil_count > 0 && <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: '0 0 8px' }}>
+              {open.fossil_count.toLocaleString()} fossil finds recorded (Paleobiology Database), e.g. near {open.fossil_sites.slice(0, 3).map((p: number[]) => `${p[0]}°, ${p[1]}°`).join(' · ')}.</p>}
+            {open.image_credit && <p style={{ fontSize: 10, color: 'var(--hx-text-3)', margin: '0 0 8px' }}>Photo: {open.image_credit}</p>}
+          </>}
           {(family === 'history' || family === 'events') && <>
             <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: '6px 0 0' }}>{dateLabel(open.event_date)}{open.location ? ` · ${open.location}` : ''} · {String(open.rarity).toUpperCase()}</p>
             {open.description && <p style={{ fontSize: 13, lineHeight: 1.45, margin: '8px 0' }}>{open.description}</p>}

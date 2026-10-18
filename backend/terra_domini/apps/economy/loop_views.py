@@ -310,7 +310,8 @@ def codex_cards(request):
             creatures.append({'uid': c['uid'], 'no': no, 'name': c['name'], 'rarity': c.get('rarity', 'common'),
                               'category': c.get('codex_category') or 'animal', 'description': c.get('description', ''),
                               'wiki_url': c.get('wiki_url', ''), 'count': caught[c['uid']], 'owned': True,
-                              'image_url': c.get('image_url', '')})
+                              'image_url': c.get('image_url', ''), 'image_credit': c.get('image_credit', ''),
+                              'fossil_count': c.get('fossil_count', 0), 'fossil_sites': c.get('fossil_sites', [])})
     by_cat = Counter(c['category'] for c in creatures)
 
     # History album: retrospective tokens (history_event POIs) — own the hex to own the card

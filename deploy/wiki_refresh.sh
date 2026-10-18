@@ -3,6 +3,7 @@
 #   bash deploy/wiki_refresh.sh --pull     # pull the agents' new candidates first (then restart if code changed)
 #   bash deploy/wiki_refresh.sh            # tokens/candidates already on disk
 #   bash deploy/wiki_refresh.sh --limit 50 # quick try
+#   bash deploy/wiki_refresh.sh --external # first refresh the open databases (Wikidata categories, iNaturalist, PBDB)
 # 1) pull the agents' new candidates  2) Wikipedia: pictures + credits, coordinates, intro, article exists?
 # 3) rebuild the master DB  4) load it into the game (owners never touched)
 set -e
@@ -15,6 +16,10 @@ export HEXOD_DB_OUT="$DATA" HEXOD_DB_JSON="$DATA/hexod_db.json"
 if [ "$1" = "--pull" ]; then
   shift
   git pull --ff-only
+fi
+if [ "$1" = "--external" ]; then
+  shift
+  $PY scripts/fetch_external.py all
 fi
 $PY scripts/wiki_enrich.py "$@"
 $PY scripts/build_hexod_db.py

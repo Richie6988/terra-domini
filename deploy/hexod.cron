@@ -17,3 +17,5 @@ M=/home/hexod/terra-domini/.venv/bin/python /home/hexod/terra-domini/backend/man
 45 2 * * *   cd /home/hexod/terra-domini/backend && HEXOD_TILE_CACHE=/home/hexod/data/tile_cache $M refine_terrain --limit 5000 >> /home/hexod/data/cron.log 2>&1
 # Daily auctions: 10 rare place cards a day (opened after midnight UTC) + settle ended ones — hourly
 7 * * * *    cd /home/hexod/terra-domini/backend && $M daily_auctions >> /home/hexod/data/cron.log 2>&1
+# Open databases (Wikidata categories, iNaturalist photos, PBDB fossils) then Wikipedia check — Sundays
+15 4 * * 0   cd /home/hexod/terra-domini && bash deploy/wiki_refresh.sh --external >> /home/hexod/data/cron.log 2>&1
