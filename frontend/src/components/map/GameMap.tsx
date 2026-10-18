@@ -15,6 +15,7 @@ import { AttackPanel } from '../hud/AttackPanel'
 import { injectGlowFilter, makeHexPolygon, injectHexAnimations, getVisibleHexes, getHexBoundary } from './HexLayer'
 import { KingdomBorderLayer } from './KingdomBorderLayer'
 import { PoiOverviewLayer } from './PoiOverviewLayer'
+import { CoinPickupLayer } from './CoinPickupLayer'
 import { iconIdFor } from '../shared/poiIcons'
 import { ExplorationLayer } from './ExplorationLayer'
 import { OwnedTerritoryHub } from '../kingdom/OwnedTerritoryHub'
@@ -545,6 +546,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       <KingdomBorderLayer map={mapRef.current} zoom={zoom} onKingdomClick={setSelectedKingdom} />
       <PoiOverviewLayer map={mapRef.current} zoom={zoom} center={center} />
+      <CoinPickupLayer map={mapRef.current} zoom={zoom} center={center} />
       <ExplorationLayer map={mapRef.current} />
       <AttackAnimationLayer map={mapRef.current} />
       <BuildingsOverlayLayer map={mapRef.current} zoom={zoom} playerId={player?.id} />

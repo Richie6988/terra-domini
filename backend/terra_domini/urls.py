@@ -87,6 +87,7 @@ from terra_domini.apps.economy.loop_views import loop_status, loop_collect, code
 from terra_domini.apps.economy.payments import hex_packs, hex_checkout, hex_checkout_confirm
 from terra_domini.apps.economy.auction_views import auctions_list, auction_bid
 from terra_domini.apps.economy.lottery_views import lottery_status, lottery_play
+from terra_domini.apps.economy.pickup_views import pickups_in_view, pickup_collect
 from terra_domini.apps.combat.recruitment import (
     my_army as combat_my_army,
     recruit as combat_recruit,
@@ -154,6 +155,8 @@ urlpatterns = [
     path('api/shop/hex-checkout/confirm/',  hex_checkout_confirm, name='hex_checkout_confirm'),
     path('api/codex/territory/<str:h3_index>/', territory_card, name='territory_card'),
     path('api/tiles/sat/<int:z>/<int:x>/<int:y>.jpg', satellite_tile, name='satellite_tile'),
+    path('api/pickups/', pickups_in_view, name='pickups_in_view'),
+    path('api/pickups/collect/', pickup_collect, name='pickup_collect'),
     path('api/lottery/', lottery_status, name='lottery_status'),
     path('api/lottery/play/', lottery_play, name='lottery_play'),
     path('api/auctions/', auctions_list, name='auctions_list'),

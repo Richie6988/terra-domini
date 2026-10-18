@@ -1148,3 +1148,18 @@ html {
 .hx-toastn__text b { font: 900 13px var(--font-heading); color: #fff; }
 .hx-toastn__text span { font-size: 12px; color: #cbd5e1; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-transform: none; letter-spacing: 0; }
 @media (max-width: 640px) { .hx-bell { width: 40px; height: 40px } .hx-inbox { top: 76px; right: 10px } .hx-toastn { top: 132px } }
+
+/* HEX coins lying on the map (CoinPickupLayer): the disc spins, the value label stays readable */
+.hx-coin { position: relative; width: 34px; height: 34px; cursor: pointer; animation: hx-coin-bob 1.8s ease-in-out infinite; }
+.hx-coin__disc { position: absolute; inset: 0; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-style: normal;
+  background: radial-gradient(circle at 35% 30%, #fff7cc, #fbbf24 45%, #b45309); border: 2px solid #7c2d12;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.55), 0 0 14px rgba(251,191,36,0.75); animation: hx-coin-spin 2.4s linear infinite; }
+.hx-coin__disc span { font: 900 15px var(--font-heading); color: #7c2d12; text-shadow: 0 1px 0 rgba(255,255,255,0.6); }
+.hx-coin b { position: absolute; top: -15px; left: 50%; transform: translateX(-50%); font: 900 11px var(--font-heading); color: #fde68a;
+  text-shadow: 0 1px 2px #000, 0 0 6px #000; white-space: nowrap; z-index: 1; }
+.hx-coin.is-golden { width: 40px; height: 40px; }
+.hx-coin.is-golden .hx-coin__disc { background: radial-gradient(circle at 35% 30%, #ffffff, #fde047 40%, #f59e0b 70%, #a16207);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.55), 0 0 26px rgba(253,224,71,0.95); }
+.hx-coin:hover { filter: brightness(1.15); }
+@keyframes hx-coin-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-5px) } }
+@keyframes hx-coin-spin { 0% { transform: scaleX(1) } 25% { transform: scaleX(0.15) } 50% { transform: scaleX(1) } 100% { transform: scaleX(1) } }

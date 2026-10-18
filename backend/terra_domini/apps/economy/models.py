@@ -281,3 +281,16 @@ class LotteryTicket(models.Model):
     class Meta:
         db_table = 'lottery_tickets'
         ordering = ['-created_at']
+
+
+class PickupClaim(models.Model):
+    """A HEX coin picked up on the map (pickup_views.py): one per hex per day per player."""
+    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='pickups')
+    h3_index = models.CharField(max_length=20)
+    day = models.DateField(db_index=True)
+    amount = models.IntegerField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'pickup_claims'
+        unique_together = ('player', 'h3_index', 'day')
