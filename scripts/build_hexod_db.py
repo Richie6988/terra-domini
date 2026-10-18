@@ -538,6 +538,49 @@ def main():
                 p['population'] = parse_population(clean(r['paragraphs']))
             add_poi(p)
 
+    # ── curated tokens (agents + editors): sources/curated_tokens.csv ──
+    # action=create adds a token; action=update overwrites the listed non-empty fields of an existing uid.
+    # A non-empty 'rarity' is forced (applied after the quotas). Applied last, so curation always wins.
+    CURATED_FIELDS = ['name', 'game_category', 'country_code', 'title', 'description', 'fun_fact_1', 'fun_fact_2',
+                      'fun_fact_3', 'rare_fact', 'wiki_url', 'image_url', 'visitors_per_year', 'geopolitical_score']
+    forced_rarity, curated_n = {}, 0
+    cur_csv = SRC / 'curated_tokens.csv'
+    if cur_csv.exists():
+        by_uid = {p['uid']: p for p in pois}
+        with open(cur_csv, newline='', encoding='utf-8') as f:
+            for r in csv.DictReader(f):
+                act, uid = (r.get('action') or '').strip(), (r.get('uid') or '').strip()
+                lat, lon = fnum(r.get('lat')), fnum(r.get('lon'))
+                if act == 'update' and uid in by_uid:
+                    tgt = by_uid[uid]
+                elif act == 'create' and r.get('name') and lat is not None and lon is not None:
+                    slug = (r.get('game_category') or 'anomaly').strip()
+                    tgt = add_poi({
+                        'uid': uid or f"cur-{norm_name(r['name'])[:40]}", 'source': 'curated', 'kind': 'landmark', 'quality': 'curated',
+                        'name': r['name'], 'game_category': slug, 'codex_category': next((v[1] for k, v in POI_CAT.items() if v[0] == slug), 'mystery'),
+                        'lat': lat, 'lon': lon, 'h3_r8': h3cell(lat, lon), 'country_code': '', 'title': '', 'description': '',
+                        'fun_fact_1': '', 'fun_fact_2': '', 'fun_fact_3': '', 'rare_fact': '', 'visitors_per_year': 0,
+                        'visitors_score': 0, 'geopolitical_score': 0, 'grade': '', 'wiki_url': '', 'image': '', 'token_id': None,
+                    })
+                    if tgt is None:
+                        issues.append(f"curated create {r['name']}: duplicate of an existing token (same name or hex) — use action=update")
+                        continue
+                    by_uid[tgt['uid']] = tgt
+                else:
+                    issues.append(f"curated row skipped: action={act} uid={uid} name={r.get('name')}")
+                    continue
+                for k in CURATED_FIELDS:
+                    v = (r.get(k) or '').strip()
+                    if v:
+                        tgt[k] = int(float(v)) if k in ('visitors_per_year',) else (float(v) if k == 'geopolitical_score' else v)
+                if act == 'update' and lat is not None and lon is not None:
+                    tgt['lat'], tgt['lon'], tgt['h3_r8'] = lat, lon, h3cell(lat, lon)
+                tgt['curation'] = {'by': (r.get('curated_by') or '').strip(), 'at': (r.get('curated_at') or '').strip(),
+                                   'notes': (r.get('notes') or '').strip()}
+                if (r.get('rarity') or '').strip() in ('common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'):
+                    forced_rarity[tgt['uid']] = r['rarity'].strip()
+                curated_n += 1
+
     # ── rarity (per family, combined score) ──
     fam = defaultdict(list)
     for p in pois:
@@ -554,6 +597,9 @@ def main():
     assign_rarity(fam['strategic'], lambda p: (p['geopolitical_score'] or 0) + 0.1 * (p['visitors_score'] or 0), STRATEGIC_QUOTAS)
     for k in ('city', 'country'):  # source files are ordered by importance → fame proxy = rank
         assign_rarity(fam[k], lambda p: -p.get('_rank', 0))
+    for p in pois:
+        if p['uid'] in forced_rarity:
+            p['rarity'] = forced_rarity[p['uid']]
     for p in pois:
         p['score'] = round(landmark_score(p), 1) if p['kind'] == 'landmark' else None
         p['on_map'] = bool(p['h3_r8'])

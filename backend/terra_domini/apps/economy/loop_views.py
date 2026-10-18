@@ -347,7 +347,7 @@ def territory_card(request, h3_index):
         return Response({'error': 'Invalid hex'}, status=400)
     t = Territory.objects.select_related('owner').filter(h3_index=h3_index).first()
     poi = UnifiedPOI.objects.filter(h3_index=h3_index, is_active=True).values(
-        'name', 'category', 'token_id', 'real_output', 'description', 'fun_fact', 'wiki_url').first() or {}
+        'name', 'category', 'token_id', 'real_output', 'description', 'fun_fact', 'wiki_url', 'image_url', 'rarity').first() or {}
     rarity = (t.rarity if t else None) or 'common'
     connected = False
     if t and t.owner_id:
@@ -370,5 +370,6 @@ def territory_card(request, h3_index):
         # Front of the token: texts from the HEXOD master DB
         'title': poi.get('real_output') or '', 'description': poi.get('description') or '',
         'fun_fact': (poi.get('fun_fact') or '').split('\n')[0], 'wiki_url': poi.get('wiki_url') or '',
+        'image_url': poi.get('image_url') or '',
         'minted': bool(t and t.token_minted_at),
     })

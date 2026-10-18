@@ -126,6 +126,7 @@ export function Token3DViewer(props: Token3DProps) {
       // Front texts from the DB (the card's own words), then the deed on the back
       const front = [d.title, d.description].filter(Boolean).join(' — ') || d.fun_fact
       if (front) viewerRef.current.update({ description: front.length > 240 ? front.slice(0, 237).replace(/\s+\S*$/, '') + '…' : front })
+      if (d.image_url) viewerRef.current.update({ imageSrc: d.image_url })   // validated image from the DB beats the stock photo
       viewerRef.current.update({ back: {
         h3Index: d.h3_index, lat: d.lat, lon: d.lon, rarity: d.rarity, owner: d.owner, capturedAt: d.captured_at,
         hexPerDay: d.hex_per_day, region: d.region?.name ?? null, continent: d.region?.continent ?? null,
