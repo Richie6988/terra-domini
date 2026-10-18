@@ -472,6 +472,17 @@ class CombatEngine:
             return False, "Owner is under protection"
         if territory.is_under_attack:
             return False, "Territory is already under attack"
+        from terra_domini.apps.economy.balance import ATTACK_RANGE_RINGS, has_boost
+        if not has_boost(attacker, 'distant_attack'):   # shop 'Distant Strike' lifts the range
+            import h3
+            from terra_domini.apps.territories.models import Territory
+            try:
+                near = list(h3.grid_disk(territory.h3_index, ATTACK_RANGE_RINGS))
+            except Exception:
+                near = []
+            if near and not Territory.objects.filter(owner=attacker, h3_index__in=near).exists():
+                return False, (f"Out of range — attack within {ATTACK_RANGE_RINGS} hexes of your land, "
+                               f"or use Distant Strike from the Shop")
         return True, ""
 
     @classmethod

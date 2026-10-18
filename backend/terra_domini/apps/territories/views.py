@@ -493,6 +493,9 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         from terra_domini.apps.economy.balance import explore_slots, explore_speed_mult
         from terra_domini.apps.territories.models import PendingClaim as _PC
         explore_hours = round(1.0 * (1.2 ** min(owned_count, 50)) * (1 if is_adjacent or is_first else 2) * explore_speed_mult(request.user), 1)
+        from terra_domini.apps.economy.balance import has_boost, BLITZ_EXPLORE_HOURS
+        if has_boost(request.user, 'claim_instant'):
+            explore_hours = BLITZ_EXPLORE_HOURS
         slots = explore_slots(request.user)
         running = _PC.objects.filter(player=request.user, method='explore', status='in_progress').count()
         player_obj = P.objects.get(id=request.user.id)
@@ -648,6 +651,9 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             from terra_domini.apps.economy.balance import explore_slots, explore_speed_mult
             base_hours = 1.0 * (1.2 ** min(owned_count, 50))
             hours = (base_hours if is_adjacent or is_first else base_hours * 2) * explore_speed_mult(request.user)
+            from terra_domini.apps.economy.balance import has_boost, BLITZ_EXPLORE_HOURS
+            if has_boost(request.user, 'claim_instant'):   # shop 'Blitz Mode'
+                hours = BLITZ_EXPLORE_HOURS
             
             # Check if already exploring this hex
             from terra_domini.apps.territories.models import PendingClaim
@@ -1251,7 +1257,8 @@ class SafariViewSet(viewsets.GenericViewSet):
         from django.utils import timezone
         today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
         done = SafariTarget.objects.filter(player=request.user, assigned_at__gte=today).count()
-        if done >= SAFARI_HUNTS_PER_DAY:
+        from terra_domini.apps.economy.balance import has_boost, use_charge
+        if done >= SAFARI_HUNTS_PER_DAY and not has_boost(request.user, 'safari_continuous'):   # shop '1H Continuous Safari'
             return Response({'error': f'{SAFARI_HUNTS_PER_DAY} hunts a day — new tracks tomorrow.'}, status=429)
         lat = float(request.data.get('lat', 48.8566))
         lon = float(request.data.get('lon', 2.3522))
@@ -1262,6 +1269,9 @@ class SafariViewSet(viewsets.GenericViewSet):
             import logging
             logging.getLogger('terra_domini.safari').exception('safari spawn failed')
             return Response({'error': f'Safari is not ready on this server ({type(e).__name__}). An admin must run the migrations.'}, status=503)
+        if use_charge(request.user, 'safari_hints'):   # shop 'Safari Hints': +2 scans
+            target.tries_left += 2
+            target.save(update_fields=['tries_left'])
         return Response({'target': _target_payload(target),
                          'message': f'{target.creature_name} is hiding near your territory! {target.tries_left} scans.'})
 
@@ -1284,6 +1294,11 @@ class SafariViewSet(viewsets.GenericViewSet):
             if any(p['h3'] == cell for p in target.probes):
                 return Response({'error': 'Already scanned'}, status=400)
             if cell == target.target_h3:
+                from terra_domini.apps.economy.balance import use_charge, RARITY_ORDER
+                from terra_domini.apps.events.hexod_db import CAPTURE_REWARD
+                if use_charge(request.user, 'rarity_boost'):   # shop '+Card Rarity': next-tier reward
+                    nxt = RARITY_ORDER[min(RARITY_ORDER.index(target.rarity) + 1, len(RARITY_ORDER) - 1)] if target.rarity in RARITY_ORDER else 'rare'
+                    target.hex_reward = max(target.hex_reward, CAPTURE_REWARD.get(nxt, int(target.hex_reward * 2.2)))
                 target.status = 'captured'; target.captured_at = timezone.now(); target.distance_at_capture = 0
                 target.probes = target.probes + [{'h3': cell, 'ring': 0}]
                 target.save()

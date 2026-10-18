@@ -415,6 +415,9 @@ def main():
 
     # ── POIs: curated tokens (backbone) ──
     rare_facts = {clean(r.get('token_id')): clean(r.get('rare_fact')) for r in sheet(SRC / 'webtoclean_in.xlsx', 'PREMIUM_EXPORT')}
+    # The same sentence on many tokens is a generated template, not a fact (RULE 1: no fake data) → blanked
+    fact_n = Counter(rare_facts.values())
+    rare_facts = {k: ('' if fact_n[v] >= 3 else v) for k, v in rare_facts.items()}
     pois, seen_names, seen_cells, merged = [], {}, {}, []
 
     def add_poi(p):
@@ -612,6 +615,13 @@ def main():
                     forced_rarity[tgt['uid']] = r['rarity'].strip()
                 curated_n += 1
 
+    # Curated rows whose notes start with 'DUPLICATE OF <uid>' are dropped (the kept token holds the curation)
+    dup = {p['uid'] for p in pois if (p.get('curation') or {}).get('notes', '').upper().startswith('DUPLICATE OF')}
+    for p in pois:
+        if p['uid'] in dup:
+            merged.append({'kept': p['curation']['notes'][:80], 'merged': p['name'], 'source': p['source'], 'h3_r8': p['h3_r8']})
+    pois[:] = [p for p in pois if p['uid'] not in dup]
+
     # ── rarity (per family, combined score) ──
     fam = defaultdict(list)
     for p in pois:
@@ -632,6 +642,19 @@ def main():
         if p.get('lat') is None:
             p['rarity'] = 'common'
     assign_rarity(fam['country'], lambda p: -p.get('_rank', 0))   # source file ordered by importance
+    RANKS = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
+    # Megacities are at least rare wherever they sit (capital landmarks scored on placeholder visitor counts)
+    metro = {}
+    if (SRC / 'major_cities.csv').exists():
+        with open(SRC / 'major_cities.csv', newline='', encoding='utf-8') as f:
+            metro = {norm_name(r['name']): int(r['metro_population'] or 0) for r in csv.DictReader(f)}
+    for p in pois:
+        if p['kind'] == 'city' or p.get('game_category') in ('capital_city', 'financial_hub'):
+            pop = max(p.get('population') or 0, metro.get(norm_name(p['name']), 0))
+            cap = p.get('game_category') == 'capital_city'
+            floor = 'epic' if pop >= 20_000_000 else 'rare' if pop >= (8_000_000 if cap else 10_000_000) else 'uncommon' if pop >= 4_000_000 else None
+            if floor and RANKS.index(floor) > RANKS.index(p['rarity']):
+                p['rarity'] = floor
     for p in pois:
         if p['uid'] in forced_rarity:
             p['rarity'] = forced_rarity[p['uid']]
@@ -718,7 +741,7 @@ def write(cats, resources, biomes, biome_res, pois, creatures, backlog, issues, 
         cols = list(rows[0].keys())
         sh.append(cols)
         for r in rows:
-            sh.append([r.get(c) for c in cols])
+            sh.append([json.dumps(v, ensure_ascii=False) if isinstance(v, (dict, list)) else v for v in (r.get(c) for c in cols)])
         sh.freeze_panes = 'A2'
         sh.auto_filter.ref = sh.dimensions
     wb.save(OUT / 'HEXOD_MASTER_DB.xlsx')

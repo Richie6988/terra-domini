@@ -249,6 +249,11 @@ class MarketplaceBuyView(APIView):
 
             price = float(listing['price_hex_coin'])
             h3_index = listing['h3_index']
+            from terra_domini.apps.economy.balance import _boost_values
+            disc = _boost_values(request.user, 'trade_discount')   # shop 'Trade Advantage': royalty -20%
+            royalty_pct = ROYALTY_PCT * (min(disc) if disc else 1)
+            listed = price
+            price = round(listed * (1 - ROYALTY_PCT) + listed * royalty_pct, 4)   # discount lowers the buyer's price only
 
             # Check buyer balance
             from terra_domini.apps.accounts.models import Player
@@ -268,8 +273,8 @@ class MarketplaceBuyView(APIView):
                 return Response({'error': 'Le territoire a changé de propriétaire'}, status=409)
 
             # Calculate splits: 95% seller, 5% royalty
-            seller_share  = round(price * (1 - ROYALTY_PCT), 4)
-            royalty_share = round(price * ROYALTY_PCT, 4)
+            seller_share  = round(listed * (1 - ROYALTY_PCT), 4)
+            royalty_share = round(listed * royalty_pct, 4)
 
             # Deduct from buyer
             Player.objects.filter(id=buyer.id).update(

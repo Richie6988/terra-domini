@@ -15,8 +15,8 @@ ITEMS = [
 
     # Attack bonuses
     {'code': 'atk_2x_army', 'name': '2X Army Power', 'category': 'attack', 'price_tdc': 300, 'description': 'Double army ATK for 24h', 'effect_type': 'atk_multiplier', 'effect_value': 2.0, 'duration': 86400},
-    {'code': 'atk_blitz', 'name': 'Blitz Mode', 'category': 'attack', 'price_tdc': 150, 'description': 'Instant territory claims for 1h', 'effect_type': 'claim_instant', 'effect_value': 1.0, 'duration': 3600},
-    {'code': 'atk_distant', 'name': 'Distant Strike', 'category': 'attack', 'price_tdc': 200, 'description': 'Attack non-adjacent territories for 12h', 'effect_type': 'distant_attack', 'effect_value': 1.0, 'duration': 43200},
+    {'code': 'atk_blitz', 'name': 'Blitz Mode', 'category': 'attack', 'price_tdc': 150, 'description': 'Explorations finish in seconds for 1h', 'effect_type': 'claim_instant', 'effect_value': 1.0, 'duration': 3600},
+    {'code': 'atk_distant', 'name': 'Distant Strike', 'category': 'attack', 'price_tdc': 200, 'description': 'Attack beyond your 10-hex range for 12h', 'effect_type': 'distant_attack', 'effect_value': 1.0, 'duration': 43200},
     {'code': 'atk_mint_speed', 'name': '2X Explore Speed', 'category': 'attack', 'price_tdc': 250, 'description': 'New explorations take half the time for 24h', 'effect_type': 'explore_speed', 'effect_value': 0.5, 'duration': 86400},
     {'code': 'explore_slot', 'name': 'Extra Explorer', 'category': 'attack', 'price_tdc': 300, 'description': '+1 exploration in parallel for 24h (max 3)', 'effect_type': 'explore_slots', 'effect_value': 1.0, 'duration': 86400},
 
@@ -29,14 +29,14 @@ ITEMS = [
     # Economy bonuses
     {'code': 'eco_2x_extraction', 'name': '2X Extraction', 'category': 'economy', 'price_tdc': 350, 'description': 'Double resource production for 24h', 'effect_type': 'resource_multiplier', 'effect_value': 2.0, 'duration': 86400},
     {'code': 'eco_energy', 'name': 'Energy Efficiency', 'category': 'economy', 'price_tdc': 200, 'description': '-50% energy costs for 48h', 'effect_type': 'energy_discount', 'effect_value': 0.5, 'duration': 172800},
-    {'code': 'eco_rare_drop', 'name': 'Rare Drop Boost', 'category': 'economy', 'price_tdc': 500, 'description': '+25% rare territory chance for 24h', 'effect_type': 'rare_chance', 'effect_value': 1.25, 'duration': 86400},
-    {'code': 'eco_trade_advantage', 'name': 'Trade Advantage', 'category': 'economy', 'price_tdc': 300, 'description': '-20% marketplace fees for 72h', 'effect_type': 'trade_discount', 'effect_value': 0.8, 'duration': 259200},
+    {'code': 'eco_rare_drop', 'name': 'Rare Drop Boost', 'category': 'economy', 'price_tdc': 500, 'description': 'Booster Rare+ odds x1.25 for 24h', 'effect_type': 'rare_chance', 'effect_value': 1.25, 'duration': 86400},
+    {'code': 'eco_trade_advantage', 'name': 'Trade Advantage', 'category': 'economy', 'price_tdc': 300, 'description': '-20% marketplace royalty on your purchases for 72h', 'effect_type': 'trade_discount', 'effect_value': 0.8, 'duration': 259200},
 
     # Collection bonuses
     {'code': 'col_luck', 'name': 'Luck Potion', 'category': 'collection', 'price_tdc': 250, 'description': '+15 luck for events for 48h', 'effect_type': 'luck_boost', 'effect_value': 15.0, 'duration': 172800},
-    {'code': 'col_rarity', 'name': '+Card Rarity', 'category': 'collection', 'price_tdc': 400, 'description': '+1 rarity tier for next 5 captures', 'effect_type': 'rarity_boost', 'effect_value': 1.0, 'duration': 0},
-    {'code': 'col_safari_1h', 'name': '1H Continuous Safari', 'category': 'collection', 'price_tdc': 300, 'description': 'No cooldown between safari captures for 1h', 'effect_type': 'safari_continuous', 'effect_value': 1.0, 'duration': 3600},
-    {'code': 'col_safari_hints', 'name': 'Safari Hints', 'category': 'collection', 'price_tdc': 150, 'description': 'Reveal target category + distance for next safari', 'effect_type': 'safari_hints', 'effect_value': 1.0, 'duration': 0},
+    {'code': 'col_rarity', 'name': '+Card Rarity', 'category': 'collection', 'price_tdc': 400, 'description': 'Next 5 safari captures pay the next rarity tier reward', 'effect_type': 'rarity_boost', 'effect_value': 1.0, 'duration': 0},
+    {'code': 'col_safari_1h', 'name': '1H Continuous Safari', 'category': 'collection', 'price_tdc': 300, 'description': 'No daily safari hunt limit for 1h', 'effect_type': 'safari_continuous', 'effect_value': 1.0, 'duration': 3600},
+    {'code': 'col_safari_hints', 'name': 'Safari Hints', 'category': 'collection', 'price_tdc': 150, 'description': '+2 scans on your next safari hunt', 'effect_type': 'safari_hints', 'effect_value': 1.0, 'duration': 0},
 
     # Social bonuses
     {'code': 'soc_global_msg', 'name': 'Global Message', 'category': 'social', 'price_tdc': 100, 'description': 'Send 1 message visible to all players', 'effect_type': 'global_message', 'effect_value': 1.0, 'duration': 0},

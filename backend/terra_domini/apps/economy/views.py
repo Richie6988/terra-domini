@@ -744,7 +744,19 @@ class AdCampaignViewSet(viewsets.GenericViewSet):
 
 # Effects the game really applies. Everything else in the catalog is shown as "coming soon" and cannot be bought.
 IMPLEMENTED_EFFECTS = {'booster_pack', 'shield', 'atk_multiplier', 'def_multiplier', 'border_color', 'hex_bonus',
-                      'explore_slots', 'explore_speed'}
+                      'explore_slots', 'explore_speed', 'claim_instant', 'distant_attack', 'resource_multiplier',
+                      'rare_chance', 'trade_discount', 'safari_continuous', 'safari_hints', 'rarity_boost'}
+
+TIMED_EFFECT_TEXT = {   # read by: territories claim, combat.can_attack, resources, booster odds, marketplace buy, safari
+    'claim_instant': 'Explorations finish in seconds',
+    'distant_attack': 'Attack any territory, no range limit',
+    'resource_multiplier': 'Resource production x{v:g}',
+    'rare_chance': 'Booster rare+ odds x{v:g}',
+    'trade_discount': 'Marketplace royalty -{pct:g}% on your purchases',
+    'safari_continuous': 'No daily safari limit',
+}
+CHARGE_EFFECTS = {'safari_hints': (1, '+2 scans on your next {n} safari hunt(s)'),
+                  'rarity_boost': (5, 'Your next {n} safari captures pay the next rarity tier')}
 
 
 def _apply_item_effect(player, item, quantity, territory_h3=None):
@@ -811,6 +823,21 @@ def _apply_item_effect(player, item, quantity, territory_h3=None):
         if item.effect_type == 'explore_slots':
             return f'+{item.effect_value:g} exploration in parallel for {hours}h.'
         return f'Exploration timers x{item.effect_value:g} for {hours}h (new explorations).'
+
+    elif item.effect_type in TIMED_EFFECT_TEXT:
+        duration = timedelta(seconds=item.effect_duration_seconds * max(quantity, 1))
+        ActiveBoost.objects.create(player=player, item=item, boost_type=item.effect_type,
+                                   boost_value=item.effect_value, expires_at=timezone.now() + duration)
+        text = TIMED_EFFECT_TEXT[item.effect_type].format(v=item.effect_value, pct=round((1 - item.effect_value) * 100))
+        return f'{text} for {round(duration.total_seconds() / 3600):g}h.'
+
+    elif item.effect_type in CHARGE_EFFECTS:
+        from terra_domini.apps.economy.balance import CHARGE_BOOST_DAYS
+        per, text = CHARGE_EFFECTS[item.effect_type]
+        n = per * max(quantity, 1)
+        ActiveBoost.objects.create(player=player, item=item, boost_type=item.effect_type, boost_value=n,
+                                   expires_at=timezone.now() + timedelta(days=CHARGE_BOOST_DAYS))
+        return text.format(n=n) + '.'
 
     elif item.effect_type in ('production_multiplier',
                                'double_attack', 'stealth_once', 'build_speed', 'build_cost_reduction'):
@@ -890,6 +917,10 @@ def _open_booster_pack(item_code: str, player=None) -> dict:
                       'booster_premium': 'rare', 'booster_mythic': 'legendary'}
 
     odds   = PACK_ODDS.get(item_code, PACK_ODDS['booster_standard'])
+    from terra_domini.apps.economy.balance import boost_mult
+    rare_x = boost_mult(player, 'rare_chance') if player else 1.0   # shop 'Rare Drop Boost'
+    if rare_x > 1:
+        odds = [(r, w * rare_x if r not in ('common', 'uncommon') else w) for r, w in odds]
     count  = PACK_COUNT.get(item_code, 3)
     cards  = []
 

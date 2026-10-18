@@ -13,9 +13,10 @@ Design (owner): Supercell-style 5-minute sessions, fast progression, FOMO.
 from decimal import Decimal
 
 # ── Production ────────────────────────────────────────────────────────────────
+# Rarity pays much more (owner 2026-10-18): yield grows faster than price (RARITY_PRICE_MULT) → rare cards are worth chasing
 HEX_PER_DAY = {
-    'common': 60, 'uncommon': 110, 'rare': 220,
-    'epic': 500, 'legendary': 1200, 'mythic': 3000,
+    'common': 60, 'uncommon': 130, 'rare': 360,
+    'epic': 900, 'legendary': 2400, 'mythic': 6000,
 }
 SHINY_MULT = 1.5
 KINGDOM_MULT = 1.15          # territory connected to a kingdom (cluster ≥ 2)
@@ -69,6 +70,36 @@ def explore_slots(player) -> int:
 def explore_speed_mult(player) -> float:
     vals = _boost_values(player, 'explore_speed')
     return max(0.25, min(vals)) if vals else 1.0
+
+
+# ── Shop boosts read by the game (ActiveBoost rows created by economy.views._apply_item_effect) ──
+ATTACK_RANGE_RINGS = 10      # attack a hex up to 10 rings (~8 km) from one of yours; 'distant_attack' lifts it
+BLITZ_EXPLORE_HOURS = 0.01   # 'claim_instant': explorations finish in ~36 s
+CHARGE_BOOST_DAYS = 30       # charge boosts (next N uses) stay valid 30 days
+
+
+def has_boost(player, boost_type) -> bool:
+    return bool(_boost_values(player, boost_type))
+
+
+def boost_mult(player, boost_type) -> float:
+    vals = _boost_values(player, boost_type)
+    return max(vals) if vals else 1.0
+
+
+def use_charge(player, boost_type) -> bool:
+    """Consume one charge of a 'next N uses' boost (boost_value = charges left). True if one was used."""
+    from django.utils import timezone
+    from terra_domini.apps.economy.models import ActiveBoost
+    b = (ActiveBoost.objects.filter(player=player, boost_type=boost_type, expires_at__gt=timezone.now(), boost_value__gte=1)
+         .order_by('activated_at').first())
+    if not b:
+        return False
+    if b.boost_value <= 1:
+        b.delete()
+    else:
+        ActiveBoost.objects.filter(pk=b.pk).update(boost_value=b.boost_value - 1)
+    return True
 
 
 # ── Card editions (a conquered place card is re-issued) ──

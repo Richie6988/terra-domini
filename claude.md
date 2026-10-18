@@ -509,6 +509,9 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 - **Strategic points**: `data/hexod_db/sources/strategic_points.csv` (own rarity ladder). **Cities**: `major_cities.csv` + city extract → `cities` in hexod_db.json.
 - **Terrain**: `territories/terrain_rules.py` — POI > urban core (3+5·√pop km) > industrial site (6 km) > suburbs > DB region keywords > old lat/lon heuristic. `import_hexod_db` re-classifies all territories.
 - **Map**: `PoiOverviewLayer` (POIs readable when zoomed out: legendary from continent view), `ExplorationLayer` (explorations greyed + countdown).
+- **Rarity pays**: HEX/day 60/130/360/900/2400/6000, resources x1/1.6/3/6/12/25 (yield grows faster than price). Megacities floored at rare/epic by metro population in the builder.
+- **Shop boosts** = `ActiveBoost` rows read by the game via `balance.has_boost / boost_mult / use_charge` (charge boosts: boost_value = uses left). Blitz (explore ~36 s), Distant Strike (attack range 10 hexes otherwise, `combat.can_attack`), 2X Extraction, Rare Drop (booster odds), Trade Advantage (royalty), Safari continuous / hints (+2 scans) / +Card Rarity (next-tier reward). Anything not in `IMPLEMENTED_EFFECTS` shows SOON and cannot be bought.
+- **DB builder**: rare_fact repeated on ≥3 tokens = template → blanked. Curated rows with notes `DUPLICATE OF <uid>` are dropped.
 
 ## 12. KNOWN ISSUES PIPELINE (updated 2026-10-17)
 

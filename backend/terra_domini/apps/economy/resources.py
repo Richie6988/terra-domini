@@ -16,7 +16,7 @@ from terra_domini.apps.events import hexod_db
 # Units/day for one territory, by the resource's rarity in the DB
 RES_PER_DAY = {'common': 10, 'regional': 6, 'variable': 8, 'high': 5, 'rare': 3, 'strategic': 3, 'unique': 2}
 POI_RES_MULT = 4                   # a POI's own resource (an oil field produces much more oil)
-RARITY_RES_MULT = {'common': 1, 'uncommon': 1.3, 'rare': 1.7, 'epic': 2.2, 'legendary': 3, 'mythic': 5}
+RARITY_RES_MULT = {'common': 1, 'uncommon': 1.6, 'rare': 3, 'epic': 6, 'legendary': 12, 'mythic': 25}  # rare cards produce far more
 
 POI_RESOURCE = {
     'oil_field': 'oil', 'gas_reserve': 'gas', 'coal_mine': 'coal', 'gold_mine': 'gold', 'diamond_mine': 'diamonds',
@@ -78,7 +78,7 @@ def player_resource_rates(player) -> dict:
     from terra_domini.apps.events.unified_poi import UnifiedPOI
     rows = list(Territory.objects.filter(owner=player).values_list('h3_index', 'center_lat', 'center_lon', 'rarity'))
     cats = dict(UnifiedPOI.objects.filter(h3_index__in=[r[0] for r in rows], is_active=True).values_list('h3_index', 'category'))
-    mult = B.BEGINNER_MULT if B.is_beginner(player) else 1
+    mult = (B.BEGINNER_MULT if B.is_beginner(player) else 1) * B.boost_mult(player, 'resource_multiplier')   # shop '2X Extraction'
     total = {}
     for h, lat, lon, rarity in rows:
         for rid, v in territory_resource_rates(lat, lon, rarity, cats.get(h, ''), mult).items():
