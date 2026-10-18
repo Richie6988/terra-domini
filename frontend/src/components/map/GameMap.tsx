@@ -252,7 +252,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
     map.on('click', (e: L.LeafletMouseEvent) => {
       const target = e.originalEvent?.target as HTMLElement
-      if (target?.closest('.territory-panel, .claim-modal, .attack-panel, .poi-panel')) return
+      if (target?.closest('.territory-panel, .claim-modal, .attack-panel, .poi-panel, .hx-coin')) return   // a coin is a bonus, not a hex
 
       // Always compute clicked hex at res 8
       try {
