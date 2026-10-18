@@ -79,7 +79,13 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
   const isShiny=!!t.is_shiny
 
   const cardName=t.custom_name||t.poi_name||t.place_name||'Zone'
-  const income=hexPerDay(t.rarity, t.is_shiny)
+  // Real yield from the server: rarity x resources on the hex (oil, gold…) ± per-hex variation
+  const { data: card } = useQuery<any>({
+    queryKey: ['territory-card', t.h3_index],
+    queryFn: () => api.get(`/codex/territory/${t.h3_index}/`).then(r => r.data),
+    enabled: !!t.h3_index, staleTime: 60000,
+  })
+  const income = Math.round(card?.hex_per_day ?? hexPerDay(t.rarity, t.is_shiny))
 
   const facts=useMemo(()=>{
     const r=[]
@@ -254,6 +260,20 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
               </div>
             </div>
           </div>
+
+          {/* What this hex sits on: resource bonuses + daily resources */}
+          {card && (card.hex_bonuses?.length > 0 || card.resources?.length > 0) && (
+            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontFamily: 'var(--font-body)', fontWeight: 800 }}>
+              {card.hex_bonuses?.slice(0, 4).map((b: any) => (
+                <span key={b.resource} className="hx-chip" style={{ color: '#fde68a', textTransform: 'none' }}>{b.resource} +{b.pct}% HEX</span>
+              ))}
+              {card.variation_pct !== 0 && <span className="hx-chip" style={{ color: card.variation_pct > 0 ? '#86efac' : '#fca5a5', textTransform: 'none' }}>
+                local {card.variation_pct > 0 ? '+' : ''}{card.variation_pct}%</span>}
+              {card.resources?.slice(0, 3).map((r: any) => (
+                <span key={r.id} className="hx-chip" style={{ textTransform: 'none' }}>+{r.per_day} {r.name}/day</span>
+              ))}
+            </div>
+          )}
 
           {/* Stats */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>

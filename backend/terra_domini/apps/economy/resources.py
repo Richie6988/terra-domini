@@ -109,3 +109,30 @@ def credit(player, amounts: dict) -> None:
             continue
         row, _ = PlayerResource.objects.get_or_create(player=player, resource_id=rid)
         PlayerResource.objects.filter(pk=row.pk).update(amount=F('amount') + v, total_produced=F('total_produced') + v)
+
+
+# ── HEX yield of a territory varies with what it sits on (owner 2026-10-18) ──
+# Bonus % on the territory's HEX/day for each resource it produces (region + POI), capped; plus a stable
+# per-hex variation so two neighbouring commons are not identical.
+RESOURCE_HEX_BONUS = {
+    'oil': 15, 'gas': 10, 'coal': 5, 'gold': 25, 'diamonds': 30, 'platinum': 20, 'silver': 12, 'uranium': 20,
+    'rareearthelements': 20, 'lithium': 18, 'cobalt': 15, 'copper': 8, 'iron': 6, 'titanium': 12, 'tungsten': 10,
+    'strategicposition': 25, 'culturalheritage': 10, 'humancapital': 10, 'freshwater': 5, 'energy': 8,
+}
+HEX_BONUS_CAP = 60
+HEX_VARIATION = 15      # ± % per hex, deterministic
+
+
+def hex_variation_pct(h3_index: str) -> int:
+    import hashlib
+    return int(hashlib.md5((h3_index or '').encode()).hexdigest()[:4], 16) % (2 * HEX_VARIATION + 1) - HEX_VARIATION
+
+
+def hex_yield(h3_index, lat, lon, rarity='common', poi_category='') -> dict:
+    """{'mult', 'bonuses': [(resource name, pct)], 'variation_pct'} for one territory."""
+    rates = territory_resource_rates(lat, lon, rarity, poi_category) if lat is not None and lon is not None else {}
+    bonuses = sorted(((resources()[r]['name'], RESOURCE_HEX_BONUS[r]) for r in rates if r in RESOURCE_HEX_BONUS),
+                     key=lambda x: -x[1])
+    total = min(HEX_BONUS_CAP, sum(p for _, p in bonuses))
+    var = hex_variation_pct(h3_index)
+    return {'mult': (1 + total / 100) * (1 + var / 100), 'bonuses': bonuses, 'bonus_pct': total, 'variation_pct': var}

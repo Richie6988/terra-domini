@@ -322,6 +322,15 @@ def codex_cards(request):
     })
 
 
+def _yield_fields(h3_index, lat, lon, rarity, category, shiny, connected):
+    from terra_domini.apps.economy.resources import hex_yield
+    y = hex_yield(h3_index, lat, lon, rarity, category)
+    return {'hex_per_day': round(B.territory_hex_per_day(rarity, shiny, connected) * y['mult'], 1),
+            'base_hex_per_day': B.territory_hex_per_day(rarity, shiny, connected),
+            'hex_bonuses': [{'resource': n, 'pct': p} for n, p in y['bonuses']],
+            'bonus_pct': y['bonus_pct'], 'variation_pct': y['variation_pct']}
+
+
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def territory_card(request, h3_index):
@@ -352,7 +361,7 @@ def territory_card(request, h3_index):
         'rarity': rarity, 'is_shiny': bool(t and t.is_shiny),
         'owner': t.owner.username if t and t.owner_id else None,
         'captured_at': t.captured_at.date().isoformat() if t and t.captured_at else None,
-        'hex_per_day': B.territory_hex_per_day(rarity, bool(t and t.is_shiny), connected),
+        **_yield_fields(h3_index, lat, lon, rarity, poi.get('category', ''), bool(t and t.is_shiny), connected),
         'connected': connected,
         'region': {'id': region['id'], 'name': region['name'], 'continent': region['continent']} if region else None,
         'resources': sorted(({'id': k, 'name': meta[k]['name'], 'per_day': round(v, 1)} for k, v in rates.items()),

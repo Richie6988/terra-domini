@@ -78,7 +78,12 @@ def territory_rates(player) -> dict:
     The ONLY production formula: harvest, Empire and Ladder all read it."""
     from terra_domini.apps.territories.models import Territory
     from terra_domini.utils.h3_compat import k_ring
-    rows = list(Territory.objects.filter(owner=player).values_list('h3_index', 'rarity', 'is_shiny'))
+    from terra_domini.apps.economy.resources import hex_yield
+    from terra_domini.apps.events.unified_poi import UnifiedPOI
+    full = list(Territory.objects.filter(owner=player).values_list('h3_index', 'rarity', 'is_shiny', 'center_lat', 'center_lon'))
+    rows = [(h, r, s) for h, r, s, _, _ in full]
+    geo = {h: (la, lo) for h, _, _, la, lo in full}
+    cats = dict(UnifiedPOI.objects.filter(h3_index__in=list(geo), is_active=True).values_list('h3_index', 'category'))
     owned = {h for h, _, _ in rows}
     mult = BEGINNER_MULT if is_beginner(player) else 1
     try:   # live real-world event on the hex (apps/events/world_events.py) → ×EVENT_MULT
@@ -92,7 +97,8 @@ def territory_rates(player) -> dict:
             connected = any(n in owned for n in k_ring(h, 1) if n != h)
         except Exception:
             connected = False
-        out[h] = territory_hex_per_day(rarity, shiny, connected) * mult * (EVENT_MULT if h in hot else 1)
+        y = hex_yield(h, *geo[h], rarity, cats.get(h, ''))['mult']      # resources on the hex (oil, gold…) ± variation
+        out[h] = round(territory_hex_per_day(rarity, shiny, connected) * y * mult * (EVENT_MULT if h in hot else 1), 1)
     return out
 
 
