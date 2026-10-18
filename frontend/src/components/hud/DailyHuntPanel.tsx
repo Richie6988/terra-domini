@@ -16,6 +16,7 @@ import { GlassPanel } from '../shared/GlassPanel'
 import { IconSVG } from '../shared/iconBank'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
+import { playSound } from '../../hooks/useSound'
 
 interface Props { onClose: () => void }
 
@@ -98,18 +99,19 @@ export function DailyHuntPanel({ onClose }: Props) {
 
   const spawn = useMutation({
     mutationFn: () => api.post('/safari/spawn/', { lat: center?.[0], lon: center?.[1] }).then(r => r.data),
-    onSuccess: d => { setLast(null); toast.success(d.message); qc.setQueryData(['safari-active'], { target: d.target }) },
+    onSuccess: d => { playSound('explore'); setLast(null); toast.success(d.message); qc.setQueryData(['safari-active'], { target: d.target }) },
     onError: (e: any) => toast.error(e?.response?.data?.error || 'No tracks found'),
   })
   const probe = useMutation({
     mutationFn: (h3: string) => api.post('/safari/probe/', { h3 }).then(r => r.data),
     onSuccess: d => {
-      if (d.result === 'miss') { qc.setQueryData(['safari-active'], { target: d.target }); return }
+      if (d.result === 'miss') { playSound('probe'); qc.setQueryData(['safari-active'], { target: d.target }); return }
       setLast(d.target); qc.setQueryData(['safari-active'], { target: null })
       if (d.result === 'captured') {
+        playSound('capture')
         toast.success(d.message, { duration: 5000 })
         ;['loop-status', 'codex-cards', 'player'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
-      } else toast.error(d.message)
+      } else { playSound('flee'); toast.error(d.message) }
     },
     onError: (e: any) => toast.error(e?.response?.data?.error || 'Scan failed'),
   })

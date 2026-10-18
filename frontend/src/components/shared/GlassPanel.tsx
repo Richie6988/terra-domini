@@ -6,6 +6,7 @@
 import { useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion } from 'framer-motion'
+import { playSound } from '../../hooks/useSound'
 
 interface GlassPanelProps {
   title: string
@@ -23,6 +24,7 @@ export function GlassPanel({
   title, onClose, accent = '#F59E0B', width, icon, subtitle, children,
 }: GlassPanelProps) {
   // ESC closes the panel
+  useEffect(() => { playSound('open') }, [])
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
     window.addEventListener('keydown', onKey)

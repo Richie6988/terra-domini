@@ -132,6 +132,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
       })
       if (res.data.status === 'exploration_started' || res.data.status === 'in_progress') {
         // Exploration is NOT a claim yet: no local ownership, no celebration (RULE 1)
+        play(res.data.status === 'exploration_started' ? 'explore' : 'notify')
         const secs = Number(res.data.eta_seconds ?? (res.data.hours_required || 0) * 3600)
         const left = secs >= 3600 ? `${Math.floor(secs / 3600)}h ${Math.round((secs % 3600) / 60)}m` : `${Math.max(1, Math.round(secs / 60))} min`
         toast.success(res.data.status === 'in_progress'

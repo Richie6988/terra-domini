@@ -17,6 +17,7 @@ import toast from 'react-hot-toast'
 import { Clock, Minus, Plus, ArrowRight, Info, Swords } from 'lucide-react'
 import { IconSVG } from '../shared/iconBank'
 import type { TerritoryLight } from '../../types'
+import { playSound } from '../../hooks/useSound'
 
 const ATTACK_TYPES = [
   { id: 'conquest', label: 'Conquest', iconId: 'swords', color: '#EF4444', desc: 'Full strength. Win and the hex becomes yours.' },
@@ -109,6 +110,7 @@ export function AttackPanel({ target, onClose }: Props) {
       units: Object.fromEntries(Object.entries(units).filter(([, n]) => n > 0)),
     }),
     onSuccess: (res) => {
+      playSound('battle')
       setLaunched({ msg: res.data?.message || 'Attack launched!', ends: res.data?.ends_at, sent: totalUnits, prob })
       qc.invalidateQueries({ queryKey: ['battles-active'] })
       qc.invalidateQueries({ queryKey: ['my-army'] })

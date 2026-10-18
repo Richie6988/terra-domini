@@ -13,6 +13,7 @@ import { cellToLatLng } from 'h3-js'
 import { IconSVG } from '../shared/iconBank'
 import { createTokenFace2D, randomBiomeImage } from '../shared/hexodTokenFace'
 import type { TierKey } from '../shared/hexodTokenFace'
+import { playSound } from '../../hooks/useSound'
 
 const RC: Record<string,string> = { common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6', epic:'#8B5CF6', legendary:'#F59E0B', mythic:'#EC4899' }
 const RL: Record<string,string> = { common:'Common', uncommon:'Uncommon', rare:'Rare', epic:'Epic', legendary:'Legendary', mythic:'Mythic' }
@@ -155,6 +156,7 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
       let idx=0;const flipNext=()=>{
         if(idx>=n){setTimeout(()=>{s.phase='done';setPhase('done');setBestCard(cards.reduce((a,b)=>(RK[b.rarity]||0)>(RK[a.rarity]||0)?b:a,cards[0]))},600);return}
         s.fl.add(idx);setRevealed(idx+1)
+        { const rk=RK[cards[idx]?.rarity]||0; playSound(rk>=4?'card_legendary':rk>=3?'card_epic':rk>=2?'card_rare':'card') }
         if((RK[cards[idx]?.rarity]||0)>=2)setFlash({color:RC[cards[idx].rarity]||'#fff',k:idx})
         const gm=(s.cms[idx] as any)?._gm
         if(gm){let g=0;const gi=setInterval(()=>{g+=0.05;gm.opacity=Math.min(0.3,g);if(g>=0.3)clearInterval(gi)},30)}

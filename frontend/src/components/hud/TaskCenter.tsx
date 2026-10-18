@@ -13,6 +13,7 @@ import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
 import { IconSVG } from '../shared/iconBank'
 import { Check, Clock, Copy, Flame } from 'lucide-react'
+import { playSound } from '../../hooks/useSound'
 
 
 interface Props { onClose: () => void }
@@ -73,6 +74,7 @@ export function TaskCenter({ onClose }: Props) {
       const m = missions.find(t => t.id === missionId)
       toast.success(`+${m?.reward_tdc || 0} HEX earned!`)
       const b = res?.data?.daily_bonus
+      playSound(b ? 'bonus' : 'mission')
       if (b) toast.success(`3/3 missions! Bonus +${b.hex} HEX${b.item ? ` + ${b.item} for 24h` : ''}`, { duration: 6000 })
       if (typeof res?.data?.balance === 'number') { const st = useStore.getState(); st.setBalance({ ...(st.balance || {}), in_game: res.data.balance } as any) }
       // Balance in the top HUD + the "reward to claim" nudge come from loop-status

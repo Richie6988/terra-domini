@@ -18,6 +18,7 @@ import toast from 'react-hot-toast'
 import { EmojiIcon } from '../shared/emojiIcons'
 import { IconSVG } from '../shared/iconBank'
 import { Clock } from 'lucide-react'
+import { playSound } from '../../hooks/useSound'
 
 const SHOP_ACCENT = '#fbbf24'
 
@@ -147,8 +148,10 @@ export function ShopPanel({ onClose }: Props) {
     api.post('/shop/purchase/', { item_code: itemCode, quantity: 1 })
       .then(res => {
         if (res.data?.booster) {
+          playSound('booster')
           setBoosterResult({ cards: res.data.booster.cards, itemName })
         } else {
+          playSound('purchase')
           toast.success(res.data?.message && res.data.message !== 'Purchase complete!' ? res.data.message : `${itemName} purchased!`, { duration: 5000 })
         }
         qc.invalidateQueries({ queryKey: ['player'] })

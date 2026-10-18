@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
 import { IconSVG } from './iconBank'
+import { playSound } from '../../hooks/useSound'
 
 interface Nudge {
   id: string; type: string; priority: number; title: string; body: string
@@ -104,16 +105,17 @@ export function useLoopActions() {
     onSuccess: (d: any) => {
       const res = Object.entries((d.resources_collected || {}) as Record<string, number>).sort((a, b) => b[1] - a[1])
       const resTxt = res.length ? ` · ${res.slice(0, 3).map(([k, v]) => `+${Math.floor(v)} ${k}`).join(', ')}${res.length > 3 ? ` +${res.length - 3} more` : ''}` : ''
+      if (d.collected > 0) playSound('collect')
       if (d.collected > 0) toast.success(`+${d.collected.toLocaleString()} HEX collected${resTxt}`, { duration: 4000 })
       else toast(d.message || 'Nothing to collect yet')
       if (d.lost > 0) toast.error(`${d.lost.toLocaleString()} HEX lost — your stock was full. Come back sooner!`, { duration: 5000 })
       syncBalance(d.balance); refresh()
     },
-    onError: (e: any) => toast.error(e?.response?.data?.error || 'Collect failed'),
+    onError: (e: any) => { playSound('error'); toast.error(e?.response?.data?.error || 'Collect failed') },
   })
   const reinforce = useMutation({
     mutationFn: (battle_id: string) => api.post('/combat/reinforce/', { battle_id }).then(r => r.data),
-    onSuccess: (d: any) => { toast.success(`Defenses ${Math.round(d.defense_points)}/${Math.round(d.max)}`); refresh() },
+    onSuccess: (d: any) => { playSound('reinforce'); toast.success(`Defenses ${Math.round(d.defense_points)}/${Math.round(d.max)}`); refresh() },
     onError: (e: any) => toast.error(e?.response?.data?.error || 'Reinforce failed'),
   })
   return { collect, reinforce, syncBalance }
