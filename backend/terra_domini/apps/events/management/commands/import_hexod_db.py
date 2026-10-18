@@ -157,9 +157,11 @@ class Command(BaseCommand):
         from terra_domini.apps.territories.terrain_rules import terrain, territory_type_for
         poi_cat = dict(UnifiedPOI.objects.filter(is_active=True).exclude(h3_index='').values_list('h3_index', 'category'))
         changed = []
-        for t in Territory.objects.exclude(center_lat__isnull=True).only('id', 'h3_index', 'center_lat', 'center_lon', 'biome', 'territory_type'):
+        for t in Territory.objects.exclude(center_lat__isnull=True).only('id', 'h3_index', 'center_lat', 'center_lon', 'biome', 'territory_type', 'terrain_source'):
             cat = poi_cat.get(t.h3_index, '')
-            biome = terrain(round(t.center_lat, 4), round(t.center_lon, 4), cat)[0]
+            if t.terrain_source and not cat:
+                continue   # measured terrain (refine_terrain) beats the coarse rules
+            biome = terrain(round(t.center_lat, 4), round(t.center_lon, 4), cat, precise=False)[0]
             ttype = 'landmark' if cat and biome == 'landmark' else territory_type_for(biome)
             if t.biome != biome or t.territory_type != ttype:
                 t.biome, t.territory_type = biome, ttype

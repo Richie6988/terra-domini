@@ -248,6 +248,10 @@ def generate_territory(h3_index: str, lat: float, lon: float, poi_category: str 
     except Exception:
         near_rarities = []
 
+    def _measured(a, b):
+        from terra_domini.apps.territories.landcover import classify
+        return classify(round(a, 4), round(b, 4)) is not None
+
     # Biome from biome_engine (precise, deterministic, Köppen-based)
     from terra_domini.apps.territories.biome_engine import assign_biome, BIOME_PRODUCTION
     from terra_domini.apps.territories.terrain_rules import territory_type_for
@@ -273,6 +277,7 @@ def generate_territory(h3_index: str, lat: float, lon: float, poi_category: str 
                 center_lon     = geo[1],
                 territory_type = territory_type_for(biome),
                 biome          = biome,
+                terrain_source = 'worldcover' if _measured(geo[0], geo[1]) else '',
                 rarity         = rarity,
                 is_shiny       = is_shiny,
                 is_landmark    = False,

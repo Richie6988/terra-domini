@@ -97,7 +97,9 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
     return r.slice(0,3)
   },[t])
 
-  const biome  = t.territory_type || t.biome || 'rural'
+  // measured terrain (ocean, lake, ice, farmland…) is more precise than the territory type; 'grassland' = legacy default
+  const biome  = (t.biome && t.biome !== 'grassland' ? t.biome : '') || t.territory_type || 'rural'
+  const biomeIcon = ({ lake: 'water_drop', ice: 'glacier', farmland: 'wheat', grassland: 'sprout', wetland: 'leaf', water: 'ocean', arctic: 'tundra' } as Record<string, string>)[biome] || biome
   const serieNum = t.token_id ? (parseInt(String(t.token_id)) % cfg.serieMax) + 1 : undefined
 
   // Claim options from backend
@@ -213,7 +215,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
       tokenName={cardName.toUpperCase()}
       category={(t.poi_category || biome || 'TERRITORY').toUpperCase()}
       catColor={cfg.c}
-      iconId={t.poi_icon || t.poi_category?.toLowerCase() || biome || 'city'}
+      iconId={t.poi_icon || t.poi_category?.toLowerCase() || biomeIcon || 'city'}
       rarityKey={rarity}
       h3Index={t.h3_index}
       description={t.poi_description ? String(t.poi_description).slice(0, 220) : undefined}
@@ -256,7 +258,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
               <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
                 <span className="hx-chip hx-chip--accent">{cfg.label.toUpperCase()}</span>
                 <span className="hx-chip">
-                  <IconSVG id={biome} size={14} />{(biome || 'rural').toUpperCase()}
+                  <IconSVG id={biomeIcon} size={14} />{(biome || 'rural').toUpperCase()}
                 </span>
                 {isShiny && <span className="hx-chip" style={{ color: '#FCD34D', borderColor: 'rgba(252,211,77,0.4)', background: 'rgba(252,211,77,0.12)' }}>SHINY</span>}
                 {isEnemy && <span className="hx-chip" style={{ color: '#FF8A95', borderColor: 'rgba(255,77,94,0.45)', background: 'rgba(255,77,94,0.12)' }}>ENEMY</span>}

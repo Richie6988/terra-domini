@@ -133,6 +133,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       overlayRef.current = L.tileLayer(tileCfg.overlay, { maxZoom: 19, opacity: 0.8 }).addTo(map)
     }
 
+    map.attributionControl.addAttribution('Terrain &copy; ESA WorldCover 2021, AWS Terrain Tiles')
     hexRef.current  = L.layerGroup().addTo(map)
     gridRef.current = L.layerGroup().addTo(map)
     mapRef.current  = map

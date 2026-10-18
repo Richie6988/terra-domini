@@ -7,6 +7,9 @@ their resources, POIs). First rule that matches wins:
 2. Urban core               → within a city's radius (3 km + 5 km·√population in millions; capitals ≥ 10 km)
 3. Industrial site          → within 6 km of an industrial POI (oil/gas field, mine, nuclear plant, dam, spaceport, port)
 4. Suburbs (≤ 1.8 × radius) → industrial if the region has heavy resources (oil, coal, iron…), else rural
+4b. Measured terrain        → ESA WorldCover 10 m land cover + AWS elevation (landcover.py): ocean, lake, ice,
+                               mountain (height/relief), coastal shoreline, forest, desert, farmland, grassland,
+                               wetland, tundra, built-up. Inside a city core only water/forest/mountain/ice stay natural.
 5. Named region             → keywords of the DB region (Sahara → desert, Rainforest → forest, Himalayan → mountain,
                                Savannah/Steppe/Plain → rural, Islands/Coast → coastal, Arctic/Taiga → tundra…)
 6. Ocean region only        → coastal
@@ -32,7 +35,8 @@ REGION_RULES = [   # order matters: the first keyword found in the region name d
 ]
 TYPE_FOR_BIOME = {'tundra': 'arctic', 'landmark': 'landmark', 'urban': 'urban', 'rural': 'rural', 'forest': 'forest',
                   'mountain': 'mountain', 'coastal': 'coastal', 'desert': 'desert', 'industrial': 'industrial',
-                  'grassland': 'rural'}
+                  'grassland': 'rural', 'farmland': 'rural', 'wetland': 'rural', 'ocean': 'water', 'lake': 'water',
+                  'ice': 'arctic'}
 
 
 def _km(lat1, lon1, lat2, lon2):
@@ -64,21 +68,36 @@ def nearest_city(lat, lon):
 
 
 @lru_cache(maxsize=50000)
-def terrain(lat: float, lon: float, poi_category: str = '') -> tuple:
-    """(biome, reason) for a point. lat/lon rounded by callers for the cache."""
+def terrain(lat: float, lon: float, poi_category: str = '', precise: bool = True) -> tuple:
+    """(biome, reason) for a point. lat/lon rounded by callers for the cache.
+    precise=False skips the measured land cover (bulk passes; refine_terrain measures them later)."""
     from terra_domini.apps.territories.biome_engine import POI_CATEGORY_BIOME, _geo_biome
     from terra_domini.apps.economy.resources import biome_for
     if poi_category and poi_category in POI_CATEGORY_BIOME:
         return POI_CATEGORY_BIOME[poi_category], f'POI {poi_category}'
     if poi_category in INDUSTRIAL_POI:
         return 'industrial', f'POI {poi_category}'
+    lc = None
+    if precise:
+        from terra_domini.apps.territories.landcover import classify
+        lc = classify(round(lat, 4), round(lon, 4))
+    NATURAL = ('ocean', 'lake', 'forest', 'mountain', 'ice')
     near = nearest_city(lat, lon)
     if near and near[1] <= near[0]['radius_km']:
+        if lc and lc[0] in NATURAL:   # a river, park forest or hill inside the city stays what it is
+            return lc[0], f"{lc[1]} in {near[0]['name']}"
         return 'urban', f"{near[0]['name']} urban area ({near[1]:.1f} km)"
-    for plat, plon in _industrial_pois():
-        if abs(plat - lat) < 0.07 and abs(plon - lon) < 0.1 and _km(lat, lon, plat, plon) <= 6:
-            return 'industrial', 'industrial site nearby'
+    if not (lc and lc[0] in ('ocean', 'lake')):
+        for plat, plon in _industrial_pois():
+            if abs(plat - lat) < 0.07 and abs(plon - lon) < 0.1 and _km(lat, lon, plat, plon) <= 6:
+                return 'industrial', 'industrial site nearby'
     region = biome_for(round(lat, 3), round(lon, 3))
+    if lc:
+        if near and near[1] <= near[0]['radius_km'] * 1.8 and lc[0] in ('farmland', 'grassland'):
+            heavy = region and HEAVY_RESOURCES & set(region.get('resource_ids', []))
+            if heavy:
+                return 'industrial', f"{near[0]['name']} suburbs, heavy-resource region"
+        return lc[0], lc[1]
     if near and near[1] <= near[0]['radius_km'] * 1.8:
         heavy = region and HEAVY_RESOURCES & set(region.get('resource_ids', []))
         return ('industrial' if heavy else 'rural'), f"{near[0]['name']} suburbs"

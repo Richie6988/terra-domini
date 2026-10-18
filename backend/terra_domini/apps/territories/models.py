@@ -106,6 +106,8 @@ class Territory(models.Model):
         choices=[('common','Common'),('uncommon','Uncommon'),('rare','Rare'),
                  ('epic','Epic'),('legendary','Legendary'),('mythic','Mythic')])
     biome             = models.CharField(max_length=20, default='grassland')
+    terrain_source    = models.CharField(max_length=20, blank=True, default='')   # 'worldcover' = measured (landcover.py)
+    elevation_m       = models.IntegerField(null=True, blank=True)
     tdc_per_day       = models.FloatField(default=10.0)
     poi_name          = models.CharField(max_length=200, blank=True, default='')
     poi_wiki_url      = models.CharField(max_length=500, blank=True, default='')

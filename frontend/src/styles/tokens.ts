@@ -61,6 +61,8 @@ export const BIOME_COLOR: Record<string, string> = {
   urban: '#60A5FA', rural: '#6EE7B7', forest: '#34D399',
   mountain: '#A8A29E', coastal: '#38BDF8', desert: '#FCD34D',
   tundra: '#BAE6FD', industrial: '#9CA3AF', landmark: '#C4B5FD',
+  // measured terrain (ESA WorldCover + elevation)
+  ocean: '#1D4ED8', lake: '#0EA5E9', ice: '#E0F2FE', farmland: '#BEF264', grassland: '#86EFAC', wetland: '#2DD4BF',
 }
 
 export const PANEL_MOTION = {
