@@ -492,7 +492,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         buy_cost = _buy_cost(owned_count, is_adjacent or is_first, (territory.rarity if territory else 'common'))
         from terra_domini.apps.economy.balance import explore_slots, explore_speed_mult
         from terra_domini.apps.territories.models import PendingClaim as _PC
-        explore_hours = round(1.0 * (1.2 ** min(owned_count, 50)) * (1 if is_adjacent or is_first else 2) * explore_speed_mult(request.user), 1)
+        from terra_domini.apps.economy.balance import explore_hours as _explore_hours
+        explore_hours = round(_explore_hours(owned_count, is_adjacent or is_first) * explore_speed_mult(request.user), 1)
         from terra_domini.apps.economy.balance import has_boost, BLITZ_EXPLORE_HOURS
         if has_boost(request.user, 'claim_instant'):
             explore_hours = BLITZ_EXPLORE_HOURS
@@ -651,8 +652,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
 
         elif method == 'explore':
             from terra_domini.apps.economy.balance import explore_slots, explore_speed_mult
-            base_hours = 1.0 * (1.2 ** min(owned_count, 50))
-            hours = (base_hours if is_adjacent or is_first else base_hours * 2) * explore_speed_mult(request.user)
+            from terra_domini.apps.economy.balance import explore_hours as _explore_hours
+            hours = _explore_hours(owned_count, is_adjacent or is_first) * explore_speed_mult(request.user)
             from terra_domini.apps.economy.balance import has_boost, BLITZ_EXPLORE_HOURS
             if has_boost(request.user, 'claim_instant'):   # shop 'Blitz Mode'
                 hours = BLITZ_EXPLORE_HOURS

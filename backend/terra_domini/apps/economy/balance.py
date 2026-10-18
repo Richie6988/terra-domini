@@ -53,6 +53,13 @@ def train_seconds(unit_type: str, quantity: int) -> int:
 
 # ── Explorations in parallel (shop: 'explore_slots' +1 for 24h, 'explore_speed' halves timers) ──
 EXPLORE_SLOTS_BASE = 1
+EXPLORE_MAX_HOURS = 12        # a free exploration never takes more than half a day (was exponential: 1700 h at 31 zones)
+
+
+def explore_hours(owned: int, near: bool) -> float:
+    """Free exploration time: 30 min for the first zones, +15 min per zone owned, ×2 far from your land, capped."""
+    h = min(EXPLORE_MAX_HOURS / 2, 0.5 + 0.25 * owned)
+    return min(EXPLORE_MAX_HOURS, h if near else h * 2)
 EXPLORE_SLOTS_MAX = 3
 
 

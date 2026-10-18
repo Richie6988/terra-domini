@@ -232,33 +232,34 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
         <div style={{
           ['--accent' as any]: cfg.c,
           position: 'relative', overflow: 'hidden',
-          width: 'min(600px, calc(100vw - 24px))', boxSizing: 'border-box',
-          padding: '14px 16px 16px', borderRadius: 18,
-          // UI kit v2 (cartoon): royal-blue panel, dark outline, 3D bottom shadow, no neon glow
-          background: 'linear-gradient(180deg, #2f5fd0 0%, #1e3c8f 100%)',
-          border: '3px solid #0f2266',
-          boxShadow: '0 6px 0 #0f2266, 0 18px 40px rgba(0,0,0,0.45), inset 0 2px 0 rgba(255,255,255,0.18)',
+          width: 'min(560px, calc(100vw - 24px))', boxSizing: 'border-box',
+          padding: '10px 14px 12px', borderRadius: 16,
+          // Dark glass matching the token studio: the token stays the star
+          background: 'linear-gradient(180deg, rgba(18,26,48,0.92), rgba(8,12,24,0.94))',
+          border: `1px solid ${cfg.c}55`,
+          boxShadow: '0 14px 40px rgba(0,0,0,0.55), inset 0 1px 0 rgba(255,255,255,0.06)',
+          backdropFilter: 'blur(8px)',
           fontFamily: 'var(--font-heading)',
-          display: 'flex', flexDirection: 'column', gap: 12,
+          display: 'flex', flexDirection: 'column', gap: 8,
         }}>
           {/* Rarity foil strip */}
           <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: `linear-gradient(90deg, transparent, ${cfg.c}, ${cfg.accent}, ${cfg.c}, transparent)` }} />
 
           {/* Header: grade emblem + name + chips */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, minWidth: 0 }}>
-            <div style={{ position: 'relative', width: 46, height: 46, flexShrink: 0 }}>
-              <svg width="46" height="46" viewBox="0 0 24 24" style={{ position: 'absolute', inset: 0, filter: `drop-shadow(0 0 6px ${cfg.c}88)` }}>
+            <div style={{ position: 'relative', width: 34, height: 34, flexShrink: 0 }}>
+              <svg width="34" height="34" viewBox="0 0 24 24" style={{ position: 'absolute', inset: 0, filter: `drop-shadow(0 0 6px ${cfg.c}88)` }}>
                 <path d="M12 1.5 21.1 6.75v10.5L12 22.5 2.9 17.25V6.75z" fill={`${cfg.c}26`} stroke={cfg.c} strokeWidth="1.2" />
               </svg>
               <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
                 fontSize: cfg.grade.length > 1 ? 13 : 16, fontWeight: 900, color: cfg.accent }}>{cfg.grade}</div>
             </div>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 20, fontWeight: 400, color: '#fff', letterSpacing: 0.5, textShadow: '0 2px 0 rgba(0,0,0,0.45)',
+              <div style={{ fontSize: 16, fontWeight: 400, color: '#fff', letterSpacing: 0.5, textShadow: '0 2px 0 rgba(0,0,0,0.45)',
                 overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {cardName.toUpperCase()}
               </div>
-              <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 5, marginTop: 4, flexWrap: 'wrap', transform: 'scale(0.92)', transformOrigin: 'left center' }}>
                 <span className="hx-chip hx-chip--accent">{cfg.label.toUpperCase()}</span>
                 <span className="hx-chip">
                   <IconSVG id={biomeIcon || 'globe'} size={14} />{(biome || '...').toUpperCase()}
@@ -270,43 +271,22 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
             </div>
           </div>
 
-          {/* What this hex sits on: resource bonuses + daily resources */}
+          {/* What this hex sits on, in one line */}
           {card && (card.hex_bonuses?.length > 0 || card.resources?.length > 0) && (
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', fontFamily: 'var(--font-body)', fontWeight: 800 }}>
-              {card.hex_bonuses?.slice(0, 4).map((b: any) => (
-                <span key={b.resource} className="hx-chip" style={{ color: '#fde68a', textTransform: 'none' }}>{b.resource} +{b.pct}% HEX</span>
-              ))}
-              {card.variation_pct !== 0 && <span className="hx-chip" style={{ color: card.variation_pct > 0 ? '#86efac' : '#fca5a5', textTransform: 'none' }}>
-                local {card.variation_pct > 0 ? '+' : ''}{card.variation_pct}%</span>}
-              {card.resources?.slice(0, 3).map((r: any) => (
-                <span key={r.id} className="hx-chip" style={{ textTransform: 'none' }}>+{r.per_day} {r.name}/day</span>
-              ))}
+            <div style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12, color: '#cbd5e1', textTransform: 'none', letterSpacing: 0,
+              whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+              {card.resources?.length > 0 && <>Produces <b style={{ color: '#fff' }}>{card.resources.slice(0, 3).map((r: any) => r.name).join(', ')}</b></>}
+              {card.bonus_pct > 0 && <span style={{ color: '#fde68a' }}> · +{card.bonus_pct}% HEX</span>}
             </div>
           )}
 
-          {/* Stats */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
-            {[
-              { label: 'INCOME', icon: <Coins size={12} />, value: `+${income.toLocaleString()}`, unit: 'HEX/DAY', color: '#FBBF24' },
-              { label: 'DEFENSE', icon: <Shield size={12} />, value: Math.round(t.defense_points || 100).toLocaleString(), unit: `TIER ${t.defense_tier || 1}`, color: '#e2e8f0' },
-              { label: 'OWNER', icon: <User size={12} />, value: isFree ? 'NONE' : (t.owner_username || 'UNKNOWN'), unit: isFree ? 'AVAILABLE' : isEnemy ? 'HOSTILE' : 'YOU', color: isFree ? '#6EE7B7' : isEnemy ? '#FF8A95' : '#00FF87', text: true },
-            ].map(st => (
-              <div key={st.label} style={{
-                padding: '8px 10px', borderRadius: 10, minWidth: 0,
-                background: 'rgba(8,20,60,0.45)', border: '2px solid rgba(15,34,102,0.7)',
-              }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, letterSpacing: 0.5, color: '#b9cdf5' }}>
-                  {st.icon}{st.label}
-                </div>
-                <div style={{
-                  marginTop: 4, color: st.color, lineHeight: 1.1,
-                  fontFamily: 'var(--font-heading)', textShadow: '0 2px 0 rgba(0,0,0,0.35)',
-                  fontSize: st.text ? 14 : 20, fontWeight: 400,
-                  overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                }}>{st.value}</div>
-                <div style={{ fontSize: 10, color: '#b9cdf5', letterSpacing: 0.5, marginTop: 2 }}>{st.unit}</div>
-              </div>
-            ))}
+          {/* Stats: one compact row */}
+          <div style={{ display: 'flex', gap: 14, alignItems: 'baseline', flexWrap: 'wrap' }}>
+            <span style={{ color: '#FBBF24', fontSize: 20, textShadow: '0 2px 0 rgba(0,0,0,0.35)' }}>+{income.toLocaleString()}
+              <small style={{ fontSize: 10, color: '#94a3b8', marginLeft: 4 }}>HEX/DAY</small></span>
+            <span style={{ color: '#e2e8f0', fontSize: 14 }}><Shield size={12} /> {Math.round(t.defense_points || 100).toLocaleString()}
+              <small style={{ fontSize: 10, color: '#94a3b8', marginLeft: 4 }}>DEF</small></span>
+            <span style={{ color: isFree ? '#6EE7B7' : isEnemy ? '#FF8A95' : '#00FF87', fontSize: 13 }}><User size={12} /> {isFree ? 'FREE' : (t.owner_username || 'UNKNOWN')}</span>
           </div>
 
           {/* Plain-language context: why this price, what explore means, what you can afford */}
@@ -325,9 +305,8 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
               if (exp && !exp.available) lines.push(`You already have ${exp.running} exploration${exp.running > 1 ? 's' : ''} running (${exp.slots} at a time). Wait for it, or get an Extra Explorer in the Shop.`)
             }
             return (
-              <div style={{ fontSize: 12, lineHeight: 1.45, color: '#dbe8ff', fontWeight: 600, fontFamily: 'var(--font-body)', textTransform: 'none', letterSpacing: 0,
-                padding: '8px 10px', borderRadius: 10, background: 'rgba(8,20,60,0.45)', border: '2px solid rgba(15,34,102,0.7)' }}>
-                {lines.map((l, i) => <div key={i}>{l}</div>)}
+              <div style={{ fontSize: 11, lineHeight: 1.4, color: '#94a3b8', fontWeight: 600, fontFamily: 'var(--font-body)', textTransform: 'none', letterSpacing: 0 }}>
+                {lines.length > 0 && <div>{lines[lines.length > 1 ? 1 : 0]}</div>}
               </div>
             )
           })()}

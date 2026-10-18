@@ -237,8 +237,8 @@ export function Token3DViewer(props: Token3DProps) {
         <div ref={infoRef} style={{
           position: 'absolute', bottom: 22, left: '50%', transform: 'translateX(-50%)',
           zIndex: 5, pointerEvents: 'auto', paddingBottom: 8,
-          // cap the sheet so the token always keeps ~40% of the screen; extra sheet content scrolls
-          maxHeight: '52vh', overflowY: 'auto', borderRadius: 18,
+          // cap the sheet so the token keeps ~60% of the screen; extra sheet content scrolls
+          maxHeight: '36vh', overflowY: 'auto', borderRadius: 18,
         }}>
           {infoPanel}
         </div>
