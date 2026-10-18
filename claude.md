@@ -523,6 +523,9 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 - **Card picture rule**: Wikipedia photo, else iNaturalist (creatures), else the satellite view of the hex (`/api/tiles/sat/z/x/y.jpg`, same-origin proxy, cached). Non-POI hexes get a description built from measured data (`_place_description`).
 - **Lucky draw**: `economy/lottery_views.py` — tickets 100/500/2000 earned HEX only, ~82 % return + jackpot (10 % of tickets), free bronze ticket daily. **Celebrate**: `celebrate(level, text)` confetti burst (collect, victory, new territory, lucky wins).
 - **UI**: no top ticker; one alert at a time with a pager; Military has its own dock button (Info left the dock).
+- **Land/sea**: `territories/landmask.py` — Natural Earth 1:10m rasterised at 0.02° (`data/landmask/land_0.02.bin.gz`, `scripts/build_landmask.py`), offline: open sea is always `ocean`, shoreline `coastal`, ice sheets `ice`. Hex cards of hexes not in the DB ask `codex/territory` for the terrain (never a client-side 'rural').
+- **Map layers**: satellite by default. `ResourceIconLayer` (`/api/map/resources/`, zoom 9+: POI resource spots + one icon per H3 cell from terrain × region resources) and `CoinPickupLayer` (`/api/pickups/`, zoom 13+: 1 hex in 50 holds a coin each day, 40-120 HEX ×2 >5 km / ×3 >50 km from your land, golden 750, 25/day, 15 shown).
+- **Notifications**: bell + inbox in the top bar (`NotificationBell`), urgent alerts as one toast (`NudgeStack`).
 - **Forces**: `my-army` returns `available` (free units — only these attack) and `stations` (kingdoms + lone territories with stationed units). `POST /combat/assign/` {kingdom_h3,unit_type,count} / `/combat/unassign/` {h3,...}. Military > FORCES tab.
 
 ## 12. KNOWN ISSUES PIPELINE (updated 2026-10-17)

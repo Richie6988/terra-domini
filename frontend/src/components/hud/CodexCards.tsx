@@ -8,6 +8,7 @@ import { Lock } from 'lucide-react'
 import { api } from '../../services/api'
 import { IconSVG } from '../shared/iconBank'
 import { useStore } from '../../store'
+import { RES_ICON } from '../shared/resourceIcons'
 import { TokenFace2D } from '../shared/TokenFace2D'
 import { Token3DViewer, RARITY_TIER } from '../shared/Token3DViewer'
 
@@ -15,15 +16,6 @@ export type CardFamily = 'rare' | 'biomes' | 'resources' | 'creatures' | 'histor
 
 const RARITY_COLOR: Record<string, string> = {
   common: '#94a3b8', uncommon: '#22c55e', rare: '#3b82f6', epic: '#8b5cf6', legendary: '#f59e0b', mythic: '#ef4444',
-}
-const RES_ICON: Record<string, string> = {
-  oil: 'oil_barrel', gas: 'flame', coal: 'res_charbon', gold: 'res_or', iron: 'res_fer', copper: 'res_composants',
-  rareearthelements: 'res_terres_rares', uranium: 'res_uranium', freshwater: 'water_drop', biomass: 'leaf',
-  cereals: 'wheat', aquaculture: 'crab', aluminium: 'res_aluminium', diamonds: 'diamond_blue', platinum: 'gem',
-  lithium: 'res_lithium', nickel: 'res_acier', phosphates: 'sprout', energy: 'lightning', culturalheritage: 'museum',
-  biodiversity: 'butterfly', humancapital: 'people', cobalt: 'res_cobalt', chromium: 'res_acier', manganese: 'rock',
-  tin: 'res_acier', zinc: 'res_acier', silver: 'gem', titanium: 'res_titanium', tungsten: 'pickaxe', marble: 'monument',
-  sand: 'desert', salt: 'snowflake', strategicposition: 'chokepoint',
 }
 const CONTINENT_ICON: Record<string, string> = {
   Africa: 'lion', Asia: 'mountain', Europe: 'castle', 'North America': 'bison', 'South America': 'forest',

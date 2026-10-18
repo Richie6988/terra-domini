@@ -2,10 +2,10 @@
 HEX coins scattered on the map (owner 2026-10-18: "random HEX coins everywhere; click one and it goes into your
 pot — a mechanic that forces exploration").
 
-- Where: about 1 hex in 20 holds a coin today, chosen by a hash of (day, hex) — the same for every player, new every
+- Where: about 1 hex in 50 holds a coin today, chosen by a hash of (day, hex) — the same for every player, new every
   day (UTC), on land and at sea. 1 coin in 40 is golden.
-- Worth: 10-40 HEX, ×2 more than 5 km from your land, ×3 beyond 50 km (exploring pays); golden = 250.
-- Each player can pick a given coin once, up to 40 coins a day. Paid as earned HEX.
+- Worth: 40-120 HEX, ×2 more than 5 km from your land, ×3 beyond 50 km (exploring pays); golden = 750.
+- Each player can pick a given coin once, up to 25 coins a day. Paid as earned HEX.
 GET  /api/pickups/?lat_min=&lat_max=&lon_min=&lon_max=   coins in the view (zoom in when the view is too large)
 POST /api/pickups/collect/ {h3}
 """
@@ -22,10 +22,11 @@ from rest_framework.response import Response
 
 from terra_domini.apps.economy.models import PickupClaim
 
-DENSITY = 20
+DENSITY = 50
 GOLDEN = 40
-DAILY_CAP = 40
+DAILY_CAP = 25
 MAX_CELLS = 8000
+MAX_IN_VIEW = 15   # the most valuable ones only: the map stays a map
 
 
 def _h(day, cell, salt=''):
@@ -37,7 +38,7 @@ def coin_at(day, cell):
     if _h(day, cell) % DENSITY:
         return None
     golden = _h(day, cell, 'g') % GOLDEN == 0
-    return (250 if golden else 10 + _h(day, cell, 'v') % 31), golden
+    return (750 if golden else 40 + _h(day, cell, 'v') % 81), golden
 
 
 def _home_points(player):
@@ -88,7 +89,8 @@ def pickups_in_view(request):
         if v:
             lat, lon = h3.cell_to_latlng(cell)
             coins.append({'h3': cell, 'lat': round(lat, 5), 'lon': round(lon, 5), 'value': v[0], 'golden': v[1]})
-    return Response({'coins': coins, 'left_today': left, 'daily_cap': DAILY_CAP})
+    coins.sort(key=lambda c: -c['value'])
+    return Response({'coins': coins[:MAX_IN_VIEW], 'left_today': left, 'daily_cap': DAILY_CAP})
 
 
 @api_view(['POST'])

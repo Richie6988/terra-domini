@@ -12,7 +12,7 @@ import { useStore } from '../../store'
 import { playSound } from '../../hooks/useSound'
 import { celebrate } from '../shared/Celebrate'
 
-export const COIN_MIN_ZOOM = 11
+export const COIN_MIN_ZOOM = 13
 
 export function CoinPickupLayer({ map, zoom, center }: { map: L.Map | null; zoom: number; center: [number, number] }) {
   const layer = useLeafletLayer(map)
@@ -28,7 +28,8 @@ export function CoinPickupLayer({ map, zoom, center }: { map: L.Map | null; zoom
     const t = setTimeout(() => {
       api.get('/pickups/', { params: { lat_min: b.getSouth(), lat_max: b.getNorth(), lon_min: b.getWest(), lon_max: b.getEast() } })
         .then(({ data }) => {
-          if (id !== reqId.current) return
+          // markers swapped during a zoom animation crash Leaflet (_leaflet_pos): skip, the next move redraws
+          if (id !== reqId.current || (map as any)._animatingZoom) return
           layer.clearLayers()
           if (!data.left_today) return
           for (const c of data.coins || []) {

@@ -234,7 +234,7 @@ export const useStore = create<Store>()(
       masterSound: true,
       musicEnabled: true,
       sfxEnabled: true,
-      mapTheme: 'game',  // stylised game map by default; 'satellite' = real imagery
+      mapTheme: 'satellite',  // real imagery by default with the game's resource icons on top; 'game' = stylised board
       notificationsEnabled: true,
       language: 'en',
       setMasterSound: (v) => set({ masterSound: v }),

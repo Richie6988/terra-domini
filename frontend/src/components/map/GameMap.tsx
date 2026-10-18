@@ -16,6 +16,7 @@ import { injectGlowFilter, makeHexPolygon, injectHexAnimations, getVisibleHexes,
 import { KingdomBorderLayer } from './KingdomBorderLayer'
 import { PoiOverviewLayer } from './PoiOverviewLayer'
 import { CoinPickupLayer } from './CoinPickupLayer'
+import { ResourceIconLayer } from './ResourceIconLayer'
 import { iconIdFor } from '../shared/poiIcons'
 import { ExplorationLayer } from './ExplorationLayer'
 import { OwnedTerritoryHub } from '../kingdom/OwnedTerritoryHub'
@@ -80,11 +81,11 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
   const mapTheme = useStore(s => s.mapTheme)
   const setMapTheme = useStore(s => s.setMapTheme)
-  const tile = (mapTheme in TILES ? mapTheme : 'game') as keyof typeof TILES   // old saved styles (light/dark/topo) → game
-  // One-time switch to the game ambiance for players who had an old map style saved
+  const tile = (mapTheme in TILES ? mapTheme : 'satellite') as keyof typeof TILES   // old saved styles → satellite
+  // One-time switch to the satellite view (default ambiance; 'game' stays one tap away)
   useEffect(() => {
     try {
-      if (!localStorage.getItem('hx_tiles_game')) { localStorage.setItem('hx_tiles_game', '1'); setMapTheme('game' as any) }
+      if (!localStorage.getItem('hx_tiles_sat')) { localStorage.setItem('hx_tiles_sat', '1'); setMapTheme('satellite' as any) }
     } catch { /* ignore */ }
   }, [setMapTheme])
   const setTile = (t: keyof typeof TILES) => setMapTheme(t as any)
@@ -546,6 +547,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       <KingdomBorderLayer map={mapRef.current} zoom={zoom} onKingdomClick={setSelectedKingdom} />
       <PoiOverviewLayer map={mapRef.current} zoom={zoom} center={center} />
+      <ResourceIconLayer map={mapRef.current} zoom={zoom} center={center} />
       <CoinPickupLayer map={mapRef.current} zoom={zoom} center={center} />
       <ExplorationLayer map={mapRef.current} />
       <AttackAnimationLayer map={mapRef.current} />
