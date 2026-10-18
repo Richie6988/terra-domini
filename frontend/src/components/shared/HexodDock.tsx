@@ -8,7 +8,7 @@ import { DockIcon } from './DockIcons'
 import { NotificationBadge, useNotifications } from '../../hooks/useNotifications'
 import { playSound } from '../../hooks/useSound'
 
-type PanelId = 'empire' | 'alliance' | 'codex' | 'marketplace' | 'ladder' | 'events' | 'hunt' | 'auction' | 'shop' | 'info' | 'combat' | 'trade' | 'profile' | 'crypto' | 'kingdom' | 'meta' | 'tasks'
+type PanelId = 'lottery' | 'empire' | 'alliance' | 'codex' | 'marketplace' | 'ladder' | 'events' | 'hunt' | 'auction' | 'shop' | 'info' | 'combat' | 'trade' | 'profile' | 'crypto' | 'kingdom' | 'meta' | 'tasks'
 
 interface DockItem {
   panel: PanelId
@@ -18,15 +18,16 @@ interface DockItem {
 
 const DOCK_ITEMS: DockItem[] = [
   { panel: 'empire',      label: 'Empire',      color: '#cc8800' },
-  { panel: 'alliance',    label: 'Alliance',    color: '#3b82f6' },
+  { panel: 'combat',      label: 'Military',    color: '#dc2626' },
   { panel: 'codex',       label: 'Codex',       color: '#7950f2' },
-  { panel: 'marketplace', label: 'Market',      color: '#cc8800' },
-  { panel: 'ladder',      label: 'Ladder',      color: '#8b5cf6' },
-  { panel: 'events',      label: 'Events',      color: '#f97316' },
   { panel: 'hunt',        label: 'Safari',      color: '#22c55e' },
+  { panel: 'events',      label: 'Events',      color: '#f97316' },
   { panel: 'auction',     label: 'Auction',     color: '#f59e0b' },
+  { panel: 'lottery',     label: 'Lucky',       color: '#ec4899' },
+  { panel: 'marketplace', label: 'Market',      color: '#cc8800' },
+  { panel: 'alliance',    label: 'Alliance',    color: '#3b82f6' },
+  { panel: 'ladder',      label: 'Ladder',      color: '#8b5cf6' },
   { panel: 'shop',        label: 'Shop',        color: '#fbbf24' },
-  { panel: 'info',        label: 'Info',        color: '#38bdf8' },
 ]
 
 const DOCK_CSS = `

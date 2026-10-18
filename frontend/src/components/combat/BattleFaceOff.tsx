@@ -12,6 +12,7 @@ import { X, Swords, Shield, Clock, Castle, Zap, Users } from 'lucide-react'
 import { api } from '../../services/api'
 import { IconSVG } from '../shared/iconBank'
 import { playSound } from '../../hooks/useSound'
+import { celebrate } from '../shared/Celebrate'
 
 const EVT = 'hx:battle'
 export const openBattle = (id: string) => window.dispatchEvent(new CustomEvent(EVT, { detail: { id } }))
@@ -89,7 +90,7 @@ function BattleFaceOff({ id, onClose }: { id: string; onClose: () => void }) {
 
   const done = data?.status === 'completed'
   const iWon = done && data && data.winner === data.role
-  useEffect(() => { if (done) playSound(iWon ? 'win' : 'lose') }, [done]) // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (done) { playSound(iWon ? 'win' : 'lose'); if (iWon) celebrate('big', 'VICTORY') } }, [done]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const after = (msg?: string) => {
     if (msg) toast.success(msg)

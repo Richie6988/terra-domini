@@ -12,6 +12,7 @@ import { api } from '../../services/api'
 import { useStore } from '../../store'
 import { IconSVG } from './iconBank'
 import { openBattle } from '../combat/BattleFaceOff'
+import { celebrate } from './Celebrate'
 import { playSound } from '../../hooks/useSound'
 
 interface Nudge {
@@ -106,7 +107,7 @@ export function useLoopActions() {
     onSuccess: (d: any) => {
       const res = Object.entries((d.resources_collected || {}) as Record<string, number>).sort((a, b) => b[1] - a[1])
       const resTxt = res.length ? ` · ${res.slice(0, 3).map(([k, v]) => `+${Math.floor(v)} ${k}`).join(', ')}${res.length > 3 ? ` +${res.length - 3} more` : ''}` : ''
-      if (d.collected > 0) playSound('collect')
+      if (d.collected > 0) { playSound('collect'); celebrate(d.collected >= 2000 ? 'big' : 'small', `+${Math.floor(d.collected).toLocaleString()} HEX`) }
       if (d.collected > 0) toast.success(`+${d.collected.toLocaleString()} HEX collected${resTxt}`, { duration: 4000 })
       else toast(d.message || 'Nothing to collect yet')
       if (d.lost > 0) toast.error(`${d.lost.toLocaleString()} HEX lost — your stock was full. Come back sooner!`, { duration: 5000 })
@@ -199,7 +200,10 @@ export function NudgeStack() {
   const askAlerts = perm === 'default' && ownsLand && !alertsHidden
 
   // Harvest nudges are shown by HarvestButton itself (still used for background notifications below)
-  const nudges = (data?.nudges || []).filter(n => !dismissed.has(n.id) && !n.type.startsWith('harvest')).slice(0, 3)
+  const nudges = (data?.nudges || []).filter(n => !dismissed.has(n.id) && !n.type.startsWith('harvest'))
+  // One alert at a time (the most urgent first), a pager for the others: the map stays visible
+  const [idx, setIdx] = useState(0)
+  const shown = nudges.length ? [nudges[idx % nudges.length]] : []
 
   // Background notifications for urgent nudges
   useEffect(() => {
@@ -224,7 +228,7 @@ export function NudgeStack() {
   return (
     <div className="hx-nudges">
       <AnimatePresence initial={false}>
-        {nudges.map(n => (
+        {shown.map(n => (
           <motion.div key={n.id} layout initial={{ opacity: 0, x: -30, scale: 0.95 }} animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -30 }} className={`hx-nudge ${n.type === 'under_attack' ? 'is-urgent' : ''}`}
             style={{ ['--accent' as any]: NUDGE_COLOR[n.type] || '#3b9bff' }}>
@@ -238,6 +242,11 @@ export function NudgeStack() {
                 disabled={collect.isPending || reinforce.isPending}>{n.cta.label}</button>
             )}
             <button className="hx-nudge__x" aria-label="Dismiss" onClick={() => setDismissed(s => new Set(s).add(n.id))}>×</button>
+            {nudges.length > 1 && (
+              <button className="hx-nudge__pager" aria-label="Next alert" onClick={() => setIdx(i => i + 1)}>
+                {(idx % nudges.length) + 1}/{nudges.length} ›
+              </button>
+            )}
           </motion.div>
         ))}
       </AnimatePresence>

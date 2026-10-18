@@ -66,7 +66,7 @@ interface UIState {
   toggleGodMode: () => void
   pickingFavorite: boolean
   setPickingFavorite: (v: boolean) => void
-  activePanel: 'territory' | 'combat' | 'alliance' | 'shop' | 'profile' | 'events' | 'trade' | 'crypto' | 'ladder' | 'meta' | 'marketplace' | 'kingdom' | 'codex' | 'hunt' | 'tasks' | 'auction' | 'empire' | 'info' | null
+  activePanel: 'territory' | 'combat' | 'alliance' | 'shop' | 'profile' | 'events' | 'trade' | 'crypto' | 'ladder' | 'meta' | 'marketplace' | 'kingdom' | 'codex' | 'hunt' | 'tasks' | 'auction' | 'empire' | 'info' | 'lottery' | null
   notifications: GameNotification[]
   wsConnected: boolean
   isMobile: boolean

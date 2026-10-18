@@ -107,8 +107,6 @@ export function CombatPanel({ onClose }: Props) {
   }
 
   const unitList = Object.values(units)
-  const maxAtk = Math.max(1, ...unitList.map(u => u.atk))
-  const maxDef = Math.max(1, ...unitList.map(u => u.def))
   const totalOwned = unitList.reduce((a, u) => a + (u.owned || 0), 0)
   const remainingOf = (t: TrainingItem) => (void tick, Math.max(0, Math.round((Date.parse(t.completes_at) - Date.now()) / 1000)))
   const activeTraining = training.filter(t => !t.done && remainingOf(t) > 0)
@@ -116,15 +114,6 @@ export function CombatPanel({ onClose }: Props) {
   const mono = "'Share Tech Mono', monospace"
   const label = { fontSize: 9, letterSpacing: 1.5, color: 'var(--hx-text-3)', fontWeight: 700, ...s } as const
 
-  const StatBar = ({ name, value, max, color }: { name: string; value: number; max: number; color: string }) => (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-      <span style={{ ...label, width: 28, color }}>{name}</span>
-      <div className="hx-progress" style={{ flex: 1, ['--accent' as any]: color }}>
-        <div className="hx-progress__fill" style={{ width: `${(value / max) * 100}%` }} />
-      </div>
-      <span style={{ fontFamily: mono, fontSize: 13, color: '#e2e8f0', width: 26, textAlign: 'right' }}>{value}</span>
-    </div>
-  )
 
   return (
     <GlassPanel title="MILITARY" onClose={onClose} accent="#dc2626"
@@ -186,64 +175,37 @@ export function CombatPanel({ onClose }: Props) {
         </div>
       )}
 
-      {/* ═══ RECRUIT TAB ═══ */}
+      {/* ═══ RECRUIT TAB — one compact row per unit ═══ */}
       {tab === 'recruit' && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 340px), 1fr))', gap: 10 }}>
-          {isLoading && [0, 1, 2, 3].map(i => <div key={i} className="hx-skeleton" style={{ height: 180, borderRadius: 12 }} />)}
-          {Object.entries(units).map(([key, u], idx) => {
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {isLoading && [0, 1, 2, 3].map(i => <div key={i} className="hx-skeleton" style={{ height: 58, borderRadius: 12 }} />)}
+          {Object.entries(units).map(([key, u]) => {
             const color = UNIT_COLORS[key] || '#64748b'
             const qty = recruitQty[key] || 1
-            const totalCost = u.cost * qty
             return (
-              <div key={key} className="hx-card hx-rise" style={{ animationDelay: `${idx * 40}ms`, display: 'flex', flexDirection: 'column', gap: 12, ['--accent' as any]: color }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{
-                    width: 56, height: 56, borderRadius: 14, flexShrink: 0,
-                    background: `radial-gradient(circle at 50% 35%, ${color}40, ${color}12)`, border: `1px solid ${color}66`,
-                    boxShadow: `0 0 16px ${color}22, inset 0 1px 0 rgba(255,255,255,0.12)`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <IconSVG id={u.icon} size={38} />
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1.5, ...s }}>{u.name}</div>
-                    <div style={{ fontSize: 11, color: 'var(--hx-text-2)', marginTop: 4, lineHeight: 1.4, fontFamily: 'system-ui, sans-serif', textTransform: 'none', letterSpacing: 0 }}>{u.desc}</div>
-                  </div>
-                  <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontSize: 24, color, fontFamily: mono, lineHeight: 1 }}>{u.owned}</div>
-                    <div style={{ ...label, marginTop: 4 }}>OWNED</div>
+              <div key={key} className="hx-card" title={u.desc} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', ['--accent' as any]: color }}>
+                <IconSVG id={u.icon} size={34} />
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 12, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1, ...s }}>{u.name}
+                    <span style={{ fontFamily: mono, color, marginLeft: 8 }}>x{u.owned}</span></div>
+                  <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 2 }}>
+                    <span style={{ color: '#f87171' }}>ATK {u.atk}</span> · <span style={{ color: '#60a5fa' }}>DEF {u.def}</span> · {formatDuration(u.effective_train_seconds)}
                   </div>
                 </div>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <StatBar name="ATK" value={u.atk} max={maxAtk} color="#ef4444" />
-                  <StatBar name="DEF" value={u.def} max={maxDef} color="#3b82f6" />
+                <div style={{ display: 'flex', gap: 2 }}>
+                  {[1, 5, 10].map(n => (
+                    <button key={n} aria-label={`Quantity ${n}`} onClick={() => setRecruitQty(prev => ({ ...prev, [key]: n }))} style={{
+                      minWidth: 30, height: 30, borderRadius: 8, cursor: 'pointer', fontSize: 11, fontFamily: mono,
+                      background: qty === n ? `${color}44` : 'rgba(0,0,0,0.25)', border: `1px solid ${qty === n ? color : 'transparent'}`,
+                      color: qty === n ? '#fff' : 'var(--hx-text-3)',
+                    }}>{n}</button>
+                  ))}
                 </div>
-
-                <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                  <span className="hx-chip"><IconSVG id="hex_coin" size={12} /> {u.cost} HEX / UNIT</span>
-                  <span className="hx-chip"><Clock size={11} /> {formatDuration(u.effective_train_seconds)} · {(u as any).train_parallel || 1} AT ONCE</span>
-                </div>
-
-                {/* Quantity + recruit button */}
-                <div style={{ display: 'flex', gap: 6, alignItems: 'center', flexWrap: 'wrap' }}>
-                  <div style={{ display: 'flex', gap: 4, padding: 3, borderRadius: 10, background: 'rgba(0,0,0,0.25)', border: '1px solid var(--hx-line)' }}>
-                    {[1, 5, 10, 25].map(n => (
-                      <button key={n} aria-label={`Quantity ${n}`} onClick={() => setRecruitQty(prev => ({...prev, [key]: n}))} style={{
-                        minWidth: 36, height: 34, borderRadius: 8, cursor: 'pointer', fontSize: 12, fontFamily: mono,
-                        background: qty === n ? `${color}33` : 'transparent',
-                        border: `1px solid ${qty === n ? color + '99' : 'transparent'}`,
-                        color: qty === n ? '#fff' : 'var(--hx-text-3)', transition: 'background .15s, color .15s',
-                      }}>{n}</button>
-                    ))}
-                  </div>
-                  <div style={{ flex: 1 }} />
-                  <button onClick={() => handleRecruit(key)} className="btn-game btn-game-red" style={{
-                    fontSize: 10, letterSpacing: 1, padding: '11px 14px', display: 'inline-flex', alignItems: 'center', gap: 6,
-                  }}>
-                    RECRUIT {qty} · <IconSVG id="hex_coin" size={13} />{totalCost.toLocaleString()}
-                  </button>
-                </div>
+                <button onClick={() => handleRecruit(key)} className="btn-game btn-game-red" style={{
+                  fontSize: 10, padding: '9px 10px', display: 'inline-flex', alignItems: 'center', gap: 4, flexShrink: 0,
+                }}>
+                  <IconSVG id="hex_coin" size={12} />{(u.cost * qty).toLocaleString()}
+                </button>
               </div>
             )
           })}

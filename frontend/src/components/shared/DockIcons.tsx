@@ -38,6 +38,8 @@ export function DockIcon({ id, color = 'currentColor', size = 20 }: { id: string
       return <svg viewBox="0 0 24 24" style={s}><path {...p} d="M8 21V10l-4 4"/><path {...p} d="M12 21V6" fill="none"/><path {...p} d="M16 21V3l4 4"/><circle {...p} cx="16" cy="3" r="2" fill={color} opacity="0.3"/></svg>
     case 'profile':
       return <svg viewBox="0 0 24 24" style={s}><circle {...p} cx="12" cy="8" r="4"/><path {...p} d="M4 20c0-4 4-7 8-7s8 3 8 7"/></svg>
+    case 'lottery':
+      return <svg viewBox="0 0 24 24" style={s}><path {...p} d="M3 8a2 2 0 002-2h14a2 2 0 002 2v2a2 2 0 000 4v2a2 2 0 00-2 2H5a2 2 0 00-2-2v-2a2 2 0 000-4z"/><path {...p} d="M12 9l1 2 2 .3-1.5 1.4.4 2.1L12 13.8l-1.9 1 .4-2.1L9 11.3l2-.3z" fill={color} opacity="0.35"/></svg>
     case 'crypto':
       return <svg viewBox="0 0 24 24" style={s}><path {...p} d="M12 2L6 7l6 5 6-5L12 2z" fill={color} opacity="0.15"/><path {...p} d="M12 12l-6-5v7l6 5 6-5V7l-6 5z"/><path {...p} d="M6 14l6 5 6-5" opacity="0.5"/></svg>
     default:

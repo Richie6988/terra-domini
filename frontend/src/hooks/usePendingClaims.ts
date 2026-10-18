@@ -11,6 +11,7 @@ import { api } from '../services/api'
 import { useStore } from '../store'
 import type { ClaimProgress } from '../components/shared/ClaimProgressBar'
 import { playSound } from './useSound'
+import { celebrate } from '../components/shared/Celebrate'
 
 export function usePendingClaims() {
   const isAuth = useStore(s => s.isAuthenticated)
@@ -33,6 +34,7 @@ export function usePendingClaims() {
       s.setTerritories([{ ...t, owner_id: s.player?.id, owner_username: s.player?.username } as any])
       if (typeof res.data?.balance === 'number') s.setBalance({ ...(s.balance || {}), in_game: res.data.balance } as any)
       playSound('claim')
+      celebrate('small', 'NEW TERRITORY')
       toast.success('Exploration complete — territory claimed!')
     } catch (e: any) {
       toast.error(e?.response?.data?.error || 'Could not finish the claim')

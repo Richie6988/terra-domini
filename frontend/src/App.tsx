@@ -16,10 +16,11 @@ import { WakeUpDigest } from './components/onboarding/Tutorial'
 import { OnboardingHotspots } from './components/onboarding/OnboardingHotspots'
 
 // ─── HEXOD Shell Components ─────────────────────────────────
-import { NewsTicker } from './components/shared/NewsTicker'
 import { HexodTopHUD, MissionsButton } from './components/shared/HexodTopHUD'
 import { HarvestButton, NudgeStack } from './components/shared/SessionLoop'
 import { BattleFaceOffHost } from './components/combat/BattleFaceOff'
+import { CelebrateHost } from './components/shared/Celebrate'
+import { LotteryPanel } from './components/hud/LotteryPanel'
 import { HexodDock } from './components/shared/HexodDock'
 import { RadarWidget } from './components/shared/RadarWidget'
 import { IconSVG } from './components/shared/iconBank'
@@ -213,11 +214,6 @@ function GameScreen() {
       {/* ═══ GAME UI — only renders after globe completes ═══ */}
       {mapLoaded && (<>
 
-      {/* News ticker — 28px fixed top */}
-      <ErrorBoundary label="NewsTicker">
-        <NewsTicker />
-      </ErrorBoundary>
-
       {/* Top HUD — glassmorphism, below ticker */}
       <ErrorBoundary label="HexodTopHUD">
         <HexodTopHUD />
@@ -254,6 +250,7 @@ function GameScreen() {
       <HarvestButton />
       <NudgeStack />
       <BattleFaceOffHost />
+      <CelebrateHost />
 
       {/* Side panels — triggered by HexodDock */}
       <AnimatePresence>
@@ -269,6 +266,7 @@ function GameScreen() {
         {activePanel === 'meta'        && <MetaDashboard    onClose={() => setActivePanel(null)} />}
         {activePanel === 'tasks'       && <TaskCenter       onClose={() => setActivePanel(null)} />}
         {activePanel === 'auction'     && <AuctionPanel     onClose={() => setActivePanel(null)} />}
+        {activePanel === 'lottery'     && <LotteryPanel     onClose={() => setActivePanel(null)} />}
         {activePanel === 'kingdom'     && <KingdomPanel     onClose={() => setActivePanel(null)} />}
         {activePanel === 'empire'      && <EmpirePanel      onClose={() => setActivePanel(null)} />}
         {activePanel === 'info'        && <InfoPanel        onClose={() => setActivePanel(null)} />}

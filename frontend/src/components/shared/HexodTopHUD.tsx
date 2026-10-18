@@ -22,7 +22,7 @@ function resolveAvatarIcon(v: unknown): string | null {
 }
 
 const HUD_CSS = `
-.hxh-top { position: fixed; top: 28px; left: 0; right: 0; height: 70px; display: flex; justify-content: space-between;
+.hxh-top { position: fixed; top: 8px; left: 0; right: 0; height: 70px; display: flex; justify-content: space-between;
   align-items: center; padding: 0 16px; z-index: 900; pointer-events: none; gap: 8px; }
 .hxh-seg { pointer-events: auto; gap: 12px !important; padding: 8px 16px 8px 8px !important; border-radius: 16px !important;
   border: 1px solid rgba(255,255,255,0.10) !important;

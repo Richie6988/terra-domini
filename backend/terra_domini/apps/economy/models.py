@@ -256,3 +256,28 @@ class AuctionBid(models.Model):
     class Meta:
         db_table = 'auction_bids'
         ordering = ['-created_at']
+
+
+class LotteryPool(models.Model):
+    """Progressive jackpot of the Lucky draw: 10 % of every ticket feeds it (one row)."""
+    amount = models.IntegerField(default=10000)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'lottery_pool'
+
+
+class LotteryTicket(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='lottery_tickets')
+    tier = models.CharField(max_length=10)
+    cost = models.IntegerField()
+    multiplier = models.FloatField(default=0)
+    prize = models.IntegerField(default=0)
+    jackpot = models.BooleanField(default=False)
+    free = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        db_table = 'lottery_tickets'
+        ordering = ['-created_at']
