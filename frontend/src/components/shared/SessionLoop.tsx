@@ -1,13 +1,14 @@
 /**
  * SessionLoop — the "5-minute session" HUD (owner, 2026-10-17).
  * HarvestButton: territories fill a stock capped at 8h; collect it or lose production.
- * NudgeStack: actionable reminders from GET /api/loop/status/ (attacks, full stock, results, missions).
+ * NotificationBell (top bar inbox) + NudgeStack (toast for urgent alerts only), from GET /api/loop/status/.
  * Browser notifications (opt-in) fire for urgent nudges when the tab is in the background.
  */
 import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Bell } from 'lucide-react'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
 import { IconSVG } from './iconBank'
@@ -188,77 +189,124 @@ export function HarvestButton() {
   )
 }
 
-export function NudgeStack() {
-  const { data } = useLoopStatus()
-  const { collect, reinforce } = useLoopActions()
+// Dismissed alerts, shared by the bell inbox and the toasts (kept for the session)
+const _dismissed = new Set<string>()
+const _subs = new Set<() => void>()
+function useDismissed(): [Set<string>, (id: string | string[]) => void] {
+  const [, bump] = useState(0)
+  useEffect(() => { const f = () => bump(n => n + 1); _subs.add(f); return () => { _subs.delete(f) } }, [])
+  return [_dismissed, (id) => { (Array.isArray(id) ? id : [id]).forEach(x => _dismissed.add(x)); _subs.forEach(f => f()) }]
+}
+
+function useNudgeActions() {
+  const { collect } = useLoopActions()
   const setActivePanel = useStore(s => s.setActivePanel)
-  const ownsLand = useStore(s => (s.myTerritories?.size ?? 0) > 0)
-  const [dismissed, setDismissed] = useState<Set<string>>(new Set())
-  const notified = useRef<Set<string>>(new Set())
-  const [perm, setPerm] = useState<string>(typeof Notification !== 'undefined' ? Notification.permission : 'unsupported')
-  const [alertsHidden, setAlertsHidden] = useState(() => { try { return localStorage.getItem('hx_alerts_hidden') === '1' } catch { return false } })
-  const askAlerts = perm === 'default' && ownsLand && !alertsHidden
-
-  // Harvest nudges are shown by HarvestButton itself (still used for background notifications below)
-  const nudges = (data?.nudges || []).filter(n => !dismissed.has(n.id) && !n.type.startsWith('harvest'))
-  // One alert at a time (the most urgent first), a pager for the others: the map stays visible
-  const [idx, setIdx] = useState(0)
-  const shown = nudges.length ? [nudges[idx % nudges.length]] : []
-
-  // Background notifications for urgent nudges
-  useEffect(() => {
-    if (perm !== 'granted' || !data) return
-    for (const n of data.nudges) {
-      if (!URGENT.has(n.type) || notified.current.has(n.id)) continue
-      notified.current.add(n.id)
-      if (document.hidden) {
-        try { new Notification(`HEXOD — ${n.title}`, { body: n.body, icon: '/favicon.svg', tag: n.id }) } catch { /* ignore */ }
-      }
-    }
-  }, [data, perm])
-
-  const run = (n: Nudge) => {
+  return (n: Nudge) => {
     if (!n.cta) return
     if (n.cta.action === 'collect') collect.mutate()
     else if (n.cta.action === 'reinforce' && n.battle_id) openBattle(n.battle_id)   // war room: troops, walls, bonus
     else if (n.cta.panel) setActivePanel(n.cta.panel as any)
   }
+}
 
-  if (!nudges.length && !askAlerts) return null
+/** Bell in the top bar: badge = live alerts, click = inbox (every alert, its action, dismiss). */
+export function NotificationBell() {
+  const { data } = useLoopStatus()
+  const [dismissed, dismiss] = useDismissed()
+  const run = useNudgeActions()
+  const [open, setOpen] = useState(false)
+  const ownsLand = useStore(s => (s.myTerritories?.size ?? 0) > 0)
+  const [perm, setPerm] = useState<string>(typeof Notification !== 'undefined' ? Notification.permission : 'unsupported')
+  const list = (data?.nudges || []).filter(n => !dismissed.has(n.id) && !n.type.startsWith('harvest'))
+  const urgent = list.some(n => URGENT.has(n.type))
+  useEffect(() => {
+    if (!open) return
+    const close = (e: MouseEvent) => { if (!(e.target as HTMLElement).closest('.hx-bell, .hx-inbox')) setOpen(false) }
+    window.addEventListener('mousedown', close)
+    return () => window.removeEventListener('mousedown', close)
+  }, [open])
   return (
-    <div className="hx-nudges">
-      <AnimatePresence initial={false}>
-        {shown.map(n => (
-          <motion.div key={n.id} layout initial={{ opacity: 0, x: -30, scale: 0.95 }} animate={{ opacity: 1, x: 0, scale: 1 }}
-            exit={{ opacity: 0, x: -30 }} className={`hx-nudge ${n.type === 'under_attack' ? 'is-urgent' : ''}`}
-            style={{ ['--accent' as any]: NUDGE_COLOR[n.type] || '#3b9bff' }}>
-            <span className="hx-nudge__icon"><IconSVG id={NUDGE_ICON[n.type] || 'megaphone'} size={26} /></span>
-            <span className="hx-nudge__text">
-              <span className="hx-nudge__title">{n.title}</span>
-              <span className="hx-nudge__body">{n.body}</span>
-            </span>
-            {n.cta && (
-              <button className="btn-game btn-game-gold hx-nudge__cta" onClick={() => run(n)}
-                disabled={collect.isPending || reinforce.isPending}>{n.cta.label}</button>
-            )}
-            <button className="hx-nudge__x" aria-label="Dismiss" onClick={() => setDismissed(s => new Set(s).add(n.id))}>×</button>
-            {nudges.length > 1 && (
-              <button className="hx-nudge__pager" aria-label="Next alert" onClick={() => setIdx(i => i + 1)}>
-                {(idx % nudges.length) + 1}/{nudges.length} ›
+    <>
+      <button className={`hx-bell${urgent ? ' is-urgent' : ''}`} aria-label={`Notifications (${list.length})`}
+        onClick={() => { setOpen(o => !o); playSound('click') }}>
+        <Bell size={22} strokeWidth={2.5} />
+        {list.length > 0 && <span className="hx-bell__badge">{list.length > 9 ? '9+' : list.length}</span>}
+      </button>
+      <AnimatePresence>
+        {open && (
+          <motion.div className="hx-inbox" initial={{ opacity: 0, y: -8, scale: 0.97 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, y: -8 }}>
+            <div className="hx-inbox__head">
+              <span>NOTIFICATIONS</span>
+              {list.length > 0 && <button onClick={() => dismiss(list.map(n => n.id))}>CLEAR ALL</button>}
+            </div>
+            {list.length === 0 && <div className="hx-inbox__empty">All quiet on your borders.</div>}
+            {list.map(n => (
+              <div key={n.id} className="hx-inbox__item" style={{ ['--accent' as any]: NUDGE_COLOR[n.type] || '#3b9bff' }}>
+                <span className="hx-inbox__icon"><IconSVG id={NUDGE_ICON[n.type] || 'megaphone'} size={22} /></span>
+                <span className="hx-inbox__text">
+                  <b>{n.title}</b>
+                  <span>{n.body}</span>
+                </span>
+                <span className="hx-inbox__acts">
+                  {n.cta && <button className="btn-game btn-game-gold" onClick={() => { run(n); setOpen(false) }}>{n.cta.label}</button>}
+                  <button className="hx-inbox__x" aria-label="Dismiss" onClick={() => dismiss(n.id)}>×</button>
+                </span>
+              </div>
+            ))}
+            {perm === 'default' && ownsLand && (
+              <button className="hx-inbox__alerts" onClick={() => Notification.requestPermission().then(setPerm)}>
+                Turn on phone/desktop alerts — know when you're attacked
               </button>
             )}
           </motion.div>
-        ))}
+        )}
       </AnimatePresence>
-      {askAlerts && (
-        <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
-          <button className="hx-nudge__alerts" onClick={() => Notification.requestPermission().then(setPerm)}>
-            Turn on alerts — know when you're attacked
-          </button>
-          <button className="hx-nudge__x" aria-label="Hide" style={{ position: 'static' }}
-            onClick={() => { setAlertsHidden(true); try { localStorage.setItem('hx_alerts_hidden', '1') } catch { /* ignore */ } }}>×</button>
-        </div>
+    </>
+  )
+}
+
+/** Toasts for urgent alerts only (attack, battle result, live event): one slim banner at the top, 7 s, then it lives
+ *  in the bell inbox. Background browser notifications when the tab is hidden. */
+export function NudgeStack() {
+  const { data } = useLoopStatus()
+  const [dismissed, dismiss] = useDismissed()
+  const run = useNudgeActions()
+  const seen = useRef<Set<string>>(new Set())
+  const [toastN, setToastN] = useState<Nudge | null>(null)
+
+  useEffect(() => {
+    if (!data) return
+    const fresh = data.nudges.find(n => URGENT.has(n.type) && !n.type.startsWith('harvest') && !seen.current.has(n.id) && !dismissed.has(n.id))
+    for (const n of data.nudges) if (URGENT.has(n.type) && !seen.current.has(n.id) && document.hidden
+      && typeof Notification !== 'undefined' && Notification.permission === 'granted') {
+      try { new Notification(`HEXOD — ${n.title}`, { body: n.body, icon: '/favicon.svg', tag: n.id }) } catch { /* ignore */ }
+    }
+    if (fresh && !toastN) {
+      seen.current.add(fresh.id)
+      setToastN(fresh)
+      playSound(fresh.type === 'under_attack' ? 'battle' : 'notify')
+    }
+    data.nudges.forEach(n => { if (URGENT.has(n.type) && document.hidden) seen.current.add(n.id) })
+  }, [data, toastN]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (!toastN) return
+    const t = setTimeout(() => setToastN(null), 7000)
+    return () => clearTimeout(t)
+  }, [toastN])
+
+  return (
+    <AnimatePresence>
+      {toastN && (
+        <motion.div key={toastN.id} className={`hx-toastn${toastN.type === 'under_attack' ? ' is-urgent' : ''}`}
+          style={{ ['--accent' as any]: NUDGE_COLOR[toastN.type] || '#3b9bff' }}
+          initial={{ opacity: 0, y: -30, x: '-50%' }} animate={{ opacity: 1, y: 0, x: '-50%' }} exit={{ opacity: 0, y: -30, x: '-50%' }}>
+          <IconSVG id={NUDGE_ICON[toastN.type] || 'megaphone'} size={24} />
+          <span className="hx-toastn__text"><b>{toastN.title}</b><span>{toastN.body}</span></span>
+          {toastN.cta && <button className="btn-game btn-game-gold" onClick={() => { run(toastN); setToastN(null) }}>{toastN.cta.label}</button>}
+          <button className="hx-inbox__x" aria-label="Close" onClick={() => { dismiss(toastN.id); setToastN(null) }}>×</button>
+        </motion.div>
       )}
-    </div>
+    </AnimatePresence>
   )
 }

@@ -7,6 +7,7 @@ import { useOwnedSync, useHexPurchaseReturn } from './SessionLoop'
 import { useQuery } from '@tanstack/react-query'
 import { useStore } from '../../store'
 import { api } from '../../services/api'
+import { NotificationBell } from './SessionLoop'
 import { IconSVG } from './iconBank'
 import { emojiToIcon } from './emojiIcons'
 
@@ -162,7 +163,9 @@ export function HexodTopHUD() {
         </button>
       )}
 
-      {/* Right — HEX Balance */}
+      {/* Right — notifications + HEX Balance */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10, pointerEvents: 'auto' }}>
+      <NotificationBell />
       <div
         className="glass-panel hud-segment hxh-seg"
         role="button" tabIndex={0}
@@ -180,6 +183,7 @@ export function HexodTopHUD() {
             {HEX.toLocaleString('en-US', { maximumFractionDigits: 0 })}
           </div>
         </div>
+      </div>
       </div>
     </div>
   )
