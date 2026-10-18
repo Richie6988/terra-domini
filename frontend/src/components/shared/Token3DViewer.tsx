@@ -130,10 +130,11 @@ export function Token3DViewer(props: Token3DProps) {
       // History tokens: the date leads ("11 Sep 2001 — ...")
       const when = d.event_date ? new Date(d.event_date.length === 4 ? `${d.event_date}-01-01` : d.event_date)
         .toLocaleDateString('en-GB', d.event_date.length === 4 ? { year: 'numeric' } : d.event_date.length === 7 ? { month: 'short', year: 'numeric' } : { day: 'numeric', month: 'short', year: 'numeric' }) : ''
-      const front = [when, d.title, d.description].filter(Boolean).join(' — ') || d.fun_fact
+      const front = [when, d.description || d.title].filter(Boolean).join(' — ') || d.fun_fact
       setCredit(d.image_url && d.image_credit ? { text: d.image_credit, wiki: d.wiki_url || '' } : null)
       if (front) viewerRef.current.update({ description: front.length > 240 ? front.slice(0, 237).replace(/\s+\S*$/, '') + '…' : front })
-      if (d.image_url) viewerRef.current.update({ imageSrc: d.image_url })   // validated image from the DB beats the stock photo
+      // Picture: the token's Wikipedia photo, else the real satellite view of its hex (never a stock photo)
+      if (d.image_url || d.satellite_url) viewerRef.current.update({ imageSrc: d.image_url || d.satellite_url })
       viewerRef.current.update({
         rarity: d.rarity, hexPerDay: d.hex_per_day, region: d.region?.name || '', country: d.country_code || '',
         terrain: d.terrain || '', tokenNo: d.token_id ? String(d.token_id) : '', cellId: d.h3_index,

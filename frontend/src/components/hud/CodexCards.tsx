@@ -79,7 +79,7 @@ function Card({ owned, accent, icon, title, sub, children, onClick, no }: {
 
 /** Album piece → token face (every card of the album is a token: 2D in the grid, 3D on click). */
 function faceOf(family: CardFamily, c: any) {
-  const base = { tokenName: c.name, rarity: c.rarity || 'common', tokenNo: c.no ? String(c.no).padStart(3, '0') : '', imageSrc: c.image_url || '' }
+  const base = { tokenName: c.name, rarity: c.rarity || 'common', tokenNo: c.no ? String(c.no).padStart(3, '0') : '', imageSrc: c.image_url || c.satellite_url || '' }
   switch (family) {
     case 'rare': return { ...base, category: c.game_category || c.category, iconId: c.category || 'monument', country: c.country_code, terrain: c.terrain }
     case 'history': return { ...base, category: 'HISTORY', iconId: 'history', country: c.country_code, edition: dateLabel(c.event_date) }

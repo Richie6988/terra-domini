@@ -72,7 +72,7 @@ export function AuctionPanel({ onClose }: Props) {
       id: l.id, tokenName: l.name, tokenIcon: l.category || 'monument', rarity: l.rarity, category: l.category || 'PLACE',
       catColor: RARITY_COLORS[l.rarity] || '#3b82f6', currentBid: l.current_bid, bidCount: l.bid_count,
       topBidder: l.top_bidder || '—', endsAt: l.ends_at, edition: 'DAILY AUCTION', serial: 1, maxSupply: 1,
-      h3: l.h3_index, imageSrc: l.image_url || '', minBid: l.min_bid, youLead: l.you_lead, bids: l.bids || [],
+      h3: l.h3_index, imageSrc: l.image_url || l.satellite_url || '', minBid: l.min_bid, youLead: l.you_lead, bids: l.bids || [],
       status: l.status, hexPerDay: l.hex_per_day, country: l.country_code || '',
     }))),
     refetchInterval: 15000,

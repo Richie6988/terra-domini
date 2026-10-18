@@ -272,6 +272,7 @@ def codex_cards(request):
             'country_code': p.get('country_code') or '', 'description': (p.get('description') or '')[:400],
             'fun_fact': p.get('fun_fact_1') or '', 'wiki_url': p.get('wiki_url') or '', 'owned': mine, 'no': no,
             'image_url': p.get('image_url') or '', 'terrain': p.get('game_category') or '',
+            'satellite_url': satellite_tile_url(p['lat'], p['lon']) if p.get('lat') is not None else '',
         })
     order = {'mythic': 0, 'legendary': 1, 'epic': 2, 'rare': 3, 'uncommon': 4, 'common': 5}
     rare.sort(key=lambda c: (not c['owned'], order.get(c['rarity'], 9), c['name']))
@@ -317,6 +318,7 @@ def codex_cards(request):
         'uid': p['uid'], 'name': p['name'], 'rarity': p['rarity'], 'category': 'history', 'event_date': p.get('event_date') or '',
         'h3_index': p.get('h3_r8'), 'lat': p.get('lat'), 'lon': p.get('lon'), 'country_code': p.get('country_code') or '',
         'description': (p.get('description') or '')[:400], 'wiki_url': p.get('wiki_url') or '', 'image_url': p.get('image_url') or '',
+        'satellite_url': satellite_tile_url(p['lat'], p['lon']) if p.get('lat') is not None else '',
         'owned': p.get('h3_r8') in owned, 'no': no,
     } for no, p in enumerate(on_map, 1) if p.get('game_category') == 'history_event']
     history.sort(key=lambda c: (not c['owned'], c['event_date'] or '9999'))
@@ -340,6 +342,67 @@ def codex_cards(request):
             'events': {'owned': len(events), 'total': len(events)},
         },
     })
+
+
+TERRAIN_LABEL = {
+    'urban': 'Urban district', 'rural': 'Countryside', 'farmland': 'Farmland', 'grassland': 'Grassland', 'forest': 'Forest',
+    'mountain': 'Mountain land', 'coastal': 'Coastline', 'desert': 'Desert', 'tundra': 'Tundra', 'ice': 'Ice field',
+    'ocean': 'Open sea', 'lake': 'Lake', 'wetland': 'Wetland', 'industrial': 'Industrial zone', 'arctic': 'Arctic land',
+    'water': 'Water', 'landmark': 'Landmark site',
+}
+
+
+def _place_description(t, region, rates, meta) -> str:
+    """Card text of a hex without a POI, only from what is known about it: measured terrain, place, region, elevation,
+    what it produces. Never invented."""
+    if not t:
+        return ''
+    terr = (t.biome if t.biome and t.biome != 'grassland' else '') or t.territory_type or 'rural'
+    where = ', '.join(x for x in (t.place_name, region['name'] if region else '', t.country_code) if x)
+    bits = [f"{TERRAIN_LABEL.get(terr, terr.title())}{' · ' + where if where else ''}."]
+    if t.elevation_m is not None and t.elevation_m > 0 and terr not in ('ocean', 'lake'):
+        bits.append(f'{t.elevation_m:,} m above sea level.')
+    top = [meta[k]['name'] for k, _ in sorted(rates.items(), key=lambda kv: -kv[1])[:3] if k in meta]
+    if top:
+        bits.append('Produces ' + ', '.join(top) + '.')
+    return ' '.join(bits)
+
+
+def satellite_tile_url(lat, lon, z=15) -> str:
+    """Same-origin satellite tile (proxied, cached) centred on the hex — ~1 km wide at z15, the size of a hex."""
+    import math
+    n = 2 ** z
+    x = int((lon + 180) / 360 * n)
+    lr = math.radians(max(-85.05, min(85.05, lat)))
+    y = int((1 - math.log(math.tan(lr) + 1 / math.cos(lr)) / math.pi) / 2 * n)
+    return f'/api/tiles/sat/{z}/{x}/{y}.jpg'
+
+
+@api_view(['GET'])
+@permission_classes([])
+def satellite_tile(request, z, x, y):
+    """GET /api/tiles/sat/<z>/<x>/<y>.jpg — Esri World Imagery tile, fetched server-side and cached on disk so the
+    token canvas (WebGL texture) can use it without cross-origin issues."""
+    from django.http import HttpResponse
+    from terra_domini.apps.territories.landcover import CACHE
+    import urllib.request
+    z, x, y = int(z), int(x), int(y)
+    if not (0 <= z <= 18 and 0 <= x < 2 ** z and 0 <= y < 2 ** z):
+        return HttpResponse(status=400)
+    f = CACHE / 'sat' / str(z) / str(x) / f'{y}.jpg'
+    if not f.exists():
+        try:
+            req = urllib.request.Request(f'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                                         headers={'User-Agent': 'HEXOD/1.0 (https://hexod.paintit.click)'})
+            with urllib.request.urlopen(req, timeout=8) as r:
+                data = r.read()
+        except Exception:
+            return HttpResponse(status=502)
+        f.parent.mkdir(parents=True, exist_ok=True)
+        f.write_bytes(data)
+    resp = HttpResponse(f.read_bytes(), content_type='image/jpeg')
+    resp['Cache-Control'] = 'public, max-age=2592000'
+    return resp
 
 
 def _yield_fields(h3_index, lat, lon, rarity, category, shiny, connected):
@@ -391,9 +454,10 @@ def territory_card(request, h3_index):
                             key=lambda r: -r['per_day']),
         'poi_name': poi.get('name'), 'poi_category': poi.get('category'), 'token_id': (t.token_id if t else None) or poi.get('token_id'),
         # Front of the token: texts from the HEXOD master DB
-        'title': poi.get('real_output') or '', 'description': poi.get('description') or '',
+        'title': poi.get('real_output') or '', 'description': poi.get('description') or _place_description(t, region, rates, meta),
         'fun_fact': (poi.get('fun_fact') or '').split('\n')[0], 'wiki_url': poi.get('wiki_url') or '',
         'image_url': poi.get('image_url') or '',
+        'satellite_url': satellite_tile_url(lat, lon),   # real view of the hex: picture of every non-POI card
         'image_credit': poi.get('image_credit') or '',   # author · license (CC BY-SA requires it next to the picture)
         'event_date': poi.get('event_date') or '',
         'minted': bool(t and t.token_minted_at),

@@ -83,7 +83,7 @@ from terra_domini.apps.events.poi_views import UnifiedPOIViewSet, map_pois
 from terra_domini.apps.territories.trade_views import ResourceTradeViewSet
 
 from terra_domini.apps.combat.views import BattleViewSet
-from terra_domini.apps.economy.loop_views import loop_status, loop_collect, codex_cards, territory_card
+from terra_domini.apps.economy.loop_views import loop_status, loop_collect, codex_cards, territory_card, satellite_tile
 from terra_domini.apps.economy.payments import hex_packs, hex_checkout, hex_checkout_confirm
 from terra_domini.apps.economy.auction_views import auctions_list, auction_bid
 from terra_domini.apps.combat.recruitment import (
@@ -152,6 +152,7 @@ urlpatterns = [
     path('api/shop/hex-checkout/',          hex_checkout,         name='hex_checkout'),
     path('api/shop/hex-checkout/confirm/',  hex_checkout_confirm, name='hex_checkout_confirm'),
     path('api/codex/territory/<str:h3_index>/', territory_card, name='territory_card'),
+    path('api/tiles/sat/<int:z>/<int:x>/<int:y>.jpg', satellite_tile, name='satellite_tile'),
     path('api/auctions/', auctions_list, name='auctions_list'),
     path('api/auctions/<str:auction_id>/bid/', auction_bid, name='auction_bid'),
     path('api/combat/my-army/',  combat_my_army,   name='combat_my_army'),

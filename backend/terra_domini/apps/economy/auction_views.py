@@ -77,12 +77,14 @@ def resolve_due() -> int:
 
 def _row(a, me):
     t = a.territory
+    from terra_domini.apps.economy.loop_views import satellite_tile_url
     from terra_domini.apps.events.unified_poi import UnifiedPOI
     poi = UnifiedPOI.objects.filter(h3_index=t.h3_index, is_active=True).values('name', 'category', 'image_url', 'country_code').first() or {}
     floor = a.current_bid and int(a.current_bid * (1 + MIN_RAISE)) + 1 or a.start_price
     return {
         'id': str(a.id), 'h3_index': t.h3_index, 'name': poi.get('name') or t.poi_name or t.place_name or t.h3_index[:10],
-        'category': poi.get('category') or '', 'image_url': poi.get('image_url') or '', 'country_code': poi.get('country_code') or t.country_code,
+        'category': poi.get('category') or '', 'image_url': poi.get('image_url') or '',
+        'satellite_url': satellite_tile_url(t.center_lat, t.center_lon) if t.center_lat is not None else '', 'country_code': poi.get('country_code') or t.country_code,
         'rarity': t.rarity, 'hex_per_day': B.HEX_PER_DAY.get(t.rarity, 60),
         'start_price': a.start_price, 'current_bid': a.current_bid, 'min_bid': floor, 'bid_count': a.bid_count,
         'top_bidder': a.top_bidder.username if a.top_bidder_id else None, 'you_lead': a.top_bidder_id == me.id,

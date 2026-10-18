@@ -277,8 +277,8 @@ const issuedLabel = (d?: string) => {
 
 /**
  * Premium collectible face (owner 2026-10-18: "readable, premium, the picture showcased, an emission date"):
- * the real picture fills the whole hexagon; few elements, big type — rarity, category, name, 3 stats, issue date, number.
- * The long description lives in the info sheet, not on the face.
+ * the real picture fills the whole hexagon; few elements, big type — rarity, category, name, 2 lines of description,
+ * 3 stats, issue date, number.
  */
 export function drawTokenFront(
   ctx: CanvasRenderingContext2D,
@@ -371,14 +371,30 @@ export function drawTokenFront(
     const w = Math.max(...lines.map(t => ctx.measureText(t).width))
     if (w > maxW) fs = fs * maxW / w
   }
-  const nameY = s * (lines.length > 1 ? 0.512 : 0.585)
+  const nameY = s * (lines.length > 1 ? 0.462 : 0.53)
   lines.forEach((l, i) => outlined(ctx, l, c, nameY + i * fs * 1.02, fs, '#ffffff', { weight: 400, maxW, stroke: 0.14 }))
 
   // ── Divider in the rarity colour ──
-  const dy = s * 0.648
+  const dy = s * 0.585
   ctx.strokeStyle = rc; ctx.lineWidth = s * 0.004
   ctx.beginPath(); ctx.moveTo(c - s * 0.2, dy); ctx.lineTo(c - s * 0.025, dy); ctx.moveTo(c + s * 0.025, dy); ctx.lineTo(c + s * 0.2, dy); ctx.stroke()
   ctx.fillStyle = rc; ctx.beginPath(); ctx.moveTo(c, dy - s * 0.014); ctx.lineTo(c + s * 0.014, dy); ctx.lineTo(c, dy + s * 0.014); ctx.lineTo(c - s * 0.014, dy); ctx.closePath(); ctx.fill()
+
+  // ── Description: 2 lines, readable (full text in the info sheet) ──
+  if (state.description) {
+    ctx.font = `700 ${s * 0.025}px Nunito, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    const dw = s * 0.74, words = state.description.split(/\s+/), dl: string[] = []
+    let cur = ''
+    for (const w of words) {
+      const t = cur ? `${cur} ${w}` : w
+      if (ctx.measureText(t).width > dw && cur) { dl.push(cur); cur = w; if (dl.length === 2) break } else cur = t
+    }
+    if (dl.length < 2 && cur) dl.push(cur)
+    if (dl.length === 2 && words.join(' ').length > dl.join(' ').length + 1) dl[1] = dl[1].replace(/\s+\S*$/, '') + '…'
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.95)'; ctx.shadowBlur = s * 0.01; ctx.fillStyle = '#e6ebff'
+    dl.forEach((l, i) => ctx.fillText(l, c, s * (0.625 + i * 0.034)))
+    ctx.restore()
+  }
 
   // ── Stats: 3 columns, big values ──
   const stats: [string, string, string][] = [
@@ -389,16 +405,16 @@ export function drawTokenFront(
   const colW = s * 0.23
   stats.forEach(([val, lab, col], i) => {
     const x = c + (i - 1) * colW
-    outlined(ctx, val, x, s * 0.695, s * 0.04, col, { maxW: colW * 0.92, stroke: 0.14 })
+    outlined(ctx, val, x, s * 0.712, s * 0.038, col, { maxW: colW * 0.92, stroke: 0.14 })
     ctx.font = `800 ${s * 0.017}px Nunito, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-    ctx.fillStyle = 'rgba(214,224,255,0.78)'; ctx.fillText(lab, x, s * 0.731)
+    ctx.fillStyle = 'rgba(214,224,255,0.78)'; ctx.fillText(lab, x, s * 0.746)
   })
 
   // ── Issue date + edition, then the token number ──
   const issued = issuedLabel(state.date)
   const line1 = [issued ? `ISSUED ${issued}` : '', state.edition ? nice(state.edition) : ''].filter(Boolean).join(' · ')
-  if (line1) outlined(ctx, line1, c, s * 0.786, s * 0.024, tier.metal, { font: 'Nunito, sans-serif', weight: 900, maxW: s * 0.6, stroke: 0.2 })
-  if (state.tokenNo) outlined(ctx, `No ${state.tokenNo}`, c, s * 0.832, s * 0.028, '#ffffff', { font: '"Roboto Mono", "Courier New", monospace', weight: 700, maxW: s * 0.42, stroke: 0.2 })
+  if (line1) outlined(ctx, line1, c, s * 0.792, s * 0.024, tier.metal, { font: 'Nunito, sans-serif', weight: 900, maxW: s * 0.6, stroke: 0.2 })
+  if (state.tokenNo) outlined(ctx, `No ${state.tokenNo}`, c, s * 0.836, s * 0.028, '#ffffff', { font: '"Roboto Mono", "Courier New", monospace', weight: 700, maxW: s * 0.42, stroke: 0.2 })
 
   if (opts.enableFilmGrain !== false) {
     ctx.save(); ctx.globalAlpha = 0.012
