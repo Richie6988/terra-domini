@@ -194,7 +194,7 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     serial: initial.serial || 1,
     maxSupply: initial.maxSupply || 1000,
     owner: initial.owner || 'VAULT_HOLDER',
-    date: initial.date || new Date().toISOString().slice(0, 10),
+    date: initial.date || '',   // emission date of the edition (codex/territory issued_at); never invented
     iconSvg: initial.iconSvg || '',
     imageSrc: initial.imageSrc || '',
     back: initial.back || null as TokenBack | null,

@@ -11,7 +11,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import * as THREE from 'three'
 import { cellToLatLng } from 'h3-js'
 import { IconSVG } from '../shared/iconBank'
-import { createTokenFace2D, randomBiomeImage } from '../shared/hexodTokenFace'
+import { createTokenFace2D } from '../shared/hexodTokenFace'
 import type { TierKey } from '../shared/hexodTokenFace'
 import { playSound } from '../../hooks/useSound'
 
@@ -40,7 +40,7 @@ function mkCardTex(card: Card): THREE.CanvasTexture {
   createTokenFace2D(c, { tier:RT[card.rarity]||'BRONZE', category:(card.territory_type||'TERRITORY').toUpperCase(),
     catColor:RC[card.rarity]||'#39FF14', biome:b.toUpperCase(), tokenName:(card.poi_name||card.h3_index?.slice(-6)||'TOKEN').toUpperCase(),
     description:'', edition:'GENESIS', serial:Math.floor(Math.random()*999)+1, maxSupply:1000, owner:'VAULT_HOLDER',
-    date:new Date().toISOString().slice(0,10), iconSvg:'', imageSrc:randomBiomeImage(b) })
+    date:new Date().toISOString().slice(0,10), iconSvg:'', imageSrc:'' })
   const t = new THREE.CanvasTexture(c); t.needsUpdate=true
   setTimeout(()=>{t.needsUpdate=true},800); setTimeout(()=>{t.needsUpdate=true},2000); return t
 }

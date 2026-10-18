@@ -395,4 +395,6 @@ def territory_card(request, h3_index):
         'image_credit': poi.get('image_credit') or '',   # author · license (CC BY-SA requires it next to the picture)
         'event_date': poi.get('event_date') or '',
         'minted': bool(t and t.token_minted_at),
+        # Emission date of the current edition: genesis = when the place entered the game, later editions = the conquest
+        'issued_at': ((t.captured_at if (t.nft_version or 1) > 1 and t.captured_at else t.created_at).date().isoformat()) if t else None,
     })

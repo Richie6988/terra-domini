@@ -16,7 +16,7 @@
  * Props are identical to Token3DViewer so swapping is trivial.
  */
 import { useEffect, useRef } from 'react'
-import { createTokenFace2D, randomBiomeImage, type TierKey } from './hexodTokenFace'
+import { createTokenFace2D, type TierKey } from './hexodTokenFace'
 import { getIcon } from './iconBank'
 
 export interface TokenFace2DProps {
@@ -61,7 +61,6 @@ export function TokenFace2D({
   clipToHex = true,
 }: TokenFace2DProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const fallbackImg = useRef(randomBiomeImage(biome))
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -87,7 +86,7 @@ export function TokenFace2D({
       owner,
       date,
       iconSvg,
-      imageSrc: imageSrc || fallbackImg.current,
+      imageSrc: imageSrc || '',   // no random stock photo: the face draws a designed plate until the real picture exists
       clipToHex,
     })
 

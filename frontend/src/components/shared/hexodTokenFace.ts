@@ -269,6 +269,17 @@ function pill(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h:
 
 const nice = (v?: string) => (v || '').replace(/_/g, ' ').trim().toUpperCase()
 
+const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+const issuedLabel = (d?: string) => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || '')
+  return m ? `${+m[3]} ${MONTHS[+m[2] - 1]} ${m[1]}` : ''
+}
+
+/**
+ * Premium collectible face (owner 2026-10-18: "readable, premium, the picture showcased, an emission date"):
+ * the real picture fills the whole hexagon; few elements, big type — rarity, category, name, 3 stats, issue date, number.
+ * The long description lives in the info sheet, not on the face.
+ */
 export function drawTokenFront(
   ctx: CanvasRenderingContext2D,
   s: number,
@@ -280,127 +291,128 @@ export function drawTokenFront(
   const tier = TIERS[state.tier]
   const rarity = (state.rarity || '').toLowerCase()
   const rc = RARITY_COLORS[rarity] || tier.metal
-  const boxW = s * 0.72, boxX = (s - boxW) / 2
+  const hasImg = !!(anim.cardImg && anim.cardImg.complete && anim.cardImg.naturalWidth > 0)
 
-  // ── Base: dark plate tinted by rarity + soft holo sheen (kept subtle: content first) ──
-  const base = ctx.createRadialGradient(c, s * 0.4, s * 0.05, c, c, s * 0.6)
-  base.addColorStop(0, '#1b2236'); base.addColorStop(1, '#05070d')
-  ctx.fillStyle = base; ctx.fillRect(0, 0, s, s)
   ctx.save()
   drawHex(ctx, c, c, s * 0.49); ctx.clip()
-  const holoR = s * 0.45
-  const holo = ctx.createLinearGradient(c + Math.cos(anim.holoAngle) * holoR, c + Math.sin(anim.holoAngle) * holoR,
-    c - Math.cos(anim.holoAngle) * holoR, c - Math.sin(anim.holoAngle) * holoR)
-  holo.addColorStop(0, 'rgba(255,0,128,0.07)'); holo.addColorStop(0.35, 'rgba(255,220,0,0.06)')
-  holo.addColorStop(0.65, 'rgba(0,200,255,0.07)'); holo.addColorStop(1, 'rgba(160,0,255,0.06)')
-  ctx.fillStyle = holo; ctx.fillRect(0, 0, s, s)
-  const tint = ctx.createLinearGradient(0, 0, 0, s)
-  tint.addColorStop(0, rc + '40'); tint.addColorStop(0.35, 'rgba(0,0,0,0)'); tint.addColorStop(1, rc + '22')
-  ctx.fillStyle = tint; ctx.fillRect(0, 0, s, s)
+
+  // ── Picture, full bleed (cover-fit, slightly above centre so faces/monuments sit in the window) ──
+  if (hasImg) {
+    const img = anim.cardImg!
+    const iw = img.naturalWidth, ih = img.naturalHeight
+    const k = Math.max(s / iw, s / ih) * 1.02, dw = iw * k, dh = ih * k
+    ctx.drawImage(img, (s - dw) / 2, (s - dh) * 0.42, dw, dh)
+  } else {
+    // No verified picture yet: a designed plate (never a random stock photo)
+    const pg = ctx.createRadialGradient(c, s * 0.4, s * 0.02, c, s * 0.45, s * 0.62)
+    pg.addColorStop(0, rc); pg.addColorStop(0.45, tier.carbon); pg.addColorStop(1, '#020308')
+    ctx.fillStyle = pg; ctx.fillRect(0, 0, s, s)
+    ctx.globalAlpha = 0.16; ctx.strokeStyle = tier.metal; ctx.lineWidth = Math.max(1, s * 0.0015)
+    const hr = s * 0.035
+    for (let row = 0, y = 0; y < s + hr; row++, y += hr * 1.5)
+      for (let x = row % 2 ? hr * 0.866 : 0; x < s + hr; x += hr * 1.732) { drawHex(ctx, x, y, hr); ctx.stroke() }
+    ctx.globalAlpha = 1
+    if (state.iconSvg) drawSVGIcon(ctx, c, s * 0.38, s * 0.24, state.iconSvg, state.catColor, tier.metal)
+  }
+
+  // ── Legibility: dark veil top (header) and bottom (name + stats), picture stays bright in the middle ──
+  const top = ctx.createLinearGradient(0, 0, 0, s * 0.34)
+  top.addColorStop(0, 'rgba(3,5,12,0.88)'); top.addColorStop(1, 'rgba(3,5,12,0)')
+  ctx.fillStyle = top; ctx.fillRect(0, 0, s, s * 0.34)
+  const bot = ctx.createLinearGradient(0, s * 0.44, 0, s)
+  bot.addColorStop(0, 'rgba(3,5,12,0)'); bot.addColorStop(0.28, 'rgba(3,5,12,0.72)'); bot.addColorStop(0.55, 'rgba(3,5,12,0.94)')
+  bot.addColorStop(1, 'rgba(3,5,12,0.98)')
+  ctx.fillStyle = bot; ctx.fillRect(0, s * 0.44, s, s * 0.56)
+
+  // ── Foil: holographic sheen + one glossy diagonal (animated in 3D) ──
+  const hr2 = s * 0.5
+  const holo = ctx.createLinearGradient(c + Math.cos(anim.holoAngle) * hr2, c + Math.sin(anim.holoAngle) * hr2,
+    c - Math.cos(anim.holoAngle) * hr2, c - Math.sin(anim.holoAngle) * hr2)
+  const foil = ['legendary', 'mythic', 'epic'].includes(rarity) ? 0.14 : 0.06
+  holo.addColorStop(0, `rgba(255,0,140,${foil})`); holo.addColorStop(0.33, `rgba(255,230,0,${foil})`)
+  holo.addColorStop(0.66, `rgba(0,220,255,${foil})`); holo.addColorStop(1, `rgba(170,0,255,${foil})`)
+  ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = holo; ctx.fillRect(0, 0, s, s)
+  ctx.globalCompositeOperation = 'source-over'
+  const sx = (anim.shineOffset % (s * 2)) - s * 0.5
+  const shine = ctx.createLinearGradient(sx, 0, sx + s * 0.35, s)
+  shine.addColorStop(0, 'rgba(255,255,255,0)'); shine.addColorStop(0.5, 'rgba(255,255,255,0.10)'); shine.addColorStop(1, 'rgba(255,255,255,0)')
+  ctx.fillStyle = shine; ctx.fillRect(0, 0, s, s)
   ctx.restore()
 
-  // ── Header: rarity ribbon (the most important info), album number left, category icon right ──
-  // Layout stays inside the visible hexagon (pointy top: it narrows above y≈0.25 and below y≈0.75)
-  const ribY = s * 0.135, ribH = s * 0.06, ribW = s * 0.34
-  pill(ctx, c - ribW / 2, ribY - ribH / 2, ribW, ribH, rc, 'rgba(0,0,0,0.85)')
+  // ── Header: rarity gem pill + category ──
+  const ribY = s * 0.13, ribH = s * 0.058, ribW = s * 0.32
+  pill(ctx, c - ribW / 2, ribY - ribH / 2, ribW, ribH, rc, 'rgba(0,0,0,0.9)')
   const gloss = ctx.createLinearGradient(0, ribY - ribH / 2, 0, ribY + ribH / 2)
-  gloss.addColorStop(0, 'rgba(255,255,255,0.45)'); gloss.addColorStop(0.5, 'rgba(255,255,255,0)')
+  gloss.addColorStop(0, 'rgba(255,255,255,0.5)'); gloss.addColorStop(0.55, 'rgba(255,255,255,0)')
   ctx.save(); ctx.globalCompositeOperation = 'source-atop'; ctx.fillStyle = gloss
   ctx.fillRect(c - ribW / 2, ribY - ribH / 2, ribW, ribH / 2); ctx.restore()
-  outlined(ctx, nice(rarity || tier.id), c, ribY + s * 0.002, s * 0.04, '#ffffff', { maxW: ribW * 0.86, stroke: 0.18 })
-
-
-  // Category (what it is) — big, readable
-  outlined(ctx, nice(state.category), c, s * 0.205, s * 0.034, '#f3f6ff', { maxW: s * 0.56 })
-
-  // ── Picture ──
-  const imageY = s * 0.245, imageH = s * 0.29
-  ctx.save()
-  ctx.beginPath(); ctx.rect(boxX, imageY, boxW, imageH); ctx.clip()
-  if (anim.cardImg && anim.cardImg.complete && anim.cardImg.naturalWidth > 0) {
-    // cover-fit (no stretching)
-    const iw = anim.cardImg.naturalWidth, ih = anim.cardImg.naturalHeight
-    const k = Math.max(boxW / iw, imageH / ih), dw = iw * k, dh = ih * k
-    ctx.drawImage(anim.cardImg, boxX + (boxW - dw) / 2, imageY + (imageH - dh) / 2, dw, dh)
-  } else {
-    const pg = ctx.createRadialGradient(c, imageY + imageH * 0.45, 0, c, imageY + imageH * 0.45, boxW * 0.62)
-    pg.addColorStop(0, state.catColor); pg.addColorStop(0.5, tier.carbon); pg.addColorStop(1, '#030303')
-    ctx.fillStyle = pg; ctx.fillRect(boxX, imageY, boxW, imageH)
-    ctx.globalAlpha = 0.5; ctx.fillStyle = '#000'; ctx.fillRect(boxX, imageY, boxW, imageH)
-    ctx.globalAlpha = 0.18; ctx.strokeStyle = tier.metal; ctx.lineWidth = Math.max(1, s * 0.0012)
-    const hr = s * 0.03
-    for (let row = 0, y = imageY; y < imageY + imageH + hr; row++, y += hr * 1.5)
-      for (let x = boxX + (row % 2 ? hr * 0.866 : 0); x < boxX + boxW + hr; x += hr * 1.732) { drawHex(ctx, x, y, hr); ctx.stroke() }
-    ctx.globalAlpha = 1
-    if (state.iconSvg) drawSVGIcon(ctx, c, imageY + imageH * 0.45, imageH * 0.5, state.iconSvg, state.catColor, tier.metal)
-  }
-  // bottom fade for the name
-  const fade = ctx.createLinearGradient(0, imageY + imageH * 0.55, 0, imageY + imageH)
-  fade.addColorStop(0, 'rgba(0,0,0,0)'); fade.addColorStop(1, 'rgba(0,0,0,0.85)')
-  ctx.fillStyle = fade; ctx.fillRect(boxX, imageY, boxW, imageH)
+  outlined(ctx, nice(rarity || tier.id), c, ribY + s * 0.002, s * 0.036, '#ffffff', { maxW: ribW * 0.84, stroke: 0.16 })
+  ctx.save(); ctx.font = `800 ${s * 0.026}px Nunito, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+  ;(ctx as any).letterSpacing = `${(s * 0.004).toFixed(1)}px`
+  ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = s * 0.012
+  ctx.fillStyle = '#e8edff'; ctx.fillText(nice(state.category).slice(0, 26), c, s * 0.198)
   ctx.restore()
-  ctx.lineWidth = s * 0.008; ctx.strokeStyle = rc; ctx.strokeRect(boxX, imageY, boxW, imageH)
 
-  // Name — the hero text, over the picture's bottom
-  outlined(ctx, state.tokenName, c, imageY + imageH - s * 0.04, s * 0.058, '#ffffff', { maxW: boxW * 0.92, stroke: 0.2 })
+  // ── Name: the hero, up to 2 lines, auto-fit ──
+  const name = (state.tokenName || '').toUpperCase()
+  const maxW = s * 0.76
+  let fs = s * 0.078
+  ctx.font = `400 ${fs}px "Lilita One", Orbitron, sans-serif`
+  let lines = [name]
+  if (ctx.measureText(name).width > maxW) {
+    const words = name.split(/\s+/)
+    let best = [name], bestW = Infinity
+    for (let i = 1; i < words.length; i++) {
+      const l = [words.slice(0, i).join(' '), words.slice(i).join(' ')]
+      const w = Math.max(...l.map(t => ctx.measureText(t).width))
+      if (w < bestW) { best = l; bestW = w }
+    }
+    lines = best
+    const w = Math.max(...lines.map(t => ctx.measureText(t).width))
+    if (w > maxW) fs = fs * maxW / w
+  }
+  const nameY = s * (lines.length > 1 ? 0.512 : 0.585)
+  lines.forEach((l, i) => outlined(ctx, l, c, nameY + i * fs * 1.02, fs, '#ffffff', { weight: 400, maxW, stroke: 0.14 }))
 
-  // ── Stats row: HEX/day · terrain · region/country ──
-  const rowY = s * 0.548, ph = s * 0.062, gap = s * 0.012, pw = (boxW - gap * 2) / 3
+  // ── Divider in the rarity colour ──
+  const dy = s * 0.648
+  ctx.strokeStyle = rc; ctx.lineWidth = s * 0.004
+  ctx.beginPath(); ctx.moveTo(c - s * 0.2, dy); ctx.lineTo(c - s * 0.025, dy); ctx.moveTo(c + s * 0.025, dy); ctx.lineTo(c + s * 0.2, dy); ctx.stroke()
+  ctx.fillStyle = rc; ctx.beginPath(); ctx.moveTo(c, dy - s * 0.014); ctx.lineTo(c + s * 0.014, dy); ctx.lineTo(c, dy + s * 0.014); ctx.lineTo(c - s * 0.014, dy); ctx.closePath(); ctx.fill()
+
+  // ── Stats: 3 columns, big values ──
   const stats: [string, string, string][] = [
-    ['HEX / DAY', state.hexPerDay ? `+${Math.round(state.hexPerDay).toLocaleString()}` : '—', '#fcd34d'],
-    ['TERRAIN', nice(state.terrain || state.biome) || '—', '#a7f3d0'],
-    [state.region ? 'REGION' : 'COUNTRY', nice(state.region) || nice(state.country) || '—', '#bfdbfe'],
+    [state.hexPerDay ? `+${Math.round(state.hexPerDay).toLocaleString()}` : '—', 'HEX / DAY', '#fcd34d'],
+    [nice(state.terrain || state.biome) || '—', 'TERRAIN', '#a7f3d0'],
+    [nice(state.country) || nice(state.region) || '—', state.country ? 'COUNTRY' : 'REGION', '#bfdbfe'],
   ]
-  stats.forEach(([lab, val, col], i) => {
-    const x = boxX + i * (pw + gap)
-    pill(ctx, x, rowY, pw, ph, 'rgba(6,10,22,0.92)', 'rgba(255,255,255,0.22)')
-    ctx.font = `800 ${s * 0.0145}px Nunito, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-    ctx.fillStyle = 'rgba(220,230,255,0.75)'; ctx.fillText(lab, x + pw / 2, rowY + ph * 0.3)
-    outlined(ctx, val, x + pw / 2, rowY + ph * 0.66, s * 0.024, col, { maxW: pw * 0.88, stroke: 0.16 })
+  const colW = s * 0.23
+  stats.forEach(([val, lab, col], i) => {
+    const x = c + (i - 1) * colW
+    outlined(ctx, val, x, s * 0.695, s * 0.04, col, { maxW: colW * 0.92, stroke: 0.14 })
+    ctx.font = `800 ${s * 0.017}px Nunito, sans-serif`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    ctx.fillStyle = 'rgba(214,224,255,0.78)'; ctx.fillText(lab, x, s * 0.731)
   })
 
-  // ── Description: clean sans, big enough to read on a phone ──
-  const descY = s * 0.622, descH = s * 0.13
-  ctx.fillStyle = 'rgba(4,6,14,0.94)'; ctx.fillRect(boxX, descY, boxW, descH)
-  ctx.lineWidth = s * 0.004; ctx.strokeStyle = rc + 'aa'; ctx.strokeRect(boxX, descY, boxW, descH)
-  ctx.fillStyle = '#eef2ff'
-  ctx.font = `700 ${s * 0.0215}px Nunito, sans-serif`
-  ctx.textBaseline = 'alphabetic'
-  const text = state.description || `${nice(state.category).charAt(0)}${nice(state.category).slice(1).toLowerCase()} on the HEXOD world map. Turn the token over for its deed.`
-  // up to 4 lines, centred in the box, ellipsis when longer
-  const words = text.split(/\s+/), lines: string[] = []
-  let line = ''
-  for (const w of words) {
-    const t = line ? `${line} ${w}` : w
-    if (ctx.measureText(t).width > boxW - s * 0.06 && line) { lines.push(line); line = w } else line = t
-  }
-  if (line) lines.push(line)
-  if (lines.length > 3) { lines.length = 3; lines[2] = lines[2].replace(/\s+\S*$/, '') + '…' }
-  const lh = s * 0.031
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-  lines.forEach((l, i) => ctx.fillText(l, c, descY + descH / 2 + (i - (lines.length - 1) / 2) * lh))
+  // ── Issue date + edition, then the token number ──
+  const issued = issuedLabel(state.date)
+  const line1 = [issued ? `ISSUED ${issued}` : '', state.edition ? nice(state.edition) : ''].filter(Boolean).join(' · ')
+  if (line1) outlined(ctx, line1, c, s * 0.786, s * 0.024, tier.metal, { font: 'Nunito, sans-serif', weight: 900, maxW: s * 0.6, stroke: 0.2 })
+  if (state.tokenNo) outlined(ctx, `No ${state.tokenNo}`, c, s * 0.832, s * 0.028, '#ffffff', { font: '"Roboto Mono", "Courier New", monospace', weight: 700, maxW: s * 0.42, stroke: 0.2 })
 
-  // ── Footer: token id + cell ──
-  // Footer: token number (big) + H3 cell — the token's identity
-  if (state.tokenNo) outlined(ctx, `No ${state.tokenNo}`, c, s * 0.79, s * 0.03, '#ffffff', { maxW: s * 0.42 })
-  const foot = [state.cellId ? `CELL ${state.cellId}` : '', state.edition ? nice(state.edition) : ''].filter(Boolean).join(' · ')
-  if (foot) outlined(ctx, foot, c, s * (state.tokenNo ? 0.835 : 0.8), s * 0.019, tier.metal, { font: '"Roboto Mono", "Courier New", monospace', weight: 700, maxW: s * 0.4, stroke: 0.25 })
-
-  // Light vignette + optional grain
-  ctx.save()
-  const vignette = ctx.createRadialGradient(c, c, s * 0.3, c, c, s * 0.56)
-  vignette.addColorStop(0, 'rgba(0,0,0,0)'); vignette.addColorStop(1, 'rgba(0,0,0,0.35)')
-  ctx.fillStyle = vignette; ctx.fillRect(0, 0, s, s)
-  ctx.restore()
   if (opts.enableFilmGrain !== false) {
-    ctx.save(); ctx.globalAlpha = 0.015
-    for (let i = 0; i < 2000; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#fff' : '#000'; ctx.fillRect(Math.random() * s, Math.random() * s, 2, 2) }
+    ctx.save(); ctx.globalAlpha = 0.012
+    for (let i = 0; i < 1500; i++) { ctx.fillStyle = Math.random() > 0.5 ? '#fff' : '#000'; ctx.fillRect(Math.random() * s, Math.random() * s, 2, 2) }
     ctx.restore()
   }
 
-  // Outer hex border: tier metal, inner rarity line
-  ctx.strokeStyle = tier.metal; ctx.lineWidth = s * 0.022; drawHex(ctx, c, c, s * 0.492); ctx.stroke()
-  ctx.strokeStyle = rc; ctx.lineWidth = s * 0.006; drawHex(ctx, c, c, s * 0.468); ctx.stroke()
+  // ── Frame: bevelled tier metal + inner rarity line ──
+  const metal = ctx.createLinearGradient(0, 0, s, s)
+  metal.addColorStop(0, '#ffffff'); metal.addColorStop(0.18, tier.metal); metal.addColorStop(0.5, tier.engrave_metal)
+  metal.addColorStop(0.82, tier.metal); metal.addColorStop(1, '#ffffff')
+  ctx.strokeStyle = metal; ctx.lineWidth = s * 0.026; drawHex(ctx, c, c, s * 0.49); ctx.stroke()
+  ctx.strokeStyle = 'rgba(0,0,0,0.6)'; ctx.lineWidth = s * 0.004; drawHex(ctx, c, c, s * 0.474); ctx.stroke()
+  ctx.strokeStyle = rc; ctx.lineWidth = s * 0.006; drawHex(ctx, c, c, s * 0.466); ctx.stroke()
 }
 
 // ══════════════════════════════════════════════════════════════════

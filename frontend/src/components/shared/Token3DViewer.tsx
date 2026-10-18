@@ -10,7 +10,6 @@
  */
 import { useEffect, useRef, useState } from 'react'
 import { createTokenViewer, type TokenViewerProps, type TierKey, TIERS } from './hexodToken3D'
-import { randomBiomeImage } from './hexodTokenFace'
 import { getIcon } from './iconBank'
 import { api } from '../../services/api'
 import { iconFor } from './poiIcons'
@@ -70,7 +69,6 @@ export function Token3DViewer(props: Token3DProps) {
   const [mounted, setMounted] = useState(false)
   const [credit, setCredit] = useState<{ text: string; wiki: string } | null>(null)   // picture author + license (CC BY-SA)
   // Stable fallback image — generated once, doesn't change on re-render
-  const fallbackImg = useRef(randomBiomeImage(biome))
 
   const onCloseRef = useRef(onClose)
   onCloseRef.current = onClose
@@ -90,9 +88,9 @@ export function Token3DViewer(props: Token3DProps) {
       serial: serial || 1,
       maxSupply: maxSupply || 1000,
       owner: owner || 'VAULT_HOLDER',
-      date: date || new Date().toISOString().slice(0, 10),
+      date: date || '',
       iconSvg,
-      imageSrc: imageSrc || fallbackImg.current,
+      imageSrc: imageSrc || '',   // no random stock photo: the face draws a designed plate until the real picture exists
     }
     viewerRef.current = createTokenViewer(containerRef.current, initialProps)
     setMounted(true)
@@ -115,7 +113,7 @@ export function Token3DViewer(props: Token3DProps) {
       serial: serial || 1,
       maxSupply: maxSupply || 1000,
       iconSvg: iconId ? iconFor(iconId) : '',
-      imageSrc: imageSrc || fallbackImg.current,
+      imageSrc: imageSrc || '',   // no random stock photo: the face draws a designed plate until the real picture exists
     })
   }, [mounted, tierKey, category, catColor, biome, tokenName, description, serial, maxSupply, iconId, imageSrc])
 
@@ -136,7 +134,7 @@ export function Token3DViewer(props: Token3DProps) {
       viewerRef.current.update({
         rarity: d.rarity, hexPerDay: d.hex_per_day, region: d.region?.name || '', country: d.country_code || '',
         terrain: d.terrain || '', tokenNo: d.token_id ? String(d.token_id) : '', cellId: d.h3_index,
-        edition: d.edition_label || 'GENESIS',
+        edition: d.edition_label || 'GENESIS', date: d.issued_at || '',
       })
       viewerRef.current.update({ back: {
         h3Index: d.h3_index, lat: d.lat, lon: d.lon, rarity: d.rarity, owner: d.owner, capturedAt: d.captured_at,
