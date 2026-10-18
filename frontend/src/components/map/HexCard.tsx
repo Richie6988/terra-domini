@@ -204,7 +204,9 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
       category={(t.poi_category || biome || 'TERRITORY').toUpperCase()}
       catColor={cfg.c}
       iconId={t.poi_icon || t.poi_category?.toLowerCase() || biome || 'city'}
-      tier={rarity === 'mythic' ? 'EMERALD' : rarity === 'legendary' ? 'GOLD' : rarity === 'epic' ? 'SILVER' : 'BRONZE'}
+      rarityKey={rarity}
+      h3Index={t.h3_index}
+      description={t.poi_description ? String(t.poi_description).slice(0, 220) : undefined}
       serial={serieNum || 1}
       maxSupply={cfg.serieMax}
       edition="GENESIS"

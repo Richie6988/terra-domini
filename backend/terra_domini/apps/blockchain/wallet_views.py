@@ -107,7 +107,7 @@ class WalletViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['POST'], url_path='cash-out')
     def cash_out(self, request):
-        """Convert EARNED HEX Coin → HEX token (TDI) at 1 HEX = $0.001, 5% burned.
+        """Convert EARNED HEX → HEX Coin token (TDI) at the fixed peg 1000 HEX = 1 HEX Coin (= 1 €), 5% burned.
         Purchased HEX can't be cashed out (economy/balance.py). Withdrawal to Polygon still needs KYC."""
         from django.db import transaction
         from terra_domini.apps.accounts.models import Player
@@ -125,9 +125,7 @@ class WalletViewSet(viewsets.GenericViewSet):
                 return Response({'error': f'Only earned HEX can be cashed out ({earned:.0f} available).',
                                  'earned_balance': float(earned)}, status=402)
             burned = (amount * B.CONVERT_BURN_PCT).quantize(Decimal('0.000001'))
-            prices = _get_prices()
-            tdi_price = Decimal(str(prices.get('TDI', {}).get('price_usd', 0.002))) or Decimal('0.002')
-            tdi = ((amount - burned) * Decimal('0.001') / tdi_price).quantize(Decimal('0.000001'))
+            tdi = ((amount - burned) / B.HEX_PER_COIN).quantize(Decimal('0.000001'))   # fixed peg: 1000 HEX = 1 HEX Coin
             wallet = _ensure_wallet(player)
             Player.objects.filter(id=player.id).update(tdc_in_game=F('tdc_in_game') - amount)
             type(wallet).objects.filter(pk=wallet.pk).update(tdi_balance=F('tdi_balance') + tdi)
@@ -135,7 +133,7 @@ class WalletViewSet(viewsets.GenericViewSet):
                 player=player, tx_type='cash_out', amount_tdi=tdi,
                 note=f'Cash-out {amount:.0f} HEX Coin ({burned:.0f} burned) -> {tdi:.4f} HEX token')
         return Response({'success': True, 'hex_spent': float(amount), 'hex_burned': float(burned),
-                         'tdi_received': float(tdi), 'tdi_price_usd': float(tdi_price)})
+                         'tdi_received': float(tdi), 'hex_per_coin': B.HEX_PER_COIN})
 
     @action(detail=False, methods=['POST'], url_path='convert')
     def convert(self, request):

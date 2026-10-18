@@ -5,3 +5,7 @@ export const HEX_PER_DAY: Record<string, number> = {
 export const STORAGE_CAP_HOURS = 8
 export const hexPerDay = (rarity?: string, shiny?: boolean) =>
   Math.round((HEX_PER_DAY[(rarity || 'common').toLowerCase()] ?? 60) * (shiny ? 1.5 : 1))
+
+// Fixed peg (economy/balance.py): 1 € = 1000 HEX = 1 HEX Coin
+export const HEX_PER_EUR = 1000
+export const HEX_PER_COIN = 1000

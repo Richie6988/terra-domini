@@ -289,3 +289,42 @@ def codex_cards(request):
             'resources': {'owned': sum(r['owned'] for r in res), 'total': len(res)},
         },
     })
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def territory_card(request, h3_index):
+    """GET /api/codex/territory/<h3>/ — real data printed on the back of a territory token."""
+    import h3 as h3lib
+    from terra_domini.apps.economy import resources as R
+    from terra_domini.apps.events.unified_poi import UnifiedPOI
+    from terra_domini.apps.territories.models import Territory
+    from terra_domini.utils.h3_compat import k_ring
+
+    try:
+        lat, lon = h3lib.cell_to_latlng(h3_index)
+    except Exception:
+        return Response({'error': 'Invalid hex'}, status=400)
+    t = Territory.objects.select_related('owner').filter(h3_index=h3_index).first()
+    poi = UnifiedPOI.objects.filter(h3_index=h3_index, is_active=True).values('name', 'category', 'token_id').first() or {}
+    rarity = (t.rarity if t else None) or 'common'
+    connected = False
+    if t and t.owner_id:
+        owned = set(Territory.objects.filter(owner_id=t.owner_id).values_list('h3_index', flat=True))
+        connected = any(n in owned for n in k_ring(h3_index, 1) if n != h3_index)
+    meta = R.resources()
+    rates = R.territory_resource_rates(lat, lon, rarity, poi.get('category', ''))
+    region = R.biome_for(round(lat, 3), round(lon, 3))
+    return Response({
+        'h3_index': h3_index, 'lat': round(lat, 4), 'lon': round(lon, 4),
+        'rarity': rarity, 'is_shiny': bool(t and t.is_shiny),
+        'owner': t.owner.username if t and t.owner_id else None,
+        'captured_at': t.captured_at.date().isoformat() if t and t.captured_at else None,
+        'hex_per_day': B.territory_hex_per_day(rarity, bool(t and t.is_shiny), connected),
+        'connected': connected,
+        'region': {'id': region['id'], 'name': region['name'], 'continent': region['continent']} if region else None,
+        'resources': sorted(({'id': k, 'name': meta[k]['name'], 'per_day': round(v, 1)} for k, v in rates.items()),
+                            key=lambda r: -r['per_day']),
+        'poi_name': poi.get('name'), 'token_id': (t.token_id if t else None) or poi.get('token_id'),
+        'minted': bool(t and t.token_minted_at),
+    })

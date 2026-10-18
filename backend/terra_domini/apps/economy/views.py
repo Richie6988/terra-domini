@@ -688,9 +688,17 @@ class StripeWebhookView(generics.GenericAPIView):
             logger.warning(f"Invalid Stripe webhook: {e}")
             return Response({'error': 'Invalid signature'}, status=400)
 
-        if event['type'] == 'payment_intent.succeeded':
+        if event['type'] == 'checkout.session.completed':
+            # Shop HEX packs (economy/payments.py) — idempotent with the client-side confirm
+            from terra_domini.apps.economy.payments import fulfil
+            try:
+                fulfil(event['data']['object']['id'])
+            except Exception as e:
+                logger.error(f"Checkout fulfil failed: {e}")
+                return Response({'error': 'retry'}, status=500)   # Stripe retries the webhook
+        elif event['type'] == 'payment_intent.succeeded':
             intent = event['data']['object']
-            from terra_domini.apps.blockchain.tasks import fulfill_tdc_purchase
+            from terra_domini.apps.territories.tasks import fulfill_tdc_purchase
             fulfill_tdc_purchase.delay(intent['id'])
 
         return Response({'status': 'ok'})

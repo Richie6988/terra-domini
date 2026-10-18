@@ -71,11 +71,12 @@ from terra_domini.apps.progression.clicker_views import ClickerViewSet
 from terra_domini.apps.progression.views import SkillTreeView, SkillUnlockView
 from terra_domini.apps.progression.leaderboard_views import LeaderboardViewSet
 from terra_domini.apps.events.resource_views import ResourcePOIViewSet
-from terra_domini.apps.events.poi_views import UnifiedPOIViewSet
+from terra_domini.apps.events.poi_views import UnifiedPOIViewSet, map_pois
 from terra_domini.apps.territories.trade_views import ResourceTradeViewSet
 
 from terra_domini.apps.combat.views import BattleViewSet
-from terra_domini.apps.economy.loop_views import loop_status, loop_collect, codex_cards
+from terra_domini.apps.economy.loop_views import loop_status, loop_collect, codex_cards, territory_card
+from terra_domini.apps.economy.payments import hex_packs, hex_checkout, hex_checkout_confirm
 from terra_domini.apps.combat.recruitment import (
     my_army as combat_my_army,
     recruit as combat_recruit,
@@ -136,6 +137,11 @@ urlpatterns = [
     path('api/loop/status/',   loop_status,   name='loop_status'),
     path('api/loop/collect/',  loop_collect,  name='loop_collect'),
     path('api/codex/cards/',   codex_cards,   name='codex_cards'),
+    path('api/map/pois/',      map_pois,      name='map_pois'),
+    path('api/shop/hex-packs/',             hex_packs,            name='hex_packs'),
+    path('api/shop/hex-checkout/',          hex_checkout,         name='hex_checkout'),
+    path('api/shop/hex-checkout/confirm/',  hex_checkout_confirm, name='hex_checkout_confirm'),
+    path('api/codex/territory/<str:h3_index>/', territory_card, name='territory_card'),
     path('api/combat/my-army/',  combat_my_army,   name='combat_my_army'),
     path('api/combat/recruit/',  combat_recruit,   name='combat_recruit'),
     path('api/combat/collect/',  combat_collect,   name='combat_collect'),

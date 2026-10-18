@@ -12,6 +12,14 @@ import { useEffect, useRef, useState } from 'react'
 import { createTokenViewer, type TokenViewerProps, type TierKey, TIERS } from './hexodToken3D'
 import { randomBiomeImage } from './hexodTokenFace'
 import { getIcon } from './iconBank'
+import { api } from '../../services/api'
+import { iconFor } from './poiIcons'
+
+// Game rarity → metal of the token (rare is no longer bronze like a common)
+const RARITY_TIER: Record<string, TierKey> = {
+  common: 'BRONZE', uncommon: 'BRONZE', rare: 'SILVER', epic: 'GOLD', legendary: 'EMERALD', mythic: 'DIAMOND',
+}
+const label = (v?: string, d = '') => (v || d).replace(/_/g, ' ').toUpperCase()
 
 export { TIERS }
 
@@ -32,6 +40,10 @@ export interface Token3DProps {
   owner?: string
   date?: string
   infoPanel?: React.ReactNode
+  /** H3 cell: the back of the token prints this territory's real data (GET /api/codex/territory/<h3>/) */
+  h3Index?: string
+  /** Game rarity ('common'…'mythic'): picks the metal tier when `tier` is not given */
+  rarityKey?: string
   /** @deprecated — kept for back-compat, unused */
   power?: number
   /** @deprecated — kept for back-compat, unused */
@@ -46,8 +58,9 @@ export function Token3DViewer(props: Token3DProps) {
     tokenName, category, catColor, iconId,
     tier, serial, maxSupply, edition, biome,
     description, imageSrc, owner, date,
-    infoPanel,
+    infoPanel, h3Index, rarityKey,
   } = props
+  const tierKey: TierKey = tier || RARITY_TIER[rarityKey || ''] || 'BRONZE'
 
   const containerRef = useRef<HTMLDivElement>(null)
   const viewerRef = useRef<ReturnType<typeof createTokenViewer> | null>(null)
@@ -60,10 +73,10 @@ export function Token3DViewer(props: Token3DProps) {
 
   useEffect(() => {
     if (!visible || !containerRef.current) return
-    const iconSvg = iconId ? getIcon(iconId) : ''
+    const iconSvg = iconId ? iconFor(iconId) : ''
     const initialProps: TokenViewerProps = {
-      tier: tier || 'BRONZE',
-      category: (category || 'TERRITORY').toUpperCase(),
+      tier: tierKey,
+      category: label(category, 'TERRITORY'),
       catColor: catColor || '#39FF14',
       biome: (biome || 'RURAL').toUpperCase(),
       tokenName: (tokenName || 'HEXOD TERRITORY').toUpperCase(),
@@ -88,18 +101,34 @@ export function Token3DViewer(props: Token3DProps) {
   useEffect(() => {
     if (!viewerRef.current || !mounted) return
     viewerRef.current.update({
-      tier: tier || 'BRONZE',
-      category: (category || 'TERRITORY').toUpperCase(),
+      tier: tierKey,
+      category: label(category, 'TERRITORY'),
       catColor: catColor || '#39FF14',
       biome: (biome || 'RURAL').toUpperCase(),
       tokenName: (tokenName || 'HEXOD TERRITORY').toUpperCase(),
       description,
       serial: serial || 1,
       maxSupply: maxSupply || 1000,
-      iconSvg: iconId ? getIcon(iconId) : '',
+      iconSvg: iconId ? iconFor(iconId) : '',
       imageSrc: imageSrc || fallbackImg.current,
     })
-  }, [mounted, tier, category, catColor, biome, tokenName, description, serial, maxSupply, iconId, imageSrc])
+  }, [mounted, tierKey, category, catColor, biome, tokenName, description, serial, maxSupply, iconId, imageSrc])
+
+  // Back of the token = real territory deed
+  useEffect(() => {
+    if (!mounted || !h3Index) return
+    let alive = true
+    api.get(`/codex/territory/${h3Index}/`).then(({ data: d }) => {
+      if (!alive || !viewerRef.current) return
+      viewerRef.current.update({ back: {
+        h3Index: d.h3_index, lat: d.lat, lon: d.lon, rarity: d.rarity, owner: d.owner, capturedAt: d.captured_at,
+        hexPerDay: d.hex_per_day, region: d.region?.name ?? null, continent: d.region?.continent ?? null,
+        resources: (d.resources || []).map((r: any) => ({ name: r.name, perDay: r.per_day })),
+        tokenId: d.token_id ?? null, minted: !!d.minted,
+      } })
+    }).catch(() => {})
+    return () => { alive = false }
+  }, [mounted, h3Index])
 
   useEffect(() => {
     if (!visible) return

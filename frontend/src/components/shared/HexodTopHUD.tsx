@@ -3,7 +3,7 @@
  * Uses SVG icons from Richard's icon bank. NO EMOJIS.
  * Also exports <MissionsButton/> (game-style MISSIONS entry point, meant to replace the inline one in App.tsx).
  */
-import { useOwnedSync } from './SessionLoop'
+import { useOwnedSync, useHexPurchaseReturn } from './SessionLoop'
 import { useQuery } from '@tanstack/react-query'
 import { useStore } from '../../store'
 import { api } from '../../services/api'
@@ -87,6 +87,7 @@ export function HexodTopHUD() {
   const myTerritories = useStore(s => s.myTerritories)
   const godMode = useStore(s => s.godMode)
   const ownedCount = useOwnedSync()
+  useHexPurchaseReturn()
   const toggleGodMode = useStore(s => s.toggleGodMode)
 
   if (!player) return null

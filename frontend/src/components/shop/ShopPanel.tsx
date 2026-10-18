@@ -206,8 +206,11 @@ export function ShopPanel({ onClose }: Props) {
             </div>
           </div>
           <button className="btn-game btn-game-glass" style={{ fontSize: 11, padding:'10px 14px', flexShrink:0 }}
-            onClick={() => { onClose(); setTimeout(() => setActivePanel('crypto'), 100) }}>GET HEX</button>
+            onClick={() => document.getElementById('shop-hexcoins')?.scrollIntoView({ behavior:'smooth', block:'start' })}>GET HEX</button>
         </div>
+
+        {/* ═══ BUY HEX — real money, straight in the shop (1 € = 1000 HEX = 1 HEX Coin) ═══ */}
+        <HexPacks />
 
         {/* Category quick-nav — scrolls to section */}
         <div style={{ display:'flex', gap:6, overflowX:'auto', padding:'4px 0 10px', marginBottom:12, position:'sticky', top:-16, zIndex:2, background:'#0b1828', scrollbarWidth:'none' }}>
@@ -400,6 +403,50 @@ function ActiveBoostBadge({ boost }: { boost: any }) {
     }}>
       {label}
       {mins != null && <span style={{ color:'rgba(255,255,255,0.55)', marginLeft:2, display:'inline-flex', alignItems:'center', gap:3 }}><Clock size={11} /> {mins < 60 ? `${mins}min` : `${Math.ceil(mins/60)}h`}</span>}
+    </div>
+  )
+}
+
+
+/** HEX packs for real money (Stripe Checkout). The HEX Coin (crypto) side is handled in the background. */
+function HexPacks() {
+  const { data } = useQuery<any>({
+    queryKey: ['hex-packs'],
+    queryFn: () => api.get('/shop/hex-packs/').then(r => r.data),
+    staleTime: 60000,
+  })
+  const [busy, setBusy] = useState<string | null>(null)
+  if (!data) return null
+  const buy = (packId: string) => {
+    setBusy(packId)
+    api.post('/shop/hex-checkout/', { pack_id: packId })
+      .then(r => { window.location.href = r.data.url })
+      .catch((e: any) => { toast.error(e?.response?.data?.error || 'Payment unavailable'); setBusy(null) })
+  }
+  return (
+    <div id="shop-hexcoins" style={{ marginBottom: 22, ['--accent' as any]: '#f5a623' }}>
+      <div className="hx-section-title">
+        <IconSVG id="hex_coin" size={16} /> BUY HEX
+        <span className="hx-chip hx-chip--accent">1 € = 1,000 HEX = 1 HEX COIN</span>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(130px, 1fr))', gap: 10 }}>
+        {data.packs.map((p: any, i: number) => (
+          <div key={p.id} className="hx-card" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: 12, textAlign: 'center',
+            borderColor: i === 2 ? '#f5a623' : undefined, background: i === 2 ? 'linear-gradient(160deg, rgba(245,166,35,0.25), transparent 70%)' : undefined }}>
+            {i === 2 && <span className="hx-chip hx-chip--accent" style={{ fontSize: 10 }}>BEST VALUE</span>}
+            <IconSVG id="hex_coin" size={30 + i * 4} />
+            <span style={{ fontFamily: 'var(--font-heading)', fontSize: 18, color: '#fff', textShadow: '0 2px 0 rgba(0,0,0,0.45)' }}>{p.total.toLocaleString()}</span>
+            <span style={{ fontSize: 11, color: p.bonus ? '#86efac' : 'var(--hx-text-3)', fontWeight: 800 }}>{p.bonus ? `+${p.bonus.toLocaleString()} BONUS` : 'HEX'}</span>
+            <button className="btn-game btn-game-gold" disabled={!!busy || !data.card_payments} onClick={() => buy(p.id)}
+              style={{ width: '100%', minHeight: 40, fontSize: 14 }}>{busy === p.id ? '…' : `${p.eur} €`}</button>
+          </div>
+        ))}
+      </div>
+      <div style={{ fontSize: 11, color: 'var(--hx-text-3)', marginTop: 8, textTransform: 'none' }}>
+        {data.card_payments
+          ? 'Secure card payment by Stripe. HEX are credited as soon as the payment is confirmed. Bought HEX buy territories, troops and boosts (not random packs, not cash-out).'
+          : 'Card payments open soon on this server.'}
+      </div>
     </div>
   )
 }

@@ -2,6 +2,7 @@
  * CryptoPanel — Section crypto complète :
  * Wallet HEX, prix live, newsfeed, convert HEX↔HEX Coin, withdraw
  */
+import { HEX_PER_COIN } from '../../services/balance'
 import { useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
@@ -131,8 +132,7 @@ function CashOutModal({ wallet, onClose }: { wallet: any; onClose: () => void })
   })
   const amt = parseFloat(amount) || 0
   const earned = Math.floor(loop?.earned_balance ?? 0)
-  const price = Number(wallet?.tdi_price_usd) || 0
-  const tokens = price > 0 ? (amt * 0.95 * 0.001) / price : 0
+  const tokens = (amt * 0.95) / HEX_PER_COIN   // fixed peg: 1000 HEX = 1 HEX Coin = 1 €
   const problem = !loop ? '' : amt < 1000 ? 'Minimum is 1,000 HEX Coin.' : amt > earned ? `You only have ${earned.toLocaleString()} earned HEX Coin.` : ''
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,5,15,0.6)', zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
@@ -149,9 +149,9 @@ function CashOutModal({ wallet, onClose }: { wallet: any; onClose: () => void })
         <div className="hx-card" style={{ marginBottom: 12, padding: '10px 12px', fontSize: 12, color: 'var(--hx-text-2)', display: 'flex', flexDirection: 'column', gap: 4 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>Burned (5%)</span><span style={{ color: '#fca5a5' }}>-{Math.round(amt * 0.05).toLocaleString()} HEX Coin</span></div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontFamily: 'var(--font-heading)', fontSize: 14, color: '#fff' }}>
-            <span>You receive</span><span style={{ color: '#d8b4fe' }}>{price > 0 ? `≈ ${tokens.toLocaleString(undefined, { maximumFractionDigits: 2 })} HEX token` : 'HEX token at market price'}</span>
+            <span>You receive</span><span style={{ color: '#d8b4fe' }}>{tokens.toLocaleString(undefined, { maximumFractionDigits: 3 })} HEX Coin</span>
           </div>
-          <div style={{ fontSize: 11, color: 'var(--hx-text-3)' }}>≈ ${(amt * 0.95 * 0.001).toFixed(2)}{price > 0 ? ` at 1 HEX token = $${price.toFixed(4)}` : ''}. Final amount uses the price at confirmation.</div>
+          <div style={{ fontSize: 11, color: 'var(--hx-text-3)' }}>Fixed rate: 1,000 HEX = 1 HEX Coin = 1 €.</div>
         </div>
         {problem && <div style={{ fontSize: 12, color: '#fde68a', marginBottom: 10 }}>{problem}</div>}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>

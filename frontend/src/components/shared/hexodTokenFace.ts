@@ -420,7 +420,7 @@ export function drawTokenFront(
   ctx.textAlign = 'center'
   ctx.fillStyle = '#e0e0e0'
   ctx.font = `italic ${s * 0.021}px Georgia`
-  const text = state.description || `This token certifies sovereign ownership of the identified HEXOD territory. Geospatial data encrypted via Vault Alpha protocol. Rarity guaranteed by Tier ${tier.id}.`
+  const text = state.description || `${state.category.charAt(0) + state.category.slice(1).toLowerCase()} territory on the HEXOD world map. Turn the token over for its deed.`
   wrapTextCentered(ctx, text, c, descY + s * 0.08, boxW - s * 0.1, s * 0.03)
 
   // Vignette

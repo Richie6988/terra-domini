@@ -68,6 +68,25 @@ export function useOwnedSync() {
   return server ?? size
 }
 
+/** Back from Stripe Checkout (?hex_paid=<session>): verify the payment server-side and show the new balance. */
+export function useHexPurchaseReturn() {
+  const qc = useQueryClient()
+  useEffect(() => {
+    const q = new URLSearchParams(window.location.search)
+    const sid = q.get('hex_paid'), cancel = q.get('hex_cancel')
+    if (!sid && !cancel) return
+    q.delete('hex_paid'); q.delete('hex_cancel')
+    window.history.replaceState(null, '', window.location.pathname + (q.toString() ? `?${q}` : ''))
+    if (cancel) { toast('Payment cancelled — nothing was charged.'); return }
+    api.post('/shop/hex-checkout/confirm/', { session_id: sid }).then(r => {
+      const s = useStore.getState()
+      s.setBalance({ ...(s.balance || {}), in_game: r.data.balance } as any)
+      toast.success(`+${Math.round(r.data.hex).toLocaleString()} HEX added to your balance!`, { duration: 6000 })
+      ;['loop-status', 'wallet', 'wallet-me', 'player'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
+    }).catch((e: any) => toast(e?.response?.data?.error || 'Payment received — your HEX will appear in a moment.', { duration: 6000 }))
+  }, [])
+}
+
 export function useLoopActions() {
   const qc = useQueryClient()
   const syncBalance = (v: number) => {
@@ -140,8 +159,7 @@ export function HarvestButton() {
           : pending < 1
             ? `First HEX in ${nextHexMin} min · ${Math.round(h.rate_per_day).toLocaleString()}/day`
             : `Full in ${fmtIn(h.full_at)} · ${Math.round(h.rate_per_day).toLocaleString()}/day`}
-          {(h.resources?.length ?? 0) > 0 ? ` · +${h.resources!.length} resources` : ''}
-          {(h.beginner_mult ?? 1) > 1 && h.beginner_until ? ` · x${h.beginner_mult} starter boost ${fmtIn(h.beginner_until)}` : ''}</span>
+          {(h.beginner_mult ?? 1) > 1 ? ` · x${h.beginner_mult} starter` : ''}</span>
       </span>
     </button>
   )

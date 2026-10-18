@@ -1038,3 +1038,21 @@ html {
   .hx-nudges { top: auto; bottom: 214px; left: 10px; right: 10px; width: auto; }
   .hx-nudges .hx-nudge:nth-child(n+2), .hx-nudge__alerts { display: none; }
 }
+
+/* Map overview POI markers (PoiOverviewLayer) */
+.hx-poi { overflow: visible; }
+.hx-poi__pin {
+  border-radius: 50%; background: #0b1626; border: 3px solid var(--c);
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+  box-shadow: 0 0 0 2px rgba(0,0,0,0.55), 0 0 14px var(--c), 0 3px 6px rgba(0,0,0,0.6);
+  cursor: pointer; transition: transform .15s;
+}
+.hx-poi__pin:hover { transform: scale(1.18); }
+.hx-poi__ico { width: 125%; height: 125%; flex-shrink: 0; }
+.hx-poi__name, .hx-poi__owner {
+  position: absolute; left: 50%; transform: translateX(-50%); white-space: nowrap; pointer-events: none;
+  font-family: 'Lilita One', sans-serif; font-size: 12px; color: #fff; letter-spacing: .3px;
+  text-shadow: 0 0 3px #000, 0 1px 2px #000, 0 0 6px rgba(0,0,0,.8);
+}
+.hx-poi__name { top: calc(100% + 2px); }
+.hx-poi__owner { top: calc(100% + 17px); font-size: 10px; color: #fca5a5; }

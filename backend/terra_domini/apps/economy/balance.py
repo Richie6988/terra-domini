@@ -51,6 +51,17 @@ def train_seconds(unit_type: str, quantity: int) -> int:
 
 # ── Crypto ───────────────────────────────────────────────────────────────────
 CONVERT_BURN_PCT = Decimal('0.05')   # 5% of HEX burned when converting to the token
+# Fixed peg (owner, 2026-10-18): 1 € = 1000 HEX = 1 HEX Coin (on-chain token). Bought in the shop directly;
+# the crypto side follows in the background.
+HEX_PER_EUR = 1000
+HEX_PER_COIN = 1000
+HEX_PACKS = [   # bonus HEX on bigger packs (bonus is purchased HEX too: not withdrawable, no boosters)
+    {'id': 'hex_1',  'eur': 1,  'hex': 1000,  'bonus': 0},
+    {'id': 'hex_5',  'eur': 5,  'hex': 5000,  'bonus': 250},
+    {'id': 'hex_10', 'eur': 10, 'hex': 10000, 'bonus': 1000},
+    {'id': 'hex_20', 'eur': 20, 'hex': 20000, 'bonus': 3000},
+    {'id': 'hex_50', 'eur': 50, 'hex': 50000, 'bonus': 10000},
+]
 
 
 def territory_hex_per_day(rarity: str, is_shiny: bool = False, connected: bool = False) -> float:

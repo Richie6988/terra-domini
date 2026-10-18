@@ -3,8 +3,8 @@
 """
 import math, logging
 from rest_framework import viewsets
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 
 from terra_domini.apps.events.unified_poi import UnifiedPOI, POI_VISUAL, RARITY_TDC
@@ -205,3 +205,39 @@ class UnifiedPOIViewSet(viewsets.GenericViewSet):
         except Exception:
             pass
         return Response({'events': events, 'count': len(events)})
+
+
+# ── Map overview: points of interest readable from far away (owner 2026-10-18) ──
+MAP_ZOOM_RARITIES = [   # (min zoom, rarities shown) — the further out, the rarer
+    (3, ('mythic', 'legendary')),
+    (5, ('mythic', 'legendary', 'epic')),
+    (7, ('mythic', 'legendary', 'epic', 'rare')),
+    (9, ('mythic', 'legendary', 'epic', 'rare', 'uncommon', 'common')),
+]
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def map_pois(request):
+    """GET /api/map/pois/?south=&west=&north=&east=&zoom= — POI markers for the zoomed-out map, rarest first."""
+    try:
+        s, w, n, e = (float(request.query_params[k]) for k in ('south', 'west', 'north', 'east'))
+        z = int(float(request.query_params.get('zoom', 5)))
+    except (KeyError, ValueError):
+        return Response({'error': 'south, west, north, east required'}, status=400)
+    rarities = MAP_ZOOM_RARITIES[0][1]
+    for mz, r in MAP_ZOOM_RARITIES:
+        if z >= mz:
+            rarities = r
+    qs = UnifiedPOI.objects.filter(is_active=True, rarity__in=rarities, latitude__range=(s, n))
+    qs = qs.filter(longitude__range=(w, e)) if w <= e else qs  # antimeridian: skip the lon filter
+    order = {'mythic': 0, 'legendary': 1, 'epic': 2, 'rare': 3, 'uncommon': 4, 'common': 5}
+    rows = sorted(qs.values('name', 'category', 'rarity', 'latitude', 'longitude', 'h3_index', 'is_featured')[:1500],
+                  key=lambda p: (order.get(p['rarity'], 9), not p['is_featured']))[:250]
+    from terra_domini.apps.territories.models import Territory
+    owners = dict(Territory.objects.filter(h3_index__in=[p['h3_index'] for p in rows], owner__isnull=False)
+                  .values_list('h3_index', 'owner__username'))
+    return Response({'zoom': z, 'pois': [{
+        'name': p['name'], 'category': p['category'], 'rarity': p['rarity'], 'lat': p['latitude'], 'lon': p['longitude'],
+        'h3_index': p['h3_index'], 'owner': owners.get(p['h3_index']),
+    } for p in rows]})

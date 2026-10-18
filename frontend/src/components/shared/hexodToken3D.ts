@@ -63,6 +63,23 @@ export interface TokenViewerProps {
   date?: string
   iconSvg?: string
   imageSrc?: string
+  /** Real territory data printed on the back (GET /api/codex/territory/<h3>/). */
+  back?: TokenBack | null
+}
+
+export interface TokenBack {
+  h3Index: string
+  lat: number
+  lon: number
+  rarity: string
+  owner: string | null
+  capturedAt: string | null
+  hexPerDay: number
+  region: string | null
+  continent: string | null
+  resources: { name: string; perDay: number }[]
+  tokenId: number | null
+  minted: boolean
 }
 
 interface ViewerHandle {
@@ -147,6 +164,21 @@ function buildStudio(): THREE.Scene {
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3)
 const easeOutBack = (t: number) => { const k = 1.6; return 1 + (k + 1) * Math.pow(t - 1, 3) + k * Math.pow(t - 1, 2) }
 
+function hexA(hex: string, a: number) {
+  const n = parseInt(hex.replace('#', '').slice(0, 6), 16)
+  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`
+}
+function shade(hex: string, k: number) {
+  const n = parseInt(hex.replace('#', '').slice(0, 6), 16)
+  const ch = (v: number) => Math.max(0, Math.min(255, Math.round(v * k))).toString(16).padStart(2, '0')
+  return `#${ch((n >> 16) & 255)}${ch((n >> 8) & 255)}${ch(n & 255)}`
+}
+function roundRect(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, r: number) {
+  ctx.beginPath()
+  ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r)
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath()
+}
+
 // ═══════════════════════════════════════════════════════════════
 // MAIN FUNCTION
 // ═══════════════════════════════════════════════════════════════
@@ -166,6 +198,7 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     date: initial.date || new Date().toISOString().slice(0, 10),
     iconSvg: initial.iconSvg || '',
     imageSrc: initial.imageSrc || '',
+    back: initial.back || null as TokenBack | null,
   }
   const tierKey = (): TierKey =>
     (Object.keys(TIERS) as TierKey[]).find(k => TIERS[k] === state.tier) || 'BRONZE'
@@ -390,175 +423,125 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
 
 
   // ═══════════════════════════════════════════════════════════
-  // drawBack — port of gold standard
+  // drawBack — the territory DEED: real data only (owner, region, production,
+  // resources, coordinates, H3 cell, mint status). Nothing random, nothing invented.
   // ═══════════════════════════════════════════════════════════
   function drawBack() {
     const tier = state.tier
-    const metalColor = tier.metal
-    const carbonColor = tier.carbon
-    const catColor = state.catColor
-    const coreRadius = s * 0.22
+    const metal = tier.metal
+    const accent = state.catColor
+    const b = state.back
+    const R = s * 0.47
 
-    // Full carbon base
-    bCtx.fillStyle = carbonColor
+    // Base: tier carbon with a soft radial light so the plate never reads as a black hole
+    const base = bCtx.createRadialGradient(c, c * 0.8, s * 0.05, c, c, s * 0.62)
+    base.addColorStop(0, shade(tier.carbon, 2.6))
+    base.addColorStop(1, tier.carbon)
+    bCtx.fillStyle = base
     bCtx.fillRect(0, 0, s, s)
 
-    // Carbon fiber weave pattern
+    // Carbon weave inside the plate
     bCtx.save()
-    bCtx.beginPath()
-    drawHex(bCtx, c, c, s * 0.47)
-    bCtx.clip()
-    bCtx.strokeStyle = 'rgba(255,255,255,0.04)'
+    drawHex(bCtx, c, c, R); bCtx.clip()
+    bCtx.strokeStyle = 'rgba(255,255,255,0.035)'
     bCtx.lineWidth = 1
-    const weaveStep = s * 0.008
-    for (let i = -s; i < s * 2; i += weaveStep) {
+    const step = s * 0.01
+    for (let i = -s; i < s * 2; i += step) {
       bCtx.beginPath(); bCtx.moveTo(i, 0); bCtx.lineTo(i + s * 0.5, s); bCtx.stroke()
-    }
-    for (let i = -s; i < s * 2; i += weaveStep) {
       bCtx.beginPath(); bCtx.moveTo(i, 0); bCtx.lineTo(i - s * 0.5, s); bCtx.stroke()
+    }
+    // Faint world grid: latitude bands behind the text, marker at the real latitude
+    if (b) {
+      bCtx.strokeStyle = hexA(metal, 0.10); bCtx.lineWidth = 2
+      for (let la = -60; la <= 60; la += 30) {
+        const y = c - (la / 90) * R; bCtx.beginPath(); bCtx.moveTo(0, y); bCtx.lineTo(s, y); bCtx.stroke()
+      }
+      const my = c - (b.lat / 90) * R, mx = c + (b.lon / 180) * R
+      bCtx.fillStyle = hexA(accent, 0.35)
+      drawHex(bCtx, mx, my, s * 0.03); bCtx.fill()
     }
     bCtx.restore()
 
-    // Outer border (tier metal)
-    bCtx.strokeStyle = metalColor
-    bCtx.lineWidth = s * 0.035
-    bCtx.shadowColor = metalColor
-    bCtx.shadowBlur = 40
-    drawHex(bCtx, c, c, s * 0.49)
-    bCtx.stroke()
+    // Metal frame
+    bCtx.strokeStyle = metal; bCtx.lineWidth = s * 0.035
+    bCtx.shadowColor = metal; bCtx.shadowBlur = 30
+    drawHex(bCtx, c, c, s * 0.49); bCtx.stroke()
     bCtx.shadowBlur = 0
-
-    // Inner border line
-    bCtx.strokeStyle = metalColor
-    bCtx.lineWidth = 2
-    bCtx.globalAlpha = 0.5
-    drawHex(bCtx, c, c, s * 0.455)
-    bCtx.stroke()
+    bCtx.globalAlpha = 0.5; bCtx.lineWidth = 3
+    drawHex(bCtx, c, c, s * 0.452); bCtx.stroke()
     bCtx.globalAlpha = 1
 
-    // "NON FUNGIBLE TERRITORY" top
-    bCtx.textAlign = 'center'
-    bCtx.font = `bold ${s * 0.022}px Orbitron`
-    bCtx.fillStyle = metalColor
-    bCtx.shadowBlur = 25
-    bCtx.shadowColor = metalColor
-    bCtx.fillText('NON FUNGIBLE TERRITORY', c, c - coreRadius - s * 0.055)
-    bCtx.shadowBlur = 0
+    const text = (str: string, x: number, y: number, size: number, color: string, weight = 900, glow = 0) => {
+      bCtx.font = `${weight} ${size}px "Lilita One", Orbitron, sans-serif`
+      bCtx.textAlign = 'center'; bCtx.textBaseline = 'middle'
+      // dark outline = readable on every metal
+      bCtx.lineJoin = 'round'; bCtx.lineWidth = size * 0.16; bCtx.strokeStyle = 'rgba(0,0,0,0.75)'
+      bCtx.strokeText(str, x, y)
+      if (glow) { bCtx.shadowColor = color; bCtx.shadowBlur = glow }
+      bCtx.fillStyle = color; bCtx.fillText(str, x, y)
+      bCtx.shadowBlur = 0
+    }
+    const fit = (str: string, size: number, maxW: number) => {
+      bCtx.font = `900 ${size}px "Lilita One", Orbitron, sans-serif`
+      const w = bCtx.measureText(str).width
+      return w > maxW ? size * maxW / w : size
+    }
 
-    // Decorative line under text
-    bCtx.strokeStyle = metalColor
-    bCtx.lineWidth = 1
-    bCtx.globalAlpha = 0.4
-    bCtx.beginPath()
-    bCtx.moveTo(c - s * 0.15, c - coreRadius - s * 0.035)
-    bCtx.lineTo(c + s * 0.15, c - coreRadius - s * 0.035)
-    bCtx.stroke()
-    bCtx.globalAlpha = 1
+    // Title
+    text('TERRITORY DEED', c, s * 0.12, s * 0.038, metal, 900, 18)
 
-    // Central core
-    const coreGrad = bCtx.createRadialGradient(c - coreRadius * 0.3, c - coreRadius * 0.3, 0, c, c, coreRadius)
-    coreGrad.addColorStop(0.3, metalColor)
-    coreGrad.addColorStop(1, tier.engrave_metal)
-    bCtx.fillStyle = coreGrad
-    bCtx.shadowBlur = 50
-    bCtx.shadowColor = metalColor
-    drawHex(bCtx, c, c, coreRadius)
-    bCtx.fill()
-    bCtx.shadowBlur = 0
+    // Rarity badge (hex medallion)
+    const rr = s * 0.065, ry = s * 0.21
+    const med = bCtx.createRadialGradient(c - rr * 0.3, ry - rr * 0.3, 0, c, ry, rr)
+    med.addColorStop(0, '#ffffff'); med.addColorStop(0.35, accent); med.addColorStop(1, shade(accent, 0.45))
+    bCtx.fillStyle = med; bCtx.shadowColor = accent; bCtx.shadowBlur = 40
+    drawHex(bCtx, c, ry, rr); bCtx.fill(); bCtx.shadowBlur = 0
+    bCtx.strokeStyle = metal; bCtx.lineWidth = s * 0.008; drawHex(bCtx, c, ry, rr); bCtx.stroke()
+    const rar = (b?.rarity || 'common').toUpperCase()
+    text(rar.slice(0, 1), c, ry + s * 0.004, s * 0.062, '#ffffff')
+    text(rar, c, ry + rr + s * 0.03, s * 0.032, accent, 900, 10)
 
-    // Core border highlight
-    bCtx.strokeStyle = catColor
-    bCtx.lineWidth = 42
-    bCtx.globalAlpha = 0.6
-    drawHex(bCtx, c, c, coreRadius)
-    bCtx.stroke()
-    bCtx.globalAlpha = 1
+    if (!b) {
+      text('HEXOD', c, c + s * 0.05, s * 0.07, metal, 900, 30)
+      bTex.needsUpdate = true
+      return
+    }
 
-    // Inner bevel
-    bCtx.strokeStyle = tier.engrave_metal
-    bCtx.lineWidth = 2
-    drawHex(bCtx, c, c, coreRadius - s * 0.012)
-    bCtx.stroke()
-
-    // Engraved metadata
-    const fontSize = s * 0.018
-    const lineH = fontSize * 1.7
-    const lines = [
-      `#HEX-${state.catId}-${String(state.serial).padStart(4, '0')}`,
-      state.edition,
-      `TIER ${tier.id}`,
-      state.date,
-      state.owner,
+    // Rows: label (left) · value (right), inside a rounded panel
+    const px = c - s * 0.3, pw = s * 0.6, py = s * 0.335, rowH = s * 0.048
+    const rows: [string, string, string?][] = [
+      ['OWNER', b.owner ? b.owner.toUpperCase() : 'UNCLAIMED', b.owner ? '#ffffff' : '#6ee7b7'],
+      ['REGION', (b.region || 'UNCHARTED').toUpperCase()],
+      ['PRODUCES', `+${Math.round(b.hexPerDay).toLocaleString()} HEX / DAY`, '#fcd34d'],
+      ...b.resources.slice(0, 3).map(r => ['', `+${r.perDay >= 10 ? Math.round(r.perDay) : r.perDay.toFixed(1)} ${r.name.toUpperCase()} / DAY`, '#93c5fd'] as [string, string, string]),
+      ['COORDS', `${Math.abs(b.lat).toFixed(3)}°${b.lat >= 0 ? 'N' : 'S'}  ${Math.abs(b.lon).toFixed(3)}°${b.lon >= 0 ? 'E' : 'W'}`],
+      ['SINCE', b.capturedAt || '—'],
     ]
-    const totalH = lines.length * lineH
-    const startY = c - totalH / 2 + lineH * 0.4
-    bCtx.font = `700 ${fontSize}px "Roboto Mono", "Courier New", monospace`
-    bCtx.textAlign = 'center'
-    bCtx.textBaseline = 'middle'
-
-    lines.forEach((line, i) => {
-      const x = c
-      const y = startY + i * lineH
-      const baseAlpha = (i === 0 || i === 2) ? 1.0 : 0.7
-
-      bCtx.save()
-      // Bright rim
-      bCtx.globalAlpha = baseAlpha * 0.3
-      bCtx.fillStyle = '#ffffff'
-      bCtx.fillText(line, x, y + 2)
-      // Multi-layer internal walls
-      bCtx.fillStyle = '#000000'
-      bCtx.globalAlpha = baseAlpha * 0.4
-      bCtx.fillText(line, x, y - 1.5)
-      bCtx.fillText(line, x - 1, y - 1)
-      bCtx.fillText(line, x + 1, y - 1)
-      // Floor of cut
-      bCtx.globalAlpha = baseAlpha
-      bCtx.shadowColor = 'rgba(0,0,0,0.8)'
-      bCtx.shadowBlur = 3
-      bCtx.fillStyle = tier.engrave_metal
-      bCtx.fillText(line, x, y)
-      // Inner glow
-      bCtx.globalAlpha = 0.1
-      bCtx.strokeStyle = '#000000'
-      bCtx.lineWidth = 0.5
-      bCtx.strokeText(line, x, y)
-      bCtx.restore()
+    const ph = rows.length * rowH + s * 0.03
+    bCtx.fillStyle = 'rgba(0,0,0,0.42)'
+    bCtx.strokeStyle = hexA(metal, 0.55); bCtx.lineWidth = 3
+    roundRect(bCtx, px, py, pw, ph, s * 0.02); bCtx.fill(); bCtx.stroke()
+    rows.forEach(([label, value, color], i) => {
+      const y = py + s * 0.015 + rowH * (i + 0.5)
+      if (label) {
+        bCtx.font = `800 ${s * 0.024}px Nunito, sans-serif`
+        bCtx.textAlign = 'left'; bCtx.textBaseline = 'middle'
+        bCtx.fillStyle = hexA(metal, 0.95); bCtx.fillText(label, px + s * 0.025, y)
+      }
+      const size = fit(value, s * 0.03, pw * 0.66)
+      bCtx.font = `900 ${size}px "Lilita One", Orbitron, sans-serif`
+      bCtx.textAlign = 'right'
+      bCtx.lineWidth = size * 0.14; bCtx.strokeStyle = 'rgba(0,0,0,0.7)'
+      bCtx.strokeText(value, px + pw - s * 0.025, y)
+      bCtx.fillStyle = color || '#e5e7eb'; bCtx.fillText(value, px + pw - s * 0.025, y)
     })
 
-    // Hash signature
-    const hash = '0x' + Math.random().toString(16).slice(2, 10).toUpperCase()
-    bCtx.font = `500 ${fontSize * 0.6}px Orbitron`
-    bCtx.globalAlpha = 0.5
-    bCtx.fillText(hash, c, startY + lines.length * lineH + s * 0.008)
-    bCtx.globalAlpha = 1
-
-    // "HEXOD" bottom
-    bCtx.font = `900 ${s * 0.055}px Orbitron`
-    bCtx.fillStyle = metalColor
-    bCtx.shadowBlur = 45
-    bCtx.shadowColor = metalColor
-    bCtx.fillText('HEXOD', c, c + coreRadius + s * 0.075)
-    bCtx.shadowBlur = 0
-
-    // Decorative line above HEXOD
-    bCtx.strokeStyle = metalColor
-    bCtx.lineWidth = 1
-    bCtx.globalAlpha = 0.4
-    bCtx.beginPath()
-    bCtx.moveTo(c - s * 0.12, c + coreRadius + s * 0.035)
-    bCtx.lineTo(c + s * 0.12, c + coreRadius + s * 0.035)
-    bCtx.stroke()
-    bCtx.globalAlpha = 1
-
-    // Corner hex accents
-    bCtx.fillStyle = metalColor
-    bCtx.globalAlpha = 0.7
-    drawHex(bCtx, s * 0.15, s * 0.12, s * 0.018); bCtx.fill()
-    drawHex(bCtx, s * 0.85, s * 0.12, s * 0.018); bCtx.fill()
-    drawHex(bCtx, s * 0.15, s * 0.88, s * 0.018); bCtx.fill()
-    drawHex(bCtx, s * 0.85, s * 0.88, s * 0.018); bCtx.fill()
-    bCtx.globalAlpha = 1
+    // Footer: mint status + the H3 cell (the token's real unique id)
+    const fy = py + ph + s * 0.04
+    text(b.minted && b.tokenId ? `MINTED · TOKEN #${b.tokenId}` : 'NOT MINTED YET', c, fy, s * 0.03, b.minted ? '#fcd34d' : hexA('#ffffff', 0.7), 900)
+    bCtx.font = `700 ${s * 0.022}px "Roboto Mono", "Courier New", monospace`
+    bCtx.textAlign = 'center'; bCtx.fillStyle = hexA(metal, 0.85)
+    bCtx.fillText(`CELL ${b.h3Index}`, c, fy + s * 0.038)
 
     bTex.needsUpdate = true
   }
@@ -733,6 +716,7 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
       if (p.owner !== undefined) state.owner = p.owner
       if (p.date !== undefined) state.date = p.date
       if (p.iconSvg !== undefined) state.iconSvg = p.iconSvg
+      if (p.back !== undefined) state.back = p.back
       if (p.imageSrc !== undefined && p.imageSrc && p.imageSrc !== state.imageSrc) {
         state.imageSrc = p.imageSrc
         cardImg.src = p.imageSrc
