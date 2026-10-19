@@ -970,10 +970,7 @@ def _open_booster_pack(item_code: str, player=None) -> dict:
                 from terra_domini.apps.territories.territory_engine import generate_territory
                 la, lo = h3.cell_to_latlng(hx)
                 generate_territory(hx, la, lo)
-                card = Territory.objects.filter(h3_index=hx, owner__isnull=True).first()
-                if card and card.rarity != rarity:
-                    card.rarity = rarity
-                    card.save(update_fields=['rarity'])
+                card = Territory.objects.filter(h3_index=hx, owner__isnull=True).first()   # keeps its own design (rarity)
             except Exception:
                 card = None
         # Only FREE territories (never someone else's); fall back to lower rarities if none left

@@ -359,6 +359,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path='mint')
     def mint(self, request):
         """POST /api/territories/mint/ {h3_index} — start minting process"""
+        # Retired (2026-10-19): it bypassed the discovery rules (price by distance, POI lock). Use /territories/claim/.
+        return Response({'error': 'Use /api/territories/claim/', 'retired': True}, status=410)
         from django.utils import timezone
         from datetime import timedelta
         h3_index = request.data.get('h3_index', '')
@@ -390,6 +392,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
     @action(detail=False, methods=['POST'], url_path='buy')
     def buy(self, request):
         """POST /api/territories/buy/ {h3_index} — instant purchase"""
+        # Retired (2026-10-19): it bypassed the discovery rules (price by distance, POI lock). Use /territories/claim/.
+        return Response({'error': 'Use /api/territories/claim/', 'retired': True}, status=410)
         from django.utils import timezone
         import math
         h3_index = request.data.get('h3_index', '')

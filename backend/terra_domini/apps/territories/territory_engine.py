@@ -65,10 +65,20 @@ def _biome_from_category(category: str) -> str:
     return POI_BIOME_MAP.get(category, 'rural')
 
 
-def _roll_standard_rarity(biome: str, near_poi_rarities: list[str]) -> str:
+ZONE_SALT = 0x4E58D   # changing it redraws every zone of the world: never change it once players own land
+
+
+def zone_rng(h3_index: str) -> random.Random:
+    """The zone's own random generator, seeded by its H3 index: the original design of a zone (rarity, shiny…)
+    is fixed for ever — the same whoever discovers it, whenever (owner 2026-10-19: "a value saved in advance for each
+    zone; then only the owner and timed variations / rare events on top of the original design")."""
+    return random.Random(int(h3_index, 16) ^ ZONE_SALT)
+
+
+def _roll_standard_rarity(biome: str, near_poi_rarities: list[str], rng: random.Random | None = None) -> str:
     """
-    Roll rarity for a standard (non-POI) territory.
-    Influenced by biome quality and neighboring POI rarities.
+    Rarity of a standard (non-POI) territory: biome quality + neighbouring POI rarities, drawn with the zone's own
+    seeded generator (deterministic). Scarcity comes from the thresholds, not from live world counts.
     """
     # Base probabilities by biome
     biome_tier = {
@@ -83,11 +93,11 @@ def _roll_standard_rarity(biome: str, near_poi_rarities: list[str]) -> str:
     neighbor_bonus = min(neighbor_bonus, 4)  # cap
 
     total = biome_tier + neighbor_bonus * 0.4
-    r = random.random()
+    r = (rng or random).random()
 
-    if total >= 4 and r < 0.02:  return _apply_scarcity('legendary')
-    if total >= 3 and r < 0.08:  return _apply_scarcity('epic')
-    if total >= 2 and r < 0.18:  return _apply_scarcity('rare')
+    if total >= 4 and r < 0.02:  return 'legendary'
+    if total >= 3 and r < 0.08:  return 'epic'
+    if total >= 2 and r < 0.18:  return 'rare'
     if total >= 1 and r < 0.38:  return 'uncommon'
     return 'common'
 
@@ -258,8 +268,9 @@ def generate_territory(h3_index: str, lat: float, lon: float, poi_category: str 
     biome = assign_biome(lat, lon, poi_category, '')
 
     # Roll rarity (influenced by biome + neighbor POIs)
-    rarity   = _roll_standard_rarity(biome, near_rarities)
-    is_shiny = random.random() < 0.10
+    rng      = zone_rng(h3_index)             # the zone's original design is fixed for ever
+    rarity   = _roll_standard_rarity(biome, near_rarities, rng)
+    is_shiny = rng.random() < 0.10
 
     # Resources from biome_engine table (not legacy BIOME_RESOURCES)
     rarity_mult = RARITY_MULT.get(rarity, 1.0) * (1.5 if is_shiny else 1.0)
