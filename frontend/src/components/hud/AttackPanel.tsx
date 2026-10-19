@@ -211,8 +211,15 @@ export function AttackPanel({ target, onClose }: Props) {
                 )}
                 <div style={{ display: 'flex', gap: 6, alignItems: 'flex-start', marginTop: 10, fontSize: 11, lineHeight: 1.4, color: 'var(--hx-text-3)', fontFamily: 'var(--font-body)', textTransform: 'none', letterSpacing: 0 }}>
                   <Info size={13} style={{ flexShrink: 0, marginTop: 1 }} />
-                  Each side rolls ±10%. The defender can reinforce before the timer ends. Survivors come back to your army; losers lose 30–60% of the units sent.
+                  Each side rolls ±10%. The defender can reinforce before the timer ends. If you win, 80–90% of your troops come back.
                 </div>
+                {totalUnits > 0 && (
+                  <div style={{ display: 'flex', gap: 6, alignItems: 'center', marginTop: 8, padding: '7px 10px', borderRadius: 8, fontSize: 11, fontWeight: 700,
+                                color: prob < 0.5 ? '#fecaca' : '#fde68a', background: prob < 0.5 ? 'rgba(239,68,68,0.14)' : 'rgba(245,158,11,0.10)',
+                                border: `1px solid ${prob < 0.5 ? 'rgba(239,68,68,0.4)' : 'rgba(245,158,11,0.3)'}` }}>
+                    If you lose, all {totalUnits} troops sent are lost.
+                  </div>
+                )}
               </div>
             )}
 
