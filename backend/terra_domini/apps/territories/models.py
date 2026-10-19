@@ -44,6 +44,10 @@ class Territory(models.Model):
     # ── Classification ────────────────────────────────────────────────────────
     territory_type = models.CharField(max_length=20, choices=TerritoryType.choices, default=TerritoryType.RURAL)
     country_code   = models.CharField(max_length=3, blank=True, db_index=True)
+    # Forces (combat/forces.py): attack / defense / spy points stored on the hex; a kingdom's counter = sum of its hexes
+    atk_pts = models.IntegerField(default=0)
+    def_pts = models.IntegerField(default=0)
+    spy_pts = models.IntegerField(default=0)
     region_name    = models.CharField(max_length=100, blank=True)
     place_name     = models.CharField(max_length=200, blank=True)
 
@@ -625,8 +629,16 @@ class SafariTarget(models.Model):
         real = pick_creature(with_places=True)
         if not real:
             return None
-        lat, lon = random.choice(real['places'])[:2]
-        cell = h3.latlng_to_cell(lat, lon, 8)
+        from terra_domini.apps.territories.models import Territory
+        places = list(real['places']); random.shuffle(places)
+        lat = lon = cell = None
+        for pl in places:                    # the hex it hides on must be free: catching it gives you that hex
+            c = h3.latlng_to_cell(pl[0], pl[1], 8)
+            if not Territory.objects.filter(h3_index=c, owner__isnull=False).exists():
+                lat, lon, cell = pl[0], pl[1], c
+                break
+        if not cell:
+            return None
         tlat, tlon = h3.cell_to_latlng(cell)
         b = biome_for(round(lat, 3), round(lon, 3))
         clue = f"Seen in the {b['name']}" + (f" ({b['continent']})" if b.get('continent') else '') if b else 'Seen somewhere on Earth'
@@ -638,30 +650,35 @@ class SafariTarget(models.Model):
 
     @classmethod
     def spawn_for_player(cls, player, base_lat=None, base_lon=None):
-        """A real species (HEXOD master DB) hides in one of the 19 hexes around one of the player's
-        territories (or the map position sent by the client when the player has no land)."""
-        import random, h3
+        """Fallback while no sighting is known for any species: a real species spotted 5-60 km from one of the
+        player's hexes (or the map position), on a free hex — same radar hunt as the world safari."""
+        import math, random, h3
         from terra_domini.apps.events.hexod_db import pick_creature, CAPTURE_REWARD
-        real = pick_creature()  # real species from the HEXOD master DB
+        from terra_domini.apps.territories.models import Territory
+        real = pick_creature()
         if real:
             cid, cname, rarity = real['uid'][:30], real['name'][:100], real['rarity']
             reward = CAPTURE_REWARD.get(rarity, 50)
         else:
             cid, cname, rarity, reward = random.choice(cls.CREATURES)
-        from terra_domini.apps.territories.models import Territory
-        owned = list(Territory.objects.filter(owner=player).values_list('h3_index', flat=True)[:200])
-        owned = [h for h in owned if h3.get_resolution(h) == 8]
+        owned = list(Territory.objects.filter(owner=player).values_list('center_lat', 'center_lon', 'place_name', 'poi_name')[:200])
         if owned:
-            center = random.choice(owned)
+            blat, blon, place, poi = random.choice(owned)
+            where = poi or place or 'your land'
         else:
-            center = h3.latlng_to_cell(base_lat if base_lat is not None else 48.8566,
-                                       base_lon if base_lon is not None else 2.3522, 8)
-        target = random.choice([c for c in h3.grid_disk(center, cls.GRID_K) if c != center])
-        lat, lon = h3.cell_to_latlng(target)
+            blat, blon, where = (base_lat if base_lat is not None else 48.8566), (base_lon if base_lon is not None else 2.3522), 'here'
+        for _ in range(20):
+            km, brg = random.uniform(5, 60), random.uniform(0, 2 * math.pi)
+            lat = blat + km / 111.0 * math.cos(brg)
+            lon = blon + km / (111.0 * max(0.2, math.cos(math.radians(blat)))) * math.sin(brg)
+            cell = h3.latlng_to_cell(lat, lon, 8)
+            if not Territory.objects.filter(h3_index=cell, owner__isnull=False).exists():
+                break
+        tlat, tlon = h3.cell_to_latlng(cell)
         return cls.objects.create(
             player=player, creature_id=cid, creature_name=cname, rarity=rarity, hex_reward=reward,
-            target_lat=lat, target_lon=lon, target_h3=target, center_h3=center, tries_left=cls.TRIES, probes=[],
-            hint=f'Spotted around your territory. {cls.TRIES} scans to find which hex it hides in.',
+            target_lat=tlat, target_lon=tlon, target_h3=cell, center_h3='', mode='world', tries_left=cls.WORLD_SCANS,
+            probes=[], hint=f'Spotted within 60 km of {where}',
         )
 
     def grid(self):

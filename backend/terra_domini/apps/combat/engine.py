@@ -246,8 +246,7 @@ class CombatEngine:
         morale_factor = 1.0  # TODO: pull from actual unit records
 
         boost_pct = min(boost_pct, GAME_CFG['MAX_MILITARY_BOOST_PCT']) / 100.0
-        from terra_domini.apps.territories.upgrades import walls_mult   # kingdom Walls upgrade: +15 % per level
-        total = (base_defense + unit_defense * morale_factor) * (1 + boost_pct) * walls_mult(territory)
+        total = (base_defense + unit_defense * morale_factor) * (1 + boost_pct)
         return total
 
     @staticmethod
@@ -284,196 +283,66 @@ class CombatEngine:
 
     @classmethod
     def resolve_battle(cls, battle: Battle) -> dict:
-        """
-        Resolve a completed battle. Called by Celery when resolves_at is reached.
-        Returns outcome dict.
-        """
-        from terra_domini.apps.territories.models import Territory
-
+        """Attack points meet the target kingdom's defense points 1 for 1 (combat/forces.py): both lose min(N, DEF).
+        N > DEF → the hex is captured and the leftover attack points stay on it."""
+        from terra_domini.apps.combat import forces as Fz
         territory = battle.target_territory
-        attackers = battle.participants.filter(side=BattleParticipant.Side.ATTACKER)
-        defenders = battle.participants.filter(side=BattleParticipant.Side.DEFENDER)
-
-        # Aggregate forces
-        attacker_units = cls._aggregate_units(attackers)
-        defender_units = cls.defender_units(battle, territory)
-        garrisons = cls.kingdom_garrisons(territory)
-
-        # Calculate powers
-        atk_power = sum(
-            cls.calculate_attack_power(p.units_deployed, territory.territory_type, levels=p.player.unit_levels)
-            for p in attackers
-        )
-        def_power = cls.calculate_defense_power(territory, defender_units, spies=attacker_units.get('spy', 0))
-        if battle.battle_type == Battle.BattleType.SURPRISE:
-            atk_power *= SURPRISE_ATK_MULT  # resolves 2x faster, troops fight below full strength
-        # Shop boosts (2X Army Power / 2X Defense) — capped like every paid military boost
-        commander = attackers.filter(is_commander=True).first()
-        atk_power *= 1 + active_boost_pct(commander.player_id if commander else None, 'atk_multiplier') / 100.0
-        def_power *= 1 + active_boost_pct(battle.defender_id, 'def_multiplier') / 100.0
-
-        # Randomness factor ±10% (skill over brute force, but not deterministic)
-        import random
-        atk_roll = random.uniform(0.9, 1.1)
-        def_roll = random.uniform(0.9, 1.1)
-        effective_atk = atk_power * atk_roll
-        effective_def = def_power * def_roll
-
-        # Determine winner
-        attacker_wins = effective_atk > effective_def
+        attackers = list(battle.participants.filter(side=BattleParticipant.Side.ATTACKER))
+        n = sum(int((p.units_deployed or {}).get('attack', 0)) for p in attackers)
+        kingdom = Fz.kingdom_hexes(territory.owner_id, territory.h3_index) if territory.owner_id else [territory.h3_index]
+        dfn = Fz.pools(kingdom)['defense']
+        attacker_wins = n > dfn
+        spent = min(n, dfn)
+        Fz.take(kingdom, 'defense', spent)
+        leftover = n - spent if attacker_wins else 0
         winner = 'attacker' if attacker_wins else 'defender'
-
-        # Casualties: a winning attacker loses 10-20 %; a beaten attacker loses ALL the troops it engaged
-        # (owner 2026-10-18: "if defeated in an attack you lose all engaged troops")
-        if attacker_wins:
-            atk_casualty_rate = random.uniform(0.10, 0.20)
-            def_casualty_rate = random.uniform(0.30, 0.50)
-        else:
-            atk_casualty_rate = 1.0
-            def_casualty_rate = random.uniform(0.10, 0.25)
-
-        atk_casualties = cls._apply_casualties(attacker_units, atk_casualty_rate)
-        def_casualties = cls._apply_casualties(defender_units, def_casualty_rate)
-
-        # Resources looted on attacker win
-        resources_looted = {}
-        if attacker_wins and battle.battle_type in [
-            Battle.BattleType.CONQUEST, Battle.BattleType.RAID
-        ]:
-            loot_rate = 0.40 if battle.battle_type == Battle.BattleType.RAID else 0.20
-            resources_looted = {
-                'energy': territory.stockpile_energy * loot_rate,
-                'food': territory.stockpile_food * loot_rate,
-                'credits': territory.stockpile_credits * loot_rate,
-                'materials': territory.stockpile_materials * loot_rate,
-            }
-
-        # Build combat log
-        combat_log = [
-            {'event': 'battle_started', 'attacker_power': round(atk_power, 1), 'defender_power': round(def_power, 1)},
-            {'event': 'rolls', 'atk_roll': round(atk_roll, 3), 'def_roll': round(def_roll, 3)},
-            {'event': 'effective', 'effective_atk': round(effective_atk, 1), 'effective_def': round(effective_def, 1)},
-            {'event': 'result', 'winner': winner},
-            {'event': 'casualties', 'attackers': atk_casualties, 'defenders': def_casualties},
-        ]
-
-        # Apply outcome to territory
         outcome = {
             'winner': winner,
-            'territory_captured': attacker_wins and battle.battle_type == Battle.BattleType.CONQUEST,
-            'attacker_casualties': atk_casualties,
-            'defender_casualties': def_casualties,
-            'resources_looted': resources_looted,
-            'combat_log': combat_log,
-            'atk_power': effective_atk,
-            'def_power': effective_def,
+            'territory_captured': attacker_wins and battle.battle_type in (Battle.BattleType.CONQUEST, Battle.BattleType.SURPRISE),
+            'attacker_casualties': {'attack': n - leftover},
+            'defender_casualties': {'defense': spent},
+            'resources_looted': {},
+            'combat_log': [{'event': 'clash', 'attack': n, 'defense': dfn, 'spent': spent, 'leftover': leftover},
+                           {'event': 'result', 'winner': winner}],
+            'atk_power': n, 'def_power': dfn, 'leftover': leftover,
         }
-
-        # Garrisons take the defender casualties (proportionally per unit type); on capture,
-        # the stack stationed on the lost hex retreats to the defender's free army pool.
-        for g in garrisons:
-            total = defender_units.get(g.unit_type, 0)
-            lost = round(def_casualties.get(g.unit_type, 0) * g.count / total) if total else 0
-            g.count = max(0, g.count - lost)
-            if outcome['territory_captured'] and g.territory_id == territory.id and g.count:
-                pool, _ = MilitaryUnit.objects.get_or_create(
-                    player_id=g.player_id, unit_type=g.unit_type, status=MilitaryUnit.UnitStatus.GARRISON,
-                    territory=None, defaults={'count': 0})
-                pool.count += g.count
-                pool.save(update_fields=['count'])
-                g.count = 0
-            g.save(update_fields=['count'])
-
-        # Reserve units the defender sent during the battle window take their share; survivors go home
-        for d in defenders:
-            lost, back = {}, {}
-            for ut, n in (d.units_deployed or {}).items():
-                total = defender_units.get(ut, 0)
-                lost[ut] = min(n, round(def_casualties.get(ut, 0) * n / total)) if total else 0
-                back[ut] = n - lost[ut]
-            d.units_lost, d.units_survived = lost, back
-            d.save(update_fields=['units_lost', 'units_survived'])
-            for ut, n in back.items():
-                if n > 0:
-                    pool, _ = MilitaryUnit.objects.get_or_create(
-                        player_id=d.player_id, unit_type=ut, status=MilitaryUnit.UnitStatus.GARRISON,
-                        territory=None, defaults={'count': 0})
-                    pool.count += n
-                    pool.save(update_fields=['count'])
-
         cls._apply_battle_outcome(battle, territory, outcome)
-
-        logger.info(
-            f"Battle {battle.id} resolved. Winner: {winner}. "
-            f"ATK: {effective_atk:.1f} vs DEF: {effective_def:.1f}"
-        )
-
+        logger.info(f"Battle {battle.id} resolved. Winner: {winner}. ATK {n} vs DEF {dfn}")
         return outcome
 
     @classmethod
-    def initiate_attack(cls, attacker, target_territory, units: dict, battle_type: str = 'conquest') -> tuple[bool, str, 'Battle']:
-        """
-        Start an attack. Returns (success, message, battle_or_None).
-        Validates all preconditions before creating the Battle record.
-        """
-        # Validate attacker can attack
+    def initiate_attack(cls, attacker, target_territory, points: int, battle_type: str = 'conquest') -> tuple[bool, str, 'Battle']:
+        """Commit `points` attack points from the kingdom nearest to the target (combat/forces.py)."""
+        from terra_domini.apps.combat import forces as Fz
         can_attack, reason = cls.can_attack(attacker, target_territory)
         if not can_attack:
             return False, reason, None
-
-        units = {k: int(v) for k, v in units.items() if int(v or 0) > 0}
-        if not units:
-            return False, "Select at least one unit", None
-
-        # Validate attacker has the units
-        for unit_type, count in units.items():
-            player_units = MilitaryUnit.objects.filter(
-                player=attacker, unit_type=unit_type,
-                status=MilitaryUnit.UnitStatus.GARRISON, territory__isnull=True,
-            ).first()
-            if not player_units or player_units.count < count:
-                return False, f"Insufficient {unit_type} units", None
-
-        # Determine battle timer
+        points = int(points or 0)
+        if points < 1:
+            return False, "Commit at least 1 attack point", None
+        src = Fz.source_kingdom(attacker.id, target_territory.h3_index)
+        have = Fz.pools(src)['attack'] if src else 0
+        if have < points:
+            return False, f"Your nearest kingdom has {have} attack points — buy more on it", None
+        Fz.take(src, 'attack', points)
         timer = cls._get_battle_timer(target_territory)
         if battle_type == 'surprise':
-            timer = timer // 2  # Surprise: half time, higher risk
-
+            timer = timer // 2
         battle = Battle.objects.create(
-            target_territory=target_territory,
-            defender=target_territory.owner,
-            battle_type=battle_type,
-            status=Battle.BattleStatus.ACTIVE,
-            resolves_at=timezone.now() + timezone.timedelta(seconds=timer),
+            target_territory=target_territory, defender=target_territory.owner, battle_type=battle_type,
+            status=Battle.BattleStatus.ACTIVE, resolves_at=timezone.now() + timezone.timedelta(seconds=timer),
         )
-
-        BattleParticipant.objects.create(
-            battle=battle,
-            player=attacker,
-            side=BattleParticipant.Side.ATTACKER,
-            units_deployed=units,
-            is_commander=True,
-        )
-
-        # Deployed units leave the garrison; survivors come back in _apply_battle_outcome
-        for unit_type, count in units.items():
-            stack = MilitaryUnit.objects.filter(
-                player=attacker, unit_type=unit_type,
-                status=MilitaryUnit.UnitStatus.GARRISON, count__gte=count, territory__isnull=True,
-            ).first()
-            stack.count -= count
-            stack.save(update_fields=['count'])
-
-        # Mark territory as under attack
+        BattleParticipant.objects.create(battle=battle, player=attacker, side=BattleParticipant.Side.ATTACKER,
+                                         units_deployed={'attack': points}, resources_contributed={'from': src[0]},
+                                         is_commander=True)
         target_territory.is_under_attack = True
         target_territory.current_battle = battle.id
         target_territory.save(update_fields=['is_under_attack', 'current_battle'])
-
         return True, "Attack initiated", battle
 
     @classmethod
-    def npc_attack(cls, bot, territory, units: dict, battle_type: str = 'raid') -> 'Battle':
-        """Bot raid: same as initiate_attack but NPC troops don't come from a garrison."""
+    def npc_attack(cls, bot, territory, points: int, battle_type: str = 'raid') -> 'Battle':
+        """Bot raid: same as initiate_attack but the NPC's attack points come from nowhere."""
         timer = cls._get_battle_timer(territory)
         battle = Battle.objects.create(
             target_territory=territory, defender=territory.owner, battle_type=battle_type,
@@ -481,7 +350,7 @@ class CombatEngine:
             resolves_at=timezone.now() + timezone.timedelta(seconds=timer),
         )
         BattleParticipant.objects.create(battle=battle, player=bot, side=BattleParticipant.Side.ATTACKER,
-                                         units_deployed=units, is_commander=True)
+                                         units_deployed={'attack': int(points)}, is_commander=True)
         territory.is_under_attack = True
         territory.current_battle = battle.id
         territory.save(update_fields=['is_under_attack', 'current_battle'])
@@ -588,25 +457,14 @@ class CombatEngine:
                         max(0, getattr(territory, stockpile_field, 0) - amount))
             territory.save(update_fields=[f'stockpile_{r}' for r in outcome['resources_looted']])
 
-        # Survivors return to the attacker's garrison
         if attacker_participant:
-            survived = {
-                k: max(0, v - outcome['attacker_casualties'].get(k, 0))
-                for k, v in attacker_participant.units_deployed.items()
-            }
-            attacker_participant.units_survived = survived
             attacker_participant.units_lost = outcome['attacker_casualties']
+            attacker_participant.units_survived = {'attack': outcome.get('leftover', 0)}
             attacker_participant.save(update_fields=['units_survived', 'units_lost'])
-            for unit_type, count in survived.items():
-                if count <= 0:
-                    continue
-                stack, _ = MilitaryUnit.objects.get_or_create(
-                    player=attacker_participant.player, unit_type=unit_type,
-                    status=MilitaryUnit.UnitStatus.GARRISON, territory=None,
-                    defaults={'count': 0},
-                )
-                stack.count += count
-                stack.save(update_fields=['count'])
+        if outcome['territory_captured']:
+            # the previous owner's points on that hex are gone; the attack that broke through now holds it
+            territory.atk_pts, territory.def_pts, territory.spy_pts = outcome.get('leftover', 0), 0, 0
+            territory.save(update_fields=['atk_pts', 'def_pts', 'spy_pts'])
 
         # Update battle record
         battle.status = Battle.BattleStatus.COMPLETED

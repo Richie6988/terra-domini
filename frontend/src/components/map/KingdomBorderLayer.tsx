@@ -23,6 +23,7 @@ interface Kingdom {
   h3_indexes: string[]
   centroid_lat: number
   centroid_lon: number
+  forces?: { attack: number; defense: number; spy: number }
 }
 
 interface Props {
@@ -200,8 +201,8 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
         }
       }
 
-      // Kingdom label — only for kingdoms with 2+ territories
-      if (k.centroid_lat && k.centroid_lon && k.size >= 2) {
+      // Kingdom label + its forces (attack / defense / spy points, owner 2026-10-19: "visible above the kingdom or territory")
+      if (k.centroid_lat && k.centroid_lon) {
         const compact = zoom < 12
         const size = compact ? 26 : 32
         // Hex emblem (tier colour) with tier digit, then size + label. Static strings only (no player text).
@@ -225,7 +226,13 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
             ${compact ? '' : `<span style="width:1px;height:14px;background:rgba(255,255,255,0.18)"></span>
             ${isMain ? crown : ''}
             <span style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:800;letter-spacing:1.5px;color:${isMain ? '#FCD34D' : 'rgba(255,255,255,0.8)'}">${kname || (isMain ? 'MAIN' : 'KINGDOM')}</span>`}
-          </div>`,
+          </div>
+          ${k.forces ? `<div style="position:absolute;left:0;top:${size / 2 + 3}px;transform:translateX(-50%);display:flex;gap:4px;white-space:nowrap;pointer-events:none">
+            ${[['#f87171', 'M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2', k.forces.attack],
+               ['#60a5fa', 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z', k.forces.defense],
+               ['#c084fc', 'M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', k.forces.spy]]
+              .map(([c, d, v]) => `<span style="display:inline-flex;align-items:center;gap:2px;padding:1px 5px;border-radius:999px;background:rgba(6,12,24,0.88);border:1px solid ${c}88;font-family:'Share Tech Mono',monospace;font-size:${compact ? 10 : 11}px;color:#fff"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="${c}" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="${d}"/></svg>${Number(v).toLocaleString()}</span>`).join('')}
+          </div>` : ''}`,
           className: 'td-kingdom-badge',
           iconSize: [0, 0],
           iconAnchor: [0, 0],

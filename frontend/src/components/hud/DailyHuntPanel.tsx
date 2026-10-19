@@ -1,12 +1,12 @@
 /**
  * DailyHuntPanel — Safari (2026-10-18 redesign, desk-friendly: no GPS walking).
  *
- * A real species from the HEXOD master DB (animals, dinosaurs/fossils, insects, plants, fungi, microbes)
- * hides in one of the 19 real hexes around one of your territories. You have 4 scans: each miss tells
- * how many rings away it is. Find it → HEX + its card goes into your album (Codex > Creatures).
+ * A real species from the HEXOD master DB hides on a free hex where it really lives (or, until its sightings are
+ * known, within 60 km of your land). Clue + radar (RadarWidget: direction and distance from the map centre), then
+ * catch it: its card goes into your album AND its hex becomes yours — a new base far from home (owner 2026-10-19).
  * 5 hunts a day. Server is the referee: the hidden hex is never sent to the client.
  *
- * API: GET /safari/active/ · POST /safari/spawn/ · POST /safari/probe/ {h3} · POST /safari/abandon/
+ * API: GET /safari/active/ · POST /safari/spawn/ · POST /safari/scan/ {lat,lon} · POST /safari/probe/ {lat,lon} · POST /safari/abandon/
  */
 import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -28,9 +28,6 @@ const CAT: Record<string, { label: string; icon: string }> = {
   insect: { label: 'Insect', icon: 'butterfly' }, vegetal: { label: 'Plant', icon: 'orchid' },
   mushroom: { label: 'Fungus', icon: 'fungus' }, microOrganism: { label: 'Microbe', icon: 'microscope' },
 }
-// Ring distance → colour of a missed scan (1 = right next to it)
-const RING_COLOR = ['#22c55e', '#ef4444', '#f97316', '#38bdf8', '#64748b']
-const RING_LABEL = ['FOUND', 'VERY HOT', 'WARM', 'COLD', 'FREEZING']
 
 interface Target {
   creature_name: string; creature_category: string; creature_description: string; creature_wiki_url: string
@@ -50,47 +47,6 @@ export function openRadarHunt(t: { clue_lat?: number; clue_lon?: number }) {
   window.dispatchEvent(new CustomEvent('hx:radar-open'))
 }
 
-function HuntGrid({ t, onProbe, busy }: { t: Target; onProbe: (h3: string) => void; busy: boolean }) {
-  const D = 46                     // centre-to-centre distance
-  const r = D / Math.sqrt(3) - 1.5 // pointy-top hex radius
-  const pos = (i: number, j: number) => [(i - j / 2) * D, j * D * Math.sqrt(3) / 2]
-  const grid = t.grid || []
-  if (!grid.length) return null
-  const pts = grid.map(g => pos(g.i, g.j))
-  const minX = Math.min(...pts.map(p => p[0])) - r - 4, maxX = Math.max(...pts.map(p => p[0])) + r + 4
-  const minY = Math.min(...pts.map(p => p[1])) - r - 4, maxY = Math.max(...pts.map(p => p[1])) + r + 4
-  const probed = new Map((t.probes || []).map(p => [p.h3, p.ring]))
-  const done = t.status !== 'active'
-  const hexPath = (x: number, y: number) => Array.from({ length: 6 }, (_, k) => {
-    const a = Math.PI / 180 * (60 * k - 90)
-    return `${x + r * Math.cos(a)},${y + r * Math.sin(a)}`
-  }).join(' ')
-  return (
-    <svg viewBox={`${minX} ${minY} ${maxX - minX} ${maxY - minY}`} style={{ width: '100%', maxWidth: 360, display: 'block', margin: '0 auto', touchAction: 'manipulation' }}
-      role="grid" aria-label="Hunting ground: tap a hex to scan it">
-      {grid.map((g, k) => {
-        const [x, y] = pts[k]
-        const ring = probed.get(g.h3)
-        const isTarget = done && t.target_h3 === g.h3
-        const isHome = g.h3 === t.center_h3
-        const fill = isTarget ? '#22c55e' : ring !== undefined ? RING_COLOR[Math.min(ring, 4)] : isHome ? '#1e3a5f' : '#16304f'
-        const clickable = !done && ring === undefined && !busy
-        return (
-          <g key={g.h3} onClick={() => clickable && onProbe(g.h3)} style={{ cursor: clickable ? 'pointer' : 'default' }}
-            role="gridcell" aria-label={ring !== undefined ? RING_LABEL[Math.min(ring, 4)] : 'Unscanned hex'}>
-            <polygon points={hexPath(x, y)} fill={fill} stroke={isTarget ? '#bbf7d0' : '#0b1626'} strokeWidth={3}
-              style={{ filter: clickable ? 'drop-shadow(0 2px 0 rgba(0,0,0,0.5))' : undefined }} />
-            {isHome && ring === undefined && !isTarget && <text x={x} y={y + 4} textAnchor="middle" fontSize={10} fill="#93c5fd" fontWeight={900}>YOU</text>}
-            {ring !== undefined && ring > 0 && <text x={x} y={y + 5} textAnchor="middle" fontSize={15} fill="#fff" fontWeight={900}
-              style={{ paintOrder: 'stroke', stroke: '#000', strokeWidth: 3 }}>{ring}</text>}
-            {isTarget && <foreignObject x={x - 14} y={y - 14} width={28} height={28}><IconSVG id={CAT[t.creature_category]?.icon || 'animal'} size={28} /></foreignObject>}
-          </g>
-        )
-      })}
-    </svg>
-  )
-}
-
 export function DailyHuntPanel({ onClose }: Props) {
   const qc = useQueryClient()
   const center = useStore(s => s.mapCenter)
@@ -102,7 +58,7 @@ export function DailyHuntPanel({ onClose }: Props) {
   })
   // A hunt from the old GPS version has no hunting ground: drop it instead of crashing
   const raw = data?.target || null
-  const legacy = !!raw && raw.mode !== 'world' && !(Array.isArray(raw.grid) && raw.grid.length)
+  const legacy = !!raw && raw.mode !== 'world'   // old honeycomb hunt: replaced by the radar hunt
   useEffect(() => {
     if (legacy) api.post('/safari/abandon/').finally(() => qc.setQueryData(['safari-active'], { target: null }))
   }, [legacy])
@@ -118,20 +74,6 @@ export function DailyHuntPanel({ onClose }: Props) {
     onError: (e: any) => toast.error(e?.response?.data?.error
       || (e?.response?.status >= 500 ? 'Safari is unavailable on the server (update pending?) — try again later' : 'Could not start a hunt')),
   })
-  const probe = useMutation({
-    mutationFn: (h3: string) => api.post('/safari/probe/', { h3 }).then(r => r.data),
-    onSuccess: d => {
-      if (d.result === 'miss') { playSound('probe'); qc.setQueryData(['safari-active'], { target: d.target }); return }
-      setLast(d.target); qc.setQueryData(['safari-active'], { target: null })
-      if (d.result === 'captured') {
-        playSound('capture')
-        toast.success(d.message, { duration: 5000 })
-        ;['loop-status', 'codex-cards', 'player'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
-      } else { playSound('flee'); toast.error(d.message) }
-    },
-    onError: (e: any) => toast.error(e?.response?.data?.error || 'Scan failed'),
-  })
-
   const col = t ? RARITY_COLORS[t.rarity] || '#94a3b8' : '#f97316'
   const cat = t ? CAT[t.creature_category] : undefined
   const captured = t?.status === 'captured'
@@ -152,7 +94,8 @@ export function DailyHuntPanel({ onClose }: Props) {
             <div style={{ fontSize: 13, color: 'var(--hx-text-2)', marginTop: 6, lineHeight: 1.45 }}>
               Animals, dinosaurs, insects, plants, fungi and microbes, each where it really lives on Earth.
               You get a clue, then scan with the radar from the map centre: direction and distance, hotter and hotter.
-              Close enough? Catch it — its token goes into your album.
+              Close enough? Catch it — its token goes into your album and its hex becomes yours, however far from home:
+              a new base to grow another kingdom.
             </div>
           </div>
           <button onClick={() => spawn.mutate()} disabled={spawn.isPending} className="btn-game btn-game-gold" style={{ width: '100%', fontSize: 15, minHeight: 52 }}>
@@ -192,7 +135,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               {!revealed && <button className="btn-game btn-game-gold" style={{ width: '100%', minHeight: 48, fontSize: 14 }} onClick={() => openRadarHunt(t)}>
                 HUNT WITH THE RADAR · {t.tries_left} SCANS</button>}
             </div>
-          ) : <HuntGrid t={t} onProbe={h => probe.mutate(h)} busy={probe.isPending} />}
+          ) : null}
 
           {!revealed && t.mode !== 'world' && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, gap: 10 }}>
@@ -204,7 +147,7 @@ export function DailyHuntPanel({ onClose }: Props) {
           {revealed && (
             <div className="hx-card" style={{ marginTop: 12, textTransform: 'none', letterSpacing: 0 }}>
               <div style={{ fontFamily: 'var(--font-heading)', fontSize: 15, color: captured ? '#86efac' : '#fca5a5', marginBottom: 6 }}>
-                {captured ? 'NEW CARD IN YOUR ALBUM' : 'IT GOT AWAY — HERE IT WAS'}
+                {captured ? 'NEW CARD IN YOUR ALBUM · ITS HEX IS YOURS' : 'IT GOT AWAY'}
               </div>
               <p style={{ fontSize: 13, lineHeight: 1.45, margin: 0 }}>{t.creature_description}</p>
               <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>

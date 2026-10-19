@@ -10,6 +10,7 @@
  *   Intelligence view → Attack options → Spy → Diplomacy
  */
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import { KingdomArmyTab } from './KingdomArmyTab'
 import { useQuery } from '@tanstack/react-query'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -22,7 +23,6 @@ import { IconSVG } from '../shared/iconBank'
 import { Lock, Shield, Crown, Swords } from 'lucide-react'
 
 /** /combat/my-army/ returns units as {key: {owned,...}} — accept legacy number form too */
-const ownedCount = (v: any): number => typeof v === 'number' ? v : Number(v?.owned) || 0
 
 const SoonChip = () => (
   <span className="hx-chip" style={{ fontSize: 9, padding: '2px 6px', color: '#fbbf24', borderColor: 'rgba(251,191,36,0.4)', background: 'rgba(251,191,36,0.1)' }}>SOON</span>
@@ -235,61 +235,8 @@ function OwnTerritories({ k }: { k: KingdomData }) {
 }
 
 function OwnArmy({ k }: { k: KingdomData }) {
-  const { data: armyData } = useQuery({
-    queryKey: ['my-army'],
-    queryFn: () => api.get('/combat/my-army/').then(r => r.data).catch(() => ({ units: {} })),
-    staleTime: 15000,
-  })
-
-  const armyUnits = armyData?.units || {}
-  const UNIT_DEFS = [
-    { key: 'infantry', name: 'Infantry', icon: 'swords', atk: 10, def: 12, color: '#dc2626' },
-    { key: 'cavalry', name: 'Cavalry', icon: 'horse', atk: 18, def: 8, color: '#f97316' },
-    { key: 'artillery', name: 'Artillery', icon: 'bomb', atk: 35, def: 4, color: '#8b5cf6' },
-    { key: 'aerial', name: 'Aerial', icon: 'plane', atk: 25, def: 6, color: '#0ea5e9' },
-    { key: 'naval', name: 'Naval', icon: 'ship', atk: 20, def: 15, color: '#0099cc' },
-    { key: 'spy', name: 'Spy', icon: 'spy', atk: 5, def: 3, color: '#475569' },
-  ]
-  const units = UNIT_DEFS.map(u => ({ ...u, count: ownedCount(armyUnits[u.key]) }))
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        <div style={statCard('#dc2626')}>
-          <div style={label}>TOTAL ATK</div>
-          <div style={val('#dc2626')}>{k.total_attack}</div>
-        </div>
-        <div style={statCard('#3b82f6')}>
-          <div style={label}>TOTAL DEF</div>
-          <div style={val('#3b82f6')}>{k.total_defense}</div>
-        </div>
-      </div>
-
-      {units.map(u => (
-        <div key={u.name} style={{
-          display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
-          borderRadius: 10, background: 'rgba(255,255,255,0.03)',
-          border: `1px solid ${u.color}15`,
-        }}>
-          <span style={{ fontSize: 18 }}><EmojiIcon emoji={u.icon} size={16} /></span>
-          <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: '#e2e8f0' }}>{u.name}</div>
-            <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.4)' }}>ATK {u.atk} · DEF {u.def}</div>
-          </div>
-          <div style={{ fontSize: 14, fontWeight: 900, color: u.color, fontFamily: "'Share Tech Mono', monospace" }}>
-            ×{u.count}
-          </div>
-          <button onClick={() => {
-            api.post('/combat/recruit/', { unit_type: (u as any).key || u.name.toLowerCase(), quantity: 1 })
-              .then(() => toast.success(`Training 1× ${u.name}...`))
-              .catch((e: any) => toast.error(e?.response?.data?.error || 'Not enough HEX'))
-          }} className="btn-game btn-game-red" style={{ fontSize: 9, padding: '4px 10px' }}>
-            + RECRUIT
-          </button>
-        </div>
-      ))}
-    </div>
-  )
+  // The military is 3 counters per kingdom (combat/forces.py): same tab as the kingdom hub
+  return <KingdomArmyTab h3={k.h3_indexes?.[0] || ''} />
 }
 
 // ════════════════════════════════════════════════════════════════

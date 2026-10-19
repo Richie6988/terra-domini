@@ -51,9 +51,10 @@ def bot_raids(probability: float = 0.2):
         if not targets:
             continue
         t = random.choice(targets)
-        defense = CombatEngine.calculate_defense_power(t, CombatEngine.garrison_dict(t))
-        infantry = max(5, int(defense / 10 * random.uniform(0.8, 1.3)))  # roughly even: reinforcing matters
+        from terra_domini.apps.combat import forces as Fz
+        defense = Fz.pools(Fz.kingdom_hexes(p.id, t.h3_index))['defense']
+        points = max(5, int(defense * random.uniform(0.8, 1.3)))   # roughly even: buying defense in time matters
         # 'conquest': a lost raid really costs the hex (a 'raid' type never captures, so the nudge would be an empty threat)
-        CombatEngine.npc_attack(random.choice(bots), t, {'infantry': infantry}, battle_type='conquest')
+        CombatEngine.npc_attack(random.choice(bots), t, points, battle_type='conquest')
         raids += 1
     return {'raids': raids}

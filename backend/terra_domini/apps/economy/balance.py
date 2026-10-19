@@ -188,6 +188,28 @@ def is_beginner(player) -> bool:
     return bool(joined) and timezone.now() - joined < timedelta(days=BEGINNER_DAYS)
 
 
+# ── Discovery (owner 2026-10-19): 1000 HEX / 1 h for a hex next to your land, ×2 per extra ring of distance,
+# capped (DISCOVERY_MAX_FACTOR); points of interest need a hex right next to them. Spy points cut both (combat/forces.py).
+DISCOVERY_COST = 1000
+DISCOVERY_HOURS = 1.0
+DISCOVERY_MAX_FACTOR = 16
+
+
+def discovery(player, h3_index: str, rarity: str = 'common', is_poi: bool = False, spies: int = 0) -> dict:
+    """Price and explore time of a hex for this player: distance in rings to their nearest hex → bounded exponential."""
+    from terra_domini.apps.combat import forces as Fz
+    near_hex, dist = Fz.nearest_owned(player.id, h3_index)
+    first = near_hex is None
+    d = 1 if first else max(1, dist)
+    factor = min(DISCOVERY_MAX_FACTOR, 2 ** (d - 1))
+    disc = Fz.spy_discount(spies)
+    cost = int(round(DISCOVERY_COST * factor * RARITY_PRICE_MULT.get((rarity or 'common').lower(), 1) * (1 - disc)))
+    hours = round(min(EXPLORE_MAX_HOURS, DISCOVERY_HOURS * factor) * (1 - disc), 2)
+    return {'distance': None if first else dist, 'factor': factor, 'cost': cost, 'hours': hours, 'first': first,
+            'locked': bool(is_poi and not first and d > 1),     # POIs: be right next to them
+            'spy_discount': disc, 'near_hex': near_hex}
+
+
 def buy_cost(owned_count: int, adjacent: bool, rarity: str = 'common') -> int:
     cost = BUY_BASE * (BUY_GROWTH ** max(0, owned_count - 1))
     if not adjacent and owned_count > 0:

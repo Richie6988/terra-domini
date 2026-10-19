@@ -1,27 +1,23 @@
 """
-Kingdom upgrades + daily draft (owner 2026-10-18: "click my kingdom: all its military units, defense points and the
-upgrades I can buy — walls, science, education…; a more fun Risk-like military and resource strategy").
+Kingdom upgrades + daily supplies (simplified 2026-10-19: the military is 3 counters, combat/forces.py).
 
 A kingdom = a connected group of owned hexes. Each upgrade has levels 0-5, bought with HEX, stored as a Building on the
 hex where it was bought; a kingdom's level = the best building inside it (split a kingdom and the building stays put).
-  walls      +15 % defense of every hex of the kingdom per level           (combat.engine.calculate_defense_power)
-  barracks   +2 troops in the daily draft per level                         (daily_draft)
+  influence  +2 hexes of attack range per level (the best kingdom counts)   (combat.engine.can_attack)
   science    +5 % HEX production of the kingdom per level                   (economy.balance.territory_rates)
   education  +5 % resource production of the kingdom per level             (economy.resources.player_resource_rates)
-  influence  +2 hexes of attack range per level (the best kingdom counts)   (combat.engine.can_attack)
-Daily draft (Risk reinforcements): once a day, free infantry = max(3, territories / 3) + kingdom size bonuses
-(5+ hexes +2, 10+ +4, 20+ +8 each) + barracks + 3 per controlled region (territories/regions.py).
+Daily supplies: once a day, max(3, territories / 3) + kingdom size bonuses (5+ hexes +2, 10+ +4, 20+ +8 each)
++ 3 per controlled region (territories/regions.py), × SUPPLY_PER_DRAFT attack AND defense points on the biggest kingdom.
 """
 from django.utils import timezone
 
 UPGRADES = {
-    'walls':     {'building': 'fort',     'name': 'Fortifications', 'base_cost': 1500, 'per_level': 15, 'unit': '% natural defense'},
     'influence': {'building': 'market',   'name': 'Influence', 'base_cost': 1500, 'per_level': 2,  'unit': ' hexes attack range'},
-    'barracks':  {'building': 'barracks', 'name': 'Barracks',  'base_cost': 1200, 'per_level': 2,  'unit': ' troops / daily draft'},
     'science':   {'building': 'lab',      'name': 'Science',   'base_cost': 2000, 'per_level': 5,  'unit': '% HEX production'},
     'education': {'building': 'academy',  'name': 'Education', 'base_cost': 2000, 'per_level': 5,  'unit': '% resource production'},
 }
 MAX_LEVEL = 5
+SUPPLY_PER_DRAFT = 5      # daily supplies: 5 attack + 5 defense points per draft unit
 BUILDING_TO_UPGRADE = {v['building']: k for k, v in UPGRADES.items()}
 
 
@@ -83,23 +79,18 @@ def hex_multipliers(owner_id, key: str) -> dict:
     return out
 
 
-def walls_mult(territory) -> float:
-    if not territory.owner_id:
-        return 1.0
-    return 1 + levels_for(kingdom_of(territory.owner_id, territory.h3_index))['walls'] * UPGRADES['walls']['per_level'] / 100
-
-
 def draft_size(player) -> dict:
     from terra_domini.apps.territories.models import Territory
     owned = set(Territory.objects.filter(owner=player).values_list('h3_index', flat=True))
     comps = clusters(owned)
     base = max(3, len(owned) // 3)
     size_bonus = sum(8 if len(c) >= 20 else 4 if len(c) >= 10 else 2 if len(c) >= 5 else 0 for c in comps)
-    barracks = sum(levels_for(c)['barracks'] for c in comps) * UPGRADES['barracks']['per_level']
     from terra_domini.apps.territories.regions import controlled, REGION_DRAFT
     regions = len(controlled(player.id)) * REGION_DRAFT                 # Risk continents
-    return {'base': base, 'kingdoms': size_bonus, 'barracks': barracks, 'regions': regions,
-            'total': base + size_bonus + barracks + regions, 'territories': len(owned)}
+    total = base + size_bonus + regions
+    # daily supplies (combat/forces.py): SUPPLY_PER_DRAFT attack AND defense points per draft unit, on the biggest kingdom
+    return {'base': base, 'kingdoms': size_bonus, 'regions': regions, 'total': total,
+            'points': total * SUPPLY_PER_DRAFT, 'territories': len(owned)}
 
 
 def draft_available(player) -> bool:

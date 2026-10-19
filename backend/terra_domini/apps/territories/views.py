@@ -487,50 +487,30 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         except Exception:
             pass
 
-        # Costs
-        from terra_domini.apps.economy.balance import buy_cost as _buy_cost
-        buy_cost = _buy_cost(owned_count, is_adjacent or is_first, (territory.rarity if territory else 'common'))
-        from terra_domini.apps.economy.balance import explore_slots, explore_speed_mult
+        # Discovery price / time (economy/balance.discovery) and what spy points would save
+        from terra_domini.apps.combat import forces as Fz
+        from terra_domini.apps.economy.balance import discovery, explore_slots, explore_speed_mult, has_boost, BLITZ_EXPLORE_HOURS
         from terra_domini.apps.territories.models import PendingClaim as _PC
-        from terra_domini.apps.economy.balance import explore_hours as _explore_hours
-        explore_hours = round(_explore_hours(owned_count, is_adjacent or is_first) * explore_speed_mult(request.user), 1)
-        from terra_domini.apps.economy.balance import has_boost, BLITZ_EXPLORE_HOURS
+        is_poi = bool(territory and (territory.is_landmark or territory.poi_name))
+        disc = discovery(request.user, h3_index, (territory.rarity if territory else 'common'), is_poi)
+        buy_cost = disc['cost']
+        explore_hours = round(disc['hours'] * explore_speed_mult(request.user), 2)
         if has_boost(request.user, 'claim_instant'):
             explore_hours = BLITZ_EXPLORE_HOURS
         slots = explore_slots(request.user)
         running = _PC.objects.filter(player=request.user, method='explore', status='in_progress').count()
-        player_obj = P.objects.get(id=request.user.id)
-        balance = float(player_obj.tdc_in_game)
-
-        # Rare POI lock
-        is_rare_poi = territory and (territory.is_landmark or (territory.rarity or 'common') in ('legendary', 'mythic'))
-        locked = is_rare_poi and not is_first and not is_adjacent
-        influence = getattr(stats, 'influence_points', 0) or 0
-        if locked and influence >= 50:
-            locked = False
+        balance = float(P.objects.get(id=request.user.id).tdc_in_game)
+        spy_have = Fz.pools(Fz.kingdom_hexes(request.user.id, disc['near_hex']))['spy'] if disc['near_hex'] else 0
+        locked = disc['locked']
 
         options = []
         if is_first:
-            # First zone: one obvious choice (showing a 120 HEX price next to FREE only confused new players)
             options.append({'method': 'free', 'label': 'CLAIM (FREE)', 'cost': 0, 'available': True})
         elif not locked:
-            options.append({
-                'method': 'buy', 'label': f'BUY ({buy_cost} ◆)',
-                'cost': buy_cost, 'available': balance >= buy_cost,
-                'balance': balance,
-            })
-            options.append({
-                'method': 'explore', 'label': f'EXPLORE ({explore_hours}h)',
-                'hours': explore_hours, 'available': running < slots,
-                'is_adjacent': is_adjacent, 'slots': slots, 'running': running,
-            })
-
-        # Locked rare POI far away: unlock it now with HEX (every in-app purchase is in HEX; real money only buys HEX)
-        if locked:
-            from terra_domini.apps.economy.balance import UNLOCK_PREMIUM
-            cost = int(round(buy_cost * UNLOCK_PREMIUM))
-            options.append({'method': 'unlock', 'label': f'UNLOCK NOW ({cost} HEX)', 'cost': cost,
-                            'available': balance >= cost, 'balance': balance})
+            options.append({'method': 'buy', 'label': f'BUY ({buy_cost} HEX)', 'cost': buy_cost,
+                            'available': balance >= buy_cost, 'balance': balance})
+            options.append({'method': 'explore', 'label': f'EXPLORE ({explore_hours}h)', 'hours': explore_hours,
+                            'available': running < slots, 'is_adjacent': is_adjacent, 'slots': slots, 'running': running})
 
         return Response({
             'status': 'claimable',
@@ -538,9 +518,11 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             'is_first': is_first,
             'is_adjacent': is_adjacent,
             'locked': locked,
-            'locked_reason': 'Need adjacent territory or 50+ influence' if locked else None,
+            'locked_reason': 'Points of interest: claim a hex right next to it first' if locked else None,
             'balance': balance,
             'options': options,
+            'distance': disc['distance'], 'factor': disc['factor'],
+            'spy': {'have': spy_have, 'per_point': Fz.SPY_DISCOUNT, 'max_points': Fz.SPY_MAX},
         })
 
     @action(detail=False, methods=['POST'], url_path='claim')
@@ -549,10 +531,10 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         
         Game rules:
         - First territory: FREE (no constraints)
-        - Unclaimed + adjacent to kingdom: buy 50◆ or explore (1h * 1.2^n)
-        - Unclaimed + NOT adjacent: buy 125◆ or explore (2h * 1.2^n)
+        - Unclaimed: buy 1000 HEX or explore 1 h when next to your land, ×2 per extra ring of distance (capped ×16;
+          explore ≤ 12 h) — economy/balance.discovery; {spies: n} spends spy points for −5 % each (max −50 %)
+        - Points of interest: only from a hex right next to them
         - Enemy territory: must attack (method=attack, not handled here)
-        - Rare POI (landmark): needs adjacent territory or influence >= 50
         """
         h3_index = request.data.get('h3_index', '').strip()
         if not h3_index:
@@ -614,28 +596,29 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         except Exception:
             pass
 
-        # ── Rare POI lock ──────────────────────────────────────────────
-        is_rare_poi = territory.is_landmark or (territory.rarity or 'common') in ('legendary', 'mythic')
-        if is_rare_poi and not is_first and not is_adjacent and method != 'unlock':
-            influence = getattr(stats, 'influence_points', 0) or 0
-            if influence < 50:
-                return Response({
-                    'error': 'This rare territory requires an adjacent territory or 50+ influence points',
-                    'locked': True,
-                    'need_influence': 50,
-                    'your_influence': influence,
-                }, status=403)
+        # ── Discovery price / time (economy/balance.discovery): distance → bounded exponential; POI: be next to it ──
+        from terra_domini.apps.combat import forces as Fz
+        from terra_domini.apps.economy.balance import discovery
+        is_poi = bool(territory.is_landmark or territory.poi_name)
+        probe = discovery(request.user, h3_index, territory.rarity or 'common', is_poi)
+        spy_hexes = Fz.kingdom_hexes(request.user.id, probe['near_hex']) if probe['near_hex'] else []
+        try:
+            spies = max(0, min(Fz.SPY_MAX, int(request.data.get('spies') or 0)))
+        except (TypeError, ValueError):
+            spies = 0
+        spies = min(spies, Fz.pools(spy_hexes)['spy'] if spy_hexes else 0)
+        disc = discovery(request.user, h3_index, territory.rarity or 'common', is_poi, spies)
+        if disc['locked']:
+            return Response({'error': 'A point of interest can only be discovered from a hex right next to it.', 'locked': True}, status=403)
 
         # ── Method validation ──────────────────────────────────────────
         if method == 'free':
             if not is_first:
                 return Response({'error': 'Free claim is only for your first territory.'}, status=403)
 
-        elif method in ('buy', 'unlock'):
-            from terra_domini.apps.economy.balance import buy_cost as _buy_cost, consume_purchased_first, UNLOCK_PREMIUM
-            cost = _buy_cost(owned_count, is_adjacent or is_first, territory.rarity or 'common')
-            if method == 'unlock':   # instant unlock of a locked rare place, paid in HEX
-                cost = int(round(cost * UNLOCK_PREMIUM))
+        elif method == 'buy':
+            from terra_domini.apps.economy.balance import consume_purchased_first
+            cost = disc['cost']
             player_obj = P.objects.get(id=request.user.id)
             if float(player_obj.tdc_in_game) < cost:
                 return Response({
@@ -647,13 +630,14 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 tdc_in_game=player_obj.tdc_in_game - cost
             )
             consume_purchased_first(player_obj, cost)
+            if spies:
+                Fz.take(spy_hexes, 'spy', spies)
             from terra_domini.apps.progression.missions import track
             track(request.user, 'spend_tdc', cost)
 
         elif method == 'explore':
             from terra_domini.apps.economy.balance import explore_slots, explore_speed_mult
-            from terra_domini.apps.economy.balance import explore_hours as _explore_hours
-            hours = _explore_hours(owned_count, is_adjacent or is_first) * explore_speed_mult(request.user)
+            hours = disc['hours'] * explore_speed_mult(request.user)
             from terra_domini.apps.economy.balance import has_boost, BLITZ_EXPLORE_HOURS
             if has_boost(request.user, 'claim_instant'):   # shop 'Blitz Mode'
                 hours = BLITZ_EXPLORE_HOURS
@@ -693,6 +677,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                                               f'Finish it, or get an extra exploration slot in the Shop.',
                                      'slots': slots, 'running': running, 'shop_item': 'explore_slot'}, status=409)
                 # Start new exploration
+                if spies:
+                    Fz.take(spy_hexes, 'spy', spies)
                 claim = PendingClaim.objects.create(
                     player=request.user,
                     h3_index=h3_index,
@@ -714,7 +700,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 })
 
         else:
-            return Response({'error': f'Unknown method: {method}. Use free, buy, unlock or explore.'}, status=400)
+            return Response({'error': f'Unknown method: {method}. Use free, buy or explore.'}, status=400)
 
         # ── Claim ─────────────────────────────────────────────────────────
         territory.owner = request.user
@@ -1220,6 +1206,29 @@ def _creature_info(uid):
 SAFARI_HUNTS_PER_DAY = 5
 
 
+def _claim_safari_hex(player, target):
+    """The hex the creature was caught on becomes the player's, however far from home (owner 2026-10-19: "it lets
+    the player start a new kingdom far away from the first base"). Named after the creature. None if someone owns it."""
+    from django.utils import timezone
+    t = Territory.objects.filter(h3_index=target.target_h3).first()
+    if t and t.owner_id:
+        return None
+    if not t:
+        try:
+            from terra_domini.apps.territories.territory_engine import generate_territory
+            generate_territory(target.target_h3, target.target_lat, target.target_lon)
+        except Exception:
+            pass
+        t = Territory.objects.filter(h3_index=target.target_h3).first() or Territory.objects.create(
+            h3_index=target.target_h3, h3_resolution=8, center_lat=target.target_lat, center_lon=target.target_lon, territory_type='rural')
+    t.owner = player
+    t.captured_at = timezone.now()
+    if not t.custom_name:
+        t.custom_name = f'{target.creature_name} grounds'[:80]
+    t.save(update_fields=['owner', 'captured_at', 'custom_name'])
+    return target.target_h3
+
+
 def _km(lat1, lon1, lat2, lon2) -> float:
     r = math.radians
     a = math.sin(r(lat2 - lat1) / 2) ** 2 + math.cos(r(lat1)) * math.cos(r(lat2)) * math.sin(r(lon2 - lon1) / 2) ** 2
@@ -1254,7 +1263,7 @@ class SafariViewSet(viewsets.GenericViewSet):
         target = SafariTarget.objects.filter(
             player=request.user, status='active'
         ).first()
-        if target and not target.center_h3 and target.mode != 'world':   # old GPS version: no hunting ground → expire it
+        if target and target.mode != 'world':   # old GPS / honeycomb hunts: replaced by the radar hunt → expire them
             target.status = 'expired'; target.save(update_fields=['status'])
             target = None
         if not target:
@@ -1357,6 +1366,7 @@ class SafariViewSet(viewsets.GenericViewSet):
                 target.status = 'captured'; target.captured_at = timezone.now(); target.distance_at_capture = 0
                 target.probes = target.probes + [{'h3': cell, 'ring': 0}]
                 target.save()
+                won_hex = _claim_safari_hex(request.user, target)    # its hex is yours, wherever it is: a new base
                 SafariCapture.objects.create(player=request.user, creature_id=target.creature_id,
                                              creature_name=target.creature_name, rarity=target.rarity,
                                              hex_earned=target.hex_reward, capture_lat=target.target_lat, capture_lon=target.target_lon)
@@ -1367,8 +1377,9 @@ class SafariViewSet(viewsets.GenericViewSet):
                 except Exception:
                     pass
                 return Response({'result': 'captured', 'target': _target_payload(target, reveal=True),
-                                 'hex_earned': target.hex_reward,
-                                 'message': f'{target.creature_name} captured! +{target.hex_reward} HEX · new card in your album'})
+                                 'hex_earned': target.hex_reward, 'won_hex': won_hex,
+                                 'message': f'{target.creature_name} captured! +{target.hex_reward} HEX · new card in your album'
+                                            + (' · its hex is yours: a new base' if won_hex else '')})
             ring = h3lib.grid_distance(cell, target.target_h3)
             target.probes = target.probes + [{'h3': cell, 'ring': ring}]
             target.tries_left -= 1

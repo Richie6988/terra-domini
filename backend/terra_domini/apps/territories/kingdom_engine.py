@@ -192,6 +192,7 @@ def recompute_kingdoms(player) -> list[dict]:
                 )
             )
 
+            from terra_domini.apps.combat import forces as _Fz
             # Player customisation (cluster_views.customize, scope=kingdom) — stored on the hexes
             from terra_domini.apps.territories.models import Territory as _T, TerritoryCustomization as _TC
             cust_rows = list(_T.objects.filter(h3_index__in=list(component)).exclude(custom_name__isnull=True, border_color__isnull=True, fill_color__isnull=True)
@@ -224,6 +225,7 @@ def recompute_kingdoms(player) -> list[dict]:
                 'poi_count': agg['poi_count'],
                 'resources': agg,
                 'h3_indexes': component,
+                'forces': _Fz.pools(component),          # attack / defense / spy points (combat/forces.py), shown above it
                 'centroid_lat': centroid_lat,
                 'centroid_lon': centroid_lon,
             })

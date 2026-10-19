@@ -4,7 +4,7 @@ and the upgrades I can buy — walls, science, education…") + the Risk-style d
 
 GET  /api/kingdom/<h3>/overview/   units stationed in the kingdom, defense, upgrades (level, next cost, effect)
 POST /api/kingdom/<h3>/upgrade/    {upgrade}  buy the next level with HEX (stored as a Building on that hex)
-POST /api/combat/draft/            once a day: free infantry (territories / 3, kingdom size, barracks)
+POST /api/combat/draft/            once a day: free attack + defense points on your biggest kingdom (supplies)
 """
 from django.db import transaction
 from django.db.models import F
@@ -17,28 +17,13 @@ from terra_domini.apps.territories import upgrades as U
 
 
 def _overview(player, h3_index):
-    from terra_domini.apps.combat.engine import CombatEngine, MilitaryUnit
-    from terra_domini.apps.combat.recruitment import UNIT_DEFS
+    from terra_domini.apps.combat import forces as Fz
     from terra_domini.apps.territories.models import Territory
     t = Territory.objects.filter(h3_index=h3_index, owner=player).first()
     if not t:
         return None
     hexes = U.kingdom_of(player.id, h3_index)
-    units = {k: 0 for k in UNIT_DEFS}
-    for ut, c in MilitaryUnit.objects.filter(player=player, territory__h3_index__in=list(hexes), count__gt=0) \
-            .values_list('unit_type', 'count'):
-        units[ut] = units.get(ut, 0) + c
-    reserve = {k: 0 for k in UNIT_DEFS}
-    for ut, c in MilitaryUnit.objects.filter(player=player, territory__isnull=True, count__gt=0).values_list('unit_type', 'count'):
-        reserve[ut] = reserve.get(ut, 0) + c
     levels = U.levels_for(hexes)
-    walls = 1 + levels['walls'] * U.UPGRADES['walls']['per_level'] / 100
-    fort = round(t.defense_points * t.terrain_defense_modifier * walls)
-    troops = round(sum(UNIT_DEFS[k]['def'] * n for k, n in units.items() if k in UNIT_DEFS) * walls)
-    try:
-        total = round(CombatEngine.calculate_defense_power(t, units))
-    except Exception:
-        total = fort + troops
     ups = []
     for key, u in U.UPGRADES.items():
         lvl = levels[key]
@@ -50,11 +35,10 @@ def _overview(player, h3_index):
     return {
         'h3': h3_index, 'name': t.custom_name or t.poi_name or t.place_name or f'Zone {h3_index[:8]}',
         'size': len(hexes), 'kind': 'kingdom' if len(hexes) > 1 else 'territory', 'hexes': sorted(hexes),
-        'units': [{'type': k, 'name': v['name'], 'icon': v['icon'], 'atk': v['atk'], 'def': v['def'],
-                   'stationed': units.get(k, 0), 'reserve': reserve.get(k, 0)} for k, v in UNIT_DEFS.items()],
-        'defense': {'fortifications': fort, 'troops': troops, 'total': total, 'walls_pct': levels['walls'] * U.UPGRADES['walls']['per_level'],
-                    'under_attack': bool(t.is_under_attack),
-                    'shield_until': t.shield_until.isoformat() if t.shield_until and t.shield_until > timezone.now() else None},
+        'forces': Fz.pools(hexes), 'point_cost': Fz.POINT_COST,
+        'spy_discount': {'per_point': Fz.SPY_DISCOUNT, 'max_points': Fz.SPY_MAX},
+        'under_attack': bool(t.is_under_attack),
+        'shield_until': t.shield_until.isoformat() if t.shield_until and t.shield_until > timezone.now() else None,
         'upgrades': ups,
         'draft': {**d, 'available': U.draft_available(player)},
         'balance': float(player.tdc_in_game or 0),
@@ -118,18 +102,23 @@ def kingdom_upgrade(request, h3_index):
 def daily_draft(request):
     """Risk reinforcements: once a day, free infantry into the reserve (then station them anywhere)."""
     from terra_domini.apps.accounts.models import Player
-    from terra_domini.apps.combat.engine import MilitaryUnit
+    from terra_domini.apps.combat import forces as Fz
+    from terra_domini.apps.territories.models import Territory
     with transaction.atomic():
         player = Player.objects.select_for_update().get(pk=request.user.pk)
         if not U.draft_available(player):
-            return Response({'error': 'Draft already taken today — come back tomorrow'}, status=400)
+            return Response({'error': 'Supplies already taken today — come back tomorrow'}, status=400)
         d = U.draft_size(player)
-        pool, _ = MilitaryUnit.objects.get_or_create(player=player, unit_type='infantry', territory=None,
-                                                     status=MilitaryUnit.UnitStatus.GARRISON, defaults={'count': 0})
-        MilitaryUnit.objects.filter(pk=pool.pk).update(count=F('count') + d['total'])
+        owned = set(Territory.objects.filter(owner=player).values_list('h3_index', flat=True))
+        if not owned:
+            return Response({'error': 'Claim a territory first'}, status=400)
+        biggest = max(U.clusters(owned), key=len)
+        anchor = sorted(biggest)[0]
+        for kind in Fz.DAILY_SUPPLY_KINDS:
+            Fz.add(anchor, kind, d['points'])
         player.last_draft_at = timezone.now()
         player.save(update_fields=['last_draft_at'])
-    return Response({'success': True, 'drafted': d['total'], 'unit_type': 'infantry', 'detail': d})
+    return Response({'success': True, 'points': d['points'], 'kinds': list(Fz.DAILY_SUPPLY_KINDS), 'kingdom_size': len(biggest), 'detail': d})
 
 
 @api_view(['GET'])
@@ -160,3 +149,14 @@ def my_regions(request):
     n = sum(r['controlled'] for r in rows)
     return Response({'regions': rows, 'controlled': n, 'bonus': {'draft': n * R.REGION_DRAFT, 'hex_pct': R.REGION_HEX_PCT},
                      'rules': {'min': R.REGION_MIN, 'draft_per_region': R.REGION_DRAFT, 'hex_pct': R.REGION_HEX_PCT}})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def forces_buy(request):
+    """POST /api/forces/buy/ {h3, kind: attack|defense|spy, qty} — points on one of your hexes (combat/forces.py)."""
+    from terra_domini.apps.combat.views import Fz_buy
+    res = Fz_buy(request.user, request.data.get('h3', ''), request.data.get('kind', ''), request.data.get('qty'))
+    if 'error' in res:
+        return Response(res, status=res.pop('status', 400))
+    return Response(res)

@@ -11,8 +11,7 @@ from rest_framework.response import Response
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
 def profile_stats(request):
-    from terra_domini.apps.combat.engine import Battle, BattleParticipant, MilitaryUnit
-    from terra_domini.apps.combat.recruitment import UNIT_DEFS
+    from terra_domini.apps.combat.engine import Battle, BattleParticipant
     from terra_domini.apps.economy.balance import player_hex_per_day
     from terra_domini.apps.events.news_models import EventCard
     from terra_domini.apps.events.unified_poi import UnifiedPOI
@@ -26,9 +25,8 @@ def profile_stats(request):
     for r in owned.values():
         by_rarity[r] = by_rarity.get(r, 0) + 1
 
-    units = dict(MilitaryUnit.objects.filter(player=me).values('unit_type').annotate(n=Sum('count')).values_list('unit_type', 'n'))
-    army = {'units': sum(units.values()), 'attack': sum(UNIT_DEFS[k]['atk'] * n for k, n in units.items() if k in UNIT_DEFS),
-            'defense': sum(UNIT_DEFS[k]['def'] * n for k, n in units.items() if k in UNIT_DEFS)}
+    pts = Territory.objects.filter(owner=me).aggregate(a=Sum('atk_pts'), d=Sum('def_pts'), s=Sum('spy_pts'))
+    army = {'attack': pts['a'] or 0, 'defense': pts['d'] or 0, 'spy': pts['s'] or 0}      # forces (combat/forces.py)
 
     done = Battle.objects.filter(status='completed')
     atk = done.filter(participants__player=me, participants__side='attacker').distinct()
@@ -36,10 +34,10 @@ def profile_stats(request):
     record = {'attacks_won': atk.filter(winner='attacker').count(), 'attacks_lost': atk.filter(winner='defender').count(),
               'defenses_won': dfn.filter(winner='defender').count(), 'defenses_lost': dfn.filter(winner='attacker').count(),
               'territories_captured': atk.filter(territory_captured=True).count()}
-    lost_units = 0
+    lost = 0
     for d in BattleParticipant.objects.filter(player=me).values_list('units_lost', flat=True):
-        lost_units += sum((d or {}).values())
-    record['units_lost'] = lost_units
+        lost += sum(v for v in (d or {}).values() if isinstance(v, (int, float)))
+    record['units_lost'] = int(lost)
 
     recent = []
     ids = set(atk.values_list('id', flat=True)) | set(dfn.values_list('id', flat=True))

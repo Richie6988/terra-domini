@@ -108,6 +108,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
 
   // Claim options from backend
   const [claimOpts, setClaimOpts] = useState<any>(null)
+  const [spies, setSpies] = useState(0)          // spy points spent on this discovery (−5 % price and time each)
   const [optsError, setOptsError] = useState(false)
   const [optsTry, setOptsTry] = useState(0)
   const [claiming, setClaiming] = useState(false)
@@ -135,7 +136,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
     try {
       const res = await api.post('/territories/claim/', {
         h3_index: t.h3_index,
-        method,
+        method, spies,
         lat: t.center_lat ?? t.lat,
         lon: t.center_lon ?? t.lon,
       })
@@ -170,7 +171,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
     } finally {
       setClaiming(false)
     }
-  }, [claiming, t, player])
+  }, [claiming, t, player, spies])
 
 
   // Stable callback: ClaimCelebration restarts its animation whenever onComplete changes identity,
@@ -187,6 +188,13 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
   // Owned hex: the token opens first; its button leads to DEFENSE (lone territory) or KINGDOM (connected hexes),
   // both on the ARMY tab where the stationed troops, defense and upgrades are (owner 2026-10-19)
   const [hub, setHub] = useState(false)
+  // Forces shown on the card (combat/forces.py): the target kingdom's defense for an enemy hex, your counters for yours
+  const { data: fz } = useQuery<any>({
+    queryKey: isEnemy ? ['combat-preview', t.h3_index] : ['kingdom-overview', t.h3_index],
+    queryFn: () => api.get(isEnemy ? `/combat/preview/?target_h3=${t.h3_index}` : `/kingdom/${t.h3_index}/overview/`).then(r => r.data),
+    enabled: !!player && (isEnemy || isOwned), staleTime: 10000,
+  })
+  const defPts = isEnemy ? fz?.target_defense : fz?.forces?.defense
   const cluster = useMemo(() => {
     if (!isOwned) return [t.h3_index]
     const mine = useStore.getState().territories
@@ -294,8 +302,10 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
           <div style={{ display: 'flex', gap: 14, alignItems: 'baseline', flexWrap: 'wrap' }}>
             <span style={{ color: '#FBBF24', fontSize: 20, textShadow: '0 2px 0 rgba(0,0,0,0.35)' }}>+{income.toLocaleString()}
               <small style={{ fontSize: 10, color: '#94a3b8', marginLeft: 4 }}>HEX/DAY</small></span>
-            <span style={{ color: '#e2e8f0', fontSize: 14 }}><Shield size={12} /> {Math.round(t.defense_points || 100).toLocaleString()}
-              <small style={{ fontSize: 10, color: '#94a3b8', marginLeft: 4 }}>DEF</small></span>
+            {!isFree && <span style={{ color: '#93c5fd', fontSize: 14 }}><Shield size={12} /> {defPts != null ? Number(defPts).toLocaleString() : '…'}
+              <small style={{ fontSize: 10, color: '#94a3b8', marginLeft: 4 }}>DEFENSE</small></span>}
+            {isOwned && fz?.forces && <span style={{ color: '#fca5a5', fontSize: 14 }}><Swords size={12} /> {fz.forces.attack.toLocaleString()}
+              <small style={{ fontSize: 10, color: '#94a3b8', marginLeft: 4 }}>ATTACK</small></span>}
             <span style={{ color: isFree ? '#6EE7B7' : isEnemy ? '#FF8A95' : '#00FF87', fontSize: 13 }}><User size={12} /> {isFree ? 'FREE' : (t.owner_username || 'UNKNOWN')}</span>
           </div>
 
@@ -307,9 +317,9 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
             const lines: string[] = []
             if (claimOpts.is_first) lines.push('Your first zone is free. It starts filling your HARVEST stock right away.')
             else {
-              lines.push(claimOpts.is_adjacent
-                ? 'Next to your kingdom: best price.'
-                : 'Not touching your kingdom: costs more and explores slower. Pick a hex next to your land to save.')
+              lines.push(claimOpts.is_adjacent || claimOpts.distance === 1
+                ? 'Next to your land: best price (1000 HEX or 1 h of exploring).'
+                : `${claimOpts.distance} hexes from your land: price and time x${claimOpts.factor}. Closer is cheaper; spies cut both.`)
               if (buy && !buy.available) lines.push(`You have ${bal.toLocaleString()} HEX: ${Math.ceil(buy.cost - bal).toLocaleString()} more needed. Collect your harvest or claim mission rewards.`)
               if (exp && exp.available) lines.push(`Explore is free but takes ${fmtHours(exp.hours)}. Come back after that and tap EXPLORE again to take the zone.`)
               if (exp && !exp.available) lines.push(`You already have ${exp.running} exploration${exp.running > 1 ? 's' : ''} running (${exp.slots} at a time). Wait for it, or get an Extra Explorer in the Shop.`)
@@ -342,7 +352,20 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
                 <IconSVG id="hex_coin" size={16} />{claiming ? '...' : opt.available ? `UNLOCK NOW · ${opt.cost.toLocaleString()} HEX` : `GET HEX · ${opt.cost.toLocaleString()} NEEDED`}
               </button>
             ))}
-            {isFree && player && !claimOpts?.locked && claimOpts?.options?.filter((o: any) => o.method !== 'unlock').map((opt: any) => (
+            {isFree && player && !claimOpts?.locked && claimOpts?.spy?.have > 0 && !claimOpts?.is_first && (
+              <div style={{ flexBasis: '100%', display: 'flex', alignItems: 'center', gap: 6, fontSize: 11, color: '#d8b4fe', fontFamily: 'var(--font-body)', fontWeight: 700, textTransform: 'none' }}>
+                Spies ({claimOpts.spy.have}):
+                {[0, 3, 5, 10].filter(n => n <= Math.min(claimOpts.spy.max_points, claimOpts.spy.have) || n === 0).map(n => (
+                  <button key={n} onClick={() => setSpies(n)} className="hx-chip" style={{ cursor: 'pointer', ...(spies === n ? { color: '#f5d0fe', borderColor: '#c084fc' } : {}) }}>
+                    {n ? `${n} · −${Math.round(n * claimOpts.spy.per_point * 100)}%` : 'NONE'}</button>
+                ))}
+              </div>
+            )}
+            {isFree && player && !claimOpts?.locked && claimOpts?.options?.filter((o: any) => o.method !== 'unlock').map((o0: any) => {
+              const k = 1 - spies * (claimOpts?.spy?.per_point || 0)       // spy discount on price and time
+              const opt = { ...o0, cost: o0.cost != null ? Math.round(o0.cost * k) : o0.cost, hours: o0.hours != null ? o0.hours * k : o0.hours,
+                            available: o0.method === 'buy' ? (o0.balance ?? 0) >= Math.round((o0.cost || 0) * k) : o0.available }
+              return (
               <button key={opt.method} onClick={() => (opt.method === 'buy' && !opt.available ? openShop() : handleClaim(opt.method))}
                 disabled={claiming || (!opt.available && opt.method !== 'buy')}
                 className={`btn-game ${opt.method === 'free' ? 'btn-game-green' : opt.method === 'buy' ? 'btn-game-gold' : 'btn-game-blue'}`}
@@ -355,7 +378,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
                 {opt.method === 'free' ? <Crown size={15} /> : opt.method === 'buy' ? <IconSVG id="hex_coin" size={16} /> : <Compass size={15} />}
                 {claiming ? '...' : opt.method === 'free' ? 'FREE CLAIM' : opt.method === 'buy' ? (opt.available ? `BUY · ${opt.cost} HEX` : `GET HEX · ${opt.cost} NEEDED`) : `EXPLORE · ${fmtHours(opt.hours)}`}
               </button>
-            ))}
+            )})}
             {isFree && player && !claimOpts && !optsError && (
               <div className="hx-skeleton" style={{ flex: 1, minHeight: 44, borderRadius: 12 }} aria-label="Loading claim options" />
             )}

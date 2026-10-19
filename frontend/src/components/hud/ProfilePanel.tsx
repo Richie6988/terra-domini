@@ -190,8 +190,8 @@ function ProfileStats({ st }: { st: any }) {
               sub={`${st.empire.kingdoms} kingdoms · biggest ${st.empire.largest_kingdom} hexes`} onClick={() => go('empire')} />
         <Tile icon={<IconSVG id="hex_coin" size={12} />} label="INCOME" color="#fde68a" value={Math.round(st.empire.hex_per_day).toLocaleString()}
               sub="HEX per day" onClick={() => go('empire')} />
-        <Tile icon={<Swords size={12} />} label="ARMY" color="#f87171" value={st.army.units}
-              sub={`ATK ${st.army.attack} · DEF ${st.army.defense}`} onClick={() => go('combat')} />
+        <Tile icon={<Swords size={12} />} label="FORCES" color="#f87171" value={st.army.attack + st.army.defense}
+              sub={`ATK ${st.army.attack} · DEF ${st.army.defense} · SPY ${st.army.spy}`} onClick={() => go('combat')} />
         <Tile icon={<Sparkles size={12} />} label="COLLECTION" color="#c084fc" value={st.collection.landmarks + st.collection.event_tokens}
               sub={`${st.collection.landmarks} landmarks · ${st.collection.event_tokens} event tokens`} onClick={() => go('codex')} />
       </div>
@@ -209,7 +209,7 @@ function ProfileStats({ st }: { st: any }) {
           ))}
         </div>
         <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 8, textTransform: 'none', letterSpacing: 0 }}>
-          {r.territories_captured} territories conquered · {r.units_lost} units lost in battle
+          {r.territories_captured} territories conquered · {r.units_lost} attack points spent
         </div>
         {st.recent_battles.length > 0 && <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 10 }}>
           {st.recent_battles.map((b: any) => (

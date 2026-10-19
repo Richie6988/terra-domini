@@ -91,15 +91,8 @@ from terra_domini.apps.economy.pickup_views import pickups_in_view, pickup_colle
 from terra_domini.apps.economy.map_resources import map_states
 from terra_domini.apps.events import card_market_views as event_cards
 from terra_domini.apps.accounts.profile_views import profile_stats
-from terra_domini.apps.territories.kingdom_views import kingdom_overview, kingdom_upgrade, daily_draft, my_regions
-from terra_domini.apps.combat.recruitment import (
-    my_army as combat_my_army,
-    recruit as combat_recruit,
-    collect_training as combat_collect,
-    assign_to_kingdom as combat_assign,
-    unassign_units as combat_unassign,
-    upgrade_unit as combat_unit_upgrade,
-)
+from terra_domini.apps.territories.kingdom_views import kingdom_overview, kingdom_upgrade, daily_draft, my_regions, forces_buy
+from terra_domini.apps.combat.recruitment import my_army as combat_my_army
 from terra_domini.apps.economy.views import ShopViewSet, StripeWebhookView, AdCampaignViewSet
 from terra_domini.apps.alliances.views import AllianceViewSet, DiplomacyViewSet
 from terra_domini.apps.events.views import ControlTowerViewSet, EventViewSet
@@ -173,16 +166,12 @@ urlpatterns = [
     path('api/event-cards/<uuid:card_id>/sell/',   event_cards.sell,   name='event_cards_sell'),
     path('api/event-cards/<uuid:card_id>/delist/', event_cards.delist, name='event_cards_delist'),
     path('api/event-cards/<uuid:card_id>/buy/',    event_cards.buy,    name='event_cards_buy'),
+    path('api/forces/buy/',      forces_buy,       name='forces_buy'),
     path('api/regions/',         my_regions,       name='my_regions'),
     path('api/combat/draft/',    daily_draft,      name='combat_draft'),
     path('api/kingdom/<str:h3_index>/overview/', kingdom_overview, name='kingdom_overview'),
     path('api/kingdom/<str:h3_index>/upgrade/',  kingdom_upgrade,  name='kingdom_upgrade'),
     path('api/combat/my-army/',  combat_my_army,   name='combat_my_army'),
-    path('api/combat/recruit/',  combat_recruit,   name='combat_recruit'),
-    path('api/combat/collect/',  combat_collect,   name='combat_collect'),
-    path('api/combat/assign/',   combat_assign,    name='combat_assign'),
-    path('api/combat/unassign/', combat_unassign,  name='combat_unassign'),
-    path('api/combat/unit-upgrade/', combat_unit_upgrade, name='combat_unit_upgrade'),
 
     # ── News Events (live news → geolocalized tokens) ─────────────────────
     path('api/events/news/', news_events_list, name='news_events_list'),

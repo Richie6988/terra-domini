@@ -16,13 +16,12 @@ import { IconSVG } from '../shared/iconBank'
 
 
 interface Props { onClose: () => void }
-type Tab = 'kingdoms' | 'regions' | 'military' | 'stats'
+type Tab = 'kingdoms' | 'regions' | 'stats'
 
 const ACCENT = '#cc8800'
 const TABS: { id: Tab; label: string; Icon: typeof Crown }[] = [
   { id: 'kingdoms', label: 'KINGDOMS', Icon: Crown },
   { id: 'regions', label: 'REGIONS', Icon: Flag },
-  { id: 'military', label: 'MILITARY', Icon: Swords },
   { id: 'stats', label: 'STATS', Icon: BarChart3 },
 ]
 
@@ -55,7 +54,6 @@ function kingdomName(k: Kingdom): string {
 }
 
 /** /combat/my-army/ returns units as {key: {owned, ...}}; accept legacy number form too */
-const ownedCount = (v: any): number => typeof v === 'number' ? v : Number(v?.owned) || 0
 
 const fmt = (n: number) => Math.round(n || 0).toLocaleString()
 
@@ -177,113 +175,6 @@ function fmtSecs(sec: number) {
   return h > 0 ? `${h}h ${m}m` : m > 0 ? `${m}m ${r}s` : `${r}s`
 }
 
-function MilitaryTab() {
-  const { data: armyData, isLoading } = useQuery({
-    queryKey: ['my-army'],
-    queryFn: () => api.get('/combat/my-army/').then(r => r.data),
-    staleTime: 15000,
-  })
-
-  const units = armyData?.units || {}
-  const training = armyData?.training || []
-  const totalAtk = armyData?.force?.attack ?? UNITS.reduce((s, u) => s + u.atk * ownedCount(units[u.name.toLowerCase()]), 0)
-  const totalDef = armyData?.force?.defense ?? UNITS.reduce((s, u) => s + u.def * ownedCount(units[u.name.toLowerCase()]), 0)
-  const setActivePanel = useStore(s => s.setActivePanel)
-  const qc = useQueryClient()
-  const [collecting, setCollecting] = useState(false)
-  const readyCount = training.filter((t: any) => t.done).reduce((a: number, t: any) => a + (t.quantity || 0), 0)
-  const collect = async () => {
-    setCollecting(true)
-    try {
-      const r = await api.post('/combat/collect/')
-      if (r.data?.total_collected > 0) toast.success(`${r.data.total_collected} units joined your army`)
-      else toast.error('No training complete yet')
-      qc.invalidateQueries({ queryKey: ['my-army'] })
-    } catch (e: any) { toast.error(e?.response?.data?.error || 'Collection failed') }
-    finally { setCollecting(false) }
-  }
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* Power summary */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        {[{ l: 'TOTAL ATTACK', v: totalAtk, c: '#ef4444', I: Swords }, { l: 'TOTAL DEFENSE', v: totalDef, c: '#3b82f6', I: Crown }].map(st => (
-          <div key={st.l} className="hx-card hx-card--accent" style={{ ['--accent' as any]: st.c, display: 'flex', alignItems: 'center', gap: 12 }}>
-            {st.l === 'TOTAL ATTACK' ? <Swords size={24} color="#fff" style={{ filter: 'drop-shadow(0 2px 0 rgba(0,0,0,0.35))' }} /> : <IconSVG id="ui_shield" size={26} />}
-            <div className="hx-stat">
-              <span className="hx-stat__label" style={{ color: 'rgba(255,255,255,0.9)' }}>{st.l}</span>
-              <span className="hx-stat__value" style={{ color: '#fff' }}>{isLoading ? '—' : fmt(st.v)}</span>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Active training */}
-      {training.length > 0 && (
-        <div className="hx-card" style={{ ['--accent' as any]: '#F59E0B' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <div className="hx-section-title" style={{ marginTop: 0, flex: 1 }}>{readyCount > 0 ? 'TRAINING DONE' : `TRAINING IN PROGRESS (${training.length})`}</div>
-            {readyCount > 0 && (
-              <button onClick={collect} disabled={collecting} className="btn-game btn-game-green" style={{ padding: '8px 14px', fontSize: 11, marginBottom: 10 }}>
-                {collecting ? '...' : `COLLECT ${readyCount}`}
-              </button>
-            )}
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {training.map((t: any, i: number) => {
-              const start = Date.parse(t.started_at), end = Date.parse(t.completes_at)
-              const pct = t.done ? 100 : (end > start ? Math.min(100, Math.max(0, ((Date.now() - start) / (end - start)) * 100)) : 0)
-              const def = UNITS.find(u => u.name.toLowerCase() === t.unit_type)
-              return (
-                <div key={t.id || i}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                    <EmojiIcon emoji={def?.icon || 'swords'} size={18} />
-                    <span style={{ flex: 1, fontSize: 11, fontWeight: 700, color: '#e2e8f0' }}>{t.quantity}× {def?.name || t.unit_type}</span>
-                    {t.done
-                      ? <span className="hx-chip" style={{ color: '#22c55e', borderColor: '#22c55e55', background: '#22c55e18' }}>READY</span>
-                      : <span style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11, color: '#F59E0B', fontFamily: MONO }}><Timer size={12} />{fmtSecs(t.remaining_seconds)}</span>}
-                  </div>
-                  <div className="hx-progress"><div className="hx-progress__fill" style={{ width: `${pct}%` }} /></div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Unit roster */}
-      <div className="hx-section-title" style={{ ['--accent' as any]: '#ef4444' }}>UNIT ROSTER</div>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(min(100%, 200px), 1fr))', gap: 10 }}>
-        {UNITS.map((u, i) => {
-          const count = ownedCount(units[u.name.toLowerCase()])
-          return (
-            <div key={u.name} className="hx-card hx-rise" style={{ animationDelay: `${i * 40}ms`, display: 'flex', alignItems: 'center', gap: 12, padding: '12px', borderColor: count > 0 ? `${u.color}45` : undefined }}>
-              <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: `${u.color}1f`, border: `1px solid ${u.color}50` }}>
-                <EmojiIcon emoji={u.icon} size={26} />
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 12, fontWeight: 800, color: '#e2e8f0', fontFamily: HEAD, letterSpacing: 1 }}>{u.name.toUpperCase()}</div>
-                <div style={{ display: 'flex', gap: 8, marginTop: 4, fontSize: 10, fontFamily: MONO, color: 'rgba(255,255,255,0.55)' }}>
-                  <span style={{ color: '#f87171' }}>ATK {u.atk}</span><span style={{ color: '#60a5fa' }}>DEF {u.def}</span><span>{u.cost} HEX</span>
-                </div>
-              </div>
-              <div style={{ fontSize: 22, fontWeight: 900, color: count > 0 ? u.color : 'rgba(255,255,255,0.3)', fontFamily: MONO, textAlign: 'right' }}>
-                ×{isLoading ? '–' : count}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      {/* CTA to full combat panel */}
-      <button onClick={() => setActivePanel('combat')} className="btn-game btn-game-red" style={{ width: '100%', minHeight: 46, fontSize: 11, letterSpacing: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-        <Swords size={16} /> OPEN MILITARY PANEL
-      </button>
-    </div>
-  )
-}
-
-// ═══ STATS TAB ═══
 function StatsTab({ kingdoms }: { kingdoms: Kingdom[] }) {
   const player = usePlayer()
   const s = (player as any)?.stats || {}
@@ -393,12 +284,12 @@ export function EmpirePanel({ onClose }: Props) {
 
   const totalTerr = kingdoms.reduce((sum, k) => sum + k.size, 0)
   const totalIncome = kingdoms.reduce((sum, k) => sum + (k.tdc_per_24h || 0), 0)
-  const armyPower = armyData?.force ? (Number(armyData.force.attack) || 0) + (Number(armyData.force.defense) || 0) : null
+  const armyPower = armyData?.forces ? (Number(armyData.forces.attack) || 0) + (Number(armyData.forces.defense) || 0) : null
   const headStats = [
     { l: 'TERRITORIES', v: isLoading ? '—' : fmt(totalTerr), icon: <MapPin size={16} color="#38bdf8" /> },
     { l: 'KINGDOMS', v: isLoading ? '—' : String(kingdoms.length), icon: <Crown size={16} color={ACCENT} /> },
     { l: 'HEX / DAY', v: isLoading ? '—' : `+${fmt(totalIncome)}`, icon: <IconSVG id="hex_coin" size={16} />, accent: true },
-    { l: 'ARMY POWER', v: armyPower === null ? '—' : fmt(armyPower), icon: <Swords size={16} color="#ef4444" /> },
+    { l: 'ATTACK + DEFENSE', v: armyPower === null ? '—' : fmt(armyPower), icon: <Swords size={16} color="#ef4444" /> },
   ]
 
   return (
@@ -429,7 +320,6 @@ export function EmpirePanel({ onClose }: Props) {
 
       {tab === 'kingdoms' && <KingdomsTab kingdoms={kingdoms} loading={isLoading && !!player} onTeleport={handleTeleport} />}
       {tab === 'regions' && <RegionsTab />}
-      {tab === 'military' && <MilitaryTab />}
       {tab === 'stats' && <StatsTab kingdoms={kingdoms} />}
     </GlassPanel>
   )
