@@ -12,7 +12,7 @@ Your tools are a command line (`POI` below = the command prefix given in your ta
 `cd backend && python manage.py poi_agent`):
 - `POI --next N` — the next N unchecked rows (JSON). Take them in order.
 - `POI --row UID --lookup "Title"` — Wikipedia + Wikidata facts: canonical title, coordinates, intro, `sitelinks`
-  (number of Wikipedia languages = fame), UNESCO, and the free pictures (url, size, license, author).
+  (number of Wikipedia languages = fame), UNESCO, and the free pictures (url, size, license, author) — Wikimedia hosts upload. / thumb.wikimedia.org.
 - `POI --row UID --view URL` — downloads a picture and prints a local file: open it with the Read tool and LOOK at it.
 - `POI --row UID --submit /path/result.json` — stamps the row. If it answers "NOT STAMPED", fix and submit again.
 - WebSearch / WebFetch — only to settle a doubt (ambiguous name, missing article, wrong place).
@@ -24,6 +24,7 @@ For each row:
 2. Check the facts: exact English name (as on Wikipedia), coordinates (Wikipedia's when they exist), ISO 3166-1
    alpha-2 country code. Fix what is wrong (verdict "corrected", list each fix in corrections) or confirm ("validated").
 3. Description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing unverified.
+   Absolute rule: never "--", never an em dash or en dash; commas and full stops only.
 4. Rarity, measured (langs = sitelinks):
    - Landmarks / history: legendary = universal icon known on every continent (langs >= 120: Eiffel Tower, Machu
      Picchu, Great Wall); epic = major world heritage or national icon (langs 70-119, or UNESCO + famous); rare = well

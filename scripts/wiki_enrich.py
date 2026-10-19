@@ -33,6 +33,7 @@ FIELDS = ['title', 'exists', 'page_title', 'lat', 'lon', 'image_file', 'image_ur
           'image_artist', 'image_license_url', 'extract', 'wikidata', 'fetched_at', 'image_w', 'image_h', 'image_v']
 WD_API = 'https://www.wikidata.org/w/api.php'
 IMAGE_V = 3            # picture rule version (bump to re-pick every picture)
+WM_HOSTS = ('https://upload.wikimedia.org/', 'https://thumb.wikimedia.org/')   # Wikimedia serves thumbnails from thumb. too (2026)
 THUMB_W = 1280         # sharp on a 640 px card at 2x
 MIN_W = 800            # smaller originals look blurry on the card
 BAD_WORDS = re.compile(r'\b(maps?|karte|carte|mapa|locator|flag|flags|drapeau|coat of arms|blason|wappen|escudo|seal|logo|'
@@ -116,7 +117,7 @@ def fetch_pages(titles):
             continue
         co = (p.get('coordinates') or [{}])[0]
         out[t] = {'title': t, 'exists': 1, 'page_title': p['title'], 'lat': co.get('lat', ''), 'lon': co.get('lon', ''),
-                  'image_file': p.get('pageimage', ''), 'extract': (p.get('extract') or '').strip()[:900],
+                  'image_file': p.get('pageimage', '').replace('_', ' '), 'extract': (p.get('extract') or '').strip()[:900],
                   'wikidata': (p.get('pageprops') or {}).get('wikibase_item', '')}
     return out
 
@@ -134,7 +135,7 @@ def fetch_images(files):
         if md.get('NonFree', {}).get('value') or re.search(r'fair use|non-free', lic + strip_html(md.get('UsageTerms', {}).get('value', '')), re.I):
             continue
         url = ii.get('thumburl') or ii.get('url') or ''
-        if url.startswith('https://upload.wikimedia.org/'):
+        if url.startswith(WM_HOSTS):
             out[p['title'].removeprefix('File:')] = (url, lic, strip_html(md.get('Artist', {}).get('value', ''))[:200],
                                                      md.get('LicenseUrl', {}).get('value', ''),
                                                      int(ii.get('width') or 0), int(ii.get('height') or 0), ii.get('mime', ''))

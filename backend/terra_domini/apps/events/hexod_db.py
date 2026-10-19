@@ -10,6 +10,7 @@ JSON at runtime (read-only reference data).
 import json
 import os
 import random
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -23,12 +24,31 @@ SPAWN_WEIGHTS = {'common': 55, 'uncommon': 25, 'rare': 13, 'epic': 6, 'legendary
 CAPTURE_REWARD = {'common': 50, 'uncommon': 100, 'rare': 200, 'epic': 450, 'legendary': 1000}
 
 
+TEXT_FIELDS = ('description', 'title', 'fun_fact_1', 'fun_fact_2', 'fun_fact_3', 'rare_fact')
+
+
+def clean_text(s: str) -> str:
+    """Absolute rule (owner 2026-10-19): never a double dash in game texts. Number ranges keep a plain hyphen
+    (en dash 1000 – 2000 → 1000-2000); any other em dash / spaced en dash / "--" becomes a comma."""
+    if not s or not re.search(r'--|—|–', s):
+        return s
+    s = re.sub(r'(\d)\s*–\s*(\d)', r'\1-\2', s)
+    s = re.sub(r'\s*(?:--+|—|\s–\s|–)\s*', ', ', s)
+    return re.sub(r',\s*([,.;:])', r'\1', s).strip(' ,')
+
+
 @lru_cache(maxsize=1)
 def load() -> dict:
     if not DB_PATH.exists():
         return {}
     with open(DB_PATH, encoding='utf-8') as f:
-        return json.load(f)
+        db = json.load(f)
+    for k in ('pois', 'creatures'):
+        for row in db.get(k, []):
+            for f in TEXT_FIELDS:
+                if isinstance(row.get(f), str):
+                    row[f] = clean_text(row[f])
+    return db
 
 
 # Safari = living nature only (owner 2026-10-19): fauna (animals, insects), flora (plants, fungi), micro-organisms, dinosaurs

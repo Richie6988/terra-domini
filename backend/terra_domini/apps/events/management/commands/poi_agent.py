@@ -59,7 +59,7 @@ For the POI you are given:
 2. Check the facts: exact name (English, as on Wikipedia), coordinates (use Wikipedia's when they exist), ISO 3166-1
    alpha-2 country code. Fix what is wrong (verdict "corrected") or confirm (verdict "validated").
 3. Write the card description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing you
-   could not verify.
+   could not verify. Absolute rule: never "--", never an em dash or en dash; commas and full stops only.
 4. Give the rarity, from fame and uniqueness, measured — not felt:
    - langs = number of Wikipedia language editions (wiki_lookup "sitelinks").
    - Landmarks / history: legendary = universal icon known on every continent (langs >= 120: Eiffel Tower, Machu
@@ -71,7 +71,7 @@ For the POI you are given:
      size and influence.
    Only 1% of tokens are legendary and 4% epic: when in doubt, take the lower tier. Never "mythic".
    Say in rarity_reason which numbers decided (langs, UNESCO, visitors).
-5. Picture: choose from the free pictures wiki_lookup returned (upload.wikimedia.org only). Call view_image on your
+5. Picture: choose from the free pictures wiki_lookup returned (Wikimedia only). Call view_image on your
    choice and LOOK: it must clearly show THIS place (the building / site / city itself, beautiful, sharp, daylight if
    possible) — no map, flag, logo, plan, diagram, crowd close-up or unrelated detail. If it fails, view the next one.
    If none is right, submit image_url "" — a wrong picture is worse than none.
@@ -85,7 +85,7 @@ TOOLS = [
      'intro, number of language editions (sitelinks), heritage designations, and the free pictures (url, size, license, author).',
      'input_schema': {'type': 'object', 'properties': {'title': {'type': 'string', 'description': 'Article title or name'}},
                       'required': ['title']}},
-    {'name': 'view_image', 'description': 'Download a picture (https://upload.wikimedia.org/ only) and show it to you.',
+    {'name': 'view_image', 'description': 'Download a picture (Wikimedia, from wiki_lookup) and show it to you.',
      'input_schema': {'type': 'object', 'properties': {'url': {'type': 'string'}}, 'required': ['url']}},
     {'name': 'submit_validation', 'description': 'Final result for this POI.',
      'input_schema': {'type': 'object', 'properties': {
@@ -190,16 +190,17 @@ class Agent:
                 heritage = [((c.get('mainsnak') or {}).get('datavalue') or {}).get('value', {}).get('id') for c in cl.get('P1435', [])]
                 v = ((((cl.get('P18') or [{}])[0]).get('mainsnak') or {}).get('datavalue') or {}).get('value')
                 p18 = (v or '').replace('_', ' ')
-        files = [f for f in [p18, page.get('image_file')] if f]
+        lead = (page.get('image_file') or '').replace('_', ' ')    # pageimages gives underscores, imageinfo titles have spaces
+        files = [f for f in [p18, lead] if f]
         files += [f for f in W.article_images([page['page_title']]).get(page['page_title'], []) if f not in files]
         info = W.fetch_images(files[:40]) if files else {}
         pics = []
         for f in files:
             im = info.get(f)
-            if not im or not (W.good_photo(f, im) or f in (p18, page.get('image_file'))):
+            if not im or not (W.good_photo(f, im) or f in (p18, lead)):
                 continue
             pics.append({'url': im[0].split('?')[0], 'file': f, 'width': im[4], 'height': im[5], 'license': im[1], 'author': im[2],
-                         'role': 'wikidata main image' if f == p18 else 'article lead image' if f == page.get('image_file') else 'article photo'})
+                         'role': 'wikidata main image' if f == p18 else 'article lead image' if f == lead else 'article photo'})
             self.pictures[pics[-1]['url']] = pics[-1]
             if len(pics) >= 8:
                 break
@@ -212,8 +213,8 @@ class Agent:
 
     def download(self, url):
         """(bytes, mime) of a picture, or (None, error)."""
-        if not url.startswith('https://upload.wikimedia.org/'):
-            return None, 'Only https://upload.wikimedia.org/ pictures (from wiki_lookup) can be used.'
+        if not url.startswith(W.WM_HOSTS):
+            return None, 'Only Wikimedia pictures (from wiki_lookup) can be used.'
         req = Request(url, headers={'User-Agent': W.UA})
         with urlopen(req, timeout=60) as r:
             mime = (r.headers.get('Content-Type') or 'image/jpeg').split(';')[0]
@@ -244,6 +245,8 @@ class Agent:
                 errs.append(f'{k} is required.')
         if len(s.get('description') or '') > 300:
             errs.append('description: 280 characters max.')
+        if any(d in (s.get('description') or '') for d in ('--', '—', '–')):
+            errs.append('description: never a double dash, em dash or en dash (absolute rule): use commas or full stops.')
         img = s.get('image_url') or ''
         if img and img not in self.pictures:
             errs.append('image_url must be one of the pictures wiki_lookup returned.')
