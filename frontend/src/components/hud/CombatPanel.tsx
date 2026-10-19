@@ -17,8 +17,9 @@ import { playSound } from '../../hooks/useSound'
 
 interface UnitDef {
   name: string; icon: string; atk: number; def: number; cost: number
-  train_seconds: number; admin_train_seconds: number; desc: string
-  owned: number; effective_train_seconds: number
+  train_seconds: number; desc: string
+  owned: number; effective_train_seconds: number    // one unit, for this player (level + rank)
+  level: number; max_level: number; upgrade_cost: number | null; role: string; how: string
 }
 interface TrainingItem {
   id: string; unit_type: string; quantity: number
@@ -34,6 +35,8 @@ interface ArmyData {
   force: { attack: number; defense: number }
   stations?: Station[]
   draft?: { base: number; kingdoms: number; barracks: number; regions?: number; total: number; territories: number; available: boolean }
+  queue?: { cap: number; waiting: number }
+  rank?: number
 }
 
 const TABS = [
@@ -84,12 +87,20 @@ export function CombatPanel({ onClose }: Props) {
     const qty = recruitQty[unitType] || 1
     try {
       const res = await api.post('/combat/recruit/', { unit_type: unitType, quantity: qty })
-      toast.success(`Training ${qty} ${units[unitType]?.name || unitType}! Ready in ${formatDuration(res.data.train_seconds)}`)
+      toast.success(`${qty} ${units[unitType]?.name || unitType} queued — all ready in ${formatDuration(res.data.train_seconds)}`)
       qc.invalidateQueries({ queryKey: ['my-army'] })
       qc.invalidateQueries({ queryKey: ['player'] })
     } catch (e: any) {
       toast.error(e?.response?.data?.error || 'Recruitment failed')
     }
+  }
+
+  const handleUpgrade = async (unitType: string) => {
+    try {
+      const { data: r } = await api.post('/combat/unit-upgrade/', { unit_type: unitType })
+      playSound('bonus'); celebrate('small', `${units[unitType]?.name} level ${r.level}`)
+      qc.invalidateQueries({ queryKey: ['my-army'] }); qc.invalidateQueries({ queryKey: ['player'] })
+    } catch (e: any) { toast.error(e?.response?.data?.error || 'Upgrade failed') }
   }
 
   const handleCollect = async () => {
@@ -184,17 +195,21 @@ export function CombatPanel({ onClose }: Props) {
             <div style={{ ...label, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 6 }}>
               <Hourglass size={13} /> {readyTraining.length > 0
                 ? `${readyTraining.reduce((a, t) => a + t.quantity, 0)} UNITS READY`
-                : `${activeTraining.length} IN TRAINING`}
+                : `BARRACKS ${activeTraining.length}/${army?.queue?.cap ?? 10} · NEXT ${units[activeTraining[0]?.unit_type]?.name?.toUpperCase() || ''} IN ${formatTime(remainingOf(activeTraining[0]))}`}
             </div>
             {readyTraining.length > 0 && (
               <button onClick={handleCollect} className="btn-game btn-game-green" style={{ padding: '8px 14px', fontSize: 10 }}>COLLECT</button>
             )}
           </div>
-          {training.map(t => (
-            <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11, color: 'var(--hx-text-2)', marginTop: 4 }}>
-              <span style={{ flex: 1 }}>{t.quantity}x {units[t.unit_type]?.name || t.unit_type}</span>
+          {activeTraining.reduce((g: { type: string; n: number; last: TrainingItem }[], t) => {   // one line per batch: 5x Infantry · all in 14:59
+            const prev = g[g.length - 1]
+            if (prev && prev.type === t.unit_type) { prev.n += t.quantity; prev.last = t } else g.push({ type: t.unit_type, n: t.quantity, last: t })
+            return g
+          }, []).map(b => (
+            <div key={b.last.id} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 11, color: 'var(--hx-text-2)', marginTop: 4 }}>
+              <span style={{ flex: 1 }}>{b.n}x {units[b.type]?.name || b.type}</span>
               <span style={{ fontFamily: mono, fontSize: 13, color: '#fbbf24', display: 'flex', alignItems: 'center', gap: 4 }}>
-                <Clock size={12} /> {formatTime(remainingOf(t))}
+                <Clock size={12} /> all in {formatTime(remainingOf(b.last))}
               </span>
             </div>
           ))}
@@ -209,29 +224,46 @@ export function CombatPanel({ onClose }: Props) {
             const color = UNIT_COLORS[key] || '#64748b'
             const qty = recruitQty[key] || 1
             return (
-              <div key={key} className="hx-card" title={u.desc} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', ['--accent' as any]: color }}>
-                <IconSVG id={u.icon} size={34} />
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 12, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1, ...s }}>{u.name}
-                    <span style={{ fontFamily: mono, color, marginLeft: 8 }}>x{u.owned}</span></div>
-                  <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 2 }}>
-                    <span style={{ color: '#f87171' }}>ATK {u.atk}</span> · <span style={{ color: '#60a5fa' }}>DEF {u.def}</span> · {formatDuration(u.effective_train_seconds)}
+              <div key={key} className="hx-card" style={{ padding: '10px 12px', ['--accent' as any]: color, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <IconSVG id={u.icon} size={38} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 13, fontWeight: 900, color: '#e2e8f0', letterSpacing: 1, ...s }}>{u.name}</span>
+                      <span style={{ fontFamily: mono, color, fontSize: 12 }}>x{u.owned}</span>
+                      {u.role && <span className="hx-chip" style={{ color, borderColor: `${color}55`, padding: '1px 7px', fontSize: 9 }}>{u.role.toUpperCase()}</span>}
+                      <span style={{ display: 'flex', gap: 2 }} aria-label={`Level ${u.level} of ${u.max_level}`}>
+                        {Array.from({ length: u.max_level || 5 }, (_, i) => <i key={i} style={{ width: 7, height: 7, borderRadius: 2, background: i < u.level ? color : 'rgba(255,255,255,0.12)' }} />)}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 2 }}>
+                      <span style={{ color: '#f87171' }}>ATK {u.atk}</span> · <span style={{ color: '#60a5fa' }}>DEF {u.def}</span> · <Clock size={10} style={{ verticalAlign: -1 }} /> {formatDuration(u.effective_train_seconds)} each
+                    </div>
                   </div>
+                  <div style={{ display: 'flex', gap: 2 }}>
+                    {[1, 5, 10].map(n => (
+                      <button key={n} aria-label={`Quantity ${n}`} onClick={() => setRecruitQty(prev => ({ ...prev, [key]: n }))} style={{
+                        minWidth: 30, height: 30, borderRadius: 8, cursor: 'pointer', fontSize: 11, fontFamily: mono,
+                        background: qty === n ? `${color}44` : 'rgba(0,0,0,0.25)', border: `1px solid ${qty === n ? color : 'transparent'}`,
+                        color: qty === n ? '#fff' : 'var(--hx-text-3)',
+                      }}>{n}</button>
+                    ))}
+                  </div>
+                  <button onClick={() => handleRecruit(key)} className="btn-game btn-game-red" style={{
+                    fontSize: 10, padding: '9px 10px', display: 'inline-flex', alignItems: 'center', gap: 4, flexShrink: 0,
+                  }}>
+                    <IconSVG id="hex_coin" size={12} />{(u.cost * qty).toLocaleString()}
+                  </button>
                 </div>
-                <div style={{ display: 'flex', gap: 2 }}>
-                  {[1, 5, 10].map(n => (
-                    <button key={n} aria-label={`Quantity ${n}`} onClick={() => setRecruitQty(prev => ({ ...prev, [key]: n }))} style={{
-                      minWidth: 30, height: 30, borderRadius: 8, cursor: 'pointer', fontSize: 11, fontFamily: mono,
-                      background: qty === n ? `${color}44` : 'rgba(0,0,0,0.25)', border: `1px solid ${qty === n ? color : 'transparent'}`,
-                      color: qty === n ? '#fff' : 'var(--hx-text-3)',
-                    }}>{n}</button>
-                  ))}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ flex: 1, fontSize: 10.5, color: 'var(--hx-text-2)', lineHeight: 1.35, textTransform: 'none', letterSpacing: 0 }}>{u.how}</div>
+                  {u.upgrade_cost != null
+                    ? <button onClick={() => handleUpgrade(key)} className="hx-chip" title="+10% attack and defence, -10% training time"
+                              style={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 4, color: '#fde68a', flexShrink: 0 }}>
+                        LEVEL {u.level + 1} · <IconSVG id="hex_coin" size={11} />{u.upgrade_cost.toLocaleString()}
+                      </button>
+                    : <span className="hx-chip" style={{ color, flexShrink: 0 }}>MAX LEVEL</span>}
                 </div>
-                <button onClick={() => handleRecruit(key)} className="btn-game btn-game-red" style={{
-                  fontSize: 10, padding: '9px 10px', display: 'inline-flex', alignItems: 'center', gap: 4, flexShrink: 0,
-                }}>
-                  <IconSVG id="hex_coin" size={12} />{(u.cost * qty).toLocaleString()}
-                </button>
               </div>
             )
           })}

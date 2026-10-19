@@ -5,15 +5,15 @@
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { Castle, Tent, FlaskConical, GraduationCap, Shield, ShieldAlert, ArrowRight } from 'lucide-react'
+import { Castle, Tent, FlaskConical, GraduationCap, Shield, ShieldAlert, ArrowRight, Radar } from 'lucide-react'
 import { IconSVG } from '../shared/iconBank'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
 import { playSound } from '../../hooks/useSound'
 import { celebrate } from '../shared/Celebrate'
 
-const UP_ICON: Record<string, typeof Castle> = { walls: Castle, barracks: Tent, science: FlaskConical, education: GraduationCap }
-const UP_COLOR: Record<string, string> = { walls: '#60a5fa', barracks: '#f87171', science: '#a78bfa', education: '#34d399' }
+const UP_ICON: Record<string, typeof Castle> = { walls: Castle, influence: Radar, barracks: Tent, science: FlaskConical, education: GraduationCap }
+const UP_COLOR: Record<string, string> = { walls: '#60a5fa', influence: '#fbbf24', barracks: '#f87171', science: '#a78bfa', education: '#34d399' }
 const HEAD = "'Orbitron', sans-serif"
 const MONO = "'Share Tech Mono', monospace"
 const label: React.CSSProperties = { fontSize: 9, letterSpacing: 1.5, color: 'var(--hx-text-3)', fontWeight: 700, fontFamily: HEAD }

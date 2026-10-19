@@ -8,13 +8,15 @@ hex where it was bought; a kingdom's level = the best building inside it (split 
   barracks   +2 troops in the daily draft per level                         (daily_draft)
   science    +5 % HEX production of the kingdom per level                   (economy.balance.territory_rates)
   education  +5 % resource production of the kingdom per level             (economy.resources.player_resource_rates)
+  influence  +2 hexes of attack range per level (the best kingdom counts)   (combat.engine.can_attack)
 Daily draft (Risk reinforcements): once a day, free infantry = max(3, territories / 3) + kingdom size bonuses
 (5+ hexes +2, 10+ +4, 20+ +8 each) + barracks + 3 per controlled region (territories/regions.py).
 """
 from django.utils import timezone
 
 UPGRADES = {
-    'walls':     {'building': 'fort',     'name': 'Walls',     'base_cost': 1500, 'per_level': 15, 'unit': '% defense'},
+    'walls':     {'building': 'fort',     'name': 'Fortifications', 'base_cost': 1500, 'per_level': 15, 'unit': '% natural defense'},
+    'influence': {'building': 'market',   'name': 'Influence', 'base_cost': 1500, 'per_level': 2,  'unit': ' hexes attack range'},
     'barracks':  {'building': 'barracks', 'name': 'Barracks',  'base_cost': 1200, 'per_level': 2,  'unit': ' troops / daily draft'},
     'science':   {'building': 'lab',      'name': 'Science',   'base_cost': 2000, 'per_level': 5,  'unit': '% HEX production'},
     'education': {'building': 'academy',  'name': 'Education', 'base_cost': 2000, 'per_level': 5,  'unit': '% resource production'},
@@ -103,3 +105,11 @@ def draft_size(player) -> dict:
 def draft_available(player) -> bool:
     last = getattr(player, 'last_draft_at', None)
     return not last or last.date() < timezone.now().date()
+
+
+def influence_rings(player_id) -> int:
+    """Extra attack range from the best Influence level among the player's kingdoms."""
+    from terra_domini.apps.territories.models import Building
+    lvl = max(Building.objects.filter(territory__owner_id=player_id, is_active=True, building_type=UPGRADES['influence']['building'])
+              .values_list('level', flat=True), default=0)
+    return lvl * UPGRADES['influence']['per_level']

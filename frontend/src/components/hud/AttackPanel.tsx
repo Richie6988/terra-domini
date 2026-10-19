@@ -36,6 +36,7 @@ interface Preview {
   defense_power: number; defense_points: number; max_defense_points: number
   atk_per_unit: Record<string, number>; timer_seconds: Record<string, number>
   surprise_atk_mult: number; roll_spread: number
+  fort_power?: number; sabotage_per_spy?: number; sabotage_max?: number
 }
 
 /** P(A*x > D*y) with x, y ~ U(1-s, 1+s) — same rolls as the server. */
@@ -97,12 +98,14 @@ export function AttackPanel({ target, onClose }: Props) {
   const totalUnits = Object.values(units).reduce((a, b) => a + (b || 0), 0)
   const atkPower = pv ? Object.entries(units).reduce((a, [k, n]) => a + (pv.atk_per_unit[k] || 0) * (n || 0), 0)
     * (atkType === 'surprise' ? pv.surprise_atk_mult : 1) : 0
-  const prob = pv ? winChance(atkPower, pv.defense_power, pv.roll_spread) : 0
+  // spies sent cut the fortifications part of the defense (combat/units.py)
+  const defPower = pv ? pv.defense_power - (pv.fort_power || 0) * Math.min(pv.sabotage_max ?? 0.4, (pv.sabotage_per_spy ?? 0.04) * (units.spy || 0)) : 0
+  const prob = pv ? winChance(atkPower, defPower, pv.roll_spread) : 0
   const probColor = prob >= 0.65 ? '#22c55e' : prob >= 0.35 ? '#F59E0B' : '#EF4444'
   const timer = pv?.timer_seconds?.[atkType] ?? 0
   // Smallest infantry count that wins at least 90% of the time — the actionable hint when odds are bad
   const infAtk = pv?.atk_per_unit?.infantry || 0
-  const needInf = pv && infAtk > 0 ? Math.ceil((pv.defense_power * 1.1 / 0.9) / (infAtk * (atkType === 'surprise' ? pv.surprise_atk_mult : 1))) : 0
+  const needInf = pv && infAtk > 0 ? Math.ceil((defPower * 1.1 / 0.9) / (infAtk * (atkType === 'surprise' ? pv.surprise_atk_mult : 1))) : 0
 
   const attackMut = useMutation({
     mutationFn: () => api.post('/combat/attack/', {
@@ -199,7 +202,7 @@ export function AttackPanel({ target, onClose }: Props) {
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10, gap: 8 }}>
                   <div>
                     <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: 0.5, color: 'var(--hx-text-2)' }}>WIN CHANCE</div>
-                    <div style={{ fontSize: 11, color: 'var(--hx-text-3)', marginTop: 4 }}>Your attack {Math.round(atkPower)} vs defense {pv ? Math.round(pv.defense_power) : '…'}</div>
+                    <div style={{ fontSize: 11, color: 'var(--hx-text-3)', marginTop: 4 }}>Your attack {Math.round(atkPower)} vs defense {pv ? Math.round(defPower) : '…'}{units.spy ? ` (spies: −${Math.round((pv?.defense_power || 0) - defPower)})` : ''}</div>
                   </div>
                   <span style={{ fontSize: 28, color: probColor, fontFamily: 'var(--font-mono)' }}>{pvLoading ? '…' : `${Math.round(prob * 100)}%`}</span>
                 </div>

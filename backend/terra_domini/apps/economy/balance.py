@@ -41,14 +41,8 @@ RARITY_ORDER = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
 REINFORCE_COST = 80          # HEX per reinforcement
 REINFORCE_DEFENSE = 60       # defense points added (capped at 2× max)
 
-# ── Army training (fast, Clash-style: minutes, barracks train TRAIN_PARALLEL units at once) ──
+# ── Army training: base seconds for ONE unit; units train one after another (combat/units.py: levels, rank) ──
 TRAIN_SECONDS = {'infantry': 180, 'cavalry': 360, 'spy': 300, 'naval': 480, 'aerial': 600, 'artillery': 720}
-TRAIN_PARALLEL = 5
-
-
-def train_seconds(unit_type: str, quantity: int) -> int:
-    import math
-    return TRAIN_SECONDS.get(unit_type, 300) * math.ceil(max(1, quantity) / TRAIN_PARALLEL)
 
 
 # ── Explorations in parallel (shop: 'explore_slots' +1 for 24h, 'explore_speed' halves timers) ──

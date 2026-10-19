@@ -202,14 +202,16 @@ def active_boost_pct(player_id, boost_type: str) -> float:
 class CombatEngine:
 
     @classmethod
-    def calculate_attack_power(cls, units: dict, territory_type: str, boost_pct: float = 0.0) -> float:
-        """Total attack power of a unit composition."""
+    def calculate_attack_power(cls, units: dict, territory_type: str, boost_pct: float = 0.0, levels: dict | None = None) -> float:
+        """Total attack power of a unit composition (unit levels: +10 % each, combat/units.py)."""
+        from terra_domini.apps.combat.units import level_mult
+        levels = levels or {}
         total = 0.0
         for unit_type, count in units.items():
             if unit_type not in UNIT_STATS or count <= 0:
                 continue
             stats = UNIT_STATS[unit_type]
-            base_atk = stats['atk'] * count
+            base_atk = stats['atk'] * count * level_mult(levels.get(unit_type))
             terrain_bonus = stats['terrain_bonus'].get(territory_type, 1.0)
             total += base_atk * terrain_bonus
 
@@ -218,11 +220,17 @@ class CombatEngine:
         return total * (1 + boost_pct)
 
     @classmethod
-    def calculate_defense_power(cls, territory, units: dict, boost_pct: float = 0.0) -> float:
-        """Total defense power: territory fortifications + garrisoned units."""
+    def calculate_defense_power(cls, territory, units: dict, boost_pct: float = 0.0, spies: int = 0) -> float:
+        """Total defense power: territory fortifications (cut by the attacker's spies) + garrisoned units
+        (owner's unit levels: +10 % each)."""
+        from terra_domini.apps.combat.units import level_mult, sabotage
         # Territory base defense
         defense_tier_mult = DEFENSE_TIER_MULTIPLIER.get(territory.defense_tier, 1.0)
-        base_defense = territory.defense_points * defense_tier_mult * territory.terrain_defense_modifier
+        base_defense = territory.defense_points * defense_tier_mult * territory.terrain_defense_modifier * (1 - sabotage(spies))
+        levels = {}
+        if territory.owner_id:
+            from terra_domini.apps.accounts.models import Player
+            levels = Player.objects.filter(id=territory.owner_id).values_list('unit_levels', flat=True).first() or {}
 
         # Unit defense
         unit_defense = 0.0
@@ -230,7 +238,7 @@ class CombatEngine:
             if unit_type not in UNIT_STATS or count <= 0:
                 continue
             stats = UNIT_STATS[unit_type]
-            base_def = stats['def'] * count
+            base_def = stats['def'] * count * level_mult(levels.get(unit_type))
             terrain_bonus = stats['terrain_bonus'].get(territory.territory_type, 1.0)
             unit_defense += base_def * terrain_bonus
 
@@ -293,10 +301,10 @@ class CombatEngine:
 
         # Calculate powers
         atk_power = sum(
-            cls.calculate_attack_power(p.units_deployed, territory.territory_type)
+            cls.calculate_attack_power(p.units_deployed, territory.territory_type, levels=p.player.unit_levels)
             for p in attackers
         )
-        def_power = cls.calculate_defense_power(territory, defender_units)
+        def_power = cls.calculate_defense_power(territory, defender_units, spies=attacker_units.get('spy', 0))
         if battle.battle_type == Battle.BattleType.SURPRISE:
             atk_power *= SURPRISE_ATK_MULT  # resolves 2x faster, troops fight below full strength
         # Shop boosts (2X Army Power / 2X Defense) — capped like every paid military boost
@@ -495,12 +503,14 @@ class CombatEngine:
         if not has_boost(attacker, 'distant_attack'):   # shop 'Distant Strike' lifts the range
             import h3
             from terra_domini.apps.territories.models import Territory
+            from terra_domini.apps.territories.upgrades import influence_rings
+            rings = ATTACK_RANGE_RINGS + influence_rings(attacker.id)   # kingdom Influence: +2 hexes per level
             try:
-                near = list(h3.grid_disk(territory.h3_index, ATTACK_RANGE_RINGS))
+                near = list(h3.grid_disk(territory.h3_index, rings))
             except Exception:
                 near = []
             if near and not Territory.objects.filter(owner=attacker, h3_index__in=near).exists():
-                return False, (f"Out of range — attack within {ATTACK_RANGE_RINGS} hexes of your land, "
+                return False, (f"Out of range — attack within {rings} hexes of your land, "
                                f"or use Distant Strike from the Shop")
         return True, ""
 

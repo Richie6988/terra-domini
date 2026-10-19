@@ -127,6 +127,8 @@ class BattleViewSet(viewsets.GenericViewSet):
         Lets the attack screen show an honest win chance instead of a made-up simulation."""
         from terra_domini.apps.territories.models import Territory
         from terra_domini.apps.combat.engine import UNIT_STATS, SURPRISE_ATK_MULT, active_boost_pct
+        from terra_domini.apps.combat.units import level_mult, levels_of, SPY_SABOTAGE, SPY_SABOTAGE_MAX
+        lv = levels_of(request.user)
         try:
             t = Territory.objects.select_related('owner').get(h3_index=request.query_params.get('target_h3', ''))
         except Territory.DoesNotExist:
@@ -140,7 +142,10 @@ class BattleViewSet(viewsets.GenericViewSet):
             'owner': t.owner.username if t.owner else None,
             'defense_power': round(CombatEngine.calculate_defense_power(t, CombatEngine.garrison_dict(t)) * def_b, 1),
             'defense_points': t.defense_points, 'max_defense_points': t.max_defense_points,
-            'atk_per_unit': {k: round(v['atk'] * v['terrain_bonus'].get(t.territory_type, 1.0) * atk_b, 2) for k, v in UNIT_STATS.items()},
+            'atk_per_unit': {k: round(v['atk'] * v['terrain_bonus'].get(t.territory_type, 1.0) * atk_b * level_mult(lv.get(k)), 2) for k, v in UNIT_STATS.items()},
+            # spies cut the fortifications part: shown defense − fort_power × min(40 %, 4 % per spy)
+            'fort_power': round(CombatEngine.calculate_defense_power(t, {}) * def_b, 1),
+            'sabotage_per_spy': SPY_SABOTAGE, 'sabotage_max': SPY_SABOTAGE_MAX,
             'atk_boost_pct': round((atk_b - 1) * 100), 'def_boost_pct': round((def_b - 1) * 100),
             'timer_seconds': {'conquest': timer, 'surprise': timer // 2},
             'surprise_atk_mult': SURPRISE_ATK_MULT,
@@ -290,14 +295,16 @@ class BattleViewSet(viewsets.GenericViewSet):
 def _hold_chance(battle, territory) -> float:
     """Defender's chance to win with current defenses (same ±10% rolls as resolve_battle)."""
     from terra_domini.apps.combat.engine import SURPRISE_ATK_MULT
-    atk = sum(CombatEngine.calculate_attack_power(p.units_deployed, territory.territory_type)
-              for p in battle.participants.filter(side=BattleParticipant.Side.ATTACKER))
+    atk_parts = list(battle.participants.filter(side=BattleParticipant.Side.ATTACKER).select_related('player'))
+    atk = sum(CombatEngine.calculate_attack_power(p.units_deployed, territory.territory_type, levels=p.player.unit_levels)
+              for p in atk_parts)
+    spies = CombatEngine._aggregate_units(atk_parts).get('spy', 0)
     if battle.battle_type == Battle.BattleType.SURPRISE:
         atk *= SURPRISE_ATK_MULT
     from terra_domini.apps.combat.engine import active_boost_pct
     commander = battle.participants.filter(is_commander=True).first()
     atk *= 1 + active_boost_pct(commander.player_id if commander else None, 'atk_multiplier') / 100.0
-    dfn = CombatEngine.calculate_defense_power(territory, CombatEngine.defender_units(battle, territory)) * (1 + active_boost_pct(battle.defender_id, 'def_multiplier') / 100.0)
+    dfn = CombatEngine.calculate_defense_power(territory, CombatEngine.defender_units(battle, territory), spies=spies) * (1 + active_boost_pct(battle.defender_id, 'def_multiplier') / 100.0)
     if atk <= 0:
         return 1.0
     n, held = 40, 0
@@ -359,11 +366,11 @@ def _faceoff(battle, viewer):
     commander = next((p for p in atk_parts if p.is_commander), None)
     atk_boost = active_boost_pct(commander.player_id if commander else None, 'atk_multiplier')
     def_boost = active_boost_pct(battle.defender_id, 'def_multiplier')
-    atk = sum(CombatEngine.calculate_attack_power(p.units_deployed, t.territory_type) for p in atk_parts)
+    atk = sum(CombatEngine.calculate_attack_power(p.units_deployed, t.territory_type, levels=p.player.unit_levels) for p in atk_parts)
     if battle.battle_type == Battle.BattleType.SURPRISE:
         atk *= SURPRISE_ATK_MULT
     atk *= 1 + atk_boost / 100.0
-    dfn = CombatEngine.calculate_defense_power(t, CombatEngine.defender_units(battle, t)) * (1 + def_boost / 100.0)
+    dfn = CombatEngine.calculate_defense_power(t, CombatEngine.defender_units(battle, t), spies=atk_units.get('spy', 0)) * (1 + def_boost / 100.0)
     is_def = battle.defender_id == viewer.id
     out = {
         **_battle_row(battle),

@@ -39,51 +39,44 @@ class TrainingQueue(models.Model):
 
 
 # ═══ UNIT DEFINITIONS ════════════════════════════════════════════
-# train_seconds mirrors economy/balance.TRAIN_SECONDS (per unit; TRAIN_PARALLEL units train at once)
-from terra_domini.apps.economy.balance import TRAIN_PARALLEL as B_TRAIN_PARALLEL
+# train_seconds = economy/balance.TRAIN_SECONDS (one unit); real time per player: combat/units.unit_seconds
 
 UNIT_DEFS = {
     'infantry': {
         'name': 'Infantry', 'icon': 'swords',
         'atk': 10, 'def': 12, 'cost': 50,
         'train_seconds': 180,
-        'admin_train_seconds': 60,   # 1 min for admin
-        'desc': 'Balanced ground troops. Strong in urban and forest terrain.',
+        'desc': 'Holds ground: cheap and sturdy, best defender per HEX. +20% in cities, +10% in forests.',
     },
     'cavalry': {
         'name': 'Cavalry', 'icon': 'horse',
         'atk': 18, 'def': 8, 'cost': 120,
         'train_seconds': 360,
-        'admin_train_seconds': 120,
-        'desc': 'Fast attack unit. Excels in rural and coastal biomes.',
+        'desc': 'Fast striker: strong attack, weak defence. +30% in the countryside, +20% on coasts.',
     },
     'artillery': {
         'name': 'Artillery', 'icon': 'bomb',
         'atk': 35, 'def': 4, 'cost': 300,
         'train_seconds': 720,
-        'admin_train_seconds': 180,
-        'desc': 'Heavy damage dealer. Slow but devastating firepower.',
+        'desc': 'Siege breaker: the hardest hitter, almost no defence.',
     },
     'aerial': {
         'name': 'Aerial', 'icon': 'plane',
         'atk': 25, 'def': 6, 'cost': 250,
         'train_seconds': 600,
-        'admin_train_seconds': 150,
-        'desc': 'Air support unit. Ignores terrain penalties.',
+        'desc': 'Air strike: high attack anywhere, -30% over mountains.',
     },
     'naval': {
         'name': 'Naval', 'icon': 'ship',
         'atk': 20, 'def': 15, 'cost': 200,
         'train_seconds': 480,
-        'admin_train_seconds': 120,
-        'desc': 'Maritime forces. Dominant on coastal territories.',
+        'desc': 'Coast master: balanced, +50% on coastal hexes.',
     },
     'spy': {
         'name': 'Spy', 'icon': 'spy',
         'atk': 5, 'def': 3, 'cost': 150,
         'train_seconds': 300,
-        'admin_train_seconds': 90,
-        'desc': 'Infiltration agent. Reveals enemy defenses before attack.',
+        'desc': "Saboteur: each spy sent cuts the target's fortifications by 4% (max -40%).",
     },
 }
 
@@ -122,20 +115,26 @@ def my_army(request):
         })
 
     # Unit defs for frontend
+    from terra_domini.apps.combat import units as U
+    levels = U.levels_of(player)
     defs = {}
     for k, v in UNIT_DEFS.items():
-        is_admin = player.is_staff
+        lvl = int(levels.get(k, 0))
         defs[k] = {
             **v,
             'owned': unit_map.get(k, 0),
             'available': reserve.get(k, 0),   # not stationed: can attack or be sent to defend
-            'effective_train_seconds': v['admin_train_seconds'] if is_admin else v['train_seconds'],
-            'train_parallel': 1 if is_admin else B_TRAIN_PARALLEL,
+            'level': lvl, 'max_level': U.UNIT_LEVEL_MAX,
+            'atk': round(v['atk'] * U.level_mult(lvl), 1), 'def': round(v['def'] * U.level_mult(lvl), 1),
+            'base_atk': v['atk'], 'base_def': v['def'],
+            'effective_train_seconds': U.unit_seconds(player, k),     # per unit, one after another
+            'upgrade_cost': U.upgrade_cost(k, lvl) if lvl < U.UNIT_LEVEL_MAX else None,
+            'role': U.ROLES.get(k, ('', ''))[0], 'how': U.ROLES.get(k, ('', ''))[1],
         }
 
     # Kingdom force totals
-    total_atk = sum(unit_map.get(k, 0) * v['atk'] for k, v in UNIT_DEFS.items())
-    total_def = sum(unit_map.get(k, 0) * v['def'] for k, v in UNIT_DEFS.items())
+    total_atk = round(sum(unit_map.get(k, 0) * v['atk'] * U.level_mult(levels.get(k)) for k, v in UNIT_DEFS.items()))
+    total_def = round(sum(unit_map.get(k, 0) * v['def'] * U.level_mult(levels.get(k)) for k, v in UNIT_DEFS.items()))
 
     return Response({
         'units': defs,
@@ -143,6 +142,8 @@ def my_army(request):
         'force': {'attack': total_atk, 'defense': total_def},
         'stations': _stations(player),
         'draft': {**_draft(player)},
+        'queue': {'cap': U.QUEUE_CAP, 'waiting': sum(1 for t in training if not t['done'])},
+        'rank': int(getattr(player, 'commander_rank', 1) or 1),
     })
 
 
@@ -202,10 +203,11 @@ def recruit(request):
     if quantity < 1 or quantity > 100:
         return Response({'error': 'Quantity must be 1-100'}, status=400)
 
-    # Check concurrent training limit (max 3 queues)
-    active = TrainingQueue.objects.filter(player=player, collected=False).count()
-    if active >= 3:
-        return Response({'error': 'Training queue full (max 3 concurrent). Collect finished units first.'}, status=400)
+    # One barracks queue: units come out one by one, each with its own time (combat/units.py)
+    from terra_domini.apps.combat.units import QUEUE_CAP, unit_seconds
+    waiting = TrainingQueue.objects.filter(player=player, collected=False, completes_at__gt=timezone.now()).count()
+    if waiting + quantity > QUEUE_CAP:
+        return Response({'error': f'Barracks queue full: {max(0, QUEUE_CAP - waiting)} place(s) left (max {QUEUE_CAP} units waiting).'}, status=400)
 
     udef = UNIT_DEFS[unit_type]
     total_cost = udef['cost'] * quantity
@@ -223,17 +225,17 @@ def recruit(request):
     track(player, 'recruit', quantity)
     track(player, 'spend_tdc', total_cost)
 
-    # Training time: admin gets fast-track
-    from terra_domini.apps.economy.balance import train_seconds
-    train_total = train_seconds(unit_type, quantity) // 12 if player.is_staff else train_seconds(unit_type, quantity)  # staff: fast-track QA
     now = timezone.now()
-
-    tq = TrainingQueue.objects.create(
-        player=player,
-        unit_type=unit_type,
-        quantity=quantity,
-        completes_at=now + timedelta(seconds=train_total),
-    )
+    last = TrainingQueue.objects.filter(player=player, collected=False).order_by('-completes_at').values_list('completes_at', flat=True).first()
+    start = max(now, last) if last else now
+    per = unit_seconds(player, unit_type)
+    rows = []
+    for k in range(quantity):
+        rows.append(TrainingQueue(player=player, unit_type=unit_type, quantity=1,
+                                  completes_at=start + timedelta(seconds=per * (k + 1))))
+    TrainingQueue.objects.bulk_create(rows)
+    tq = rows[-1]
+    train_total = int((tq.completes_at - now).total_seconds())
 
     return Response({
         'success': True,
@@ -364,3 +366,31 @@ def unassign_units(request):
                                                      status='garrison', defaults={'count': 0})
         pool.count += moved; pool.save(update_fields=['count'])
     return Response({'success': True, 'moved': moved, 'unit_type': unit_type})
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def upgrade_unit(request):
+    """POST /api/combat/unit-upgrade/ {unit_type} — next level: +10 % atk/def, −10 % training time (combat/units.py)."""
+    from django.db import transaction
+    from django.db.models import F
+    from terra_domini.apps.accounts.models import Player
+    from terra_domini.apps.combat import units as U
+    from terra_domini.apps.economy.balance import consume_purchased_first
+    unit_type = request.data.get('unit_type', '')
+    if unit_type not in UNIT_DEFS:
+        return Response({'error': 'Unknown unit'}, status=400)
+    with transaction.atomic():
+        p = Player.objects.select_for_update().get(id=request.user.id)
+        levels = U.levels_of(p)
+        lvl = int(levels.get(unit_type, 0))
+        if lvl >= U.UNIT_LEVEL_MAX:
+            return Response({'error': 'Already at max level'}, status=400)
+        cost = U.upgrade_cost(unit_type, lvl)
+        if float(p.tdc_in_game or 0) < cost:
+            return Response({'error': f'Need {cost:,} HEX'}, status=402)
+        levels[unit_type] = lvl + 1
+        Player.objects.filter(id=p.id).update(tdc_in_game=F('tdc_in_game') - cost, unit_levels=levels)
+        p.refresh_from_db(fields=['tdc_in_game'])
+    consume_purchased_first(p, cost)
+    return Response({'success': True, 'unit_type': unit_type, 'level': lvl + 1, 'cost': cost, 'balance': float(p.tdc_in_game)})
