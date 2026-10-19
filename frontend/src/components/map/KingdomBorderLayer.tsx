@@ -147,6 +147,10 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
       const isMain = k.is_main
 
       if (zoom >= 10 && k.h3_indexes?.length) {
+        // Kingdom picture as the background of the whole kingdom (owner 2026-10-19), else the fill colour
+        const pic: string = (k as any).embed_url || ''
+        const usePic = /^(https:\/\/|\/media\/)[^"'()<>\s]+$/.test(pic)
+        const polys: L.Polygon[] = []
         // Fill: draw all hexes — clickable
         k.h3_indexes.forEach(hx => {
           try {
@@ -167,8 +171,30 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
               }
             })
             layer.addLayer(poly)
+            polys.push(poly)
           } catch (_) {}
         })
+        if (usePic && polys.length) {
+          // one SVG pattern spanning the kingdom's box (layer pixels, redrawn on zoom): every hex shows its part of it
+          const svg = ((polys[0] as any)._path as SVGPathElement | undefined)?.ownerSVGElement
+          if (svg) {
+            const ns = 'http://www.w3.org/2000/svg'
+            const defs = svg.querySelector('defs') || svg.insertBefore(document.createElementNS(ns, 'defs'), svg.firstChild)
+            const id = `hxk-${String((k as any).cluster_id ?? k.h3_indexes[0]).replace(/[^\w-]/g, '')}`
+            defs.querySelector(`#${id}`)?.remove()
+            const b = polys.reduce((acc, p) => acc.extend(p.getBounds()), L.latLngBounds(polys[0].getBounds().getSouthWest(), polys[0].getBounds().getNorthEast()))
+            const a = map.latLngToLayerPoint(b.getNorthWest()), z = map.latLngToLayerPoint(b.getSouthEast())
+            const pat = document.createElementNS(ns, 'pattern')
+            pat.setAttribute('id', id); pat.setAttribute('patternUnits', 'userSpaceOnUse')
+            pat.setAttribute('x', String(a.x)); pat.setAttribute('y', String(a.y))
+            pat.setAttribute('width', String(Math.max(1, z.x - a.x))); pat.setAttribute('height', String(Math.max(1, z.y - a.y)))
+            const img = document.createElementNS(ns, 'image')
+            img.setAttribute('href', pic); img.setAttribute('width', String(Math.max(1, z.x - a.x))); img.setAttribute('height', String(Math.max(1, z.y - a.y)))
+            img.setAttribute('preserveAspectRatio', 'xMidYMid slice')
+            pat.appendChild(img); defs.appendChild(pat)
+            polys.forEach(p => { const el = (p as any)._path as SVGPathElement; el?.setAttribute('fill', `url(#${id})`); el?.setAttribute('fill-opacity', '0.9') })
+          }
+        }
 
         // Border: only outer edges (merged kingdom border)
         // Neon stack, drawn bottom→top: soft halo, glow, crisp core, white highlight

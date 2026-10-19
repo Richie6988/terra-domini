@@ -24,7 +24,7 @@ logger = logging.getLogger('terra_domini.territories')
 # Unlock thresholds: cluster size → tier
 CLUSTER_TIERS = [
     (1,  0, 'rename + emoji'),
-    (3,  1, 'image embed + border color'),
+    (2,  1, 'kingdom background picture + colours'),
     (6,  2, 'video embed'),
     (10, 3, 'live stream slot'),
     (15, 4, 'private chat room'),

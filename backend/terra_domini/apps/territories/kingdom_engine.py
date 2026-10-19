@@ -197,8 +197,21 @@ def recompute_kingdoms(player) -> list[dict]:
             from terra_domini.apps.territories.models import Territory as _T, TerritoryCustomization as _TC
             cust_rows = list(_T.objects.filter(h3_index__in=list(component)).exclude(custom_name__isnull=True, border_color__isnull=True, fill_color__isnull=True)
                              .values_list('custom_name', 'border_color', 'fill_color')[:50])
-            pick = lambda i: next((r[i] for r in cust_rows if r[i]), None)
-            embed = _TC.objects.filter(territory__h3_index__in=list(component)).exclude(embed_url='').values_list('embed_url', flat=True).first()
+            # The kingdom's main style = the most common value among its hexes; every hex adopts it (owner 2026-10-19:
+            # "a newly added territory adopts the kingdom's main style"), the kingdom picture included
+            from collections import Counter as _C
+            pick = lambda i: (_C(r[i] for r in cust_rows if r[i]).most_common(1) or [(None, 0)])[0][0]
+            embed = (_C(_TC.objects.filter(territory__h3_index__in=list(component)).exclude(embed_url='')
+                        .values_list('embed_url', flat=True)).most_common(1) or [(None, 0)])[0][0]
+            if size > 1 and (pick(0) or pick(1) or pick(2)):
+                for field, val in (('custom_name', pick(0)), ('border_color', pick(1)), ('fill_color', pick(2))):
+                    if val:
+                        _T.objects.filter(h3_index__in=list(component)).exclude(**{field: val}).update(**{field: val})
+            if size > 1 and embed:
+                have = set(_TC.objects.filter(territory__h3_index__in=list(component)).values_list('territory__h3_index', flat=True))
+                for t_ in _T.objects.filter(h3_index__in=[h for h in component if h not in have]):
+                    _TC.objects.get_or_create(territory=t_, defaults={'embed_type': 'image', 'embed_url': embed})
+                _TC.objects.filter(territory__h3_index__in=list(component)).exclude(embed_url=embed).update(embed_type='image', embed_url=embed)
             # No custom name: named after its most notable place (was "Kingdom 6c63df")
             order = {'mythic': 5, 'legendary': 4, 'epic': 3, 'rare': 2, 'uncommon': 1}
             places = sorted(_T.objects.filter(h3_index__in=list(component)).values_list('rarity', 'poi_name', 'place_name'),

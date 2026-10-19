@@ -53,6 +53,7 @@ interface TokenInfo {
   income_per_day: number
   defense_points: number
   is_capital?: boolean
+  has_token?: boolean     // a real token (POI, deposit, species) sits on the hex — plain hexes are not in the gallery
 }
 
 interface Props {
@@ -170,7 +171,7 @@ function GalleryTab({ kingdom, tokens, onToken3D }: {
         <div className="hx-empty">
           <LayoutGrid size={28} color={ACCENT} />
           <div className="hx-empty__title">NO TOKENS YET</div>
-          <div>Claim territories in this kingdom to grow your collection</div>
+          <div>Plain territories carry no token: take places, deposits or species next to this kingdom to fill the gallery</div>
         </div>
       ) : (
         <>
@@ -204,7 +205,7 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
     if (cust.imageUrl) setImageUrl(cust.imageUrl)
   }, [cust.name, cust.fillColor, cust.borderColor, cust.imageUrl])
 
-  const minTerritoriesForEmbed = 3
+  const minTerritoriesForEmbed = 2      // any kingdom (2+ connected hexes) — cluster_views.CLUSTER_TIERS
   const embedUnlocked = (kingdom.size || tokens.length) >= minTerritoriesForEmbed
   const [uploading, setUploading] = useState(false)
   const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -253,31 +254,35 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
         <ColorField label="BORDER COLOR" value={borderColor} onChange={setBorderColor} />
       </div>
 
-      {/* Kingdom picture: upload from the device (or a https link) — shown on the map badge and the kingdom header */}
+      {/* Kingdom background: a picture from the computer, drawn over the whole kingdom on the map (and its badge) */}
       <div>
         <div style={{ ...fieldLabel, display: 'flex', alignItems: 'center', gap: 6 }}>
-          KINGDOM PICTURE
+          KINGDOM BACKGROUND · SHOWN ON THE MAP
           {!embedUnlocked && (
             <span className="hx-chip" style={{ color: '#f59e0b', borderColor: 'rgba(245,158,11,0.45)', background: 'rgba(245,158,11,0.12)' }}>
-              <Lock size={10} /> UNLOCK AT {minTerritoriesForEmbed} CONNECTED TERRITORIES
+              <Lock size={10} /> CONNECT {minTerritoriesForEmbed} TERRITORIES
             </span>
           )}
         </div>
-        <div style={{ display: 'flex', gap: 8, alignItems: 'center', opacity: embedUnlocked ? 1 : 0.5 }}>
-          <label className="btn-game btn-game-blue" style={{ padding: '9px 12px', fontSize: 11, cursor: embedUnlocked && !uploading ? 'pointer' : 'not-allowed', flexShrink: 0 }}>
-            {uploading ? 'UPLOADING…' : 'UPLOAD A PICTURE'}
-            <input type="file" accept="image/jpeg,image/png,image/webp" disabled={!embedUnlocked || uploading} onChange={onPick} style={{ display: 'none' }} />
-          </label>
-          <input
-            className="hx-input"
-            value={imageUrl}
-            onChange={e => setImageUrl(e.target.value)}
-            disabled={!embedUnlocked}
-            placeholder="or paste https://..."
-            style={{ fontFamily: MONO, boxSizing: 'border-box', flex: 1, minWidth: 0 }}
-          />
-          {imageUrl && embedUnlocked && <button className="hx-chip" style={{ cursor: 'pointer' }} onClick={() => setImageUrl('')} aria-label="Remove the picture">REMOVE</button>}
-        </div>
+        <label
+          onDragOver={e => { e.preventDefault() }}
+          onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files?.[0]; if (f && embedUnlocked) onPick({ target: { files: [f], value: '' } } as any) }}
+          style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 6, height: 128,
+            borderRadius: 14, cursor: embedUnlocked && !uploading ? 'pointer' : 'not-allowed', overflow: 'hidden', opacity: embedUnlocked ? 1 : 0.5,
+            border: `2px dashed ${imageUrl ? borderColor : 'rgba(255,255,255,0.25)'}`,
+            background: imageUrl ? `linear-gradient(180deg, rgba(0,0,0,0.15), rgba(0,0,0,0.55)), url('${imageUrl}') center/cover` : 'rgba(0,0,0,0.25)' }}>
+          <input type="file" accept="image/jpeg,image/png,image/webp" disabled={!embedUnlocked || uploading} onChange={onPick} style={{ display: 'none' }} />
+          <IconSVG id="picture" size={30} />
+          <span style={{ font: "13px 'Lilita One', sans-serif", color: '#fff', textShadow: '0 1px 2px #000' }}>
+            {uploading ? 'UPLOADING…' : imageUrl ? 'CHANGE THE PICTURE' : 'DROP A PICTURE OR CLICK'}</span>
+          <span style={{ fontSize: 10, color: 'rgba(226,232,240,0.75)', textTransform: 'none', letterSpacing: 0 }}>JPG · PNG · WEBP · up to 4 MB</span>
+        </label>
+        {imageUrl && embedUnlocked && (
+          <button className="hx-chip" style={{ cursor: 'pointer', marginTop: 6 }} onClick={async () => {
+            setImageUrl('')
+            if (anchor) { try { await saveKingdom(anchor, { name, fillColor, borderColor, imageUrl: '' }); toast.success('Background removed') } catch { /* toast below */ } }
+          }}>REMOVE THE BACKGROUND</button>
+        )}
       </div>
 
       {/* Live preview — diaporama */}
@@ -567,6 +572,7 @@ export function OwnedTerritoryHub({ kingdom, initialTab = 'gallery', onClose }: 
         income_per_day: Math.round((source?.resource_credits || source?.tdc_per_day || 10) * 288),
         defense_points: source?.defense_points || 100,
         is_capital: i === 0,
+        has_token: !!(source?.poi_name || source?.is_landmark),
       }
     })
   }, [kingdom, mineData])
@@ -613,7 +619,7 @@ export function OwnedTerritoryHub({ kingdom, initialTab = 'gallery', onClose }: 
             exit={{ opacity: 0, y: -6 }}
             transition={{ duration: 0.18 }}
           >
-            {tab === 'gallery'   && <GalleryTab kingdom={kingdom} tokens={tokens} onToken3D={setToken3D} />}
+            {tab === 'gallery'   && <GalleryTab kingdom={kingdom} tokens={tokens.filter(t => t.has_token)} onToken3D={setToken3D} />}
             {tab === 'army'      && <KingdomArmyTab h3={tokens[0]?.h3_index || ''}
                                       onOpenMilitary={() => { onClose(); useStore.getState().setActivePanel('combat') }} />}
             {tab === 'customize' && <CustomizeTab kingdom={kingdom} tokens={tokens} />}
