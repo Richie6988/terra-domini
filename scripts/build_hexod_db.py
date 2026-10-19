@@ -700,7 +700,9 @@ def main():
         w = wiki.get(wiki_title(p.get('wiki_url')))
         if not w or str(w.get('exists')) != '1':
             continue
-        if w.get('image_url') and not str(p.get('image_url', '')).startswith('https://'):
+        cur = str(p.get('image_url', ''))
+        # the enriched picture wins over an older Wikimedia one; a hand-picked picture (other host) is kept
+        if w.get('image_url') and (not cur.startswith('https://') or cur.startswith('https://upload.wikimedia.org/')):
             p['image_url'] = w['image_url']
             p['image_credit'] = ' · '.join(x for x in (w.get('image_artist', '')[:120], w.get('image_license', '')) if x) or 'Wikimedia Commons'
         if w.get('extract') and len(p.get('description') or '') < 40:

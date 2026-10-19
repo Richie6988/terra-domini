@@ -303,7 +303,12 @@ export function drawTokenFront(
     const img = anim.cardImg!
     const iw = img.naturalWidth, ih = img.naturalHeight
     const k = Math.max(s / iw, s / ih), dw = iw * k, dh = ih * k
+    // 1280 px Wikimedia photos scaled down: high-quality smoothing, and a light grade so they pop like a premium card
+    ctx.imageSmoothingEnabled = true
+    ctx.imageSmoothingQuality = 'high'
+    ctx.filter = 'saturate(1.12) contrast(1.06)'
     ctx.drawImage(img, (s - dw) / 2, (s - dh) * 0.4, dw, dh)
+    ctx.filter = 'none'
   } else {
     const pg = ctx.createRadialGradient(c, s * 0.36, s * 0.02, c, s * 0.45, s * 0.65)
     pg.addColorStop(0, rc + 'cc'); pg.addColorStop(0.5, tier.carbon); pg.addColorStop(1, '#020308')

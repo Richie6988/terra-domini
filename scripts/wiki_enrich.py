@@ -7,7 +7,10 @@ Wikipedia enrichment for the HEXOD master DB — run where Wikipedia is reachabl
   python3 scripts/wiki_enrich.py --refresh 30    # re-fetch rows older than 30 days
 
 For each English Wikipedia article (wiki_url of tokens, creatures, sources/candidates/*.csv) it records:
-exists, canonical title, coordinates, lead picture (800 px) with author + license, 3-sentence intro, Wikidata id.
+exists, canonical title, coordinates, the best picture (1280 px) with author + license, 3-sentence intro, Wikidata id.
+Picture choice (image_v 2, owner 2026-10-19 "beautiful images for the tokens"): the Wikidata main image (P18), else the
+article's lead picture, else its best other photo — maps, flags, logos, coats of arms, diagrams, SVG drawings, small
+files and odd shapes are refused. Rows picked with an older rule are re-picked on the next run (pictures only).
 Non-free pictures (fair use) are never kept. Output: data/hexod_db/sources/wiki_enrich.csv (resumable cache,
 commit it). Then: python3 scripts/build_hexod_db.py && python manage.py import_hexod_db.
 
@@ -26,7 +29,18 @@ OUT = SRC / 'wiki_enrich.csv'
 API = 'https://en.wikipedia.org/w/api.php'
 UA = 'HEXOD-wiki-enrich/1.0 (https://hexod.paintit.click; game token database)'
 FIELDS = ['title', 'exists', 'page_title', 'lat', 'lon', 'image_file', 'image_url', 'image_license',
-          'image_artist', 'image_license_url', 'extract', 'wikidata', 'fetched_at']
+          'image_artist', 'image_license_url', 'extract', 'wikidata', 'fetched_at', 'image_w', 'image_h', 'image_v']
+WD_API = 'https://www.wikidata.org/w/api.php'
+IMAGE_V = 2            # picture rule version (bump to re-pick every picture)
+THUMB_W = 1280         # sharp on a 640 px card at 2x
+MIN_W = 800            # smaller originals look blurry on the card
+BAD_WORDS = re.compile(r'\b(maps?|karte|carte|mapa|locator|flag|flags|drapeau|coat of arms|blason|wappen|escudo|seal|logo|'
+                       r'emblem|insignia|icon|symbol|diagram|chart|graph|plan|schema|sketch|signature|stamp|banknote|'
+                       r'coin|poster|cover|screenshot)\b', re.I)
+
+
+def bad_file(name: str) -> bool:
+    return bool(BAD_WORDS.search(re.sub(r'[_\-.]', ' ', name or '')))
 
 
 def title_of(url: str) -> str:
@@ -35,11 +49,11 @@ def title_of(url: str) -> str:
     return unquote(m.group(1)).replace('_', ' ').strip() if m else ''
 
 
-def api(params: dict, tries=4) -> dict:
+def api(params: dict, tries=4, host=API) -> dict:
     params = {**params, 'format': 'json', 'formatversion': 2, 'maxlag': 5}
     for i in range(tries):
         try:
-            req = Request(API + '?' + urlencode(params), headers={'User-Agent': UA})
+            req = Request(host + '?' + urlencode(params), headers={'User-Agent': UA})
             with urlopen(req, timeout=30) as r:
                 d = json.load(r)
             if d.get('error', {}).get('code') == 'maxlag':
@@ -104,9 +118,9 @@ def fetch_pages(titles):
 
 
 def fetch_images(files):
-    """≤50 file names → {file: (thumb url, license, artist, license url)}; non-free files are left out."""
+    """≤50 file names → {file: (thumb url, license, artist, license url, width, height, mime)}; non-free files left out."""
     d = api({'action': 'query', 'titles': '|'.join('File:' + f for f in files), 'prop': 'imageinfo',
-             'iiprop': 'url|extmetadata', 'iiurlwidth': 800,
+             'iiprop': 'url|size|mime|extmetadata', 'iiurlwidth': THUMB_W,
              'iiextmetadatafilter': 'LicenseShortName|Artist|LicenseUrl|NonFree|UsageTerms'})
     out = {}
     for p in d.get('query', {}).get('pages', []):
@@ -118,8 +132,87 @@ def fetch_images(files):
         url = ii.get('thumburl') or ii.get('url') or ''
         if url.startswith('https://upload.wikimedia.org/'):
             out[p['title'].removeprefix('File:')] = (url, lic, strip_html(md.get('Artist', {}).get('value', ''))[:200],
-                                                     md.get('LicenseUrl', {}).get('value', ''))
+                                                     md.get('LicenseUrl', {}).get('value', ''),
+                                                     int(ii.get('width') or 0), int(ii.get('height') or 0), ii.get('mime', ''))
     return out
+
+
+def good_photo(name, info) -> bool:
+    """A real photo worth a premium card: JPEG/PNG/WebP, wide enough, not a map/flag/logo/diagram, sane shape."""
+    if not info:
+        return False
+    w, h, mime = info[4], info[5], info[6]
+    if mime not in ('image/jpeg', 'image/webp') and not (mime == 'image/png' and w >= 1200):
+        return False
+    if w < MIN_W or not h or not 0.6 <= w / h <= 2.4:
+        return False
+    return not bad_file(name)
+
+
+def photo_score(info) -> float:
+    w, h = info[4], info[5]
+    ratio = w / h
+    return min(w * h, 4e6) * (1.25 if 1.2 <= ratio <= 1.9 else 1.0) * (1.1 if info[6] == 'image/jpeg' else 1.0)
+
+
+def fetch_p18(qids):
+    """≤50 Wikidata ids → {qid: main image file name (P18)}."""
+    d = api({'action': 'wbgetentities', 'ids': '|'.join(qids), 'props': 'claims'}, host=WD_API)
+    out = {}
+    for q, e in (d.get('entities') or {}).items():
+        for c in (e.get('claims') or {}).get('P18', []):
+            v = ((c.get('mainsnak') or {}).get('datavalue') or {}).get('value')
+            if v:
+                out[q] = v.replace('_', ' '); break
+    return out
+
+
+def article_images(titles):
+    """≤20 page titles → {page title: [file names]} (the files shown in the article)."""
+    d = api({'action': 'query', 'titles': '|'.join(titles), 'prop': 'images', 'imlimit': 'max'})
+    out = {}
+    for p in d.get('query', {}).get('pages', []):
+        out[p['title']] = [i['title'].removeprefix('File:') for i in p.get('images', [])
+                           if re.search(r'\.(jpe?g|png|webp)$', i['title'], re.I) and not bad_file(i['title'])][:25]
+    return out
+
+
+def pick_pictures(rows):
+    """Choose the best picture for each found row (Wikidata P18 → lead picture → best article photo). Mutates rows."""
+    found = [r for r in rows if str(r.get('exists')) == '1']
+    if not found:
+        return
+    qids = sorted({r['wikidata'] for r in found if r.get('wikidata')})
+    p18 = {}
+    for j in range(0, len(qids), 50):
+        p18.update(fetch_p18(qids[j:j + 50])); time.sleep(0.5)
+    extra = {}
+    pages = [r['page_title'] for r in found if r.get('page_title')]
+    for j in range(0, len(pages), 20):
+        extra.update(article_images(pages[j:j + 20])); time.sleep(0.5)
+    files = set()
+    for r in found:
+        files |= {f for f in (p18.get(r.get('wikidata')), r.get('image_file')) if f} | set(extra.get(r.get('page_title'), []))
+    files = sorted(files)
+    info = {}
+    for j in range(0, len(files), 50):
+        info.update(fetch_images(files[j:j + 50])); time.sleep(1)
+    for r in found:
+        choice = next((f for f in (p18.get(r.get('wikidata')), r.get('image_file')) if f and good_photo(f, info.get(f))), None)
+        if not choice:
+            others = [f for f in extra.get(r.get('page_title'), []) if good_photo(f, info.get(f))]
+            choice = max(others, key=lambda f: photo_score(info[f]), default=None)
+        lead = r.get('image_file')
+        if not choice and lead and info.get(lead) and not bad_file(lead) and info[lead][4] >= 400 \
+                and info[lead][6] in ('image/jpeg', 'image/png', 'image/webp'):
+            choice = lead          # old events: a small archive photo still beats a satellite view
+        if choice:
+            im = info[choice]
+            r.update(image_file=choice, image_url=im[0], image_license=im[1], image_artist=im[2], image_license_url=im[3],
+                     image_w=im[4], image_h=im[5])
+        else:
+            r.update(image_url='', image_license='', image_artist='', image_license_url='', image_w='', image_h='')
+        r['image_v'] = IMAGE_V
 
 
 def main():
@@ -134,10 +227,14 @@ def main():
         with open(OUT, newline='', encoding='utf-8') as f:
             cache = {r['title']: r for r in csv.DictReader(f)}
     cutoff = (date.today() - timedelta(days=a.refresh)).isoformat() if a.refresh else None
-    todo = [t for t in wanted(a.only) if t not in cache or (cutoff and cache[t].get('fetched_at', '') < cutoff)]
+    want = wanted(a.only)
+    todo = [t for t in want if t not in cache or (cutoff and cache[t].get('fetched_at', '') < cutoff)]
+    # Rows whose picture was chosen with an older rule: re-pick the picture only (no page re-fetch)
+    repick = [t for t in want if t in cache and t not in set(todo) and str(cache[t].get('exists')) == '1'
+              and str(cache[t].get('image_v') or '0') != str(IMAGE_V)]
     if a.limit:
-        todo = todo[:a.limit]
-    print(f'{len(todo)} articles to fetch ({len(cache)} cached)')
+        todo, repick = todo[:a.limit], repick[:a.limit]
+    print(f'{len(todo)} articles to fetch, {len(repick)} pictures to re-pick ({len(cache)} cached)')
 
     def save():
         with open(OUT, 'w', newline='', encoding='utf-8') as f:
@@ -146,16 +243,17 @@ def main():
                 w.writerow({c: cache[k].get(c, '') for c in FIELDS})
 
     now = datetime.utcnow().strftime('%Y-%m-%d')
+    for i in range(0, len(repick), 20):
+        pick_pictures([cache[t] for t in repick[i:i + 20]])
+        done = min(i + 20, len(repick))
+        if done % 200 == 0 or done == len(repick):
+            save()
+            print(f'  re-picked {done}/{len(repick)} · with picture {sum(1 for t in repick[:done] if cache[t].get("image_url"))}')
+        time.sleep(1)
     for i in range(0, len(todo), 20):
         rows = fetch_pages(todo[i:i + 20])
-        files = sorted({r['image_file'] for r in rows.values() if r.get('image_file')})
-        imgs = {}
-        for j in range(0, len(files), 50):
-            imgs.update(fetch_images(files[j:j + 50])); time.sleep(1)
+        pick_pictures(list(rows.values()))
         for t, r in rows.items():
-            im = imgs.get(r.get('image_file', ''))
-            if im:
-                r['image_url'], r['image_license'], r['image_artist'], r['image_license_url'] = im
             r['fetched_at'] = now
             cache[t] = r
         done = min(i + 20, len(todo))
