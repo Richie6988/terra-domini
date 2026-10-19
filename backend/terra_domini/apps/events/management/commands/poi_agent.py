@@ -69,6 +69,8 @@ For the POI you are given:
    - Landmarks / history: legendary = universal icon known on every continent (langs >= 120: Eiffel Tower, Machu
      Picchu, Great Wall); epic = major world heritage or national icon (langs 70-119, or UNESCO + famous); rare = well
      known in its country and to travellers (langs 35-69); uncommon = regional (langs 12-34); common = local (< 12).
+   - Resource / strategic sites (game_category is a mine, oil / gas field, port, canal, dam, airport...): rate by world
+     rank, not by languages: world's largest or #1 = epic, top 10 in the world = rare, top in its country = uncommon.
    - Cities: legendary = global megacity icon (Paris, London, New York, Tokyo...); epic = capital or world-famous city; rare =
      major national city; uncommon = regional city; common = small city.
    - Countries: legendary = world powers; epic = major regional powers or globally famous; rare / uncommon / common by
