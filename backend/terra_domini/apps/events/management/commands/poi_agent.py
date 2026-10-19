@@ -1,0 +1,355 @@
+"""
+POI agent (owner 2026-10-19) — a Haiku agent walks the exhaustive POI list one row at a time:
+checks the facts, gives the rarity, derives the HEX income, picks a picture it has actually LOOKED at, then stamps the
+row (ledger + game DB) and moves to the next one. Run it where Wikipedia is reachable (the VPS).
+
+  python manage.py poi_agent --limit 3              # test: the next 3 unchecked rows
+  python manage.py poi_agent --limit 500            # a batch (resumable: stamped rows are skipped)
+  python manage.py poi_agent --uid poi-100003       # one given row (re-checked even if already stamped)
+  python manage.py poi_agent --kinds landmark,city  # only some kinds (default: landmark, history, city, country)
+
+Needs ANTHROPIC_API_KEY (.env.prod). Model: POI_AGENT_MODEL (default claude-haiku-5-5).
+
+The agent's tools:
+  web_search, web_fetch     Anthropic server tools: cross-check facts on the web
+  wiki_lookup(title)        Wikipedia + Wikidata: coordinates, intro, language count (fame), heritage status,
+                            free pictures with size, author and license
+  view_image(url)           the picture itself, shown to the model — nothing is stamped on a picture it has not seen
+  submit_validation(...)    the result; checked here (rarity value, picture seen + free license, position close to
+                            Wikipedia's) and sent back to the agent to fix when it breaks a rule
+Income is never chosen by the agent: it follows the rarity (economy.balance.token_hex_per_day).
+Stamp = one line in poi_validations.jsonl (verdict, data, sources, confidence, model, date) + UnifiedPOI.validated_at.
+Then `manage.py import_hexod_db` keeps the stamped data across rebuilds (rejected rows leave the map).
+"""
+import base64
+import json
+import math
+import os
+import sys
+import time
+from pathlib import Path
+from urllib.error import HTTPError
+from urllib.request import Request, urlopen
+
+from django.core.management.base import BaseCommand, CommandError
+from django.utils import timezone
+
+from terra_domini.apps.economy.balance import token_hex_per_day
+from terra_domini.apps.events import hexod_db, poi_validations
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[6] / 'scripts'))
+import wiki_enrich as W  # noqa: E402  (stdlib Wikipedia helpers: pages, Wikidata, free pictures)
+
+API_URL = 'https://api.anthropic.com/v1/messages'
+MODEL = os.environ.get('POI_AGENT_MODEL', 'claude-haiku-5-5')
+VERSION = 'poi-agent/1'
+RARITIES = ('common', 'uncommon', 'rare', 'epic', 'legendary')   # mythic stays for live events
+DEFAULT_KINDS = ('landmark', 'history', 'city', 'country')       # generated deposits and species copies have no single real place
+MAX_TURNS = 14
+
+SYSTEM = """You are the HEXOD POI agent. HEXOD is a geo-strategy collection game: every real place on Earth is a token on a
+hexagon of the world map. You check ONE point of interest at a time and must be right: players trust these cards.
+
+For the POI you are given:
+1. Identify it with certainty. Call wiki_lookup with its Wikipedia title (or its name). If the name is ambiguous, wrong
+   or the article is missing, use web_search / web_fetch to find the real place. If the place does not exist, is a
+   duplicate of a more famous entry, or cannot be located, submit verdict "rejected" with the reason.
+2. Check the facts: exact name (English, as on Wikipedia), coordinates (use Wikipedia's when they exist), ISO 3166-1
+   alpha-2 country code. Fix what is wrong (verdict "corrected") or confirm (verdict "validated").
+3. Write the card description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing you
+   could not verify.
+4. Give the rarity, from fame and uniqueness, measured — not felt:
+   - langs = number of Wikipedia language editions (wiki_lookup "sitelinks").
+   - Landmarks / history: legendary = universal icon known on every continent (langs >= 120: Eiffel Tower, Machu
+     Picchu, Great Wall); epic = major world heritage or national icon (langs 70-119, or UNESCO + famous); rare = well
+     known in its country and to travellers (langs 35-69); uncommon = regional (langs 12-34); common = local (< 12).
+   - Cities: legendary = global megacity icon (Paris, New York, Tokyo...); epic = capital or world-famous city; rare =
+     major national city; uncommon = regional city; common = small city.
+   - Countries: legendary = world powers; epic = major regional powers or globally famous; rare / uncommon / common by
+     size and influence.
+   Only 1% of tokens are legendary and 4% epic: when in doubt, take the lower tier. Never "mythic".
+   Say in rarity_reason which numbers decided (langs, UNESCO, visitors).
+5. Picture: choose from the free pictures wiki_lookup returned (upload.wikimedia.org only). Call view_image on your
+   choice and LOOK: it must clearly show THIS place (the building / site / city itself, beautiful, sharp, daylight if
+   possible) — no map, flag, logo, plan, diagram, crowd close-up or unrelated detail. If it fails, view the next one.
+   If none is right, submit image_url "" — a wrong picture is worse than none.
+6. Call submit_validation once with everything. If it answers with errors, fix them and submit again.
+Be efficient: usually wiki_lookup + 1-2 view_image + submit is enough; search the web only to settle a doubt."""
+
+TOOLS = [
+    {'type': 'web_search_20250305', 'name': 'web_search', 'max_uses': 4},
+    {'type': 'web_fetch_20250910', 'name': 'web_fetch', 'max_uses': 3},
+    {'name': 'wiki_lookup', 'description': 'English Wikipedia + Wikidata facts for one article: canonical title, coordinates, '
+     'intro, number of language editions (sitelinks), heritage designations, and the free pictures (url, size, license, author).',
+     'input_schema': {'type': 'object', 'properties': {'title': {'type': 'string', 'description': 'Article title or name'}},
+                      'required': ['title']}},
+    {'name': 'view_image', 'description': 'Download a picture (https://upload.wikimedia.org/ only) and show it to you.',
+     'input_schema': {'type': 'object', 'properties': {'url': {'type': 'string'}}, 'required': ['url']}},
+    {'name': 'submit_validation', 'description': 'Final result for this POI.',
+     'input_schema': {'type': 'object', 'properties': {
+         'verdict': {'type': 'string', 'enum': ['validated', 'corrected', 'rejected']},
+         'name': {'type': 'string'}, 'lat': {'type': 'number'}, 'lon': {'type': 'number'},
+         'country_code': {'type': 'string', 'description': 'ISO 3166-1 alpha-2'},
+         'wiki_title': {'type': 'string'},
+         'description': {'type': 'string', 'description': '2 factual sentences, <= 280 chars'},
+         'rarity': {'type': 'string', 'enum': list(RARITIES)},
+         'rarity_reason': {'type': 'string'},
+         'image_url': {'type': 'string', 'description': 'A picture you viewed, or ""'},
+         'corrections': {'type': 'array', 'items': {'type': 'string'}, 'description': 'What was wrong in the input row'},
+         'sources': {'type': 'array', 'items': {'type': 'string'}},
+         'confidence': {'type': 'number', 'description': '0-1: how sure you are of the whole card'},
+         'reject_reason': {'type': 'string'}},
+         'required': ['verdict', 'name', 'rarity', 'rarity_reason', 'confidence']}},
+]
+TOOLS[-1]['cache_control'] = {'type': 'ephemeral'}   # tools + system prompt cached across rows
+
+
+def km(a, b):
+    r = math.pi / 180
+    h = math.sin((b[0] - a[0]) * r / 2) ** 2 + math.cos(a[0] * r) * math.cos(b[0] * r) * math.sin((b[1] - a[1]) * r / 2) ** 2
+    return 12742 * math.asin(math.sqrt(h))
+
+
+def call_api(messages):
+    body = json.dumps({'model': MODEL, 'max_tokens': 2048, 'tools': TOOLS, 'messages': messages,
+                       'system': [{'type': 'text', 'text': SYSTEM, 'cache_control': {'type': 'ephemeral'}}]}).encode()
+    for i in range(5):
+        req = Request(API_URL, data=body, headers={
+            'x-api-key': os.environ['ANTHROPIC_API_KEY'], 'anthropic-version': '2023-06-01',
+            'anthropic-beta': 'web-fetch-2025-09-10', 'content-type': 'application/json'})
+        try:
+            with urlopen(req, timeout=180) as r:
+                return json.load(r)
+        except HTTPError as e:
+            msg = e.read().decode(errors='replace')[:400]
+            if e.code in (429, 500, 502, 503, 529) and i < 4:
+                time.sleep(10 * (i + 1)); continue
+            if e.code == 400 and 'web_fetch' in msg and any(t['name'] == 'web_fetch' for t in TOOLS):
+                TOOLS[:] = [t for t in TOOLS if t['name'] != 'web_fetch']   # model without web fetch: web search only
+                print('  web_fetch not available for this model: continuing with web_search', file=sys.stderr)
+                return call_api(messages)
+            raise CommandError(f'Anthropic API {e.code}: {msg}')
+    raise CommandError('Anthropic API unreachable')
+
+
+class Agent:
+    """One POI: the tool loop, the facts it was shown (to check its submission against them)."""
+
+    def __init__(self, row):
+        self.row = row
+        self.pictures = {}     # url → {license, artist, file, w, h}
+        self.seen = set()      # urls shown to the model
+        self.wiki = {}         # canonical title → facts
+        self.usage = {'input': 0, 'output': 0, 'cache_read': 0, 'searches': 0, 'fetches': 0}
+
+    # ── client tools ──
+    def wiki_lookup(self, title):
+        t = W.title_of(title) or title.strip()
+        page = W.fetch_pages([t]).get(t) or {}
+        if not page.get('exists'):
+            return {'found': False, 'title': t, 'hint': 'Not on English Wikipedia under this title: try another title or web_search.'}
+        qid = page.get('wikidata', '')
+        sitelinks, heritage, p18 = 0, [], ''
+        if qid:
+            d = W.api({'action': 'wbgetentities', 'ids': qid, 'props': 'sitelinks|claims'}, host=W.WD_API)
+            e = (d.get('entities') or {}).get(qid, {})
+            sitelinks = len(e.get('sitelinks') or {})
+            cl = e.get('claims') or {}
+            heritage = [((c.get('mainsnak') or {}).get('datavalue') or {}).get('value', {}).get('id') for c in cl.get('P1435', [])]
+            v = ((((cl.get('P18') or [{}])[0]).get('mainsnak') or {}).get('datavalue') or {}).get('value')
+            p18 = (v or '').replace('_', ' ')
+        files = [f for f in [p18, page.get('image_file')] if f]
+        files += [f for f in W.article_images([page['page_title']]).get(page['page_title'], []) if f not in files]
+        info = W.fetch_images(files[:40]) if files else {}
+        pics = []
+        for f in files:
+            im = info.get(f)
+            if not im or not (W.good_photo(f, im) or f in (p18, page.get('image_file'))):
+                continue
+            pics.append({'url': im[0], 'file': f, 'width': im[4], 'height': im[5], 'license': im[1], 'author': im[2],
+                         'role': 'wikidata main image' if f == p18 else 'article lead image' if f == page.get('image_file') else 'article photo'})
+            self.pictures[im[0]] = pics[-1]
+            if len(pics) >= 8:
+                break
+        self.wiki[page['page_title']] = page
+        return {'found': True, 'title': page['page_title'], 'url': 'https://en.wikipedia.org/wiki/' + page['page_title'].replace(' ', '_'),
+                'lat': page.get('lat'), 'lon': page.get('lon'), 'intro': page.get('extract', ''), 'wikidata': qid,
+                'sitelinks': sitelinks, 'heritage_designations': [h for h in heritage if h],
+                'unesco_world_heritage': 'Q9259' in heritage, 'pictures': pics}
+
+    def view_image(self, url):
+        if not url.startswith('https://upload.wikimedia.org/'):
+            return None, 'Only https://upload.wikimedia.org/ pictures (from wiki_lookup) can be used.'
+        req = Request(url, headers={'User-Agent': W.UA})
+        with urlopen(req, timeout=60) as r:
+            mime = (r.headers.get('Content-Type') or 'image/jpeg').split(';')[0]
+            data = r.read(6_000_000)
+        if mime not in ('image/jpeg', 'image/png', 'image/webp', 'image/gif'):
+            return None, f'Not a picture ({mime}).'
+        self.seen.add(url)
+        meta = self.pictures.get(url, {})
+        return [{'type': 'image', 'source': {'type': 'base64', 'media_type': mime, 'data': base64.b64encode(data).decode()}},
+                {'type': 'text', 'text': f"{meta.get('file', url)} · {meta.get('width', '?')}x{meta.get('height', '?')} · "
+                                         f"{meta.get('license', 'license unknown')}. Does it clearly show {self.row['name']}?"}], None
+
+    def check(self, s):
+        """Rules the submission must follow; [] when it can be stamped."""
+        errs = []
+        if s.get('verdict') == 'rejected':
+            return [] if s.get('reject_reason') else ['reject_reason is required for a rejected row.']
+        if s.get('rarity') not in RARITIES:
+            errs.append(f'rarity must be one of {RARITIES}.')
+        for k in ('lat', 'lon', 'country_code', 'description'):
+            if s.get(k) in (None, ''):
+                errs.append(f'{k} is required.')
+        if len(s.get('description') or '') > 300:
+            errs.append('description: 280 characters max.')
+        img = s.get('image_url') or ''
+        if img and img not in self.pictures:
+            errs.append('image_url must be one of the pictures wiki_lookup returned.')
+        elif img and img not in self.seen:
+            errs.append('call view_image on image_url before choosing it.')
+        page = self.wiki.get(s.get('wiki_title') or '') or next(iter(self.wiki.values()), None)
+        if page and page.get('lat') not in (None, '') and s.get('lat') is not None:
+            d = km((float(page['lat']), float(page['lon'])), (s['lat'], s.get('lon') or 0))
+            if d > 25:
+                errs.append(f'coordinates are {d:.0f} km from Wikipedia\'s ({page["lat"]}, {page["lon"]}): use them or explain in corrections.')
+        return errs
+
+    # ── loop ──
+    def run(self):
+        r = self.row
+        facts = {k: r.get(k) for k in ('uid', 'kind', 'name', 'game_category', 'lat', 'lon', 'country_code', 'wiki_url', 'title',
+                                       'description', 'rarity', 'visitors_per_year', 'fun_fact_1', 'rare_fact') if r.get(k) not in (None, '')}
+        messages = [{'role': 'user', 'content': 'Check this POI from the HEXOD database (current values, may be wrong):\n'
+                                                + json.dumps(facts, ensure_ascii=False, indent=1)}]
+        nudged = rejected_tries = 0
+        for _ in range(MAX_TURNS):
+            resp = call_api(messages)
+            u = resp.get('usage') or {}
+            self.usage['input'] += u.get('input_tokens', 0) + u.get('cache_creation_input_tokens', 0)
+            self.usage['cache_read'] += u.get('cache_read_input_tokens', 0)
+            self.usage['output'] += u.get('output_tokens', 0)
+            stu = u.get('server_tool_use') or {}
+            self.usage['searches'] += stu.get('web_search_requests', 0)
+            self.usage['fetches'] += stu.get('web_fetch_requests', 0)
+            content = resp.get('content') or []
+            messages.append({'role': 'assistant', 'content': content})
+            stop = resp.get('stop_reason')
+            if stop == 'pause_turn':
+                continue
+            calls = [b for b in content if b.get('type') == 'tool_use']
+            if not calls:
+                if nudged:
+                    return None, 'no submission'
+                nudged = 1
+                messages.append({'role': 'user', 'content': 'Call submit_validation now.'})
+                continue
+            results = []
+            for b in calls:
+                name, inp = b['name'], b.get('input') or {}
+                try:
+                    if name == 'submit_validation':
+                        errs = self.check(inp)
+                        if not errs:
+                            return inp, None
+                        rejected_tries += 1
+                        if rejected_tries > 3:
+                            return None, 'submission still breaks the rules: ' + '; '.join(errs)
+                        results.append({'type': 'tool_result', 'tool_use_id': b['id'], 'is_error': True,
+                                        'content': 'Fix and submit again: ' + ' '.join(errs)})
+                    elif name == 'wiki_lookup':
+                        results.append({'type': 'tool_result', 'tool_use_id': b['id'],
+                                        'content': json.dumps(self.wiki_lookup(inp.get('title', '')), ensure_ascii=False)})
+                    elif name == 'view_image':
+                        blocks, err = self.view_image(inp.get('url', ''))
+                        results.append({'type': 'tool_result', 'tool_use_id': b['id'], 'is_error': bool(err), 'content': err or blocks})
+                    else:
+                        results.append({'type': 'tool_result', 'tool_use_id': b['id'], 'is_error': True, 'content': f'unknown tool {name}'})
+                except Exception as e:   # network / API hiccup on our side: tell the agent, it can retry or move on
+                    results.append({'type': 'tool_result', 'tool_use_id': b['id'], 'is_error': True, 'content': f'{type(e).__name__}: {e}'[:300]})
+            messages.append({'role': 'user', 'content': results})
+        return None, 'too many turns'
+
+
+def stamp(row, s, agent):
+    """Ledger line + game DB update. Returns the ledger entry."""
+    import h3
+    from terra_domini.apps.events.unified_poi import UnifiedPOI
+    from terra_domini.apps.territories.models import Territory
+    now = timezone.now()
+    entry = {'uid': row['uid'], 'verdict': s['verdict'], 'validated_at': now.isoformat(), 'validator': VERSION, 'model': MODEL,
+             'confidence': s.get('confidence'), 'sources': s.get('sources') or [], 'corrections': s.get('corrections') or [],
+             'usage': agent.usage, 'previous': {k: row.get(k) for k in ('name', 'lat', 'lon', 'rarity', 'country_code')}}
+    if s['verdict'] == 'rejected':
+        entry['reject_reason'] = s.get('reject_reason', '')
+        UnifiedPOI.objects.filter(db_uid=row['uid']).update(is_active=False, validated_at=now)
+    else:
+        pic = agent.pictures.get(s.get('image_url') or '', {})
+        lat, lon = round(float(s['lat']), 6), round(float(s['lon']), 6)
+        hexes = h3.latlng_to_cell(lat, lon, 8)
+        hpd = round(token_hex_per_day(s['rarity'], row.get('game_category', '')))
+        entry.update(name=s['name'][:300], lat=lat, lon=lon, h3_r8=hexes, country_code=(s.get('country_code') or '').upper()[:2],
+                     description=s.get('description', '')[:300], rarity=s['rarity'], rarity_reason=s.get('rarity_reason', ''),
+                     hex_per_day=hpd, wiki_title=s.get('wiki_title', ''), image_url=s.get('image_url') or '',
+                     image_credit=f"{pic.get('author') or 'Unknown author'} · {pic.get('license', '')} · Wikimedia Commons" if pic else '',
+                     image_file=pic.get('file', ''))
+        UnifiedPOI.objects.filter(db_uid=row['uid']).update(
+            name=entry['name'], latitude=lat, longitude=lon, h3_index=hexes, country_code=entry['country_code'],
+            description=entry['description'], rarity=s['rarity'], tdc_per_24h=hpd,
+            image_url=entry['image_url'], image_credit=entry['image_credit'][:300], verified=True, validated_at=now)
+        Territory.objects.filter(h3_index=row.get('h3_r8'), poi_name=row['name'][:200]).update(rarity=s['rarity'])
+    poi_validations.append(entry)
+    return entry
+
+
+class Command(BaseCommand):
+    help = 'Haiku POI agent: check, rate, price and picture every POI, one row at a time, with a validation stamp'
+
+    def add_arguments(self, parser):
+        parser.add_argument('--limit', type=int, default=3)
+        parser.add_argument('--uid', action='append', default=[])
+        parser.add_argument('--kinds', default=','.join(DEFAULT_KINDS))
+
+    def handle(self, *args, **o):
+        if not os.environ.get('ANTHROPIC_API_KEY'):
+            raise CommandError('ANTHROPIC_API_KEY missing: add it to /home/hexod/terra-domini/.env.prod')
+        db = hexod_db.load()
+        if not db:
+            raise CommandError(f'{hexod_db.DB_PATH} not found')
+        done = poi_validations.load()
+        if o['uid']:
+            queue = [p for p in db['pois'] if p['uid'] in o['uid']]
+        else:
+            kinds = set(o['kinds'].split(','))
+            rows = [p for p in db['pois'] if p['kind'] in kinds and p['uid'] not in done]
+            queue = sorted(rows, key=lambda p: not p.get('on_map'))[:o['limit']]   # on-map rows first, master DB order
+        self.stdout.write(f'{len(queue)} row(s) to check · {len(done)} already stamped · model {MODEL} · ledger {poi_validations.LEDGER}')
+        tot = {'input': 0, 'output': 0, 'cache_read': 0, 'searches': 0, 'fetches': 0}
+        for i, row in enumerate(queue, 1):
+            t0 = time.time()
+            self.stdout.write(f"\n[{i}/{len(queue)}] {row['uid']} · {row['name']} ({row['kind']}, {row.get('rarity')})")
+            agent = Agent(row)
+            try:
+                sub, err = agent.run()
+            except CommandError as e:
+                self.stderr.write(f'  API error: {e}'); break
+            for k in tot:
+                tot[k] += agent.usage[k]
+            if err:
+                self.stdout.write(self.style.WARNING(f'  not stamped: {err}'))
+                continue
+            e = stamp(row, sub, agent)
+            if e['verdict'] == 'rejected':
+                self.stdout.write(self.style.WARNING(f"  REJECTED: {e['reject_reason']}"))
+            else:
+                self.stdout.write(self.style.SUCCESS(f"  {e['verdict'].upper()} · {e['name']} · {e['rarity']} → {e['hex_per_day']} HEX/day · conf {e['confidence']}"))
+                self.stdout.write(f"  {e['lat']}, {e['lon']} {e['country_code']} · {e['description']}")
+                self.stdout.write(f"  rarity: {e['rarity_reason']}")
+                self.stdout.write(f"  picture: {e['image_url'] or 'none'}{' · ' + e['image_credit'] if e['image_credit'] else ''}")
+                for c in e['corrections']:
+                    self.stdout.write(f'  fixed: {c}')
+            self.stdout.write(f"  {time.time() - t0:.0f}s · tokens in {agent.usage['input']} (+{agent.usage['cache_read']} cached) / out "
+                              f"{agent.usage['output']} · {agent.usage['searches']} searches, {agent.usage['fetches']} fetches")
+        self.stdout.write(f"\nTotal: tokens in {tot['input']} (+{tot['cache_read']} cached) / out {tot['output']} · "
+                          f"{tot['searches']} searches · {tot['fetches']} fetches. Then: manage.py import_hexod_db to rebuild the map from the stamps.")

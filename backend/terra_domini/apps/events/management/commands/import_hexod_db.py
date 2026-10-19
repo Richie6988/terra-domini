@@ -9,12 +9,14 @@ Load the HEXOD master database (data/hexod_db/hexod_db.json) into the game DB.
   unless --keep-legacy (one unique database).
 - Territory: one res-8 territory per on-map POI. Owners and defenses are never
   touched; only POI/rarity/income fields are refreshed.
+- POI agent ledger (poi_validations.jsonl) applied on top: validated rows keep their checked data + validated_at.
 - Unowned legacy POI territories at another resolution (res 7/10, not clickable on
   the res-8 grid) are removed.
 Idempotent: safe to re-run after every rebuild of the JSON.
 """
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
+from django.utils.dateparse import parse_datetime
 
 from terra_domini.apps.economy.balance import HEX_PER_DAY
 from terra_domini.apps.events import hexod_db
@@ -49,6 +51,11 @@ class Command(BaseCommand):
         if res != 8:
             raise CommandError(f'expected H3 resolution 8, got {res}')
         pois = [p for p in db['pois'] if p.get('on_map') and p.get('h3_r8')]
+        # POI agent stamps (poi_validations.jsonl): checked rows keep their checked data, rejected rows leave the map
+        from terra_domini.apps.events import poi_validations
+        pois, n_valid, n_rej = poi_validations.overlay([dict(p) for p in pois])
+        if n_valid or n_rej:
+            self.stdout.write(f'POI agent ledger: {n_valid} validated rows applied, {n_rej} rejected rows left out')
 
         # One POI per hex on the map — keep the rarest (admin-edited tokens keep their own territory)
         admin_uids = set(UnifiedPOI.objects.filter(source='admin').exclude(db_uid='').values_list('db_uid', flat=True))
@@ -91,6 +98,7 @@ class Command(BaseCommand):
                     image_credit=(p.get('image_credit') or '')[:300], event_date=(p.get('event_date') or '')[:10],
                     token_id=p.get('token_id') or None, visitors_per_year=int(p.get('visitors_per_year') or 0),
                     geopolitical_score=int(p.get('geopolitical_score') or 0),
+                    validated_at=parse_datetime(p['validated_at']) if p.get('validated_at') else None,
                 ))
             UnifiedPOI.objects.bulk_create(rows, batch_size=500)
             deactivated = 0
