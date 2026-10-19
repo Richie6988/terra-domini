@@ -296,3 +296,16 @@ class PickupClaim(models.Model):
     class Meta:
         db_table = 'pickup_claims'
         unique_together = ('player', 'h3_index', 'day')
+
+
+class DailyCounter(models.Model):
+    """How many times a player did something today (safari hunts, event tickets…): drives the prices that climb
+    with each use until the next day (economy/balance.escalated_price)."""
+    player = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='daily_counters')
+    kind = models.CharField(max_length=20)
+    day = models.DateField(db_index=True)
+    count = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'daily_counters'
+        unique_together = ('player', 'kind', 'day')

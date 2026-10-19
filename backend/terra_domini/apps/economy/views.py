@@ -989,7 +989,7 @@ def _open_booster_pack(item_code: str, player=None) -> dict:
             card.owner = player
             card.captured_at = timezone.now()
             card.save(update_fields=['owner', 'captured_at'])
-        cards.append({'h3_index': card.h3_index, 'poi_name': card.poi_name, 'territory_type': card.territory_type,
+        cards.append({'h3_index': card.h3_index, 'poi_name': card.poi_name, 'place_name': card.place_name or card.custom_name or '', 'territory_type': card.territory_type,
                       'biome': card.biome, 'is_shiny': card.is_shiny, 'rarity': card.rarity})
     met = not g or any(order.index(c['rarity'] or 'common') >= order.index(g) for c in cards)
     return {'cards': cards, 'count': len(cards), 'short': len(cards) < count or not met}

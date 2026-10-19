@@ -42,7 +42,7 @@ export function RadarWidget() {
     setBusy(true)
     try {
       const { data: r } = await api.post('/safari/scan/', { lat, lon })
-      qc.setQueryData(['safari-active'], { target: r.fled ? null : r.target })
+      qc.setQueryData(['safari-active'], (o: any) => ({ ...o, target: r.fled ? null : r.target }))
       if (r.fled) { playSound('flee'); toast.error(`${r.target?.creature_name || 'It'} fled — out of scans.`) }
       else playSound(r.band === 'here' ? 'bonus' : 'probe')
     } catch (e: any) { toast.error(e?.response?.data?.error || 'Scan failed') }
@@ -53,7 +53,7 @@ export function RadarWidget() {
     setBusy(true)
     try {
       const { data: r } = await api.post('/safari/probe/', { lat, lon })
-      qc.setQueryData(['safari-active'], { target: null })
+      qc.setQueryData(['safari-active'], (o: any) => ({ ...o, target: null }))
       playSound('capture'); celebrate('big', r.target?.creature_name || 'Captured!')
       toast.success(r.message, { duration: 5000 })
       ;['loop-status', 'codex-cards', 'player'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))

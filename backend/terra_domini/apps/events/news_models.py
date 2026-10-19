@@ -108,6 +108,7 @@ class NewsEventRegistration(models.Model):
     hex_earned = models.IntegerField(default=0)
     token_serial = models.IntegerField(null=True, blank=True)
     luck_bonus = models.IntegerField(default=0)
+    tickets = models.IntegerField(default=1)      # each extra ticket = one more chance in the draw
 
     class Meta:
         db_table = 'news_event_registrations'

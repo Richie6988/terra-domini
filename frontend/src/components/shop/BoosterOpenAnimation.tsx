@@ -3,7 +3,9 @@
  *
  * Phase 1: Metallic pack floating + rotating, pulsing glow. "TAP TO OPEN"
  * Phase 2: Explosion — pack shatters, particles burst, light flash
- * Phase 3: Cards fan out as 3D planes with TokenFace2D textures. Auto-flip.
+ * Phase 3: One card at a time, like a revelation (owner 2026-10-19): the next card comes face down to the centre;
+ *          tap → suspense (it shakes and glows longer the rarer it is) → it flips; tap again → it joins the row
+ *          at the bottom and the next one comes up. SKIP reveals the rest.
  * Phase 4: Summary — best card highlighted, "CONTINUE" button.
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
@@ -12,6 +14,7 @@ import * as THREE from 'three'
 import { cellToLatLng } from 'h3-js'
 import { IconSVG } from '../shared/iconBank'
 import { createTokenFace2D } from '../shared/hexodTokenFace'
+import { iconFor } from '../shared/poiIcons'
 import type { TierKey } from '../shared/hexodTokenFace'
 import { playSound } from '../../hooks/useSound'
 
@@ -20,7 +23,7 @@ const RL: Record<string,string> = { common:'Common', uncommon:'Uncommon', rare:'
 const RT: Record<string, TierKey> = { common:'BRONZE', uncommon:'BRONZE', rare:'SILVER', epic:'GOLD', legendary:'EMERALD', mythic:'EMERALD' }
 const RK: Record<string,number> = { common:0, uncommon:1, rare:2, epic:3, legendary:4, mythic:5 }
 
-interface Card { h3_index: string; poi_name?: string; rarity: string; biome?: string; territory_type?: string; is_shiny?: boolean }
+interface Card { h3_index: string; poi_name?: string; place_name?: string; rarity: string; biome?: string; territory_type?: string; is_shiny?: boolean }
 interface Props { cards: Card[]; packName?: string; onClose: () => void }
 type Phase = 'pack' | 'explode' | 'reveal' | 'done'
 
@@ -38,39 +41,36 @@ function mkCardTex(card: Card): THREE.CanvasTexture {
   const c = document.createElement('canvas'); c.width=512; c.height=512
   const b = card.biome||'rural'
   createTokenFace2D(c, { tier:RT[card.rarity]||'BRONZE', category:(card.territory_type||'TERRITORY').toUpperCase(),
-    catColor:RC[card.rarity]||'#39FF14', biome:b.toUpperCase(), tokenName:(card.poi_name||card.h3_index?.slice(-6)||'TOKEN').toUpperCase(),
-    description:'', edition:'GENESIS', serial:Math.floor(Math.random()*999)+1, maxSupply:1000, owner:'VAULT_HOLDER',
-    date:new Date().toISOString().slice(0,10), iconSvg:'', imageSrc:'' })
+    catColor:RC[card.rarity]||'#39FF14', biome:b.toUpperCase(), tokenName:(card.poi_name||card.place_name||'NEW TERRITORY').toUpperCase(),
+    description:'', edition:'GENESIS', serial:1, maxSupply:1000, owner:'VAULT_HOLDER', rarity: card.rarity,
+    date:new Date().toISOString().slice(0,10), iconSvg: iconFor(card.territory_type || b), clipToHex: true,
+    imageSrc: card.h3_index ? `/api/tiles/satcard/${card.h3_index}.jpg?v=2` : '' })   // the hex's real satellite view
   const t = new THREE.CanvasTexture(c); t.needsUpdate=true
-  setTimeout(()=>{t.needsUpdate=true},800); setTimeout(()=>{t.needsUpdate=true},2000); return t
+  ;[400, 900, 1600, 2600, 4000].forEach(ms => setTimeout(() => { t.needsUpdate = true }, ms)); return t
 }
 
-function mkBackTex(r: string): THREE.CanvasTexture {
-  const c = document.createElement('canvas'); c.width=512; c.height=512; const x=c.getContext('2d')!; const col=RC[r]||'#9CA3AF'
-  x.fillStyle='#0a0a0f'; x.fillRect(0,0,512,512); x.strokeStyle=col; x.lineWidth=8; x.strokeRect(16,16,480,480)
-  x.strokeStyle=col+'30'; x.lineWidth=1
+/** Card back: the same for every card (the rarity is the surprise), hexagon on a transparent background. */
+function mkBackTex(): THREE.CanvasTexture {
+  const c = document.createElement('canvas'); c.width=512; c.height=512; const x=c.getContext('2d')!
+  const hex = (r: number) => { x.beginPath(); for (let a=0;a<6;a++){const ag=(Math.PI/3)*a-Math.PI/2; const px=256+r*Math.cos(ag),py=256+r*Math.sin(ag); a===0?x.moveTo(px,py):x.lineTo(px,py)} x.closePath() }
+  hex(250); const g=x.createLinearGradient(0,0,512,512); g.addColorStop(0,'#f6c453'); g.addColorStop(0.5,'#b7791f'); g.addColorStop(1,'#f6c453'); x.fillStyle=g; x.fill()
+  hex(222); x.fillStyle='#0b1628'; x.fill()
+  x.save(); hex(222); x.clip(); x.strokeStyle='rgba(246,196,83,0.16)'; x.lineWidth=2
   for (let y=40;y<480;y+=40) for (let xx=40+((y/40)%2)*20;xx<480;xx+=40) {
     x.beginPath(); for (let a=0;a<6;a++){const ag=(Math.PI/3)*a-Math.PI/6; const px=xx+15*Math.cos(ag),py=y+15*Math.sin(ag); a===0?x.moveTo(px,py):x.lineTo(px,py)} x.closePath();x.stroke() }
-  x.fillStyle=col; x.font='bold 48px Orbitron, sans-serif'; x.textAlign='center'; x.fillText('HEXOD',256,250)
-  x.font='24px Orbitron, sans-serif'; x.fillStyle=col+'80'; x.fillText(RL[r]?.toUpperCase()||'TOKEN',256,290)
-  x.font='bold 100px Georgia, serif'; x.fillStyle=col+'20'; x.fillText('?',256,400)
+  x.restore()
+  x.fillStyle='#f6c453'; x.font='64px "Lilita One", sans-serif'; x.textAlign='center'; x.fillText('HEXOD',256,250)
+  x.font='bold 120px "Lilita One", Georgia, serif'; x.fillStyle='rgba(246,196,83,0.35)'; x.fillText('?',256,380)
   return new THREE.CanvasTexture(c)
 }
 
-/** Grid layout for revealed cards — fits the visible frustum at z=0 (camera z=5, fov 50). */
-function layoutTargets(n: number, aspect: number) {
-  const visH = 2 * 5 * Math.tan((25 * Math.PI) / 180)
-  const visW = visH * aspect
-  const maxCols = aspect < 0.8 ? 2 : 5
-  const cols = Math.max(1, n > maxCols ? Math.ceil(n / Math.ceil(n / maxCols)) : n)
-  const rows = Math.ceil(n / cols)
-  const pitch = Math.min(1.25, (visW * 0.9) / cols, (visH * 0.58) / rows)
-  const scale = pitch / 0.92
-  return Array.from({ length: n }, (_, i) => {
-    const r = Math.floor(i / cols), inRow = Math.min(cols, n - r * cols), c = i - r * cols
-    return { x: (c - (inRow - 1) / 2) * pitch, y: (aspect < 0.8 ? 0.95 : 0.45) + ((rows - 1) / 2 - r) * pitch, scale }
-  })
+/** Small row at the bottom for the cards already revealed. */
+function rowTarget(i: number, n: number, aspect: number) {
+  const visH = 2 * 5 * Math.tan((25 * Math.PI) / 180), visW = visH * aspect
+  const pitch = Math.min(0.62, (visW * 0.92) / Math.max(1, n))
+  return { x: (i - (n - 1) / 2) * pitch, y: -visH / 2 + pitch * 0.62 + 0.15, scale: pitch / 0.78 }
 }
+const CENTRE_SCALE = 1.75
 
 export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
   const elRef = useRef<HTMLDivElement>(null)
@@ -79,6 +79,8 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
   const [bestCard, setBestCard] = useState<Card|null>(null)
   const [revealed, setRevealed] = useState(0)
   const [flash, setFlash] = useState<{ color: string; k: number } | null>(null)
+  const [cur, setCur] = useState(0)                         // card at the centre
+  const [step, setStep] = useState<'hidden' | 'charging' | 'shown'>('hidden')
 
   useEffect(() => {
     const el = elRef.current; if (!el) return
@@ -116,18 +118,55 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
     sc.add(new THREE.Points(sg, new THREE.PointsMaterial({color:0xffffff,size:0.03,transparent:true,opacity:0.6})))
 
     const st: any = { sc,cam,ren,pk,bm,em,rl,cms:[] as THREE.Mesh[],prt:null,phase:'pack',fl:new Set<number>() }
-    sRef.current = st; const ck = new THREE.Clock()
+    sRef.current = st; const ck = new THREE.Clock(); st.clock = ck
     const loop = () => { st._r=requestAnimationFrame(loop); const t=ck.getElapsedTime()
       if(st.phase==='pack'){pk.rotation.y=Math.sin(t*0.5)*0.3;pk.rotation.x=Math.sin(t*0.7)*0.05;pk.position.y=Math.sin(t*1.2)*0.08;bm.emissiveIntensity=0.1+Math.sin(t*2)*0.06;rl.position.x=Math.sin(t)*3;rl.position.z=Math.cos(t)*3+2}
       if(st.phase==='explode'){pk.scale.multiplyScalar(0.92);pk.rotation.y+=0.3;pk.rotation.z+=0.1;if(st.prt){const pp=st.prt.pts.geometry.attributes.position;for(let i=0;i<pp.count;i++){pp.array[i*3]+=st.prt.v[i*3]*0.016;pp.array[i*3+1]+=st.prt.v[i*3+1]*0.016;pp.array[i*3+2]+=st.prt.v[i*3+2]*0.016}pp.needsUpdate=true;st.prt.m.opacity*=0.98}}
-      if(st.phase==='reveal'||st.phase==='done'){st.cms.forEach((m:any,i:number)=>{if(!m._tgt)return;m.position.lerp(m._tgt,0.06);const ry=st.fl.has(i)?0:Math.PI;m.rotation.y+=(ry-m.rotation.y)*0.1})}
+      if(st.phase==='reveal'||st.phase==='done'){st.cms.forEach((m:any,i:number)=>{if(!m._tgt)return;m.position.lerp(m._tgt,0.08)
+        if(m._sc){const k=m.scale.x+(m._sc-m.scale.x)*0.1;m.scale.setScalar(k)}
+        const ry=st.fl.has(i)?0:Math.PI;m.rotation.y+=(ry-m.rotation.y)*0.12
+        if(st.charge===i){const a=Math.min(1,(t-st.chargeT)/1.2);m.rotation.z=Math.sin(t*38)*0.05*a;m.position.x=m._tgt.x+Math.sin(t*45)*0.03*a;if(m._gm)m._gm.opacity=0.15+0.35*a*(0.6+0.4*Math.sin(t*20))}
+        else m.rotation.z*=0.8})}
       ren.render(sc,cam) }
     loop()
     const onR=()=>{const w2=el.clientWidth,h2=el.clientHeight;cam.aspect=w2/h2;cam.updateProjectionMatrix();ren.setSize(w2,h2)
-      if(st.cms.length){const L=layoutTargets(st.cms.length,cam.aspect);st.cms.forEach((m:any,i:number)=>{m._tgt?.set(L[i].x,L[i].y,0);m.scale.setScalar(L[i].scale)})}}
+      if(st.cms.length){const n=st.cms.length;st.cms.forEach((m:any,i:number)=>{if(i<(st.cur??0)||st.phase==='done'){const R=rowTarget(i,n,cam.aspect);m._tgt?.set(R.x,R.y,0);m._sc=R.scale}})}}
     window.addEventListener('resize',onR)
     return ()=>{cancelAnimationFrame(st._r);window.removeEventListener('resize',onR);ren.dispose();if(el.contains(ren.domElement))el.removeChild(ren.domElement)}
   }, [])
+
+  // Card i comes face down to the centre
+  const bring = (i: number) => {
+    const s = sRef.current; const m: any = s?.cms[i]; if (!m) return
+    m._tgt.set(0, 0.3, 0.4); m._sc = CENTRE_SCALE; s.cur = i; setCur(i); setStep('hidden')
+  }
+  const finish = () => {
+    const s = sRef.current; if (!s) return
+    s.phase = 'done'; setPhase('done'); setRevealed(cards.length)
+    s.cms.forEach((m: any, i: number) => { const R = rowTarget(i, cards.length, s.cam.aspect); m._tgt.set(R.x, R.y, 0); m._sc = R.scale; s.fl.add(i); if (m._gm) m._gm.opacity = 0 })
+    setBestCard(cards.reduce((a, b) => (RK[b.rarity] || 0) > (RK[a.rarity] || 0) ? b : a, cards[0]))
+  }
+  // Tap: reveal the centre card (suspense grows with rarity), or send it to the row and bring the next
+  const tap = useCallback(() => {
+    const s = sRef.current; if (!s || s.phase !== 'reveal') return
+    const i = s.cur, card = cards[i], rk = RK[card?.rarity] || 0
+    if (step === 'charging') return
+    if (step === 'hidden') {
+      setStep('charging'); s.charge = i; s.chargeT = s.clock?.getElapsedTime?.() ?? performance.now() / 1000
+      playSound('booster')
+      setTimeout(() => {
+        s.charge = null; s.fl.add(i); setRevealed(i + 1); setStep('shown')
+        playSound(rk >= 4 ? 'card_legendary' : rk >= 3 ? 'card_epic' : rk >= 2 ? 'card_rare' : 'card')
+        if (rk >= 2) setFlash({ color: RC[card.rarity] || '#fff', k: i })
+        const m: any = s.cms[i]; if (m?._gm) m._gm.opacity = rk >= 2 ? 0.35 : 0
+      }, 450 + rk * 350)
+      return
+    }
+    const R = rowTarget(i, cards.length, s.cam.aspect); const m: any = s.cms[i]
+    m._tgt.set(R.x, R.y, 0); m._sc = R.scale; if (m._gm) m._gm.opacity = 0
+    if (i + 1 < cards.length) bring(i + 1)
+    else setTimeout(finish, 350)
+  }, [cards, step]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const doExplode = useCallback(() => {
     const s=sRef.current; if(!s||s.phase!=='pack') return; s.phase='explode'; setPhase('explode')
@@ -137,34 +176,26 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
     setTimeout(()=>{
       s.sc.remove(s.pk);if(s.prt){s.sc.remove(s.prt.pts);s.prt=null};s.sc.remove(p2.pts)
       const n=cards.length
-      const L=layoutTargets(n,s.cam.aspect)
       if(n===0){s.phase='done';setPhase('done');return}
+      const backTex=mkBackTex()
       cards.forEach((card,i)=>{
         const geo=new THREE.PlaneGeometry(0.7,0.7)
-        const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:mkCardTex(card),metalness:0.1,roughness:0.5}))
+        const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:mkCardTex(card),metalness:0.1,roughness:0.5,transparent:true,alphaTest:0.05}))
         // Back = separate plane turned away (FrontSide). It was BackSide, so it z-fought the face and the
         // revealed cards showed a mirrored 'HEXOD' back instead of the territory.
-        const back=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:mkBackTex(card.rarity),metalness:0.3,roughness:0.4,side:THREE.FrontSide}))
-        back.rotation.y=Math.PI;back.position.z=-0.002;mesh.add(back);mesh.position.set(0,0,0);mesh.rotation.y=Math.PI
-        mesh.scale.setScalar(L[i].scale)
-        ;(mesh as any)._tgt=new THREE.Vector3(L[i].x,L[i].y,0)
-        if(['rare','epic','legendary','mythic'].includes(card.rarity)){
-          const gm=new THREE.MeshBasicMaterial({color:RC[card.rarity],transparent:true,opacity:0,side:THREE.DoubleSide})
-          const gl=new THREE.Mesh(new THREE.PlaneGeometry(0.8,0.8),gm);gl.position.z=-0.01;mesh.add(gl);(mesh as any)._gm=gm}
+        const back=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:backTex,metalness:0.3,roughness:0.4,side:THREE.FrontSide,transparent:true,alphaTest:0.05}))
+        back.rotation.y=Math.PI;back.position.z=-0.002;mesh.add(back);mesh.rotation.y=Math.PI
+        // Face-down pile slightly below centre; the first card rises to the centre
+        mesh.position.set(0,-0.2-i*0.02,-0.4-i*0.05);mesh.scale.setScalar(1.6)
+        ;(mesh as any)._tgt=new THREE.Vector3(0,-0.2-i*0.02,-0.4-i*0.05);(mesh as any)._sc=1.6
+        const gm=new THREE.MeshBasicMaterial({color:RC[card.rarity]||'#fff',transparent:true,opacity:0,side:THREE.DoubleSide})
+        const gl=new THREE.Mesh(new THREE.CircleGeometry(0.47,6),gm);gl.rotation.z=Math.PI/6;gl.position.z=-0.01;mesh.add(gl);(mesh as any)._gm=gm
         s.sc.add(mesh);s.cms.push(mesh)})
-      s.phase='reveal';setPhase('reveal')
-      let idx=0;const flipNext=()=>{
-        if(idx>=n){setTimeout(()=>{s.phase='done';setPhase('done');setBestCard(cards.reduce((a,b)=>(RK[b.rarity]||0)>(RK[a.rarity]||0)?b:a,cards[0]))},600);return}
-        s.fl.add(idx);setRevealed(idx+1)
-        { const rk=RK[cards[idx]?.rarity]||0; playSound(rk>=4?'card_legendary':rk>=3?'card_epic':rk>=2?'card_rare':'card') }
-        if((RK[cards[idx]?.rarity]||0)>=2)setFlash({color:RC[cards[idx].rarity]||'#fff',k:idx})
-        const gm=(s.cms[idx] as any)?._gm
-        if(gm){let g=0;const gi=setInterval(()=>{g+=0.05;gm.opacity=Math.min(0.3,g);if(g>=0.3)clearInterval(gi)},30)}
-        idx++;setTimeout(flipNext,500)};setTimeout(flipNext,400)
+      s.cur=0;s.phase='reveal';setPhase('reveal');bring(0)
     },900)
   },[cards])
 
-  useEffect(()=>{const el=elRef.current;if(!el)return;const h=()=>{if(phase==='pack')doExplode()};el.addEventListener('click',h);return()=>el.removeEventListener('click',h)},[phase,doExplode])
+  useEffect(()=>{const el=elRef.current;if(!el)return;const h=()=>{if(phase==='pack')doExplode();else if(phase==='reveal')tap()};el.addEventListener('click',h);return()=>el.removeEventListener('click',h)},[phase,doExplode,tap])
 
   const bc=bestCard?RC[bestCard.rarity]:'#F59E0B'
   const counts = Object.keys(RK).map(r => ({ r, n: cards.filter(c => c.rarity === r).length })).filter(x => x.n > 0).reverse()
@@ -184,6 +215,22 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
           </div>
         )}
       </div>
+      {/* Centre card caption: the revelation, one card at a time */}
+      {phase==='reveal' && cards[cur] && (
+        <div style={{position:'absolute',left:0,right:0,bottom:'24%',textAlign:'center',pointerEvents:'none',padding:'0 20px'}}>
+          {step==='shown' ? (<motion.div key={'c'+cur} initial={{opacity:0,y:10,scale:0.9}} animate={{opacity:1,y:0,scale:1}}>
+            <div style={{fontFamily:orb,fontSize:22,color:RC[cards[cur].rarity],textShadow:'0 2px 0 rgba(0,0,0,0.6), 0 0 18px '+RC[cards[cur].rarity]}}>{(RL[cards[cur].rarity]||'').toUpperCase()}{cards[cur].is_shiny?' · SHINY':''}</div>
+            <div style={{fontFamily:orb,fontSize:15,color:'#fff',marginTop:2,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{cards[cur].poi_name||cards[cur].place_name||'New territory'}</div>
+            <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',marginTop:6,fontFamily:orb,letterSpacing:1}}>{cur+1<cards.length?`TAP FOR THE NEXT ONE · ${cards.length-cur-1} LEFT`:'TAP TO FINISH'}</div>
+          </motion.div>) : (
+            <motion.div key={'h'+cur+step} animate={{opacity:[0.5,1,0.5]}} transition={{duration:step==='charging'?0.4:1.4,repeat:Infinity}}
+              style={{fontFamily:orb,fontSize:14,color:'#fbbf24',letterSpacing:1}}>{step==='charging'?'…':`TAP TO REVEAL · ${cur+1}/${cards.length}`}</motion.div>
+          )}
+        </div>
+      )}
+      {phase==='reveal' && cur+1<cards.length && (
+        <button onClick={(e)=>{e.stopPropagation();finish()}} className="hx-chip" style={{position:'absolute',top:20,left:16,zIndex:10,cursor:'pointer'}}>SKIP</button>
+      )}
       {/* Rarity flash */}
       <AnimatePresence>
         {flash && (<motion.div key={'f'+flash.k} initial={{opacity:0}} animate={{opacity:[0,1,0]}} transition={{duration:0.7}}
@@ -225,7 +272,7 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
                   style={{display:'flex',alignItems:'center',gap:8,width:'100%',padding:'7px 10px',borderRadius:10,cursor:'pointer',textAlign:'left',
                     background:'rgba(255,255,255,0.06)',border:`2px solid ${RC[c.rarity]||'#9CA3AF'}55`,color:'#e2e8f0',fontSize:12,fontFamily:'var(--font-body)'}}>
                   <span style={{width:10,height:10,borderRadius:3,background:RC[c.rarity]||'#9CA3AF',flexShrink:0,border:'1.5px solid #0b1828'}} />
-                  <span style={{flex:1,minWidth:0,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{c.poi_name||`Zone ${c.h3_index.slice(0,8)}`}</span>
+                  <span style={{flex:1,minWidth:0,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{c.poi_name||c.place_name||'New territory'}</span>
                   <span style={{fontSize:10,color:RC[c.rarity],fontFamily:orb}}>{(RL[c.rarity]||c.rarity||'').toUpperCase()}</span>
                   <span style={{fontSize:10,color:'#fbbf24',fontFamily:orb}}>SEE</span>
                 </button>

@@ -74,17 +74,20 @@ def _serialize_event(event, player=None):
 
 def _draw_info(event, reg, player):
     from terra_domini.apps.events.world_events import EDITIONS, ticket_weight
-    lucks = list(event.registrations.values_list('luck_bonus', flat=True))
+    regs = list(event.registrations.values_list('luck_bonus', 'tickets'))
     slots = EDITIONS - (1 if getattr(event, 'h3_index', '') else 0)      # #1 is the hex holder's
     chance = None
     if reg:
-        total = sum(ticket_weight(l) for l in lucks) or 1
-        chance = round(min(1.0, slots * ticket_weight(reg.luck_bonus) / total) * 100)
-    potion = 0
+        total = sum(ticket_weight(l) * t for l, t in regs) or 1
+        chance = round(min(1.0, slots * ticket_weight(reg.luck_bonus) * reg.tickets / total) * 100)
+    potion, next_cost = 0, None
     if player and player.is_authenticated:
         from terra_domini.apps.economy import balance as B
+        from terra_domini.utils.god import god_cost
         potion = int(B.boost_mult(player, 'luck_boost')) if B.has_boost(player, 'luck_boost') else 0
-    return {'editions': EDITIONS, 'draw_slots': slots, 'tickets': len(lucks),
+        next_cost = god_cost(player, B.escalated_price(player, 'event_ticket', base=max(event.registration_cost, 50)))
+    return {'editions': EDITIONS, 'draw_slots': slots, 'tickets': sum(t for _, t in regs),
+            'my_tickets': reg.tickets if reg else 0, 'next_ticket_cost': next_cost,
             'my_luck': reg.luck_bonus if reg else potion, 'my_chance': chance, 'luck_potion_active': bool(potion)}
 
 
@@ -124,30 +127,36 @@ def register_for_event(request, event_id):
     if not event.is_active:
         return Response({'error': 'Event is not active'}, status=400)
 
-    if event.registered_count >= event.max_participants:
+    if event.registered_count >= event.max_participants and not event.registrations.filter(player=request.user).exists():
         return Response({'error': 'Event is full'}, status=400)
 
-    if NewsEventRegistration.objects.filter(event=event, player=request.user).exists():
-        return Response({'error': 'Already registered'}, status=400)
-
-    # A ticket for the draw of the 10 numbered tokens — random content: paid with HEX earned in game only
+    # Tickets for the draw of the 10 numbered tokens — random content: paid with HEX earned in game only.
+    # As many as the player wants (each one = one more chance); the price climbs with every ticket of the day.
     from decimal import Decimal
     from django.db.models import F
     from terra_domini.apps.accounts.models import Player
     from terra_domini.apps.economy import balance as B
+    from terra_domini.utils.god import god_cost
     player = request.user
-    cost = event.registration_cost
+    reg = NewsEventRegistration.objects.filter(event=event, player=player).first()
+    cost = god_cost(player, B.escalated_price(player, 'event_ticket', base=max(event.registration_cost, 50)))
     if cost > 0 and B.spendable_earned(player) < Decimal(cost):
-        return Response({'error': f'Tickets are paid with HEX earned in game ({float(B.spendable_earned(player)):,.0f} earned).'}, status=402)
+        return Response({'error': f'Next ticket: {cost:,} HEX earned in game ({float(B.spendable_earned(player)):,.0f} earned).',
+                         'cost': cost}, status=402)
     if cost > 0:
         Player.objects.filter(id=player.id).update(tdc_in_game=F('tdc_in_game') - cost)
         player.refresh_from_db(fields=['tdc_in_game'])
+    B.bump_daily(player, 'event_ticket')
     luck = int(B.boost_mult(player, 'luck_boost')) if B.has_boost(player, 'luck_boost') else 0   # shop Luck Potion
-    NewsEventRegistration.objects.create(event=event, player=player, luck_bonus=luck)
+    if reg:
+        NewsEventRegistration.objects.filter(pk=reg.pk).update(tickets=F('tickets') + 1, luck_bonus=max(reg.luck_bonus, luck))
+    else:
+        NewsEventRegistration.objects.create(event=event, player=player, luck_bonus=luck)
 
     return Response({
         'success': True,
         'message': f'Ticket bought for {event.headline[:50]}',
+        'next_ticket_cost': god_cost(player, B.escalated_price(player, 'event_ticket', base=max(event.registration_cost, 50))),
         'cost': cost, 'luck': luck,
         'remaining_balance': float(player.tdc_in_game),
         'event': _serialize_event(event, player),

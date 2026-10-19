@@ -4,7 +4,7 @@
  * A real species from the HEXOD master DB hides on a free hex where it really lives (or, until its sightings are
  * known, within 60 km of your land). Clue + radar (RadarWidget: direction and distance from the map centre), then
  * catch it: its card goes into your album AND its hex becomes yours — a new base far from home (owner 2026-10-19).
- * 5 hunts a day. Server is the referee: the hidden hex is never sent to the client.
+ * 5 free hunts a day, then more at a price that climbs with each hunt until tomorrow. Server is the referee: the hidden hex is never sent to the client.
  *
  * API: GET /safari/active/ · POST /safari/spawn/ · POST /safari/scan/ {lat,lon} · POST /safari/probe/ {lat,lon} · POST /safari/abandon/
  */
@@ -69,12 +69,18 @@ export function DailyHuntPanel({ onClose }: Props) {
   const spawn = useMutation({
     mutationFn: () => api.post('/safari/spawn/', { lat: center?.[0], lon: center?.[1] }).then(r => r.data),
     onSuccess: d => {
-      playSound('explore'); setLast(null); toast.success(d.message); qc.setQueryData(['safari-active'], { target: d.target })
+      playSound('explore'); setLast(null); toast.success(d.message)
+      qc.setQueryData(['safari-active'], { target: d.target, hunts_today: d.hunts_today, free_hunts: d.free_hunts, next_hunt_cost: d.next_hunt_cost })
+      if (d.paid) { const st = useStore.getState(); st.setBalance({ ...(st.balance || {}), in_game: Number(st.balance?.in_game || 0) - d.paid } as any) }
       if (d.target?.mode === 'world') openRadarHunt(d.target)    // straight to the radar, in the clue's region
     },
     onError: (e: any) => toast.error(e?.response?.data?.error
       || (e?.response?.status >= 500 ? 'Safari is unavailable on the server (update pending?) — try again later' : 'Could not start a hunt')),
   })
+  // 5 free hunts a day, then a price that climbs with each hunt until tomorrow (GET /safari/active/ next_hunt_cost)
+  const price: number = data?.next_hunt_cost ?? 0
+  const freeLeft = Math.max(0, (data?.free_hunts ?? 5) - (data?.hunts_today ?? 0))
+  const huntLabel = (txt: string) => price ? <>{txt} · <IconSVG id="hex_coin" size={14} />{price.toLocaleString()}</> : <>{txt}{freeLeft < 5 ? ` · ${freeLeft} FREE LEFT` : ''}</>
   const col = t ? RARITY_COLORS[t.rarity] || '#94a3b8' : '#f97316'
   const cat = t ? CAT[t.creature_category] : undefined
   const captured = t?.status === 'captured'
@@ -82,7 +88,7 @@ export function DailyHuntPanel({ onClose }: Props) {
 
   return (
     <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316" width={480}
-      icon={<IconSVG id="safari_radar" size={24} />} subtitle="Find real creatures where they live · 5 hunts a day">
+      icon={<IconSVG id="safari_radar" size={24} />} subtitle="Find real creatures where they live · 5 free hunts a day">
       {isLoading && <div className="hx-skeleton" style={{ height: 260, borderRadius: 16 }} />}
 
       {!isLoading && !t && (
@@ -93,14 +99,14 @@ export function DailyHuntPanel({ onClose }: Props) {
             </div>
             <div style={{ fontFamily: 'var(--font-heading)', fontSize: 18, color: '#fff' }}>4,401 REAL SPECIES TO COLLECT</div>
             <div style={{ fontSize: 13, color: 'var(--hx-text-2)', marginTop: 6, lineHeight: 1.45 }}>
-              Animals, dinosaurs, insects, plants, fungi and microbes, each where it really lives on Earth.
+              Animals, dinosaurs, insects, plants, fungi and microbes, each where it really lives on Earth — and now and then a fantastic creature.
               You get a clue, then scan with the radar from the map centre: direction and distance, hotter and hotter.
               Close enough? Catch it — its token goes into your album and its hex becomes yours, however far from home:
               a new base to grow another kingdom.
             </div>
           </div>
           <button onClick={() => spawn.mutate()} disabled={spawn.isPending} className="btn-game btn-game-gold" style={{ width: '100%', fontSize: 15, minHeight: 52 }}>
-            {spawn.isPending ? 'LOOKING FOR TRACKS…' : 'START A HUNT'}
+            {spawn.isPending ? 'LOOKING FOR TRACKS…' : huntLabel('START A HUNT')}
           </button>
         </div>
       )}
@@ -152,7 +158,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               </div>
               <p style={{ fontSize: 13, lineHeight: 1.45, margin: 0 }}>{t.creature_description}</p>
               <div style={{ display: 'flex', gap: 8, marginTop: 12, flexWrap: 'wrap' }}>
-                <button className="btn-game btn-game-gold" onClick={() => spawn.mutate()} disabled={spawn.isPending}>NEW HUNT</button>
+                <button className="btn-game btn-game-gold" onClick={() => spawn.mutate()} disabled={spawn.isPending} style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}>{huntLabel('NEW HUNT')}</button>
                 {captured && <button className="btn-game btn-game-blue" onClick={() => useStore.getState().setActivePanel('codex' as any)}>OPEN ALBUM</button>}
                 {t.creature_wiki_url && <a className="btn-game btn-game-glass" href={t.creature_wiki_url} target="_blank" rel="noreferrer">WIKIPEDIA</a>}
               </div>

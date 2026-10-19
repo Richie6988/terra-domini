@@ -47,6 +47,7 @@ interface NewsEventData {
   event_kind?: string; h3_index?: string; poi_name?: string; holder?: string | null; i_hold?: boolean
   my_hex_earned: number; my_serial: number | null
   editions?: number; draw_slots?: number; tickets?: number; my_luck?: number; my_chance?: number | null; luck_potion_active?: boolean
+  my_tickets?: number; next_ticket_cost?: number | null
 }
 
 interface MyResultData {
@@ -96,10 +97,10 @@ export function EventsPanel({ onClose }: Props) {
   }
 
   const handleRegister = async (ev: NewsEventData) => {
-    if (ev.my_registered) return
-    try {
+    try {      // as many tickets as wanted: each one is one more chance, the price climbs with every ticket of the day
       const { data: r } = await api.post(`/events/news/${ev.id}/register/`)
-      toast.success(`Ticket bought — ${r.event?.my_chance ?? '?'}% chance to get one of the ${ev.editions || 10} tokens`)
+      toast.success(`Ticket ${r.event?.my_tickets ?? 1} bought — ${r.event?.my_chance ?? '?'}% chance to get one of the ${ev.editions || 10} tokens`)
+      const st = useStore.getState(); st.setBalance({ ...(st.balance || {}), in_game: r.remaining_balance } as any)
       refetchEvents()
     } catch (e: any) {
       toast.error(e?.response?.data?.error || 'Registration failed')
@@ -210,12 +211,13 @@ export function EventsPanel({ onClose }: Props) {
                       <b style={{ color: '#fbbf24', fontFamily: mono, fontSize: 12 }}>{ev.editions || 10} TOKENS ONLY</b> · {ev.tickets ?? ev.registered_count} tickets
                       <br />{ev.h3_index ? `#1 to the holder, ${ev.draw_slots ?? 9} drawn at the end` : `${ev.draw_slots ?? 10} drawn at the end`} · resell them to collectors
                     </div>
-                    {ev.my_registered
-                      ? <span className="hx-chip" style={{ color: '#86efac' }}><Check size={11} /> {ev.my_chance != null ? `${ev.my_chance}% CHANCE` : 'TICKET'}</span>
-                      : <button onClick={() => handleRegister(ev)} className="btn-game btn-game-gold"
-                                style={{ padding: '8px 10px', fontSize: 10, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 4 }}>
-                          TICKET · {ev.registration_cost === 0 ? 'FREE' : <><IconSVG id="hex_coin" size={12} />{ev.registration_cost}</>}
-                        </button>}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+                      {ev.my_registered && <span className="hx-chip" style={{ color: '#86efac' }}><Check size={11} /> {ev.my_tickets || 1} TICKET{(ev.my_tickets || 1) > 1 ? 'S' : ''}{ev.my_chance != null ? ` · ${ev.my_chance}%` : ''}</span>}
+                      <button onClick={() => handleRegister(ev)} className="btn-game btn-game-gold"
+                              style={{ padding: '8px 10px', fontSize: 10, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 4 }}>
+                        {ev.my_registered ? '+1 TICKET' : 'TICKET'} · {(ev.next_ticket_cost ?? ev.registration_cost) === 0 ? 'FREE' : <><IconSVG id="hex_coin" size={12} />{(ev.next_ticket_cost ?? ev.registration_cost).toLocaleString()}</>}
+                      </button>
+                    </div>
                   </div>
                   <div style={{ fontSize: 10, color: ev.luck_potion_active ? '#86efac' : 'var(--hx-text-3)', display: 'flex', alignItems: 'center', gap: 6, ...body }}>
                     {ev.luck_potion_active

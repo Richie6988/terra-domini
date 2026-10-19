@@ -192,7 +192,7 @@ def draw(ev, holder_id=None) -> list:
         _card(ev, holder_id, 1)
         serial = 2
     while pool and serial <= EDITIONS:
-        r = random.choices(pool, weights=[ticket_weight(x.luck_bonus) for x in pool])[0]
+        r = random.choices(pool, weights=[ticket_weight(x.luck_bonus) * max(1, getattr(x, 'tickets', 1)) for x in pool])[0]
         pool.remove(r)
         r.result, r.token_serial = 'won', serial
         r.save(update_fields=['result', 'token_serial'])

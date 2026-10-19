@@ -364,7 +364,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
             {isFree && player && !claimOpts?.locked && claimOpts?.options?.filter((o: any) => o.method !== 'unlock').map((o0: any) => {
               const k = 1 - spies * (claimOpts?.spy?.per_point || 0)       // spy discount on price and time
               const opt = { ...o0, cost: o0.cost != null ? Math.round(o0.cost * k) : o0.cost, hours: o0.hours != null ? o0.hours * k : o0.hours,
-                            available: o0.method === 'buy' ? (o0.balance ?? 0) >= Math.round((o0.cost || 0) * k) : o0.available }
+                            available: o0.method === 'buy' ? (o0.god_free || (o0.balance ?? 0) >= Math.round((o0.cost || 0) * k)) : o0.available }
               return (
               <button key={opt.method} onClick={() => (opt.method === 'buy' && !opt.available ? openShop() : handleClaim(opt.method))}
                 disabled={claiming || (!opt.available && opt.method !== 'buy')}
@@ -376,7 +376,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
                   cursor: claiming ? 'wait' : (opt.available || opt.method === 'buy') ? 'pointer' : 'not-allowed',
                 }}>
                 {opt.method === 'free' ? <Crown size={15} /> : opt.method === 'buy' ? <IconSVG id="hex_coin" size={16} /> : <Compass size={15} />}
-                {claiming ? '...' : opt.method === 'free' ? 'FREE CLAIM' : opt.method === 'buy' ? (opt.available ? `BUY · ${opt.cost} HEX` : `GET HEX · ${opt.cost} NEEDED`) : `EXPLORE · ${fmtHours(opt.hours)}`}
+                {claiming ? '...' : opt.method === 'free' ? 'FREE CLAIM' : opt.method === 'buy' ? (opt.god_free ? `BUY · ${opt.cost} HEX · GOD: NOT CHARGED` : opt.available ? `BUY · ${opt.cost} HEX` : `GET HEX · ${opt.cost} NEEDED`) : `EXPLORE · ${fmtHours(opt.hours)}`}
               </button>
             )})}
             {isFree && player && !claimOpts && !optsError && (

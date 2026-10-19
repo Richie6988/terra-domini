@@ -36,7 +36,7 @@ function Wheel({ angle, spinning }: { angle: number; spinning: boolean }) {
     return `M0 0 L${R * Math.cos(a0)} ${R * Math.sin(a0)} A${R} ${R} 0 0 1 ${R * Math.cos(a1)} ${R * Math.sin(a1)} Z`
   }
   return (
-    <div style={{ position: 'relative', width: 'min(300px, 78vw)', aspectRatio: '1', margin: '0 auto 12px' }}>
+    <div style={{ position: 'relative', width: 'min(300px, 78vw, 42vh)', aspectRatio: '1', margin: '6px auto 8px' }}>
       {/* pointer */}
       <svg viewBox="0 0 40 44" style={{ position: 'absolute', top: -10, left: '50%', width: 40, transform: 'translateX(-50%)', zIndex: 2, filter: 'drop-shadow(0 3px 0 #1e1b4b)' }}>
         <path d="M20 42 L4 8 Q20 -6 36 8 Z" fill="#fde047" stroke="#1e1b4b" strokeWidth="4" strokeLinejoin="round" />
@@ -54,9 +54,10 @@ function Wheel({ angle, spinning }: { angle: number; spinning: boolean }) {
             <g key={i}>
               <path d={arc(i)} fill={sl.fill} stroke="#1e1b4b" strokeWidth="4" strokeLinejoin="round" />
               <path d={arc(i)} fill="url(#hxWheelShine)" />
-              <text transform={`rotate(${i * SEG}) translate(0 ${-R * 0.66}) rotate(0)`} textAnchor="middle" dominantBaseline="middle"
-                fontFamily="'Luckiest Guy', 'Lilita One', var(--font-heading), sans-serif" fontWeight="900"
-                fontSize={sl.label.length > 4 ? 12 : sl.label.length > 2 ? 15 : 19} fill={sl.ink ? sl.ink : '#fff'}
+              {/* Radial label, centred between hub and rim: always inside its slice */}
+              <text transform={`rotate(${i * SEG - 90}) translate(${R * 0.6} 0)${i * SEG > 180 ? ' rotate(180)' : ''}`} textAnchor="middle" dominantBaseline="central"
+                fontFamily="'Lilita One', var(--font-heading), sans-serif"
+                fontSize={Math.min(18, 58 / (sl.label.length * 0.62))} fill={sl.ink ? sl.ink : '#fff'}
                 stroke={sl.ink ? 'none' : '#1e1b4b'} strokeWidth="3" paintOrder="stroke">{sl.label}</text>
             </g>
           ))}
@@ -81,6 +82,7 @@ export function LotteryPanel({ onClose }: { onClose: () => void }) {
   const [angle, setAngle] = useState(0)
   const [result, setResult] = useState<any>(null)
   const turns = useRef(0)
+  const [showOdds, setShowOdds] = useState(false)
 
   const play = async (tier: string, free = false) => {
     if (spinning) return
@@ -115,19 +117,20 @@ export function LotteryPanel({ onClose }: { onClose: () => void }) {
   return (
     <GlassPanel title="LUCKY" onClose={onClose} accent="#ec4899" icon={<IconSVG id="clover" size={24} />}
       subtitle="Spin for HEX, a territory, a POI or the jackpot">
-      {/* Jackpot */}
-      <div className="hx-card" style={{ textAlign: 'center', marginBottom: 12, background: 'linear-gradient(135deg, rgba(236,72,153,0.25), rgba(251,191,36,0.18))', borderColor: '#f59e0b' }}>
-        <div style={{ fontSize: 10, letterSpacing: 3, color: '#fde68a' }}>JACKPOT</div>
+      {/* Jackpot (one line) */}
+      <div className="hx-card" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '8px 12px', marginBottom: 4,
+        background: 'linear-gradient(135deg, rgba(236,72,153,0.25), rgba(251,191,36,0.18))', borderColor: '#f59e0b' }}>
+        <div style={{ fontSize: 10, letterSpacing: 2, color: '#fde68a', lineHeight: 1.3 }}>JACKPOT<br /><span style={{ fontSize: 9, color: 'var(--hx-text-3)', letterSpacing: 0.5 }}>GOLD WINS IT ALL</span></div>
         <motion.div key={data?.pool} initial={{ scale: 1.2 }} animate={{ scale: 1 }}
-          style={{ fontFamily: 'var(--font-heading)', fontSize: 40, color: '#fde047', textShadow: '0 3px 0 #7c2d12, 0 0 24px #f59e0b', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
-          <IconSVG id="hex_coin" size={34} />{(data?.pool ?? 0).toLocaleString()}
+          style={{ fontFamily: 'var(--font-heading)', fontSize: 28, color: '#fde047', textShadow: '0 2px 0 #7c2d12, 0 0 18px #f59e0b', display: 'flex', alignItems: 'center', gap: 6 }}>
+          <IconSVG id="hex_coin" size={24} />{(data?.pool ?? 0).toLocaleString()}
         </motion.div>
-        <div style={{ fontSize: 11, color: 'var(--hx-text-2)', textTransform: 'none', letterSpacing: 0 }}>10 % of every ticket feeds it. Gold wins it all.</div>
       </div>
 
       <Wheel angle={angle} spinning={spinning} />
+      <div style={{ minHeight: 26, marginBottom: 6, textAlign: 'center' }}>
       {result && !spinning && (
-        <div style={{ textAlign: 'center', marginBottom: 10, fontFamily: 'var(--font-heading)', fontSize: 16, color: result.prize || result.won ? '#4ade80' : '#94a3b8' }}>
+        <div style={{ textAlign: 'center', fontFamily: 'var(--font-heading)', fontSize: 15, color: result.prize || result.won ? '#4ade80' : '#94a3b8' }}>
           {result.won ? (result.won.kind === 'poi' ? `POINT OF INTEREST WON: ${result.won.name}` : `TERRITORY WON${result.won.name ? `: ${result.won.name}` : ''} — a new base`)
             : result.jackpot ? `JACKPOT! +${result.prize.toLocaleString()} HEX` : result.prize ? `+${result.prize.toLocaleString()} HEX` : 'No luck — try again'}
           {result.won && (
@@ -137,31 +140,34 @@ export function LotteryPanel({ onClose }: { onClose: () => void }) {
           )}
         </div>
       )}
+      </div>
 
       {/* Tickets */}
       {data?.free_ticket && (
         <motion.button animate={{ scale: [1, 1.04, 1] }} transition={{ repeat: Infinity, duration: 1.4 }} disabled={spinning}
-          onClick={() => play('bronze', true)} className="btn-game btn-game-green" style={{ width: '100%', marginBottom: 10, minHeight: 48, fontSize: 14 }}>
+          onClick={() => play('bronze', true)} className="btn-game btn-game-green" style={{ width: '100%', marginBottom: 8, minHeight: 42, fontSize: 14 }}>
           FREE DAILY TICKET
         </motion.button>
       )}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
         {(data?.tiers || []).map((t: any) => (
           <button key={t.id} disabled={spinning} onClick={() => play(t.id)} className="hx-card" style={{ cursor: 'pointer', textAlign: 'center',
-            borderColor: TIER_STYLE[t.id].color, background: `linear-gradient(180deg, ${TIER_STYLE[t.id].color}33, transparent)`, padding: 12 }}>
+            borderColor: TIER_STYLE[t.id].color, background: `linear-gradient(180deg, ${TIER_STYLE[t.id].color}33, transparent)`, padding: '8px 6px' }}>
             <div style={{ fontFamily: 'var(--font-heading)', fontSize: 14, color: TIER_STYLE[t.id].color }}>{TIER_STYLE[t.id].label}</div>
             <div style={{ fontSize: 18, fontWeight: 900, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4, margin: '4px 0' }}>
               <IconSVG id="hex_coin" size={16} />{t.cost.toLocaleString()}</div>
-            <div style={{ fontSize: 10, color: 'var(--hx-text-3)' }}>up to x25 · land · {Math.round(t.jackpot_share * 100)}% jackpot</div>
+            <div style={{ fontSize: 9.5, color: 'var(--hx-text-3)' }}>{Math.round(t.jackpot_share * 100)}% of jackpot</div>
           </button>
         ))}
       </div>
-      <div style={{ fontSize: 11, color: 'var(--hx-text-3)', marginTop: 8, textTransform: 'none', letterSpacing: 0 }}>
-        Paid with HEX earned in game ({Math.floor(data?.earned_balance ?? 0).toLocaleString()} available) — purchased HEX can't be used here.
+      <div style={{ fontSize: 10.5, color: 'var(--hx-text-3)', marginTop: 6, textTransform: 'none', letterSpacing: 0, display: 'flex', justifyContent: 'space-between', gap: 8 }}>
+        <span>Earned HEX only · {Math.floor(data?.earned_balance ?? 0).toLocaleString()} available</span>
+        <button className="hx-chip" style={{ cursor: 'pointer', flexShrink: 0 }} onClick={() => setShowOdds(v => !v)} aria-expanded={showOdds}>
+          {showOdds ? 'HIDE ODDS' : 'ODDS & WINS'}</button>
       </div>
 
-      {/* Odds + winners: transparent */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 12 }}>
+      {/* Odds + winners: transparent, folded so the wheel fits the screen */}
+      {showOdds && <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginTop: 10 }}>
         <div className="hx-card" style={{ padding: 10 }}>
           <div style={{ fontSize: 10, letterSpacing: 2, marginBottom: 6 }}>ODDS</div>
           {(data?.odds || []).map((o: any) => (
@@ -181,7 +187,7 @@ export function LotteryPanel({ onClose }: { onClose: () => void }) {
             </div>
           ))}
         </div>
-      </div>
+      </div>}
     </GlassPanel>
   )
 }

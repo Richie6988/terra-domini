@@ -508,7 +508,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             options.append({'method': 'free', 'label': 'CLAIM (FREE)', 'cost': 0, 'available': True})
         elif not locked:
             options.append({'method': 'buy', 'label': f'BUY ({buy_cost} HEX)', 'cost': buy_cost,
-                            'available': balance >= buy_cost, 'balance': balance})
+                            'available': balance >= buy_cost or bool(disc.get('god_free')), 'balance': balance,
+                            'god_free': bool(disc.get('god_free'))})
             options.append({'method': 'explore', 'label': f'EXPLORE ({explore_hours}h)', 'hours': explore_hours,
                             'available': running < slots, 'is_adjacent': is_adjacent, 'slots': slots, 'running': running})
 
@@ -618,7 +619,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
 
         elif method == 'buy':
             from terra_domini.apps.economy.balance import consume_purchased_first
-            cost = disc['cost']
+            cost = 0 if disc.get('god_free') else disc['cost']     # god mode: shown, not charged
             player_obj = P.objects.get(id=request.user.id)
             if float(player_obj.tdc_in_game) < cost:
                 return Response({
@@ -1207,7 +1208,19 @@ def _creature_info(uid):
             'creature_wiki_url': c.get('wiki_url', '')}
 
 
-SAFARI_HUNTS_PER_DAY = 5
+SAFARI_HUNTS_PER_DAY = 5      # free hunts a day (economy.balance.ESCALATION['safari']); more cost more and more
+
+
+def _hunt_price(player):
+    """Hunts done today and the price of the next one (0 while free hunts remain)."""
+    from django.utils import timezone
+    from terra_domini.apps.economy.balance import escalated_price, has_boost
+    from terra_domini.utils.god import is_god
+    today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    done = SafariTarget.objects.filter(player=player, assigned_at__gte=today).count()
+    free = is_god(player) or has_boost(player, 'safari_continuous')
+    return {'hunts_today': done, 'free_hunts': SAFARI_HUNTS_PER_DAY,
+            'next_hunt_cost': 0 if free else escalated_price(player, 'safari', used=done)}
 
 
 def _claim_safari_hex(player, target):
@@ -1274,8 +1287,8 @@ class SafariViewSet(viewsets.GenericViewSet):
             target.status = 'expired'; target.save(update_fields=['status'])
             target = None
         if not target:
-            return Response({'target': None, 'message': 'No active hunt. Spawn a new target!'})
-        return Response({'target': _target_payload(target)})
+            return Response({'target': None, 'message': 'No active hunt. Spawn a new target!', **_hunt_price(request.user)})
+        return Response({'target': _target_payload(target), **_hunt_price(request.user)})
 
     @action(detail=False, methods=['POST'], url_path='spawn')
     def spawn_target(self, request):
@@ -1292,9 +1305,19 @@ class SafariViewSet(viewsets.GenericViewSet):
         from django.utils import timezone
         today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
         done = SafariTarget.objects.filter(player=request.user, assigned_at__gte=today).count()
-        from terra_domini.apps.economy.balance import has_boost, use_charge
-        if done >= SAFARI_HUNTS_PER_DAY and not god and not has_boost(request.user, 'safari_continuous'):   # shop '1H Continuous Safari'
-            return Response({'error': f'{SAFARI_HUNTS_PER_DAY} hunts a day — new tracks tomorrow.'}, status=429)
+        from terra_domini.apps.economy.balance import has_boost, use_charge, escalated_price
+        # 5 free hunts a day, then as many as the player wants at a price that climbs with each hunt until tomorrow
+        price = 0 if (god or has_boost(request.user, 'safari_continuous')) else escalated_price(request.user, 'safari', used=done)
+        if price:
+            from django.db import transaction
+            from django.db.models import F
+            from terra_domini.apps.accounts.models import Player as _P
+            with transaction.atomic():
+                me = _P.objects.select_for_update().get(id=request.user.id)
+                if float(me.tdc_in_game or 0) < price:
+                    return Response({'error': f'Extra hunt today: {price:,} HEX (you have {float(me.tdc_in_game or 0):,.0f}). Free hunts again tomorrow.',
+                                     'cost': price, 'shop': True}, status=402)
+                _P.objects.filter(id=me.id).update(tdc_in_game=F('tdc_in_game') - price)
         lat = float(request.data.get('lat', 48.8566))
         lon = float(request.data.get('lon', 2.3522))
 
@@ -1313,7 +1336,7 @@ class SafariViewSet(viewsets.GenericViewSet):
             target.save(update_fields=['tries_left'])
         msg = (f'{target.creature_name}: {target.hint}. Use the radar — {target.tries_left} scans.' if target.mode == 'world'
                else f'{target.creature_name} is hiding near your territory! {target.tries_left} scans.')
-        return Response({'target': _target_payload(target), 'message': msg})
+        return Response({'target': _target_payload(target), 'message': msg, 'paid': price, **_hunt_price(request.user)})
 
     @action(detail=False, methods=['POST'], url_path='scan')
     def radar_scan(self, request):

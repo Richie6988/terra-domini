@@ -209,9 +209,9 @@ def discovery(player, h3_index: str, rarity: str = 'common', is_poi: bool = Fals
     cost = int(round(DISCOVERY_COST * factor * RARITY_PRICE_MULT.get((rarity or 'common').lower(), 1) * (1 - disc)))
     hours = round(min(EXPLORE_MAX_HOURS, DISCOVERY_HOURS * factor) * (1 - disc), 2)
     from terra_domini.utils.god import is_god
-    if is_god(player):          # god mode: free, instant, anywhere (POIs included)
-        return {'distance': None if first else dist, 'factor': 1, 'cost': 0, 'hours': BLITZ_EXPLORE_HOURS, 'first': first,
-                'locked': False, 'spy_discount': 0, 'near_hex': near_hex}
+    if is_god(player):          # god mode: real price shown but not charged, instant, anywhere (POIs included)
+        return {'distance': None if first else dist, 'factor': factor, 'cost': cost, 'hours': BLITZ_EXPLORE_HOURS, 'first': first,
+                'locked': False, 'spy_discount': disc, 'near_hex': near_hex, 'god_free': True}
     return {'distance': None if first else dist, 'factor': factor, 'cost': cost, 'hours': hours, 'first': first,
             'locked': bool(is_poi and not first and d > 1),     # POIs: be right next to them
             'spy_discount': disc, 'near_hex': near_hex}
@@ -239,3 +239,37 @@ def consume_purchased_first(player, amount) -> None:
         return
     use = min(bought, Decimal(str(amount)))
     type(player).objects.filter(pk=player.pk).update(hex_purchased_balance=bought - use)
+
+
+# ── Prices that climb with each use until the next day (owner 2026-10-19: "allow event and safari as much as the
+#    player wants but it costs more and more until next day") ──
+ESCALATION = {           # kind: (free uses a day, base HEX, growth per extra use)
+    'safari': (5, 300, 1.6),
+    'event_ticket': (0, None, 1.5),     # base = the event's ticket price
+}
+
+
+def daily_count(player, kind) -> int:
+    from terra_domini.apps.economy.models import DailyCounter
+    from django.utils import timezone
+    row = DailyCounter.objects.filter(player=player, kind=kind, day=timezone.localdate()).first()
+    return row.count if row else 0
+
+
+def escalated_price(player, kind, base=None, used=None) -> int:
+    """HEX price of the next use today: free uses first, then base × growth^(extra uses), rounded to 10."""
+    free, b, growth = ESCALATION[kind]
+    b = b if base is None else base
+    n = daily_count(player, kind) if used is None else used
+    if n < free or not b:
+        return 0
+    return int(round(b * growth ** (n - free) / 10) * 10)
+
+
+def bump_daily(player, kind) -> int:
+    from terra_domini.apps.economy.models import DailyCounter
+    from django.db.models import F
+    from django.utils import timezone
+    row, _ = DailyCounter.objects.get_or_create(player=player, kind=kind, day=timezone.localdate())
+    DailyCounter.objects.filter(pk=row.pk).update(count=F('count') + 1)
+    return row.count + 1
