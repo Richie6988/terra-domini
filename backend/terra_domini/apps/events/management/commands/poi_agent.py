@@ -56,6 +56,9 @@ For the POI you are given:
 1. Identify it with certainty. Call wiki_lookup with its Wikipedia title (or its name). If the name is ambiguous, wrong
    or the article is missing, use web_search / web_fetch to find the real place. If the place does not exist, is a
    duplicate of a more famous entry, or cannot be located, submit verdict "rejected" with the reason.
+   The row's game_category and country_code say WHAT the token is: if the article / coordinates describe another kind
+   of thing (category gas_reserve in QA but a granite dome in California), the row was mismatched: find the real place
+   of that category and country and use its article. Never turn a token into another kind of thing.
 2. Check the facts: exact name (English, as on Wikipedia), coordinates (use Wikipedia's when they exist), ISO 3166-1
    alpha-2 country code. Fix what is wrong (verdict "corrected") or confirm (verdict "validated").
 3. Write the card description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing you

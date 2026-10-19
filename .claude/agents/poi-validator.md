@@ -21,6 +21,10 @@ For each row:
 1. Identify it with certainty: `--lookup` with its Wikipedia title (from wiki_url) or its name. If ambiguous or
    missing, search the web. If the place does not exist, duplicates a more famous entry, or cannot be located,
    submit verdict "rejected" with reject_reason.
+   The row's game_category and country_code say WHAT the token is meant to be. If the wiki_url, coordinates or
+   description describe a different kind of thing (e.g. category gas_reserve in QA but the article is a granite dome
+   in California), the source row was mismatched: find the real place matching the category and country (web search),
+   use ITS article and coordinates, and list the fix in corrections. Never turn a token into another kind of thing.
 2. Check the facts: exact English name (as on Wikipedia), coordinates (Wikipedia's when they exist), ISO 3166-1
    alpha-2 country code. Fix what is wrong (verdict "corrected", list each fix in corrections) or confirm ("validated").
 3. Description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing unverified.
