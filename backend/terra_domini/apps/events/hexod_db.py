@@ -31,11 +31,17 @@ def load() -> dict:
         return json.load(f)
 
 
+# Safari = living nature only (owner 2026-10-19): fauna (animals, insects), flora (plants, fungi), micro-organisms, dinosaurs
+SAFARI_FAMILIES = {'animal', 'insect', 'vegetal', 'mushroom', 'microOrganism', 'fossil'}
+
+
 @lru_cache(maxsize=1)
 def _creatures_by_rarity() -> dict:
     out: dict = {}
     for c in load().get('creatures', []):
         if not c.get('description') or c.get('needs_review'):   # wrong article / no text: not spawned
+            continue
+        if c.get('codex_category') not in SAFARI_FAMILIES:
             continue
         out.setdefault(c.get('rarity') or 'common', []).append(c)
     return out

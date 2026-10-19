@@ -1202,3 +1202,10 @@ html {
 @keyframes hx-wheel-bulb { 0%, 100% { opacity: 1 } 50% { opacity: 0.35 } }
 .hx-wheel-bulb { animation: hx-wheel-bulb 0.4s steps(2) infinite }
 @media (prefers-reduced-motion: reduce) { .hx-wheel-bulb { animation: none } }
+/* Safari hunting zone (SafariZoneLayer): slow breathing so it reads as "alive" without hiding the map */
+@keyframes hx-safari-zone { 0%, 100% { fill-opacity: 0.32 } 50% { fill-opacity: 0.5 } }
+.hx-safari-zone { animation: hx-safari-zone 2.4s ease-in-out infinite }
+@media (prefers-reduced-motion: reduce) { .hx-safari-zone { animation: none } }
+@keyframes hx-safari-hex { 0%, 100% { fill-opacity: 0.35 } 50% { fill-opacity: 0.65 } }
+.hx-safari-hex { animation: hx-safari-hex 1.2s ease-in-out infinite }
+@media (prefers-reduced-motion: reduce) { .hx-safari-hex { animation: none } }

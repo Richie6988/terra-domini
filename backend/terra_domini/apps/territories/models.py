@@ -567,26 +567,40 @@ class PendingClaim(models.Model):
 
 class SafariTarget(models.Model):
     """Active safari hunt target assigned to a player."""
+    # Fallback when the nature DB is missing: real species only (fauna, flora, micro-organisms, dinosaurs)
     CREATURES = [
-        ('trex', 'Tyrannosaurus Rex', 'legendary', 1000),
-        ('raptor', 'Velociraptor Pack', 'epic', 500),
+        ('trex', 'Tyrannosaurus', 'legendary', 1000),
+        ('raptor', 'Velociraptor', 'epic', 500),
         ('mammoth', 'Woolly Mammoth', 'epic', 400),
-        ('eagle', 'Giant Golden Eagle', 'rare', 200),
-        ('whale', 'Blue Whale Migration', 'legendary', 800),
-        ('fungus', 'Bioluminescent Fungus', 'rare', 150),
-        ('phoenix', 'Phoenix Egg', 'mythic', 2000),
-        ('dragon', 'Storm Dragon', 'mythic', 2500),
-        ('wolf', 'Ghost Wolf Alpha', 'epic', 350),
-        ('kraken', 'Deep Sea Kraken', 'legendary', 1200),
-        ('unicorn', 'Crystal Unicorn', 'mythic', 1800),
-        ('serpent', 'Ancient Sea Serpent', 'legendary', 900),
-        ('bear', 'Arctic Dire Bear', 'rare', 250),
-        ('beetle', 'Titan Scarab Beetle', 'uncommon', 100),
-        ('coral', 'Living Coral Colony', 'uncommon', 80),
+        ('eagle', 'Golden Eagle', 'rare', 200),
+        ('whale', 'Blue Whale', 'legendary', 800),
+        ('fungus', 'Ghost Fungus', 'rare', 150),
+        ('wolf', 'Grey Wolf', 'epic', 350),
+        ('bear', 'Polar Bear', 'rare', 250),
+        ('beetle', 'Goliath Beetle', 'uncommon', 100),
+        ('coral', 'Staghorn Coral', 'uncommon', 80),
         ('frog', 'Poison Dart Frog', 'common', 50),
-        ('butterfly', 'Aurora Butterfly Swarm', 'rare', 175),
-        ('spider', 'Crystal Cave Spider', 'epic', 450),
+        ('butterfly', 'Monarch Butterfly', 'rare', 175),
+        ('orchid', 'Ghost Orchid', 'epic', 450),
+        ('baobab', 'Baobab', 'rare', 200),
+        ('tardigrade', 'Tardigrade', 'epic', 400),
     ]
+    # Fantastic creatures (owner 2026-10-19: "fantastic creatures accepted in safari too"): a rare hunt (FANTASY_CHANCE),
+    # hidden near the player's land like any radar hunt. Own album family 'fantasy'. (uid, name, rarity, HEX, legend)
+    FANTASY = [
+        ('fx-dragon', 'Storm Dragon', 'mythic', 2500, 'A dragon that nests inside thunderclouds and drinks lightning.'),
+        ('fx-phoenix', 'Phoenix', 'mythic', 2000, 'The firebird that burns to ash every five centuries and is reborn from it.'),
+        ('fx-unicorn', 'Crystal Unicorn', 'mythic', 1800, 'A white horse with a single spiralled horn said to purify water.'),
+        ('fx-kraken', 'Kraken', 'legendary', 1200, 'The giant sea monster of Norse sailors, big enough to drag ships under.'),
+        ('fx-serpent', 'Ancient Sea Serpent', 'legendary', 900, 'A colossal serpent seen by sailors in every ocean since antiquity.'),
+        ('fx-griffin', 'Griffin', 'legendary', 1000, 'Lion body, eagle head and wings: guardian of treasures in Greek legend.'),
+        ('fx-yeti', 'Yeti', 'epic', 600, 'The ape-like giant of the Himalayas, known only by its footprints in the snow.'),
+        ('fx-nessie', 'Loch Ness Monster', 'epic', 500, 'The long-necked creature of the Scottish loch, photographed but never caught.'),
+        ('fx-wolf', 'Ghost Wolf Alpha', 'epic', 350, 'A pale wolf that leads its pack through the fog and leaves no tracks.'),
+        ('fx-kitsune', 'Nine-tailed Fox', 'legendary', 950, 'The Japanese fox spirit that grows a new tail every hundred years.'),
+    ]
+    FANTASY_CHANCE = 1 / 15
+    WORLD_SCANS_MAX = 10   # radar scans can never go above this (shop hints included)
 
     player = models.ForeignKey('accounts.Player', on_delete=models.CASCADE, related_name='safari_targets')
     creature_id = models.CharField(max_length=30)
@@ -649,14 +663,17 @@ class SafariTarget(models.Model):
         )
 
     @classmethod
-    def spawn_for_player(cls, player, base_lat=None, base_lon=None):
+    def spawn_for_player(cls, player, base_lat=None, base_lon=None, fantasy=False):
         """Fallback while no sighting is known for any species: a real species spotted 5-60 km from one of the
-        player's hexes (or the map position), on a free hex — same radar hunt as the world safari."""
+        player's hexes (or the map position), on a free hex — same radar hunt as the world safari.
+        fantasy=True: one of the FANTASY creatures instead."""
         import math, random, h3
         from terra_domini.apps.events.hexod_db import pick_creature, CAPTURE_REWARD
         from terra_domini.apps.territories.models import Territory
-        real = pick_creature()
-        if real:
+        real = None if fantasy else pick_creature()
+        if fantasy:
+            cid, cname, rarity, reward, _ = random.choice(cls.FANTASY)
+        elif real:
             cid, cname, rarity = real['uid'][:30], real['name'][:100], real['rarity']
             reward = CAPTURE_REWARD.get(rarity, 50)
         else:
@@ -678,7 +695,7 @@ class SafariTarget(models.Model):
         return cls.objects.create(
             player=player, creature_id=cid, creature_name=cname, rarity=rarity, hex_reward=reward,
             target_lat=tlat, target_lon=tlon, target_h3=cell, center_h3='', mode='world', tries_left=cls.WORLD_SCANS,
-            probes=[], hint=f'Spotted within 60 km of {where}',
+            probes=[], hint=(f'Legends place it within 60 km of {where}' if fantasy else f'Spotted within 60 km of {where}'),
         )
 
     def grid(self):

@@ -333271,7 +333271,7 @@
   {
    "uid": "cr-n21",
    "name": "Common warthog",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "The common warthog (Phacochoerus africanus) is a wild member of thepig family (Suidae) found in grassland, savanna, and woodland insub-Saharan Africa. In the past, it was commonly treated as a subspecies of P. aethiopicus, but today that scientific name is restricted to the desert warthog of northern Kenya, Somalia, a…",
    "wiki_url": "https://en.wikipedia.org/wiki/Common_Warthog",
    "image": "",
@@ -333311,7 +333311,7 @@
   {
    "uid": "cr-n25",
    "name": "Scimitar oryx",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The scimitar oryx (Oryx dammah), also known as thescimitar-horned oryx and the Sahara oryx, is an Oryx species that was once widespread across North Africa and parts of West Africa and Central Africa. In 2000, it was declared extinct in the wildon the IUCN Red List, but in 2023 it was down listed to endangered, with a…",
    "wiki_url": "https://en.wikipedia.org/wiki/Scimitar-horned_Oryx",
    "image": "",
@@ -333331,7 +333331,7 @@
   {
    "uid": "cr-n27",
    "name": "Dama gazelle",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Thedama gazelle (Nanger dama), also known as the addra gazelle ormhorr gazelle, is a species of gazelle. It lives in Africa, in the Sahara desert and the Sahel.",
    "wiki_url": "https://en.wikipedia.org/wiki/Dama_Gazelle",
    "image": "",
@@ -333871,7 +333871,7 @@
   {
    "uid": "cr-n81",
    "name": "Mona monkey",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The mona monkey (Cercopithecus mona) is an Old World monkey that lives in western Africa between Ghana and Cameroon. The mona monkey can also be found on the island of Grenada as it was transported to the island aboard slave ships headed to the New World during the 18th century.",
    "wiki_url": "https://en.wikipedia.org/wiki/Mona_Monkey",
    "image": "",
@@ -334101,7 +334101,7 @@
   {
    "uid": "cr-n104",
    "name": "Black-and-white colobus",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Black-and-white colobuses (orcolobi) are Old World monkeys of the genus Colobus, native to Africa. They are closely related to the red colobus monkeys of genus Piliocolobus.",
    "wiki_url": "https://en.wikipedia.org/wiki/Black-and-white_Colobus",
    "image": "",
@@ -334111,7 +334111,7 @@
   {
    "uid": "cr-n105",
    "name": "King colobus",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The king colobus (Colobus polykomos), also known as the western black-and-white colobus, is a species of Old World monkey, found in lowland and mountain rainforests in a region stretching from Senegal, through Guinea-Bissau, Guinea, Sierra Leone and Liberia to the Ivory Coast. One of five members of the genus Colobus,…",
    "wiki_url": "https://en.wikipedia.org/wiki/King_Colobus",
    "image": "",
@@ -334211,7 +334211,7 @@
   {
    "uid": "cr-n115",
    "name": "Pennant's colobus",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Pennant's colobusor Pennant's red colobus (Piliocolobus pennantii) is a species of tree-dwellingprimatein the family Cercopithecidae. It is endemic to tropical Central Africa.",
    "wiki_url": "https://en.wikipedia.org/wiki/Pennant%27s_Red_Colobus",
    "image": "N115_Pennant's colobus_0.jpg",
@@ -334221,7 +334221,7 @@
   {
    "uid": "cr-n116",
    "name": "Bouvier%27s Red Colobus",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Pennant's colobusor Pennant's red colobus (Piliocolobus pennantii) is a species of tree-dwellingprimatein the family Cercopithecidae. It is endemic to tropical Central Africa.",
    "wiki_url": "https://en.wikipedia.org/wiki/Bouvier%27s_Red_Colobus",
    "image": "",
@@ -334381,7 +334381,7 @@
   {
    "uid": "cr-n134",
    "name": "White-bellied pangolin",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The white-bellied pangolin (Phataginus tricuspis) is one of eight extant species of pangolins (\"scaly anteaters\"), and is native to equatorial Africa. Also known as the tree pangolinorthree-cusped pangolin, it is the most common of the African forest pangolins.",
    "wiki_url": "https://en.wikipedia.org/wiki/Tree_Pangolin",
    "image": "",
@@ -334391,7 +334391,7 @@
   {
    "uid": "cr-n135",
    "name": "Giant pangolin",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The giant pangolin (Smutsia gigantea) is a species of pangolin from genus Smutsi a of subfamily Smutsiinae within the family Manidae. It is the largest living species of pangolins.",
    "wiki_url": "https://en.wikipedia.org/wiki/Giant_Pangolin",
    "image": "",
@@ -334401,7 +334401,7 @@
   {
    "uid": "cr-n136",
    "name": "Long-tailed pangolin",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The long-tailed pangolin (Phataginus tetradactyla), also called the African black-bellied pangolin or ip i, is a diurnal, arboreal pangolin species belonging to the family Manidae, in the order Pholidota. They feed on ants rather than termites.",
    "wiki_url": "https://en.wikipedia.org/wiki/Long-tailed_Pangolin",
    "image": "",
@@ -334461,7 +334461,7 @@
   {
    "uid": "cr-n142",
    "name": "Natal multimammate mouse",
-   "codex_category": "microOrganism",
+   "codex_category": "animal",
    "description": "The Natal multimammate mouse (Mastomys natalensis) is a species of rodent in the family Muridae. It is also known as the Natal multimammate rat, the common African rat, African soft fur rator the African soft-furred mouse.",
    "wiki_url": "https://en.wikipedia.org/wiki/Natal_Multimammate_Mouse",
    "image": "",
@@ -334571,7 +334571,7 @@
   {
    "uid": "cr-n153",
    "name": "Unstriped ground squirrel",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The unstriped ground squirrel (Xerus rutilus) is a species of rodent (order Rodentia) in the family Sciuridae. It is the only member of the genus Xerus.",
    "wiki_url": "https://en.wikipedia.org/wiki/Unstriped_Ground_Squirrel",
    "image": "",
@@ -334631,7 +334631,7 @@
   {
    "uid": "cr-n159",
    "name": "Smith's bush squirrel",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Smith's bush squirrel (Paraxerus cepapi), also known as theyellow-footed squirrel or tree squirrel, is an African bush squirrel which is native to woodlands of the southern Afrotropic s.",
    "wiki_url": "https://en.wikipedia.org/wiki/Smith%27s_Bush_Squirrel",
    "image": "",
@@ -334711,7 +334711,7 @@
   {
    "uid": "cr-n167",
    "name": "Striped polecat",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The striped polecat (Ictonyx striatus), also called the African polecat, zoril, zorille, zorilla, African muishond, striped muishond, Cape polecat, and African skunk, is a species of mammal native tosub-Saharan Africa. Despite bearing some resemblance to askunk (of the family Mephitidae), it belongs in a separate fami…",
    "wiki_url": "https://en.wikipedia.org/wiki/Striped_Polecat",
    "image": "N167_Striped polecat_0.jpg",
@@ -334951,7 +334951,7 @@
   {
    "uid": "cr-n192",
    "name": "Sloth bear",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Thesloth bear (Melursus ursinus), also known as the Indian bear, is amyrmecophago us bear species native to the Indian subcontinent. It feeds on fruits, ants and termites.",
    "wiki_url": "https://en.wikipedia.org/wiki/Sloth_Bear",
    "image": "N192_Sloth bear_3.jpg",
@@ -334971,7 +334971,7 @@
   {
    "uid": "cr-n194",
    "name": "Gaur",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Thegaur (Bos gaurus; ), also known as the Indian bison, is a large bovine native to the Indian subcontinent and Southeast Asia, and has been listed as Vulnerable on the IUCN Red List since 1986. The global population was estimated at a maximum of 21,000 mature individuals in 2016, with the majority of those existing i…",
    "wiki_url": "https://en.wikipedia.org/wiki/Gaur",
    "image": "",
@@ -334981,7 +334981,7 @@
   {
    "uid": "cr-n195",
    "name": "Wild water buffalo",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The wild water buffalo (Bubalus arnee), also called Asian buffalo, Asiatic buffalo and wild buffalo, is a large bovine native to the Indian subcontinent and Southeast Asia. It was first described in 1792.",
    "wiki_url": "https://en.wikipedia.org/wiki/Wild_Water_Buffalo",
    "image": "N195_Wild water buffalo_0.jpg",
@@ -335001,7 +335001,7 @@
   {
    "uid": "cr-n197",
    "name": "Kouprey",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The kouprey (Bos sauveli), also known as the forest oxand grey ox, is a possibly extinct species of forest-dwelling wild bovine native to Southeast Asia. It was first scientifically described in 1937.",
    "wiki_url": "https://en.wikipedia.org/wiki/Kouprey",
    "image": "",
@@ -335041,7 +335041,7 @@
   {
    "uid": "cr-n201",
    "name": "Blackbuck",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The blackbuck (Antilope cervicapra), also known as the Indian antelope, is a medium-sizedantelopenative to India and Nepal. It inhabits grassy plains and lightly forested areas with perennial water sources.",
    "wiki_url": "https://en.wikipedia.org/wiki/Blackbuck",
    "image": "",
@@ -335241,7 +335241,7 @@
   {
    "uid": "cr-n222",
    "name": "Black-and-white snub-nosed monkey",
-   "codex_category": "mushroom",
+   "codex_category": "animal",
    "description": "The black-and-white snub-nosed monkey (Rhinopithecus bieti), also known as the Yunnan snub-nosed monkey, is a large black and white primate that lives only in the southern Chinese province of Yunnan, where it is known to the locals as the Yunnan golden hair monkey (Chinese:滇金丝猴) and the black-and-white snub-nosed monk…",
    "wiki_url": "https://en.wikipedia.org/wiki/Black_Snub-nosed_Monkey",
    "image": "",
@@ -335331,7 +335331,7 @@
   {
    "uid": "cr-n232",
    "name": "Siamang",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "The siamang ( , also UK: ; Symphalangus syndactylus) is an endangered arboreal, black-furredgibbonnative to the forests of Indonesia, Malaysia, and Thailand. The largest of the gibbons, the siamang can be twice the size of other gibbons, reaching 1 m (3.3 ft) in height, and weighing up to 14 kg (31 lb).",
    "wiki_url": "https://en.wikipedia.org/wiki/Siamang",
    "image": "",
@@ -335401,7 +335401,7 @@
   {
    "uid": "cr-n239",
    "name": "Pygmy slow loris",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The pygmy slow loris (Xanthonycticebus pygmaeus) is a species of slow loris found east of the Mekong River in Vietnam, Laos, eastern Cambodia, and China. It occurs in a variety of forest habitats, including tropical dry forests, semi-evergreen, and evergreen forests.",
    "wiki_url": "https://en.wikipedia.org/wiki/Pygmy_Slow_Loris",
    "image": "",
@@ -335411,7 +335411,7 @@
   {
    "uid": "cr-n240",
    "name": "Slender loris",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The slender lorises (Loris) are a genus ofloris native to India and Sri Lanka. The genus comprises two species, the red slender loris found in Sri Lanka and the gray slender lorisfrom Sri Lanka and India.",
    "wiki_url": "https://en.wikipedia.org/wiki/Slender_Loris",
    "image": "",
@@ -335421,7 +335421,7 @@
   {
    "uid": "cr-n241",
    "name": "Indian pangolin",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The Indian pangolin (Manis crassicaudata), also calledthick-tailed pangolin and scaly anteater, is a pangolin native to the Indian subcontinent. Like other pangolins, it has large, overlapping scales on its body which act as armour.",
    "wiki_url": "https://en.wikipedia.org/wiki/Indian_Pangolin",
    "image": "",
@@ -335511,7 +335511,7 @@
   {
    "uid": "cr-n250",
    "name": "Tolai hare",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Thetolai hare (Lepus tolai) is a species of hare native to Central Asia, including much of Mongolia, eastern Iran, Afghanistan, southern Kazakhstan, Turkmenistan, Uzbekistan, Kyrgyzstan, and North and Central China. It inhabitssemi-desert, steppes, rocky habitats, grasslands, and river valleys.",
    "wiki_url": "https://en.wikipedia.org/wiki/Tolai_Hare",
    "image": "",
@@ -335561,7 +335561,7 @@
   {
    "uid": "cr-n255",
    "name": "Greater horseshoe bat",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The greater horseshoe bat (Rhinolophus ferrumequinum) is an insectivorous batof the genus Rhinolophus. Its distribution covers Europe, Northern Africa, Central Asia and Eastern Asia.",
    "wiki_url": "https://en.wikipedia.org/wiki/Greater_Horseshoe_Bat",
    "image": "",
@@ -335571,7 +335571,7 @@
   {
    "uid": "cr-n256",
    "name": "Lesser horseshoe bat",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The lesser horseshoe bat (Rhinolophus hipposideros) is a type of small European and North African insectivorous bat, related to its larger cousin, the greater horseshoe bat. As with all horseshoe bats, the species gets its name from its distinctive horseshoe-shapednoseleaf.",
    "wiki_url": "https://en.wikipedia.org/wiki/Lesser_Horseshoe_Bat",
    "image": "",
@@ -335621,7 +335621,7 @@
   {
    "uid": "cr-n261",
    "name": "Indian palm squirrel",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The Indian palm squirrelorthree-striped palm squirrel (Funambulus palmarum) is a species of rodent in the family Sciuridae found naturally in India (south of the Vindhyas) and Sri Lanka. In the late 19th century, the palm squirrel was introduced to Madagascar, Réunion, Mayotte, Com oro Islands, Mauritius, and Seychell…",
    "wiki_url": "https://en.wikipedia.org/wiki/Indian_Palm_Squirrel",
    "image": "",
@@ -335651,7 +335651,7 @@
   {
    "uid": "cr-n264",
    "name": "Pallas's squirrel",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Pallas's squirrel (Callosciurus erythraeus), also known as thered-bellied tree squirrel, is a species of squirrel native to China, Taiwan, India, Bhutan, and Southeast Asia.",
    "wiki_url": "https://en.wikipedia.org/wiki/Pallas%27s_Squirrel",
    "image": "",
@@ -335671,7 +335671,7 @@
   {
    "uid": "cr-n266",
    "name": "Prevost's squirrel",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Prevost's squirrelor Asian tri-coloured squirrel (Callosciurus prevostii) is a colourful species of rodent in the family Sciuridae. It is found in forests in the Thai-Malay Peninsula, Sumatra, Borneo and nearby smaller islands, with an introduced population in northern Sulawesi.",
    "wiki_url": "https://en.wikipedia.org/wiki/Prevost%27s_Squirrel",
    "image": "",
@@ -335701,7 +335701,7 @@
   {
    "uid": "cr-n269",
    "name": "Himalayan marmot",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "The Himalayan marmot (Marmota himalayana) is a marmot species that inhabits alpine grasslands throughout the Himalayas and on the Tibetan Plateau. It is IUCN Red Listed as Least Concern because of its wide range and possibly large population.",
    "wiki_url": "https://en.wikipedia.org/wiki/Himalayan_Marmot",
    "image": "",
@@ -335801,7 +335801,7 @@
   {
    "uid": "cr-n280",
    "name": "Common treeshrew",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The common treeshrew (Tupaia glis) is a small mammal in the tree shrew family Tupaiidae, and is native to Thailand, Malaysia, Singapore and Indonesia. It has been listed as Least Concern by IUCNas it remains common and displays some adapt ability to ongoing habitat loss.",
    "wiki_url": "https://en.wikipedia.org/wiki/Common_Tree_Shrew",
    "image": "",
@@ -335851,7 +335851,7 @@
   {
    "uid": "cr-n285",
    "name": "Iberian lynx",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "The Iberian lynx (Lynx pardinus) is one of the four extant species of the Lynx, a genus of medium-sized wildcats. It is endemic to the Iberian Peninsula.",
    "wiki_url": "https://en.wikipedia.org/wiki/Iberian_Lynx",
    "image": "",
@@ -336031,7 +336031,7 @@
   {
    "uid": "cr-n304",
    "name": "European hamster",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "The European hamster (Cricetus cricetus), also known as the Eurasian hamster, black-bellied hamster or common hamster, is the only living species of hamster in the genus Cricetus. It is native to grassland and similar habitats in a large part of Eurasia, extending from Belgium to the Altai Mountains and Yenisey River …",
    "wiki_url": "https://en.wikipedia.org/wiki/European_Hamster",
    "image": "N304_European hamster_0.jpg",
@@ -336111,7 +336111,7 @@
   {
    "uid": "cr-n312",
    "name": "Red squirrel",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The red squirrel (Sciurus vulgaris), also called Eurasian red squirrel, is a species of tree squirrel in the genus Sciurus. It is an arboreal and primarily herbivorous rodent and common throughout Eurasia.",
    "wiki_url": "https://en.wikipedia.org/wiki/European_Red_Squirrel",
    "image": "N312_Red squirrel_0.jpg",
@@ -336271,7 +336271,7 @@
   {
    "uid": "cr-n329",
    "name": "European rabbit",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "European rabbits prefer grassland habitats and are herbivorous, mainly feeding on grasses and leaves, though they may supplement their diet with berries, tree bark, and field crops such as maize. They are prey to a variety of predators, including birds of prey, weasels, cats, and canids.",
    "wiki_url": "https://en.wikipedia.org/wiki/European_Rabbit",
    "image": "",
@@ -336281,7 +336281,7 @@
   {
    "uid": "cr-n330",
    "name": "Pika (Alpine)",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "European rabbits prefer grassland habitats and are herbivorous, mainly feeding on grasses and leaves, though they may supplement their diet with berries, tree bark, and field crops such as maize. They are prey to a variety of predators, including birds of prey, weasels, cats, and canids.",
    "wiki_url": "https://en.wikipedia.org/wiki/Pika_(Alpine)",
    "image": "",
@@ -336291,7 +336291,7 @@
   {
    "uid": "cr-n331",
    "name": "Pika (Collared)",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "European rabbits prefer grassland habitats and are herbivorous, mainly feeding on grasses and leaves, though they may supplement their diet with berries, tree bark, and field crops such as maize. They are prey to a variety of predators, including birds of prey, weasels, cats, and canids.",
    "wiki_url": "https://en.wikipedia.org/wiki/Pika_(Collared)",
    "image": "",
@@ -336301,7 +336301,7 @@
   {
    "uid": "cr-n332",
    "name": "American bison",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "The American bison (Bison bison; pl.:bison), commonly known as the American buffalo, or simply buffalo (not to be confused withtrue buffalo), is a species of bison that is endemic (or native) to North America. It is one of two extant species of bison, along with the European bison.",
    "wiki_url": "https://en.wikipedia.org/wiki/American_Bison",
    "image": "",
@@ -336491,7 +336491,7 @@
   {
    "uid": "cr-n351",
    "name": "Moose",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The moose (pl.:moose; used in North America) orelk (pl.:elkorelks; used in Eurasia) (Alces alces) is the world's tallest, largest and heaviest extant species of deer and the only extant species in the genus Alces. It is also the tallest, and the second-largest, land animal in North America, falling short only to the A…",
    "wiki_url": "https://en.wikipedia.org/wiki/Moose",
    "image": "",
@@ -336501,7 +336501,7 @@
   {
    "uid": "cr-n352",
    "name": "Elk (Wapiti)",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The moose (pl.:moose; used in North America) orelk (pl.:elkorelks; used in Eurasia) (Alces alces) is the world's tallest, largest and heaviest extant species of deer and the only extant species in the genus Alces. It is also the tallest, and the second-largest, land animal in North America, falling short only to the A…",
    "wiki_url": "https://en.wikipedia.org/wiki/Elk_(Wapiti)",
    "image": "",
@@ -336611,7 +336611,7 @@
   {
    "uid": "cr-n364",
    "name": "Black-tailed jackrabbit",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The black-tailed jackrabbit (Lepus californicus), also known as the American desert hare, is a common hare of the western United States and Mexico, where it is found at elevations from sea level up to 10,000 ft (3,000 m). Reaching a length around 2 ft (61 cm), and a weight from 3 to 6 lb (1.4 to 2.7 kg), the black-tai…",
    "wiki_url": "https://en.wikipedia.org/wiki/Black-tailed_Jackrabbit",
    "image": "",
@@ -336631,7 +336631,7 @@
   {
    "uid": "cr-n366",
    "name": "American pika",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The American pika (Ochotona princeps) is a small, herbivorous mammal of the family Ochotonidae, closely related to rabbits and hares (order Lagomorpha). It is native to the mountainous regions of western North America, typically inhabiting rocky slopes andtalus fields at or above the tree line.",
    "wiki_url": "https://en.wikipedia.org/wiki/American_Pika",
    "image": "",
@@ -336831,7 +336831,7 @@
   {
    "uid": "cr-n386",
    "name": "Eastern gray squirrel",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The eastern gray squirrel (Sciurus carolinensis), known outside of the United States as the grey squirrel, is a species of tree squirrel in the genus Sciurus. It is native to eastern North America, where it is the most prodigious and ecologically essential natural forest re generator.",
    "wiki_url": "https://en.wikipedia.org/wiki/Eastern_Gray_Squirrel",
    "image": "N386_Eastern gray squirrel_0.jpg",
@@ -336841,7 +336841,7 @@
   {
    "uid": "cr-n387",
    "name": "Fox squirrel",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The fox squirrel (Sciurus niger), also known as the eastern fox squirrel or Bryant's fox squirrel, is the largest species of tree squirrel native to North America. It is sometimes mistaken for the American red squirrel or eastern gray squirrel in areas where the species coexist, though they differ in size and colorati…",
    "wiki_url": "https://en.wikipedia.org/wiki/Eastern_Fox_Squirrel",
    "image": "",
@@ -336871,7 +336871,7 @@
   {
    "uid": "cr-n390",
    "name": "American red squirrel",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The American red squirrel (Tamiasciurus hudsonicus) is one of three species of tree squirrels currently classified in the genus Tamiasciurus, known as the pine squirrels (the others are the Douglas squirrel, T. douglasii, and thesouthwestern red squirrel, T. fremonti). The American red squirrel is variously known as t…",
    "wiki_url": "https://en.wikipedia.org/wiki/American_Red_Squirrel",
    "image": "",
@@ -336881,7 +336881,7 @@
   {
    "uid": "cr-n391",
    "name": "Northern flying squirrel",
-   "codex_category": "mushroom",
+   "codex_category": "animal",
    "description": "The northern flying squirrel (Glaucomys sabrinus) is one of three species of the genus Glaucomys, the only flying squirrels found in North America. They are found in coniferous and mixed coniferous forests across much of Canada, from Alaska to Nova Scotia, and south to the mountains of North Carolina and west to Utahi…",
    "wiki_url": "https://en.wikipedia.org/wiki/Northern_Flying_Squirrel",
    "image": "",
@@ -336901,7 +336901,7 @@
   {
    "uid": "cr-n393",
    "name": "Yellow-bellied marmot",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The yellow-bellied marmot (Marmota flaviventer), also known as the rock chuck, is a large, stout-bodiedground squirrel in the marmot genus. It is one of fourteen species of marmots, and is native to mountainous and semi-arid regions of southwestern Canada and western United States, including the Rocky Mountains, Sierr…",
    "wiki_url": "https://en.wikipedia.org/wiki/Yellow-bellied_Marmot",
    "image": "",
@@ -337001,7 +337001,7 @@
   {
    "uid": "cr-n403",
    "name": "Eastern chipmunk",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The eastern chipmunk (Tamias striatus) is a chipmunk species found in eastern North America. It is the only living member of the genus Tamias.",
    "wiki_url": "https://en.wikipedia.org/wiki/Eastern_Chipmunk",
    "image": "",
@@ -337031,7 +337031,7 @@
   {
    "uid": "cr-n406",
    "name": "Cliff chipmunk",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The cliff chipmunk (Neotamias dorsalis) is a small, bushy-tailedsquirrel that typically lives along cliff walls or boulder fields bordering Pinyon-juniper woodlands in the Western United States and Mexico (commonly spotted in northern Arizonato Colorado). Cliff chipmunks are very agile, and can often be seen scaling s…",
    "wiki_url": "https://en.wikipedia.org/wiki/Cliff_Chipmunk",
    "image": "",
@@ -337051,7 +337051,7 @@
   {
    "uid": "cr-n408",
    "name": "Long-tailed vole",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The long-tailed vole (Microtus longicaudus), in some areas known as the San Bernardino long-tailed vole, is a small vole found in western North America. They have short ears and a long tail.",
    "wiki_url": "https://en.wikipedia.org/wiki/Long-tailed_Vole",
    "image": "",
@@ -337061,7 +337061,7 @@
   {
    "uid": "cr-n409",
    "name": "Eastern meadow vole",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The eastern meadow vole (Microtus pennsylvanicus), sometimes called the field mouse or meadow mouse, is a North American vole found in eastern Canada and the United States. Its range extends farther south along the Atlantic coast.",
    "wiki_url": "https://en.wikipedia.org/wiki/Meadow_Vole",
    "image": "",
@@ -337071,7 +337071,7 @@
   {
    "uid": "cr-n410",
    "name": "Prairie vole",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The prairie vole (Microtus ochrogaster) is a small vole found in central North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Prairie_Vole",
    "image": "",
@@ -337081,7 +337081,7 @@
   {
    "uid": "cr-n411",
    "name": "Woodland vole",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The woodland vole (Microtus pinetorum) is a small vole found in eastern North America. It is also known as the pine vole.",
    "wiki_url": "https://en.wikipedia.org/wiki/Woodland_Vole",
    "image": "",
@@ -337091,7 +337091,7 @@
   {
    "uid": "cr-n413",
    "name": "Southern red-backed vole",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The southern red-backed voleor Gapper's red-backed vole (Clethrionomys gapperi) is a small slender vole found in Canada and the northern United States. It is closely related to the western red-backed vole (Clethrionomys californius), which lives to the south and west of its range and which is less red with a less shar…",
    "wiki_url": "https://en.wikipedia.org/wiki/Southern_Red-backed_Vole",
    "image": "",
@@ -337101,7 +337101,7 @@
   {
    "uid": "cr-n414",
    "name": "Northern red-backed vole",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The northern red-backed vole (Clethrionomys rutilus) is a small slender vole found in Alaska, northern Canada, Scandinavia and northern Russia.",
    "wiki_url": "https://en.wikipedia.org/wiki/Northern_Red-backed_Vole",
    "image": "",
@@ -337111,7 +337111,7 @@
   {
    "uid": "cr-n415",
    "name": "Sagebrush vole",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The sagebrush vole (Lemmiscus curtatus) is a tinyvole found in western North America. It is the only member of the genus Lemmiscus.",
    "wiki_url": "https://en.wikipedia.org/wiki/Sagebrush_Vole",
    "image": "",
@@ -337131,7 +337131,7 @@
   {
    "uid": "cr-n417",
    "name": "Southern bog lemming",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The southern bog lemming (Synaptomys cooperi) is a small North American lemming. Its range overlaps with the other species in genus Synaptomys, the northern bog lemming, in southeastern Canada, but extends farther south.",
    "wiki_url": "https://en.wikipedia.org/wiki/Southern_Bog_Lemming",
    "image": "",
@@ -337141,7 +337141,7 @@
   {
    "uid": "cr-n418",
    "name": "Northern bog lemming",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The northern bog lemming (Synaptomys borealis) is a small North American lemming. It is one of two species in the genus Synaptomys, the other being the southern bog lemming (S. cooperi).",
    "wiki_url": "https://en.wikipedia.org/wiki/Northern_Bog_Lemming",
    "image": "",
@@ -337151,7 +337151,7 @@
   {
    "uid": "cr-n419",
    "name": "Meadow jumping mouse",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The meadow jumping mouse (Zapus hudsonius) is the most widely distributed mouse in the family Zapodidae. Its range extends from the Atlantic coast in the east to the Great Plains west, and from the arctic tree lines in Canada and Alaska to the north, and Georgia, Alabama, Arizona, and New Mexico to the south.",
    "wiki_url": "https://en.wikipedia.org/wiki/Meadow_Jumping_Mouse",
    "image": "",
@@ -337181,7 +337181,7 @@
   {
    "uid": "cr-n422",
    "name": "Preble's shrew",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Preble's shrew (Sorex preblei) is a small shrew distributed across the Great Basin of the United States and southern British Columbia in Canada.",
    "wiki_url": "https://en.wikipedia.org/wiki/Preble%27s_Shrew",
    "image": "",
@@ -337191,7 +337191,7 @@
   {
    "uid": "cr-n423",
    "name": "American pygmy shrew",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The American pygmy shrew (Sorex hoyi), also called the eastern pygmy shrew, is a small shrew found throughout much of Alaska, Canada, and the northern contiguous United States, as well as south along the Appalachian Mountains and in a small region in the Colorado and Wyoming Rockies. The species was first discovered i…",
    "wiki_url": "https://en.wikipedia.org/wiki/American_Pygmy_Shrew",
    "image": "",
@@ -337201,7 +337201,7 @@
   {
    "uid": "cr-n424",
    "name": "Smoky shrew",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Thesmoky shrew (Sorex fumeus) is a medium-sized North American shrew found in eastern Canada and the northeastern United States and further south along the Appalachian Mountains.",
    "wiki_url": "https://en.wikipedia.org/wiki/Smoky_Shrew",
    "image": "",
@@ -337211,7 +337211,7 @@
   {
    "uid": "cr-n425",
    "name": "Long-tailed shrew",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The long-tailed shreworrock shrew (Sorex dispar) is a small shrew found in Atlantic Canada and the Northeastern United States.",
    "wiki_url": "https://en.wikipedia.org/wiki/Long-tailed_Shrew",
    "image": "N425_Long-tailed shrew_0.jpg",
@@ -337221,7 +337221,7 @@
   {
    "uid": "cr-n427",
    "name": "Arctic shrew",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The Arctic shrew (Sorex arcticus), also known as the black back shrew or saddle backed shrew, is a medium-sizedshrewfound in Canada and the northern United States. Separate species status has been proposed for the maritime shrew (Sorex maritimensis) which is found in New Brunswick and Nova Scotia and had been consider…",
    "wiki_url": "https://en.wikipedia.org/wiki/Arctic_Shrew",
    "image": "",
@@ -337231,7 +337231,7 @@
   {
    "uid": "cr-n428",
    "name": "Cinereus shrew",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The cinereus shrewormasked shrew (Sorex cinereus) is a small shrew found in Alaska, Canada, and the northern United States. This is the most widely distributed shrew in North America, where it is also known as the common shrew.",
    "wiki_url": "https://en.wikipedia.org/wiki/Masked_Shrew",
    "image": "",
@@ -337241,7 +337241,7 @@
   {
    "uid": "cr-n429",
    "name": "Northern short-tailed shrew",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The northern short-tailed shrew (Blarina brevicauda) is the largest shrew in the genus Blarina, and occurs in the northeastern region of North America. It is a semifossorial, highly active, and voracious insectivore and is present in a variety of habitats like broad leaved and pine forests among shrubs and hedges as w…",
    "wiki_url": "https://en.wikipedia.org/wiki/Northern_Short-tailed_Shrew",
    "image": "",
@@ -337251,7 +337251,7 @@
   {
    "uid": "cr-n430",
    "name": "Southern short-tailed shrew",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The southern short-tailed shrew (Blarina carolinensis) is a gray, short-tailedshrewthat inhabits the eastern United States.",
    "wiki_url": "https://en.wikipedia.org/wiki/Southern_Short-tailed_Shrew",
    "image": "N430_Southern short-tailed shrew_0.jpg",
@@ -337461,7 +337461,7 @@
   {
    "uid": "cr-n451",
    "name": "Bush dog",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "The bush dog (Speothos venaticus) is a canine found in Central and South America. In spite of its extensive range, it is very rare in most areas except in Suriname, Guyana and Peru; it was first described by Peter Wilhelm Lund from fossils in Brazilian caves and was believed to be extinct.",
    "wiki_url": "https://en.wikipedia.org/wiki/Bush_Dog",
    "image": "N451_Bush dog_0.jpg",
@@ -337521,7 +337521,7 @@
   {
    "uid": "cr-n457",
    "name": "Hoary fox",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Thehoary foxorhoary zorro (Lycalopexvetulus), also known asraposinha-do-campoin Brazil (Portuguesefor \"little fox of the meadow\"), is a species ofzorroor \"false\" fox endemic to Brazil. Unlike many other foxes, it feeds primarily on small invertebrates such as insects.",
    "wiki_url": "https://en.wikipedia.org/wiki/Hoary_Fox",
    "image": "N457_Hoary fox_0.jpg",
@@ -337631,7 +337631,7 @@
   {
    "uid": "cr-n468",
    "name": "Giant anteater",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The giant anteater (Myrmecophaga tridactyla) is an insectivorous mammal native to Central and South America. It is the largest of the four living species of anteaters, which are classified with sloths in the order Pilosa.",
    "wiki_url": "https://en.wikipedia.org/wiki/Giant_Anteater",
    "image": "N468_Giant anteater_0.jpg",
@@ -337731,7 +337731,7 @@
   {
    "uid": "cr-n479",
    "name": "Capybara",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The capybaraorgreater capybara (Hydrochoerus hydrochaeris) is the largest living rodent, native to all countries in South America except Chile. It is a semi aquatic herbivore that inhabits savannas and dense forests, living near and in bodies of water and feeding mainly on grasses and aquatic plants.",
    "wiki_url": "https://en.wikipedia.org/wiki/Capybara",
    "image": "",
@@ -338001,7 +338001,7 @@
   {
    "uid": "cr-n507",
    "name": "Mountain degu",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The mountain degu (Octodontomys gliroides), also known as the Andean degu, is a species of rodent in the family Octodontidae. It isthe only species in the genus Octodon to mys.",
    "wiki_url": "https://en.wikipedia.org/wiki/Mountain_Degu",
    "image": "N507_Mountain degu_0.jpg",
@@ -338161,7 +338161,7 @@
   {
    "uid": "cr-n524",
    "name": "Mexican hairy dwarf porcupine",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The Mexican hairy dwarf porcupine or Mexican tree porcupine (Coendou mexicanus) is a species of rodent in the family Erethizontidae. It is found in Costa Rica, El Salvador, Guatemala, Honduras, Panama, Mexico, Nicaragua and Belize.",
    "wiki_url": "https://en.wikipedia.org/wiki/Mexican_Hairy_Dwarf_Porcupine",
    "image": "N524_Mexican hairy dwarf porcupine_0.jpg",
@@ -338471,7 +338471,7 @@
   {
    "uid": "cr-n555",
    "name": "Deltaic four-eyed opossum",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The deltaic four-eyed opossum or delta opossum (Philander deltae) is a species of opossum found in the Orinoco River delta region of Venezuela, South America, first described in 2006. It inhabits perennially flooded swamp forest or seasonally flooded marsh forest of the adjacent deltas of the Orinoco and nearby rivers.",
    "wiki_url": "https://en.wikipedia.org/wiki/Deltaic_Four-eyed_Opossum",
    "image": "N555_Deltaic four-eyed opossum_2.jpg",
@@ -338541,7 +338541,7 @@
   {
    "uid": "cr-n562",
    "name": "Rufous mouse opossum",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The rufous mouse opossum (Marmosa lepida) or little rufous mouse opossum is an opossum species from South America. The species has been found in Bolivia, French Guinea, Brazil, Colombia, Ecuador, Guyana, Peru and Suriname in lowland tropical rainforest at altitudes from 100 to 1,000 m (330 to 3,280 ft).",
    "wiki_url": "https://en.wikipedia.org/wiki/Rufous_Mouse_Opossum",
    "image": "N562_Rufous mouse opossum_0.jpg",
@@ -338551,7 +338551,7 @@
   {
    "uid": "cr-n563",
    "name": "Guianan Mouse Opossum",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The rufous mouse opossum (Marmosa lepida) or little rufous mouse opossum is an opossum species from South America. The species has been found in Bolivia, French Guinea, Brazil, Colombia, Ecuador, Guyana, Peru and Suriname in lowland tropical rainforest at altitudes from 100 to 1,000 m (330 to 3,280 ft).",
    "wiki_url": "https://en.wikipedia.org/wiki/Guianan_Mouse_Opossum",
    "image": "",
@@ -338691,7 +338691,7 @@
   {
    "uid": "cr-n577",
    "name": "Gray slender opossum",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The gray slender opossum (Marmosops incanus), is an opossum species endemic to eastern Brazil. It is a semi-arborealmarsupialof the genus Marmosops.",
    "wiki_url": "https://en.wikipedia.org/wiki/Gray_Slender_Opossum",
    "image": "N577_Gray slender opossum_0.jpg",
@@ -338701,7 +338701,7 @@
   {
    "uid": "cr-n578",
    "name": "Panama slender opossum",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The Panama slender opossum (Marmosops invictus), also known as theslaty slender mouse opossum, is a species of opossum in the family Didelphidae. It is endemic to Panama, where it has been found in tropical rainforest habitats, including disturbed areas, at elevations from 500 to 1,500 m (1,600 to 4,900 ft).",
    "wiki_url": "https://en.wikipedia.org/wiki/Panama_Slender_Opossum",
    "image": "N578_Panama slender opossum_2.jpg",
@@ -338731,7 +338731,7 @@
   {
    "uid": "cr-n582",
    "name": "Delicate slender opossum",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The delicate slender opossum (Marmosops parvidens) is a small pouch less marsupial of the family Di delphi daethat occurs in French Guiana, Guyana, Suriname, and adjacent Venezuela and Brazil. Marmosops pinheiro i, Marmosops bishop i and Marmosops juninensis had long been considered to represent the same species, unti…",
    "wiki_url": "https://en.wikipedia.org/wiki/Delicate_Slender_Opossum",
    "image": "N582_Delicate slender opossum_2.jpg",
@@ -338801,7 +338801,7 @@
   {
    "uid": "cr-n589",
    "name": "Elegant fat-tailed mouse opossum",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The elegant fat-tailed mouse opossum (Thylamys elegans), also known as the Chilean mouse opossum, is an opossum from central Chile. The type species of Thylamys, it was first described by English naturalist George Robert Waterhouse in 1839.",
    "wiki_url": "https://en.wikipedia.org/wiki/Elegant_Fat-tailed_Mouse_Opossum",
    "image": "N589_Elegant fat-tailed mouse opossum_0.jpg",
@@ -338811,7 +338811,7 @@
   {
    "uid": "cr-n590",
    "name": "Karimi's fat-tailed mouse opossum",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Karimi's fat-tailed mouse opossum (Thylamys karimii) is a species of opossum in the family Didelphidae. It is endemic to central and northeast Brazil, where it is found in the cerrado and caatinga at elevations from 300 to 1100 m.",
    "wiki_url": "https://en.wikipedia.org/wiki/Karimi%27s_Fat-tailed_Mouse_Opossum",
    "image": "N590_Karimi's fat-tailed mouse opossum_2.jpg",
@@ -338981,7 +338981,7 @@
   {
    "uid": "cr-n607",
    "name": "Monito del monte",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The monito del monte (Dromiciops gliroides), orcolocolo opossum, is a diminutive species of marsupial native only to south-western South America (Argentina and Chile). It is the only extant species in the ancient order Microbiotheria, and the sole New World representative of the superorder Australidelphia, being more …",
    "wiki_url": "https://en.wikipedia.org/wiki/Monito_del_Monte",
    "image": "N607_Monito del monte_0.jpg",
@@ -338991,7 +338991,7 @@
   {
    "uid": "cr-n608",
    "name": "Southern Monito del Monte",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The monito del monte (Dromiciops gliroides), orcolocolo opossum, is a diminutive species of marsupial native only to south-western South America (Argentina and Chile). It is the only extant species in the ancient order Microbiotheria, and the sole New World representative of the superorder Australidelphia, being more …",
    "wiki_url": "https://en.wikipedia.org/wiki/Southern_Monito_del_Monte",
    "image": "",
@@ -339061,7 +339061,7 @@
   {
    "uid": "cr-n615",
    "name": "Agile wallaby",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The agile wallaby (Notamacropus agilis), also known as the sandy wallaby, is a species of wallaby found in northern Australia and southern New Guinea. It is the most common wallaby in north Australia.",
    "wiki_url": "https://en.wikipedia.org/wiki/Agile_Wallaby",
    "image": "N615_Agile wallaby_0.jpg",
@@ -339081,7 +339081,7 @@
   {
    "uid": "cr-n617",
    "name": "Parma wallaby",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The parma wallaby (Notamacropus parma) is a small marsupial macropod mammal native to forests and densely-vegetated areas of northeastern New South Wales, Australia, close to the border with Queensland. An introduced population exists on New Zealand's Kawau Island.",
    "wiki_url": "https://en.wikipedia.org/wiki/Parma_Wallaby",
    "image": "N617_Parma wallaby_0.jpg",
@@ -339111,7 +339111,7 @@
   {
    "uid": "cr-n620",
    "name": "Swamp wallaby",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The swamp wallaby (Wallabia bicolor) is a small macropod marsupial of eastern Australia. Thiswallabyis also commonly known as the black wallaby, with other names includingblack-tailed wallaby, fern wallaby, black pade melon, stinker (in Queensland), and black stinker (in New South Wales) on account of its characterist…",
    "wiki_url": "https://en.wikipedia.org/wiki/Swamp_Wallaby",
    "image": "",
@@ -339161,7 +339161,7 @@
   {
    "uid": "cr-n625",
    "name": "Northern nail-tail wallaby",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The northernorsandy nail-tail wallaby (Onychogalea unguifera) is a species of macropod found across northern Australia on arid and sparsely wooded plains. The largest species of the genus Onychogale a, it is a solitary and nocturnal herbivorous browser that selects its food from a wide variety of grasses and succulent…",
    "wiki_url": "https://en.wikipedia.org/wiki/Northern_Nail-tail_Wallaby",
    "image": "",
@@ -339211,7 +339211,7 @@
   {
    "uid": "cr-n630",
    "name": "Herbert's rock-wallaby",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Herbert's rock-wallaby (Petrogale herberti) is a member of a group of seven very closely relatedrock-wallabiesfound in northeastern Queensland, Australia. Herbert's is the most southerly and most widespread of the group.",
    "wiki_url": "https://en.wikipedia.org/wiki/Herbert%27s_Rock-wallaby",
    "image": "",
@@ -339221,7 +339221,7 @@
   {
    "uid": "cr-n631",
    "name": "Unadorned rock-wallaby",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The unadorned rock-wallaby (Petrogale inornata) is a member of a group of closely relatedrock-wallabiesfound in northeastern Queensland, Australia. It is paler than most of its relatives and even plainer, hence its common name.",
    "wiki_url": "https://en.wikipedia.org/wiki/Unadorned_Rock-wallaby",
    "image": "",
@@ -339231,7 +339231,7 @@
   {
    "uid": "cr-n632",
    "name": "Mareeba rock-wallaby",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The Mareeba rock-wallaby (Petrogale mareeba) is a rare species ofrock-wallabyfound around Mareeba in northeastern Queensland, Australia.",
    "wiki_url": "https://en.wikipedia.org/wiki/Mareeba_Rock-wallaby",
    "image": "",
@@ -339261,7 +339261,7 @@
   {
    "uid": "cr-n635",
    "name": "Yellow-footed rock-wallaby",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The yellow-footed rock-wallaby (Petrogale xanthopus), formerly known as thering-tailed rock-wallaby, is a member of the macropod family (themarsupialfamily that includes thekangaroos, wallabies, tree-kangaroos, andwallaroos).",
    "wiki_url": "https://en.wikipedia.org/wiki/Yellow-footed_Rock-wallaby",
    "image": "",
@@ -339281,7 +339281,7 @@
   {
    "uid": "cr-n637",
    "name": "Lumholtz's tree-kangaroo",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Lumholtz's tree-kangaroo (Dendrolagus lumholtzi) is a rare, long-tailedmarsupialfound in rainforests in northeastern Australia. Like most tree-kangaroos (genus Dendrolagus), it lives alone in trees and feeds on plant matter.",
    "wiki_url": "https://en.wikipedia.org/wiki/Lumholtz%27s_Tree-kangaroo",
    "image": "N637_Lumholtz's tree-kangaroo_0.jpg",
@@ -339291,7 +339291,7 @@
   {
    "uid": "cr-n638",
    "name": "Bennett's tree-kangaroo",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Bennett's tree-kangaroo (Dendrolagus bennettianus) is a largetree-kangaroo. Males can weigh from 11.5 kg up to almost 14 kg (25 to 31 lbs), while the females range between about 8 to 10.6 kg (18 to 23 lb).",
    "wiki_url": "https://en.wikipedia.org/wiki/Bennett%27s_Tree-kangaroo",
    "image": "",
@@ -339301,7 +339301,7 @@
   {
    "uid": "cr-n639",
    "name": "Matschie's tree-kangaroo",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Matschie's tree-kangaroo (Dendrolagus matschiei), also known as the Huon tree-kangaroois atree-kangaroonative to the Huon Peninsula of northeastern New Guinea island, within the nation of Papua New Guinea. Under the IUCN classification, Matschie's tree-kangaroo is an endangered species.",
    "wiki_url": "https://en.wikipedia.org/wiki/Matschie%27s_Tree-kangaroo",
    "image": "",
@@ -339311,7 +339311,7 @@
   {
    "uid": "cr-n640",
    "name": "Goodfellow's tree-kangaroo",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Goodfellow's tree-kangaroo (Dendrolagus goodfellowi), also called the ornate tree-kangaroo, is an endangered, long-tailedmammalnative to rainforests of New Guinea. Like mosttree-kangaroos (genus Dendrolagus), it lives in the tree tops and feeds on leaves or other plant matter.",
    "wiki_url": "https://en.wikipedia.org/wiki/Goodfellow%27s_Tree-kangaroo",
    "image": "",
@@ -339321,7 +339321,7 @@
   {
    "uid": "cr-n641",
    "name": "Doria's tree-kangaroo",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Doria's tree-kangaroo (Dendrolagus dorianus) is a long-tailed, furry, bear-like mammal found only in tropical mountain forests on the island of New Guinea (in Papua New Guinea). It is one of the largest tree-kangaroos (genus Dendrolagus), living alone in trees and active at night to feed on leaves or fruit.",
    "wiki_url": "https://en.wikipedia.org/wiki/Doria%27s_Tree-kangaroo",
    "image": "",
@@ -339331,7 +339331,7 @@
   {
    "uid": "cr-n642",
    "name": "Grizzled tree-kangaroo",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The grizzled tree-kangaroo (Dendrolagus inustus) is a furry, long-tailed mammal native to tropical rainforests on the island of New Guinea (split between Indonesia and Papua New Guinea). Like most tree-kangaroos (genus Dendrolagus), it lives in trees and eats leaves, fruit, and bark.",
    "wiki_url": "https://en.wikipedia.org/wiki/Grizzled_Tree-kangaroo",
    "image": "",
@@ -339341,7 +339341,7 @@
   {
    "uid": "cr-n643",
    "name": "Ursine tree-kangaroo",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The ursine tree-kangaroo (Dendrolagus ursinus) is a long-tailed, furry, bear-likemammalfound only in tropical forests on the island of New Guinea (in Indonesia). Slightly larger than a cat, it lives alone in trees and is active at night to feed on leaves and fruit.",
    "wiki_url": "https://en.wikipedia.org/wiki/Ursine_Tree-kangaroo",
    "image": "",
@@ -339351,7 +339351,7 @@
   {
    "uid": "cr-n644",
    "name": "Golden-mantled tree-kangaroo",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The golden-mantled tree-kangaroo (Dendrolagus pulcherrimus) is a critically endangered, furry, bear-like mammal found only in mountain rain forests on the island of New Guinea (split between Indonesia and Papua New Guinea). Like other tree-kangaroos (genus Dendrolagus), it lives in trees and feeds on plant matter.",
    "wiki_url": "https://en.wikipedia.org/wiki/Golden-mantled_Tree-kangaroo",
    "image": "",
@@ -339361,7 +339361,7 @@
   {
    "uid": "cr-n645",
    "name": "Lowlands tree-kangaroo",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The lowlands tree-kangaroo (Dendrolagus spadix), also spelt \"lowland,\" is a long-tailed, furry, bear-like mammal found only in lowland tropical rainforests on the island of New Guinea (in Papua New Guinea). It is a species of tree-kangaroo (genus Dendrolagus), which are tree-dwelling animals that feed on leaves or oth…",
    "wiki_url": "https://en.wikipedia.org/wiki/Lowlands_Tree-kangaroo",
    "image": "",
@@ -339371,7 +339371,7 @@
   {
    "uid": "cr-n646",
    "name": "Dingiso",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The dingiso ( ) (Dendrolagus mbaiso), also known as the bondegezouorbakaga, is an endangered, long-tailed marsupial found only in mountain forests on the west of the island of New Guinea (in Indonesia). It is a species of tree-kangaroo (genus Dendrolagus), which are mammals native to Australia and New Guinea that feed…",
    "wiki_url": "https://en.wikipedia.org/wiki/Dingiso",
    "image": "",
@@ -339381,7 +339381,7 @@
   {
    "uid": "cr-n647",
    "name": "Tenkile",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The tenkile (Dendrolagus scottae), also known as Scott's tree-kangaroo, is a species oftree-kangarooin the family Macropodidae. It is endemic to a very small area of the Torricelli Mountains of Papua New Guinea.",
    "wiki_url": "https://en.wikipedia.org/wiki/Tenkile",
    "image": "",
@@ -339391,7 +339391,7 @@
   {
    "uid": "cr-n648",
    "name": "Wondiwoi Tree-kangaroo",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The tenkile (Dendrolagus scottae), also known as Scott's tree-kangaroo, is a species oftree-kangarooin the family Macropodidae. It is endemic to a very small area of the Torricelli Mountains of Papua New Guinea.",
    "wiki_url": "https://en.wikipedia.org/wiki/Wondiwoi_Tree-kangaroo",
    "image": "",
@@ -339431,7 +339431,7 @@
   {
    "uid": "cr-n652",
    "name": "Tasmanian pademelon",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The Tasmanian pademelon (Thylogale billardierii), also known as therufous-bellied pademelonorred-bellied pademelon, is the sole species ofpade melon found in Tasmania, and was formerly found throughout southeastern Australia. This pademelon has developed heavier and bushier fur than its northern relatives, which inhab…",
    "wiki_url": "https://en.wikipedia.org/wiki/Tasmanian_Pademelon",
    "image": "",
@@ -339441,7 +339441,7 @@
   {
    "uid": "cr-n653",
    "name": "Dusky pademelon",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Thedusky pademelonordusky wallaby (Thylogale brunii) is a species of marsupial in the family Macropodidae. It is found in the Aruand Kai islands and the Trans-Fly savanna and grasslands ecoregion of New Guinea.",
    "wiki_url": "https://en.wikipedia.org/wiki/Dusky_Pademelon",
    "image": "",
@@ -339531,7 +339531,7 @@
   {
    "uid": "cr-n662",
    "name": "Musky rat-kangaroo",
-   "codex_category": "mushroom",
+   "codex_category": "animal",
    "description": "Themusky rat-kangaroo (Hypsiprymnodon moschatus) is a small marsupial found only in the rainforests of northeastern Australia. First described in the later 19th century, the only other species are known from fossil specimens.",
    "wiki_url": "https://en.wikipedia.org/wiki/Musky_Rat-kangaroo",
    "image": "",
@@ -339541,7 +339541,7 @@
   {
    "uid": "cr-n663",
    "name": "Rufous rat-kangaroo",
-   "codex_category": "mushroom",
+   "codex_category": "animal",
    "description": "The rufousrat-kangarooorrufous bettong (Aepyprymnus rufescens) is a small, jumping, rat-like marsupial native to eastern Australia. It is the only species in the genus Aepyprymnus.",
    "wiki_url": "https://en.wikipedia.org/wiki/Rufous_Bettong",
    "image": "",
@@ -339551,7 +339551,7 @@
   {
    "uid": "cr-n664",
    "name": "Eastern bettong",
-   "codex_category": "mushroom",
+   "codex_category": "animal",
    "description": "The eastern bettong (Bettongia gaimardi), also known as the southern or Tasmanian bettong, is a small, hopping, rat-like mammal native to grassy forests of southeastern Australia and Tasmania. A member of the rat-kangaroo family (Potoroidae), it is active at night and feeds on fungi and plant roots.",
    "wiki_url": "https://en.wikipedia.org/wiki/Eastern_Bettong",
    "image": "",
@@ -339561,7 +339561,7 @@
   {
    "uid": "cr-n666",
    "name": "Woylie (Brush-tailed Bettong)",
-   "codex_category": "mushroom",
+   "codex_category": "animal",
    "description": "The eastern bettong (Bettongia gaimardi), also known as the southern or Tasmanian bettong, is a small, hopping, rat-like mammal native to grassy forests of southeastern Australia and Tasmania. A member of the rat-kangaroo family (Potoroidae), it is active at night and feeds on fungi and plant roots.",
    "wiki_url": "https://en.wikipedia.org/wiki/Woylie_(Brush-tailed_Bettong)",
    "image": "",
@@ -339571,7 +339571,7 @@
   {
    "uid": "cr-n667",
    "name": "Northern bettong",
-   "codex_category": "mushroom",
+   "codex_category": "animal",
    "description": "The northern bettong (Bettongia tropica) is a small, endangered, gerbil-likemammalnative to forests in northeast Australia. A member of the rat-kangaroo family (Potoroidae), it moves by hopping and lives in burrows, feeding at night on roots and fungi.",
    "wiki_url": "https://en.wikipedia.org/wiki/Northern_Bettong",
    "image": "",
@@ -339581,7 +339581,7 @@
   {
    "uid": "cr-n668",
    "name": "Boodie (Burrowing Bettong)",
-   "codex_category": "mushroom",
+   "codex_category": "animal",
    "description": "The northern bettong (Bettongia tropica) is a small, endangered, gerbil-likemammalnative to forests in northeast Australia. A member of the rat-kangaroo family (Potoroidae), it moves by hopping and lives in burrows, feeding at night on roots and fungi.",
    "wiki_url": "https://en.wikipedia.org/wiki/Boodie_(Burrowing_Bettong)",
    "image": "",
@@ -339591,7 +339591,7 @@
   {
    "uid": "cr-n669",
    "name": "Long-nosed potoroo",
-   "codex_category": "mushroom",
+   "codex_category": "animal",
    "description": "The long-nosed potoroo (Potorous tridactylus) is a small, hopping mammal native to forests and shrubland of southeastern Australia and Tasmania. A member of the potoroo and bettong family (Potoroidae), it lives alone and digs at night for fungi, roots, or small insects.",
    "wiki_url": "https://en.wikipedia.org/wiki/Long-nosed_Potoroo",
    "image": "",
@@ -339761,7 +339761,7 @@
   {
    "uid": "cr-n686",
    "name": "Little red kaluta",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "The little red kaluta (Dasykaluta rosamondae) is a small, reddish-brown, shrew-likemammalnative to dry grasslands of northwest Western Australia. It is active at night, feeding on insects and other small animals.",
    "wiki_url": "https://en.wikipedia.org/wiki/Little_Red_Kaluta",
    "image": "N686_Little red kaluta_0.jpg",
@@ -340151,7 +340151,7 @@
   {
    "uid": "cr-n725",
    "name": "Kultarr",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The kultarr (Antechinomys laniger) (also called the \"jerboa-marsupial\" or marsupial jerboa) is a small insectivorous nocturnal marsupial inhabiting the arid interior of Australia. Preferred habitat includes stony deserts, shrubland, woodland, grassland and open plains.",
    "wiki_url": "https://en.wikipedia.org/wiki/Kultarr",
    "image": "N725_Kultarr_0.jpg",
@@ -340261,7 +340261,7 @@
   {
    "uid": "cr-n736",
    "name": "Numbat",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The numbat ( ; binomen:Myrmecobius fasciatus), also known as thenoom bator walpurti, is an insectivorous marsupial. It is diurnal and its diet consists almost exclusively of termites.",
    "wiki_url": "https://en.wikipedia.org/wiki/Numbat",
    "image": "",
@@ -340271,7 +340271,7 @@
   {
    "uid": "cr-n737",
    "name": "Greater bilby",
-   "codex_category": "mushroom",
+   "codex_category": "animal",
    "description": "The greater bilby (Macrotis lagotis) or often simply bilby, is a long-eared, rabbit-like mammal native to Australia. It lives in burrows and is active at night, feeding on insects, fruit, or fungi.",
    "wiki_url": "https://en.wikipedia.org/wiki/Greater_Bilby",
    "image": "",
@@ -340311,7 +340311,7 @@
   {
    "uid": "cr-n741",
    "name": "Platypus",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "The platypus (Ornithorhynchus anatinus), sometimes referred to as theduck-billed platypus, is a semi aquatic, egg-layingmammalendemic to eastern Australia, including Tasmania. The platypus is the sole living representative of its family Ornithorhynchidaeandgenus Ornithorhynchus, though a number of related species appe…",
    "wiki_url": "https://en.wikipedia.org/wiki/Platypus",
    "image": "",
@@ -340321,7 +340321,7 @@
   {
    "uid": "cr-n742",
    "name": "Short-beaked echidna",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The short-beaked echidna (Tachyglossus aculeatus), also known as the common echidna, orshort-nosed echidna, is one of four living species of echidna, and the only member of the genus Tachyglossus, from Ancient Greekταχύς(takhús), meaning \"fast\", andγλῶσσα(glôssa), meaning \"tongue\". It is covered in fur and spines and …",
    "wiki_url": "https://en.wikipedia.org/wiki/Short-beaked_Echidna",
    "image": "",
@@ -340941,7 +340941,7 @@
   {
    "uid": "cr-n804",
    "name": "Southern bottlenose whale",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The southern bottlenose whale (Hyperoodon planifrons) is a species of whale, in theziphiid family, one of two members of the genus Hyperoodon. Seldom observed, the southern bottlenose whale is resident in Antarctic waters.",
    "wiki_url": "https://en.wikipedia.org/wiki/Southern_Bottlenose_Whale",
    "image": "",
@@ -341331,7 +341331,7 @@
   {
    "uid": "cr-n845",
    "name": "Juan Fernández fur seal",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The Juan Fernández fur seal (Arctocephalus philippii) is the second smallest of the fur seals, second only to the Galápagos fur seal. They are found only on the Pacific Coast of South America, more specifically on the Juan Fernández Islands and the Des ventura das Islands.",
    "wiki_url": "https://en.wikipedia.org/wiki/Juan_Fern%C3%A1ndez_Fur_Seal",
    "image": "",
@@ -341421,7 +341421,7 @@
   {
    "uid": "cr-n855",
    "name": "West Indian manatee",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The West Indian manatee (Trichechus manatus), also known as the North American manatee, is a large, aquatic mammal native to warm coastal areas of the Caribbean, from the Eastern United States to northern Brazil. Living alone or in herds, it feeds on underwater plants and uses its whiskers to navigate.",
    "wiki_url": "https://en.wikipedia.org/wiki/West_Indian_Manatee",
    "image": "",
@@ -341641,7 +341641,7 @@
   {
    "uid": "cr-n878",
    "name": "Onion",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "The onion (Allium cepa L. Tooltip Carl Linnaeus, from Latincepa), also known as the bulb onion or common onion, is a vegetable that is the most widely cultivated species of the genus Allium.",
    "wiki_url": "https://en.wikipedia.org/wiki/Onion",
    "image": "",
@@ -341741,7 +341741,7 @@
   {
    "uid": "cr-n888",
    "name": "Cucumber",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The cucumber (Cucumis sativus) is a widely-cultivatedcreeping vine plant in the family Cucurbitaceae that bears cylindrical to spherical fruits, used as culinary vegetables. Considered an annual plant, there are three main types of cucumber—slicing, pickling, and seedless.",
    "wiki_url": "https://en.wikipedia.org/wiki/Cucumber",
    "image": "N888_Cucumber_0.jpg",
@@ -341821,7 +341821,7 @@
   {
    "uid": "cr-n896",
    "name": "Chickpea",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "The chickpeaorchick pea (Cicer arietinum) is an annual legume of the family Fabaceae, subfamily Faboideae, cultivated for its edible seeds. Its different types are variously known as gram, Bengal gram, chana (চানা), garbanzo, garbanzo bean, or Egyptian pea.",
    "wiki_url": "https://en.wikipedia.org/wiki/Chickpea",
    "image": "",
@@ -342001,7 +342001,7 @@
   {
    "uid": "cr-n914",
    "name": "Birch",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "A birch is a thin-leaveddeciduoushardwoodtreeof the genus Betula ( ), in the family Betulaceae, which also includes alders, hazels, and horn beams. It is closely related to thebeech-oakfamily Fagaceae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Birch",
    "image": "N914_Birch_0.jpg",
@@ -342021,7 +342021,7 @@
   {
    "uid": "cr-n916",
    "name": "Elm",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Elmsaredeciduousandsemi-deciduoustrees comprising the genus Ulmusin the family Ulmaceae. They are distributed over most of the Northern Hemisphere, inhabiting thetemperateandtropical-montaneregions of North America and Eurasia, ranging southward in Western Asia to Iran, in Africa to Libya, and in Southeast Asia into I…",
    "wiki_url": "https://en.wikipedia.org/wiki/Elm",
    "image": "",
@@ -342181,7 +342181,7 @@
   {
    "uid": "cr-n932",
    "name": "Mahogany",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Mahogany is a straight-grained, reddish-browntimberof three tropical hardwood species of the genus Swieten i a, indigenous to the Americas and part of the pantropical china berry family, Meliaceae. Mahogany is used commercially for a wide variety of goods, due to its coloring and durable nature.",
    "wiki_url": "https://en.wikipedia.org/wiki/Mahogany",
    "image": "",
@@ -342271,7 +342271,7 @@
   {
    "uid": "cr-n941",
    "name": "Quercus suber",
-   "codex_category": "insect",
+   "codex_category": "fossil",
    "description": "Quercus suber, commonly called the cork oak, is closely related to Greek words yphar meaning 'wrinkled skin'. It is a medium-sized, evergreen oaktree in the section Quercus sect.",
    "wiki_url": "https://en.wikipedia.org/wiki/Cork_Oak",
    "image": "",
@@ -342391,7 +342391,7 @@
   {
    "uid": "cr-n953",
    "name": "Banksia",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Heavy producers of nectar, banksias are a vital part of the food chain in the Australian bush. They are an important food source for nectar ivorous animals, including birds, bats, rats, possums, sting less bees and a host of invertebrates.",
    "wiki_url": "https://en.wikipedia.org/wiki/Banksia",
    "image": "",
@@ -342401,7 +342401,7 @@
   {
    "uid": "cr-n954",
    "name": "Eucalyptus marginata",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Eucalyptus marginata, commonly known asjarrah, d jarral yin Noongar language and historically as Swan River mahogany, is a plant in the myrtle family, Myrtaceae and is endemic to thesouth-westof Western Australia. It is a tree with rough, fibrous bark, leaves with a distinct mid vein, white flowers and relatively larg…",
    "wiki_url": "https://en.wikipedia.org/wiki/Jarrah",
    "image": "",
@@ -342711,7 +342711,7 @@
   {
    "uid": "cr-n986",
    "name": "Pear",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Pears are a genus of trees, Pyrus , in the family Rosaceae, that bear an edibleapple-likefruit of the same name. Several species of pears are cultivated for their fruit and juices, while others are grown as ornamental flowering trees.",
    "wiki_url": "https://en.wikipedia.org/wiki/Pear",
    "image": "N986_Pear_0.jpg",
@@ -342761,7 +342761,7 @@
   {
    "uid": "cr-n991",
    "name": "Avocado",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "The avocado, alligator pear or avocado pear (Persea americana) is an evergreen tree in the laurel family (Lauraceae). It is native tothe Americas, with archaeological evidence of early human avocado use dating back thousands of years across various regions of Central and South America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Avocado",
    "image": "N991_Avocado_0.jpg",
@@ -342981,7 +342981,7 @@
   {
    "uid": "cr-n1015",
    "name": "Bok choy",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Chinensisvarieties are popular in southern China, East Asia, and Southeast Asia. Originally classified as Brassica chinensisby Carl Linnaeus, they are now considered a subspecies of Brassica rapa.",
    "wiki_url": "https://en.wikipedia.org/wiki/Bok_Choy",
    "image": "",
@@ -342991,7 +342991,7 @@
   {
    "uid": "cr-n1016",
    "name": "Napa Cabbage",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Chinensisvarieties are popular in southern China, East Asia, and Southeast Asia. Originally classified as Brassica chinensisby Carl Linnaeus, they are now considered a subspecies of Brassica rapa.",
    "wiki_url": "https://en.wikipedia.org/wiki/Napa_Cabbage",
    "image": "",
@@ -343001,7 +343001,7 @@
   {
    "uid": "cr-n1017",
    "name": "Mustard Greens",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Chinensisvarieties are popular in southern China, East Asia, and Southeast Asia. Originally classified as Brassica chinensisby Carl Linnaeus, they are now considered a subspecies of Brassica rapa.",
    "wiki_url": "https://en.wikipedia.org/wiki/Mustard_Greens",
    "image": "",
@@ -343221,7 +343221,7 @@
   {
    "uid": "cr-n1042",
    "name": "Chili pepper",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Chili peppers, also spelled chile or chilli (from Classical Nahuatlchīlli[ˈt͡ʃiːlːi]ⓘ), are varieties ofberry-fruitplants from the genus Capsicum, which are members of the nightshade family Solanaceae, cultivated for their pungency (spicy heat). They are used as a spice to add pungency in many cuisines.",
    "wiki_url": "https://en.wikipedia.org/wiki/Chili_Pepper",
    "image": "",
@@ -343471,7 +343471,7 @@
   {
    "uid": "cr-n1067",
    "name": "Quercus robur",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Quercus robur, thepedunculate (or\"English\") oak, is a species of flowering plant in the beech andoak family, Fagaceae. It is a large tree, native to Europe and western Asia, and is widely cultivated in other temperate regions.",
    "wiki_url": "https://en.wikipedia.org/wiki/English_Oak",
    "image": "N1067_Quercus robur_0.jpg",
@@ -343921,7 +343921,7 @@
   {
    "uid": "cr-n1112",
    "name": "Salix arctica",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Salix arctica, the Arctic willow, is a tiny creeping willow (family Salicaceae). It is adapted to survive in Arctic conditions, specifically tundras.",
    "wiki_url": "https://en.wikipedia.org/wiki/Arctic_Willow",
    "image": "",
@@ -344461,7 +344461,7 @@
   {
    "uid": "cr-n1170",
    "name": "Lychee",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Lychee ( LIE-chee, USalso LEE-chee; Litchi chinensis; Chinese:荔枝; pinyin:lìzhī; Jyutping:lai6 zi1; Pe̍h-ōe-jī:nāi-chi) is a monotypic taxon and the sole member in the genus Litchi in the soap berry family, Sapindaceae. The fruit is edible and has a sweet, mildly tart flavor and a distinctive floral aroma often describ…",
    "wiki_url": "https://en.wikipedia.org/wiki/Lychee",
    "image": "",
@@ -344521,7 +344521,7 @@
   {
    "uid": "cr-n1176",
    "name": "Soursop",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Soursop (also calledgraviola, guyabano, and in Hispanic Americaguanábana) is the fruit of Annona muri cat a, a broadleaf, flowering, evergreen tree. It is native to the tropical Americas and is widely propagated.",
    "wiki_url": "https://en.wikipedia.org/wiki/Soursop",
    "image": "",
@@ -344561,7 +344561,7 @@
   {
    "uid": "cr-n1180",
    "name": "Pine nut",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Pine nuts, also calledpiñón (Spanish:), pinoli (Italian:), orpignoli, are the edible seeds of pines (family Pinaceae, genus Pinus). According to the Food and Agriculture Organization, only 29 species provide edible nuts, while 20 are traded locally or internationally owing to their seed size being large enough to be w…",
    "wiki_url": "https://en.wikipedia.org/wiki/Pine_Nut",
    "image": "N1180_Pine nut_0.jpg",
@@ -344571,7 +344571,7 @@
   {
    "uid": "cr-n1181",
    "name": "Raffia Palm",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Pine nuts, also calledpiñón (Spanish:), pinoli (Italian:), orpignoli, are the edible seeds of pines (family Pinaceae, genus Pinus). According to the Food and Agriculture Organization, only 29 species provide edible nuts, while 20 are traded locally or internationally owing to their seed size being large enough to be w…",
    "wiki_url": "https://en.wikipedia.org/wiki/Raffia_Palm",
    "image": "",
@@ -344721,7 +344721,7 @@
   {
    "uid": "cr-n1196",
    "name": "Rose",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "A rose is either a woody perennial flowering plant of the genus Rosa ( ), in the family Rosaceae ( ), or the flower it bears. There are over three hundred species and tens of thousands of cultivars.",
    "wiki_url": "https://en.wikipedia.org/wiki/Rose",
    "image": "N1196_Rose_0.jpg",
@@ -344831,7 +344831,7 @@
   {
    "uid": "cr-n1208",
    "name": "Digitalis",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Digital is ( or ) is a genus of about 20 species of herbaceous perennial plants, shrubs, and biennials, commonly called foxgloves.",
    "wiki_url": "https://en.wikipedia.org/wiki/Foxglove",
    "image": "",
@@ -344961,7 +344961,7 @@
   {
    "uid": "cr-n1221",
    "name": "Clematis",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Clematis is a genus of about 380species within the buttercup family, Ranunculaceae. Their garden hybrids and cultivars have been popular among gardeners, beginning with Clematis'Jackmanii', a garden staple since 1862.",
    "wiki_url": "https://en.wikipedia.org/wiki/Clematis",
    "image": "",
@@ -345031,7 +345031,7 @@
   {
    "uid": "cr-n1229",
    "name": "Orchid",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Orchids are plants that belong to the family Orchidaceae ( ), a diverse and widespread group of flowering plants with blooms that are often colourful and fragrant. Orchids are cosmopolitan plants, living in diverse habitats on every continent except Antarctica.",
    "wiki_url": "https://en.wikipedia.org/wiki/Orchid",
    "image": "",
@@ -345221,7 +345221,7 @@
   {
    "uid": "cr-n1250",
    "name": "Calla lily",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Calla lily is a common name of several members of the family, Araceae. It may refer to:",
    "wiki_url": "https://en.wikipedia.org/wiki/Calla_Lily",
    "image": "",
@@ -345231,7 +345231,7 @@
   {
    "uid": "cr-n1251",
    "name": "Canna Lily",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Calla lily is a common name of several members of the family, Araceae. It may refer to:",
    "wiki_url": "https://en.wikipedia.org/wiki/Canna_Lily",
    "image": "",
@@ -345551,7 +345551,7 @@
   {
    "uid": "cr-n1283",
    "name": "Cypripedioideae",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Cypripedioideae is a subfamily of orchids commonly known aslady's slipper orchids, lady slipper orchids or slipper orchids. Cypripedioideae includes the genera Cypripedium, Mexipedium, Paphiopedilum, Phragmipedium and Selenipedium.",
    "wiki_url": "https://en.wikipedia.org/wiki/Lady%27s_Slipper",
    "image": "",
@@ -345681,7 +345681,7 @@
   {
    "uid": "cr-n1296",
    "name": "Myosotis",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Myosot is ( MY-ə-SOH-tiss) is a genus of flowering plants in the borage family Boraginaceae. In the Northern Hemisphere, they are colloquially known asforget-me-notsorscorpion grasses.",
    "wiki_url": "https://en.wikipedia.org/wiki/Forget-me-not",
    "image": "N1296_Myosotis_0.jpg",
@@ -346081,7 +346081,7 @@
   {
    "uid": "cr-n1340",
    "name": "Rice",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Rice is a cereal grain and in its domesticated form is the staple foodof over half of theworld's population, particularly in Asia and Africa. Rice is the seed of the grass species Oryza sativa (Asian rice)—or, much less commonly, Oryza gla berrima (African rice).",
    "wiki_url": "https://en.wikipedia.org/wiki/Rice",
    "image": "",
@@ -346091,7 +346091,7 @@
   {
    "uid": "cr-n1341",
    "name": "Barley",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Barley (Hordeum vulgare), a member of the grass family, is a major cereal grain grown in temperate climates globally. One of the first cultivated grains, it was domesticated in the Fertile Crescent around 9000 BC, giving it non shattering spikelets and making it much easier to harvest.",
    "wiki_url": "https://en.wikipedia.org/wiki/Barley",
    "image": "N1341_Barley_0.jpg",
@@ -346101,7 +346101,7 @@
   {
    "uid": "cr-n1342",
    "name": "Oat",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "The oat (Avena sativa), sometimes called the common oat, is a species of cereal grass (Avena) grown for fodder and for its seed, which is known by the same name (usually in the plural). Oats appear to have been domesticated as a secondary crop, as their seeds resembled those of other cereals closely enough for them to…",
    "wiki_url": "https://en.wikipedia.org/wiki/Oats",
    "image": "",
@@ -346151,7 +346151,7 @@
   {
    "uid": "cr-n1347",
    "name": "Pampas grass",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Pampas grassorpampas-grassor Pap's grass is a common name which may refer to any of several similar-looking, tall-growing species of grass:",
    "wiki_url": "https://en.wikipedia.org/wiki/Pampas_Grass",
    "image": "",
@@ -346211,7 +346211,7 @@
   {
    "uid": "cr-n1353",
    "name": "Bird's-nest fern",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Bird's-nest fernis a common name applied to several related species of epiphytic ferns in the genus Asplenium. They grow in a tight, nest-like clump with a lingulate leaf rosette.",
    "wiki_url": "https://en.wikipedia.org/wiki/Bird%27s_Nest_Fern",
    "image": "",
@@ -346221,7 +346221,7 @@
   {
    "uid": "cr-n1354",
    "name": "Japanese Painted Fern",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Bird's-nest fernis a common name applied to several related species of epiphytic ferns in the genus Asplenium. They grow in a tight, nest-like clump with a lingulate leaf rosette.",
    "wiki_url": "https://en.wikipedia.org/wiki/Japanese_Painted_Fern",
    "image": "",
@@ -346381,7 +346381,7 @@
   {
    "uid": "cr-n1371",
    "name": "Venus flytrap",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "The Venus flytrap (Dionaea muscipula) is a carnivorous plant native to the temperate and subtropical wetlands of North Carolina and South Carolina, on the East Coast of the United States. Although various modern hybrids have been created in cultivation, D. muscipula is the only species of the monotypic genus Dionaea.",
    "wiki_url": "https://en.wikipedia.org/wiki/Venus_Flytrap",
    "image": "N1371_Venus flytrap_0.jpg",
@@ -346391,7 +346391,7 @@
   {
    "uid": "cr-n1372",
    "name": "Pitcher Plant",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "The Venus flytrap (Dionaea muscipula) is a carnivorous plant native to the temperate and subtropical wetlands of North Carolina and South Carolina, on the East Coast of the United States. Although various modern hybrids have been created in cultivation, D. muscipula is the only species of the monotypic genus Dionaea.",
    "wiki_url": "https://en.wikipedia.org/wiki/Pitcher_Plant",
    "image": "",
@@ -346401,7 +346401,7 @@
   {
    "uid": "cr-n1373",
    "name": "Drosera",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Drosera, which is commonly known as the sundews, is one of the largest genera of carnivorous plants, with at least 194species. These members of the family Drosera ceaelure, capture, and digest insects using stalked mucilaginous glands covering their leaf surfaces.",
    "wiki_url": "https://en.wikipedia.org/wiki/Sundew",
    "image": "",
@@ -346421,7 +346421,7 @@
   {
    "uid": "cr-n1375",
    "name": "Pinguicula",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Pinguicula, commonly known as butter worts, is a genus of carnivorous flowering plants in the family Lentibulariaceae. They use sticky, glandular leaves to lure, trap, and digest insects in order to supplement the poor mineral nutrition they obtain from the environment. 126 species are currently accepted.13 are native…",
    "wiki_url": "https://en.wikipedia.org/wiki/Butterwort",
    "image": "",
@@ -346451,7 +346451,7 @@
   {
    "uid": "cr-n1378",
    "name": "Giant bamboo",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Giant bamboo is a common name for several large species of bamboo and may refer to:",
    "wiki_url": "https://en.wikipedia.org/wiki/Giant_Bamboo",
    "image": "",
@@ -346461,7 +346461,7 @@
   {
    "uid": "cr-n1379",
    "name": "Moso Bamboo",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Giant bamboo is a common name for several large species of bamboo and may refer to:",
    "wiki_url": "https://en.wikipedia.org/wiki/Moso_Bamboo",
    "image": "",
@@ -346491,7 +346491,7 @@
   {
    "uid": "cr-n1382",
    "name": "Bambusa ventricosa",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Bambusa ventricosa is a species of bamboo in the family Poaceae. It is native to Vietnam and to Guangdong province in southern China.",
    "wiki_url": "https://en.wikipedia.org/wiki/Buddha_Belly_Bamboo",
    "image": "N1382_Bambusa ventricosa_0.jpg",
@@ -346501,7 +346501,7 @@
   {
    "uid": "cr-n1383",
    "name": "Clumping Bamboo",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Bambusa ventricosa is a species of bamboo in the family Poaceae. It is native to Vietnam and to Guangdong province in southern China.",
    "wiki_url": "https://en.wikipedia.org/wiki/Clumping_Bamboo",
    "image": "",
@@ -346621,7 +346621,7 @@
   {
    "uid": "cr-n1397",
    "name": "Kangaroo paw",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Kangaroo pawis the common name for a number of species, in two genera of the family Haemodoraceae, that are native to the south-west of Western Australia. These rhizomatous perennial plants are noted for their unique bird-attracting flowers.",
    "wiki_url": "https://en.wikipedia.org/wiki/Kangaroo_Paw",
    "image": "",
@@ -346741,7 +346741,7 @@
   {
    "uid": "cr-n1409",
    "name": "Ixia",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Ixia is a genus ofcormous plants native to South Africa from the family Iridaceae. Some of them are known as the corn lily.",
    "wiki_url": "https://en.wikipedia.org/wiki/Ixia",
    "image": "",
@@ -347031,7 +347031,7 @@
   {
    "uid": "cr-n1445",
    "name": "Monarda",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Monarda is a genus of flowering plants in the mint family, Lamiaceae. The genus is endemic to North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Bee_Balm",
    "image": "",
@@ -347041,7 +347041,7 @@
   {
    "uid": "cr-n1446",
    "name": "Cardinal Flower",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Monarda is a genus of flowering plants in the mint family, Lamiaceae. The genus is endemic to North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Cardinal_Flower",
    "image": "",
@@ -347401,7 +347401,7 @@
   {
    "uid": "cr-n1482",
    "name": "Miscanthus sinensis",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Miscanthus sinensis, also called eulalia grass, Chinese silver grass, or elephant grass, is a species of flowering plant in the grass family Poaceae, native to most of East Asia (China, Japan, Taiwanand Korea) and Southeast Asia (the Philippines, eastern Indonesia, Malaysia, Vietnam, Thailand, and Laos).",
    "wiki_url": "https://en.wikipedia.org/wiki/Maiden_Grass",
    "image": "",
@@ -347431,7 +347431,7 @@
   {
    "uid": "cr-n1485",
    "name": "Molinia caerulea",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Molinia caerulea, known by the common name purple moor-grass, is a species of grass that is native to Europe, west Asia, and north Africa. It grows in locations from the lowlands up to 2,300 m (7,546 ft) in the Alps.",
    "wiki_url": "https://en.wikipedia.org/wiki/Purple_Moor_Grass",
    "image": "",
@@ -347441,7 +347441,7 @@
   {
    "uid": "cr-n1486",
    "name": "Tufted Hair Grass",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Molinia caerulea, known by the common name purple moor-grass, is a species of grass that is native to Europe, west Asia, and north Africa. It grows in locations from the lowlands up to 2,300 m (7,546 ft) in the Alps.",
    "wiki_url": "https://en.wikipedia.org/wiki/Tufted_Hair_Grass",
    "image": "",
@@ -347791,7 +347791,7 @@
   {
    "uid": "cr-n1522",
    "name": "Viola",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "The viola ( vee-OH-lə,(ⓘ) Italian:[ˈvjɔːla, viˈɔːla]) is a string instrument of the violin family, and is usually bowed when played. The viola is slightly larger than the violin and has a lower sound.",
    "wiki_url": "https://en.wikipedia.org/wiki/Viola",
    "image": "N1522_Viola_0.jpg",
@@ -347971,7 +347971,7 @@
   {
    "uid": "cr-n1540",
    "name": "Xerochrysum bracteatum",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Xerochrysum bracteatum, commonly known as the golden everlasting or straw flower, is a flowering plant in the family Asteraceae native to Australia. Described byÉtienne Pierre Venten at in 1803, it was known as Helichrysum bracteatum for many years before being transferred to a new genus Xerochrysumin 1990.",
    "wiki_url": "https://en.wikipedia.org/wiki/Strawflower",
    "image": "",
@@ -348101,7 +348101,7 @@
   {
    "uid": "cr-n1559",
    "name": "Bergenia",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Bergenia (elephant-eared saxifrage, elephant's ears) is a genus of ten species of flowering plants in the family Saxifragaceae, native to central Asia, from Afghanistan to China and the Himalayan region.",
    "wiki_url": "https://en.wikipedia.org/wiki/Bergenia",
    "image": "",
@@ -348371,7 +348371,7 @@
   {
    "uid": "cr-n1590",
    "name": "Fittonia",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Fittonia (ornerve plantormosaic plant) is a genus of evergreen perennial flowering plants in the acanthus ('bear’s britches') family, Acanthaceae. The genus is native to tropical and subtropical forested areas in northern and western South America, mainly Perú.",
    "wiki_url": "https://en.wikipedia.org/wiki/Fittonia",
    "image": "",
@@ -348381,7 +348381,7 @@
   {
    "uid": "cr-n1591",
    "name": "Rex Begonia",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Fittonia (ornerve plantormosaic plant) is a genus of evergreen perennial flowering plants in the acanthus ('bear’s britches') family, Acanthaceae. The genus is native to tropical and subtropical forested areas in northern and western South America, mainly Perú.",
    "wiki_url": "https://en.wikipedia.org/wiki/Rex_Begonia",
    "image": "",
@@ -348781,7 +348781,7 @@
   {
    "uid": "cr-n1633",
    "name": "Claytosmunda",
-   "codex_category": "vegetal",
+   "codex_category": "fossil",
    "description": "The plant is known from fossils to have grown in Europe, showing a previous circum boreal distribution. Fragmentary foliage resembling Clay tosmundahas been found in the fossil record as far back as the Triassic.",
    "wiki_url": "https://en.wikipedia.org/wiki/Interrupted_Fern",
    "image": "N1633_Claytosmunda_0.jpg",
@@ -348921,7 +348921,7 @@
   {
    "uid": "cr-n1647",
    "name": "Heliamphora",
-   "codex_category": "microOrganism",
+   "codex_category": "vegetal",
    "description": "The genus Heliamphora ( or ; Greek:helos\"marsh\" andamphoreus\"amphora\") contains 24 species of pitcher plants endemic to South America. The species are collectively known assun pitchers, based on the mistaken notion that the he li of Heliamphorais from the Greek helios, meaning \"sun\".",
    "wiki_url": "https://en.wikipedia.org/wiki/Sun_Pitcher",
    "image": "N1647_Heliamphora_0.jpg",
@@ -348931,7 +348931,7 @@
   {
    "uid": "cr-n1648",
    "name": "Dewy Pine",
-   "codex_category": "microOrganism",
+   "codex_category": "vegetal",
    "description": "The genus He li amphora ( or ; Greek:helos\"marsh\" andamphoreus\"amphora\") contains 24 species of pitcher plants endemic to South America. The species are collectively known assun pitchers, based on the mistaken notion that the he li of Heliamphorais from the Greek helios, meaning \"sun\".",
    "wiki_url": "https://en.wikipedia.org/wiki/Dewy_Pine",
    "image": "",
@@ -348941,7 +348941,7 @@
   {
    "uid": "cr-n1649",
    "name": "Rainbow Plant",
-   "codex_category": "microOrganism",
+   "codex_category": "vegetal",
    "description": "The genus He li amphora ( or ; Greek:helos\"marsh\" andamphoreus\"amphora\") contains 24 species of pitcher plants endemic to South America. The species are collectively known assun pitchers, based on the mistaken notion that the he li of Heliamphorais from the Greek helios, meaning \"sun\".",
    "wiki_url": "https://en.wikipedia.org/wiki/Rainbow_Plant",
    "image": "",
@@ -348951,7 +348951,7 @@
   {
    "uid": "cr-n1650",
    "name": "Portuguese Sundew",
-   "codex_category": "microOrganism",
+   "codex_category": "vegetal",
    "description": "The genus He li amphora ( or ; Greek:helos\"marsh\" andamphoreus\"amphora\") contains 24 species of pitcher plants endemic to South America. The species are collectively known assun pitchers, based on the mistaken notion that the he li of Heliamphorais from the Greek helios, meaning \"sun\".",
    "wiki_url": "https://en.wikipedia.org/wiki/Portuguese_Sundew",
    "image": "",
@@ -348961,7 +348961,7 @@
   {
    "uid": "cr-n1651",
    "name": "Running Bamboo",
-   "codex_category": "microOrganism",
+   "codex_category": "vegetal",
    "description": "The genus He li amphora ( or ; Greek:helos\"marsh\" andamphoreus\"amphora\") contains 24 species of pitcher plants endemic to South America. The species are collectively known assun pitchers, based on the mistaken notion that the he li of Heliamphorais from the Greek helios, meaning \"sun\".",
    "wiki_url": "https://en.wikipedia.org/wiki/Running_Bamboo",
    "image": "",
@@ -348991,7 +348991,7 @@
   {
    "uid": "cr-n1654",
    "name": "Guadua",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Physically, Guadua angustifolia is noted for being the largest Neotropical bamboo. The genus is similar to Bambus a and is sometimes included in that genus.",
    "wiki_url": "https://en.wikipedia.org/wiki/Guadua",
    "image": "",
@@ -349011,7 +349011,7 @@
   {
    "uid": "cr-n1656",
    "name": "Dendrocalamus",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Dendrocalamus is a tropical Asian genus of giant clumping bamboos in the grass family. It is found in the Indian subcontinent, China, and Southeast Asia.",
    "wiki_url": "https://en.wikipedia.org/wiki/Dendrocalamus",
    "image": "",
@@ -349021,7 +349021,7 @@
   {
    "uid": "cr-n1657",
    "name": "Gigantochloa",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Gigantochloa is a tropical Asian and Papua sian genus of giant clumping bamboos in the grass family. It is found in southern China, Southeast Asia, the Indian subcontinent, and New Guinea.",
    "wiki_url": "https://en.wikipedia.org/wiki/Gigantochloa",
    "image": "",
@@ -349041,7 +349041,7 @@
   {
    "uid": "cr-n1659",
    "name": "Thyrsostachys",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Thyrsostachys is a genus of Chinese and Indochinese bamboo in the grass family.",
    "wiki_url": "https://en.wikipedia.org/wiki/Thyrsostachys",
    "image": "",
@@ -349061,7 +349061,7 @@
   {
    "uid": "cr-n1661",
    "name": "Melocanna",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Melocanna is a genus of Asian clumping bamboo in the grass family.",
    "wiki_url": "https://en.wikipedia.org/wiki/Melocanna",
    "image": "",
@@ -349111,7 +349111,7 @@
   {
    "uid": "cr-n1666",
    "name": "Sinobambusa",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Sinobambusa is a genus of East Asian bamboo in the grass family. It is native to China and Vietnam.",
    "wiki_url": "https://en.wikipedia.org/wiki/Sinobambusa",
    "image": "N1666_Sinobambusa_0.jpg",
@@ -349231,7 +349231,7 @@
   {
    "uid": "cr-n1679",
    "name": "Conospermum",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Conospermum is a genus of about 50species of flowering plants in the family Proteaceae that are endemic to Australia. Members of the genus are known as smoke bushes- from a distance, their wispy heads of blue or grey flowers resemble puffs of smoke.",
    "wiki_url": "https://en.wikipedia.org/wiki/Conospermum",
    "image": "",
@@ -349261,7 +349261,7 @@
   {
    "uid": "cr-n1682",
    "name": "Paranomus",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "The species occur mainly in mountainous areas of the Western and Eastern Cape provinces from the Cederbergto Uitenhage, with the highest numbers found in the districts of Cale don, Worcester and Swell end am. They are often associated withfynbos habitats.",
    "wiki_url": "https://en.wikipedia.org/wiki/Paranomus",
    "image": "",
@@ -349441,7 +349441,7 @@
   {
    "uid": "cr-n1701",
    "name": "Kingia",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "When not flowering, Kingia australis bear a superficial similarity to species of the genus Xanthorrhoea. However, the flower stalks of Kingia australis are completely different from that of Xanthorrhoea species and the two are not closely related.",
    "wiki_url": "https://en.wikipedia.org/wiki/Kingia",
    "image": "",
@@ -349501,7 +349501,7 @@
   {
    "uid": "cr-n1708",
    "name": "Ferraria",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Ferraria is a genus of monocotyledonous flowering plants in the family Iridaceae, native to tropical and southern Africa. They areherbaceouscorm-bearing plants growing to 30–45 cm tall.",
    "wiki_url": "https://en.wikipedia.org/wiki/Ferraria",
    "image": "",
@@ -349821,7 +349821,7 @@
   {
    "uid": "cr-n1744",
    "name": "Tuberaria",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "The leaves are in a rosette at the base of the plant, and then in opposite pairs up the stem; they are simple oval, 2–5 cm long and 1–2 cm broad. The flowers are 2–5 cm diameter, with five petals, yellow with a red spot at the base of each petal, the red spot acting as a 'target' for pollinating insects.",
    "wiki_url": "https://en.wikipedia.org/wiki/Tuberaria",
    "image": "",
@@ -349941,7 +349941,7 @@
   {
    "uid": "cr-n1759",
    "name": "Trochodendron",
-   "codex_category": "vegetal",
+   "codex_category": "fossil",
    "description": "Trochodendron is a genus of flowering plants with one living species, Trochodendron aralioides, and six extinct species known from the fossil record. It was often considered the sole genus in the family Trochodendraceae, though botanists now also include the distinct genus Tetra centro nin the family.",
    "wiki_url": "https://en.wikipedia.org/wiki/Trochodendron",
    "image": "",
@@ -349971,7 +349971,7 @@
   {
    "uid": "cr-n1763",
    "name": "Eucommia",
-   "codex_category": "vegetal",
+   "codex_category": "fossil",
    "description": "Eucommia is a genus of small trees now native to China, with a fossil record that shows a much wider distribution. The single living species, Eucommia ulmoides, is near threatened in the wild, but is widely cultivated in China for its bark, and is highly valued in herbologysuch as traditional Chinese medicine.",
    "wiki_url": "https://en.wikipedia.org/wiki/Eucommia",
    "image": "",
@@ -350041,7 +350041,7 @@
   {
    "uid": "cr-n1770",
    "name": "Mastixia",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "The classification of Mastixiais inconsistent due to continuing investigation into its phylogenetic relationships. Although generally placed in Cornaceae, it has also been associated with the family Nyssaceae, when that family is removed from Cornaceae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Mastixia",
    "image": "N1770_Mastixia_0.jpg",
@@ -350201,7 +350201,7 @@
   {
    "uid": "cr-n1786",
    "name": "Rattlesnake weed",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Rattlesnake weedmay refer to several plant species used in folk medicine to treat snake bites, such as:",
    "wiki_url": "https://en.wikipedia.org/wiki/Rattlesnake_Weed",
    "image": "",
@@ -350211,7 +350211,7 @@
   {
    "uid": "cr-n1787",
    "name": "Dutchman%27s Breeches",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Rattlesnake weedmay refer to several plant species used in folk medicine to treat snake bites, such as:",
    "wiki_url": "https://en.wikipedia.org/wiki/Dutchman%27s_Breeches",
    "image": "",
@@ -350221,7 +350221,7 @@
   {
    "uid": "cr-n1788",
    "name": "Dicentra canadensis",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Dicentra canadensis, the squirrel corn, is a flowering plant from eastern North America with oddly shaped white flowers and finely divided leaves.",
    "wiki_url": "https://en.wikipedia.org/wiki/Squirrel_Corn",
    "image": "N1788_Dicentra canadensis_0.jpg",
@@ -350491,7 +350491,7 @@
   {
    "uid": "cr-n1818",
    "name": "Arctous alpina",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "A rctous alpina (syn. Arctostaphylos alpina), the alpine bear berry, mountain bear berry or black bear berry, is a dwarf shrub in the heather family Ericaceae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Alpine_Bearberry",
    "image": "",
@@ -350531,7 +350531,7 @@
   {
    "uid": "cr-n1822",
    "name": "Linaria alpina",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Linaria alpina, sometimes called alpine toad flax, is a purple-flowered plant native to mountainous areas of southern and central Europe. It belongs to the family Plant aginaceae family.",
    "wiki_url": "https://en.wikipedia.org/wiki/Alpine_Toadflax",
    "image": "",
@@ -350541,7 +350541,7 @@
   {
    "uid": "cr-n1823",
    "name": "Silene",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "Silene is a genus of flowering plants in the family Caryophyllaceae. Containing nearly 900 species, it is the largest genus in the family.",
    "wiki_url": "https://en.wikipedia.org/wiki/Alpine_Catchfly",
    "image": "",
@@ -350551,7 +350551,7 @@
   {
    "uid": "cr-n1824",
    "name": "Cerastium alpinum",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Cerastium alpinum, commonly called alpine mouse-earoralpine chick weed, is a mat-forming perennial plant. The species was first described by Carl Linnaeus in 1753.",
    "wiki_url": "https://en.wikipedia.org/wiki/Alpine_Mouse-ear",
    "image": "",
@@ -350561,7 +350561,7 @@
   {
    "uid": "cr-n1825",
    "name": "Alpine Chickweed",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Cerastium alpinum, commonly called alpine mouse-earoralpine chickweed, is a mat-forming perennial plant. The species was first described by Carl Linnaeus in 1753.",
    "wiki_url": "https://en.wikipedia.org/wiki/Alpine_Chickweed",
    "image": "",
@@ -350571,7 +350571,7 @@
   {
    "uid": "cr-n1826",
    "name": "Alpine Sandwort",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Cerastium alpinum, commonly called alpine mouse-earoralpine chick weed, is a mat-forming perennial plant. The species was first described by Carl Linnaeus in 1753.",
    "wiki_url": "https://en.wikipedia.org/wiki/Alpine_Sandwort",
    "image": "",
@@ -351161,7 +351161,7 @@
   {
    "uid": "cr-n1890",
    "name": "Phyllodoce caerulea",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Phyllodoce caerulea, known as blue heath in British English and purple mountain heather or blue mountain heath in American English, is an evergreen species of dwarf shrub that grows up to around 15 cm (6 in) tall, and bears clusters of 2–6 purple flowers. It is native to boreal regions around the Northern Hemisphere, …",
    "wiki_url": "https://en.wikipedia.org/wiki/Blue_Heath",
    "image": "N1890_Phyllodoce caerulea_0.jpg",
@@ -351171,7 +351171,7 @@
   {
    "uid": "cr-n1892",
    "name": "Yellow Mountain Heather",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Phyllodoce caerulea, known as blue heath in British English and purple mountain heather or blue mountain heath in American English, is an evergreen species of dwarf shrub that grows up to around 15 cm (6 in) tall, and bears clusters of 2–6 purple flowers. It is native to boreal regions around the Northern Hemisphere, …",
    "wiki_url": "https://en.wikipedia.org/wiki/Yellow_Mountain_Heather",
    "image": "",
@@ -351181,7 +351181,7 @@
   {
    "uid": "cr-n1893",
    "name": "Aleutian Mountain Heather",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Phyllodoce caerulea, known as blue heath in British English and purple mountain heather or blue mountain heath in American English, is an evergreen species of dwarf shrub that grows up to around 15 cm (6 in) tall, and bears clusters of 2–6 purple flowers. It is native to boreal regions around the Northern Hemisphere, …",
    "wiki_url": "https://en.wikipedia.org/wiki/Aleutian_Mountain_Heather",
    "image": "",
@@ -351191,7 +351191,7 @@
   {
    "uid": "cr-n1894",
    "name": "White Mountain Heather",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Phyllodoce caerulea, known as blue heath in British English and purple mountain heather or blue mountain heath in American English, is an evergreen species of dwarf shrub that grows up to around 15 cm (6 in) tall, and bears clusters of 2–6 purple flowers. It is native to boreal regions around the Northern Hemisphere, …",
    "wiki_url": "https://en.wikipedia.org/wiki/White_Mountain_Heather",
    "image": "",
@@ -351201,7 +351201,7 @@
   {
    "uid": "cr-n1895",
    "name": "Western Moss Heather",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Phyllodoce caerulea, known as blue heath in British English and purple mountain heather or blue mountain heath in American English, is an evergreen species of dwarf shrub that grows up to around 15 cm (6 in) tall, and bears clusters of 2–6 purple flowers. It is native to boreal regions around the Northern Hemisphere, …",
    "wiki_url": "https://en.wikipedia.org/wiki/Western_Moss_Heather",
    "image": "",
@@ -351211,7 +351211,7 @@
   {
    "uid": "cr-n1896",
    "name": "Four-angled Cassiope",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Phyllodoce caerulea, known as blue heath in British English and purple mountain heather or blue mountain heath in American English, is an evergreen species of dwarf shrub that grows up to around 15 cm (6 in) tall, and bears clusters of 2–6 purple flowers. It is native to boreal regions around the Northern Hemisphere, …",
    "wiki_url": "https://en.wikipedia.org/wiki/Four-angled_Cassiope",
    "image": "",
@@ -351221,7 +351221,7 @@
   {
    "uid": "cr-n1897",
    "name": "Moss Plant",
-   "codex_category": "vegetal",
+   "codex_category": "animal",
    "description": "Phyllodoce caerulea, known as blue heath in British English and purple mountain heather or blue mountain heath in American English, is an evergreen species of dwarf shrub that grows up to around 15 cm (6 in) tall, and bears clusters of 2–6 purple flowers. It is native to boreal regions around the Northern Hemisphere, …",
    "wiki_url": "https://en.wikipedia.org/wiki/Moss_Plant",
    "image": "",
@@ -352091,7 +352091,7 @@
   {
    "uid": "cr-n1998",
    "name": "Alnus glutinosa",
-   "codex_category": "microOrganism",
+   "codex_category": "vegetal",
    "description": "Alnus glutinosa, the common alder, black alder, European alder, European black alder, or just alder, is a species of tree in the family Betulaceae, native to most of Europe, southwest Asia and northern Africa. It thrives in wet locations where its association with the bacterium Frank i a alni enables it to grow in poo…",
    "wiki_url": "https://en.wikipedia.org/wiki/European_Alder",
    "image": "N1998_Alnus glutinosa_0.jpg",
@@ -352241,7 +352241,7 @@
   {
    "uid": "cr-n2014",
    "name": "Alnus subcordata",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Alnus subcordata, the Caucasian alder, is a species in the family Betulaceae, prevalent in the Hyrcanian woodlands situated in the Caspian Mountains of northern Iran and southeast Azerbaijan. It is closely related to the Italian alder (A. cordata) and Alnus orientalis.",
    "wiki_url": "https://en.wikipedia.org/wiki/Caucasian_Alder",
    "image": "N2014_Alnus subcordata_0.jpg",
@@ -352251,7 +352251,7 @@
   {
    "uid": "cr-n2015",
    "name": "Japanese Alder",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Alnus subcordata, the Caucasian alder, is a species in the family Betulaceae, prevalent in the Hyrcanian woodlands situated in the Caspian Mountains of northern Iran and southeast Azerbaijan. It is closely related to the Italian alder (A. cordata) and Alnus orientalis.",
    "wiki_url": "https://en.wikipedia.org/wiki/Japanese_Alder",
    "image": "",
@@ -352261,7 +352261,7 @@
   {
    "uid": "cr-n2016",
    "name": "Manchurian Alder",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Alnus subcordata, the Caucasian alder, is a species in the family Betulaceae, prevalent in the Hyrcanian woodlands situated in the Caspian Mountains of northern Iran and southeast Azerbaijan. It is closely related to the Italian alder (A. cordata) and Alnus orientalis.",
    "wiki_url": "https://en.wikipedia.org/wiki/Manchurian_Alder",
    "image": "",
@@ -352271,7 +352271,7 @@
   {
    "uid": "cr-n2017",
    "name": "Siberian Alder",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Alnus subcordata, the Caucasian alder, is a species in the family Betulaceae, prevalent in the Hyrcanian woodlands situated in the Caspian Mountains of northern Iran and southeast Azerbaijan. It is closely related to the Italian alder (A. cordata) and Alnus orientalis.",
    "wiki_url": "https://en.wikipedia.org/wiki/Siberian_Alder",
    "image": "",
@@ -352281,7 +352281,7 @@
   {
    "uid": "cr-n2018",
    "name": "Dwarf Alder",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Alnus subcordata, the Caucasian alder, is a species in the family Betulaceae, prevalent in the Hyrcanian woodlands situated in the Caspian Mountains of northern Iran and southeast Azerbaijan. It is closely related to the Italian alder (A. cordata) and Alnus orientalis.",
    "wiki_url": "https://en.wikipedia.org/wiki/Dwarf_Alder",
    "image": "",
@@ -352291,7 +352291,7 @@
   {
    "uid": "cr-n2019",
    "name": "Shrub Alder",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Alnus subcordata, the Caucasian alder, is a species in the family Betulaceae, prevalent in the Hyrcanian woodlands situated in the Caspian Mountains of northern Iran and southeast Azerbaijan. It is closely related to the Italian alder (A. cordata) and Alnus orientalis.",
    "wiki_url": "https://en.wikipedia.org/wiki/Shrub_Alder",
    "image": "",
@@ -358281,7 +358281,7 @@
   {
    "uid": "cr-n2628",
    "name": "Pinctada",
-   "codex_category": "animal",
+   "codex_category": "mushroom",
    "description": "Pearl oysters are not closely related to either the edible oysters of family Ostreidae or the freshwater pearl mussels of the families Unionidae and Margaritiferidae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Pearl_Oyster",
    "image": "N2628_Pinctada_0.jpg",
@@ -358291,7 +358291,7 @@
   {
    "uid": "cr-n2629",
    "name": "King Oyster",
-   "codex_category": "animal",
+   "codex_category": "mushroom",
    "description": "Pearl oysters are not closely related to either the edible oysters of family Ostreidae or the freshwater pearl mussels of the families Unionidae and Margaritiferidae.",
    "wiki_url": "https://en.wikipedia.org/wiki/King_Oyster",
    "image": "",
@@ -358301,7 +358301,7 @@
   {
    "uid": "cr-n2630",
    "name": "Phoenix Oyster",
-   "codex_category": "animal",
+   "codex_category": "mushroom",
    "description": "Pearl oysters are not closely related to either the edible oysters of family Ostreidae or the freshwater pearl mussels of the families Unionidae and Margaritiferidae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Phoenix_Oyster",
    "image": "",
@@ -358311,7 +358311,7 @@
   {
    "uid": "cr-n2631",
    "name": "Golden Oyster",
-   "codex_category": "animal",
+   "codex_category": "mushroom",
    "description": "Pearl oysters are not closely related to either the edible oysters of family Ostreidae or the freshwater pearl mussels of the families Unionidae and Margaritiferidae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Golden_Oyster",
    "image": "",
@@ -358481,7 +358481,7 @@
   {
    "uid": "cr-n2648",
    "name": "Calvatia cyathiformis",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Calvatia cyathiformis, orpurple-spored puff ball, is a large saprobic species of Calvatia. This terrestrial puffball has purplish or purple-brown spores, which distinguish it from other large Agaric ales.",
    "wiki_url": "https://en.wikipedia.org/wiki/Purple-spored_Puffball",
    "image": "N2648_Calvatia cyathiformis_0.jpg",
@@ -358491,7 +358491,7 @@
   {
    "uid": "cr-n2649",
    "name": "Mosaic Puffball",
-   "codex_category": "animal",
+   "codex_category": "vegetal",
    "description": "Calvatia cyathiformis, orpurple-spored puffball, is a large saprobic species of Calvatia. This terrestrial puffball has purplish or purple-brown spores, which distinguish it from other large Agaric ales.",
    "wiki_url": "https://en.wikipedia.org/wiki/Mosaic_Puffball",
    "image": "",
@@ -358611,7 +358611,7 @@
   {
    "uid": "cr-n2661",
    "name": "Tremella fuciformis",
-   "codex_category": "mushroom",
+   "codex_category": "vegetal",
    "description": "The species is widespread, especially in the tropics, where it can be found on the dead branches of broadleaf trees. It is a parasitic yeast, and grows as a slimy, mucus-like film until it encounters its preferred hosts, various species of Annulohypoxylon (or possibly Hypoxylon) fungi, whereupon it then invades, trigg…",
    "wiki_url": "https://en.wikipedia.org/wiki/White_Jelly_Fungus",
    "image": "N2661_Tremella fuciformis_0.jpg",
@@ -358621,7 +358621,7 @@
   {
    "uid": "cr-n2663",
    "name": "Common Stinkhorn",
-   "codex_category": "mushroom",
+   "codex_category": "vegetal",
    "description": "The species is widespread, especially in the tropics, where it can be found on the dead branches of broadleaf trees. It is a parasitic yeast, and grows as a slimy, mucus-like film until it encounters its preferred hosts, various species of Annulohypoxylon (or possibly Hypoxylon) fungi, whereupon it then invades, trigg…",
    "wiki_url": "https://en.wikipedia.org/wiki/Common_Stinkhorn",
    "image": "",
@@ -358631,7 +358631,7 @@
   {
    "uid": "cr-n2664",
    "name": "Basket Stinkhorn",
-   "codex_category": "mushroom",
+   "codex_category": "vegetal",
    "description": "The species is widespread, especially in the tropics, where it can be found on the dead branches of broadleaf trees. It is a parasitic yeast, and grows as a slimy, mucus-like film until it encounters its preferred hosts, various species of Annulohypoxylon (or possibly Hypoxylon) fungi, whereupon it then invades, trigg…",
    "wiki_url": "https://en.wikipedia.org/wiki/Basket_Stinkhorn",
    "image": "",
@@ -359091,7 +359091,7 @@
   {
    "uid": "cr-n2710",
    "name": "Hortiboletus rubellus",
-   "codex_category": "animal",
+   "codex_category": "mushroom",
    "description": "Hortiboletus rubellus, commonly known as the ruby bolete, is a small, dainty, brightly coloured member of the family Boletaceae, with a reddish capandstipe, and yellow pores. Like manyboletes, it stains blue when cut or bruised.",
    "wiki_url": "https://en.wikipedia.org/wiki/Ruby_Bolete",
    "image": "N2710_Hortiboletus rubellus_0.jpg",
@@ -359101,7 +359101,7 @@
   {
    "uid": "cr-n2711",
    "name": "Chestnut Bolete",
-   "codex_category": "animal",
+   "codex_category": "mushroom",
    "description": "Hortiboletus rubellus, commonly known as the ruby bolete, is a small, dainty, brightly coloured member of the family Boletaceae, with a reddish capandstipe, and yellow pores. Like manyboletes, it stains blue when cut or bruised.",
    "wiki_url": "https://en.wikipedia.org/wiki/Chestnut_Bolete",
    "image": "",
@@ -359111,7 +359111,7 @@
   {
    "uid": "cr-n2712",
    "name": "Blackening Bolete",
-   "codex_category": "animal",
+   "codex_category": "mushroom",
    "description": "Hortiboletus rubellus, commonly known as the ruby bolete, is a small, dainty, brightly coloured member of the family Boletaceae, with a reddish capandstipe, and yellow pores. Like manyboletes, it stains blue when cut or bruised.",
    "wiki_url": "https://en.wikipedia.org/wiki/Blackening_Bolete",
    "image": "",
@@ -359121,7 +359121,7 @@
   {
    "uid": "cr-n2713",
    "name": "Gilled Bolete",
-   "codex_category": "animal",
+   "codex_category": "mushroom",
    "description": "Hortiboletus rubellus, commonly known as the ruby bolete, is a small, dainty, brightly coloured member of the family Boletaceae, with a reddish capandstipe, and yellow pores. Like manyboletes, it stains blue when cut or bruised.",
    "wiki_url": "https://en.wikipedia.org/wiki/Gilled_Bolete",
    "image": "",
@@ -359791,7 +359791,7 @@
   {
    "uid": "cr-n2780",
    "name": "Rhizopogon",
-   "codex_category": "animal",
+   "codex_category": "mushroom",
    "description": "Rhizopogon is a genus ofecto mycorrhizal basidiomycete sin the family Rhizopogonaceae. Species formhypogeous sporocarps commonly referred to as \"false truffles\".",
    "wiki_url": "https://en.wikipedia.org/wiki/Rhizopogon",
    "image": "N2780_Rhizopogon_0.jpg",
@@ -359801,7 +359801,7 @@
   {
    "uid": "cr-n2781",
    "name": "Dog Turd Fungus",
-   "codex_category": "animal",
+   "codex_category": "mushroom",
    "description": "Rhizopogon is a genus ofecto mycorrhizal basidiomycete sin the family Rhizopogonaceae. Species formhypogeous sporocarps commonly referred to as \"false truffles\".",
    "wiki_url": "https://en.wikipedia.org/wiki/Dog_Turd_Fungus",
    "image": "",
@@ -359811,7 +359811,7 @@
   {
    "uid": "cr-n2782",
    "name": "Pisolithus Tinctorius",
-   "codex_category": "animal",
+   "codex_category": "mushroom",
    "description": "Rhizopogon is a genus ofecto mycorrhizal basidiomycete sin the family Rhizopogonaceae. Species formhypogeous sporocarps commonly referred to as \"false truffles\".",
    "wiki_url": "https://en.wikipedia.org/wiki/Pisolithus_Tinctorius",
    "image": "",
@@ -361351,7 +361351,7 @@
   {
    "uid": "cr-n2938",
    "name": "Hysterangium",
-   "codex_category": "animal",
+   "codex_category": "mushroom",
    "description": "Hysterangium is agenusoftruffle-likefungiin the family Hysterangiaceae. The genus is widespread, especially intemperate regions, and contains more than 60 species.",
    "wiki_url": "https://en.wikipedia.org/wiki/Hysterangium",
    "image": "N2938_Hysterangium_0.jpg",
@@ -363771,7 +363771,7 @@
   {
    "uid": "cr-n3185",
    "name": "Goyocephale",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "Goyocephale is an extinct genus of pachycephalosaur ian ornithischian that lived in Mongolia during the Late Cretaceous about 76 million years ago. It was first described in 1982 by Alt anger el Perle, Teresa Maryańskaand Halszka Osmólskafor a disarticulated skeleton with most of askull, part of the forelimb and hindl…",
    "wiki_url": "https://en.wikipedia.org/wiki/Goyocephale",
    "image": "N3185_Goyocephale_0.jpg",
@@ -364051,7 +364051,7 @@
   {
    "uid": "cr-n3213",
    "name": "Confuciusornis",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "Together with the early mammal Zhangheotherium, which was discovered at around the same time, Confuciusornis was considered to be the most remarkable fossil discovery of the Jehol Biota[by whom?], which in the next decades would reveal the most important record of Mesozoic birds worldwide.: 5–6In the late 1990s, Confu…",
    "wiki_url": "https://en.wikipedia.org/wiki/Confuciusornis",
    "image": "",
@@ -364061,7 +364061,7 @@
   {
    "uid": "cr-n3214",
    "name": "Sapeornis",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "The hand of Sapeornis was far more derived than that of Archaeopteryx. It had three fingers, the outer ones with two and the middle one with three phalanges, and a well-fusedcarpometacarpus.",
    "wiki_url": "https://en.wikipedia.org/wiki/Sapeornis",
    "image": "",
@@ -364101,7 +364101,7 @@
   {
    "uid": "cr-n3218",
    "name": "Gobipteryx",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "Gobipteryx (from Gobi [referring to the Gobi Desert where it was first discovered], and Greek pteryx \"wing\") is a genus of prehistoric bird from the Campanian Ageof the Late Cretaceous Period. It is not known to have any direct descendants.",
    "wiki_url": "https://en.wikipedia.org/wiki/Gobipteryx",
    "image": "",
@@ -364121,7 +364121,7 @@
   {
    "uid": "cr-n3220",
    "name": "Ichthyornis",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "Ichthyorn is (meaning \"fish bird\", after its fish-like vertebrae) is an extinct genus of toothyseabird-likeornithuranfrom the late Cretaceous period of North America. Its fossil remains are known from the chalks of Alberta, Alabama, Kansas (Greenhorn Limestone), New Mexico, Saskatchewan, and Texas, in strata that were…",
    "wiki_url": "https://en.wikipedia.org/wiki/Ichthyornis",
    "image": "",
@@ -364131,7 +364131,7 @@
   {
    "uid": "cr-n3221",
    "name": "Gansus",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "Gansus is a genus of aquatic avialans that lived during the Aptian age of the Early Cretaceous (Aptian-Albian) period in what are now Gansuand Liaoning provinces, western China. The rock layers from which their fossils have been recovered are dated to 120 million years ago.",
    "wiki_url": "https://en.wikipedia.org/wiki/Gansus",
    "image": "",
@@ -364381,7 +364381,7 @@
   {
    "uid": "cr-n3246",
    "name": "Placodus",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "Placodus (from Greek:plax, plakos, \"a plate\" and Greek:odous, \"tooth\") is an extinct genus of marine reptiles belonging to the order Placodontia, which swam in the shallow seas of the middle Triassic period (c.240 million years ago). Fossils of Placodus have been found in Central Europe (Germany, France, Poland) and C…",
    "wiki_url": "https://en.wikipedia.org/wiki/Placodus",
    "image": "",
@@ -364401,7 +364401,7 @@
   {
    "uid": "cr-n3248",
    "name": "Nothosaurus",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "Nothosaurus ('false lizard', from the Ancient Greekνόθος, nothos,'illegitimate'andσαῦρος, sauros,'lizard') is an extinct genus of sauropterygian reptile from the Triassic period, approximately 245–228 million years ago, with fossils being distributed throughout the former Tethys Ocean, from North Africa and Europe to …",
    "wiki_url": "https://en.wikipedia.org/wiki/Nothosaurus",
    "image": "",
@@ -364441,7 +364441,7 @@
   {
    "uid": "cr-n3252",
    "name": "Hercules beetle",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The Hercules beetle (Dynastes hercules) is a species of rhinoceros beetle native to the tropical forests of southern Mexico, Central America, South America, and the Lesser Antilles. It is the longest extant species of beetle in the world, and is also one of the largest flying insects in the world.",
    "wiki_url": "https://en.wikipedia.org/wiki/Hercules_Beetle",
    "image": "",
@@ -364451,7 +364451,7 @@
   {
    "uid": "cr-n3253",
    "name": "Titan Beetle",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The Hercules beetle (Dynastes hercules) is a species of rhinoceros beetle native to the tropical forests of southern Mexico, Central America, South America, and the Lesser Antilles. It is the longest extant species of beetle in the world, and is also one of the largest flying insects in the world.",
    "wiki_url": "https://en.wikipedia.org/wiki/Titan_Beetle",
    "image": "",
@@ -364631,7 +364631,7 @@
   {
    "uid": "cr-n3271",
    "name": "Drugstore beetle",
-   "codex_category": "mushroom",
+   "codex_category": "insect",
    "description": "The drugstore beetle (Stegobium paniceum), also known as the bread beetle, biscuit beetle, and mis named as the biscuit we evil (despite not being aweevil), is a small brown beetle that infests a wide variety of dried plant products, where it is among the most common non-weevils. It is the only living member of the ge…",
    "wiki_url": "https://en.wikipedia.org/wiki/Drugstore_Beetle",
    "image": "N3271_Drugstore beetle_3.jpg",
@@ -364651,7 +364651,7 @@
   {
    "uid": "cr-n3273",
    "name": "Mealworm",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Tenebrio molitorhas been used in biomedical research. Meal worms can be a dietary source for animals and humans.",
    "wiki_url": "https://en.wikipedia.org/wiki/Mealworm_Beetle",
    "image": "N3273_Mealworm_0.jpg",
@@ -364671,7 +364671,7 @@
   {
    "uid": "cr-n3275",
    "name": "Dynastinae",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Many rhinoceros beetles are well known for their unique shapes and large sizes. Some famous species are, for example, the Atlas beetle (Chalcosoma atlas), common rhinoceros beetle (Xylotrupes ulysses), elephant beetle (Megasoma elephas), European rhinoceros beetle (Oryctes nasicornis), Hercules beetle (Dynastes hercul…",
    "wiki_url": "https://en.wikipedia.org/wiki/Rhinoceros_Beetle",
    "image": "N3275_Dynastinae_4.jpg",
@@ -364681,7 +364681,7 @@
   {
    "uid": "cr-n3276",
    "name": "Elephant beetle",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The elephant beetle (Megasoma elephas) is a member of the family Scarab aeidaeand the subfamily Dynastinae. Elephant beetles are Neotropical rhinoceros beetles.",
    "wiki_url": "https://en.wikipedia.org/wiki/Elephant_Beetle",
    "image": "",
@@ -364691,7 +364691,7 @@
   {
    "uid": "cr-n3277",
    "name": "Christmas Beetle",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The elephant beetle (Megasoma elephas) is a member of the family Scarab aeidaeand the subfamily Dynastinae. Elephant beetles are Neotropical rhinoceros beetles.",
    "wiki_url": "https://en.wikipedia.org/wiki/Christmas_Beetle",
    "image": "",
@@ -364791,7 +364791,7 @@
   {
    "uid": "cr-n3287",
    "name": "Cassidinae",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The Cassidinae (tortoise and leaf-mining beetles) are a subfamily of the leaf beetles, or Chrysomelidae. The antennae arise close to each other and some members have the pro not al and elytra ledges extended to the side and covering the legs so as to give them the common name of tortoise beetles.",
    "wiki_url": "https://en.wikipedia.org/wiki/Tortoise_Beetle",
    "image": "",
@@ -365271,7 +365271,7 @@
   {
    "uid": "cr-n3338",
    "name": "Otiorhynchus ovatus",
-   "codex_category": "vegetal",
+   "codex_category": "insect",
    "description": "Otiorhynchus ovatus, the strawberry root we evil, is one of the many species in the weevil family (Curculionidae), occurring across Canada and the northern United States. The species was first described by Carl Linnaeus in his landmark 175810th edition of System a Naturae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Strawberry_Root_Weevil",
    "image": "N3338_Otiorhynchus ovatus_0.jpg",
@@ -366251,7 +366251,7 @@
   {
    "uid": "cr-n3438",
    "name": "Corythucha elegans",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Corythucha elegans, the willow lace bug, is a bug species in the family Tingidae found on willows in North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Willow_Lace_Bug",
    "image": "N3438_Corythucha elegans_1.jpg",
@@ -366261,7 +366261,7 @@
   {
    "uid": "cr-n3439",
    "name": "Poplar Lace Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Corythucha elegans, the willow lace bug, is a bug species in the family Tingidae found on willows in North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Poplar_Lace_Bug",
    "image": "",
@@ -366271,7 +366271,7 @@
   {
    "uid": "cr-n3440",
    "name": "Alder Lace Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Corythucha elegans, the willow lace bug, is a bug species in the family Tingidae found on willows in North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Alder_Lace_Bug",
    "image": "",
@@ -366281,7 +366281,7 @@
   {
    "uid": "cr-n3441",
    "name": "Cottonwood Lace Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Corythucha elegans, the willow lace bug, is a bug species in the family Tingidae found on willows in North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Cottonwood_Lace_Bug",
    "image": "",
@@ -366291,7 +366291,7 @@
   {
    "uid": "cr-n3442",
    "name": "Aspen Lace Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Corythucha elegans, the willow lace bug, is a bug species in the family Tingidae found on willows in North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Aspen_Lace_Bug",
    "image": "",
@@ -366301,7 +366301,7 @@
   {
    "uid": "cr-n3443",
    "name": "Boxelder Lace Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Corythucha elegans, the willow lace bug, is a bug species in the family Tingidae found on willows in North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Boxelder_Lace_Bug",
    "image": "",
@@ -366311,7 +366311,7 @@
   {
    "uid": "cr-n3444",
    "name": "Maple Lace Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Corythucha elegans, the willow lace bug, is a bug species in the family Tingidae found on willows in North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Maple_Lace_Bug",
    "image": "",
@@ -366321,7 +366321,7 @@
   {
    "uid": "cr-n3445",
    "name": "Beech Lace Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Corythucha elegans, the willow lace bug, is a bug species in the family Tingidae found on willows in North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Beech_Lace_Bug",
    "image": "",
@@ -366331,7 +366331,7 @@
   {
    "uid": "cr-n3446",
    "name": "Hickory Lace Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Corythucha elegans, the willow lace bug, is a bug species in the family Tingidae found on willows in North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Hickory_Lace_Bug",
    "image": "",
@@ -366341,7 +366341,7 @@
   {
    "uid": "cr-n3447",
    "name": "Pecan Lace Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Corythucha elegans, the willow lace bug, is a bug species in the family Tingidae found on willows in North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Pecan_Lace_Bug",
    "image": "",
@@ -366351,7 +366351,7 @@
   {
    "uid": "cr-n3448",
    "name": "Buttonwood Lace Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Corythucha elegans, the willow lace bug, is a bug species in the family Tingidae found on willows in North America.",
    "wiki_url": "https://en.wikipedia.org/wiki/Buttonwood_Lace_Bug",
    "image": "",
@@ -366451,7 +366451,7 @@
   {
    "uid": "cr-n3458",
    "name": "Small tortoiseshell",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The small tortoiseshell (Aglais urticae) is a colourful Eurasian butterfly in the family Nymphalidae. Adults feed on nectar and may hibernate over winter; in warmer climates they may have two broods in a season.",
    "wiki_url": "https://en.wikipedia.org/wiki/Small_Tortoiseshell",
    "image": "",
@@ -366791,7 +366791,7 @@
   {
    "uid": "cr-n3492",
    "name": "Comma",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "The comma, is a punctuation mark that appears in several variants in different languages. Some typefaces render it as a small line, slightly curved or straight, but inclined from the vertical; others give it the appearance of a miniature filled-in figure9placed on the baseline.",
    "wiki_url": "https://en.wikipedia.org/wiki/Comma",
    "image": "",
@@ -366821,7 +366821,7 @@
   {
    "uid": "cr-n3496",
    "name": "Large tortoiseshell",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The large tortoiseshell or black leg tortoiseshell (Nymphalis polychloros) is a butterfly of the family Nymphalidae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Large_Tortoiseshell",
    "image": "N3496_Large tortoiseshell_0.jpg",
@@ -366951,7 +366951,7 @@
   {
    "uid": "cr-n3509",
    "name": "Small Heath",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The land, therefore, seems to have developed as a pasture or common land, on which locals could graze their animals. However, the site lies directly on the route between Birmingham and Coventry, and so was probably used by drovers transporting animals to and from the two cities, and the livestock markets within each.",
    "wiki_url": "https://en.wikipedia.org/wiki/Small_Heath",
    "image": "",
@@ -367051,7 +367051,7 @@
   {
    "uid": "cr-n3519",
    "name": "Arran Brown",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Arran Brown (born 24 March 1985 in Johannesburg) is a South African professional road cyclist, riding for Team Cycle Fit - Road Cover. Brown started cycling at the age of 16 and joined his first professional team at the age of 20.",
    "wiki_url": "https://en.wikipedia.org/wiki/Arran_Brown",
    "image": "N3519_Arran Brown_0.jpg",
@@ -367511,7 +367511,7 @@
   {
    "uid": "cr-n3566",
    "name": "Macrothylacia rubi",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Macrothylacia rubi, the fox moth, is a lepidopteran belonging to the family Lasiocampidae. It was first described by Carl Linnaeus in his 175810th edition of System a Naturae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Fox_Moth",
    "image": "",
@@ -367691,7 +367691,7 @@
   {
    "uid": "cr-n3584",
    "name": "Six-spot burnet",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "The six-spot burnet (Zygaena filipendulae) is a day-flyingmothof the family Zygaenidae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Six-spot_Burnet",
    "image": "",
@@ -367701,7 +367701,7 @@
   {
    "uid": "cr-n3585",
    "name": "Zygaena trifolii",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Zygaena trifolii, thefive-spot burnet, is a day-flyingmothin the family Zyga enid ae found in North Africa and Europe. It was described bythe German zoologist Eugenius Johann Christoph Es per in 1783 from the type specimen found in Frankfurt am Main, Germany.",
    "wiki_url": "https://en.wikipedia.org/wiki/Five-spot_Burnet",
    "image": "",
@@ -367811,7 +367811,7 @@
   {
    "uid": "cr-n3597",
    "name": "Herminia grisealis",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Herminia grisealis, the small fan-foot, is a litter mothof the family Erebidae. It is found in Europe.",
    "wiki_url": "https://en.wikipedia.org/wiki/Small_Fan-foot",
    "image": "",
@@ -367821,7 +367821,7 @@
   {
    "uid": "cr-n3598",
    "name": "Macrochilo cribrumalis",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Macrochilo cribrumalis, the dotted fan-foot, is a litter mothof the family Erebidae. The species was first described by Jacob Hübnerin 1793.",
    "wiki_url": "https://en.wikipedia.org/wiki/Dotted_Fan-foot",
    "image": "",
@@ -367831,7 +367831,7 @@
   {
    "uid": "cr-n3599",
    "name": "Herminia tarsicrinalis",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Herminia tarsicrinalis, commonly known as the shaded fan-foot, is a litter mothof the family Erebidae. This species was first described by August Wilhelm Knochin 1782.",
    "wiki_url": "https://en.wikipedia.org/wiki/Shaded_Fan-foot",
    "image": "",
@@ -368401,7 +368401,7 @@
   {
    "uid": "cr-n3656",
    "name": "Foxglove pug",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The foxglove pug (Eupithecia pulchellata) is a moth of the family Geometridae found in Europe. It was described by the English entomologist James Francis Stephens in 1831.",
    "wiki_url": "https://en.wikipedia.org/wiki/Foxglove_Pug",
    "image": "",
@@ -368601,7 +368601,7 @@
   {
    "uid": "cr-n3676",
    "name": "Coronet",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "In British heraldry, a coronet is a type of crown that is a mark of rank of non-reigning members of the royal family and peers. In other languages, this distinction is not made, and usually the same word for crown is used irrespective of rank (German:Krone, Dutch:kroon, Swedish:krona, French:couronne, Italian:corona, …",
    "wiki_url": "https://en.wikipedia.org/wiki/Coronet",
    "image": "",
@@ -369361,7 +369361,7 @@
   {
    "uid": "cr-n3752",
    "name": "Leafcutter ant",
-   "codex_category": "mushroom",
+   "codex_category": "insect",
    "description": "Leafcutter ants are any of at least 55species of leaf-chewingantsbelonging to the three genera Atta, Acromyrmex, and Amoimyrmex, within the tribe Attini. These species of tropical, fungus-growing ants are all endemic to South and Central America, Mexico, and parts of the southern United States.",
    "wiki_url": "https://en.wikipedia.org/wiki/Leafcutter_Ant",
    "image": "",
@@ -369481,7 +369481,7 @@
   {
    "uid": "cr-n3764",
    "name": "Cuckoo bee",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The termcuckoo beeis used for a variety of different bee lineages which have evolved the klepto parasitic behaviour of laying their eggs in the nests of other bees, reminiscent of the behavior of cuckoo birds. The name is perhaps best applied to the apid subfamily Nomadinae, but is sometimes used in Europe to mean bum…",
    "wiki_url": "https://en.wikipedia.org/wiki/Cuckoo_Bee",
    "image": "",
@@ -369491,7 +369491,7 @@
   {
    "uid": "cr-n3765",
    "name": "Long-horned Bee",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The termcuckoo beeis used for a variety of different bee lineages which have evolved the klepto parasitic behaviour of laying their eggs in the nests of other bees, reminiscent of the behavior of cuckoo birds. The name is perhaps best applied to the apid subfamily Nomadinae, but is sometimes used in Europe to mean bum…",
    "wiki_url": "https://en.wikipedia.org/wiki/Long-horned_Bee",
    "image": "",
@@ -369501,7 +369501,7 @@
   {
    "uid": "cr-n3766",
    "name": "Squash Bee",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The termcuckoo beeis used for a variety of different bee lineages which have evolved the klepto parasitic behaviour of laying their eggs in the nests of other bees, reminiscent of the behavior of cuckoo birds. The name is perhaps best applied to the apid subfamily Nomadinae, but is sometimes used in Europe to mean bum…",
    "wiki_url": "https://en.wikipedia.org/wiki/Squash_Bee",
    "image": "",
@@ -369511,7 +369511,7 @@
   {
    "uid": "cr-n3767",
    "name": "Sunflower Bee",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The termcuckoo beeis used for a variety of different bee lineages which have evolved the klepto parasitic behaviour of laying their eggs in the nests of other bees, reminiscent of the behavior of cuckoo birds. The name is perhaps best applied to the apid subfamily Nomadinae, but is sometimes used in Europe to mean bum…",
    "wiki_url": "https://en.wikipedia.org/wiki/Sunflower_Bee",
    "image": "",
@@ -370891,7 +370891,7 @@
   {
    "uid": "cr-n3907",
    "name": "Rat-tailed maggot",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The most commonly encountered rat-tailed maggot is the larva of the drone fly, Eristalis tenax. It lives in stagnant, oxygen-deprived water, with a high organic content.",
    "wiki_url": "https://en.wikipedia.org/wiki/Rat-tailed_Maggot",
    "image": "N3907_Rat-tailed maggot_0.jpg",
@@ -371061,7 +371061,7 @@
   {
    "uid": "cr-n3924",
    "name": "Deer fly",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Chrysopsinae is an insect subfamily in the family Tabanidae commonly known as deer flies or sheep flies and are blood sucking insects considered pests to humans and cattle. They are large flies with large brightly-colouredcompound eyes, and large clear wings with dark bands.",
    "wiki_url": "https://en.wikipedia.org/wiki/Deer_Fly",
    "image": "N3924_Deer fly_0.jpg",
@@ -371071,7 +371071,7 @@
   {
    "uid": "cr-n3925",
    "name": "Greenhead Horse Fly",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Chrysopsinae is an insect subfamily in the family Tabanidae commonly known as deer flies or sheep flies and are blood sucking insects considered pests to humans and cattle. They are large flies with large brightly-colouredcompound eyes, and large clear wings with dark bands.",
    "wiki_url": "https://en.wikipedia.org/wiki/Greenhead_Horse_Fly",
    "image": "",
@@ -371081,7 +371081,7 @@
   {
    "uid": "cr-n3926",
    "name": "Yellow Fly",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Chrysopsinae is an insect subfamily in the family Tabanidae commonly known as deer flies or sheep flies and are blood sucking insects considered pests to humans and cattle. They are large flies with large brightly-colouredcompound eyes, and large clear wings with dark bands.",
    "wiki_url": "https://en.wikipedia.org/wiki/Yellow_Fly",
    "image": "",
@@ -371171,7 +371171,7 @@
   {
    "uid": "cr-n3935",
    "name": "Snakefly",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "An adult snakefly resembles a lacewing in appearance but has a notably elongated thorax which, together with the mobile head, gives the group their common name. The body is long and slender and the two pairs of long, membranous wings are prominently veined.",
    "wiki_url": "https://en.wikipedia.org/wiki/Snakefly",
    "image": "N3935_Snakefly_0.jpg",
@@ -371181,7 +371181,7 @@
   {
    "uid": "cr-n3936",
    "name": "Alderfly",
-   "codex_category": "insect",
+   "codex_category": "fossil",
    "description": "A lderfliesaremegalopteraninsectsof thefamily Sialidae. They are closely related to the dobson flies and fish flies as well as to the prehistoric Euchauliodidae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Alderfly",
    "image": "N3936_Alderfly_0.jpg",
@@ -372491,7 +372491,7 @@
   {
    "uid": "cr-n4067",
    "name": "Black darter",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Black darter is a common name for several animals and may refer to:",
    "wiki_url": "https://en.wikipedia.org/wiki/Black_Darter",
    "image": "",
@@ -372591,7 +372591,7 @@
   {
    "uid": "cr-n4077",
    "name": "Ophiogomphus cecilia",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Ophiogomphus cecilia, the green snake tail, green go mphid, or green club-tailed dragonfly, is a species of dragonfly in the family Gomphidae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Green_Snaketail",
    "image": "N4077_Ophiogomphus cecilia_0.jpg",
@@ -372601,7 +372601,7 @@
   {
    "uid": "cr-n4078",
    "name": "Small Pincertail",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Ophiogomphus cecilia, the green snake tail, green go mphid, or green club-tailed dragonfly, is a species of dragonfly in the family Gomphidae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Small_Pincertail",
    "image": "",
@@ -372611,7 +372611,7 @@
   {
    "uid": "cr-n4079",
    "name": "Large Pincertail",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Ophiogomphus cecilia, the green snake tail, green go mphid, or green club-tailed dragonfly, is a species of dragonfly in the family Gomphidae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Large_Pincertail",
    "image": "",
@@ -373661,7 +373661,7 @@
   {
    "uid": "cr-n4185",
    "name": "Ophiogomphus anomalus",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Ophiogomphus anomalus, theextra-striped snake tail, is a species of dragonfly in the family Gomphidae. It is found in Canada and the United States.",
    "wiki_url": "https://en.wikipedia.org/wiki/Extra-striped_Snaketail",
    "image": "",
@@ -373671,7 +373671,7 @@
   {
    "uid": "cr-n4186",
    "name": "Boreal Snaketail",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Ophiogomphus anomalus, theextra-striped snaketail, is a species of dragonfly in the family Gomphidae. It is found in Canada and the United States.",
    "wiki_url": "https://en.wikipedia.org/wiki/Boreal_Snaketail",
    "image": "",
@@ -373681,7 +373681,7 @@
   {
    "uid": "cr-n4187",
    "name": "Eastern Snaketail",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Ophiogomphus anomalus, theextra-striped snaketail, is a species of dragonfly in the family Gomphidae. It is found in Canada and the United States.",
    "wiki_url": "https://en.wikipedia.org/wiki/Eastern_Snaketail",
    "image": "",
@@ -374131,7 +374131,7 @@
   {
    "uid": "cr-n4232",
    "name": "Reduviidae",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "The Reduviidaeis a large cosmopolitan family of the suborder Heteropteraof the order Hemiptera (true bugs). Among the Hemiptera and together with the Nabidae almost all species are terrestrial ambush predators; most other predatory Hemiptera are aquatic.",
    "wiki_url": "https://en.wikipedia.org/wiki/Assassin_Bug",
    "image": "N4232_Reduviidae_0.jpg",
@@ -374141,7 +374141,7 @@
   {
    "uid": "cr-n4233",
    "name": "Belostomatidae",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "Belostomatidae is a family of freshwater hemiptera n insects known as giant water bugsor colloquially astoe-biters, Indian toe-biters, electric-light bugs (because they fly to lights in large numbers), alligator ticks, or alligator fleas (in Florida). They are the largest insects in the order Hemiptera.",
    "wiki_url": "https://en.wikipedia.org/wiki/Giant_Water_Bug",
    "image": "N4233_Belostomatidae_0.jpg",
@@ -374231,7 +374231,7 @@
   {
    "uid": "cr-n4242",
    "name": "Aphid",
-   "codex_category": "mushroom",
+   "codex_category": "insect",
    "description": "Aphids are among the most destructive insect pests on cultivated plants in temperate regions. In addition to weakening the plant by sucking sap, they act as vectors for plant viruses and disfigure ornamental plants with deposits of honeydew and the subsequent growth ofsooty moulds.",
    "wiki_url": "https://en.wikipedia.org/wiki/Aphid",
    "image": "N4242_Aphid_0.jpg",
@@ -374241,7 +374241,7 @@
   {
    "uid": "cr-n4243",
    "name": "Woolly Apple Aphid",
-   "codex_category": "mushroom",
+   "codex_category": "insect",
    "description": "Aphids are among the most destructive insect pests on cultivated plants in temperate regions. In addition to weakening the plant by sucking sap, they act as vectors for plant viruses and disfigure ornamental plants with deposits of honeydew and the subsequent growth ofsooty moulds.",
    "wiki_url": "https://en.wikipedia.org/wiki/Woolly_Apple_Aphid",
    "image": "",
@@ -374251,7 +374251,7 @@
   {
    "uid": "cr-n4244",
    "name": "Woolly Alder Aphid",
-   "codex_category": "mushroom",
+   "codex_category": "insect",
    "description": "Aphids are among the most destructive insect pests on cultivated plants in temperate regions. In addition to weakening the plant by sucking sap, they act as vectors for plant viruses and disfigure ornamental plants with deposits of honeydew and the subsequent growth ofsooty moulds.",
    "wiki_url": "https://en.wikipedia.org/wiki/Woolly_Alder_Aphid",
    "image": "",
@@ -374261,7 +374261,7 @@
   {
    "uid": "cr-n4245",
    "name": "Spirea Aphid",
-   "codex_category": "mushroom",
+   "codex_category": "insect",
    "description": "Aphids are among the most destructive insect pests on cultivated plants in temperate regions. In addition to weakening the plant by sucking sap, they act as vectors for plant viruses and disfigure ornamental plants with deposits of honeydew and the subsequent growth ofsooty moulds.",
    "wiki_url": "https://en.wikipedia.org/wiki/Spirea_Aphid",
    "image": "",
@@ -374271,7 +374271,7 @@
   {
    "uid": "cr-n4246",
    "name": "Scale insect",
-   "codex_category": "mushroom",
+   "codex_category": "insect",
    "description": "Scale insectsare small insects of the order Hemiptera, suborder Stern or rhyncha. Of dramatically variable appearance and extreme sexual dimorphism, they comprise the infraorder Cocco morph a which is considered a more convenient grouping than the superfamily Cocco idea due to taxonomic uncertainties.",
    "wiki_url": "https://en.wikipedia.org/wiki/Scale_Insect",
    "image": "N4246_Scale insect_0.jpg",
@@ -374471,7 +374471,7 @@
   {
    "uid": "cr-n4266",
    "name": "Brown planthopper",
-   "codex_category": "microOrganism",
+   "codex_category": "insect",
    "description": "The brown planthopper (BPH), Nilaparvata lugens (Stål) (Hemiptera: Delphacidae) is a plant hopper species that feeds on rice plants (Oryza sativa L.). These insects are among the most important pests of rice, which is the major staple crop for about half the world's population.",
    "wiki_url": "https://en.wikipedia.org/wiki/Brown_Planthopper",
    "image": "N4266_Brown planthopper_0.jpg",
@@ -374481,7 +374481,7 @@
   {
    "uid": "cr-n4267",
    "name": "White-backed Planthopper",
-   "codex_category": "microOrganism",
+   "codex_category": "insect",
    "description": "The brown planthopper (BPH), Nilaparvata lugens (Stål) (Hemiptera: Delphacidae) is a plant hopper species that feeds on rice plants (Oryza sativa L.). These insects are among the most important pests of rice, which is the major staple crop for about half the world's population.",
    "wiki_url": "https://en.wikipedia.org/wiki/White-backed_Planthopper",
    "image": "",
@@ -374491,7 +374491,7 @@
   {
    "uid": "cr-n4268",
    "name": "Small Brown Planthopper",
-   "codex_category": "microOrganism",
+   "codex_category": "insect",
    "description": "The brown planthopper (BPH), Nilaparvata lugens (Stål) (Hemiptera: Delphacidae) is a plant hopper species that feeds on rice plants (Oryza sativa L.). These insects are among the most important pests of rice, which is the major staple crop for about half the world's population.",
    "wiki_url": "https://en.wikipedia.org/wiki/Small_Brown_Planthopper",
    "image": "",
@@ -374501,7 +374501,7 @@
   {
    "uid": "cr-n4269",
    "name": "Corn Delphacid",
-   "codex_category": "microOrganism",
+   "codex_category": "vegetal",
    "description": "The brown plant hopper (BPH), Nilaparvata lugens (Stål) (Hemiptera: Delphacidae) is a plant hopper species that feeds on rice plants (Oryza sativa L.). These insects are among the most important pests of rice, which is the major staple crop for about half the world's population.",
    "wiki_url": "https://en.wikipedia.org/wiki/Corn_Delphacid",
    "image": "",
@@ -374511,7 +374511,7 @@
   {
    "uid": "cr-n4270",
    "name": "Sugarcane Delphacid",
-   "codex_category": "microOrganism",
+   "codex_category": "vegetal",
    "description": "The brown plant hopper (BPH), Nilaparvata lugens (Stål) (Hemiptera: Delphacidae) is a plant hopper species that feeds on rice plants (Oryza sativa L.). These insects are among the most important pests of rice, which is the major staple crop for about half the world's population.",
    "wiki_url": "https://en.wikipedia.org/wiki/Sugarcane_Delphacid",
    "image": "",
@@ -374521,7 +374521,7 @@
   {
    "uid": "cr-n4271",
    "name": "Spotted lanternfly",
-   "codex_category": "insect",
+   "codex_category": "vegetal",
    "description": "The spotted lanternfly (Lycorma delicatula) is a species of plant hopper indigenous to parts of China and Vietnam. It was accidentally introduced into South Korea and has spread invasive lyto Japan and the United States, where it is often referred to by theacronym\"SLF\".",
    "wiki_url": "https://en.wikipedia.org/wiki/Spotted_Lanternfly",
    "image": "",
@@ -375151,7 +375151,7 @@
   {
    "uid": "cr-n4334",
    "name": "Gelastocoridae",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The Gelastocoridae (toad bugs) is a family of about 100 species of insects in the suborder Heteroptera. These fall into two genera, about 15 species of Gelastocoris from the New World and 85 of Nerthra from the Old World.",
    "wiki_url": "https://en.wikipedia.org/wiki/Toad_Bug",
    "image": "",
@@ -375161,7 +375161,7 @@
   {
    "uid": "cr-n4335",
    "name": "Unique-headed Bug",
-   "codex_category": "insect",
+   "codex_category": "animal",
    "description": "The Gelastocoridae (toad bugs) is a family of about 100 species of insects in the suborder Heteroptera. These fall into two genera, about 15 species of Gelastocoris from the New World and 85 of Nerthra from the Old World.",
    "wiki_url": "https://en.wikipedia.org/wiki/Unique-headed_Bug",
    "image": "",
@@ -375221,7 +375221,7 @@
   {
    "uid": "cr-n4341",
    "name": "Anthocoridae",
-   "codex_category": "vegetal",
+   "codex_category": "insect",
    "description": "An thocoridae is a family of bugs, commonly called minute pirate bugs or flower bugs. Worldwide there are 500 to 600 species.",
    "wiki_url": "https://en.wikipedia.org/wiki/Minute_Pirate_Bug",
    "image": "",
@@ -375231,7 +375231,7 @@
   {
    "uid": "cr-n4342",
    "name": "Insidious Flower Bug",
-   "codex_category": "vegetal",
+   "codex_category": "insect",
    "description": "An thocoridae is a family of bugs, commonly called minute pirate bugs or flower bugs. Worldwide there are 500 to 600 species.",
    "wiki_url": "https://en.wikipedia.org/wiki/Insidious_Flower_Bug",
    "image": "",
@@ -375241,7 +375241,7 @@
   {
    "uid": "cr-n4343",
    "name": "Big-eyed Bug",
-   "codex_category": "vegetal",
+   "codex_category": "insect",
    "description": "An thocoridae is a family of bugs, commonly called minute pirate bugs or flower bugs. Worldwide there are 500 to 600 species.",
    "wiki_url": "https://en.wikipedia.org/wiki/Big-eyed_Bug",
    "image": "",
@@ -375251,7 +375251,7 @@
   {
    "uid": "cr-n4345",
    "name": "Milkweed Bug",
-   "codex_category": "vegetal",
+   "codex_category": "insect",
    "description": "An thocoridae is a family of bugs, commonly called minute pirate bugs or flower bugs. Worldwide there are 500 to 600 species.",
    "wiki_url": "https://en.wikipedia.org/wiki/Milkweed_Bug",
    "image": "",
@@ -375261,7 +375261,7 @@
   {
    "uid": "cr-n4346",
    "name": "Large milkweed bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Oncopeltus fasciatus, known as the large milkweed bug, is a medium-sizedhemipteran (true bug) of the family Lygaeidae. It is distributed throughout North America, from Central America through Mexico and the Caribbean to southern areas in Canada.",
    "wiki_url": "https://en.wikipedia.org/wiki/Large_Milkweed_Bug",
    "image": "",
@@ -375271,7 +375271,7 @@
   {
    "uid": "cr-n4347",
    "name": "Small Milkweed Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Oncopeltus fasciatus, known as the large milkweed bug, is a medium-sizedhemipteran (true bug) of the family Lygaeidae. It is distributed throughout North America, from Central America through Mexico and the Caribbean to southern areas in Canada.",
    "wiki_url": "https://en.wikipedia.org/wiki/Small_Milkweed_Bug",
    "image": "",
@@ -375281,7 +375281,7 @@
   {
    "uid": "cr-n4348",
    "name": "False Milkweed Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Oncopeltus fasciatus, known as the large milkweed bug, is a medium-sizedhemipteran (true bug) of the family Lygaeidae. It is distributed throughout North America, from Central America through Mexico and the Caribbean to southern areas in Canada.",
    "wiki_url": "https://en.wikipedia.org/wiki/False_Milkweed_Bug",
    "image": "",
@@ -375291,7 +375291,7 @@
   {
    "uid": "cr-n4349",
    "name": "Eastern Boxelder Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Oncopeltus fasciatus, known as the large milkweed bug, is a medium-sizedhemipteran (true bug) of the family Lygaeidae. It is distributed throughout North America, from Central America through Mexico and the Caribbean to southern areas in Canada.",
    "wiki_url": "https://en.wikipedia.org/wiki/Eastern_Boxelder_Bug",
    "image": "",
@@ -375301,7 +375301,7 @@
   {
    "uid": "cr-n4350",
    "name": "Western Boxelder Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Oncopeltus fasciatus, known as the large milkweed bug, is a medium-sizedhemipteran (true bug) of the family Lygaeidae. It is distributed throughout North America, from Central America through Mexico and the Caribbean to southern areas in Canada.",
    "wiki_url": "https://en.wikipedia.org/wiki/Western_Boxelder_Bug",
    "image": "",
@@ -375311,7 +375311,7 @@
   {
    "uid": "cr-n4351",
    "name": "Elm Seed Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Oncopeltus fasciatus, known as the large milkweed bug, is a medium-sizedhemipteran (true bug) of the family Lygaeidae. It is distributed throughout North America, from Central America through Mexico and the Caribbean to southern areas in Canada.",
    "wiki_url": "https://en.wikipedia.org/wiki/Elm_Seed_Bug",
    "image": "",
@@ -375331,7 +375331,7 @@
   {
    "uid": "cr-n4353",
    "name": "Chinch bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "All three species are in the order Hemiptera, making them true bugs.",
    "wiki_url": "https://en.wikipedia.org/wiki/Chinch_Bug",
    "image": "",
@@ -375341,7 +375341,7 @@
   {
    "uid": "cr-n4354",
    "name": "Hairy Chinch Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "All three species are in the order Hemiptera, making them true bugs.",
    "wiki_url": "https://en.wikipedia.org/wiki/Hairy_Chinch_Bug",
    "image": "",
@@ -375351,7 +375351,7 @@
   {
    "uid": "cr-n4355",
    "name": "Southern Chinch Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "All three species are in the order Hemiptera, making them true bugs.",
    "wiki_url": "https://en.wikipedia.org/wiki/Southern_Chinch_Bug",
    "image": "",
@@ -375361,7 +375361,7 @@
   {
    "uid": "cr-n4356",
    "name": "Western Chinch Bug",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "All three species are in the order Hemiptera, making them true bugs.",
    "wiki_url": "https://en.wikipedia.org/wiki/Western_Chinch_Bug",
    "image": "",
@@ -375411,7 +375411,7 @@
   {
    "uid": "cr-n4362",
    "name": "Diaphorina citri",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Diaphorina citri, the Asian citrus psyllid, is a sap-sucking, hemiptera nbug now in the taxonomic family Liviidae. It is one of two confirmed vectors of citrus green ing disease.",
    "wiki_url": "https://en.wikipedia.org/wiki/Asian_Citrus_Psyllid",
    "image": "N4362_Diaphorina citri_0.jpg",
@@ -375421,7 +375421,7 @@
   {
    "uid": "cr-n4363",
    "name": "Potato Psyllid",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Diaphorina citri, the Asian citrus psyllid, is a sap-sucking, hemiptera nbug now in the taxonomic family Liviidae. It is one of two confirmed vectors of citrus green ing disease.",
    "wiki_url": "https://en.wikipedia.org/wiki/Potato_Psyllid",
    "image": "",
@@ -375431,7 +375431,7 @@
   {
    "uid": "cr-n4364",
    "name": "Tomato Psyllid",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Diaphorina citri, the Asian citrus psyllid, is a sap-sucking, hemiptera nbug now in the taxonomic family Liviidae. It is one of two confirmed vectors of citrus green ing disease.",
    "wiki_url": "https://en.wikipedia.org/wiki/Tomato_Psyllid",
    "image": "",
@@ -375441,7 +375441,7 @@
   {
    "uid": "cr-n4365",
    "name": "Carrot Psyllid",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Diaphorina citri, the Asian citrus psyllid, is a sap-sucking, hemiptera nbug now in the taxonomic family Liviidae. It is one of two confirmed vectors of citrus green ing disease.",
    "wiki_url": "https://en.wikipedia.org/wiki/Carrot_Psyllid",
    "image": "",
@@ -375451,7 +375451,7 @@
   {
    "uid": "cr-n4366",
    "name": "Privet Psyllid",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Diaphorina citri, the Asian citrus psyllid, is a sap-sucking, hemiptera nbug now in the taxonomic family Liviidae. It is one of two confirmed vectors of citrus green ing disease.",
    "wiki_url": "https://en.wikipedia.org/wiki/Privet_Psyllid",
    "image": "",
@@ -375461,7 +375461,7 @@
   {
    "uid": "cr-n4367",
    "name": "Hackberry Nipplegall Maker",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Diaphorina citri, the Asian citrus psyllid, is a sap-sucking, hemiptera nbug now in the taxonomic family Liviidae. It is one of two confirmed vectors of citrus green ing disease.",
    "wiki_url": "https://en.wikipedia.org/wiki/Hackberry_Nipplegall_Maker",
    "image": "",
@@ -375471,7 +375471,7 @@
   {
    "uid": "cr-n4368",
    "name": "Bladder-gall Midge",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Diaphorina citri, the Asian citrus psyllid, is a sap-sucking, hemiptera nbug now in the taxonomic family Liviidae. It is one of two confirmed vectors of citrus green ing disease.",
    "wiki_url": "https://en.wikipedia.org/wiki/Bladder-gall_Midge",
    "image": "",
@@ -375481,7 +375481,7 @@
   {
    "uid": "cr-n4369",
    "name": "Gall Mite",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Diaphorina citri, the Asian citrus psyllid, is a sap-sucking, hemiptera nbug now in the taxonomic family Liviidae. It is one of two confirmed vectors of citrus green ing disease.",
    "wiki_url": "https://en.wikipedia.org/wiki/Gall_Mite",
    "image": "",
@@ -375491,7 +375491,7 @@
   {
    "uid": "cr-n4370",
    "name": "Fuchsia Gall Mite",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Diaphorina citri, the Asian citrus psyllid, is a sap-sucking, hemiptera nbug now in the taxonomic family Liviidae. It is one of two confirmed vectors of citrus green ing disease.",
    "wiki_url": "https://en.wikipedia.org/wiki/Fuchsia_Gall_Mite",
    "image": "",
@@ -375501,7 +375501,7 @@
   {
    "uid": "cr-n4371",
    "name": "Tomato Russet Mite",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Diaphorina citri, the Asian citrus psyllid, is a sap-sucking, hemiptera nbug now in the taxonomic family Liviidae. It is one of two confirmed vectors of citrus green ing disease.",
    "wiki_url": "https://en.wikipedia.org/wiki/Tomato_Russet_Mite",
    "image": "",
@@ -375511,7 +375511,7 @@
   {
    "uid": "cr-n4372",
    "name": "Citrus Rust Mite",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Diaphorina citri, the Asian citrus psyllid, is a sap-sucking, hemiptera nbug now in the taxonomic family Liviidae. It is one of two confirmed vectors of citrus green ing disease.",
    "wiki_url": "https://en.wikipedia.org/wiki/Citrus_Rust_Mite",
    "image": "",
@@ -375521,7 +375521,7 @@
   {
    "uid": "cr-n4373",
    "name": "Silver Mite",
-   "codex_category": "animal",
+   "codex_category": "insect",
    "description": "Diaphorina citri, the Asian citrus psyllid, is a sap-sucking, hemiptera nbug now in the taxonomic family Liviidae. It is one of two confirmed vectors of citrus green ing disease.",
    "wiki_url": "https://en.wikipedia.org/wiki/Silver_Mite",
    "image": "",
@@ -375691,7 +375691,7 @@
   {
    "uid": "cr-n4390",
    "name": "Tardigrade",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Tardigrades ( ⓘ), also known as water bears or moss piglets, are a phylum of eight-leggedsegmentedmicro-animals. They were first described by the German zoologist Johann August Ephraim Goezein 1773, who called them Kleine r Wasserbär'little water bear'.",
    "wiki_url": "https://en.wikipedia.org/wiki/Water_Bear",
    "image": "",
@@ -375701,7 +375701,7 @@
   {
    "uid": "cr-n4391",
    "name": "Giant Tardigrade",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Tardigrades ( ⓘ), also known as water bears or moss piglets, are a phylum of eight-leggedsegmentedmicro-animals. They were first described by the German zoologist Johann August Ephraim Goezein 1773, who called them Kleine r Wasserbär'little water bear'.",
    "wiki_url": "https://en.wikipedia.org/wiki/Giant_Tardigrade",
    "image": "",
@@ -375711,7 +375711,7 @@
   {
    "uid": "cr-n4392",
    "name": "Arctic Tardigrade",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Tardigrades ( ⓘ), also known as water bears or moss piglets, are a phylum of eight-leggedsegmentedmicro-animals. They were first described by the German zoologist Johann August Ephraim Goezein 1773, who called them Kleine r Wasserbär'little water bear'.",
    "wiki_url": "https://en.wikipedia.org/wiki/Arctic_Tardigrade",
    "image": "",
@@ -375721,7 +375721,7 @@
   {
    "uid": "cr-n4393",
    "name": "Radiation Resistant",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Tardigrades ( ⓘ), also known as water bears or moss piglets, are a phylum of eight-leggedsegmentedmicro-animals. They were first described by the German zoologist Johann August Ephraim Goezein 1773, who called them Kleine r Wasserbär'little water bear'.",
    "wiki_url": "https://en.wikipedia.org/wiki/Radiation_Resistant",
    "image": "",
@@ -375731,7 +375731,7 @@
   {
    "uid": "cr-n4394",
    "name": "Space Survivor",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Tardigrades ( ⓘ), also known as water bears or moss piglets, are a phylum of eight-leggedsegmentedmicro-animals. They were first described by the German zoologist Johann August Ephraim Goezein 1773, who called them Kleine r Wasserbär'little water bear'.",
    "wiki_url": "https://en.wikipedia.org/wiki/Space_Survivor",
    "image": "",
@@ -375741,7 +375741,7 @@
   {
    "uid": "cr-n4395",
    "name": "Marine Tardigrade",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Tardigrades ( ⓘ), also known as water bears or moss piglets, are a phylum of eight-leggedsegmentedmicro-animals. They were first described by the German zoologist Johann August Ephraim Goezein 1773, who called them Kleine r Wasserbär'little water bear'.",
    "wiki_url": "https://en.wikipedia.org/wiki/Marine_Tardigrade",
    "image": "",
@@ -375751,7 +375751,7 @@
   {
    "uid": "cr-n4396",
    "name": "X-ray Resistant",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Tardigrades ( ⓘ), also known as water bears or moss piglets, are a phylum of eight-leggedsegmentedmicro-animals. They were first described by the German zoologist Johann August Ephraim Goezein 1773, who called them Kleine r Wasserbär'little water bear'.",
    "wiki_url": "https://en.wikipedia.org/wiki/X-ray_Resistant",
    "image": "",
@@ -375761,7 +375761,7 @@
   {
    "uid": "cr-n4397",
    "name": "Moss Piglet",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Tardigrades ( ⓘ), also known as water bears or moss piglets, are a phylum of eight-leggedsegmentedmicro-animals. They were first described by the German zoologist Johann August Ephraim Goezein 1773, who called them Kleine r Wasserbär'little water bear'.",
    "wiki_url": "https://en.wikipedia.org/wiki/Moss_Piglet",
    "image": "",
@@ -375771,7 +375771,7 @@
   {
    "uid": "cr-n4398",
    "name": "Deep Sea Tardigrade",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Tardigrades ( ⓘ), also known as water bears or moss piglets, are a phylum of eight-leggedsegmentedmicro-animals. They were first described by the German zoologist Johann August Ephraim Goezein 1773, who called them Kleine r Wasserbär'little water bear'.",
    "wiki_url": "https://en.wikipedia.org/wiki/Deep_Sea_Tardigrade",
    "image": "",
@@ -375781,7 +375781,7 @@
   {
    "uid": "cr-n4399",
    "name": "Spiny Tardigrade",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Tardigrades ( ⓘ), also known as water bears or moss piglets, are a phylum of eight-leggedsegmentedmicro-animals. They were first described by the German zoologist Johann August Ephraim Goezein 1773, who called them Kleine r Wasserbär'little water bear'.",
    "wiki_url": "https://en.wikipedia.org/wiki/Spiny_Tardigrade",
    "image": "",
@@ -375791,7 +375791,7 @@
   {
    "uid": "cr-n4400",
    "name": "Bristly Tardigrade",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Tardigrades ( ⓘ), also known as water bears or moss piglets, are a phylum of eight-leggedsegmentedmicro-animals. They were first described by the German zoologist Johann August Ephraim Goezein 1773, who called them Kleine r Wasserbär'little water bear'.",
    "wiki_url": "https://en.wikipedia.org/wiki/Bristly_Tardigrade",
    "image": "",
@@ -375801,7 +375801,7 @@
   {
    "uid": "cr-n4401",
    "name": "Barbarian Tardigrade",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Tardigrades ( ⓘ), also known as water bears or moss piglets, are a phylum of eight-leggedsegmentedmicro-animals. They were first described by the German zoologist Johann August Ephraim Goezein 1773, who called them Kleine r Wasserbär'little water bear'.",
    "wiki_url": "https://en.wikipedia.org/wiki/Barbarian_Tardigrade",
    "image": "",
@@ -375811,7 +375811,7 @@
   {
    "uid": "cr-n4402",
    "name": "Batillipes",
-   "codex_category": "animal",
+   "codex_category": "microOrganism",
    "description": "Batillipesisgenusoftardigrades, the only genus in the family Batillipedidae. It was first described by Ferdinand Richter sin 1909.",
    "wiki_url": "https://en.wikipedia.org/wiki/Batillipes",
    "image": "N4402_Batillipes_0.jpg",
@@ -375821,7 +375821,7 @@
   {
    "uid": "cr-n4403",
    "name": "falculus",
-   "codex_category": "animal",
+   "codex_category": "microOrganism",
    "description": "Clavarctus falculusis a species of tardigrades. It is the only species in the genus Clavarctus, part of the family Halechiniscidae.",
    "wiki_url": "https://en.wikipedia.org/wiki/Clavarctus",
    "image": "",
@@ -375831,7 +375831,7 @@
   {
    "uid": "cr-n4404",
    "name": "Bdelloidea",
-   "codex_category": "animal",
+   "codex_category": "fossil",
    "description": "Bdelloidea (from Greekβδέλλα, bdella'leech') is a class of rotifers found in freshwater habitats all over the world. There are over 450 described species of bdelloid rotifers (or 'bdelloids'), distinguished from each other mainly on the basis of morphology.",
    "wiki_url": "https://en.wikipedia.org/wiki/Bdelloid_Rotifer",
    "image": "N4404_Bdelloidea_0.jpg",
@@ -375841,7 +375841,7 @@
   {
    "uid": "cr-n4405",
    "name": "Philodina",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Thisrotifer-related article is astub. You can help Wikipedia by adding missing information.",
    "wiki_url": "https://en.wikipedia.org/wiki/Philodina",
    "image": "N4405_Philodina_0.jpg",
@@ -375861,7 +375861,7 @@
   {
    "uid": "cr-n4407",
    "name": "Habrotrocha",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Thisrotifer-related article is astub. You can help Wikipedia by adding missing information.",
    "wiki_url": "https://en.wikipedia.org/wiki/Habrotrocha",
    "image": "N4407_Habrotrocha_0.jpg",
@@ -375871,7 +375871,7 @@
   {
    "uid": "cr-n4408",
    "name": "Ceratotrocha",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Thisrotifer-related article is astub. You can help Wikipedia by adding missing information.",
    "wiki_url": "https://en.wikipedia.org/wiki/Ceratotrocha",
    "image": "",
@@ -375881,7 +375881,7 @@
   {
    "uid": "cr-n4409",
    "name": "Rotaria",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Rotaria citrina Rotaria macrura Rotaria magna calcarata Rotaria neptunia Rotaria neptu noida Rotaria rotator i a Rotaria social is Rotaria sordid a Rotaria tardigrada Rotaria sp. CWB-2005",
    "wiki_url": "https://en.wikipedia.org/wiki/Rotaria",
    "image": "N4409_Rotaria_0.jpg",
@@ -375891,7 +375891,7 @@
   {
    "uid": "cr-n4410",
    "name": "Embata",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Thisrotifer-related article is astub. You can help Wikipedia by adding missing information.",
    "wiki_url": "https://en.wikipedia.org/wiki/Embata",
    "image": "",
@@ -375901,7 +375901,7 @@
   {
    "uid": "cr-n4411",
    "name": "Bradyscela",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Thisrotifer-related article is astub. You can help Wikipedia by adding missing information.",
    "wiki_url": "https://en.wikipedia.org/wiki/Bradyscela",
    "image": "",
@@ -375911,7 +375911,7 @@
   {
    "uid": "cr-n4412",
    "name": "Adineta jinan",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Thisrotifer-related article is astub. You can help Wikipedia by adding missing information.",
    "wiki_url": "https://en.wikipedia.org/wiki/Adineta_jinan",
    "image": "",
@@ -375921,7 +375921,7 @@
   {
    "uid": "cr-n4413",
    "name": "Philodina chinensis",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Thisrotifer-related article is astub. You can help Wikipedia by adding missing information.",
    "wiki_url": "https://en.wikipedia.org/wiki/Philodina_chinensis",
    "image": "",
@@ -375931,7 +375931,7 @@
   {
    "uid": "cr-n4414",
    "name": "Brachionus",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "The following species are recognised in the genus Brachionus:",
    "wiki_url": "https://en.wikipedia.org/wiki/Brachionus",
    "image": "N4414_Brachionus_0.jpg",
@@ -375941,7 +375941,7 @@
   {
    "uid": "cr-n4415",
    "name": "Brachionus angularis",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "The following species are recognised in the genus Brachionus:",
    "wiki_url": "https://en.wikipedia.org/wiki/Brachionus_angularis",
    "image": "",
@@ -375961,7 +375961,7 @@
   {
    "uid": "cr-n4417",
    "name": "Keratella cochlearis",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Keratella cochlearishas an oval lorica, a shell-like protective outer cuticle. At the anterior end are three pairs of spines.",
    "wiki_url": "https://en.wikipedia.org/wiki/Keratella_cochlearis",
    "image": "N4417_Keratella cochlearis_0.jpg",
@@ -375971,7 +375971,7 @@
   {
    "uid": "cr-n4418",
    "name": "Keratella quadrata",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Keratella cochlearishas an oval lorica, a shell-like protective outer cuticle. At the anterior end are three pairs of spines.",
    "wiki_url": "https://en.wikipedia.org/wiki/Keratella_quadrata",
    "image": "",
@@ -375981,7 +375981,7 @@
   {
    "uid": "cr-n4419",
    "name": "Keratella tecta",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Keratella cochlearishas an oval lorica, a shell-like protective outer cuticle. At the anterior end are three pairs of spines.",
    "wiki_url": "https://en.wikipedia.org/wiki/Keratella_tecta",
    "image": "",
@@ -375991,7 +375991,7 @@
   {
    "uid": "cr-n4420",
    "name": "Keratella tropica",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Keratella cochlearishas an oval lorica, a shell-like protective outer cuticle. At the anterior end are three pairs of spines.",
    "wiki_url": "https://en.wikipedia.org/wiki/Keratella_tropica",
    "image": "",
@@ -376001,7 +376001,7 @@
   {
    "uid": "cr-n4421",
    "name": "Notholca striata",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Keratella cochlearishas an oval lorica, a shell-like protective outer cuticle. At the anterior end are three pairs of spines.",
    "wiki_url": "https://en.wikipedia.org/wiki/Notholca_striata",
    "image": "",
@@ -376011,7 +376011,7 @@
   {
    "uid": "cr-n4422",
    "name": "Notholca acuminata",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Keratella cochlearishas an oval lorica, a shell-like protective outer cuticle. At the anterior end are three pairs of spines.",
    "wiki_url": "https://en.wikipedia.org/wiki/Notholca_acuminata",
    "image": "",
@@ -376021,7 +376021,7 @@
   {
    "uid": "cr-n4423",
    "name": "Platyias quadricornis",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Keratella cochlearishas an oval lorica, a shell-like protective outer cuticle. At the anterior end are three pairs of spines.",
    "wiki_url": "https://en.wikipedia.org/wiki/Platyias_quadricornis",
    "image": "",
@@ -376031,7 +376031,7 @@
   {
    "uid": "cr-n4424",
    "name": "Seison",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Thisrotifer-related article is astub. You can help Wikipedia by adding missing information.",
    "wiki_url": "https://en.wikipedia.org/wiki/Seison",
    "image": "N4424_Seison_0.jpg",
@@ -376081,7 +376081,7 @@
   {
    "uid": "cr-n4429",
    "name": "infection",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "Pinworm infection (threadworm infectionin the UK), also known as entero bias is, is ahuman parasitic disease caused by the pinworm, Enterobius vermicularis. The most common symptom ispruritus ani, or itching in the anal area.",
    "wiki_url": "https://en.wikipedia.org/wiki/Pinworm",
    "image": "N4429_Pinworm infection_0.jpg",
@@ -376091,7 +376091,7 @@
   {
    "uid": "cr-n4430",
    "name": "Trichuris trichiura",
-   "codex_category": "animal",
+   "codex_category": "microOrganism",
    "description": "Trichur is trichiura or whip worm, is a parasitic roundworm (a type ofhelminth) that causes trichur i as is (a type ofhelminthiasiswhich is one of theneglected tropical diseases) when it infects a human large intestine. It is commonly known as the whip worm which refers to the shape of the worm; it looks like a whip w…",
    "wiki_url": "https://en.wikipedia.org/wiki/Whipworm",
    "image": "N4430_Trichuris trichiura_0.jpg",
@@ -376101,7 +376101,7 @@
   {
    "uid": "cr-n4431",
    "name": "Vinegar Eel",
-   "codex_category": "animal",
+   "codex_category": "microOrganism",
    "description": "Trichur is trichiura or whip worm, is a parasitic roundworm (a type ofhelminth) that causes trichur i as is (a type ofhelminthiasiswhich is one of theneglected tropical diseases) when it infects a human large intestine. It is commonly known as the whip worm which refers to the shape of the worm; it looks like a whip w…",
    "wiki_url": "https://en.wikipedia.org/wiki/Vinegar_Eel",
    "image": "",
@@ -376111,7 +376111,7 @@
   {
    "uid": "cr-n4432",
    "name": "Caenorhabditis briggsae",
-   "codex_category": "animal",
+   "codex_category": "microOrganism",
    "description": "Caenorhabdit is briggs aeis a small nematode, closely related to Caenorhabditis elegans. The differences between the two species are subtle.",
    "wiki_url": "https://en.wikipedia.org/wiki/Caenorhabditis_briggsae",
    "image": "",
@@ -376171,7 +376171,7 @@
   {
    "uid": "cr-n4438",
    "name": "Armorloricus",
-   "codex_category": "animal",
+   "codex_category": "microOrganism",
    "description": "Thisprotostome-related article is astub. You can help Wikipedia by adding missing information.",
    "wiki_url": "https://en.wikipedia.org/wiki/Armorloricus",
    "image": "",
@@ -376181,7 +376181,7 @@
   {
    "uid": "cr-n4439",
    "name": "Australoricus",
-   "codex_category": "animal",
+   "codex_category": "microOrganism",
    "description": "A ustraloricus oculatus is a species of Loricifera, a species of microscopic marine sediment-dwelling animals, in the family Nanaloricidae. It is the only described species in the genus Australoricus.",
    "wiki_url": "https://en.wikipedia.org/wiki/Australoricus",
    "image": "",
@@ -376521,7 +376521,7 @@
   {
    "uid": "cr-n4474",
    "name": "Halorubrum",
-   "codex_category": "animal",
+   "codex_category": "microOrganism",
    "description": "Halorubrum is a genus in the family Halorubraceae. Halo rubrum species are usually halophilic and can be found in waters with high salt concentration such as the Dead Seaor Lake Zabuye.",
    "wiki_url": "https://en.wikipedia.org/wiki/Halorubrum",
    "image": "",
@@ -376601,7 +376601,7 @@
   {
    "uid": "cr-n4482",
    "name": "Methanothermus",
-   "codex_category": "animal",
+   "codex_category": "microOrganism",
    "description": "Methanothermus is a genus of microbes within the family Methanothermaceae. The species within this genes are hyperthermophiles and strictly anaerobic.",
    "wiki_url": "https://en.wikipedia.org/wiki/Methanothermus",
    "image": "",
@@ -376651,7 +376651,7 @@
   {
    "uid": "cr-n4487",
    "name": "Bacillus subtilis",
-   "codex_category": "microOrganism",
+   "codex_category": "vegetal",
    "description": "Bacillus subtilis ( ), known also as the hay bacillus or grass bacillus, is agram-positive, catalase-positivebacterium, found in soil and the gastrointestinal tract of ruminants, humans and marine sponges. Bacillus subtilis is motile and amylase positive.",
    "wiki_url": "https://en.wikipedia.org/wiki/Bacillus_subtilis",
    "image": "N4487_Bacillus subtilis_0.jpg",
@@ -376821,7 +376821,7 @@
   {
    "uid": "cr-n4505",
    "name": "Loricifera",
-   "codex_category": "animal",
+   "codex_category": "microOrganism",
    "description": "Loricifera (from Latin, lorica, corselet (armour) +ferre, to bear), also known as corset animals, is a phylum of very small to microscopic marinecycloneuraliansediment-dwelling animals with 43 described species and approximately 100 more that have been collected and not yet described. Their sizes range from 100 μm toc…",
    "wiki_url": "https://en.wikipedia.org/wiki/Loriciferan",
    "image": "",
@@ -376871,7 +376871,7 @@
   {
    "uid": "cr-n4511",
    "name": "Algae",
-   "codex_category": "microOrganism",
+   "codex_category": "vegetal",
    "description": "Algae ( ⓘAL-jee, UKalso AL-ghee; sg.:alga ⓘ) are any of a large and diverse group of photosynthetic organisms. It excludes the land plants (embryophytes).",
    "wiki_url": "https://en.wikipedia.org/wiki/Alga",
    "image": "",
@@ -376901,7 +376901,7 @@
   {
    "uid": "cr-n4515",
    "name": "Diatom",
-   "codex_category": "vegetal",
+   "codex_category": "microOrganism",
    "description": "A diatom (Neo-Latindiatoma) is any member of a large group comprising several genera of algae, specifically micro algae, found in the oceans, waterways and soils of the world. Living diatoms make up a significant portion of Earth'sbiomass.",
    "wiki_url": "https://en.wikipedia.org/wiki/Diatom",
    "image": "",
@@ -376911,7 +376911,7 @@
   {
    "uid": "cr-n4516",
    "name": "Amphipoda",
-   "codex_category": "microOrganism",
+   "codex_category": "animal",
    "description": "A mphipoda ( ) is an order of malacostraca n crustaceans with no carapace and generally with laterally compressed bodies. Amphipods ( ) range in size from 1 to 340 millimetres (0.039 to 13 in) and are mostly detritivores or scavengers.",
    "wiki_url": "https://en.wikipedia.org/wiki/Amphipod",
    "image": "N4516_Amphipoda_0.jpg",

@@ -26,6 +26,7 @@ const CREATURE_FAMILY: Record<string, { label: string; icon: string }> = {
   animal: { label: 'Animals', icon: 'lion' }, fossil: { label: 'Dinosaurs & fossils', icon: 'dinosaur' },
   insect: { label: 'Insects', icon: 'butterfly' }, vegetal: { label: 'Plants', icon: 'orchid' },
   mushroom: { label: 'Fungi', icon: 'fungus' }, microOrganism: { label: 'Microbes', icon: 'microscope' },
+  fantasy: { label: 'Fantastic creatures', icon: 'dragon' },
 }
 
 interface CardsData {

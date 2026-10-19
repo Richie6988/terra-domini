@@ -333,6 +333,13 @@ def codex_cards(request):
                               'wiki_url': c.get('wiki_url', ''), 'count': caught[c['uid']], 'owned': True,
                               'image_url': c.get('image_url', ''), 'image_credit': c.get('image_credit', ''),
                               'fossil_count': c.get('fossil_count', 0), 'fossil_sites': c.get('fossil_sites', [])})
+    # Fantastic creatures (SafariTarget.FANTASY): their own family, numbered after the DB species
+    from terra_domini.apps.territories.models import SafariTarget
+    for k, (uid, name, rarity, _, legend) in enumerate(SafariTarget.FANTASY, len(creatures_db) + 1):
+        if uid in caught:
+            creatures.append({'uid': uid, 'no': k, 'name': name, 'rarity': rarity, 'category': 'fantasy', 'description': legend,
+                              'wiki_url': '', 'count': caught[uid], 'owned': True, 'image_url': '', 'image_credit': ''})
+    totals['fantasy'] = len(SafariTarget.FANTASY)
     by_cat = Counter(c['category'] for c in creatures)
 
     # History album: retrospective tokens (history_event POIs) — own the hex to own the card
@@ -360,7 +367,7 @@ def codex_cards(request):
             'rare': {'owned': sum(c['owned'] for c in rare), 'total': sum(1 for c in rare if c['rarity'] in order and order[c['rarity']] <= 3)},
             'biomes': {'owned': len(mine_b), 'total': len(biomes)},
             'resources': {'owned': sum(r['owned'] for r in res), 'total': len(res)},
-            'creatures': {'owned': len(creatures), 'total': len(creatures_db)},
+            'creatures': {'owned': len(creatures), 'total': len(creatures_db) + len(SafariTarget.FANTASY)},
             'history': {'owned': sum(c['owned'] for c in history), 'total': len(history)},
             'events': {'owned': len(events), 'total': len(events)},
         },

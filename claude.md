@@ -547,6 +547,7 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 - **Map opening view**: main kingdom centroid (`/territories-geo/kingdoms/`), IP geoloc only for players without land.
 - **Kingdom gallery**: `GalleryToken` = TokenFace2D fed by `/codex/territory/<h3>/` (same face as Codex/3D), Token3DViewer gets `h3Index` for the real face/back.
 - **Lucky wheel (2026-10-19)**: cartoon SVG wheel (LotteryPanel `Wheel`), server draws. Land prizes: 'territory' 3 % (free land hex 2-4 rings from a random POI — a far base), 'poi' 1/10 000 (a free POI); none free → pays x2. `LotteryTicket.won_h3/won_kind` (migration economy 0006).
+- **Safari pool + zone (2026-10-19)**: living nature only — fauna (animal, insect), flora (vegetal, mushroom), microOrganism, fossil (dinosaurs) — `hexod_db.SAFARI_FAMILIES`, needs_review entries never spawn. Creature family = `build_hexod_db.classify_creature` (defining sentence first, vertebrates before insects/plants: the old rule put pangolins in insects and gazelles in plants). Fantastic creatures `SafariTarget.FANTASY` (1 hunt in 15, album family 'fantasy', numbered after the DB). Scans: 8, never above `WORLD_SCANS_MAX` 10 (shop hints); payload `scans_max`, `clue_km`. Map `SafariZoneLayer`: clue region / scan sector (band range, bearing ±) / capture hexes, safari stripes (SVG pattern) — built only from radar answers, never the hidden hex.
 
 ## 12. KNOWN ISSUES PIPELINE (updated 2026-10-17)
 

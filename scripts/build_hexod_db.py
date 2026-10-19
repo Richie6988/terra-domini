@@ -69,14 +69,35 @@ POI_CAT = {
 }
 GAME_SLUGS = set(v[0] for v in POI_CAT.values())
 
-CREATURE_RULES = [  # (codex category, keywords in the first paragraph) — first match wins
-    ('fossil', r'dinosaur|pterosaur|ichthyosaur|plesiosaur|mosasaur|stegosaur|sauropod|theropod'),
-    ('microOrganism', r'\bbacteri|\bvirus\b|archaea|protist|microorganism|plankton|amoeba'),
-    ('mushroom', r'\bfung(?:us|i)\b|mushroom|lichen|mould|mold\b'),
-    ('insect', r'\binsect|beetle|butterfl|\bmoth\b|dragonfl|damselfl|\bants?\b|\bbees?\b|wasp|cricket|katydid|grasshopper|cicada|mantis|termite|\bfly\b|flies\b|aphid|spider|scorpion'),
-    ('vegetal', r'\bplant|\btree|shrub|flower|herbaceous|perennial|\bgenus of\b.*\b(?:plants|grasses|trees)|fern|moss|orchid|cactus|seaweed|alga|vine\b|palm\b'),
-    ('animal', r'\bspecies of\b|\bgenus of\b|\bfamily\b|native to|predator|herbivor|carnivor|endemic|hippopotam|ungulate|marsupial|scientific name|mammal|\bbird|fish\b|reptile|amphibian|primate|rodent|\bbat\b|snake|lizard|turtle|frog|whale|dolphin|shark|seal\b|deer|antelope|cat\b|dog\b|monkey|ape\b|gibbon|elephant|rhino|bear\b|wolf|fox|eagle|owl|parrot|penguin|crab|octopus|squid|coral\b'),
+CREATURE_RULES = [  # (codex category, keywords) — first match wins; tried on the defining sentence, then the paragraph
+    ('fossil', r'dinosaur|pterosaur|ichthyosaur|plesiosaur|mosasaur|stegosaur|sauropod|theropod|prehistoric|extinct genus|fossil'),
+    ('microOrganism', r'\bbacteri|\bvirus\b|archaea|protist|microorganism|microb|plankton|amoeba|diatom|tardigrade|\bmicroscopic'),
+    ('mushroom', r'\bfung(?:us|i|al)\b|mushroom|toadstool|waxcap|yeast|lichen|mould|\bmold\b|ascomycete|basidiomycete|\bgenus of\b.*\bfungi'),
+    # vertebrates before insects / plants: "a pangolin eats ants", "a tree-dwelling monkey"
+    ('animal', r'\bmammal|\bbirds?\b|\bfish(?:es)?\b|reptile|amphibian|primate|rodent|\bbats?\b|snake|lizard|turtle|tortoise|'
+               r'\bfrogs?\b|\btoads?\b|salamander|whale|dolphin|shark|\bseals?\b|\bdeer\b|antelope|gazelle|oryx|monkey|colobus|'
+               r'\bapes?\b|lemur|loris|pangolin|marsupial|kangaroo|wallaby|bettong|opossum|squirrel|\bmouse\b|\bmice\b|\brats?\b|'
+               r'\bhare\b|rabbit|ungulate|elephant|rhino|hippopotam|\bbears?\b|\bwolf|\bfox|\bcat\b|felid|canid|eagle|\bowl|'
+               r'parrot|penguin|crocodil|alligator|crustacean|\bcrabs?\b|shrimp|lobster|octopus|squid|mollus|\bsnail|jellyfish|coral\b'),
+    ('insect', r'\binsect|beetle|butterfl|\bmoths?\b|dragonfl|damselfl|clubtail|\bants?\b|\bbees?\b|wasp|cricket|katydid|'
+               r'grasshopper|cicada|mantis|termite|\bfly\b|flies\b|aphid|spider|scorpion|arachnid|planthopper|\bbugs?\b|weevil|lepidoptera'),
+    ('vegetal', r'\bplants?\b|\btrees?\b|shrub|flower|herbaceous|perennial|\bgrass|fern|\bmoss|orchid|cactus|seaweed|alga|'
+                r'\bvine\b|\bpalm\b|hornwort|sundew|carnivorous plant|bamboo|cultivar|\bherb\b|\bbulb'),
+    ('animal', r'\bspecies of\b|\bgenus of\b|native to|predator|herbivor|carnivor|endemic|scientific name|\banimal'),
 ]
+
+
+def classify_creature(para: str) -> str:
+    """Codex family of a nature entry: the defining sentence ("X is a species of ...") decides, else the paragraph."""
+    low = (para or '').lower()
+    first = re.split(r'(?<=[.!?])\s', low, maxsplit=1)[0]
+    for rules in (CREATURE_RULES[:-1], CREATURE_RULES[-1:]):     # specific families first, the generic 'species of' last
+        for text in (first, low):
+            hit = next((c for c, rx in rules if re.search(rx, text)), '')
+            if hit:
+                return hit
+    return ''
+
 
 BIO_WORDS = (r'species|genus|family|subspecies|population|organism|animal|mammal|bird|fish|reptile|insect|plant|'
              r'tree|flower|fung|primate|monkey|ape\b|rodent|squirrel|predator|habitat|native|endemic|wild|extinct|fossil|'
@@ -770,7 +791,7 @@ def main():
         seen_cr.add(norm_name(name))
         para = fix_glued(first_paragraph(r['paragraphs']), protect=re.split(r'[\s_-]+', name))
         low = para.lower()
-        codex = next((c for c, rx in CREATURE_RULES if re.search(rx, low)), '')
+        codex = classify_creature(para)
         review = ''
         if not para:
             review = 'no text'

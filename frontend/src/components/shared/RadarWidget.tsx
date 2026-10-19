@@ -17,7 +17,7 @@ import { playSound } from '../../hooks/useSound'
 import { celebrate } from './Celebrate'
 import { BAND } from '../hud/DailyHuntPanel'
 
-const CAT_ICON: Record<string, string> = { animal: 'lion', fossil: 'dinosaur', insect: 'butterfly', vegetal: 'orchid', mushroom: 'fungus', microOrganism: 'microscope' }
+const CAT_ICON: Record<string, string> = { animal: 'lion', fossil: 'dinosaur', insect: 'butterfly', vegetal: 'orchid', mushroom: 'fungus', microOrganism: 'microscope', fantasy: 'dragon' }
 const MONO = "'Share Tech Mono', monospace"
 
 export function RadarWidget() {
@@ -75,7 +75,7 @@ export function RadarWidget() {
         <span className="hx-radar-sweep" />
         <IconSVG id={hunt ? CAT_ICON[hunt.creature_category] || 'lion' : 'safari_radar'} size={28} />
         <span style={{ fontSize: 8.5, fontWeight: 900, letterSpacing: 1, fontFamily: 'var(--font-heading)', color: band?.color || '#a5f3fc' }}>
-          {hunt ? (band ? band.label : `${hunt.tries_left} SCANS`) : 'SAFARI'}</span>
+          {hunt ? (band ? band.label : `${hunt.tries_left}/${hunt.scans_max ?? hunt.tries_left} SCANS`) : 'SAFARI'}</span>
       </button>
     )
   }
@@ -118,7 +118,7 @@ export function RadarWidget() {
       {last?.band === 'here'
         ? <button onClick={catchIt} disabled={busy} className="btn-game btn-game-green" style={{ width: '100%', fontSize: 13, minHeight: 44 }}>CATCH IT</button>
         : <button onClick={scan} disabled={busy} className="btn-game btn-game-gold" style={{ width: '100%', fontSize: 13, minHeight: 44 }}>
-            {busy ? 'SCANNING…' : `SCAN FROM MAP CENTRE · ${hunt.tries_left} LEFT`}</button>}
+            {busy ? 'SCANNING…' : `SCAN FROM MAP CENTRE · ${hunt.tries_left}/${hunt.scans_max ?? hunt.tries_left}`}</button>}
     </div>
   )
 }

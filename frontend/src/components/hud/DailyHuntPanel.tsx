@@ -27,11 +27,12 @@ const CAT: Record<string, { label: string; icon: string }> = {
   animal: { label: 'Animal', icon: 'lion' }, fossil: { label: 'Dinosaur & fossil', icon: 'dinosaur' },
   insect: { label: 'Insect', icon: 'butterfly' }, vegetal: { label: 'Plant', icon: 'orchid' },
   mushroom: { label: 'Fungus', icon: 'fungus' }, microOrganism: { label: 'Microbe', icon: 'microscope' },
+  fantasy: { label: 'Fantastic creature', icon: 'dragon' },
 }
 
 interface Target {
   creature_name: string; creature_category: string; creature_description: string; creature_wiki_url: string
-  id: string; rarity: string; hex_reward: number; status: string; tries_left: number
+  id: string; rarity: string; hex_reward: number; status: string; tries_left: number; scans_max?: number
   probes: { h3?: string; ring?: number; km?: number; band?: string; bearing?: number }[]; grid: { h3: string; i: number; j: number }[]
   center_h3: string; target_h3?: string
   mode?: 'world' | 'local'; hint?: string; clue_lat?: number; clue_lon?: number; capture_km?: number
@@ -133,13 +134,13 @@ export function DailyHuntPanel({ onClose }: Props) {
                 </div>
               ))}
               {!revealed && <button className="btn-game btn-game-gold" style={{ width: '100%', minHeight: 48, fontSize: 14 }} onClick={() => openRadarHunt(t)}>
-                HUNT WITH THE RADAR · {t.tries_left} SCANS</button>}
+                HUNT WITH THE RADAR · {t.tries_left}/{t.scans_max ?? t.tries_left} SCANS</button>}
             </div>
           ) : null}
 
           {!revealed && t.mode !== 'world' && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, gap: 10 }}>
-              <span className="hx-chip">{t.tries_left} SCAN{t.tries_left > 1 ? 'S' : ''} LEFT</span>
+              <span className="hx-chip">{t.tries_left}/{t.scans_max ?? t.tries_left} SCANS LEFT</span>
               <span style={{ fontSize: 12, color: 'var(--hx-text-2)', textTransform: 'none' }}>Numbers = rings away from it</span>
             </div>
           )}

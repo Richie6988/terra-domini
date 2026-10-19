@@ -1199,6 +1199,9 @@ import math
 def _creature_info(uid):
     """Codex details of a real species from the HEXOD master DB (empty for legacy targets)."""
     from terra_domini.apps.events.hexod_db import creature
+    fx = next((f for f in SafariTarget.FANTASY if f[0] == uid), None)
+    if fx:
+        return {'creature_category': 'fantasy', 'creature_description': fx[4], 'creature_wiki_url': ''}
     c = creature(uid) or {}
     return {'creature_category': c.get('codex_category', ''), 'creature_description': c.get('description', ''),
             'creature_wiki_url': c.get('wiki_url', '')}
@@ -1244,12 +1247,15 @@ def _target_payload(target, reveal=False):
         'center_h3': target.center_h3, 'tries_left': target.tries_left, 'probes': target.probes,
         'grid': target.grid() if target.center_h3 else [],
         'mode': getattr(target, 'mode', 'local') or 'local', 'capture_km': SafariTarget.CAPTURE_KM,
+        'scans_max': target.tries_left + sum(1 for p in (target.probes or []) if p.get('band') and p['band'] != 'here'),
     }
     if d['mode'] == 'world':   # where to start looking: the centre of the clue's region (never the hiding hex)
         from terra_domini.apps.economy.resources import biome_for
         b = biome_for(round(target.target_lat, 3), round(target.target_lon, 3))
         if b:
             d['clue_lat'], d['clue_lon'] = (b['lat_min'] + b['lat_max']) / 2, (b['lon_min'] + b['lon_max']) / 2
+            # radius of the clue region (half its diagonal), to draw the hunting zone
+            d['clue_km'] = round(min(2500, max(150, _km(b['lat_min'], b['lon_min'], b['lat_max'], b['lon_max']) / 2)))
     if reveal:
         d['target_h3'] = target.target_h3
     return d
@@ -1293,13 +1299,17 @@ class SafariViewSet(viewsets.GenericViewSet):
         lon = float(request.data.get('lon', 2.3522))
 
         try:   # world hunt (the species where it really lives) when sightings are known, else around your land
-            target = SafariTarget.spawn_world(request.user) or SafariTarget.spawn_for_player(request.user, base_lat=lat, base_lon=lon)
+            import random as _rnd
+            if _rnd.random() < SafariTarget.FANTASY_CHANCE:   # a fantastic creature now and then
+                target = SafariTarget.spawn_for_player(request.user, base_lat=lat, base_lon=lon, fantasy=True)
+            else:
+                target = SafariTarget.spawn_world(request.user) or SafariTarget.spawn_for_player(request.user, base_lat=lat, base_lon=lon)
         except Exception as e:   # e.g. migrations not applied on this server (safari grid columns missing)
             import logging
             logging.getLogger('terra_domini.safari').exception('safari spawn failed')
             return Response({'error': f'Safari is not ready on this server ({type(e).__name__}). An admin must run the migrations.'}, status=503)
         if use_charge(request.user, 'safari_hints'):   # shop 'Safari Hints': +2 scans
-            target.tries_left += 2
+            target.tries_left = min(SafariTarget.WORLD_SCANS_MAX, target.tries_left + 2)
             target.save(update_fields=['tries_left'])
         msg = (f'{target.creature_name}: {target.hint}. Use the radar — {target.tries_left} scans.' if target.mode == 'world'
                else f'{target.creature_name} is hiding near your territory! {target.tries_left} scans.')
