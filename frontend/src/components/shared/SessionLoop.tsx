@@ -19,7 +19,7 @@ import { playSound } from '../../hooks/useSound'
 interface Nudge {
   id: string; type: string; priority: number; title: string; body: string
   ends_at?: string; battle_id?: string
-  cta: { label: string; action?: 'collect' | 'reinforce'; panel?: string } | null
+  cta: { label: string; action?: 'collect' | 'reinforce'; panel?: string; tab?: string } | null
 }
 interface LoopStatus {
   balance: number; earned_balance: number
@@ -31,14 +31,14 @@ interface LoopStatus {
 const NUDGE_ICON: Record<string, string> = {
   under_attack: 'swords', territory_lost: 'flag_red', harvest_full: 'wheat', harvest_ready: 'wheat',
   battle_result: 'trophy', missions_claimable: 'daily_task', first_claim: 'pin', can_expand: 'castle',
-  event_hold: 'event_ticket', event_open: 'event_ticket',
+  event_hold: 'event_ticket', event_open: 'event_ticket', region_threat: 'flag_red', region_close: 'crown',
 }
 const NUDGE_COLOR: Record<string, string> = {
   under_attack: '#ef4444', territory_lost: '#ef4444', harvest_full: '#f59e0b', harvest_ready: '#34d058',
   battle_result: '#8b5cf6', missions_claimable: '#f5a623', first_claim: '#3b9bff', can_expand: '#3b9bff',
-  event_hold: '#d946ef', event_open: '#d946ef',
+  event_hold: '#d946ef', event_open: '#d946ef', region_threat: '#f97316', region_close: '#fbbf24',
 }
-const URGENT = new Set(['under_attack', 'harvest_full', 'battle_result', 'territory_lost', 'event_hold'])
+const URGENT = new Set(['under_attack', 'harvest_full', 'battle_result', 'territory_lost', 'event_hold', 'region_threat'])
 
 const fmtIn = (iso?: string) => {
   if (!iso) return ''
@@ -205,7 +205,10 @@ function useNudgeActions() {
     if (!n.cta) return
     if (n.cta.action === 'collect') collect.mutate()
     else if (n.cta.action === 'reinforce' && n.battle_id) openBattle(n.battle_id)   // war room: troops, walls, bonus
-    else if (n.cta.panel) setActivePanel(n.cta.panel as any)
+    else if (n.cta.panel) {
+      if (n.cta.tab) try { sessionStorage.setItem(`hx_tab_${n.cta.panel}`, n.cta.tab) } catch {}   // open on that tab
+      setActivePanel(n.cta.panel as any)
+    }
   }
 }
 

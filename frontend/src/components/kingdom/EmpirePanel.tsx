@@ -362,7 +362,10 @@ function StatsTab({ kingdoms }: { kingdoms: Kingdom[] }) {
 
 // ═══ MAIN ═══
 export function EmpirePanel({ onClose }: Props) {
-  const [tab, setTab] = useState<Tab>('kingdoms')
+  const [tab, setTab] = useState<Tab>(() => {   // a notification can open a given tab (SessionLoop cta.tab)
+    try { const t = sessionStorage.getItem('hx_tab_empire'); sessionStorage.removeItem('hx_tab_empire'); if (t) return t as Tab } catch {}
+    return 'kingdoms'
+  })
   const player = usePlayer()
 
   const { data, isLoading } = useQuery<{ kingdoms: Kingdom[] }>({

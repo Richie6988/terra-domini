@@ -192,6 +192,27 @@ def loop_status(request):
                            'cta': {'label': 'SEE', 'panel': 'events'}})
     except Exception:
         pass
+    try:   # Risk regions (territories/regions.py): one more hex to take a region, or a rival closing in on yours
+        from terra_domini.apps.territories import regions as R
+        me = str(player.id)
+        for rid, e in R.standings().items():
+            mine_n = e['counts'].get(me, 0)
+            if not mine_n:
+                continue
+            lead, _ = R.leader_of(e)
+            rival = max((n for o, n in e['counts'].items() if o != me), default=0)
+            if lead == me and rival >= mine_n - 1:
+                nudges.append({'id': f'region-threat-{rid}-{rival}', 'type': 'region_threat', 'priority': 75,
+                               'title': f'{e["name"]} is slipping away',
+                               'body': f'A rival holds {rival} territories there, you {mine_n}. Expand or attack to keep +{R.REGION_DRAFT} troops a day.',
+                               'cta': {'label': 'REGIONS', 'panel': 'empire', 'tab': 'regions'}})
+            elif lead != me and max(R.REGION_MIN - mine_n, rival - mine_n + 1) == 1:
+                nudges.append({'id': f'region-close-{rid}-{mine_n}', 'type': 'region_close', 'priority': 55,
+                               'title': f'One territory away from {e["name"]}',
+                               'body': f'Take one more hex there to control the region: +{R.REGION_DRAFT} troops a day, +{R.REGION_HEX_PCT}% HEX.',
+                               'cta': {'label': 'REGIONS', 'panel': 'empire', 'tab': 'regions'}})
+    except Exception:
+        pass
     if owned == 0:
         nudges.append({
             'id': 'first-claim', 'type': 'first_claim', 'priority': 95,
