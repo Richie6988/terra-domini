@@ -11,8 +11,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import * as THREE from 'three'
-import { cellToLatLng } from 'h3-js'
-import { IconSVG } from '../shared/iconBank'
+import { IconSVG, getIcon } from '../shared/iconBank'
 import { createTokenFace2D } from '../shared/hexodTokenFace'
 import { iconFor } from '../shared/poiIcons'
 import type { TierKey } from '../shared/hexodTokenFace'
@@ -24,7 +23,18 @@ const RL: Record<string,string> = RARITY_LABEL
 const RT: Record<string, TierKey> = { common:'BRONZE', uncommon:'SILVER', rare:'GOLD', epic:'EMERALD', legendary:'DIAMOND', mythic:'DIAMOND' }
 const RK: Record<string,number> = { common:0, uncommon:1, rare:2, epic:3, legendary:4, mythic:5 }
 
-interface Card { h3_index: string; poi_name?: string; place_name?: string; rarity: string; biome?: string; territory_type?: string; is_shiny?: boolean }
+// A booster card (economy.views._open_booster_pack): a shop boost, a HEX amount, or a POI (rarer)
+interface Card {
+  kind?: 'boost' | 'hex' | 'poi'; rarity: string
+  h3_index?: string; poi_name?: string; place_name?: string; category?: string; image_url?: string; description?: string; lat?: number; lon?: number
+  code?: string; name?: string; effect_type?: string; note?: string; duration_seconds?: number
+  amount?: number; biome?: string; territory_type?: string; is_shiny?: boolean
+}
+const BOOST_ICON: Record<string, string> = { shield: 'ui_shield', atk_multiplier: 'muscle', def_multiplier: 'castle', hex_bonus: 'hex_coin',
+  explore_slots: 'compass', explore_speed: 'lightning', claim_instant: 'lightning', distant_attack: 'target', rare_chance: 'gem',
+  trade_discount: 'chart_up', safari_continuous: 'safari_radar', safari_hints: 'crystal_ball', rarity_boost: 'cards', luck_boost: 'clover' }
+const cardTitle = (c: Card) => c.kind === 'boost' ? (c.name || 'Boost') : c.kind === 'hex' ? `+${(c.amount || 0).toLocaleString()} HEX` : (c.poi_name || c.place_name || 'Point of interest')
+const cardKind = (c: Card) => c.kind === 'boost' ? 'SHOP BOOST' : c.kind === 'hex' ? 'HEX' : 'POINT OF INTEREST'
 interface Props { cards: Card[]; packName?: string; onClose: () => void }
 type Phase = 'pack' | 'explode' | 'reveal' | 'done'
 
@@ -40,12 +50,19 @@ function mkPart(sc: THREE.Scene, n: number, col: string, spd: number) {
 
 function mkCardTex(card: Card): THREE.CanvasTexture {
   const c = document.createElement('canvas'); c.width=512; c.height=512
-  const b = card.biome||'rural'
-  createTokenFace2D(c, { tier:RT[card.rarity]||'BRONZE', category:(card.territory_type||'TERRITORY').toUpperCase(),
-    catColor:RC[card.rarity]||'#39FF14', biome:b.toUpperCase(), tokenName:(card.poi_name||card.place_name||'NEW TERRITORY').toUpperCase(),
-    description:'', edition:'GENESIS', serial:1, maxSupply:1000, owner:'VAULT_HOLDER', rarity: card.rarity,
-    date:new Date().toISOString().slice(0,10), iconSvg: iconFor(card.territory_type || b), clipToHex: true,
-    imageSrc: card.h3_index ? `/api/tiles/satcard/${card.h3_index}.jpg?v=2` : '' })   // the hex's real satellite view
+  const common = { serial: 1, maxSupply: 1000, owner: 'VAULT_HOLDER', date: new Date().toISOString().slice(0, 10), clipToHex: true }
+  if (card.kind === 'boost') {
+    createTokenFace2D(c, { ...common, tier: 'SILVER', rarity: 'uncommon', category: 'SHOP BOOST', catColor: '#cbd5e1', biome: '',
+      tokenName: (card.name || 'BOOST').toUpperCase(), description: card.note || '', iconSvg: getIcon(BOOST_ICON[card.effect_type || ''] || 'lightning'), imageSrc: '' })
+  } else if (card.kind === 'hex') {
+    createTokenFace2D(c, { ...common, tier: card.rarity === 'rare' ? 'GOLD' : 'BRONZE', rarity: card.rarity, category: 'HEX', catColor: '#fbbf24', biome: '',
+      tokenName: `+${(card.amount || 0).toLocaleString()} HEX`, description: 'Added to your balance', iconSvg: getIcon('hex_coin'), imageSrc: '' })
+  } else {
+    createTokenFace2D(c, { ...common, tier: RT[card.rarity] || 'GOLD', rarity: card.rarity, category: (card.category || 'POINT OF INTEREST').toUpperCase(),
+      catColor: RC[card.rarity] || '#fbbf24', biome: '', tokenName: (card.poi_name || card.place_name || 'POINT OF INTEREST').toUpperCase(),
+      description: card.description || '', iconSvg: iconFor(card.category || 'monument'),
+      imageSrc: card.image_url || (card.h3_index ? `/api/tiles/satcard/${card.h3_index}.jpg?v=2` : '') })
+  }
   const t = new THREE.CanvasTexture(c); t.needsUpdate=true
   ;[400, 900, 1600, 2600, 4000].forEach(ms => setTimeout(() => { t.needsUpdate = true }, ms)); return t
 }
@@ -64,6 +81,8 @@ function mkBackTex(): THREE.CanvasTexture {
   x.font='bold 120px "Lilita One", Georgia, serif'; x.fillStyle='rgba(246,196,83,0.35)'; x.fillText('?',256,380)
   return new THREE.CanvasTexture(c)
 }
+
+const score = (c: Card) => c.kind === 'poi' ? 100 + (RK[c.rarity] || 0) : c.kind === 'hex' ? (c.amount || 0) / 100 : 1
 
 /** Small row at the bottom for the cards already revealed. */
 function rowTarget(i: number, n: number, aspect: number) {
@@ -145,7 +164,7 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
     const s = sRef.current; if (!s) return
     s.phase = 'done'; setPhase('done'); setRevealed(cards.length)
     s.cms.forEach((m: any, i: number) => { const R = rowTarget(i, cards.length, s.cam.aspect); m._tgt.set(R.x, R.y, 0); m._sc = R.scale; s.fl.add(i); if (m._gm) m._gm.opacity = 0 })
-    setBestCard(cards.reduce((a, b) => (RK[b.rarity] || 0) > (RK[a.rarity] || 0) ? b : a, cards[0]))
+    setBestCard(cards.reduce((a, b) => score(b) > score(a) ? b : a, cards[0]))
   }
   // Tap: reveal the centre card (suspense grows with rarity), or send it to the row and bring the next
   const tap = useCallback(() => {
@@ -181,7 +200,7 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
       const backTex=mkBackTex()
       cards.forEach((card,i)=>{
         const geo=new THREE.PlaneGeometry(0.7,0.7)
-        const mesh=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:mkCardTex(card),metalness:0.1,roughness:0.5,transparent:true,alphaTest:0.05}))
+        const mesh=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({map:mkCardTex(card),transparent:true,alphaTest:0.05}))   // unlit: the face keeps its true colours
         // Back = separate plane turned away (FrontSide). It was BackSide, so it z-fought the face and the
         // revealed cards showed a mirrored 'HEXOD' back instead of the territory.
         const back=new THREE.Mesh(geo,new THREE.MeshStandardMaterial({map:backTex,metalness:0.3,roughness:0.4,side:THREE.FrontSide,transparent:true,alphaTest:0.05}))
@@ -220,8 +239,8 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
       {phase==='reveal' && cards[cur] && (
         <div style={{position:'absolute',left:0,right:0,bottom:'24%',textAlign:'center',pointerEvents:'none',padding:'0 20px'}}>
           {step==='shown' ? (<motion.div key={'c'+cur} initial={{opacity:0,y:10,scale:0.9}} animate={{opacity:1,y:0,scale:1}}>
-            <div style={{fontFamily:orb,fontSize:22,color:RC[cards[cur].rarity],textShadow:'0 2px 0 rgba(0,0,0,0.6), 0 0 18px '+RC[cards[cur].rarity]}}>{(RL[cards[cur].rarity]||'').toUpperCase()}{cards[cur].is_shiny?' · SHINY':''}</div>
-            <div style={{fontFamily:orb,fontSize:15,color:'#fff',marginTop:2,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{cards[cur].poi_name||cards[cur].place_name||'New territory'}</div>
+            <div style={{fontFamily:orb,fontSize:22,color:RC[cards[cur].rarity],textShadow:'0 2px 0 rgba(0,0,0,0.6), 0 0 18px '+RC[cards[cur].rarity]}}>{cards[cur].kind === 'poi' ? `${(RL[cards[cur].rarity]||'').toUpperCase()} · ` : ''}{cardKind(cards[cur])}</div>
+            <div style={{fontFamily:orb,fontSize:15,color:'#fff',marginTop:2,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{cardTitle(cards[cur])}</div>
             <div style={{fontSize:11,color:'rgba(255,255,255,0.6)',marginTop:6,fontFamily:orb,letterSpacing:1}}>{cur+1<cards.length?`TAP FOR THE NEXT ONE · ${cards.length-cur-1} LEFT`:'TAP TO FINISH'}</div>
           </motion.div>) : (
             <motion.div key={'h'+cur+step} animate={{opacity:[0.5,1,0.5]}} transition={{duration:step==='charging'?0.4:1.4,repeat:Infinity}}
@@ -259,23 +278,24 @@ export function BoosterOpenAnimation({ cards, packName, onClose }: Props) {
             <div style={{fontSize: 11,letterSpacing:0.5,color:'rgba(255,255,255,0.5)',fontFamily:orb}}>BEST PULL</div>
             <div style={{padding:'8px 18px',borderRadius:999,background:`${bc}1f`,border:`2px solid ${bc}66`,color:bc,fontSize:12,fontWeight:900,letterSpacing:0.5,fontFamily:orb,textShadow:'0 2px 0 rgba(0,0,0,0.45)',display:'flex',alignItems:'center',gap:6,maxWidth:'100%'}}>
               {bestCard.is_shiny&&<IconSVG id="sparkles" size={14} />}
-              <span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{(RL[bestCard.rarity]||bestCard.rarity||'').toUpperCase()} · {bestCard.poi_name||bestCard.h3_index?.slice(-6)}</span>
+              <span style={{whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{bestCard.kind === 'poi' ? `${(RL[bestCard.rarity]||'').toUpperCase()} · ` : ''}{cardTitle(bestCard)}</span>
             </div>
             <div style={{display:'flex',gap:6,flexWrap:'wrap',justifyContent:'center'}}>
               {counts.map(({r,n})=>(
                 <span key={r} style={{padding:'3px 10px',borderRadius:999,fontSize: 11,fontWeight:700,letterSpacing:0.5,fontFamily:orb,color:RC[r],background:`${RC[r]}18`,border:`2px solid ${RC[r]}44`}}>{n} × {(RL[r]||r).toUpperCase()}</span>
               ))}
             </div>
-            <div style={{fontSize:13,color:'#fff',letterSpacing:0.5,fontFamily:orb,textShadow:'0 2px 0 rgba(0,0,0,0.45)'}}>{cards.length} TERRITORIES ADDED TO YOUR EMPIRE</div>
+            <div style={{fontSize:13,color:'#fff',letterSpacing:0.5,fontFamily:orb,textShadow:'0 2px 0 rgba(0,0,0,0.45)'}}>{(() => { const p = cards.filter(c => c.kind === 'poi').length, b = cards.filter(c => c.kind === 'boost').length, h = cards.reduce((a, c) => a + (c.kind === 'hex' ? c.amount || 0 : 0), 0)
+              return [p ? `${p} PLACE${p > 1 ? 'S' : ''} ADDED` : '', b ? `${b} BOOST${b > 1 ? 'S' : ''} ACTIVE` : '', h ? `+${h.toLocaleString()} HEX` : ''].filter(Boolean).join(' · ') })()}</div>
             <div style={{display:'flex',flexDirection:'column',gap:6,width:'100%',maxHeight:170,overflowY:'auto'}}>
-              {cards.map(c=>(
-                <button key={c.h3_index} onClick={()=>{try{const [lat,lon]=cellToLatLng(c.h3_index);window.dispatchEvent(new CustomEvent('terra:flyto',{detail:{lat,lon,zoom:15}}))}catch{};onClose()}}
-                  style={{display:'flex',alignItems:'center',gap:8,width:'100%',padding:'7px 10px',borderRadius:10,cursor:'pointer',textAlign:'left',
+              {cards.map((c, i)=>(
+                <button key={i} onClick={()=>{ if (c.kind === 'poi' && c.lat != null) { window.dispatchEvent(new CustomEvent('terra:flyto',{detail:{lat:c.lat,lon:c.lon,zoom:15}})); onClose() } }}
+                  style={{display:'flex',alignItems:'center',gap:8,width:'100%',padding:'7px 10px',borderRadius:10,cursor:c.kind === 'poi' ? 'pointer' : 'default',textAlign:'left',
                     background:'rgba(255,255,255,0.06)',border:`2px solid ${RC[c.rarity]||'#9CA3AF'}55`,color:'#e2e8f0',fontSize:12,fontFamily:'var(--font-body)'}}>
-                  <span style={{width:10,height:10,borderRadius:3,background:RC[c.rarity]||'#9CA3AF',flexShrink:0,border:'1.5px solid #0b1828'}} />
-                  <span style={{flex:1,minWidth:0,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{c.poi_name||c.place_name||'New territory'}</span>
-                  <span style={{fontSize:10,color:RC[c.rarity],fontFamily:orb}}>{(RL[c.rarity]||c.rarity||'').toUpperCase()}</span>
-                  <span style={{fontSize:10,color:'#fbbf24',fontFamily:orb}}>SEE</span>
+                  <IconSVG id={c.kind === 'boost' ? (BOOST_ICON[c.effect_type || ''] || 'lightning') : c.kind === 'hex' ? 'hex_coin' : 'monument'} size={18} />
+                  <span style={{flex:1,minWidth:0,whiteSpace:'nowrap',overflow:'hidden',textOverflow:'ellipsis'}}>{cardTitle(c)}</span>
+                  <span style={{fontSize:10,color:RC[c.rarity],fontFamily:orb}}>{c.kind === 'poi' ? (RL[c.rarity]||'').toUpperCase() : cardKind(c)}</span>
+                  {c.kind === 'poi' && <span style={{fontSize:10,color:'#fbbf24',fontFamily:orb}}>SEE</span>}
                 </button>
               ))}
             </div>

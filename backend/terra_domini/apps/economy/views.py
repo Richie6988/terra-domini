@@ -888,105 +888,73 @@ def _apply_item_effect(player, item, quantity, territory_h3=None):
         pass  # géré dans la vue purchase
 
 
+BOOSTER_RULES = {   # owner 2026-10-19: boosters only give shop boosts, some HEX and (rarer) POIs
+    #               cards  odds (boost, hex, poi)   HEX range       POI rarity weights                      guarantee
+    'booster_standard':  (3, (0.62, 0.33, 0.05), (80, 300),   {'rare': 70, 'epic': 25, 'legendary': 5},   None),
+    'booster_rare':      (4, (0.52, 0.30, 0.18), (200, 700),  {'rare': 50, 'epic': 38, 'legendary': 12}, None),
+    'booster_legendary': (5, (0.40, 0.28, 0.32), (500, 1500), {'epic': 55, 'legendary': 38, 'mythic': 7}, 'poi'),
+}
+BOOSTER_RULES['booster_premium'] = BOOSTER_RULES['booster_rare']        # legacy codes
+BOOSTER_RULES['booster_mythic'] = BOOSTER_RULES['booster_legendary']
+BOOSTER_SKIP_EFFECTS = {'booster_pack', 'border_color', 'resource_multiplier'}
+
+
 def _open_booster_pack(item_code: str, player=None) -> dict:
-    """
-    Tire aléatoirement des territoires POI selon les garanties du pack.
-    Retourne la liste des territoires tirés (pour l'animation d'ouverture).
-    """
+    """Open a booster: each card is a shop boost (applied at once), a HEX amount, or a free POI (rarer, more in the
+    bigger packs). Returns the cards for the opening animation; 'short' when a guaranteed POI could not be found."""
     import random
+    from django.db.models import F
+    from terra_domini.apps.accounts.models import Player
+    from terra_domini.apps.economy.models import ShopItem
+    from terra_domini.apps.events.unified_poi import UnifiedPOI
     from terra_domini.apps.territories.models import Territory
-
-    PACK_ODDS = {
-        'booster_standard': [
-            ('common',    0.55), ('uncommon', 0.30), ('rare', 0.12),
-            ('epic',      0.025), ('legendary',0.005),
-        ],
-        'booster_rare': [
-            ('uncommon',  0.40), ('rare',     0.40), ('epic', 0.17),
-            ('legendary', 0.03),
-        ],
-        'booster_legendary': [
-            ('rare',      0.45), ('epic',     0.40), ('legendary', 0.13),
-            ('mythic',    0.02),
-        ],
-    }
-    PACK_ODDS['booster_premium'] = PACK_ODDS['booster_rare']        # legacy codes
-    PACK_ODDS['booster_mythic'] = PACK_ODDS['booster_legendary']
-    PACK_COUNT = {'booster_standard': 3, 'booster_rare': 4, 'booster_legendary': 5,
-                  'booster_premium': 4, 'booster_mythic': 5}
-    # Guaranteed minimum rarity on the last card (what the shop advertises)
-    PACK_GUARANTEE = {'booster_rare': 'rare', 'booster_legendary': 'legendary',
-                      'booster_premium': 'rare', 'booster_mythic': 'legendary'}
-
-    odds   = PACK_ODDS.get(item_code, PACK_ODDS['booster_standard'])
+    from terra_domini.apps.economy.resources import RESOURCE_SITES
     from terra_domini.apps.economy.balance import boost_mult
-    rare_x = boost_mult(player, 'rare_chance') if player else 1.0   # shop 'Rare Drop Boost'
-    if rare_x > 1:
-        odds = [(r, w * rare_x if r not in ('common', 'uncommon') else w) for r, w in odds]
-    count  = PACK_COUNT.get(item_code, 3)
-    cards  = []
-
-    rarities_pool = [r for r, _ in odds]
-    weights       = [w for _, w in odds]
-
-    order = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
-    rolls = [random.choices(rarities_pool, weights=weights)[0] for _ in range(count)]
-    g = PACK_GUARANTEE.get(item_code)
-    if g and not any(order.index(r) >= order.index(g) for r in rolls):
-        rolls[-1] = g
-    taken = set()
-    # Cards land where they help: commons/uncommons on free hexes touching the kingdom (kingdom bonus),
-    # rarer cards on the nearest free territory of that rarity (landmarks are real places, they can't move).
-    owned, frontier, home = set(), [], None
-    if player is not None:
-        from terra_domini.utils.h3_compat import k_ring
-        rows = list(Territory.objects.filter(owner=player).values_list('h3_index', 'center_lat', 'center_lon'))
-        owned = {h for h, _, _ in rows}
-        pts = [(la, lo) for _, la, lo in rows if la is not None and lo is not None]
-        if pts:
-            home = (sum(p[0] for p in pts) / len(pts), sum(p[1] for p in pts) / len(pts))
-        ring = {n for h in owned for n in k_ring(h, 1)} - owned
-        busy = set(Territory.objects.filter(h3_index__in=list(ring), owner__isnull=False).values_list('h3_index', flat=True))
-        frontier = [h for h in ring if h not in busy]
-        random.shuffle(frontier)
-
-    def _nearest(qs):
-        if home is None:
-            return qs.filter(is_landmark=True).order_by('?').first() or qs.order_by('?').first()
-        lat, lon = home
-        for d in (0.5, 2, 8, 30, 180):
-            cand = list(qs.filter(center_lat__range=(lat - d, lat + d), center_lon__range=(lon - d * 1.5, lon + d * 1.5))[:200])
-            if cand:
-                cand.sort(key=lambda t: (t.center_lat - lat) ** 2 + (t.center_lon - lon) ** 2)
-                return random.choice(cand[:5])
-        return qs.order_by('?').first()
-
-    for rarity in rolls:
-        card = None
-        if rarity in ('common', 'uncommon') and frontier:
-            hx = frontier.pop()
-            try:
-                import h3
-                from terra_domini.apps.territories.territory_engine import generate_territory
-                la, lo = h3.cell_to_latlng(hx)
-                generate_territory(hx, la, lo)
-                card = Territory.objects.filter(h3_index=hx, owner__isnull=True).first()   # keeps its own design (rarity)
-            except Exception:
-                card = None
-        # Only FREE territories (never someone else's); fall back to lower rarities if none left
-        if not card:
-            for r in order[:order.index(rarity) + 1][::-1]:
-                card = _nearest(Territory.objects.filter(rarity=r, owner__isnull=True).exclude(h3_index__in=taken))
-                if card:
-                    break
-        if not card:
+    count, odds, (hlo, hhi), poi_w, guarantee = BOOSTER_RULES.get(item_code, BOOSTER_RULES['booster_standard'])
+    rare_x = boost_mult(player, 'rare_chance') if player else 1.0          # shop 'Rare Drop Boost': more POIs
+    odds = (odds[0], odds[1], odds[2] * rare_x)
+    kinds = random.choices(['boost', 'hex', 'poi'], weights=odds, k=count)
+    if guarantee == 'poi' and 'poi' not in kinds:
+        kinds[-1] = 'poi'
+    boosts = [i for i in ShopItem.objects.filter(is_active=True, effect_type__in=IMPLEMENTED_EFFECTS - BOOSTER_SKIP_EFFECTS)]
+    taken, cards, short = set(), [], False
+    for kind in kinds:
+        if kind == 'poi':
+            # a free real place (landmark / city token, not a deposit or a species), rarity drawn from the pack
+            rarity = random.choices(list(poi_w), weights=list(poi_w.values()))[0]
+            order = ['rare', 'epic', 'legendary', 'mythic']
+            t = None
+            for r in [rarity] + [x for x in reversed(order[:order.index(rarity)])]:
+                hexes = list(UnifiedPOI.objects.filter(is_active=True, rarity=r).exclude(category__startswith='species_')
+                             .exclude(category__in=RESOURCE_SITES).exclude(h3_index__in=taken).values_list('h3_index', flat=True)[:4000])
+                free = set(hexes) - set(Territory.objects.filter(h3_index__in=hexes, owner__isnull=False).values_list('h3_index', flat=True))
+                if free:
+                    h = random.choice(sorted(free))
+                    t = Territory.objects.filter(h3_index=h).first()
+                    if t:
+                        break
+            if not t:
+                if guarantee == 'poi' and not any(c['kind'] == 'poi' for c in cards):
+                    short = True
+                kind = 'hex'
+            else:
+                taken.add(t.h3_index)
+                if player is not None:
+                    t.owner = player; t.captured_at = timezone.now()
+                    t.save(update_fields=['owner', 'captured_at'])
+                poi = UnifiedPOI.objects.filter(h3_index=t.h3_index, is_active=True).values('name', 'category', 'rarity', 'image_url', 'description').first() or {}
+                cards.append({'kind': 'poi', 'h3_index': t.h3_index, 'poi_name': poi.get('name') or t.poi_name, 'category': poi.get('category') or '',
+                              'rarity': poi.get('rarity') or t.rarity, 'image_url': poi.get('image_url') or '',
+                              'description': (poi.get('description') or '')[:200], 'lat': t.center_lat, 'lon': t.center_lon})
+                continue
+        if kind == 'boost' and boosts:
+            item = random.choice(boosts)
+            note = _apply_item_effect(player, item, 1) if player is not None else ''
+            cards.append({'kind': 'boost', 'code': item.code, 'name': item.name, 'effect_type': item.effect_type,
+                          'duration_seconds': item.effect_duration_seconds, 'note': note or item.description[:120], 'rarity': 'uncommon'})
             continue
-        taken.add(card.h3_index)
+        amount = int(round(random.uniform(hlo, hhi) / 10) * 10)
         if player is not None:
-            card.owner = player
-            card.captured_at = timezone.now()
-            card.save(update_fields=['owner', 'captured_at'])
-        cards.append({'h3_index': card.h3_index, 'poi_name': card.poi_name, 'place_name': card.place_name or card.custom_name or '', 'territory_type': card.territory_type,
-                      'biome': card.biome, 'is_shiny': card.is_shiny, 'rarity': card.rarity})
-    met = not g or any(order.index(c['rarity'] or 'common') >= order.index(g) for c in cards)
-    return {'cards': cards, 'count': len(cards), 'short': len(cards) < count or not met}
+            Player.objects.filter(id=player.id).update(tdc_in_game=F('tdc_in_game') + amount)
+        cards.append({'kind': 'hex', 'amount': amount, 'rarity': 'common' if amount < (hlo + hhi) / 2 else 'rare'})
+    return {'cards': cards, 'count': len(cards), 'short': short}

@@ -324,8 +324,8 @@ const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', '
 /**
  * Collectible face, Sorare-grade (owner 2026-10-18: "think Sorare: clean, premium, the picture first").
  * Full-bleed sharp picture; centre: name with a dark outline; 3 bright lines of story; bottom: HEX / day.
- * The wide metal frame is engraved (owner 2026-10-19, v6): pictos on the top-left edge, terrain on the top-right edge,
- * CATEGORY on the left edge, RARITY + ID on the right edge; bottom: main picto + "184 HEX". A dark glass panel sits
+ * The wide metal frame is engraved (owner 2026-10-19, v6): CATEGORY on the left edge, RARITY + ID on the right edge,
+ * upper edges plain; bottom: main picto + "184 HEX". A dark glass panel sits
  * behind the name and the story for contrast. The inner line carries the rarity colour.
  */
 export function drawTokenFront(
@@ -491,29 +491,7 @@ export function drawTokenFront(
   }
   engrave(nice(state.category), -1)
   engrave([RARITY_NAME[rarity] || tier.id, state.tokenNo ? `#${String(state.tokenNo).replace(/^#/, '')}` : ''].filter(Boolean).join('  ·  '), 1)
-  // upper edges: category on the top-right edge, every picto on the top-left edge
-  const rm = rb * Math.cos(Math.PI / 6)                       // centre → edge middle
-  const onEdge = (deg: number, rot: number, draw: () => void) => {
-    const a = deg * Math.PI / 180
-    ctx.save(); ctx.translate(c + rm * Math.cos(a), c + rm * Math.sin(a)); ctx.rotate(rot); draw(); ctx.restore()
-  }
-  const cat = nice(state.terrain || state.biome)      // top-right edge: the terrain
-  if (cat) onEdge(-60, Math.PI / 6, () => {
-    let ef = s * 0.034
-    ctx.font = `900 ${ef}px Orbitron, ${SANS}`; (ctx as any).letterSpacing = `${(s * 0.004).toFixed(1)}px`
-    while (ctx.measureText(cat).width > rb * 0.78 && ef > s * 0.012) { ef -= s * 0.001; ctx.font = `900 ${ef}px Orbitron, ${SANS}` }
-    cutText(cat, 0)
-    ;(ctx as any).letterSpacing = '0px'
-  })
-  const icons = [...new Set((state.pictos && state.pictos.length ? state.pictos : [state.iconSvg]).filter(Boolean) as string[])].slice(0, 4)
-  if (icons.length) onEdge(-120, -Math.PI / 6, () => {
-    const isz = s * 0.056, gap = s * 0.032
-    const total = icons.length * isz + (icons.length - 1) * gap
-    icons.forEach((svg, k) => {
-      ctx.save(); ctx.translate(-total / 2 + isz / 2 + k * (isz + gap), -isz * 0.22); ctx.rotate(Math.PI / 6)   // upright, centred in the band (outline + bevel weigh low)
-      engravedIcon(ctx, svg, isz); ctx.restore()
-    })
-  })
+  // upper edges stay plain metal (owner 2026-10-19: no terrain, no engraved icons on the borders)
 }
 
 // ══════════════════════════════════════════════════════════════════

@@ -33,11 +33,11 @@ const CATS = [
 // ═══ SHOP CATALOG — ported from main_prototype.html ═══
 const BOOSTERS = [
   { id:'booster_standard',  name:'STANDARD BOOSTER', icon:'box', price:200,  color:'#0099cc',
-    desc:'3 free territories\nCommon to Rare\nSmall Epic/Legendary chance', code:'booster_standard' },
+    desc:'3 cards: boosts & HEX\nSmall POI chance', code:'booster_standard' },
   { id:'booster_rare',      name:'RARE BOOSTER',     icon:'heart_purple', price:500,  color:'#8b5cf6',
-    desc:'4 free territories\n1 Rare or better guaranteed', code:'booster_rare' },
+    desc:'4 cards · more HEX\nBetter POI chance', code:'booster_rare' },
   { id:'booster_legendary', name:'LEGENDARY BOOSTER', icon:'crown', price:1200, color:'#cc8800',
-    desc:'5 free territories\n1 Legendary guaranteed', code:'booster_legendary' },
+    desc:'5 cards · 1 POI guaranteed\nBig HEX, rare places', code:'booster_legendary' },
 ]
 
 // Icons per server item code (catalog = /api/shop/catalog/, seeded by `manage.py seed_shop`)
