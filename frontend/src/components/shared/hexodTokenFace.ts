@@ -278,8 +278,9 @@ const issuedLabel = (d?: string) => {
 
 /**
  * Collectible face, Sorare-grade (owner 2026-10-18: "think Sorare: clean, premium, the picture first").
- * Full-bleed sharp picture; a discreet top pill (rarity · tier · number); at the bottom a clean title block:
- * big name, category · country with the token's pictos, 2 lines of story, 3 quiet stats, issue line.
+ * Full-bleed sharp picture; top: category icon + name (ring = rarity colour); centre: name with a dark outline;
+ * 3 bright lines of story; bottom: HEX / day. The wide metal frame is engraved: terrain on the left edge,
+ * edition + issue date on the right edge (owner 2026-10-19).
  */
 export function drawTokenFront(
   ctx: CanvasRenderingContext2D,
@@ -320,9 +321,9 @@ export function drawTokenFront(
   const top = ctx.createLinearGradient(0, 0, 0, s * 0.22)
   top.addColorStop(0, 'rgba(0,0,0,0.55)'); top.addColorStop(1, 'rgba(0,0,0,0)')
   ctx.fillStyle = top; ctx.fillRect(0, 0, s, s * 0.22)
-  const bot = ctx.createLinearGradient(0, s * 0.42, 0, s)
-  bot.addColorStop(0, 'rgba(4,6,12,0)'); bot.addColorStop(0.35, 'rgba(4,6,12,0.78)'); bot.addColorStop(0.6, 'rgba(4,6,12,0.95)'); bot.addColorStop(1, '#04060c')
-  ctx.fillStyle = bot; ctx.fillRect(0, s * 0.42, s, s * 0.58)
+  const bot = ctx.createLinearGradient(0, s * 0.46, 0, s)
+  bot.addColorStop(0, 'rgba(4,6,12,0)'); bot.addColorStop(0.3, 'rgba(4,6,12,0.72)'); bot.addColorStop(0.55, 'rgba(4,6,12,0.92)'); bot.addColorStop(1, '#04060c')
+  ctx.fillStyle = bot; ctx.fillRect(0, s * 0.46, s, s * 0.54)
 
   // ── Gloss: one slow diagonal sheen; a faint prism only on rare+ ──
   const sx = (anim.shineOffset % (s * 2)) - s * 0.5
@@ -338,29 +339,34 @@ export function drawTokenFront(
   }
   ctx.restore()
 
-  // ── Top pill: RARITY · tier letter · No ──
-  const pillTxt = [nice(rarity || 'common'), tier.id[0], state.tokenNo ? `No ${state.tokenNo}` : ''].filter(Boolean).join('  ·  ')
-  let pf = s * 0.024
+  // ── Top: category icon + category name (owner 2026-10-19) — the pill's ring carries the rarity colour ──
+  const catTxt = nice(state.category) || 'TERRITORY'
+  let pf = s * 0.028
   ctx.font = `800 ${pf}px Orbitron, ${SANS}`
   ;(ctx as any).letterSpacing = `${(s * 0.003).toFixed(1)}px`
-  while (ctx.measureText(pillTxt).width > s * 0.36 && pf > s * 0.014) { pf -= s * 0.001; ctx.font = `800 ${pf}px Orbitron, ${SANS}` }
-  const pw = ctx.measureText(pillTxt).width + s * 0.06, ph = s * 0.05, py = s * 0.165   // inside the hex's narrow top
+  while (ctx.measureText(catTxt).width > s * 0.34 && pf > s * 0.016) { pf -= s * 0.001; ctx.font = `800 ${pf}px Orbitron, ${SANS}` }
+  const ico = s * 0.05, hasIco = !!state.iconSvg
+  const tw = ctx.measureText(catTxt).width
+  const pw = tw + s * 0.06 + (hasIco ? ico + s * 0.012 : 0), ph = s * 0.064, py = s * 0.17   // inside the hex's narrow top
   ctx.beginPath(); ctx.roundRect(c - pw / 2, py - ph / 2, pw, ph, ph / 2)
-  ctx.fillStyle = 'rgba(6,8,16,0.72)'; ctx.fill(); ctx.lineWidth = s * 0.003; ctx.strokeStyle = rc; ctx.stroke()
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = rc; ctx.fillText(pillTxt, c, py + s * 0.002)
+  ctx.fillStyle = 'rgba(4,6,14,0.82)'; ctx.fill(); ctx.lineWidth = s * 0.004; ctx.strokeStyle = rc; ctx.stroke()
+  const x0 = c - pw / 2 + s * 0.03
+  if (hasIco) drawSVGIcon(ctx, x0 + ico / 2, py, ico, state.iconSvg!, state.catColor || rc, tier.metal)
+  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#ffffff'
+  ctx.fillText(catTxt, x0 + (hasIco ? ico + s * 0.012 : 0), py + s * 0.002)
   ;(ctx as any).letterSpacing = '0px'
 
-  // ── Title block ──
+  // ── Title: a bit smaller, white with a dark outline so it reads on any photo ──
   const name = (state.tokenName || '').toUpperCase()
-  const maxW = s * 0.74
-  let fs = s * 0.072
+  const maxW = s * 0.7
+  let fs = s * 0.06
   ctx.font = `900 ${fs}px ${SANS}`
   let lines = [name]
   if (ctx.measureText(name).width > maxW) {
     const words = name.split(/\s+/)
     let best = [name], bestW = Infinity
-    for (let i = 1; i < words.length; i++) {
-      const l = [words.slice(0, i).join(' '), words.slice(i).join(' ')]
+    for (let k = 1; k < words.length; k++) {
+      const l = [words.slice(0, k).join(' '), words.slice(k).join(' ')]
       const w = Math.max(...l.map(t => ctx.measureText(t).width))
       if (w < bestW) { best = l; bestW = w }
     }
@@ -368,57 +374,47 @@ export function drawTokenFront(
     const w = Math.max(...lines.map(t => ctx.measureText(t).width))
     if (w > maxW) fs = fs * maxW / w
   }
-  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-  ctx.shadowColor = 'rgba(0,0,0,0.8)'; ctx.shadowBlur = s * 0.02; ctx.fillStyle = '#ffffff'; ctx.font = `900 ${fs}px ${SANS}`
-  const nameY = s * (lines.length > 1 ? 0.5 : 0.545)
-  lines.forEach((l, i) => ctx.fillText(l, c, nameY + i * fs * 1.0))
+  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'
+  ctx.font = `900 ${fs}px ${SANS}`
+  const nameY = s * (lines.length > 1 ? 0.56 : 0.6)
+  lines.forEach((l, k) => {
+    const y = nameY + k * fs * 1.02
+    ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = s * 0.018
+    ctx.lineWidth = fs * 0.2; ctx.strokeStyle = 'rgba(0,0,0,0.95)'; ctx.strokeText(l, c, y)
+    ctx.shadowBlur = 0; ctx.fillStyle = '#ffffff'; ctx.fillText(l, c, y)
+  })
   ctx.restore()
 
-  // category · country, with the token's own pictos
-  const sub = [nice(state.category), nice(state.country)].filter(Boolean).join('  ·  ')
-  const pictos = (state.pictos || []).filter(Boolean).slice(0, 3)
-  const subY = s * 0.6
-  ctx.font = `800 ${s * 0.022}px ${SANS}`; (ctx as any).letterSpacing = `${(s * 0.003).toFixed(1)}px`
-  const subW = ctx.measureText(sub).width, ps = s * 0.034, picW = pictos.length ? pictos.length * (ps + s * 0.008) + s * 0.014 : 0
-  const sx0 = c - (subW + picW) / 2
-  pictos.forEach((svg, i) => drawSVGIcon(ctx, sx0 + ps / 2 + i * (ps + s * 0.008), subY, ps, svg, state.catColor || rc, tier.metal))
-  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = rc; ctx.fillText(sub, sx0 + picW, subY)
-  ;(ctx as any).letterSpacing = '0px'
-
-  // story: 2 lines
+  // ── Story: bigger, bright, 3 lines on the dark band ──
   if (state.description) {
-    ctx.font = `600 ${s * 0.022}px ${SANS}`; ctx.textAlign = 'center'; ctx.fillStyle = 'rgba(226,232,240,0.86)'
+    const dfs = s * 0.031
+    ctx.font = `700 ${dfs}px ${SANS}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
     const dw = s * 0.7, words = state.description.split(/\s+/), dl: string[] = []
     let cur = ''
     for (const w of words) {
       const t = cur ? `${cur} ${w}` : w
-      if (ctx.measureText(t).width > dw && cur) { dl.push(cur); cur = w; if (dl.length === 2) break } else cur = t
+      if (ctx.measureText(t).width > dw && cur) { dl.push(cur); cur = w; if (dl.length === 3) break } else cur = t
     }
-    if (dl.length < 2 && cur) dl.push(cur)
-    if (dl.length === 2 && words.join(' ').length > dl.join(' ').length + 1) dl[1] = dl[1].replace(/\s+\S*$/, '') + '…'
-    dl.forEach((l, i) => ctx.fillText(l, c, s * (0.645 + i * 0.03)))
+    if (dl.length < 3 && cur) dl.push(cur)
+    if (dl.length === 3 && words.join(' ').length > dl.join(' ').length + 1) dl[2] = dl[2].replace(/\s+\S*$/, '') + '…'
+    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = s * 0.006; ctx.fillStyle = '#f8fafc'
+    const y0 = nameY + (lines.length - 1) * fs * 1.02 + fs * 0.62 + dfs * 0.9
+    dl.forEach((l, k) => ctx.fillText(l, c, y0 + k * dfs * 1.3))
+    ctx.restore()
   }
 
-  // quiet stats
-  ctx.strokeStyle = 'rgba(255,255,255,0.14)'; ctx.lineWidth = s * 0.0025
-  ctx.beginPath(); ctx.moveTo(c - s * 0.3, s * 0.698); ctx.lineTo(c + s * 0.3, s * 0.698); ctx.stroke()
-  const stats: [string, string][] = [
-    [state.hexPerDay ? `+${Math.round(state.hexPerDay).toLocaleString()}` : '—', 'HEX / DAY'],
-    [nice(state.terrain || state.biome) || '—', 'TERRAIN'],
-    [nice(state.edition) || 'GENESIS', issuedLabel(state.date) || 'EDITION'],
-  ]
-  stats.forEach(([v, l], i) => {
-    const x = c + (i - 1) * s * 0.22
-    ctx.textAlign = 'center'; ctx.fillStyle = i === 0 ? '#fcd34d' : '#f1f5f9'; ctx.font = `900 ${s * 0.03}px ${SANS}`
-    let fz = s * 0.03
-    while (ctx.measureText(v).width > s * 0.2 && fz > s * 0.016) { fz -= s * 0.002; ctx.font = `900 ${fz}px ${SANS}` }
-    ctx.fillText(v, x, s * 0.735)
-    ctx.font = `700 ${s * 0.015}px ${SANS}`; ctx.fillStyle = 'rgba(203,213,225,0.7)'; ctx.fillText(l, x, s * 0.765)
-  })
-  if (state.cellId) {
-    ctx.font = `600 ${s * 0.015}px "Roboto Mono", monospace`; ctx.fillStyle = 'rgba(203,213,225,0.45)'; ctx.textAlign = 'center'
-    ctx.fillText(`CELL ${state.cellId}`, c, s * 0.81)
-  }
+  // ── Bottom: HEX / day ──
+  const hv = state.hexPerDay ? `+${Math.round(state.hexPerDay).toLocaleString()}` : '—'
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+  ctx.font = `900 ${s * 0.05}px ${SANS}`
+  const hvW = ctx.measureText(hv).width
+  ctx.font = `800 ${s * 0.02}px Orbitron, ${SANS}`
+  const unitW = ctx.measureText('HEX / DAY').width
+  const gx = c - (hvW + s * 0.014 + unitW) / 2, hy = s * 0.845
+  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = s * 0.01
+  ctx.textAlign = 'left'; ctx.font = `900 ${s * 0.05}px ${SANS}`; ctx.fillStyle = '#fcd34d'; ctx.fillText(hv, gx, hy)
+  ctx.font = `800 ${s * 0.02}px Orbitron, ${SANS}`; ctx.fillStyle = 'rgba(253,230,138,0.85)'; ctx.fillText('HEX / DAY', gx + hvW + s * 0.014, hy + s * 0.006)
+  ctx.restore()
 
   if (opts.enableFilmGrain !== false) {
     ctx.save(); ctx.globalAlpha = 0.01
@@ -426,12 +422,28 @@ export function drawTokenFront(
     ctx.restore()
   }
 
-  // ── Frame: polished tier metal + a fine rarity line ──
+  // ── Frame: wide polished tier metal, engraved (owner 2026-10-19): terrain on the left edge, edition + date on the right ──
   const metal = ctx.createLinearGradient(0, 0, s, s)
   metal.addColorStop(0, '#ffffff'); metal.addColorStop(0.2, tier.metal); metal.addColorStop(0.5, tier.engrave_metal)
   metal.addColorStop(0.8, tier.metal); metal.addColorStop(1, '#ffffff')
-  ctx.strokeStyle = metal; ctx.lineWidth = s * 0.022; drawHex(ctx, c, c, s * 0.49); ctx.stroke()
-  ctx.strokeStyle = rc; ctx.lineWidth = s * 0.004; drawHex(ctx, c, c, s * 0.471); ctx.stroke()
+  const band = s * 0.06, rb = s * 0.5 - band / 2 - s * 0.002
+  ctx.strokeStyle = metal; ctx.lineWidth = band; ctx.lineJoin = 'miter'; drawHex(ctx, c, c, rb); ctx.stroke()
+  ctx.strokeStyle = 'rgba(0,0,0,0.45)'; ctx.lineWidth = s * 0.003; drawHex(ctx, c, c, rb - band / 2); ctx.stroke()
+  ctx.strokeStyle = rc; ctx.lineWidth = s * 0.005; drawHex(ctx, c, c, rb - band / 2 - s * 0.006); ctx.stroke()
+  const engrave = (text: string, side: -1 | 1) => {
+    if (!text) return
+    const x = c + side * rb * Math.cos(Math.PI / 6)          // middle of the vertical edge's band
+    ctx.save(); ctx.translate(x, c); ctx.rotate(side * Math.PI / 2)
+    let ef = s * 0.034
+    ctx.font = `900 ${ef}px Orbitron, ${SANS}`; (ctx as any).letterSpacing = `${(s * 0.004).toFixed(1)}px`
+    while (ctx.measureText(text).width > rb * 0.9 && ef > s * 0.012) { ef -= s * 0.001; ctx.font = `900 ${ef}px Orbitron, ${SANS}` }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fillText(text, 0, s * 0.0022)    // bevel light
+    ctx.fillStyle = 'rgba(28,16,2,0.92)'; ctx.fillText(text, 0, 0)                  // cut into the metal
+    ;(ctx as any).letterSpacing = '0px'; ctx.restore()
+  }
+  engrave(nice(state.terrain || state.biome), -1)
+  engrave([nice(state.edition) || 'GENESIS', issuedLabel(state.date)].filter(Boolean).join('  ·  '), 1)
 }
 
 // ══════════════════════════════════════════════════════════════════
