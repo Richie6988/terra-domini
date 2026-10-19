@@ -4,6 +4,8 @@ Token data from open reference databases, category by category — run on the VP
   python3 scripts/fetch_external.py wikidata     # places + history events → sources/candidates/wikidata.csv
   python3 scripts/fetch_external.py inat         # creature photos (iNaturalist, CC licences) → sources/creature_photos.csv
   python3 scripts/fetch_external.py pbdb         # fossil sites of extinct creatures (Paleobiology DB) → sources/fossil_sites.csv
+  python3 scripts/fetch_external.py places       # where each living species is really seen (iNaturalist research-grade
+                                                 #   sightings) → sources/creature_places.csv — the world safari hides it there
   python3 scripts/fetch_external.py all
 
 - Wikidata: one SPARQL query per category (volcanoes, waterfalls, castles, stadiums, battles, earthquakes…), only
@@ -175,6 +177,52 @@ def pbdb():
         time.sleep(1)
 
 
+def places():
+    """Up to 12 well-spread real sightings per living species (iNaturalist, research grade, rounded to 0.01°)."""
+    import math
+    f = SRC / 'creature_places.csv'
+    cache = _cache(f, 'uid')
+    photos = _cache(SRC / 'creature_photos.csv', 'uid')
+    fields = ['uid', 'name', 'inat_taxon_id', 'places', 'fetched_at']
+    todo = [c for c in _creatures() if c.get('codex_category') != 'fossil' and c['uid'] not in cache]
+    print(f'places: {len(todo)} species to look up ({len(cache)} cached)')
+    for i, c in enumerate(todo, 1):
+        tid = (photos.get(c['uid']) or {}).get('inat_taxon_id', '')
+        if not tid:
+            name = (unquote(c.get('wiki_url', '').rsplit('/', 1)[-1]).replace('_', ' ') or c['name']).split('(')[0].strip()
+            d = get_json('https://api.inaturalist.org/v1/taxa', {'q': name, 'per_page': 1, 'is_active': 'true'})
+            t = ((d or {}).get('results') or [None])[0]
+            tid = t['id'] if t and t.get('name', '').lower() == name.lower() else ''
+            time.sleep(1)
+        pts = []
+        if tid:
+            d = get_json('https://api.inaturalist.org/v1/observations', {'taxon_id': tid, 'quality_grade': 'research',
+                                                                        'geo': 'true', 'per_page': 100, 'order_by': 'votes'})
+            seen = set()
+            for o in (d or {}).get('results') or []:
+                gj = o.get('geojson') or {}
+                if gj.get('type') == 'Point' and not o.get('obscured'):
+                    lon, lat = gj['coordinates'][:2]
+                    k = (round(lat, 2), round(lon, 2))
+                    if k not in seen:
+                        seen.add(k); pts.append(k)
+            spread = pts[:1]                     # greedy: keep the points farthest from those already kept
+            while pts and len(spread) < 12:
+                best = max(pts, key=lambda p: min(math.hypot(p[0] - q[0], p[1] - q[1]) for q in spread))
+                if best in spread:
+                    break
+                spread.append(best)
+            pts = spread
+        cache[c['uid']] = {'uid': c['uid'], 'name': c['name'], 'inat_taxon_id': tid, 'places': json.dumps(pts), 'fetched_at': TODAY}
+        if i % 50 == 0 or i == len(todo):
+            with open(f, 'w', newline='', encoding='utf-8') as fh:
+                w = csv.DictWriter(fh, fieldnames=fields); w.writeheader()
+                for r in cache.values():
+                    w.writerow({k: r.get(k, '') for k in fields})
+            print(f'  {i}/{len(todo)} · with places {sum(1 for r in cache.values() if r.get("places", "[]") != "[]")}')
+        time.sleep(1)
+
+
 if __name__ == '__main__':
     what = (sys.argv[1:] or ['all'])[0]
     if what in ('wikidata', 'all'):
@@ -183,3 +231,5 @@ if __name__ == '__main__':
         inat()
     if what in ('pbdb', 'all'):
         pbdb()
+    if what in ('places', 'all'):
+        places()

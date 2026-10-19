@@ -34,8 +34,20 @@ const RING_LABEL = ['FOUND', 'VERY HOT', 'WARM', 'COLD', 'FREEZING']
 
 interface Target {
   creature_name: string; creature_category: string; creature_description: string; creature_wiki_url: string
-  rarity: string; hex_reward: number; status: string; tries_left: number
-  probes: { h3: string; ring: number }[]; grid: { h3: string; i: number; j: number }[]; center_h3: string; target_h3?: string
+  id: string; rarity: string; hex_reward: number; status: string; tries_left: number
+  probes: { h3?: string; ring?: number; km?: number; band?: string; bearing?: number }[]; grid: { h3: string; i: number; j: number }[]
+  center_h3: string; target_h3?: string
+  mode?: 'world' | 'local'; hint?: string; clue_lat?: number; clue_lon?: number; capture_km?: number
+}
+export const BAND: Record<string, { label: string; color: string }> = {
+  freezing: { label: 'FREEZING', color: '#64748b' }, cold: { label: 'COLD', color: '#38bdf8' }, warm: { label: 'WARM', color: '#f59e0b' },
+  hot: { label: 'HOT', color: '#f97316' }, burning: { label: 'BURNING', color: '#ef4444' }, here: { label: 'IT IS HERE', color: '#22c55e' },
+}
+/** World hunt: close the panel, fly to the clue's region and open the radar. */
+export function openRadarHunt(t: { clue_lat?: number; clue_lon?: number }) {
+  useStore.getState().setActivePanel(null)
+  if (t.clue_lat != null) window.dispatchEvent(new CustomEvent('terra:flyto', { detail: { lat: t.clue_lat, lon: t.clue_lon, zoom: 6 } }))
+  window.dispatchEvent(new CustomEvent('hx:radar-open'))
 }
 
 function HuntGrid({ t, onProbe, busy }: { t: Target; onProbe: (h3: string) => void; busy: boolean }) {
@@ -90,7 +102,7 @@ export function DailyHuntPanel({ onClose }: Props) {
   })
   // A hunt from the old GPS version has no hunting ground: drop it instead of crashing
   const raw = data?.target || null
-  const legacy = !!raw && !(Array.isArray(raw.grid) && raw.grid.length)
+  const legacy = !!raw && raw.mode !== 'world' && !(Array.isArray(raw.grid) && raw.grid.length)
   useEffect(() => {
     if (legacy) api.post('/safari/abandon/').finally(() => qc.setQueryData(['safari-active'], { target: null }))
   }, [legacy])
@@ -99,7 +111,10 @@ export function DailyHuntPanel({ onClose }: Props) {
 
   const spawn = useMutation({
     mutationFn: () => api.post('/safari/spawn/', { lat: center?.[0], lon: center?.[1] }).then(r => r.data),
-    onSuccess: d => { playSound('explore'); setLast(null); toast.success(d.message); qc.setQueryData(['safari-active'], { target: d.target }) },
+    onSuccess: d => {
+      playSound('explore'); setLast(null); toast.success(d.message); qc.setQueryData(['safari-active'], { target: d.target })
+      if (d.target?.mode === 'world') openRadarHunt(d.target)    // straight to the radar, in the clue's region
+    },
     onError: (e: any) => toast.error(e?.response?.data?.error
       || (e?.response?.status >= 500 ? 'Safari is unavailable on the server (update pending?) — try again later' : 'Could not start a hunt')),
   })
@@ -124,7 +139,7 @@ export function DailyHuntPanel({ onClose }: Props) {
 
   return (
     <GlassPanel title="SAFARI" onClose={onClose} accent="#f97316" width={480}
-      icon={<IconSVG id="safari_radar" size={24} />} subtitle="Find real creatures near your land · 5 hunts a day">
+      icon={<IconSVG id="safari_radar" size={24} />} subtitle="Find real creatures where they live · 5 hunts a day">
       {isLoading && <div className="hx-skeleton" style={{ height: 260, borderRadius: 16 }} />}
 
       {!isLoading && !t && (
@@ -135,8 +150,9 @@ export function DailyHuntPanel({ onClose }: Props) {
             </div>
             <div style={{ fontFamily: 'var(--font-heading)', fontSize: 18, color: '#fff' }}>4,401 REAL SPECIES TO COLLECT</div>
             <div style={{ fontSize: 13, color: 'var(--hx-text-2)', marginTop: 6, lineHeight: 1.45 }}>
-              Animals, dinosaurs, insects, plants, fungi and microbes. One hides around your territory:
-              scan the hexes — each miss says how many rings away it is. 4 scans to find it.
+              Animals, dinosaurs, insects, plants, fungi and microbes, each where it really lives on Earth.
+              You get a clue, then scan with the radar from the map centre: direction and distance, hotter and hotter.
+              Close enough? Catch it — its token goes into your album.
             </div>
           </div>
           <button onClick={() => spawn.mutate()} disabled={spawn.isPending} className="btn-game btn-game-gold" style={{ width: '100%', fontSize: 15, minHeight: 52 }}>
@@ -146,7 +162,7 @@ export function DailyHuntPanel({ onClose }: Props) {
       )}
 
       {t && (
-        <motion.div key={t.center_h3 + t.status} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
+        <motion.div key={(t.center_h3 || t.id) + t.status} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }}>
           <div className="hx-card" style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12, borderColor: col,
             background: `linear-gradient(160deg, ${col}30, transparent 70%)` }}>
             <span style={{ width: 54, height: 54, borderRadius: 14, display: 'grid', placeItems: 'center', background: `${col}2a`, border: `3px solid ${col}`, flexShrink: 0 }}>
@@ -164,9 +180,21 @@ export function DailyHuntPanel({ onClose }: Props) {
             </div>
           </div>
 
-          <HuntGrid t={t} onProbe={h => probe.mutate(h)} busy={probe.isPending} />
+          {t.mode === 'world' ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <div className="hx-card" style={{ textTransform: 'none', letterSpacing: 0, fontSize: 14, color: '#fde68a', fontWeight: 800 }}>{t.hint}</div>
+              {(t.probes || []).slice(-5).reverse().map((p, k) => (
+                <div key={k} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, color: 'var(--hx-text-2)' }}>
+                  <span className="hx-chip" style={{ color: BAND[p.band || 'cold']?.color }}>{BAND[p.band || 'cold']?.label}</span>
+                  <span style={{ fontFamily: 'var(--font-mono)' }}>{p.km?.toLocaleString()} km</span>
+                </div>
+              ))}
+              {!revealed && <button className="btn-game btn-game-gold" style={{ width: '100%', minHeight: 48, fontSize: 14 }} onClick={() => openRadarHunt(t)}>
+                HUNT WITH THE RADAR · {t.tries_left} SCANS</button>}
+            </div>
+          ) : <HuntGrid t={t} onProbe={h => probe.mutate(h)} busy={probe.isPending} />}
 
-          {!revealed && (
+          {!revealed && t.mode !== 'world' && (
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 12, gap: 10 }}>
               <span className="hx-chip">{t.tries_left} SCAN{t.tries_left > 1 ? 'S' : ''} LEFT</span>
               <span style={{ fontSize: 12, color: 'var(--hx-text-2)', textTransform: 'none' }}>Numbers = rings away from it</span>

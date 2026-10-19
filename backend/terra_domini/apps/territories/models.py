@@ -596,6 +596,9 @@ class SafariTarget(models.Model):
     tries_left = models.IntegerField(default=4)
     probes = models.JSONField(default=list, blank=True)           # [{h3, ring}]
     hint = models.TextField(blank=True)
+    # 'world': the species hides where it really lives (iNaturalist / fossil sites), found with the radar;
+    # 'local': fallback when no place is known yet — one of the 19 hexes around the player's land
+    mode = models.CharField(max_length=8, default='local')
     status = models.CharField(max_length=12, default='active', choices=[
         ('active', 'Active'), ('captured', 'Captured'), ('expired', 'Expired'),
     ])
@@ -609,6 +612,29 @@ class SafariTarget(models.Model):
 
     GRID_K = 2          # hunting ground = centre + 2 rings = 19 real hexes
     TRIES = 4
+    WORLD_SCANS = 8     # radar scans in a world hunt
+    CAPTURE_KM = 2.5    # world hunt: the map centre must be this close to the creature to catch it
+
+    @classmethod
+    def spawn_world(cls, player):
+        """The species hides in a real hex of its range (iNaturalist research-grade sightings, fossil sites).
+        Clue = the region of that place; the radar does the rest. None when no species has a known place yet."""
+        import random, h3
+        from terra_domini.apps.events.hexod_db import pick_creature, CAPTURE_REWARD
+        from terra_domini.apps.economy.resources import biome_for
+        real = pick_creature(with_places=True)
+        if not real:
+            return None
+        lat, lon = random.choice(real['places'])[:2]
+        cell = h3.latlng_to_cell(lat, lon, 8)
+        tlat, tlon = h3.cell_to_latlng(cell)
+        b = biome_for(round(lat, 3), round(lon, 3))
+        clue = f"Seen in the {b['name']}" + (f" ({b['continent']})" if b.get('continent') else '') if b else 'Seen somewhere on Earth'
+        return cls.objects.create(
+            player=player, creature_id=real['uid'][:30], creature_name=real['name'][:100], rarity=real['rarity'],
+            hex_reward=CAPTURE_REWARD.get(real['rarity'], 50), target_lat=tlat, target_lon=tlon, target_h3=cell,
+            center_h3='', mode='world', tries_left=cls.WORLD_SCANS, probes=[], hint=clue,
+        )
 
     @classmethod
     def spawn_for_player(cls, player, base_lat=None, base_lon=None):

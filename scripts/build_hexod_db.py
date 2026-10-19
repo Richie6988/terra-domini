@@ -786,8 +786,8 @@ def main():
             near = Counter(x['codex_category'] for x in creatures[max(0, i - 15):i + 16] if x['codex_category'])
             c['codex_category'] = near.most_common(1)[0][0] if near else 'animal'
     # Open databases (scripts/fetch_external.py, run on the VPS): iNaturalist photo when Wikipedia has none, fossil sites
-    photos, fossils = {}, {}
-    for fname, store in (('creature_photos.csv', photos), ('fossil_sites.csv', fossils)):
+    photos, fossils, sightings = {}, {}, {}
+    for fname, store in (('creature_photos.csv', photos), ('fossil_sites.csv', fossils), ('creature_places.csv', sightings)):
         if (SRC / fname).exists():
             with open(SRC / fname, newline='', encoding='utf-8') as fh:
                 store.update({r['uid']: r for r in csv.DictReader(fh)})
@@ -799,6 +799,10 @@ def main():
         if fo and int(fo.get('occurrences') or 0):
             c['fossil_count'] = int(fo['occurrences'])
             c['fossil_sites'] = json.loads(fo.get('sites') or '[]')
+        # Where the world safari hides it: real sightings (iNaturalist) or, for extinct species, fossil sites
+        pl = json.loads((sightings.get(c['uid']) or {}).get('places') or '[]') or c.get('fossil_sites') or []
+        if pl:
+            c['places'] = pl[:12]
     for c in creatures:   # Wikipedia picture for the Safari / Codex card (beats iNaturalist)
         w = wiki.get(wiki_title(c.get('wiki_url')))
         if w and str(w.get('exists')) == '1' and w.get('image_url'):

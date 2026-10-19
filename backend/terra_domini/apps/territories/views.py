@@ -1220,6 +1220,12 @@ def _creature_info(uid):
 SAFARI_HUNTS_PER_DAY = 5
 
 
+def _km(lat1, lon1, lat2, lon2) -> float:
+    r = math.radians
+    a = math.sin(r(lat2 - lat1) / 2) ** 2 + math.cos(r(lat1)) * math.cos(r(lat2)) * math.sin(r(lon2 - lon1) / 2) ** 2
+    return 6371.0 * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
 def _target_payload(target, reveal=False):
     d = {
         'id': str(target.id), 'creature_id': target.creature_id, 'creature_name': target.creature_name,
@@ -1227,7 +1233,13 @@ def _target_payload(target, reveal=False):
         'hint': target.hint, 'status': target.status, 'assigned_at': target.assigned_at.isoformat(),
         'center_h3': target.center_h3, 'tries_left': target.tries_left, 'probes': target.probes,
         'grid': target.grid() if target.center_h3 else [],
+        'mode': getattr(target, 'mode', 'local') or 'local', 'capture_km': SafariTarget.CAPTURE_KM,
     }
+    if d['mode'] == 'world':   # where to start looking: the centre of the clue's region (never the hiding hex)
+        from terra_domini.apps.economy.resources import biome_for
+        b = biome_for(round(target.target_lat, 3), round(target.target_lon, 3))
+        if b:
+            d['clue_lat'], d['clue_lon'] = (b['lat_min'] + b['lat_max']) / 2, (b['lon_min'] + b['lon_max']) / 2
     if reveal:
         d['target_h3'] = target.target_h3
     return d
@@ -1242,7 +1254,7 @@ class SafariViewSet(viewsets.GenericViewSet):
         target = SafariTarget.objects.filter(
             player=request.user, status='active'
         ).first()
-        if target and not target.center_h3:   # hunt from the old GPS version: no hunting ground → expire it
+        if target and not target.center_h3 and target.mode != 'world':   # old GPS version: no hunting ground → expire it
             target.status = 'expired'; target.save(update_fields=['status'])
             target = None
         if not target:
@@ -1266,8 +1278,8 @@ class SafariViewSet(viewsets.GenericViewSet):
         lat = float(request.data.get('lat', 48.8566))
         lon = float(request.data.get('lon', 2.3522))
 
-        try:
-            target = SafariTarget.spawn_for_player(request.user, base_lat=lat, base_lon=lon)
+        try:   # world hunt (the species where it really lives) when sightings are known, else around your land
+            target = SafariTarget.spawn_world(request.user) or SafariTarget.spawn_for_player(request.user, base_lat=lat, base_lon=lon)
         except Exception as e:   # e.g. migrations not applied on this server (safari grid columns missing)
             import logging
             logging.getLogger('terra_domini.safari').exception('safari spawn failed')
@@ -1275,8 +1287,40 @@ class SafariViewSet(viewsets.GenericViewSet):
         if use_charge(request.user, 'safari_hints'):   # shop 'Safari Hints': +2 scans
             target.tries_left += 2
             target.save(update_fields=['tries_left'])
-        return Response({'target': _target_payload(target),
-                         'message': f'{target.creature_name} is hiding near your territory! {target.tries_left} scans.'})
+        msg = (f'{target.creature_name}: {target.hint}. Use the radar — {target.tries_left} scans.' if target.mode == 'world'
+               else f'{target.creature_name} is hiding near your territory! {target.tries_left} scans.')
+        return Response({'target': _target_payload(target), 'message': msg})
+
+    @action(detail=False, methods=['POST'], url_path='scan')
+    def radar_scan(self, request):
+        """POST /api/safari/scan/ {lat, lon} — world hunt: one radar ping from the map centre → distance band, km and
+        bearing to the creature. Within CAPTURE_KM the radar says it is here (catch it with /safari/probe/ {lat, lon})."""
+        from django.db import transaction
+        try:
+            lat, lon = float(request.data['lat']), float(request.data['lon'])
+        except (KeyError, TypeError, ValueError):
+            return Response({'error': 'lat, lon required'}, status=400)
+        with transaction.atomic():
+            t = SafariTarget.objects.select_for_update().filter(player=request.user, status='active', mode='world').first()
+            if not t:
+                return Response({'error': 'No radar hunt running'}, status=404)
+            if t.tries_left <= 0:
+                return Response({'error': 'No scans left'}, status=400)
+            km = _km(lat, lon, t.target_lat, t.target_lon)
+            band = ('here' if km <= SafariTarget.CAPTURE_KM else 'burning' if km <= 20 else 'hot' if km <= 100
+                    else 'warm' if km <= 500 else 'cold' if km <= 2000 else 'freezing')
+            y = math.sin(math.radians(t.target_lon - lon)) * math.cos(math.radians(t.target_lat))
+            x = (math.cos(math.radians(lat)) * math.sin(math.radians(t.target_lat))
+                 - math.sin(math.radians(lat)) * math.cos(math.radians(t.target_lat)) * math.cos(math.radians(t.target_lon - lon)))
+            bearing = (math.degrees(math.atan2(y, x)) + 360) % 360
+            if band != 'here':
+                t.tries_left -= 1
+            t.probes = t.probes + [{'lat': round(lat, 4), 'lon': round(lon, 4), 'km': round(km, 1), 'band': band, 'bearing': round(bearing)}]
+            if t.tries_left <= 0 and band != 'here':
+                t.status = 'expired'
+            t.save(update_fields=['tries_left', 'probes', 'status'])
+        return Response({'band': band, 'km': round(km, 1), 'bearing': round(bearing), 'scans_left': t.tries_left,
+                         'fled': t.status == 'expired', 'target': _target_payload(t, reveal=t.status == 'expired')})
 
     @action(detail=False, methods=['POST'], url_path='probe')
     def probe(self, request):
@@ -1290,11 +1334,19 @@ class SafariViewSet(viewsets.GenericViewSet):
         cell = request.data.get('h3', '')
         with transaction.atomic():
             target = SafariTarget.objects.select_for_update().filter(player=request.user, status='active').first()
-            if not target or not target.center_h3:
+            if not target or (not target.center_h3 and target.mode != 'world'):
                 return Response({'error': 'No active hunt'}, status=404)
-            if cell not in {g['h3'] for g in target.grid()}:
+            if target.mode == 'world':   # radar hunt: the map centre must be within CAPTURE_KM of the creature
+                try:
+                    km = _km(float(request.data['lat']), float(request.data['lon']), target.target_lat, target.target_lon)
+                except (KeyError, TypeError, ValueError):
+                    return Response({'error': 'lat, lon required'}, status=400)
+                if km > SafariTarget.CAPTURE_KM:
+                    return Response({'error': f'Not here — {km:.1f} km away. Scan again.'}, status=400)
+                cell = target.target_h3
+            elif cell not in {g['h3'] for g in target.grid()}:
                 return Response({'error': 'That hex is outside the hunting ground'}, status=400)
-            if any(p['h3'] == cell for p in target.probes):
+            if any(p.get('h3') == cell for p in target.probes):
                 return Response({'error': 'Already scanned'}, status=400)
             if cell == target.target_h3:
                 from terra_domini.apps.economy.balance import use_charge, RARITY_ORDER

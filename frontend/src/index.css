@@ -1190,3 +1190,11 @@ html {
 .hx-st-shield-badge { background: rgba(12,74,110,0.9); border: 2px solid #38bdf8; box-shadow: 0 0 16px #38bdf8; }
 .hx-st-event-badge { background: rgba(120,53,15,0.9); border: 2px solid #fbbf24; box-shadow: 0 0 18px #fbbf24; }
 @keyframes hx-st-bob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-4px) } }
+
+/* Safari radar (RadarWidget) */
+.hx-radar-btn { position: fixed; overflow: hidden; }
+.hx-radar-sweep { position: absolute; inset: 0; border-radius: 50%; pointer-events: none;
+  background: conic-gradient(from 0deg, rgba(34,211,238,0.35), rgba(34,211,238,0) 25%); animation: hx-radar-spin 2.6s linear infinite; }
+.hx-radar-dial-sweep { transform-origin: 0 0; animation: hx-radar-spin 2.6s linear infinite; }
+@keyframes hx-radar-spin { to { transform: rotate(360deg) } }
+@media (prefers-reduced-motion: reduce) { .hx-radar-sweep, .hx-radar-dial-sweep { animation: none } }

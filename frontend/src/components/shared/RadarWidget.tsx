@@ -1,293 +1,124 @@
 /**
- * RadarWidget — Radar with Safari mode.
- * Small: 100×100px bottom-right, click to expand.
- * Expanded: 280×280px centered overlay with safari tracking info.
- * 
- * Safari mode: shows dedicated blip for active safari target,
- * distance/direction text, hot/cold indicator.
+ * RadarWidget — the safari radar (owner 2026-10-19: "use the radar to find a territory somewhere in the world where an
+ * animal or a flower token is"). Real data only (the old widget drew random blips).
+ *
+ * World hunt running (GET /api/safari/active/, mode 'world'): SCAN pings from the map centre (POST /safari/scan/) →
+ * direction arrow + distance band (freezing → cold → warm → hot → burning → here). Within capture range: CATCH
+ * (POST /safari/probe/ {lat, lon}) → the creature's token goes into the album.
+ * No hunt: a small radar button that opens the Safari panel.
  */
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { IconSVG } from './iconBank'
+import { api } from '../../services/api'
+import { useStore } from '../../store'
+import { playSound } from '../../hooks/useSound'
+import { celebrate } from './Celebrate'
+import { BAND } from '../hud/DailyHuntPanel'
 
-interface Blip {
-  id: string; angle: number; distance: number; color: string
-  label?: string; isSafari?: boolean; category?: string
-  lat?: number; lon?: number
-}
-
-const CAT_COLORS: Record<string, string> = {
-  natural_disasters: '#f97316', places_structures: '#6366f1',
-  nature_geography: '#22c55e', conflict_intrigue: '#dc2626',
-  culture_society: '#d946ef', life_organisms: '#22c55e',
-  fantastic: '#a855f7', economic_assets: '#cc8800',
-}
-
-function generateMockBlips(centerLat = 48.8566, centerLon = 2.3522): Blip[] {
-  const cats = Object.keys(CAT_COLORS)
-  const blips: Blip[] = Array.from({ length: 6 }, (_, i) => {
-    const angle = (Math.PI * 2 * i) / 6 + Math.random() * 0.5
-    const dist = 0.25 + Math.random() * 0.6
-    // Convert radar distance (~5km max) to lat/lon offset
-    const kmOffset = dist * 5
-    return {
-      id: `blip-${i}`, angle, distance: dist,
-      color: CAT_COLORS[cats[i % cats.length]],
-      category: cats[i % cats.length],
-      lat: centerLat + Math.sin(angle) * kmOffset / 111,
-      lon: centerLon + Math.cos(angle) * kmOffset / (111 * Math.cos(centerLat * Math.PI / 180)),
-    }
-  })
-  // Safari target blip
-  const sAngle = Math.random() * Math.PI * 2
-  const sDist = 0.4 + Math.random() * 0.4
-  blips.push({
-    id: 'safari-target', angle: sAngle, distance: sDist,
-    color: '#fbbf24', label: 'SAFARI TARGET', isSafari: true,
-    lat: centerLat + Math.sin(sAngle) * sDist * 5 / 111,
-    lon: centerLon + Math.cos(sAngle) * sDist * 5 / (111 * Math.cos(centerLat * Math.PI / 180)),
-  })
-  return blips
-}
+const CAT_ICON: Record<string, string> = { animal: 'lion', fossil: 'dinosaur', insect: 'butterfly', vegetal: 'orchid', mushroom: 'fungus', microOrganism: 'microscope' }
+const MONO = "'Share Tech Mono', monospace"
 
 export function RadarWidget() {
-  const [expanded, setExpanded] = useState(false)
-  const [sweepAngle, setSweepAngle] = useState(0)
-  const [blips] = useState<Blip[]>(generateMockBlips)
-  const animRef = useRef<number>(0)
+  const qc = useQueryClient()
+  const isAuth = useStore(s => s.isAuthenticated)
+  const [open, setOpen] = useState(false)
+  const [busy, setBusy] = useState(false)
+  const { data } = useQuery({ queryKey: ['safari-active'], queryFn: () => api.get('/safari/active/').then(r => r.data), enabled: isAuth, staleTime: 15000 })
+  const t = data?.target
+  const hunt = t && t.mode === 'world' && t.status === 'active' ? t : null
+  const last = hunt?.probes?.[hunt.probes.length - 1]
+  const band = last ? BAND[last.band] : null
 
   useEffect(() => {
-    let lastTime = 0
-    const animate = (time: number) => {
-      if (!lastTime) lastTime = time
-      setSweepAngle(prev => (prev + ((time - lastTime) / 3000) * Math.PI * 2) % (Math.PI * 2))
-      lastTime = time
-      animRef.current = requestAnimationFrame(animate)
-    }
-    animRef.current = requestAnimationFrame(animate)
-    return () => cancelAnimationFrame(animRef.current)
+    const on = () => setOpen(true)
+    window.addEventListener('hx:radar-open', on)
+    return () => window.removeEventListener('hx:radar-open', on)
   }, [])
 
-  // Escape closes expanded
-  useEffect(() => {
-    if (!expanded) return
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setExpanded(false) }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [expanded])
+  const scan = async () => {
+    const [lat, lon] = useStore.getState().mapCenter
+    setBusy(true)
+    try {
+      const { data: r } = await api.post('/safari/scan/', { lat, lon })
+      qc.setQueryData(['safari-active'], { target: r.fled ? null : r.target })
+      if (r.fled) { playSound('flee'); toast.error(`${r.target?.creature_name || 'It'} fled — out of scans.`) }
+      else playSound(r.band === 'here' ? 'bonus' : 'probe')
+    } catch (e: any) { toast.error(e?.response?.data?.error || 'Scan failed') }
+    setBusy(false)
+  }
+  const catchIt = async () => {
+    const [lat, lon] = useStore.getState().mapCenter
+    setBusy(true)
+    try {
+      const { data: r } = await api.post('/safari/probe/', { lat, lon })
+      qc.setQueryData(['safari-active'], { target: null })
+      playSound('capture'); celebrate('big', r.target?.creature_name || 'Captured!')
+      toast.success(r.message, { duration: 5000 })
+      ;['loop-status', 'codex-cards', 'player'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
+      setOpen(false)
+    } catch (e: any) { toast.error(e?.response?.data?.error || 'Not here') }
+    setBusy(false)
+  }
 
-  const safariBlip = blips.find(b => b.isSafari)
-  const safariDist = safariBlip ? Math.floor(safariBlip.distance * 5000) : 0
-  const safariHeat = safariBlip ? (safariBlip.distance < 0.3 ? 'HOT' : safariBlip.distance < 0.6 ? 'WARM' : 'COLD') : 'COLD'
-  const safariHeatColor = safariHeat === 'HOT' ? '#dc2626' : safariHeat === 'WARM' ? '#f97316' : '#3b82f6'
+  if (!isAuth) return null
 
-  const renderRadar = useCallback((size: number, detailed: boolean) => {
-    const cx = size / 2, cy = size / 2, r = size * 0.4
-    const sweepX = cx + Math.cos(sweepAngle) * r
-    const sweepY = cy + Math.sin(sweepAngle) * r
-    const trailAngle = 0.8
-    const trailStart = sweepAngle - trailAngle
-    const trailStartX = cx + Math.cos(trailStart) * r
-    const trailStartY = cy + Math.sin(trailStart) * r
-
+  // Idle: small radar button → Safari panel
+  if (!hunt || !open) {
     return (
-      <svg viewBox={`0 0 ${size} ${size}`} width={size} height={size}>
-        <circle cx={cx} cy={cy} r={r + 7} fill="rgba(6,14,26,0.92)" stroke="rgba(12,197,255,0.35)" strokeWidth="1.5" />
-        <circle cx={cx} cy={cy} r={r + 3} fill="none" stroke="rgba(255,255,255,0.08)" strokeWidth="1" />
-        {Array.from({ length: 24 }).map((_, i) => {
-          const a = (i / 24) * Math.PI * 2
-          const major = i % 6 === 0
-          const r1 = r + (major ? 1 : 3), r2 = r + 6
-          return <line key={i} x1={cx + Math.cos(a) * r1} y1={cy + Math.sin(a) * r1} x2={cx + Math.cos(a) * r2} y2={cy + Math.sin(a) * r2}
-            stroke={major ? 'rgba(12,197,255,0.7)' : 'rgba(12,197,255,0.25)'} strokeWidth={major ? 1.5 : 1} />
-        })}
-        <circle cx={cx} cy={cy} r={r * 0.75} fill="none" stroke="rgba(12,197,255,0.18)" strokeWidth="0.75" />
-        <circle cx={cx} cy={cy} r={r * 0.5} fill="none" stroke="rgba(12,197,255,0.18)" strokeWidth="0.75" />
-        <circle cx={cx} cy={cy} r={r * 0.25} fill="none" stroke="rgba(12,197,255,0.18)" strokeWidth="0.75" />
-        <line x1={cx - r} y1={cy} x2={cx + r} y2={cy} stroke="rgba(12,197,255,0.14)" strokeWidth="0.75" />
-        <line x1={cx} y1={cy - r} x2={cx} y2={cy + r} stroke="rgba(12,197,255,0.14)" strokeWidth="0.75" />
-
-        <path
-          d={`M ${cx} ${cy} L ${trailStartX} ${trailStartY} A ${r} ${r} 0 0 1 ${sweepX} ${sweepY} Z`}
-          fill="url(#sweepG)" opacity="0.3"
-        />
-        <defs>
-          <radialGradient id="sweepG" cx="50%" cy="50%" r="50%">
-            <stop offset="0%" stopColor="rgba(0,153,204,0)" />
-            <stop offset="100%" stopColor="rgba(0,153,204,0.4)" />
-          </radialGradient>
-        </defs>
-
-        <line x1={cx} y1={cy} x2={sweepX} y2={sweepY} stroke="#0099cc" strokeWidth={detailed ? 2 : 1.5} opacity="0.8" />
-
-        {blips.map(blip => {
-          const bx = cx + Math.cos(blip.angle) * (blip.distance * r)
-          const by = cy + Math.sin(blip.angle) * (blip.distance * r)
-          const angleDiff = Math.abs(sweepAngle - blip.angle) % (Math.PI * 2)
-          const nearSweep = angleDiff < 0.5 || angleDiff > Math.PI * 2 - 0.5
-          const blipR = blip.isSafari ? (detailed ? 6 : 4) : (detailed ? 4 : 2)
-          return (
-            <g key={blip.id} style={{ cursor: 'pointer' }}
-              onClick={(e) => {
-                e.stopPropagation()
-                // Fly to this blip's location on the map
-                if (blip.lat && blip.lon) {
-                  window.dispatchEvent(new CustomEvent('terra:flyto', {
-                    detail: { lat: blip.lat, lon: blip.lon, zoom: 16 }
-                  }))
-                  setExpanded(false)
-                }
-                toast.success(`${blip.category || 'Signal'} — ${Math.floor(blip.distance * 5000)}m`, { duration: 2000 })
-              }}
-            >
-              <circle cx={bx} cy={by} r={blipR + 4} fill="transparent" />
-              <circle cx={bx} cy={by} r={blipR}
-                fill={blip.color} opacity={nearSweep ? 1 : 0.6}
-                style={{ transition: 'opacity 0.3s' }}
-              />
-              {detailed && (
-                <text x={bx} y={by + blipR + 10} textAnchor="middle"
-                  fontSize="9" fill={blip.color} opacity="0.85"
-                  fontFamily="'Orbitron', system-ui, sans-serif">
-                  {(blip.category || '').slice(0, 6).toUpperCase()}
-                </text>
-              )}
-              {blip.isSafari && (
-                <>
-                  <circle cx={bx} cy={by} r={blipR + 4} fill="none"
-                    stroke={blip.color} strokeWidth="1" opacity="0.4">
-                    <animate attributeName="r" values={`${blipR + 2};${blipR + 8};${blipR + 2}`} dur="2s" repeatCount="indefinite" />
-                    <animate attributeName="opacity" values="0.4;0.1;0.4" dur="2s" repeatCount="indefinite" />
-                  </circle>
-                  {detailed && (
-                    <text x={bx} y={by - blipR - 6} textAnchor="middle"
-                      fontSize="10" fontWeight="900" fill="#fbbf24"
-                      fontFamily="'Orbitron', system-ui, sans-serif">
-                      SAFARI
-                    </text>
-                  )}
-                </>
-              )}
-            </g>
-          )
-        })}
-
-        <circle cx={cx} cy={cy} r={detailed ? 4 : 3} fill="#0099cc" />
-        <circle cx={cx} cy={cy} r={detailed ? 7 : 5} fill="none" stroke="#0099cc" strokeWidth="0.5" opacity="0.5" />
-        <circle cx={cx} cy={cy} r={r} fill="none" stroke="rgba(12,197,255,0.4)" strokeWidth="1" />
-        <rect x={cx - (detailed ? 9 : 7)} y={cy - r + 3} width={detailed ? 18 : 14} height={detailed ? 14 : 12} rx="3"
-          fill="#dc2626" />
-        <text x={cx} y={cy - r + (detailed ? 13.5 : 12.2)} textAnchor="middle"
-          fontSize={detailed ? 10 : 9} fontWeight="900" fill="#fff"
-          fontFamily="'Orbitron', system-ui, sans-serif">N</text>
-      </svg>
+      <button onClick={() => hunt ? setOpen(true) : useStore.getState().setActivePanel('hunt' as any)} className="hx-radar-btn"
+        aria-label={hunt ? 'Open the safari radar' : 'Start a safari hunt'}
+        style={{ position: 'fixed', right: 16, bottom: 110, zIndex: 900, width: 76, height: 76, borderRadius: '50%', cursor: 'pointer',
+          background: 'radial-gradient(circle, rgba(8,30,40,0.92) 55%, rgba(8,30,40,0.7))', border: `2px solid ${band?.color || '#22d3ee'}`,
+          boxShadow: `0 0 18px ${(band?.color || '#22d3ee')}66`, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 2, color: '#fff' }}>
+        <span className="hx-radar-sweep" />
+        <IconSVG id={hunt ? CAT_ICON[hunt.creature_category] || 'lion' : 'safari_radar'} size={28} />
+        <span style={{ fontSize: 8.5, fontWeight: 900, letterSpacing: 1, fontFamily: 'var(--font-heading)', color: band?.color || '#a5f3fc' }}>
+          {hunt ? (band ? band.label : `${hunt.tries_left} SCANS`) : 'SAFARI'}</span>
+      </button>
     )
-  }, [sweepAngle, blips])
+  }
 
+  // Open: the radar dial
+  const ang = (last?.bearing ?? 0) - 90
   return (
-    <>
-      {/* Small radar — click to expand */}
-      <div
-        onClick={() => setExpanded(true)}
-        style={{
-          position: 'fixed', bottom: 96, right: 12, zIndex: 900,
-          cursor: 'pointer', filter: 'drop-shadow(0 4px 14px rgba(0,0,0,0.5))',
-          display: 'flex', flexDirection: 'column', alignItems: 'center',
-        }}
-        title="Expand radar"
-        role="button" aria-label="Expand radar"
-      >
-        {renderRadar(100, false)}
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 5, marginTop: -4,
-          height: 18, padding: '0 8px', borderRadius: 999,
-          background: 'rgba(6,14,26,0.92)', border: `1px solid ${safariHeatColor}66`,
-          fontSize: 9, fontWeight: 700, letterSpacing: 1.5, whiteSpace: 'nowrap',
-          color: safariHeatColor, fontFamily: "'Orbitron', system-ui, sans-serif",
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: safariHeatColor, boxShadow: `0 0 6px ${safariHeatColor}` }} />
-          {safariBlip ? `${safariHeat} · ${safariDist}m` : 'RADAR'}
+    <div style={{ position: 'fixed', right: 16, bottom: 110, zIndex: 900, width: 250, padding: 12, borderRadius: 18,
+      background: 'linear-gradient(180deg, rgba(10,24,40,0.96), rgba(6,14,26,0.96))', border: `2px solid ${band?.color || '#22d3ee'}`,
+      boxShadow: '0 12px 30px rgba(0,0,0,0.5)', color: '#e2e8f0' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+        <IconSVG id={CAT_ICON[hunt.creature_category] || 'lion'} size={26} />
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1, fontFamily: 'var(--font-heading)' }}>??? · {String(hunt.rarity).toUpperCase()}</div>
+          <div style={{ fontSize: 10, color: '#fde68a', textTransform: 'none', lineHeight: 1.3 }}>{hunt.hint}</div>
         </div>
+        <button onClick={() => setOpen(false)} aria-label="Minimise the radar" className="hx-chip" style={{ cursor: 'pointer' }}>—</button>
       </div>
-
-      {/* Expanded radar overlay */}
-      <AnimatePresence>
-        {expanded && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
-            transition={{ type: 'spring', stiffness: 400, damping: 30 }}
-            onClick={() => setExpanded(false)}
-            style={{
-              position: 'fixed', inset: 0, zIndex: 1500,
-              background: 'rgba(0,5,15,0.7)', backdropFilter: 'blur(8px)',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexDirection: 'column', gap: 12,
-            }}
-          >
-            <div onClick={e => e.stopPropagation()}>
-              {renderRadar(280, true)}
-            </div>
-
-            {/* Safari tracking info */}
-            {safariBlip && (
-              <motion.div
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                transition={{ delay: 0.2 }}
-                onClick={e => e.stopPropagation()}
-                style={{
-                  padding: '12px 20px', borderRadius: 14,
-                  background: 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(10,22,40,0.95))',
-                  backdropFilter: 'blur(30px)',
-                  border: '1px solid rgba(255,255,255,0.12)',
-                  boxShadow: '0 8px 30px rgba(0,0,0,0.2)',
-                  fontFamily: "'Orbitron', system-ui, sans-serif",
-                  display: 'flex', alignItems: 'center', gap: 16,
-                  maxWidth: 400,
-                }}
-              >
-                <div style={{
-                  width: 48, height: 48, borderRadius: '50%',
-                  background: `linear-gradient(135deg, ${safariHeatColor}20, ${safariHeatColor}05)`,
-                  border: `2px solid ${safariHeatColor}40`,
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                }}><IconSVG id="safari_radar" size={30} /></div>
-                <div style={{ flex: 1 }}>
-                  <div style={{ fontSize: 9, fontWeight: 900, color: '#e2e8f0', letterSpacing: 2 }}>
-                    ACTIVE SAFARI
-                  </div>
-                  <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.55)', marginTop: 3, lineHeight: 1.4 }}>
-                    Track the target using clues · Check Safari panel for details
-                  </div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{
-                    fontSize: 16, fontWeight: 900, color: safariHeatColor,
-                    fontFamily: "'Share Tech Mono', monospace",
-                  }}>
-                    {safariDist}m
-                  </div>
-                  <div style={{
-                    fontSize: 9, fontWeight: 700, color: safariHeatColor, letterSpacing: 2,
-                  }}>
-                    {safariHeat}
-                  </div>
-                </div>
-              </motion.div>
-            )}
-
-            <div style={{
-              fontSize: 9, color: 'rgba(255,255,255,0.5)', letterSpacing: 2,
-              fontFamily: "'Orbitron', system-ui, sans-serif",
-            }}>
-              CLICK OUTSIDE TO CLOSE · ESC
-            </div>
-          </motion.div>
+      <svg viewBox="-60 -60 120 120" style={{ width: '100%', display: 'block' }} aria-label="Radar">
+        <circle r="56" fill="#04121c" stroke="#164e63" strokeWidth="1.5" />
+        {[18, 36].map(r => <circle key={r} r={r} fill="none" stroke="#164e63" strokeWidth="1" />)}
+        <line x1="-56" y1="0" x2="56" y2="0" stroke="#164e63" strokeWidth="0.8" /><line x1="0" y1="-56" x2="0" y2="56" stroke="#164e63" strokeWidth="0.8" />
+        <text x="0" y="-47" textAnchor="middle" fontSize="7" fill="#67e8f9" fontWeight="900">N</text>
+        <g className="hx-radar-dial-sweep"><path d="M0 0 L0 -56 A56 56 0 0 1 28 -48.5 Z" fill="rgba(34,211,238,0.18)" /></g>
+        {last && last.band !== 'here' && (
+          <g transform={`rotate(${ang + 90})`}>
+            <line x1="0" y1="0" x2="0" y2="-44" stroke={band?.color} strokeWidth="4" strokeLinecap="round" />
+            <path d="M0 -54 L-7 -40 L7 -40 Z" fill={band?.color} />
+          </g>
         )}
-      </AnimatePresence>
-    </>
+        {last?.band === 'here' && <circle r="12" fill={band?.color} opacity="0.9" />}
+        <circle r="3" fill="#e2e8f0" />
+      </svg>
+      <div style={{ textAlign: 'center', margin: '6px 0 8px' }}>
+        {last
+          ? <><div style={{ fontFamily: 'var(--font-heading)', fontSize: 16, color: band?.color }}>{band?.label}</div>
+              <div style={{ fontFamily: MONO, fontSize: 13 }}>{last.km.toLocaleString()} km {last.band !== 'here' ? `· ${Math.round(last.bearing)}°` : ''}</div></>
+          : <div style={{ fontSize: 11, color: 'var(--hx-text-2)', textTransform: 'none' }}>Move the map, then scan from its centre.</div>}
+      </div>
+      {last?.band === 'here'
+        ? <button onClick={catchIt} disabled={busy} className="btn-game btn-game-green" style={{ width: '100%', fontSize: 13, minHeight: 44 }}>CATCH IT</button>
+        : <button onClick={scan} disabled={busy} className="btn-game btn-game-gold" style={{ width: '100%', fontSize: 13, minHeight: 44 }}>
+            {busy ? 'SCANNING…' : `SCAN FROM MAP CENTRE · ${hunt.tries_left} LEFT`}</button>}
+    </div>
   )
 }

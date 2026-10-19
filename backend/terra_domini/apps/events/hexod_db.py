@@ -41,9 +41,12 @@ def _creatures_by_rarity() -> dict:
     return out
 
 
-def pick_creature(rng=random):
-    """Rarity-weighted random creature, or None if the DB file is missing."""
+def pick_creature(rng=random, with_places=False):
+    """Rarity-weighted random creature, or None if the DB file is missing.
+    with_places: only species whose real sightings / fossil sites are known (world safari)."""
     pools = _creatures_by_rarity()
+    if with_places:
+        pools = {r: [c for c in cs if c.get('places')] for r, cs in pools.items()}
     rarities = [r for r in SPAWN_WEIGHTS if pools.get(r)]
     if not rarities:
         return None
