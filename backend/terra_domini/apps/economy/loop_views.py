@@ -400,7 +400,7 @@ def _place_description(t, terr, region, rates, meta) -> str:
 def satellite_tile_url(lat, lon, z=15) -> str:
     """Same-origin sharp satellite picture centred on the hex (see satellite_card)."""
     import h3 as h3lib
-    return f'/api/tiles/satcard/{h3lib.latlng_to_cell(lat, lon, 8)}.jpg'
+    return f'/api/tiles/satcard/{h3lib.latlng_to_cell(lat, lon, 8)}.jpg?v=2'   # v2 = exactly centred
 
 
 def _esri_tile(z, x, y):
@@ -425,8 +425,8 @@ def _esri_tile(z, x, y):
 @api_view(['GET'])
 @permission_classes([])
 def satellite_card(request, h3_index):
-    """GET /api/tiles/satcard/<h3>.jpg — 640×640 satellite picture of the hex, sharp: a 3×3 mosaic of zoom-16 tiles
-    cropped on the hex centre (one zoom-15 tile stretched on the card was blurry). Cached on disk."""
+    """GET /api/tiles/satcard/<h3>.jpg — 640×640 satellite picture of the hex, sharp (zoom-16 tiles) and exactly centred
+    on the hex: the zoom-16 tiles covering the frame are stitched, then cropped. Cached on disk."""
     import io
     import math
     import h3 as h3lib
@@ -437,31 +437,34 @@ def satellite_card(request, h3_index):
         lat, lon = h3lib.cell_to_latlng(h3_index)
     except Exception:
         return HttpResponse(status=400)
-    out = CACHE / 'satcard' / f'{h3_index}.jpg'
+    out = CACHE / 'satcard2' / f'{h3_index}.jpg'   # v2: exactly centred (v1 clamped its crop, hex up to 64 px off)
     if not out.exists():
-        z, n = 16, 2 ** 16
+        z, n, size = 16, 2 ** 16, 640
         fx = (lon + 180) / 360 * n
         lr = math.radians(max(-85.05, min(85.05, lat)))
         fy = (1 - math.log(math.tan(lr) + 1 / math.cos(lr)) / math.pi) / 2 * n
-        cx, cy = int(fx), int(fy)
-        canvas = Image.new('RGB', (768, 768), (12, 30, 60))
+        # the 640 px frame centred on the hex, in global zoom-16 pixels; fetch exactly the tiles it covers
+        left, top = int(round(fx * 256)) - size // 2, int(round(fy * 256)) - size // 2
+        tx0, ty0 = left // 256, top // 256
+        tx1, ty1 = (left + size - 1) // 256, (top + size - 1) // 256
+        canvas = Image.new('RGB', ((tx1 - tx0 + 1) * 256, (ty1 - ty0 + 1) * 256), (12, 30, 60))
         got = 0
-        for dx in (-1, 0, 1):
-            for dy in (-1, 0, 1):
-                data = _esri_tile(z, (cx + dx) % n, cy + dy)
+        for tx in range(tx0, tx1 + 1):
+            for ty in range(ty0, ty1 + 1):
+                if not 0 <= ty < n:
+                    continue
+                data = _esri_tile(z, tx % n, ty)
                 if data:
                     try:
-                        canvas.paste(Image.open(io.BytesIO(data)).convert('RGB'), ((dx + 1) * 256, (dy + 1) * 256))
+                        canvas.paste(Image.open(io.BytesIO(data)).convert('RGB'), ((tx - tx0) * 256, (ty - ty0) * 256))
                         got += 1
                     except Exception:
                         pass
         if not got:
             return HttpResponse(status=502)
-        px, py = 256 + (fx - cx) * 256, 256 + (fy - cy) * 256       # hex centre in the mosaic
-        half = 320
-        left, top = int(max(0, min(768 - 2 * half, px - half))), int(max(0, min(768 - 2 * half, py - half)))
+        ox, oy = left - tx0 * 256, top - ty0 * 256
         out.parent.mkdir(parents=True, exist_ok=True)
-        canvas.crop((left, top, left + 2 * half, top + 2 * half)).save(out, 'JPEG', quality=86)
+        canvas.crop((ox, oy, ox + size, oy + size)).save(out, 'JPEG', quality=86)
     resp = HttpResponse(out.read_bytes(), content_type='image/jpeg')
     resp['Cache-Control'] = 'public, max-age=2592000'
     return resp
