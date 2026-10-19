@@ -336,12 +336,25 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     // Defer first call until map pane is initialized
     setTimeout(onMove, 100)
 
-    // Server-side IP geolocation
-    fetch('/api/geoip/').then(r=>r.json())
-      .then(d => { if (d.lat && d.lon) map.setView([d.lat, d.lon], (window.innerWidth < 480) ? 15 : 13) })
+    // Opening view: always the main kingdom (the IP lookup landed anywhere on Earth); IP / device location only
+    // for a player with no land yet
+    const geoip = () => fetch('/api/geoip/').then(r => r.json())
+      .then(d => { if (mapRef.current && d.lat && d.lon) map.setView([d.lat, d.lon], (window.innerWidth < 480) ? 15 : 13) })
       .catch(() => navigator.geolocation?.getCurrentPosition(
-        p => map.setView([p.coords.latitude, p.coords.longitude], 14), () => {}
+        p => { if (mapRef.current) map.setView([p.coords.latitude, p.coords.longitude], 14) }, () => {}
       ))
+    const tok = useStore.getState().accessToken
+    if (tok) {
+      fetch('/api/territories-geo/kingdoms/', { headers: { Authorization: `Bearer ${tok}` } })
+        .then(r => r.ok ? r.json() : null)
+        .then(d => {
+          const ks = d?.kingdoms || []
+          const main = ks.find((k: any) => k.is_main) || ks[0]
+          if (main?.centroid_lat != null && mapRef.current) map.setView([main.centroid_lat, main.centroid_lon], (window.innerWidth < 480) ? 15 : 14)
+          else geoip()
+        })
+        .catch(geoip)
+    } else geoip()
 
     return () => { window.removeEventListener('terra:flyto', onFlyTo); clearTimeout(vpTimer.current); map.remove(); mapRef.current = null; selectedLayer.clearLayers() }
   }, []) // eslint-disable-line

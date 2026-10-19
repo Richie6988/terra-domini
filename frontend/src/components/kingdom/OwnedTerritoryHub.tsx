@@ -17,9 +17,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import toast from 'react-hot-toast'
 import { useQuery } from '@tanstack/react-query'
 import { GlassPanel } from '../shared/GlassPanel'
-import { IconSVG } from '../shared/iconBank'
-import { Token3DViewer } from '../shared/Token3DViewer'
-import { TokenHexPreview } from '../shared/TokenHexPreview'
+import { IconSVG, getIcon } from '../shared/iconBank'
+import { Token3DViewer, RARITY_TIER, TERRAIN_ICON } from '../shared/Token3DViewer'
+import { TokenFace2D } from '../shared/TokenFace2D'
+import { iconFor } from '../shared/poiIcons'
+import { RES_ICON } from '../shared/resourceIcons'
 import { api } from '../../services/api'
 import { useServerKingdomCustom, useSaveKingdomCustom, withLegacy } from './kingdomCustom'
 import { usePlayer, useStore } from '../../store'
@@ -117,6 +119,29 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
   )
 }
 
+/** One gallery slot: the final token face (same as the Codex / the 3D token), data from /codex/territory/<h3>/. */
+function GalleryToken({ token, onOpen }: { token: TokenInfo; onOpen: () => void }) {
+  const { data: d } = useQuery<any>({ queryKey: ['codex-territory', token.h3_index],
+    queryFn: () => api.get(`/codex/territory/${token.h3_index}/`).then(r => r.data), enabled: !!token.h3_index, staleTime: 300000 })
+  const rarity = (d?.rarity || token.rarity || 'common').toLowerCase()
+  const iconId = token.poi_icon || d?.poi_category || token.poi_category?.toLowerCase() || TERRAIN_ICON[d?.terrain] || d?.terrain || token.biome || 'city'
+  const pictos = useMemo(() => d ? [iconFor(d.poi_category || iconId), getIcon(TERRAIN_ICON[d.terrain] || d.terrain || 'globe'),
+    d.resources?.[0] ? getIcon(RES_ICON[d.resources[0].id] || 'box') : ''].filter(Boolean) : undefined, [d, iconId])
+  return (
+    <button onClick={onOpen} aria-label={`Inspect ${token.name || 'token'} in 3D`} title={token.name}
+      style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, color: 'inherit' }}>
+      <TokenFace2D tier={RARITY_TIER[rarity] || 'BRONZE'} rarity={rarity} size={132}
+        tokenName={token.name} category={(d?.poi_category || token.poi_category || d?.terrain || token.biome || 'TERRITORY').replace(/_/g, ' ')}
+        iconId={iconId} imageSrc={d?.image_url || d?.satellite_url || ''} pictos={pictos}
+        hexPerDay={d?.hex_per_day} terrain={d?.terrain} country={d?.country_code} tokenNo={d?.token_id ? String(d.token_id) : ''}
+        edition={d?.edition_label || 'GENESIS'} date={d?.issued_at || ''}
+        style={{ filter: 'drop-shadow(0 6px 10px rgba(0,0,0,0.55))' }} />
+      {token.is_capital && <span className="hx-chip" style={{ position: 'absolute', top: 0, left: 0, padding: '2px 6px', color: '#fbbf24', borderColor: 'rgba(251,191,36,0.5)', background: 'rgba(0,0,0,0.65)' }}><Crown size={10} /> CAPITAL</span>}
+      <span style={{ fontSize: 10, fontWeight: 800, color: 'var(--hx-text-1)', maxWidth: 132, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{token.name}</span>
+    </button>
+  )
+}
+
 // ════════════════════════════════════════════════════════════════
 // GALLERY TAB — grid of owned tokens, tap → Token3D
 // ════════════════════════════════════════════════════════════════
@@ -149,56 +174,8 @@ function GalleryTab({ kingdom, tokens, onToken3D }: {
       ) : (
         <>
           <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', letterSpacing: 1.5, fontFamily: HEAD, marginTop: -4 }}>TAP A TOKEN TO INSPECT IN 3D</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(124px, 1fr))', gap: 10 }}>
-            {sorted.map((token, i) => {
-              const r = (token.rarity || 'common').toLowerCase()
-              const color = RARITY_COLORS[r] || '#94a3b8'
-              const premium = r === 'legendary' || r === 'mythic'
-              return (
-                <button
-                  key={`${token.h3_index}-${i}`}
-                  onClick={() => onToken3D(token)}
-                  className="hx-card hx-card--interactive hx-rise"
-                  aria-label={`Inspect ${token.name || 'token'} in 3D`}
-                  style={{
-                    ['--accent' as any]: color,
-                    animationDelay: `${i * 40}ms`,
-                    display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
-                    padding: '14px 8px 10px', color: 'inherit', font: 'inherit', textAlign: 'center',
-                    background: `radial-gradient(circle at 50% 30%, ${color}${premium ? '40' : '24'}, transparent 65%), linear-gradient(180deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02))`,
-                    borderColor: `${color}${premium ? '90' : '50'}`,
-                    boxShadow: premium ? `0 0 18px ${color}35, inset 0 1px 0 rgba(255,255,255,0.08)` : undefined,
-                    overflow: 'hidden',
-                  }}
-                >
-                  <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: color, boxShadow: `0 0 10px ${color}` }} />
-                  {token.is_capital && (
-                    <span className="hx-chip" style={{ position: 'absolute', top: 8, left: 6, padding: '2px 6px', color: '#fbbf24', borderColor: 'rgba(251,191,36,0.5)', background: 'rgba(0,0,0,0.55)' }}>
-                      <Crown size={10} /> CAPITAL
-                    </span>
-                  )}
-                  <div style={{ marginTop: token.is_capital ? 14 : 0 }}>
-                    <TokenHexPreview
-                      iconId={token.poi_icon || token.poi_category?.toLowerCase() || token.biome || 'city'}
-                      rarity={r}
-                      catColor={color}
-                      size={72}
-                      shiny={r === 'mythic'}
-                    />
-                  </div>
-                  <div style={{
-                    fontSize: 10, fontWeight: 700, color: '#e2e8f0', fontFamily: HEAD, letterSpacing: 0.5,
-                    overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '100%',
-                  }}>
-                    {(token.name || 'ZONE').toUpperCase()}
-                  </div>
-                  <span style={{ fontSize: 9, fontWeight: 800, letterSpacing: 1.5, color, fontFamily: HEAD }}>{r.toUpperCase()}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: 'rgba(255,255,255,0.65)', fontFamily: MONO }}>
-                    <IconSVG id="hex_coin" size={11} /> +{(token.income_per_day || 0).toLocaleString()}/d
-                  </div>
-                </button>
-              )
-            })}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(136px, 1fr))', gap: 10, justifyItems: 'center' }}>
+            {sorted.map((token, i) => <GalleryToken key={`${token.h3_index}-${i}`} token={token} onOpen={() => onToken3D(token)} />)}
           </div>
         </>
       )}
@@ -228,6 +205,21 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
 
   const minTerritoriesForEmbed = 3
   const embedUnlocked = (kingdom.size || tokens.length) >= minTerritoriesForEmbed
+  const [uploading, setUploading] = useState(false)
+  const onPick = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]; e.target.value = ''
+    if (!file || !anchor) return
+    setUploading(true)
+    try {
+      const fd = new FormData(); fd.append('image', file)
+      const { data } = await api.post('/territories-geo/upload-image/', fd, { headers: { 'Content-Type': 'multipart/form-data' } })
+      setImageUrl(data.url)
+      const r = await saveKingdom(anchor, { name, fillColor, borderColor, imageUrl: data.url })
+      toast.success(`Picture saved on ${r.applied} territor${r.applied > 1 ? 'ies' : 'y'}`)
+    } catch (err: any) {
+      toast.error(err?.response?.data?.error || 'Upload failed')
+    } finally { setUploading(false) }
+  }
 
   const handleSave = async () => {
     if (!anchor) return
@@ -260,36 +252,31 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
         <ColorField label="BORDER COLOR" value={borderColor} onChange={setBorderColor} />
       </div>
 
-      {/* Embed image */}
+      {/* Kingdom picture: upload from the device (or a https link) — shown on the map badge and the kingdom header */}
       <div>
         <div style={{ ...fieldLabel, display: 'flex', alignItems: 'center', gap: 6 }}>
-          EMBED IMAGE URL
+          KINGDOM PICTURE
           {!embedUnlocked && (
             <span className="hx-chip" style={{ color: '#f59e0b', borderColor: 'rgba(245,158,11,0.45)', background: 'rgba(245,158,11,0.12)' }}>
-              <Lock size={10} /> UNLOCK AT {minTerritoriesForEmbed} TERRITORIES
+              <Lock size={10} /> UNLOCK AT {minTerritoriesForEmbed} CONNECTED TERRITORIES
             </span>
           )}
         </div>
-        <input
-          className="hx-input"
-          value={imageUrl}
-          onChange={e => setImageUrl(e.target.value)}
-          disabled={!embedUnlocked}
-          placeholder="https://..."
-          style={{ fontFamily: MONO, boxSizing: 'border-box', opacity: embedUnlocked ? 1 : 0.5 }}
-        />
-        {imageUrl && embedUnlocked && (
-          <img
-            src={imageUrl}
-            alt=""
-            style={{
-              width: '100%', maxHeight: 120, objectFit: 'cover',
-              borderRadius: 8, marginTop: 8,
-              border: `1px solid ${borderColor}40`,
-            }}
-            onError={e => (e.currentTarget.style.display = 'none')}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', opacity: embedUnlocked ? 1 : 0.5 }}>
+          <label className="btn-game btn-game-blue" style={{ padding: '9px 12px', fontSize: 11, cursor: embedUnlocked && !uploading ? 'pointer' : 'not-allowed', flexShrink: 0 }}>
+            {uploading ? 'UPLOADING…' : 'UPLOAD A PICTURE'}
+            <input type="file" accept="image/jpeg,image/png,image/webp" disabled={!embedUnlocked || uploading} onChange={onPick} style={{ display: 'none' }} />
+          </label>
+          <input
+            className="hx-input"
+            value={imageUrl}
+            onChange={e => setImageUrl(e.target.value)}
+            disabled={!embedUnlocked}
+            placeholder="or paste https://..."
+            style={{ fontFamily: MONO, boxSizing: 'border-box', flex: 1, minWidth: 0 }}
           />
-        )}
+          {imageUrl && embedUnlocked && <button className="hx-chip" style={{ cursor: 'pointer' }} onClick={() => setImageUrl('')} aria-label="Remove the picture">REMOVE</button>}
+        </div>
       </div>
 
       {/* Live preview — diaporama */}
@@ -546,9 +533,10 @@ export function OwnedTerritoryHub({ kingdom, initialTab = 'gallery', onClose }: 
     })
   }, [kingdom, mineData])
 
-  const kingdomName = kingdom.owner_username
+  const custom = useServerKingdomCustom(kingdom.h3_indexes?.[0] || tokens[0]?.h3_index)
+  const kingdomName = custom.name || (kingdom as any).name || (kingdom.owner_username
     ? `${kingdom.owner_username}'s Kingdom`
-    : (kingdom.is_main ? 'Main Kingdom' : 'Kingdom')
+    : (kingdom.is_main ? 'Main Kingdom' : 'Kingdom'))
 
   const accentColor = TIER_COLOR[Math.min(kingdom.tier || 1, 6)]
 
@@ -559,7 +547,9 @@ export function OwnedTerritoryHub({ kingdom, initialTab = 'gallery', onClose }: 
         onClose={onClose}
         accent={ACCENT}
         width={520}
-        icon={<Crown size={20} />}
+        icon={custom.imageUrl
+          ? <span style={{ width: 30, height: 30, borderRadius: '50%', display: 'block', background: `#0b1626 url('${custom.imageUrl}') center/cover`, border: `1.5px solid ${ACCENT}` }} />
+          : <Crown size={20} />}
         subtitle={
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
             <span style={{ color: accentColor, fontWeight: 700 }}>TIER {kingdom.tier || 1}</span>
@@ -613,6 +603,8 @@ export function OwnedTerritoryHub({ kingdom, initialTab = 'gallery', onClose }: 
           edition="GENESIS"
           biome={(token3D.biome || 'rural').toUpperCase()}
           power={token3D.defense_points || 50}
+          h3Index={token3D.h3_index}
+          rarityKey={(token3D.rarity || 'common').toLowerCase()}
           rarity={
             (token3D.rarity || '').toLowerCase() === 'mythic' ? 99 :
             (token3D.rarity || '').toLowerCase() === 'legendary' ? 95 :

@@ -4,7 +4,7 @@
  * Also exports <MissionsButton/> (game-style MISSIONS entry point, meant to replace the inline one in App.tsx).
  */
 import { useOwnedSync, useHexPurchaseReturn } from './SessionLoop'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useStore } from '../../store'
 import { api } from '../../services/api'
 import { NotificationBell } from './SessionLoop'
@@ -89,7 +89,9 @@ export function HexodTopHUD() {
   const godMode = useStore(s => s.godMode)
   const ownedCount = useOwnedSync()
   useHexPurchaseReturn()
-  const toggleGodMode = useStore(s => s.toggleGodMode)
+  const toggleGod = useStore(s => s.toggleGodMode)
+  const qc = useQueryClient()
+  const toggleGodMode = () => { toggleGod(); setTimeout(() => qc.invalidateQueries(), 0) }   // prices / limits change
 
   if (!player) return null
 

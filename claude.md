@@ -542,6 +542,11 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 - **Leaflet**: every window listener added in the map effect must be removed in its cleanup (StrictMode remount left `terra:flyto` on a destroyed map → `_leaflet_pos` crash).
 - **Event tokens**: 10 numbered editions per event (`world_events.draw`): #1 to the hex holder at the end, the rest drawn among paid tickets (earned HEX only, weight 1 + luck/10, Luck Potion = +15 → x2.5). `EventCard.serial/max_supply/price_hex`. Market `api/event-cards/market|<id>/sell|delist|buy` (5 % royalty), Marketplace > Event tokens.
 - **Profile**: `GET /api/players/me/profile-stats/` (empire, army, battle record from Battle rows, collection, rank by territories, streak, recent battles). Unwired toggles (push, language) were removed — never show a setting that does nothing.
+- **God mode (2026-10-19)**: staff GOD MODE switch → client sends `X-Hexod-God: 1` (services/api.ts); `utils/god.py` GodModeMiddleware + `is_god(player)` (header AND is_staff) / `god_cost()`. Discovery free + instant + no POI lock / slot cap, safari no daily cap + unlimited scans, forces / upgrades / shop / shield free. Add `god_cost` to any new HEX sink.
+- **Kingdom picture (2026-10-19)**: `POST /api/territories-geo/upload-image/` (multipart `image` ≤ 4 MB → Pillow 640 px JPEG in MEDIA_ROOT/kingdoms/, returns `/media/kingdoms/x.jpg`); customize accepts https:// or that path; shown as avatar on the map kingdom pill + hub header. Needs 3 connected hexes (CLUSTER_TIERS). Dev serves /media via Django + Vite proxy; prod via nginx.
+- **Map opening view**: main kingdom centroid (`/territories-geo/kingdoms/`), IP geoloc only for players without land.
+- **Kingdom gallery**: `GalleryToken` = TokenFace2D fed by `/codex/territory/<h3>/` (same face as Codex/3D), Token3DViewer gets `h3Index` for the real face/back.
+- **Lucky wheel (2026-10-19)**: cartoon SVG wheel (LotteryPanel `Wheel`), server draws. Land prizes: 'territory' 3 % (free land hex 2-4 rings from a random POI — a far base), 'poi' 1/10 000 (a free POI); none free → pays x2. `LotteryTicket.won_h3/won_kind` (migration economy 0006).
 
 ## 12. KNOWN ISSUES PIPELINE (updated 2026-10-17)
 

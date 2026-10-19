@@ -15,7 +15,7 @@ import { api } from '../../services/api'
 import { iconFor } from './poiIcons'
 import { RES_ICON } from './resourceIcons'
 
-const TERRAIN_ICON: Record<string, string> = { lake: 'water_drop', ice: 'glacier', farmland: 'wheat', grassland: 'sprout', wetland: 'leaf', water: 'ocean', arctic: 'tundra' }
+export const TERRAIN_ICON: Record<string, string> = { lake: 'water_drop', ice: 'glacier', farmland: 'wheat', grassland: 'sprout', wetland: 'leaf', water: 'ocean', arctic: 'tundra' }
 
 // Game rarity → metal of the token (rare is no longer bronze like a common)
 export const RARITY_TIER: Record<string, TierKey> = {

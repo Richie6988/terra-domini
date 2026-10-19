@@ -442,7 +442,8 @@ class ShopViewSet(viewsets.GenericViewSet):
             if _game('SHIELD_MAX_HOURS_PER_DAY', 12) - used <= 0:
                 return Response({'error': 'Daily shield limit reached — try again tomorrow.'}, status=429)
 
-        total_cost = item.price_tdc * quantity
+        from terra_domini.utils.god import god_cost
+        total_cost = god_cost(player, item.price_tdc * quantity)     # god mode: free
 
         # Check balance
         if float(player.tdc_in_game) < float(total_cost):

@@ -68,6 +68,7 @@ MIDDLEWARE = [
     # Django admin uses session auth but is protected by staff_member_required
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
+    'terra_domini.utils.god.GodModeMiddleware',
 ]
 
 ROOT_URLCONF = 'terra_domini.urls'

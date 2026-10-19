@@ -66,6 +66,9 @@ def _boost_values(player, boost_type):
 
 
 def explore_slots(player) -> int:
+    from terra_domini.utils.god import is_god
+    if is_god(player):
+        return 99
     return min(EXPLORE_SLOTS_MAX, EXPLORE_SLOTS_BASE + int(sum(_boost_values(player, 'explore_slots'))))
 
 
@@ -205,6 +208,10 @@ def discovery(player, h3_index: str, rarity: str = 'common', is_poi: bool = Fals
     disc = Fz.spy_discount(spies)
     cost = int(round(DISCOVERY_COST * factor * RARITY_PRICE_MULT.get((rarity or 'common').lower(), 1) * (1 - disc)))
     hours = round(min(EXPLORE_MAX_HOURS, DISCOVERY_HOURS * factor) * (1 - disc), 2)
+    from terra_domini.utils.god import is_god
+    if is_god(player):          # god mode: free, instant, anywhere (POIs included)
+        return {'distance': None if first else dist, 'factor': 1, 'cost': 0, 'hours': BLITZ_EXPLORE_HOURS, 'first': first,
+                'locked': False, 'spy_discount': 0, 'near_hex': near_hex}
     return {'distance': None if first else dist, 'factor': factor, 'cost': cost, 'hours': hours, 'first': first,
             'locked': bool(is_poi and not first and d > 1),     # POIs: be right next to them
             'spy_discount': disc, 'near_hex': near_hex}

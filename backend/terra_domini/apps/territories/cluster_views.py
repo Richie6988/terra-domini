@@ -7,6 +7,7 @@ GET  /api/territories/overlay/      — map overlay events for viewport
 """
 import logging, uuid
 from decimal import Decimal
+from django.conf import settings
 from django.utils import timezone
 from rest_framework import viewsets
 from rest_framework.decorators import action
@@ -162,8 +163,8 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
         name = str(request.data.get('display_name', '') or '').strip()[:30]
         border, fill = _color(request.data.get('border_color')), _color(request.data.get('fill_color'))
         embed_url = str(request.data.get('embed_url', '') or '').strip()
-        if embed_url and not embed_url.startswith('https://'):
-            return Response({'error': 'Image URL must start with https://'}, status=400)
+        if embed_url and not (embed_url.startswith('https://') or embed_url.startswith(settings.MEDIA_URL + 'kingdoms/')):
+            return Response({'error': 'Image URL must start with https:// (or upload a picture)'}, status=400)
 
         cust, _ = TerritoryCustomization.objects.get_or_create(territory=territory)
         cust.display_name = name or cust.display_name
@@ -192,6 +193,29 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
         return Response({'success': True, 'tier': tier, 'embed_type': cust.embed_type, 'applied': applied,
                          'name': cust.display_name, 'border_color': cust.border_color, 'fill_color': cust.fill_color,
                          'embed_url': cust.embed_url})
+
+    @action(detail=False, methods=['POST'], url_path='upload-image')
+    def upload_image(self, request):
+        """Kingdom picture from the player's device (multipart 'image', ≤ 4 MB): re-encoded to a 640 px JPEG in
+        MEDIA_ROOT/kingdoms/ (strips EXIF and anything that is not a picture). Returns its /media/ URL for customize."""
+        f = request.FILES.get('image')
+        if not f:
+            return Response({'error': 'No image sent'}, status=400)
+        if f.size > 4 * 1024 * 1024:
+            return Response({'error': 'Image too big (max 4 MB)'}, status=400)
+        from PIL import Image, ImageOps
+        try:
+            img = ImageOps.exif_transpose(Image.open(f))
+            img = img.convert('RGB')
+            img.thumbnail((640, 640))
+        except Exception:
+            return Response({'error': 'Not a picture (use JPG, PNG or WEBP)'}, status=400)
+        import os
+        folder = os.path.join(str(settings.MEDIA_ROOT), 'kingdoms')
+        os.makedirs(folder, exist_ok=True)
+        name = f'{uuid.uuid4().hex}.jpg'
+        img.save(os.path.join(folder, name), 'JPEG', quality=85, optimize=True)
+        return Response({'url': f'{settings.MEDIA_URL}kingdoms/{name}'})
 
     @action(detail=False, methods=['GET'], url_path='income')
     def income(self, request):

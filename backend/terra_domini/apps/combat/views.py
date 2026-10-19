@@ -291,7 +291,8 @@ def Fz_buy(player, h3_index, kind, qty):
         return {'error': 'qty between 1 and 10,000'}
     if not Territory.objects.filter(h3_index=h3_index, owner=player).exists():
         return {'error': 'Not your territory', 'status': 404}
-    cost = qty * Fz.POINT_COST[kind]
+    from terra_domini.utils.god import god_cost
+    cost = god_cost(player, qty * Fz.POINT_COST[kind])     # god mode: free
     with transaction.atomic():
         p = Player.objects.select_for_update().get(id=player.id)
         if float(p.tdc_in_game or 0) < cost:

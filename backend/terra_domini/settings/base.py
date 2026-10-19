@@ -66,6 +66,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'terra_domini.middleware.RequestTimingMiddleware',
     'terra_domini.middleware.GameSessionMiddleware',
+    'terra_domini.utils.god.GodModeMiddleware',
 ]
 
 ROOT_URLCONF = 'terra_domini.urls'

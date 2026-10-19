@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 import { FlaskConical, GraduationCap, Radar, ShieldAlert } from 'lucide-react'
 import { IconSVG } from '../shared/iconBank'
 import { api } from '../../services/api'
-import { useStore } from '../../store'
+import { useStore, useGodMode } from '../../store'
 import { playSound } from '../../hooks/useSound'
 import { celebrate } from '../shared/Celebrate'
 import { ForcesCounters } from '../combat/ForcesCounters'
@@ -19,6 +19,7 @@ const label: React.CSSProperties = { fontSize: 9, letterSpacing: 1.5, color: 'va
 
 export function KingdomArmyTab({ h3, onOpenMilitary }: { h3: string; onOpenMilitary?: () => void }) {
   const qc = useQueryClient()
+  const god = useGodMode()
   const { data, isLoading } = useQuery({
     queryKey: ['kingdom-overview', h3],
     queryFn: () => api.get(`/kingdom/${h3}/overview/`).then(r => r.data),
@@ -39,7 +40,7 @@ export function KingdomArmyTab({ h3, onOpenMilitary }: { h3: string; onOpenMilit
   }
 
   if (isLoading || !data) return <div style={{ padding: 30, textAlign: 'center', color: 'var(--hx-text-3)', fontSize: 12 }}>Loading forces…</div>
-  const bal = data.balance
+  const bal = god ? Infinity : data.balance     // god mode: everything is free server-side
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>

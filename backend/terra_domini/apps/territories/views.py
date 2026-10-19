@@ -890,7 +890,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         except Territory.DoesNotExist:
             return Response({'error': 'Territory not found or not yours'}, status=404)
 
-        tdc_cost = 50 if hours == 6 else 90
+        from terra_domini.utils.god import god_cost
+        tdc_cost = god_cost(request.user, 50 if hours == 6 else 90)
 
         if request.user.tdc_in_game < tdc_cost:
             return Response({'error': f'Need {tdc_cost} TDC, you have {request.user.tdc_in_game:.0f}'}, status=402)
@@ -1274,6 +1275,10 @@ class SafariViewSet(viewsets.GenericViewSet):
     def spawn_target(self, request):
         """POST /api/safari/spawn/ {lat, lon} — spawn new creature near player."""
         # Check cooldown: 1 active target at a time
+        from terra_domini.utils.god import is_god
+        god = is_god(request.user)     # god mode: a new hunt any time, no daily limit
+        if god:
+            SafariTarget.objects.filter(player=request.user, status='active').update(status='expired')
         active = SafariTarget.objects.filter(player=request.user, status='active').count()
         if active > 0:
             return Response({'error': 'You already have an active target. Capture or abandon it first.'}, status=400)
@@ -1282,7 +1287,7 @@ class SafariViewSet(viewsets.GenericViewSet):
         today = timezone.now().replace(hour=0, minute=0, second=0, microsecond=0)
         done = SafariTarget.objects.filter(player=request.user, assigned_at__gte=today).count()
         from terra_domini.apps.economy.balance import has_boost, use_charge
-        if done >= SAFARI_HUNTS_PER_DAY and not has_boost(request.user, 'safari_continuous'):   # shop '1H Continuous Safari'
+        if done >= SAFARI_HUNTS_PER_DAY and not god and not has_boost(request.user, 'safari_continuous'):   # shop '1H Continuous Safari'
             return Response({'error': f'{SAFARI_HUNTS_PER_DAY} hunts a day — new tracks tomorrow.'}, status=429)
         lat = float(request.data.get('lat', 48.8566))
         lon = float(request.data.get('lon', 2.3522))
@@ -1322,7 +1327,8 @@ class SafariViewSet(viewsets.GenericViewSet):
             x = (math.cos(math.radians(lat)) * math.sin(math.radians(t.target_lat))
                  - math.sin(math.radians(lat)) * math.cos(math.radians(t.target_lat)) * math.cos(math.radians(t.target_lon - lon)))
             bearing = (math.degrees(math.atan2(y, x)) + 360) % 360
-            if band != 'here':
+            from terra_domini.utils.god import is_god
+            if band != 'here' and not is_god(request.user):     # god mode: unlimited scans
                 t.tries_left -= 1
             t.probes = t.probes + [{'lat': round(lat, 4), 'lon': round(lon, 4), 'km': round(km, 1), 'band': band, 'bearing': round(bearing)}]
             if t.tries_left <= 0 and band != 'here':
@@ -1382,7 +1388,9 @@ class SafariViewSet(viewsets.GenericViewSet):
                                             + (' · its hex is yours: a new base' if won_hex else '')})
             ring = h3lib.grid_distance(cell, target.target_h3)
             target.probes = target.probes + [{'h3': cell, 'ring': ring}]
-            target.tries_left -= 1
+            from terra_domini.utils.god import is_god
+            if not is_god(request.user):
+                target.tries_left -= 1
             if target.tries_left <= 0:
                 target.status = 'expired'
             target.save()

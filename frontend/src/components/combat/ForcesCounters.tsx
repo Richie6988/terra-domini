@@ -8,7 +8,7 @@ import toast from 'react-hot-toast'
 import { Swords, Shield, Eye } from 'lucide-react'
 import { IconSVG } from '../shared/iconBank'
 import { api } from '../../services/api'
-import { useStore } from '../../store'
+import { useStore, useGodMode } from '../../store'
 import { playSound } from '../../hooks/useSound'
 
 export type Forces = { attack: number; defense: number; spy: number }
@@ -23,6 +23,7 @@ export function ForcesCounters({ h3, forces, pointCost, compact = false }: {
   h3: string; forces: Forces; pointCost: Record<string, number>; compact?: boolean
 }) {
   const qc = useQueryClient()
+  const god = useGodMode()
   const [qty, setQty] = useState(10)
   const [busy, setBusy] = useState<string | null>(null)
   const buy = async (kind: keyof Forces) => {
@@ -51,7 +52,7 @@ export function ForcesCounters({ h3, forces, pointCost, compact = false }: {
               </div>
               <button onClick={() => buy(k)} disabled={busy !== null} className="btn-game btn-game-gold"
                 style={{ width: '100%', padding: '6px 4px', fontSize: 10, letterSpacing: 0.5, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 3 }}>
-                +{qty} · <IconSVG id="hex_coin" size={11} />{(qty * (pointCost?.[k] || 0)).toLocaleString()}
+                +{qty} · {god ? 'FREE' : <><IconSVG id="hex_coin" size={11} />{(qty * (pointCost?.[k] || 0)).toLocaleString()}</>}
               </button>
             </div>
           )

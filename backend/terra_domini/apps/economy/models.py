@@ -276,6 +276,8 @@ class LotteryTicket(models.Model):
     prize = models.IntegerField(default=0)
     jackpot = models.BooleanField(default=False)
     free = models.BooleanField(default=False)
+    won_h3 = models.CharField(max_length=20, blank=True, default='')      # land prize: the hex won
+    won_kind = models.CharField(max_length=10, blank=True, default='')    # 'territory' | 'poi'
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:

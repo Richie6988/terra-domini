@@ -250,6 +250,8 @@ urlpatterns = [
     # Any URL that doesn't match /api/ /admin/ /health/ /static/ /ws/
     # gets served the React app — React Router handles client-side routing
     # Servir les assets Vite buildés (/assets/index-xxx.js etc.)
+    # Player uploads (kingdom pictures) — nginx serves /media/ in prod, this covers dev
+    re_path(r'^media/(?P<path>.*)$', static_serve, {'document_root': str(settings.MEDIA_ROOT)}),
     re_path(r'^assets/(?P<path>.*)$', static_serve, {
         'document_root': str(settings.BASE_DIR.parent / 'frontend' / 'dist' / 'assets'),
     }),

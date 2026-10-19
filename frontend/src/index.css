@@ -1198,3 +1198,7 @@ html {
 .hx-radar-dial-sweep { transform-origin: 0 0; animation: hx-radar-spin 2.6s linear infinite; }
 @keyframes hx-radar-spin { to { transform: rotate(360deg) } }
 @media (prefers-reduced-motion: reduce) { .hx-radar-sweep, .hx-radar-dial-sweep { animation: none } }
+/* Lucky wheel bulbs blink while it spins */
+@keyframes hx-wheel-bulb { 0%, 100% { opacity: 1 } 50% { opacity: 0.35 } }
+.hx-wheel-bulb { animation: hx-wheel-bulb 0.4s steps(2) infinite }
+@media (prefers-reduced-motion: reduce) { .hx-wheel-bulb { animation: none } }

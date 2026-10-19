@@ -75,7 +75,8 @@ def kingdom_upgrade(request, h3_index):
         lvl = best.level if best else 0
         if lvl >= U.MAX_LEVEL:
             return Response({'error': f"{U.UPGRADES[key]['name']} already at max level"}, status=400)
-        cost = U.upgrade_cost(key, lvl)
+        from terra_domini.utils.god import god_cost
+        cost = god_cost(player, U.upgrade_cost(key, lvl))     # god mode: free
         if float(player.tdc_in_game or 0) < cost:
             return Response({'error': f'Need {cost:,} HEX', 'cost': cost}, status=400)
         Player.objects.filter(pk=player.pk).update(tdc_in_game=F('tdc_in_game') - cost)

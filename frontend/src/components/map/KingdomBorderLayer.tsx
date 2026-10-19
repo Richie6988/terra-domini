@@ -210,6 +210,10 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
             <path d="M12 1.5 21.1 6.75v10.5L12 22.5 2.9 17.25V6.75z" fill="${color}" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
             <text x="12" y="16" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="10" font-weight="900" fill="#06101e">${k.tier}</text>
           </svg>`
+        // Kingdom picture (uploaded /media/ file or https link), as a round avatar before the emblem
+        const pic: string = (k as any).embed_url || ''
+        const avatar = /^(https:\/\/|\/media\/)[^"'()<>\s]+$/.test(pic)
+          ? `<span style="width:${size - 6}px;height:${size - 6}px;border-radius:50%;flex-shrink:0;border:1.5px solid ${color};background:#0b1626 url('${pic}') center/cover"></span>` : ''
         const crown = `<svg width="11" height="11" viewBox="0 0 24 24" fill="#FCD34D" style="flex-shrink:0"><path d="M3 7l4.5 4L12 4l4.5 7L21 7l-2 12H5z"/></svg>`
         const icon = L.divIcon({
           html: `<div class="td-kingdom-pill" style="
@@ -221,7 +225,7 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
             box-shadow:0 0 14px ${color}55,0 3px 10px rgba(0,0,0,0.55),inset 0 1px 0 rgba(255,255,255,0.08);
             cursor:pointer;white-space:nowrap;
           ">
-            ${emblem}
+            ${avatar}${emblem}
             <span style="font-family:'Share Tech Mono',monospace;font-size:${compact ? 13 : 15}px;font-weight:700;color:#fff;line-height:1">${k.size}</span>
             ${compact ? '' : `<span style="width:1px;height:14px;background:rgba(255,255,255,0.18)"></span>
             ${isMain ? crown : ''}

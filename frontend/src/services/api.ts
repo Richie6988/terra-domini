@@ -28,6 +28,9 @@ api.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`
   }
+  // GOD MODE switch (staff): the server lifts discovery / safari / price limits — it checks is_staff itself
+  const st = useStore.getState()
+  if (st.godMode && (st.player as any)?.is_staff) config.headers['X-Hexod-God'] = '1'
   return config
 })
 
