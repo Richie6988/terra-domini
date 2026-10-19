@@ -8,7 +8,8 @@ Wikipedia enrichment for the HEXOD master DB — run where Wikipedia is reachabl
 
 For each English Wikipedia article (wiki_url of tokens, creatures, sources/candidates/*.csv) it records:
 exists, canonical title, coordinates, the best picture (1280 px) with author + license, 3-sentence intro, Wikidata id.
-Picture choice (image_v 2, owner 2026-10-19 "beautiful images for the tokens"): the Wikidata main image (P18), else the
+Picture choice (image_v 3): articles listed in column H of the owner's extracts keep their lead picture as is (already
+validated). Others (owner 2026-10-19 "beautiful images for the tokens"): the Wikidata main image (P18), else the
 article's lead picture, else its best other photo — maps, flags, logos, coats of arms, diagrams, SVG drawings, small
 files and odd shapes are refused. Rows picked with an older rule are re-picked on the next run (pictures only).
 Non-free pictures (fair use) are never kept. Output: data/hexod_db/sources/wiki_enrich.csv (resumable cache,
@@ -31,7 +32,7 @@ UA = 'HEXOD-wiki-enrich/1.0 (https://hexod.paintit.click; game token database)'
 FIELDS = ['title', 'exists', 'page_title', 'lat', 'lon', 'image_file', 'image_url', 'image_license',
           'image_artist', 'image_license_url', 'extract', 'wikidata', 'fetched_at', 'image_w', 'image_h', 'image_v']
 WD_API = 'https://www.wikidata.org/w/api.php'
-IMAGE_V = 2            # picture rule version (bump to re-pick every picture)
+IMAGE_V = 3            # picture rule version (bump to re-pick every picture)
 THUMB_W = 1280         # sharp on a 640 px card at 2x
 MIN_W = 800            # smaller originals look blurry on the card
 BAD_WORDS = re.compile(r'\b(maps?|karte|carte|mapa|locator|flag|flags|drapeau|coat of arms|blason|wappen|escudo|seal|logo|'
@@ -177,6 +178,30 @@ def article_images(titles):
     return out
 
 
+_TRUSTED = None
+
+
+def trusted_titles() -> set:
+    """Articles whose pictures the owner already validated: column H ('link') of the source extracts
+    (nature / wiki / city / country_full_extract.xlsx). Their lead picture is used as is (owner 2026-10-19)."""
+    global _TRUSTED
+    if _TRUSTED is None:
+        _TRUSTED = set()
+        try:
+            import openpyxl
+            for f in ('nature_full_extract.xlsx', 'wiki_full_extract.xlsx', 'city_full_extract.xlsx', 'country_full_extract.xlsx'):
+                if (SRC / f).exists():
+                    ws = openpyxl.load_workbook(SRC / f, read_only=True).worksheets[0]
+                    rows = ws.iter_rows(values_only=True)
+                    head = [str(h or '') for h in next(rows)]
+                    k = head.index('link') if 'link' in head else 7
+                    _TRUSTED |= {title_of(str(r[k] or '')) for r in rows if len(r) > k and r[k]}
+        except Exception as e:      # openpyxl missing: every picture goes through the normal choice
+            print(f'  trusted links not loaded ({e})', file=sys.stderr)
+        _TRUSTED.discard('')
+    return _TRUSTED
+
+
 def pick_pictures(rows):
     """Choose the best picture for each found row (Wikidata P18 → lead picture → best article photo). Mutates rows."""
     found = [r for r in rows if str(r.get('exists')) == '1']
@@ -197,12 +222,16 @@ def pick_pictures(rows):
     info = {}
     for j in range(0, len(files), 50):
         info.update(fetch_images(files[j:j + 50])); time.sleep(1)
+    trusted = trusted_titles()
     for r in found:
-        choice = next((f for f in (p18.get(r.get('wikidata')), r.get('image_file')) if f and good_photo(f, info.get(f))), None)
+        lead = r.get('image_file')
+        if (r.get('title') in trusted or r.get('page_title') in trusted) and lead and info.get(lead):
+            choice = lead              # picture already validated by the owner: the article's lead picture, as is
+        else:
+            choice = next((f for f in (p18.get(r.get('wikidata')), r.get('image_file')) if f and good_photo(f, info.get(f))), None)
         if not choice:
             others = [f for f in extra.get(r.get('page_title'), []) if good_photo(f, info.get(f))]
             choice = max(others, key=lambda f: photo_score(info[f]), default=None)
-        lead = r.get('image_file')
         if not choice and lead and info.get(lead) and not bad_file(lead) and info[lead][4] >= 400 \
                 and info[lead][6] in ('image/jpeg', 'image/png', 'image/webp'):
             choice = lead          # old events: a small archive photo still beats a satellite view
