@@ -3,7 +3,7 @@
  * d'intérêt d'un zoom plus élevé"). Below zoom 13 the hex layer is too dense to read, so the map shows
  * one marker per POI, rarest first: legendary from the continent view, epic from the country view,
  * rare from the region view, everything from the city view (GET /api/map/pois/).
- * Tap a marker → fly to the hex.
+ * Tap a marker → fly to the hex and open its card.
  */
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
@@ -71,7 +71,10 @@ export function PoiOverviewLayer({ map, zoom, center }: { map: L.Map | null; zoo
             iconSize: [sz, sz], iconAnchor: [sz / 2, sz / 2],
           })
           const m = L.marker([p.lat, p.lon], { icon, zIndexOffset: 500 + (sz * 10), keyboard: false, title: p.name })
-          m.on('click', () => map.flyTo([p.lat, p.lon], 15, { duration: 1.2 }))
+          m.on('click', () => {   // zoom in AND open its card (owner 2026-10-19): same path as a tap on the hex
+            map.once('moveend', () => map.fire('click', { latlng: L.latLng(p.lat, p.lon), originalEvent: { target: map.getContainer() } } as any))
+            map.flyTo([p.lat, p.lon], 15, { duration: 1.2 })
+          })
           layer.addLayer(m)
         }
         // Zones with POIs but no visible marker yet: a counter bubble (tap → zoom into the zone)

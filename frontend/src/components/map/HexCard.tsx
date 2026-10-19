@@ -16,6 +16,7 @@ import toast from 'react-hot-toast'
 import { Swords, Lock, Shield, User, Compass, Coins, Crown } from 'lucide-react'
 import { IconSVG } from '../shared/iconBank'
 import { hexPerDay } from '../../services/balance'
+import { gridDisk } from 'h3-js'
 
 /* ── Rarity ─────────────────────────────────────────────── */
 const RARITY: Record<string, {
@@ -183,11 +184,27 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
   }
   const onCelebrated = useCallback(() => doneRef.current(), [])
 
+  // Owned hex: the token opens first; its button leads to DEFENSE (lone territory) or KINGDOM (connected hexes),
+  // both on the ARMY tab where the stationed troops, defense and upgrades are (owner 2026-10-19)
+  const [hub, setHub] = useState(false)
+  const cluster = useMemo(() => {
+    if (!isOwned) return [t.h3_index]
+    const mine = useStore.getState().territories
+    const seen = new Set([t.h3_index]), todo = [t.h3_index]
+    while (todo.length && seen.size < 200) {
+      for (const n of gridDisk(todo.pop()!, 1)) {
+        if (!seen.has(n) && (mine as any)[n]?.owner_id === player?.id) { seen.add(n); todo.push(n) }
+      }
+    }
+    return [t.h3_index, ...[...seen].filter(h => h !== t.h3_index)]
+  }, [isOwned, t.h3_index, player?.id])
+  const inKingdom = cluster.length > 1
+
   // For owned territories, wrap as kingdom-like shape for OwnedTerritoryHub
   const asKingdom = useMemo(() => ({
     cluster_id: t.cluster_id || t.h3_index,
-    h3_indexes: [t.h3_index],
-    size: 1,
+    h3_indexes: cluster,
+    size: cluster.length,
     tier: 1,
     is_main: false,
     tdc_per_24h: income,
@@ -204,14 +221,14 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
       defense_points: t.defense_points || 100,
       is_capital: true,
     }],
-  }), [t, cardName, rarity, biome, income])
+  }), [t, cardName, rarity, biome, income, cluster])
 
   return (<>
     {/* OWNED hex: show 3-tab hub (Gallery/Customize/Kingdom) */}
-    {isOwned && <OwnedTerritoryHub kingdom={asKingdom as any} onClose={onClose} />}
+    {isOwned && hub && <OwnedTerritoryHub kingdom={asKingdom as any} initialTab="army" onClose={onClose} />}
 
-    {/* NON-OWNED hex (free or enemy): keep Token3D as primary for claim flow */}
-    {!isOwned && !celebrating && createPortal(
+    {/* Token first for every hex (owned: DEFENSE / KINGDOM button below) */}
+    {!(isOwned && hub) && !celebrating && createPortal(
     <Token3DViewer
       visible={true}
       onClose={onClose}
@@ -353,9 +370,9 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
               }}><Swords size={17} />ATTACK</button>
             )}
             {isOwned && (
-              <button onClick={() => { onClose(); setTimeout(() => useStore.getState().setActivePanel('kingdom'), 100) }} className="btn-game btn-game-blue" style={{
-                flex: 1, minHeight: 44, fontSize: 13, letterSpacing: 0.5,
-              }}>KINGDOM</button>
+              <button onClick={() => setHub(true)} className={`btn-game ${inKingdom ? 'btn-game-gold' : 'btn-game-blue'}`} style={{
+                flex: 1, minHeight: 46, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 14, letterSpacing: 0.5,
+              }}>{inKingdom ? <><Crown size={16} />KINGDOM · {cluster.length} HEXES</> : <><Shield size={16} />DEFENSE</>}</button>
             )}
           </div>
         </div>

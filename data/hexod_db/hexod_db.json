@@ -25437,10 +25437,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Temple_Mount",
    "image": "",
    "token_id": 100214,
    "aliases": "Old City of Jerusalem",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 63.4,
    "on_map": true
@@ -26124,10 +26129,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/AT%26T_Stadium",
    "image": "",
    "token_id": 100078,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -26189,10 +26199,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Anti-Atlas",
    "image": "",
    "token_id": 100720,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 49.5,
    "on_map": true
@@ -26339,10 +26354,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Library_of_Alexandria",
    "image": "",
    "token_id": 100688,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 59.4,
    "on_map": true
@@ -26434,10 +26454,15 @@
    "visitors_score": 0,
    "geopolitical_score": 75.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Almaty",
    "image": "",
    "token_id": 101064,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 53.4,
    "on_map": true
@@ -26494,10 +26519,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Altai_Mountains",
    "image": "",
    "token_id": 100378,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 49.5,
    "on_map": true
@@ -26584,10 +26614,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Amazon_(company)",
    "image": "",
    "token_id": 100227,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -26614,10 +26649,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Amboseli_National_Park",
    "image": "",
    "token_id": 100261,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -26644,10 +26684,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Amphitheatre_of_El_Jem",
    "image": "",
    "token_id": 100253,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 59.4,
    "on_map": true
@@ -26764,10 +26809,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Apia",
    "image": "",
    "token_id": 101101,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -26914,10 +26964,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Atlas_Mountains",
    "image": "",
    "token_id": 100717,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 49.5,
    "on_map": true
@@ -26974,10 +27029,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Avenue_of_the_Baobabs",
    "image": "",
    "token_id": 100282,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -27004,10 +27064,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Awash_National_Park",
    "image": "",
    "token_id": 100696,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -27124,10 +27189,15 @@
    "visitors_score": 0,
    "geopolitical_score": 75.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Bahrain_Financial_Harbour",
    "image": "",
    "token_id": 100529,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 53.4,
    "on_map": true
@@ -27244,10 +27314,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Bangalore",
    "image": "",
    "token_id": 100950,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -27274,10 +27349,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Bangui",
    "image": "",
    "token_id": 101076,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -27424,10 +27504,15 @@
    "visitors_score": 0,
    "geopolitical_score": 75.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Downtown_Beirut",
    "image": "",
    "token_id": 100604,
    "aliases": "Beirut",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 53.4,
    "on_map": true
@@ -27454,10 +27539,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Kingdom_of_Benin",
    "image": "",
    "token_id": 100281,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 59.4,
    "on_map": true
@@ -27514,10 +27604,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Bissau",
    "image": "",
    "token_id": 101079,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -27574,10 +27669,15 @@
    "visitors_score": 0,
    "geopolitical_score": 70.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Bombay_Stock_Exchange",
    "image": "",
    "token_id": 100025,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 45.5,
    "on_map": true
@@ -27634,10 +27734,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Heart_of_Borneo",
    "image": "",
    "token_id": 100440,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -27880,10 +27985,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Cango_Caves",
    "image": "",
    "token_id": 100710,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -27910,10 +28020,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Cardamom_Mountains",
    "image": "",
    "token_id": 100822,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -28120,10 +28235,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Chitwan_National_Park",
    "image": "",
    "token_id": 100623,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -28150,10 +28270,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Chobe_National_Park",
    "image": "",
    "token_id": 100595,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -28180,10 +28305,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Congo_Basin",
    "image": "",
    "token_id": 100088,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -28210,10 +28340,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Conkouati-Douli_National_Park",
    "image": "",
    "token_id": 100725,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -28240,10 +28375,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Mosque%E2%80%93Cathedral_of_C%C3%B3rdoba",
    "image": "",
    "token_id": 100875,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 61.9,
    "on_map": true
@@ -28390,10 +28530,15 @@
    "visitors_score": 0,
    "geopolitical_score": 75.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Dar_es_Salaam",
    "image": "",
    "token_id": 101017,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 53.4,
    "on_map": true
@@ -28420,10 +28565,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Dili",
    "image": "",
    "token_id": 101097,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -28450,10 +28600,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Dinder_National_Park",
    "image": "",
    "token_id": 100692,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -28630,10 +28785,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Draa_River",
    "image": "",
    "token_id": 100718,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -28720,10 +28880,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Dzong_architecture",
    "image": "",
    "token_id": 100619,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -28750,14 +28915,14 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Economic_Community_of_West_African_States",
    "image": "",
    "token_id": 100484,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy opinionated stats removed. Facts generic. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "common",
    "score": 52.0,
@@ -28995,10 +29160,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Everglades_National_Park",
    "image": "",
    "token_id": 100661,
    "aliases": "Everglades Sawgrass",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -29055,10 +29225,15 @@
    "visitors_score": 0,
    "geopolitical_score": 70.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Frankfurt_Stock_Exchange",
    "image": "",
    "token_id": 100026,
    "aliases": "DE-CIX Frankfurt",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 45.5,
    "on_map": true
@@ -29085,10 +29260,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Garden_Route",
    "image": "",
    "token_id": 100709,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -29205,10 +29385,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Greenland_ice_sheet",
    "image": "",
    "token_id": 100436,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -29355,10 +29540,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/K%C4%ABlauea",
    "image": "",
    "token_id": 100434,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 53.5,
    "on_map": true
@@ -29535,10 +29725,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Hollywood_Walk_of_Fame",
    "image": "",
    "token_id": 100389,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -29565,10 +29760,15 @@
    "visitors_score": 0,
    "geopolitical_score": 70.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Hong_Kong_Stock_Exchange",
    "image": "",
    "token_id": 100021,
    "aliases": "PCCW HK Internet Exchange",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 45.5,
    "on_map": true
@@ -29595,10 +29795,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Victoria_Peak",
    "image": "",
    "token_id": 100467,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 49.5,
    "on_map": true
@@ -29625,10 +29830,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Honiara",
    "image": "",
    "token_id": 101092,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -29655,10 +29865,15 @@
    "visitors_score": 0,
    "geopolitical_score": 75.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Honolulu",
    "image": "",
    "token_id": 101072,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 53.4,
    "on_map": true
@@ -29745,10 +29960,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Hustai_National_Park",
    "image": "",
    "token_id": 100773,
    "aliases": "Khustain Nuruu Horse",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -29935,10 +30155,15 @@
    "visitors_score": 0,
    "geopolitical_score": 70.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Japan_Exchange_Group",
    "image": "",
    "token_id": 100019,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 45.5,
    "on_map": true
@@ -29965,10 +30190,15 @@
    "visitors_score": 0,
    "geopolitical_score": 60.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Port_of_Jebel_Ali",
    "image": "",
    "token_id": 100211,
    "aliases": "Dubai Jebel Ali Desalination",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 42.5,
    "on_map": true
@@ -30025,10 +30255,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Jeju_Volcanic_Island_and_Lava_Tubes",
    "image": "",
    "token_id": 100861,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -30085,10 +30320,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Karakorum",
    "image": "",
    "token_id": 100376,
    "aliases": "Karakorum Erdene Zuu",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 59.4,
    "on_map": true
@@ -30175,10 +30415,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Kerala_backwaters",
    "image": "",
    "token_id": 100317,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -30205,10 +30450,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Khao_Yai_National_Park",
    "image": "",
    "token_id": 100813,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -30265,10 +30515,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Kingstown",
    "image": "",
    "token_id": 101102,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -30325,10 +30580,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Koh_Ker",
    "image": "",
    "token_id": 100823,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 59.4,
    "on_map": true
@@ -30385,10 +30645,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Konark_Sun_Temple",
    "image": "",
    "token_id": 100617,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 59.4,
    "on_map": true
@@ -30445,10 +30710,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Kruger_National_Park",
    "image": "",
    "token_id": 100273,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -30535,10 +30805,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Lewa_Wildlife_Conservancy",
    "image": "",
    "token_id": 100699,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -30565,10 +30840,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Lilongwe",
    "image": "",
    "token_id": 101089,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -30595,10 +30875,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Lom%C3%A9",
    "image": "",
    "token_id": 101096,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -30685,10 +30970,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Lop%C3%A9_National_Park",
    "image": "",
    "token_id": 100724,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -30715,10 +31005,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Madaba_Map",
    "image": "",
    "token_id": 100742,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 59.4,
    "on_map": true
@@ -30775,10 +31070,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Majuro",
    "image": "",
    "token_id": 101086,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -30925,10 +31225,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Masada",
    "image": "",
    "token_id": 100303,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 59.4,
    "on_map": true
@@ -31015,10 +31320,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/McLeod_Ganj",
    "image": "",
    "token_id": 100791,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 61.9,
    "on_map": true
@@ -31045,10 +31355,15 @@
    "visitors_score": 0,
    "geopolitical_score": 75.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Medell%C3%ADn",
    "image": "",
    "token_id": 101049,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 53.4,
    "on_map": true
@@ -31075,10 +31390,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Melbourne_Cricket_Ground",
    "image": "",
    "token_id": 100077,
    "aliases": "Melbourne",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -31225,10 +31545,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Mgahinga_Gorilla_National_Park",
    "image": "",
    "token_id": 100706,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -31255,10 +31580,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Microsoft_Redmond_campus",
    "image": "",
    "token_id": 100226,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -31315,10 +31645,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Monrovia",
    "image": "",
    "token_id": 101083,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -31345,10 +31680,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Monteverde_Cloud_Forest_Reserve",
    "image": "",
    "token_id": 100912,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -31405,10 +31745,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Moroni,_Comoros",
    "image": "",
    "token_id": 101085,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -31495,10 +31840,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Mount_Kenya_National_Park",
    "image": "",
    "token_id": 100263,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 49.5,
    "on_map": true
@@ -31525,10 +31875,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Musandam_Peninsula",
    "image": "",
    "token_id": 100754,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -31765,10 +32120,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Niamey",
    "image": "",
    "token_id": 101073,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -32515,10 +32875,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Perfume_Pagoda",
    "image": "",
    "token_id": 100819,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 61.9,
    "on_map": true
@@ -32545,10 +32910,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Perito_Moreno_Glacier",
    "image": "",
    "token_id": 100424,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -32635,10 +33005,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Port_Moresby",
    "image": "",
    "token_id": 101071,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -33031,10 +33406,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Land_of_Frankincense",
    "image": "",
    "token_id": 100757,
    "aliases": "Salalah Khareef Monsoon",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -33361,10 +33741,15 @@
    "visitors_score": 0,
    "geopolitical_score": 70.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Shenzhen_Stock_Exchange",
    "image": "",
    "token_id": 100023,
    "aliases": "Shenzhen Tech Hub, Tencent Shenzhen HQ",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 45.5,
    "on_map": true
@@ -33391,10 +33776,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Valle_dei_Templi",
    "image": "",
    "token_id": 100869,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 59.4,
    "on_map": true
@@ -33451,10 +33841,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Singapore_Botanic_Gardens",
    "image": "",
    "token_id": 100835,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -33571,10 +33966,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Sixty_Dome_Mosque",
    "image": "",
    "token_id": 100808,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 61.9,
    "on_map": true
@@ -33691,10 +34091,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/SpaceX",
    "image": "",
    "token_id": 100233,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -33721,10 +34126,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Sukhothai_Historical_Park",
    "image": "",
    "token_id": 100452,
    "aliases": "Sukhothai Thai Kingdom",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 59.4,
    "on_map": true
@@ -33751,10 +34161,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Tana_Toraja_Regency",
    "image": "",
    "token_id": 100826,
    "aliases": "Tana Toraja",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 59.4,
    "on_map": true
@@ -33901,10 +34316,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Suva",
    "image": "",
    "token_id": 101070,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -33961,10 +34381,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/S%C3%A3o_Tom%C3%A9",
    "image": "",
    "token_id": 101093,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -34021,10 +34446,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Tarawa",
    "image": "",
    "token_id": 101082,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -34141,10 +34571,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Gorkhi-Terelj_National_Park",
    "image": "",
    "token_id": 100866,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -34201,10 +34636,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Tierra_del_Fuego",
    "image": "",
    "token_id": 100923,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -34501,10 +34941,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Ur",
    "image": "",
    "token_id": 100306,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 59.4,
    "on_map": true
@@ -34681,14 +35126,14 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/World_Health_Organization",
    "image": "",
    "token_id": 100112,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy opinionated stats removed. Facts generic. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "common",
    "score": 52.0,
@@ -35051,10 +35496,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Yala_National_Park",
    "image": "",
    "token_id": 100805,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -35201,10 +35651,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Zakouma_National_Park",
    "image": "",
    "token_id": 100723,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -35231,10 +35686,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/ISimangaliso_Wetland_Park",
    "image": "",
    "token_id": 100707,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 57.1,
    "on_map": true
@@ -35291,10 +35751,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Cape_of_Good_Hope",
    "image": "",
    "token_id": 100271,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.0,
    "on_map": true
@@ -35754,10 +36219,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Witwatersrand",
    "image": "",
    "token_id": 100198,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 53.5,
    "on_map": true
@@ -35945,10 +36415,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Antarctic_Peninsula",
    "image": "",
    "token_id": 100435,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -36075,10 +36550,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Asunci%C3%B3n",
    "image": "",
    "token_id": 101091,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -36261,10 +36741,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Baihetan_Dam",
    "image": "",
    "token_id": 100003,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -36291,10 +36776,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Banda_Islands",
    "image": "",
    "token_id": 100827,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 54.6,
    "on_map": true
@@ -36321,10 +36811,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Bridgetown",
    "image": "",
    "token_id": 100906,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 60.4,
    "on_map": true
@@ -36571,10 +37066,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Caracas",
    "image": "",
    "token_id": 101048,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -36827,10 +37327,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Dakar",
    "image": "",
    "token_id": 101025,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -37047,10 +37552,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Event_Horizon_Telescope",
    "image": "",
    "token_id": 100055,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -37227,10 +37737,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Fes_el_Bali",
    "image": "",
    "token_id": 100248,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 60.4,
    "on_map": true
@@ -37347,10 +37862,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Grand_Coulee_Dam",
    "image": "",
    "token_id": 100007,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -37377,10 +37897,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Grenada",
    "image": "",
    "token_id": 100907,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 54.6,
    "on_map": true
@@ -37468,10 +37993,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Guri_Dam",
    "image": "",
    "token_id": 100005,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -37498,10 +38028,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Gyeongju_Historic_Areas",
    "image": "",
    "token_id": 100860,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 60.4,
    "on_map": true
@@ -37588,10 +38123,15 @@
    "visitors_score": 0,
    "geopolitical_score": 75.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Ho_Chi_Minh_City",
    "image": "",
    "token_id": 101056,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 53.4,
    "on_map": true
@@ -37678,10 +38218,15 @@
    "visitors_score": 0,
    "geopolitical_score": 75.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Houston",
    "image": "",
    "token_id": 101040,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 53.4,
    "on_map": true
@@ -37738,10 +38283,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/IceCube_Neutrino_Observatory",
    "image": "",
    "token_id": 100052,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -38094,10 +38644,15 @@
    "visitors_score": 0,
    "geopolitical_score": 65.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Kadena_Air_Base",
    "image": "",
    "token_id": 100943,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 64.0,
    "on_map": true
@@ -38124,10 +38679,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Kampala",
    "image": "",
    "token_id": 101022,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -38250,10 +38810,15 @@
    "visitors_score": 0,
    "geopolitical_score": 65.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Khmeimim_Air_Base",
    "image": "",
    "token_id": 100109,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 64.0,
    "on_map": true
@@ -38310,10 +38875,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Kingston,_Jamaica",
    "image": "",
    "token_id": 101081,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -38591,10 +39161,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Medina_of_Tunis",
    "image": "",
    "token_id": 100254,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 60.4,
    "on_map": true
@@ -38686,10 +39261,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Montevideo",
    "image": "",
    "token_id": 101099,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -39071,10 +39651,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Pattadakal",
    "image": "",
    "token_id": 100789,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 60.4,
    "on_map": true
@@ -39256,10 +39841,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Port_of_Spain",
    "image": "",
    "token_id": 101098,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -39406,10 +39996,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Quebrada_de_Humahuaca",
    "image": "",
    "token_id": 100666,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 60.4,
    "on_map": true
@@ -39501,10 +40096,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Art_Nouveau_architecture_in_Riga",
    "image": "",
    "token_id": 100891,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 60.4,
    "on_map": true
@@ -39591,10 +40191,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Rothenburg_ob_der_Tauber",
    "image": "",
    "token_id": 100406,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 60.4,
    "on_map": true
@@ -39621,14 +40226,14 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Ch%C3%A2teau_Mouton_Rothschild",
    "image": "",
    "token_id": 100169,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy opinionated stats removed. Facts generic. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "common",
    "score": 52.0,
@@ -39786,10 +40391,15 @@
    "visitors_score": 0,
    "geopolitical_score": 80.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/San_Salvador",
    "image": "",
    "token_id": 101094,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.3,
    "on_map": true
@@ -39881,10 +40491,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Tomb_of_Hafez",
    "image": "",
    "token_id": 100602,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 60.4,
    "on_map": true
@@ -40066,10 +40681,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Sudd",
    "image": "",
    "token_id": 100932,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -40096,10 +40716,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Sun_Moon_Lake",
    "image": "",
    "token_id": 100374,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -40251,10 +40876,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/The_Venetian_Macao",
    "image": "",
    "token_id": 100074,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -40311,10 +40941,15 @@
    "visitors_score": 0,
    "geopolitical_score": 75.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Toronto",
    "image": "",
    "token_id": 101041,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 53.4,
    "on_map": true
@@ -40401,10 +41036,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Tucuru%C3%AD_Dam",
    "image": "",
    "token_id": 100006,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -40526,10 +41166,15 @@
    "visitors_score": 0,
    "geopolitical_score": 75.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Yangon",
    "image": "",
    "token_id": 101062,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 53.4,
    "on_map": true
@@ -40556,10 +41201,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Copperbelt",
    "image": "",
    "token_id": 100492,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -40946,10 +41596,15 @@
    "visitors_score": 0,
    "geopolitical_score": 100.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Amman",
    "image": "",
    "token_id": 101032,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 63.2,
    "on_map": true
@@ -41072,10 +41727,15 @@
    "visitors_score": 0,
    "geopolitical_score": 100.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Belgrade",
    "image": "",
    "token_id": 101010,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 63.2,
    "on_map": true
@@ -41207,10 +41867,15 @@
    "visitors_score": 0,
    "geopolitical_score": 95.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Chengdu",
    "image": "",
    "token_id": 100985,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 60.3,
    "on_map": true
@@ -41307,10 +41972,15 @@
    "visitors_score": 0,
    "geopolitical_score": 100.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Damascus",
    "image": "",
    "token_id": 101033,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 63.2,
    "on_map": true
@@ -41437,10 +42107,15 @@
    "visitors_score": 0,
    "geopolitical_score": 100.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Hanoi",
    "image": "",
    "token_id": 101057,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 63.2,
    "on_map": true
@@ -41804,10 +42479,15 @@
    "visitors_score": 0,
    "geopolitical_score": 100.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Riyadh",
    "image": "",
    "token_id": 101026,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 63.2,
    "on_map": true
@@ -41904,10 +42584,15 @@
    "visitors_score": 0,
    "geopolitical_score": 100.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Santiago",
    "image": "",
    "token_id": 101046,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 63.2,
    "on_map": true
@@ -41934,10 +42619,15 @@
    "visitors_score": 0,
    "geopolitical_score": 100.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Stockholm",
    "image": "",
    "token_id": 101003,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 63.2,
    "on_map": true
@@ -42069,14 +42759,14 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Aokigahara",
    "image": "",
    "token_id": 100858,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy terse text replaced; dubious stats (\"100 suicides/yr\", prices, etc.) removed. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "uncommon",
    "score": 61.4,
@@ -42140,14 +42830,14 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Arches_National_Park",
    "image": "",
    "token_id": 100926,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy terse text replaced; dubious stats (\"100 suicides/yr\", prices, etc.) removed. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "uncommon",
    "score": 61.4,
@@ -42175,14 +42865,14 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Bennington_Triangle",
    "image": "",
    "token_id": 100960,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy terse text replaced; dubious stats (\"100 suicides/yr\", prices, etc.) removed. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "uncommon",
    "score": 61.4,
@@ -42210,10 +42900,15 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Bilderberg_Meeting",
    "image": "",
    "token_id": 100119,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 58.0,
    "on_map": true
@@ -42240,14 +42935,14 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Cliffs_of_Moher",
    "image": "",
    "token_id": 100411,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy terse text replaced; dubious stats (\"100 suicides/yr\", prices, etc.) removed. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "uncommon",
    "score": 61.4,
@@ -42375,14 +43070,14 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Derinkuyu_underground_city",
    "image": "",
    "token_id": 100733,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy terse text replaced; dubious stats (\"100 suicides/yr\", prices, etc.) removed. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "uncommon",
    "score": 61.4,
@@ -42515,10 +43210,15 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Dulce_Base",
    "image": "",
    "token_id": 100958,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 58.0,
    "on_map": true
@@ -42616,14 +43316,14 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Gobi_Desert",
    "image": "",
    "token_id": 100375,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy terse text replaced; dubious stats (\"100 suicides/yr\", prices, etc.) removed. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "common",
    "score": 61.4,
@@ -42751,14 +43451,14 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/High-frequency_Active_Auroral_Research_Program",
    "image": "",
    "token_id": 100947,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy opinionated stats removed. Facts generic. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "uncommon",
    "score": 61.4,
@@ -43132,10 +43832,15 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Choeung_Ek",
    "image": "",
    "token_id": 100337,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 58.0,
    "on_map": true
@@ -43232,10 +43937,15 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Raven_Rock_Mountain_Complex",
    "image": "",
    "token_id": 100104,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 58.0,
    "on_map": true
@@ -43362,14 +44072,14 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Siwa_Oasis",
    "image": "",
    "token_id": 100246,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy terse text replaced; dubious stats (\"100 suicides/yr\", prices, etc.) removed. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "uncommon",
    "score": 61.4,
@@ -43462,14 +44172,14 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Spitsbergen",
    "image": "",
    "token_id": 100896,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy terse text replaced; dubious stats (\"100 suicides/yr\", prices, etc.) removed. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "uncommon",
    "score": 61.4,
@@ -43632,14 +44342,14 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Wahiba_Sands",
    "image": "",
    "token_id": 100755,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy terse text replaced; dubious stats (\"100 suicides/yr\", prices, etc.) removed. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "common",
    "score": 61.4,
@@ -43667,14 +44377,14 @@
    "visitors_score": 0,
    "geopolitical_score": 45.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/White_Desert_National_Park",
    "image": "",
    "token_id": 100689,
    "aliases": "",
    "curation": {
-    "by": "token-creator-agent",
-    "at": "2026-10-18",
-    "notes": "Legacy terse text replaced; dubious stats (\"100 suicides/yr\", prices, etc.) removed. IMAGE TO SOURCE (network blocked)."
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
    },
    "rarity": "common",
    "score": 61.4,
@@ -43947,10 +44657,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Road_Town",
    "image": "",
    "token_id": 100164,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -44013,10 +44728,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/George_Town,_Cayman_Islands",
    "image": "",
    "token_id": 100163,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -44043,10 +44763,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Wilmington,_Delaware",
    "image": "",
    "token_id": 100166,
    "aliases": "Wilmington Delaware Corps",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -44104,10 +44829,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/St_Peter_Port",
    "image": "",
    "token_id": 100167,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -44289,10 +45019,15 @@
    "visitors_score": 0,
    "geopolitical_score": 70.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/SEA-ME-WE_3",
    "image": "",
    "token_id": 100044,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "uncommon",
    "score": 65.5,
    "on_map": true
@@ -44419,10 +45154,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Tortola",
    "image": "",
    "token_id": 100956,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -44549,10 +45289,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Blue_Nile_Falls",
    "image": "",
    "token_id": 100693,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.0,
    "on_map": true
@@ -44579,10 +45324,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Blyde_River_Canyon",
    "image": "",
    "token_id": 100276,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -44849,10 +45599,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Kuang_Si_Falls",
    "image": "",
    "token_id": 100816,
    "aliases": "",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 56.0,
    "on_map": true
@@ -44969,10 +45724,15 @@
    "visitors_score": 0,
    "geopolitical_score": 25.0,
    "grade": "",
-   "wiki_url": "",
+   "wiki_url": "https://en.wikipedia.org/wiki/Tiger_Leaping_Gorge",
    "image": "",
    "token_id": 100846,
    "aliases": "Tiger Leaping Gorge Yunnan",
+   "curation": {
+    "by": "agent-images",
+    "at": "2026-10-19",
+    "notes": "wiki_url added for pictures"
+   },
    "rarity": "common",
    "score": 52.0,
    "on_map": true
@@ -65569,7 +66329,7 @@
     "at": "2026-10-18",
     "notes": ""
    },
-   "aliases": "Masada",
+   "aliases": "",
    "score": null,
    "on_map": false
   },
@@ -234548,7 +235308,7 @@
     "at": "2026-10-18",
     "notes": ""
    },
-   "aliases": "World Health Organization",
+   "aliases": "",
    "score": null,
    "on_map": false
   },
