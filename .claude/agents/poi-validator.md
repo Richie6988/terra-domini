@@ -26,7 +26,7 @@ For each row:
    in California), the source row was mismatched: find the real place matching the category and country (web search),
    use ITS article and coordinates, and list the fix in corrections. Never turn a token into another kind of thing.
 2. Check the facts: exact English name (as on Wikipedia), coordinates (Wikipedia's when they exist), ISO 3166-1
-   alpha-2 country code. Fix what is wrong (verdict "corrected", list each fix in corrections) or confirm ("validated").
+   alpha-2 country code ("" for open sea, never anything else). Fix what is wrong (verdict "corrected", list each fix in corrections) or confirm ("validated").
 3. Description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing unverified.
    Absolute rule: never "--", never an em dash or en dash; commas and full stops only.
 4. Rarity, measured (langs = sitelinks):
@@ -37,6 +37,8 @@ For each row:
      major national city; uncommon = regional city; common = small city.
    - Countries: legendary = world powers; epic = major regional powers or globally famous; rare / uncommon / common by
      size and influence.
+   Fame is measured on the article players know the place by: for the headquarters / site of a famous organisation
+   (CIA, NASA...), the organisation's article (usually the row's wiki_url).
    Only 1% of tokens are legendary and 4% epic: when in doubt, the lower tier. Never "mythic". rarity_reason says which
    numbers decided (langs, UNESCO, visitors). The HEX income follows the rarity automatically: do not set it.
 5. Picture: from the pictures `--lookup` returned only. `--view` your choice, Read the file and check it clearly shows

@@ -27,6 +27,7 @@ import base64
 import json
 import math
 import os
+import re
 import sys
 import time
 from pathlib import Path
@@ -72,6 +73,8 @@ For the POI you are given:
      major national city; uncommon = regional city; common = small city.
    - Countries: legendary = world powers; epic = major regional powers or globally famous; rare / uncommon / common by
      size and influence.
+   Fame is measured on the article players know the place by: for the headquarters / site of a famous organisation
+   (CIA, NASA...), the organisation's article.
    Only 1% of tokens are legendary and 4% epic: when in doubt, take the lower tier. Never "mythic".
    Say in rarity_reason which numbers decided (langs, UNESCO, visitors).
 5. Picture: choose from the free pictures wiki_lookup returned (Wikimedia only). Call view_image on your
@@ -243,7 +246,10 @@ class Agent:
             return [] if s.get('reject_reason') else ['reject_reason is required for a rejected row.']
         if s.get('rarity') not in RARITIES:
             errs.append(f'rarity must be one of {RARITIES}.')
-        for k in ('lat', 'lon', 'country_code', 'description'):
+        cc = s.get('country_code') or ''
+        if cc and not re.fullmatch(r'[A-Za-z]{2}', cc):
+            errs.append('country_code: 2 letters (ISO 3166-1 alpha-2), or "" for open sea.')
+        for k in ('lat', 'lon', 'description'):
             if s.get(k) in (None, ''):
                 errs.append(f'{k} is required.')
         if len(s.get('description') or '') > 300:
