@@ -3,10 +3,9 @@ Resource & biome cards (2026-10-18) — data from the HEXOD master DB (apps/even
 
 - Biome card: one of the DB's named regions (lat/lon boxes). A territory belongs to the smallest
   land region containing its centre (ocean regions only if no land region matches).
-- Resource card: one of the DB's resources. Every owned territory produces, per day, each resource
-  of its biome, plus the resource of its POI category (oil field → oil, gold mine → gold...).
-- Production goes into the same stock as HEX (capped at balance.STORAGE_CAP_HOURS) and is credited
-  to PlayerResource on COLLECT — no automatic credit.
+- Resources (owner 2026-10-19, simpler): no stock, no collecting. A resource only exists as a RARE TOKEN — a real
+  extraction site of the DB (Prudhoe Bay oil, North Dome gas, Witwatersrand gold, Orapa diamonds…). Holding one
+  pays far more HEX than a regular territory (RESOURCE_TOKEN_BONUS). Regular hexes carry no resource.
 """
 from functools import lru_cache
 
@@ -59,33 +58,20 @@ def biome_for(lat: float, lon: float):
     return min(pool, key=lambda b: b['area']) if pool else None
 
 
+RESOURCE_SITES = {'oil_field', 'gas_reserve', 'coal_mine', 'gold_mine', 'diamond_mine', 'rare_earth', 'iron_ore',
+                  'copper_mine', 'lithium_deposit', 'uranium_mine'}   # the only POI categories that are resource tokens
+
+
+def site_resource(poi_category: str):
+    """Resource id of a resource token (extraction site), else None."""
+    rid = POI_RESOURCE.get(poi_category or '') if (poi_category or '') in RESOURCE_SITES else None
+    return rid if rid and rid in resources() else None
+
+
 def territory_resource_rates(lat, lon, rarity='common', poi_category='', mult=1.0) -> dict:
-    """Resource id → units/day for one territory."""
-    out = {}
-    b = biome_for(round(lat, 3), round(lon, 3)) if lat is not None and lon is not None else None
-    rm = RARITY_RES_MULT.get(rarity or 'common', 1) * mult
-    for rid in (b['resource_ids'] if b else []):
-        out[rid] = out.get(rid, 0) + RES_PER_DAY.get(resources()[rid].get('rarity'), 5) * rm
-    rid = POI_RESOURCE.get(poi_category or '')
-    if rid and rid in resources():
-        out[rid] = out.get(rid, 0) + RES_PER_DAY.get(resources()[rid].get('rarity'), 5) * POI_RES_MULT * rm
-    return out
-
-
-def player_resource_rates(player) -> dict:
-    """Resource id → units/day for the whole empire (starter boost included, like HEX)."""
-    from terra_domini.apps.territories.models import Territory
-    from terra_domini.apps.events.unified_poi import UnifiedPOI
-    rows = list(Territory.objects.filter(owner=player).values_list('h3_index', 'center_lat', 'center_lon', 'rarity'))
-    cats = dict(UnifiedPOI.objects.filter(h3_index__in=[r[0] for r in rows], is_active=True).values_list('h3_index', 'category'))
-    mult = (B.BEGINNER_MULT if B.is_beginner(player) else 1) * B.boost_mult(player, 'resource_multiplier')   # shop '2X Extraction'
-    from terra_domini.apps.territories.upgrades import hex_multipliers
-    edu = hex_multipliers(player.id, 'education')                     # kingdom Education upgrade: +5 % per level
-    total = {}
-    for h, lat, lon, rarity in rows:
-        for rid, v in territory_resource_rates(lat, lon, rarity, cats.get(h, ''), mult * edu.get(h, 1)).items():
-            total[rid] = total.get(rid, 0) + v
-    return {k: round(v, 2) for k, v in total.items()}
+    """Resource id → 1 for a resource token (its site's resource), {} for every other hex."""
+    rid = site_resource(poi_category)
+    return {rid: 1} if rid else {}
 
 
 def player_biomes(player) -> dict:
@@ -99,29 +85,14 @@ def player_biomes(player) -> dict:
     return out
 
 
-def pending(rates: dict, stored_hours: float) -> dict:
-    return {k: round(v * stored_hours / 24, 2) for k, v in rates.items() if v > 0}
-
-
-def credit(player, amounts: dict) -> None:
-    from django.db.models import F
-    from terra_domini.apps.economy.models import PlayerResource
-    for rid, v in amounts.items():
-        if v <= 0:
-            continue
-        row, _ = PlayerResource.objects.get_or_create(player=player, resource_id=rid)
-        PlayerResource.objects.filter(pk=row.pk).update(amount=F('amount') + v, total_produced=F('total_produced') + v)
-
-
 # ── HEX yield of a territory varies with what it sits on (owner 2026-10-18) ──
 # Bonus % on the territory's HEX/day for each resource it produces (region + POI), capped; plus a stable
 # per-hex variation so two neighbouring commons are not identical.
-RESOURCE_HEX_BONUS = {
-    'oil': 15, 'gas': 10, 'coal': 5, 'gold': 25, 'diamonds': 30, 'platinum': 20, 'silver': 12, 'uranium': 20,
-    'rareearthelements': 20, 'lithium': 18, 'cobalt': 15, 'copper': 8, 'iron': 6, 'titanium': 12, 'tungsten': 10,
-    'strategicposition': 25, 'culturalheritage': 10, 'humancapital': 10, 'freshwater': 5, 'energy': 8,
+# A resource token pays its rarity's HEX × (1 + bonus): the rarer the resource, the bigger
+RESOURCE_TOKEN_BONUS = {
+    'oil': 150, 'gas': 120, 'coal': 80, 'iron': 80, 'copper': 100, 'gold': 200, 'diamonds': 250,
+    'rareearthelements': 220, 'lithium': 200, 'uranium': 220,
 }
-HEX_BONUS_CAP = 60
 HEX_VARIATION = 15      # ± % per hex, deterministic
 
 
@@ -132,9 +103,8 @@ def hex_variation_pct(h3_index: str) -> int:
 
 def hex_yield(h3_index, lat, lon, rarity='common', poi_category='') -> dict:
     """{'mult', 'bonuses': [(resource name, pct)], 'variation_pct'} for one territory."""
-    rates = territory_resource_rates(lat, lon, rarity, poi_category) if lat is not None and lon is not None else {}
-    bonuses = sorted(((resources()[r]['name'], RESOURCE_HEX_BONUS[r]) for r in rates if r in RESOURCE_HEX_BONUS),
-                     key=lambda x: -x[1])
-    total = min(HEX_BONUS_CAP, sum(p for _, p in bonuses))
+    rid = site_resource(poi_category)
+    bonuses = [(resources()[rid]['name'], RESOURCE_TOKEN_BONUS.get(rid, 100))] if rid else []
+    total = sum(p for _, p in bonuses)
     var = hex_variation_pct(h3_index)
     return {'mult': (1 + total / 100) * (1 + var / 100), 'bonuses': bonuses, 'bonus_pct': total, 'variation_pct': var}

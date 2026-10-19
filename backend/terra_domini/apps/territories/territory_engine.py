@@ -247,17 +247,6 @@ def generate_territory(h3_index: str, lat: float, lon: float, poi_category: str 
     if existing:
         return _territory_to_dict(existing)
 
-    # Neighbor POI rarities for rarity roll
-    try:
-        ring1 = [c for c in h3.grid_disk(h3_index, 1) if c != h3_index]
-        ring2 = [c for c in h3.grid_disk(h3_index, 2) if c not in ring1 and c != h3_index]
-        near_pois = Territory.objects.filter(
-            h3_index__in=ring1 + ring2, is_landmark=True
-        ).values_list('rarity', flat=True)
-        near_rarities = list(near_pois)
-    except Exception:
-        near_rarities = []
-
     def _measured(a, b):
         from terra_domini.apps.territories.landcover import classify
         return classify(round(a, 4), round(b, 4)) is not None
@@ -268,15 +257,17 @@ def generate_territory(h3_index: str, lat: float, lon: float, poi_category: str 
     biome = assign_biome(lat, lon, poi_category, '')
 
     # Roll rarity (influenced by biome + neighbor POIs)
-    rng      = zone_rng(h3_index)             # the zone's original design is fixed for ever
-    rarity   = _roll_standard_rarity(biome, near_rarities, rng)
-    is_shiny = rng.random() < 0.10
+    # A plain hex has no token and no rarity (owner 2026-10-19): 100 HEX/day, +10 inside a kingdom. Rarity and value
+    # come from the tokens placed on specific hexes (UnifiedPOI: POIs, resource deposits, events…).
+    rarity   = 'common'
+    is_shiny = False
 
     # Resources from biome_engine table (not legacy BIOME_RESOURCES)
     rarity_mult = RARITY_MULT.get(rarity, 1.0) * (1.5 if is_shiny else 1.0)
     base_res = BIOME_PRODUCTION.get(biome, BIOME_PRODUCTION['rural'])
     resources = {field: round(val * rarity_mult, 2) for field, val in base_res.items()}
-    tdc_per_day = RARITY_INCOME.get(rarity, 10)
+    from terra_domini.apps.economy.balance import PLAIN_HEX_PER_DAY
+    tdc_per_day = PLAIN_HEX_PER_DAY
 
     try:
         geo = h3.cell_to_latlng(h3_index)

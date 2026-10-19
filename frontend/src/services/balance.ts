@@ -3,8 +3,10 @@ export const HEX_PER_DAY: Record<string, number> = {
   common: 60, uncommon: 130, rare: 360, epic: 900, legendary: 2400, mythic: 6000,
 }
 export const STORAGE_CAP_HOURS = 8
-export const hexPerDay = (rarity?: string, shiny?: boolean) =>
-  Math.round((HEX_PER_DAY[(rarity || 'common').toLowerCase()] ?? 60) * (shiny ? 1.5 : 1))
+// A plain hex (no token) pays PLAIN_HEX_PER_DAY, +KINGDOM_BONUS inside a kingdom; each token on it adds HEX_PER_DAY[rarity]
+export const PLAIN_HEX_PER_DAY = 100
+export const KINGDOM_BONUS = 10
+export const hexPerDay = (_rarity?: string, _shiny?: boolean) => PLAIN_HEX_PER_DAY   // fallback before /codex/territory/ answers
 
 // Fixed peg (economy/balance.py): 1 € = 1000 HEX = 1 HEX Coin
 export const HEX_PER_EUR = 1000

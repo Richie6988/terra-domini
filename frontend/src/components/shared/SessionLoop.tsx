@@ -23,7 +23,7 @@ interface Nudge {
 }
 interface LoopStatus {
   balance: number; earned_balance: number
-  harvest: { rate_per_day: number; pending: number; cap_amount: number; cap_hours: number; fill_pct: number; is_full: boolean; full_at: string; lost: number; resources?: { id: string; name: string; rate_per_day: number; pending: number }[]; beginner_mult?: number; beginner_until?: string | null }
+  harvest: { rate_per_day: number; pending: number; cap_amount: number; cap_hours: number; fill_pct: number; is_full: boolean; full_at: string; lost: number; beginner_mult?: number; beginner_until?: string | null }
   streak: { current: number; reward_today: number }
   nudges: Nudge[]
 }
@@ -106,10 +106,8 @@ export function useLoopActions() {
   const collect = useMutation({
     mutationFn: () => api.post('/loop/collect/').then(r => r.data),
     onSuccess: (d: any) => {
-      const res = Object.entries((d.resources_collected || {}) as Record<string, number>).sort((a, b) => b[1] - a[1])
-      const resTxt = res.length ? ` · ${res.slice(0, 3).map(([k, v]) => `+${Math.floor(v)} ${k}`).join(', ')}${res.length > 3 ? ` +${res.length - 3} more` : ''}` : ''
       if (d.collected > 0) { playSound('collect'); celebrate(d.collected >= 2000 ? 'big' : 'small', `+${Math.floor(d.collected).toLocaleString()} HEX`) }
-      if (d.collected > 0) toast.success(`+${d.collected.toLocaleString()} HEX collected${resTxt}`, { duration: 4000 })
+      if (d.collected > 0) toast.success(`+${d.collected.toLocaleString()} HEX collected`, { duration: 4000 })
       else toast(d.message || 'Nothing to collect yet')
       if (d.lost > 0) toast.error(`${d.lost.toLocaleString()} HEX lost — your stock was full. Come back sooner!`, { duration: 5000 })
       syncBalance(d.balance); refresh()

@@ -15,6 +15,9 @@ export const ICON_ALIAS: Record<string, string> = {
   internet_cable: 'tech', data_center: 'tech', casino_resort: 'treasure', offshore_haven: 'money_bag',
   secret_facility: 'conspiracy', oligarch_asset: 'treasure', media_hq: 'news', alliance_hq: 'diplomacy',
   anomaly: 'mystery',
+  // Living species tokens (layer 3 of the fixed map table)
+  species_animal: 'lion', species_vegetal: 'orchid', species_mushroom: 'fungus', species_microorganism: 'microscope',
+  species_fossil: 'dinosaur', species_insect: 'butterfly', species_marine: 'whale',
 }
 /** Icon id for a POI category (falls back to the category itself) */
 export const iconIdFor = (id?: string) => { const k = (id || '').toLowerCase(); return ICON_ALIAS[k] || k || 'city' }

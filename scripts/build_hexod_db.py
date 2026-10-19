@@ -103,6 +103,161 @@ BIO_WORDS = (r'species|genus|family|subspecies|population|organism|animal|mammal
              r'tree|flower|fung|primate|monkey|ape\b|rodent|squirrel|predator|habitat|native|endemic|wild|extinct|fossil|'
              r'feeds|prey|breed|herbivor|carnivor|cultivat|leaves|seeds|fruit')
 
+
+# ── Resource tokens (owner 2026-10-19: "resource tokens smartly spread in mass over the territory: oil in Russia and
+# the Gulf, diamonds in Africa…"). Regular hexes carry no resource. Two kinds of resource token:
+#  - real extraction sites of the POI sheets (Prudhoe Bay, North Dome, Witwatersrand…): at least rare;
+#  - deposits placed in every region the resource DB lists for that resource ('Biome' sheet → resources), on land
+#    (offline land mask; sea regions get offshore deposits), at fixed points (seeded by region + resource): an honest game placement, said so in its text.
+SITE_CATEGORY = {'oil': 'oil_field', 'gas': 'gas_reserve', 'coal': 'coal_mine', 'copper': 'copper_mine',
+                 'diamonds': 'diamond_mine', 'rareearthelements': 'rare_earth'}
+DEPOSITS_PER_REGION = {'oil': 40, 'gas': 40, 'coal': 40, 'copper': 40, 'diamonds': 12, 'rareearthelements': 12}
+SITE_FLOOR = {'oil_field': 'rare', 'gas_reserve': 'rare', 'coal_mine': 'rare', 'iron_ore': 'rare', 'copper_mine': 'rare',
+              'gold_mine': 'epic', 'diamond_mine': 'epic', 'rare_earth': 'epic', 'lithium_deposit': 'epic', 'uranium_mine': 'epic'}
+RES_TOKEN_BONUS = {'oil': 150, 'gas': 120, 'coal': 80, 'copper': 100, 'diamonds': 250, 'rareearthelements': 220}   # = economy/resources.py
+
+
+def add_resource_tokens(pois, biomes, resources):
+    import random
+    sys.path.insert(0, str(ROOT / 'backend'))
+    from terra_domini.apps.territories.landmask import is_land
+    ranks = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
+    for p in pois:                                    # real sites: never below their floor
+        floor = SITE_FLOOR.get(p.get('game_category'))
+        if floor and ranks.index(p['rarity']) < ranks.index(floor):
+            p['rarity'] = floor
+    names = {r['id']: r['name'] for r in resources}
+    used = {(p.get('h3_r8'), p.get('game_category')) for p in pois}
+    added = 0
+    for b in biomes:
+        sea = b['type'] != 'land'          # offshore oil and gas, deep-sea rare earths: placed at sea
+        for rid in [x.strip() for x in (b.get('resources') or '').split(',') if x.strip() in SITE_CATEGORY]:
+            cat, rng = SITE_CATEGORY[rid], random.Random(f"{b['id']}:{rid}")
+            precious = rid in ('diamonds', 'rareearthelements')
+            k = tries = 0
+            while k < DEPOSITS_PER_REGION[rid] and tries < DEPOSITS_PER_REGION[rid] * 40:
+                tries += 1
+                lat, lon = rng.uniform(b['lat_min'], b['lat_max']), rng.uniform(b['lon_min'], b['lon_max'])
+                land = is_land(lat, lon)
+                if land is not None and land == sea:      # land regions: on land; sea regions: at sea
+                    continue
+                cell = h3.latlng_to_cell(lat, lon, H3_RES)
+                if (cell, cat) in used:
+                    continue
+                used.add((cell, cat)); k += 1; added += 1
+                x = rng.random()
+                rarity = (('epic' if x < 0.1 else 'rare' if x < 0.4 else 'uncommon') if precious
+                          else ('rare' if x < 0.04 else 'uncommon' if x < 0.2 else 'common'))
+                clat, clon = h3.cell_to_latlng(cell)
+                pois.append({
+                    'uid': f"res-{b['id']}-{rid}-{k}", 'source': 'generated:resource', 'kind': 'resource', 'quality': '',
+                    'name': f"{names.get(rid, rid)} deposit {k} · {b['name']}", 'game_category': cat, 'codex_category': 'resource',
+                    'lat': round(clat, 5), 'lon': round(clon, 5), 'h3_r8': cell, 'country_code': '',
+                    'title': f"{names.get(rid, rid)} deposit",
+                    'description': (f"Resource token: the {b['name']} holds {names.get(rid, rid).lower()} (HEXOD resource database). "
+                                    f"Holding this hex pays +{RES_TOKEN_BONUS[rid]}% HEX on top of its rarity. "
+                                    "Game placement inside the region, not a surveyed site."),
+                    'fun_fact_1': '', 'fun_fact_2': '', 'fun_fact_3': '', 'rare_fact': '', 'visitors_per_year': None,
+                    'visitors_score': None, 'geopolitical_score': None, 'grade': '', 'wiki_url': '', 'image': '',
+                    'token_id': None, 'aliases': [], 'curation': 'generated', 'rarity': rarity,
+                })
+    print(f'resource tokens: {added} deposits placed', file=sys.stderr)
+
+
+
+# ── Layer 3 — living species spread by statistics (owner 2026-10-19: "several elephants…, marine species in the
+# water"). Species are visible tokens on the map; the Safari radar lets a player catch one far from any of his
+# hexes (that hex becomes his). A species with real places (iNaturalist sightings, fossil sites) keeps them; the others get COPIES points
+# inside the regions their own description names (region names first, then continents), at sea for marine species,
+# on land otherwise (offline land mask), fixed by the species uid. They stay hidden: the Safari radar finds them.
+SPECIES_COPIES = {'common': 3, 'uncommon': 2, 'rare': 2, 'epic': 2, 'legendary': 1, 'mythic': 1}   # copies in the world
+MARINE_RX = re.compile(r'\b(marine|oceans?|seas?|reefs?|coral|whales?|dolphins?|sharks?|seabirds?|squids?|octopus|'
+                       r'jellyfish|crabs?|lobsters?|plankton|seaweed|kelp|sea turtle)\b')
+CONTINENT_RX = {
+    'Africa': r'africa|madagascar|sahara|congo|kenya|tanzania|ethiopia|nigeria|savanna',
+    'Asia': r'\basia|india|china|japan|indonesia|borneo|sumatra|himalaya|siberia|thailand|vietnam|malaysia|philippines|korea|arabia',
+    'Europe': r'europe|british|britain|ireland|france|germany|spain|italy|scandinavia|alps|mediterranean|iberia|balkan',
+    'North America': r'north america|canada|united states|mexico|alaska|california|florida|caribbean|central america',
+    'South America': r'south america|amazon|brazil|andes|argentina|peru|chile|colombia|venezuela|patagonia',
+    'Oceania': r'australia|new zealand|papua|new guinea|tasmania|oceania|polynesia|hawaii',
+}
+
+
+GEO_WORDS = {'forest', 'forests', 'savannah', 'savanna', 'desert', 'basin', 'plateau', 'coast', 'coastal', 'mountains',
+             'highlands', 'lowlands', 'river', 'plains', 'steppe', 'tundra', 'woodland', 'rainforest', 'island', 'islands',
+             'north', 'south', 'east', 'west', 'northern', 'southern', 'eastern', 'western', 'central', 'great', 'upper',
+             'lower', 'valley', 'delta', 'shelf', 'ridge', 'gulf', 'grasslands', 'wetlands', 'peninsula', 'arctic', 'tropical'}
+
+
+def species_tokens(creatures) -> list:
+    """Every placed copy of a species = a visible token on its hex (layer 3 of the fixed map table)."""
+    out = []
+    for c in creatures:
+        fam = 'marine' if c.get('habitat') == 'sea' else (c.get('codex_category') or 'animal')
+        for k, (lat, lon) in enumerate(c.get('places') or [], 1):
+            cell = h3.latlng_to_cell(lat, lon, H3_RES)
+            clat, clon = h3.cell_to_latlng(cell)
+            out.append({
+                'uid': f"sp-{c['uid']}-{k}", 'source': 'species', 'kind': 'species', 'quality': '', 'creature_uid': c['uid'],
+                'name': c['name'], 'game_category': f'species_{fam}'[:30], 'codex_category': 'species',
+                'lat': round(clat, 5), 'lon': round(clon, 5), 'h3_r8': cell, 'country_code': '', 'title': c['name'],
+                'description': c.get('description', ''), 'fun_fact_1': '', 'fun_fact_2': '', 'fun_fact_3': '', 'rare_fact': '',
+                'visitors_per_year': None, 'visitors_score': None, 'geopolitical_score': None, 'grade': '',
+                'wiki_url': c.get('wiki_url', ''), 'image': c.get('image') or '', 'image_url': c.get('image_url') or '', 'image_credit': c.get('image_credit', ''), 'token_id': None,
+                'aliases': [], 'curation': c.get('place_source', ''), 'rarity': c.get('rarity') or 'common', 'on_map': True,
+                'needs_review': c.get('needs_review', ''),
+            })
+    return [t for t in out if not t['needs_review']]
+
+
+def place_species(creatures, biomes):
+    import random
+    sys.path.insert(0, str(ROOT / 'backend'))
+    from terra_domini.apps.territories.landmask import is_land
+    land_regions = [b for b in biomes if b['type'] == 'land']
+    sea_regions = [b for b in biomes if b['type'] != 'land']
+    stats = Counter()
+    # Continents named in each species' article; none named → the majority of its 30 neighbours (the nature extract
+    # is ordered in geographic blocks: African mammals, European hares, American opossums…)
+    own = [[k for k, rx in CONTINENT_RX.items() if re.search(rx, f"{c.get('name', '')} {c.get('_text', '')}".lower())] for c in creatures]
+    for i, c in enumerate(creatures):
+        if not own[i]:
+            near = Counter(k for x in own[max(0, i - 15):i + 16] for k in x)
+            c['_conts'] = [near.most_common(1)[0][0]] if near else []
+        else:
+            c['_conts'] = own[i]
+    for c in creatures:
+        if c.get('places'):
+            c['place_source'] = 'fossils' if c.get('fossil_sites') and c['places'] == c['fossil_sites'][:12] else 'sightings'
+            stats[c['place_source']] += 1
+            continue
+        text = f"{c.get('name', '')} {c.get('_text', '') or c.get('description', '')}".lower()
+        marine = c.get('codex_category') in ('animal', 'microOrganism') and bool(MARINE_RX.search(f"{c.get('name', '')} {c.get('description', '')}".lower()))
+        pool = sea_regions if marine else land_regions
+        conts = c['_conts']
+        inside = [b for b in pool if not conts or b['continent'] in conts or marine]
+        named = [b for b in inside if any(re.search(rf'\b{w}', text) for w in re.findall(r'[a-z]{5,}', b['name'].lower()) if w not in GEO_WORDS)]
+        cands = named or [b for b in pool if b['continent'] in conts] or pool
+        rng = random.Random(c['uid'])
+        pts, tries = [], 0
+        want = SPECIES_COPIES.get(c.get('rarity'), 1)
+        while len(pts) < want and tries < 400:
+            tries += 1
+            b = rng.choice(cands)
+            lat, lon = rng.uniform(b['lat_min'], b['lat_max']), rng.uniform(b['lon_min'], b['lon_max'])
+            land = is_land(lat, lon)
+            if land is not None and land == marine:
+                continue
+            pts.append([round(lat, 4), round(lon, 4)])
+        if pts:
+            c['places'], c['place_source'] = pts, 'statistical'
+            c['habitat'] = 'sea' if marine else 'land'
+            stats['statistical'] += 1
+    for c in creatures:
+        c.pop('_text', None); c.pop('_conts', None)
+    print(f"species places: {dict(stats)} · {sum(len(c.get('places') or []) for c in creatures)} points", file=sys.stderr)
+
+
 # ── helpers ───────────────────────────────────────────────────────────────────
 def sheet(path, name=None):
     wb = openpyxl.load_workbook(path, read_only=True, data_only=True)
@@ -776,6 +931,7 @@ def main():
     for p in pois:
         if p['uid'] in forced_rarity:
             p['rarity'] = forced_rarity[p['uid']]
+    add_resource_tokens(pois, biomes, resources)
     for p in pois:
         p['score'] = round(landmark_score(p), 1) if p['kind'] == 'landmark' and not p['source'].startswith('candidate') else None
         p['on_map'] = bool(p['h3_r8']) and not p.get('pending_wiki')   # candidates wait for the Wikipedia check
@@ -797,7 +953,8 @@ def main():
             review = 'no text'
         elif not re.search(BIO_WORDS, low):
             review = 'text does not describe an organism (scraped wrong article?)'
-        creatures.append({'uid': f"cr-{clean(r['card_number']).lower()}", 'name': name, 'codex_category': codex,
+        creatures.append({'_text': clean(r['paragraphs'])[:4000].lower(),   # whole article text: habitat for the placement
+                          'uid': f"cr-{clean(r['card_number']).lower()}", 'name': name, 'codex_category': codex,
                           'description': first_sentences(para), 'wiki_url': clean(r['link']),
                           'image': (images(r['images']) or [''])[0], 'needs_review': review, 'fame': len(para)})
     # The nature extract is ordered in blocks (mammals, plants, dinosaurs, insects…): an unclassified
@@ -832,6 +989,8 @@ def main():
     assign_rarity(creatures, lambda c: c['fame'])
     for c in creatures:
         c.pop('fame')
+    place_species(creatures, biomes)
+    pois.extend(species_tokens(creatures))
 
     # ── unlocated wiki names (backlog to geocode) ──
     backlog = []

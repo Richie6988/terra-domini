@@ -149,7 +149,7 @@ export function Token3DViewer(props: Token3DProps) {
       viewerRef.current.update({ back: {
         h3Index: d.h3_index, lat: d.lat, lon: d.lon, rarity: d.rarity, owner: d.owner, capturedAt: d.captured_at,
         hexPerDay: d.hex_per_day, region: d.region?.name ?? null, continent: d.region?.continent ?? null,
-        resources: (d.resources || []).map((r: any) => ({ name: r.name, perDay: r.per_day })),
+        resources: (d.resources || []).map((r: any) => ({ name: r.name, bonusPct: r.bonus_pct })),
         tokenId: d.token_id ?? null, minted: !!d.minted, edition: d.edition || 1,
       } })
     }).catch(() => {})

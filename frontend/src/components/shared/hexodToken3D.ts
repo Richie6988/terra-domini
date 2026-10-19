@@ -86,7 +86,7 @@ export interface TokenBack {
   hexPerDay: number
   region: string | null
   continent: string | null
-  resources: { name: string; perDay: number }[]
+  resources: { name: string; bonusPct: number }[]
   tokenId: number | null
   minted: boolean
   edition?: number
@@ -499,7 +499,7 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     engrave(b.owner ? `HELD BY ${b.owner.toUpperCase()}` : 'UNCLAIMED', s * 0.525, s * 0.038)
     if (b.capturedAt) engrave(`SINCE ${b.capturedAt}`, s * 0.575, s * 0.026, 700)
     engrave(`${b.rarity.toUpperCase()} · ${Math.round(b.hexPerDay).toLocaleString()} HEX A DAY`, s * 0.635, s * 0.032)
-    if (b.resources.length) engrave(b.resources.slice(0, 3).map(r => r.name.toUpperCase()).join(' · '), s * 0.68, s * 0.024, 700)
+    if (b.resources.length) engrave(b.resources.slice(0, 3).map(r => `${r.name.toUpperCase()} +${r.bonusPct}% HEX`).join(' · '), s * 0.68, s * 0.024, 700)
     rule(s * 0.725, s * 0.2)
     // Edition (owner 2026-10-19): No 1 is the only copy until a conquest of the hex mints No 2
     if (b.edition && b.edition > 1) {

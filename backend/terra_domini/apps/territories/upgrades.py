@@ -5,7 +5,6 @@ A kingdom = a connected group of owned hexes. Each upgrade has levels 0-5, bough
 hex where it was bought; a kingdom's level = the best building inside it (split a kingdom and the building stays put).
   influence  +2 hexes of attack range per level (the best kingdom counts)   (combat.engine.can_attack)
   science    +5 % HEX production of the kingdom per level                   (economy.balance.territory_rates)
-  education  +5 % resource production of the kingdom per level             (economy.resources.player_resource_rates)
 Daily supplies: once a day, max(3, territories / 3) + kingdom size bonuses (5+ hexes +2, 10+ +4, 20+ +8 each)
 + 3 per controlled region (territories/regions.py), × SUPPLY_PER_DRAFT attack AND defense points on the biggest kingdom.
 """
@@ -14,7 +13,6 @@ from django.utils import timezone
 UPGRADES = {
     'influence': {'building': 'market',   'name': 'Influence', 'base_cost': 1500, 'per_level': 2,  'unit': ' hexes attack range'},
     'science':   {'building': 'lab',      'name': 'Science',   'base_cost': 2000, 'per_level': 5,  'unit': '% HEX production'},
-    'education': {'building': 'academy',  'name': 'Education', 'base_cost': 2000, 'per_level': 5,  'unit': '% resource production'},
 }
 MAX_LEVEL = 5
 SUPPLY_PER_DRAFT = 5      # daily supplies: 5 attack + 5 defense points per draft unit
@@ -61,7 +59,7 @@ def levels_for(hexes) -> dict:
 
 
 def hex_multipliers(owner_id, key: str) -> dict:
-    """h3 → (1 + level × per_level %) for every owned hex (science / education), one query per player."""
+    """h3 → (1 + level × per_level %) for every owned hex (science), one query per player."""
     from terra_domini.apps.territories.models import Building, Territory
     owned = set(Territory.objects.filter(owner_id=owner_id).values_list('h3_index', flat=True))
     built = {}

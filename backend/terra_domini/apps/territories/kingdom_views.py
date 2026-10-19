@@ -1,6 +1,6 @@
 """
 Kingdom screen (owner 2026-10-18: "click my kingdom / territory: all its military units by type, its defense points
-and the upgrades I can buy — walls, science, education…") + the Risk-style daily draft.
+and the upgrades I can buy — influence, science…") + the Risk-style daily draft.
 
 GET  /api/kingdom/<h3>/overview/   units stationed in the kingdom, defense, upgrades (level, next cost, effect)
 POST /api/kingdom/<h3>/upgrade/    {upgrade}  buy the next level with HEX (stored as a Building on that hex)

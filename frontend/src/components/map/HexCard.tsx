@@ -7,6 +7,7 @@ import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
 import { Token3DViewer } from '../shared/Token3DViewer'
+import { iconIdFor } from '../shared/poiIcons'
 import { ClaimCelebration } from '../shared/ClaimCelebration'
 import { OwnedTerritoryHub } from '../kingdom/OwnedTerritoryHub'
 import { api } from '../../services/api'
@@ -231,29 +232,11 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
     }],
   }), [t, cardName, rarity, biome, income, cluster])
 
-  return (<>
-    {/* OWNED hex: show 3-tab hub (Gallery/Customize/Kingdom) */}
-    {isOwned && hub && <OwnedTerritoryHub kingdom={asKingdom as any} initialTab="army" onClose={onClose} />}
-
-    {/* Token first for every hex (owned: DEFENSE / KINGDOM button below) */}
-    {!(isOwned && hub) && !celebrating && createPortal(
-    <Token3DViewer
-      visible={true}
-      onClose={onClose}
-      tokenName={cardName.toUpperCase()}
-      category={(t.poi_category || biome || 'TERRITORY').toUpperCase()}
-      catColor={cfg.c}
-      iconId={t.poi_icon || t.poi_category?.toLowerCase() || biomeIcon || 'city'}
-      rarityKey={rarity}
-      h3Index={t.h3_index}
-      description={t.poi_description ? String(t.poi_description).slice(0, 220) : undefined}
-      serial={serieNum || 1}
-      maxSupply={cfg.serieMax}
-      edition="GENESIS"
-      biome={(biome || '...').toUpperCase()}
-      power={t.poi_geo_score || 50}
-      rarity={rarity === 'mythic' ? 99 : rarity === 'legendary' ? 95 : rarity === 'epic' ? 85 : rarity === 'rare' ? 70 : rarity === 'uncommon' ? 50 : 30}
-      infoPanel={
+  // Most hexes carry no token (owner 2026-10-19): a plain hex shows a simple card; tokens (POIs, resource deposits,
+  // species) show the 3D token
+  const hasToken = card ? !!card.has_token : !!t.poi_name
+  // The panel under the token (or alone for a plain hex)
+  const panel = (
         <div style={{
           ['--accent' as any]: cfg.c,
           position: 'relative', overflow: 'hidden',
@@ -278,11 +261,11 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
                 {cardName.toUpperCase()}
               </div>
               <div style={{ display: 'flex', gap: 5, marginTop: 4, flexWrap: 'wrap', transform: 'scale(0.92)', transformOrigin: 'left center' }}>
-                <span className="hx-chip hx-chip--accent">{cfg.label.toUpperCase()}</span>
+                <span className="hx-chip hx-chip--accent">{hasToken ? cfg.label.toUpperCase() : 'TERRITORY'}</span>
                 <span className="hx-chip">
                   <IconSVG id={biomeIcon || 'globe'} size={14} />{(biome || '...').toUpperCase()}
                 </span>
-                {isShiny && <span className="hx-chip" style={{ color: '#FCD34D', borderColor: 'rgba(252,211,77,0.4)', background: 'rgba(252,211,77,0.12)' }}>SHINY</span>}
+                {hasToken && isShiny && <span className="hx-chip" style={{ color: '#FCD34D', borderColor: 'rgba(252,211,77,0.4)', background: 'rgba(252,211,77,0.12)' }}>SHINY</span>}
                 {isEnemy && <span className="hx-chip" style={{ color: '#FF8A95', borderColor: 'rgba(255,77,94,0.45)', background: 'rgba(255,77,94,0.12)' }}>ENEMY</span>}
                 {isFree && <span className="hx-chip" style={{ color: '#6EE7B7', borderColor: 'rgba(16,185,129,0.4)', background: 'rgba(16,185,129,0.1)' }}>UNCLAIMED</span>}
               </div>
@@ -293,8 +276,24 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
           {card && (card.hex_bonuses?.length > 0 || card.resources?.length > 0) && (
             <div style={{ fontFamily: 'var(--font-body)', fontWeight: 700, fontSize: 12, color: '#cbd5e1', textTransform: 'none', letterSpacing: 0,
               whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-              {card.resources?.length > 0 && <>Produces <b style={{ color: '#fff' }}>{card.resources.slice(0, 3).map((r: any) => r.name).join(', ')}</b></>}
+              {card.resources?.length > 0 && <>Resource token: <b style={{ color: '#fff' }}>{card.resources[0].name}</b> </>}
               {card.bonus_pct > 0 && <span style={{ color: '#fde68a' }}> · +{card.bonus_pct}% HEX</span>}
+            </div>
+          )}
+
+          {/* Tokens on this hex (one hex can host several: a place, a deposit, species…) */}
+          {card?.tokens?.length > 0 && (
+            <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+              {card.tokens.slice(0, 4).map((k: any, i: number) => (
+                <span key={i} className="hx-chip" style={{ textTransform: 'none', letterSpacing: 0 }}>
+                  <IconSVG id={iconIdFor(k.category)} size={13} />{k.name} · +{Math.round(k.hex_per_day).toLocaleString()}</span>
+              ))}
+              {card.tokens.length > 4 && <span className="hx-chip">+{card.tokens.length - 4}</span>}
+            </div>
+          )}
+          {card && !hasToken && (
+            <div style={{ fontFamily: 'var(--font-body)', fontWeight: 600, fontSize: 12, color: '#cbd5e1', textTransform: 'none', letterSpacing: 0 }}>
+              Plain territory: {card.plain_hex_per_day} HEX a day, +{card.kingdom_bonus} when it joins a kingdom. Tokens (places, deposits, species) pay more.
             </div>
           )}
 
@@ -399,7 +398,43 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
             )}
           </div>
         </div>
-      }
+  )
+
+  return (<>
+    {/* OWNED hex: show 3-tab hub (Gallery/Customize/Kingdom) */}
+    {isOwned && hub && <OwnedTerritoryHub kingdom={asKingdom as any} initialTab="army" onClose={onClose} />}
+
+    {/* Plain hex: simple card at the bottom of the map */}
+    {!(isOwned && hub) && !celebrating && !hasToken && createPortal(
+      <div onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+        padding: '0 12px calc(92px + env(safe-area-inset-bottom))', background: 'rgba(2,6,16,0.3)' }}>
+        <div onClick={e => e.stopPropagation()} style={{ position: 'relative' }}>
+          <button onClick={onClose} aria-label="Close" className="hx-close" style={{ position: 'absolute', top: -14, right: -6, zIndex: 2 }}>×</button>
+          {panel}
+        </div>
+      </div>,
+      document.body
+    )}
+
+    {/* Token hex (owned: DEFENSE / KINGDOM button below) */}
+    {!(isOwned && hub) && !celebrating && hasToken && createPortal(
+    <Token3DViewer
+      visible={true}
+      onClose={onClose}
+      tokenName={cardName.toUpperCase()}
+      category={(t.poi_category || biome || 'TERRITORY').toUpperCase()}
+      catColor={cfg.c}
+      iconId={t.poi_icon || t.poi_category?.toLowerCase() || biomeIcon || 'city'}
+      rarityKey={rarity}
+      h3Index={t.h3_index}
+      description={t.poi_description ? String(t.poi_description).slice(0, 220) : undefined}
+      serial={serieNum || 1}
+      maxSupply={cfg.serieMax}
+      edition="GENESIS"
+      biome={(biome || '...').toUpperCase()}
+      power={t.poi_geo_score || 50}
+      rarity={rarity === 'mythic' ? 99 : rarity === 'legendary' ? 95 : rarity === 'epic' ? 85 : rarity === 'rare' ? 70 : rarity === 'uncommon' ? 50 : 30}
+      infoPanel={panel}
     />,
     document.body
   )}

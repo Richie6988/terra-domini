@@ -137,6 +137,40 @@ HEX_PACKS = [   # bonus HEX on bigger packs (bonus is purchased HEX too: not wit
 ]
 
 
+# ── Territory income (owner 2026-10-19): most hexes carry no token — a plain hex pays PLAIN_HEX_PER_DAY, +KINGDOM_BONUS
+# when it belongs to a kingdom (connected). Tokens (POIs, resource deposits, events…) sit on specific hexes, one hex can
+# host several, and each adds its rarity's HEX_PER_DAY (× the resource bonus for resource tokens) — token_hex_per_day.
+PLAIN_HEX_PER_DAY = 100
+KINGDOM_BONUS = 10
+
+
+def plain_hex_per_day(connected: bool = False) -> int:
+    return PLAIN_HEX_PER_DAY + (KINGDOM_BONUS if connected else 0)
+
+
+def token_hex_per_day(rarity: str, category: str = '') -> float:
+    """HEX/day one token adds to its hex."""
+    from terra_domini.apps.economy.resources import site_resource, RESOURCE_TOKEN_BONUS
+    v = HEX_PER_DAY.get((rarity or 'common').lower(), HEX_PER_DAY['common'])
+    rid = site_resource(category)
+    return v * (1 + RESOURCE_TOKEN_BONUS.get(rid, 0) / 100) if rid else v
+
+
+def hex_tokens(h3_list) -> dict:
+    """h3 → [(name, category, rarity)] of the active tokens on those hexes."""
+    from terra_domini.apps.events.unified_poi import UnifiedPOI
+    out = {}
+    for h, n, c, r in UnifiedPOI.objects.filter(h3_index__in=list(h3_list), is_active=True).values_list('h3_index', 'name', 'category', 'rarity'):
+        out.setdefault(h, []).append((n, c, r))
+    return out
+
+
+def hex_income(h3_index: str, connected: bool, tokens=None) -> float:
+    """HEX/day of one hex before player multipliers: plain value + its tokens."""
+    toks = hex_tokens([h3_index]).get(h3_index, []) if tokens is None else tokens
+    return plain_hex_per_day(connected) + sum(token_hex_per_day(r, c) for _, c, r in toks)
+
+
 def territory_hex_per_day(rarity: str, is_shiny: bool = False, connected: bool = False) -> float:
     v = HEX_PER_DAY.get((rarity or 'common').lower(), HEX_PER_DAY['common'])
     if is_shiny:
@@ -151,13 +185,10 @@ def territory_rates(player) -> dict:
     The ONLY production formula: harvest, Empire and Ladder all read it."""
     from terra_domini.apps.territories.models import Territory
     from terra_domini.utils.h3_compat import k_ring
-    from terra_domini.apps.economy.resources import hex_yield
-    from terra_domini.apps.events.unified_poi import UnifiedPOI
-    full = list(Territory.objects.filter(owner=player).values_list('h3_index', 'rarity', 'is_shiny', 'center_lat', 'center_lon'))
-    rows = [(h, r, s) for h, r, s, _, _ in full]
-    geo = {h: (la, lo) for h, _, _, la, lo in full}
-    cats = dict(UnifiedPOI.objects.filter(h3_index__in=list(geo), is_active=True).values_list('h3_index', 'category'))
-    owned = {h for h, _, _ in rows}
+    full = list(Territory.objects.filter(owner=player).values_list('h3_index', 'center_lat', 'center_lon'))
+    geo = {h: (la, lo) for h, la, lo in full}
+    owned = set(geo)
+    toks = hex_tokens(owned)                                         # tokens on my hexes (POIs, resource deposits…)
     mult = BEGINNER_MULT if is_beginner(player) else 1
     try:   # live real-world event on the hex (apps/events/world_events.py) → ×EVENT_MULT
         from terra_domini.apps.events.world_events import live_event_hexes, EVENT_MULT
@@ -170,13 +201,12 @@ def territory_rates(player) -> dict:
     mine = controlled(player.id)                                     # regions this player controls (Risk continents)
     reg = {h: 1 + REGION_HEX_PCT / 100 for h, (la, lo) in geo.items() if mine and (region_at(la, lo, h) or (None,))[0] in mine}
     out = {}
-    for h, rarity, shiny in rows:
+    for h in owned:
         try:
             connected = any(n in owned for n in k_ring(h, 1) if n != h)
         except Exception:
             connected = False
-        y = hex_yield(h, *geo[h], rarity, cats.get(h, ''))['mult']      # resources on the hex (oil, gold…) ± variation
-        out[h] = round(territory_hex_per_day(rarity, shiny, connected) * y * mult * (EVENT_MULT if h in hot else 1) * sci.get(h, 1) * reg.get(h, 1), 1)
+        out[h] = round(hex_income(h, connected, toks.get(h, [])) * mult * (EVENT_MULT if h in hot else 1) * sci.get(h, 1) * reg.get(h, 1), 1)
     return out
 
 

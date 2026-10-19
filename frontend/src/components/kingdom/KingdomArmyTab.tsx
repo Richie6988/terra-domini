@@ -1,11 +1,11 @@
 /**
  * KingdomArmyTab — the "ARMY" tab of a kingdom / territory (GET /api/kingdom/<h3>/overview/): its 3 counters
- * (attack, defense, spy — combat/forces.py) to buy with HEX, and the kingdom upgrades (influence, science, education —
+ * (attack, defense, spy — combat/forces.py) to buy with HEX, and the kingdom upgrades (influence, science —
  * POST /api/kingdom/<h3>/upgrade/).
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { FlaskConical, GraduationCap, Radar, ShieldAlert } from 'lucide-react'
+import { FlaskConical, Radar, ShieldAlert } from 'lucide-react'
 import { IconSVG } from '../shared/iconBank'
 import { api } from '../../services/api'
 import { useStore, useGodMode } from '../../store'
@@ -13,8 +13,8 @@ import { playSound } from '../../hooks/useSound'
 import { celebrate } from '../shared/Celebrate'
 import { ForcesCounters } from '../combat/ForcesCounters'
 
-const UP_ICON: Record<string, typeof Radar> = { influence: Radar, science: FlaskConical, education: GraduationCap }
-const UP_COLOR: Record<string, string> = { influence: '#fbbf24', science: '#a78bfa', education: '#34d399' }
+const UP_ICON: Record<string, typeof Radar> = { influence: Radar, science: FlaskConical }
+const UP_COLOR: Record<string, string> = { influence: '#fbbf24', science: '#a78bfa' }
 const label: React.CSSProperties = { fontSize: 9, letterSpacing: 1.5, color: 'var(--hx-text-3)', fontWeight: 700, fontFamily: "'Orbitron', sans-serif" }
 
 export function KingdomArmyTab({ h3, onOpenMilitary }: { h3: string; onOpenMilitary?: () => void }) {

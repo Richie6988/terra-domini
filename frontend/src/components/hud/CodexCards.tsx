@@ -79,8 +79,9 @@ function faceOf(family: CardFamily, c: any) {
     case 'events': return { ...base, category: c.category === 'sport' ? 'SPORT EVENT' : 'WORLD EVENT', iconId: 'trophy', edition: dateLabel(c.event_date) }
     case 'creatures': return { ...base, category: CREATURE_FAMILY[c.category]?.label || 'CREATURE', iconId: CREATURE_FAMILY[c.category]?.icon || 'animal', edition: c.count > 1 ? `x${c.count}` : '' }
     case 'biomes': return { ...base, rarity: c.type === 'ocean' ? 'rare' : 'uncommon', category: `BIOME · ${c.continent}`, iconId: CONTINENT_ICON[c.continent] || 'globe', terrain: c.type }
-    default: return { ...base, rarity: c.rarity === 'strategic' || c.rarity === 'unique' ? 'epic' : c.rarity === 'rare' ? 'rare' : 'common',
-      category: `RESOURCE · ${c.category || ''}`, iconId: RES_ICON[c.id] || 'box', hexPerDay: c.rate_per_day || undefined }
+    // Resource token = a real extraction site (oil field, gold mine…): pays +bonus % HEX
+    default: return { ...base, category: `RESOURCE · ${c.resource || ''}`, iconId: RES_ICON[c.id] || 'box', country: c.country_code,
+      edition: `+${c.bonus_pct}% HEX` }
   }
 }
 
@@ -133,9 +134,8 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
     : family === 'rare'
     ? 'Famous places of the world (rare to legendary). Own the hex to own the card.'
     : family === 'biomes'
-      ? 'Each region of the world is a card. Own one territory there to unlock it and its resources.'
-      : 'Your territories produce these every day. They fill your stock with HEX — collect with HARVEST.'
-  const totalRate = family === 'resources' ? data.resources.reduce((a, r) => a + (r.rate_per_day || 0), 0) : 0
+      ? 'Each region of the world is a card. Own one territory there to unlock it.'
+      : 'Rare resource tokens: real oil and gas fields, gold, diamond and uranium mines where they really are. Hold one: it pays far more HEX than a regular territory.'
 
   return (
     <div>
@@ -148,12 +148,6 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
           <span className="hx-stat__label">COLLECTED</span>
           <span className="hx-stat__value">{s.owned}/{s.total}</span>
         </div>
-        {family === 'resources' && (
-          <div className="hx-stat" style={{ minWidth: 92 }}>
-            <span className="hx-stat__label">PER DAY</span>
-            <span className="hx-stat__value">{fmt(totalRate)}</span>
-          </div>
-        )}
       </div>
       {family === 'creatures' && (
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 8, marginBottom: 12 }}>
@@ -208,11 +202,11 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
             {open.fun_fact && <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: '0 0 8px' }}>Did you know? {open.fun_fact}</p>}
           </>}
           {family === 'biomes' && <p style={{ fontSize: 13, margin: '8px 0' }}>
-            Resources: {open.resources.map((r: any) => r.name).join(', ') || 'none'}.
             {open.owned ? ` You hold ${open.territories} territor${open.territories > 1 ? 'ies' : 'y'} here.` : ' Claim a territory in this region to unlock it.'}
           </p>}
           {family === 'resources' && <p style={{ fontSize: 13, margin: '8px 0' }}>
-            Used for: {open.strategic_use}. {open.owned ? `Stock ${fmt(open.amount)} · produced ${fmt(open.total_produced)} so far · +${fmt(open.rate_per_day)}/day.` : 'None of your territories produce it yet.'}
+            {open.resource} token · pays +{open.bonus_pct}% HEX on top of its rarity. {open.description}
+            {open.owned ? ' It is yours.' : ' Claim its hex (or take it from its holder) to own it.'}
           </p>}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {(open.lat !== undefined || open.center) && (
