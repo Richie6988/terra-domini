@@ -501,9 +501,15 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     engrave(`${b.rarity.toUpperCase()} · ${Math.round(b.hexPerDay).toLocaleString()} HEX A DAY`, s * 0.635, s * 0.032)
     if (b.resources.length) engrave(b.resources.slice(0, 3).map(r => r.name.toUpperCase()).join(' · '), s * 0.68, s * 0.024, 700)
     rule(s * 0.725, s * 0.2)
-    const ed = b.edition && b.edition > 1 ? `EDITION ${b.edition} · VALUE 1/${b.edition}` : 'GENESIS EDITION'
-    engrave(`${ed} · ${b.minted && b.tokenId ? `TOKEN ${b.tokenId}` : 'NOT MINTED'}`, s * 0.77, s * 0.024, 700)
-    engrave(b.h3Index, s * 0.81, s * 0.026, 700, '"Roboto Mono", "Courier New", monospace')
+    // Edition (owner 2026-10-19): No 1 is the only copy until a conquest of the hex mints No 2
+    if (b.edition && b.edition > 1) {
+      engrave(`No ${b.edition} · VALUE 1/${b.edition}`, s * 0.765, s * 0.03)
+      engrave(b.minted && b.tokenId ? `TOKEN ${b.tokenId}` : 'MINTED BY CONQUEST', s * 0.8, s * 0.022, 700)
+    } else {
+      engrave('No 1 · THE ONLY ONE', s * 0.765, s * 0.03)
+      engrave('UNTIL A CONQUEST MINTS No 2', s * 0.8, s * 0.022, 700)
+    }
+    engrave(b.h3Index, s * 0.838, s * 0.024, 700, '"Roboto Mono", "Courier New", monospace')
 
     bTex.needsUpdate = true
   }

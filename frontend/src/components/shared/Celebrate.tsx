@@ -1,6 +1,7 @@
 /**
- * Celebrate — full-screen reward burst (confetti + big text) for the moments that matter:
- * harvest, battle won, lucky win, jackpot, rare card. Call celebrate('big', '+2,400 HEX') from anywhere.
+ * Celebrate — reward moment for what matters: harvest, battle won, lucky win, jackpot, rare card.
+ * Premium and quiet (owner 2026-10-19: "no confetti, it looks cheap"): a soft golden bloom, a thin hexagonal ring
+ * opening from the centre (two for big, three for jackpot) and the big text. Call celebrate('big', '+2,400 HEX').
  */
 import { useEffect, useRef, useState } from 'react'
 
@@ -9,46 +10,51 @@ const EVT = 'hx:celebrate'
 export const celebrate = (level: Level = 'small', text = '') =>
   window.dispatchEvent(new CustomEvent(EVT, { detail: { level, text } }))
 
-const COLORS = ['#fbbf24', '#f59e0b', '#22c55e', '#38bdf8', '#a855f7', '#ec4899', '#ffffff']
-
 export function CelebrateHost() {
   const ref = useRef<HTMLCanvasElement>(null)
   const [label, setLabel] = useState<{ text: string; level: Level; key: number } | null>(null)
 
   useEffect(() => {
-    let raf = 0
-    let parts: { x: number; y: number; vx: number; vy: number; r: number; c: string; a: number; s: number; hex: boolean }[] = []
-    const tick = () => {
+    let raf = 0, start = 0, level: Level = 'small'
+    const DUR = { small: 900, big: 1300, jackpot: 1900 }
+    const tick = (now: number) => {
       const cv = ref.current, ctx = cv?.getContext('2d')
       if (!cv || !ctx) return
+      if (!start) start = now
+      const t = (now - start) / DUR[level]
       ctx.clearRect(0, 0, cv.width, cv.height)
-      parts = parts.filter(p => p.y < cv.height + 40)
-      for (const p of parts) {
-        p.vy += 0.22; p.vx *= 0.99; p.x += p.vx; p.y += p.vy; p.a += p.s
-        ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c
-        if (p.hex) { ctx.beginPath(); for (let i = 0; i < 6; i++) ctx.lineTo(p.r * Math.cos(i * Math.PI / 3), p.r * Math.sin(i * Math.PI / 3)); ctx.fill() }
-        else ctx.fillRect(-p.r, -p.r / 2, p.r * 2, p.r)
-        ctx.restore()
+      if (t >= 1) { raf = 0; return }
+      const cx = cv.width / 2, cy = cv.height * 0.45, R = Math.hypot(cv.width, cv.height) * 0.5
+      const ease = 1 - Math.pow(1 - t, 3)
+      // bloom: warm light that swells then fades
+      const ga = Math.sin(Math.PI * Math.min(1, t * 1.4)) * (level === 'small' ? 0.28 : 0.4)
+      const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R * (0.35 + 0.35 * ease))
+      g.addColorStop(0, `rgba(255,214,120,${ga})`); g.addColorStop(0.5, `rgba(251,191,36,${ga * 0.35})`); g.addColorStop(1, 'rgba(251,191,36,0)')
+      ctx.fillStyle = g; ctx.fillRect(0, 0, cv.width, cv.height)
+      // thin hexagonal rings opening outwards
+      const rings = level === 'jackpot' ? 3 : level === 'big' ? 2 : 1
+      for (let k = 0; k < rings; k++) {
+        const tk = Math.max(0, Math.min(1, (t - k * 0.14) / 0.8))
+        if (tk <= 0) continue
+        const r = R * 0.12 + R * 0.75 * (1 - Math.pow(1 - tk, 3))
+        ctx.save(); ctx.translate(cx, cy)
+        ctx.beginPath()
+        for (let i = 0; i < 6; i++) { const a = i * Math.PI / 3 - Math.PI / 2; ctx.lineTo(r * Math.cos(a), r * Math.sin(a)) }
+        ctx.closePath()
+        ctx.lineWidth = 2.5 * (1 - tk) + 0.5
+        ctx.strokeStyle = `rgba(253,230,138,${0.85 * (1 - tk)})`
+        ctx.shadowColor = 'rgba(251,191,36,0.9)'; ctx.shadowBlur = 18
+        ctx.stroke(); ctx.restore()
       }
-      raf = parts.length ? requestAnimationFrame(tick) : 0
-      if (!parts.length) ctx.clearRect(0, 0, cv.width, cv.height)
+      raf = requestAnimationFrame(tick)
     }
     const on = (e: Event) => {
-      const { level, text } = (e as CustomEvent).detail as { level: Level; text: string }
+      const d = (e as CustomEvent).detail as { level: Level; text: string }
       const cv = ref.current
       if (!cv) return
       cv.width = window.innerWidth; cv.height = window.innerHeight
-      const n = level === 'jackpot' ? 320 : level === 'big' ? 160 : 60
-      const burst = (cx: number, cy: number, k: number) => {
-        for (let i = 0; i < k; i++) {
-          const ang = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.2, sp = 6 + Math.random() * (level === 'small' ? 7 : 12)
-          parts.push({ x: cx, y: cy, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, r: 4 + Math.random() * 6,
-            c: COLORS[(Math.random() * COLORS.length) | 0], a: Math.random() * 6, s: (Math.random() - 0.5) * 0.3, hex: Math.random() < 0.4 })
-        }
-      }
-      burst(cv.width / 2, cv.height * 0.55, n)
-      if (level !== 'small') { burst(cv.width * 0.15, cv.height, n / 3); burst(cv.width * 0.85, cv.height, n / 3) }
-      if (text) setLabel({ text, level, key: Date.now() })
+      level = d.level; start = 0
+      if (d.text) setLabel({ text: d.text, level: d.level, key: Date.now() })
       if (!raf) raf = requestAnimationFrame(tick)
       try { navigator.vibrate?.(level === 'jackpot' ? [60, 40, 60, 40, 120] : level === 'big' ? [40, 30, 60] : 25) } catch { /* ignore */ }
     }

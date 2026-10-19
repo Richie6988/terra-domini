@@ -302,8 +302,14 @@ function engravedIcon(ctx: CanvasRenderingContext2D, svg: string, size: number) 
     o.globalCompositeOperation = 'source-in'; o.fillStyle = color; o.fillRect(0, 0, px, px)
     return oc
   }
-  ctx.drawImage(tint('rgba(255,255,255,0.65)'), -px / 2, -px / 2 + size * 0.06, px, px)   // bevel light
-  ctx.drawImage(tint('#1c1002'), -px / 2, -px / 2, px, px)                                 // cut into the metal
+  // set into the metal: dark cut outline around the shape, then the icon in its own colours (owner 2026-10-19:
+  // "improve icon readability, colour it")
+  const cut = tint('#1c1002'), o = Math.max(1.5, size * 0.06)
+  for (const [dx, dy] of [[-o, 0], [o, 0], [0, -o], [0, o], [-o, -o], [o, o], [-o, o], [o, -o]])
+    ctx.drawImage(cut, -px / 2 + dx, -px / 2 + dy, px, px)
+  ctx.drawImage(tint('rgba(255,255,255,0.55)'), -px / 2, -px / 2 + o * 1.6, px, px)   // bevel light below
+  ctx.drawImage(cut, -px / 2, -px / 2 + o * 0.8, px, px)
+  ctx.drawImage(im, -px / 2, -px / 2, px, px)
 }
 
 const nice = (v?: string) => (v || '').replace(/_/g, ' ').trim().toUpperCase()
@@ -451,6 +457,14 @@ export function drawTokenFront(
   ctx.strokeStyle = metal; ctx.lineWidth = band; ctx.lineJoin = 'miter'; drawHex(ctx, c, c, rb); ctx.stroke()
   ctx.strokeStyle = 'rgba(0,0,0,0.45)'; ctx.lineWidth = s * 0.003; drawHex(ctx, c, c, rb - band / 2); ctx.stroke()
   ctx.strokeStyle = rc; ctx.lineWidth = s * 0.005; drawHex(ctx, c, c, rb - band / 2 - s * 0.006); ctx.stroke()
+  // engraved text centred in the band's height: the cap box (not the font box) is centred on the band's middle line
+  const cutText = (text: string, x: number) => {
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'
+    const m = ctx.measureText(text)
+    const y = (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2
+    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fillText(text, x, y + s * 0.0022)    // bevel light
+    ctx.fillStyle = 'rgba(28,16,2,0.92)'; ctx.fillText(text, x, y)                     // cut into the metal
+  }
   const engrave = (text: string, side: -1 | 1) => {
     if (!text) return
     const x = c + side * rb * Math.cos(Math.PI / 6)          // middle of the vertical edge's band
@@ -458,9 +472,7 @@ export function drawTokenFront(
     let ef = s * 0.034
     ctx.font = `900 ${ef}px Orbitron, ${SANS}`; (ctx as any).letterSpacing = `${(s * 0.004).toFixed(1)}px`
     while (ctx.measureText(text).width > rb * 0.9 && ef > s * 0.012) { ef -= s * 0.001; ctx.font = `900 ${ef}px Orbitron, ${SANS}` }
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fillText(text, 0, s * 0.0022)    // bevel light
-    ctx.fillStyle = 'rgba(28,16,2,0.92)'; ctx.fillText(text, 0, 0)                  // cut into the metal
+    cutText(text, 0)
     ;(ctx as any).letterSpacing = '0px'; ctx.restore()
   }
   engrave(nice(state.terrain || state.biome), -1)
@@ -476,17 +488,15 @@ export function drawTokenFront(
     let ef = s * 0.034
     ctx.font = `900 ${ef}px Orbitron, ${SANS}`; (ctx as any).letterSpacing = `${(s * 0.004).toFixed(1)}px`
     while (ctx.measureText(cat).width > rb * 0.78 && ef > s * 0.012) { ef -= s * 0.001; ctx.font = `900 ${ef}px Orbitron, ${SANS}` }
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fillText(cat, 0, s * 0.0022)
-    ctx.fillStyle = 'rgba(28,16,2,0.92)'; ctx.fillText(cat, 0, 0)
+    cutText(cat, 0)
     ;(ctx as any).letterSpacing = '0px'
   })
   const icons = [...new Set((state.pictos && state.pictos.length ? state.pictos : [state.iconSvg]).filter(Boolean) as string[])].slice(0, 4)
   if (icons.length) onEdge(-120, -Math.PI / 6, () => {
-    const isz = s * 0.046, gap = s * 0.03
+    const isz = s * 0.056, gap = s * 0.032
     const total = icons.length * isz + (icons.length - 1) * gap
     icons.forEach((svg, k) => {
-      ctx.save(); ctx.translate(-total / 2 + isz / 2 + k * (isz + gap), 0); ctx.rotate(Math.PI / 6)   // icons stay upright
+      ctx.save(); ctx.translate(-total / 2 + isz / 2 + k * (isz + gap), -isz * 0.22); ctx.rotate(Math.PI / 6)   // upright, centred in the band (outline + bevel weigh low)
       engravedIcon(ctx, svg, isz); ctx.restore()
     })
   })
