@@ -171,19 +171,25 @@ class Agent:
         if not page.get('exists'):
             return {'found': False, 'title': t, 'hint': 'Not on English Wikipedia under this title: try another title or web_search.'}
         qid = page.get('wikidata', '')
-        sitelinks, heritage, p18 = 0, [], ''
+        sitelinks, heritage, p18, wd_ok = 0, [], '', False
+        # fame = number of Wikipedia languages (langlinks + English), from Wikipedia itself (Wikidata throttles shared IPs)
+        try:
+            ll = W.api({'action': 'query', 'titles': page['page_title'], 'prop': 'langlinks', 'lllimit': 'max'})
+            sitelinks = 1 + len(((ll.get('query') or {}).get('pages') or [{}])[0].get('langlinks') or [])
+        except Exception:
+            sitelinks = None
         if qid:
             try:
-                d = W.api({'action': 'wbgetentities', 'ids': qid, 'props': 'sitelinks|claims'}, host=W.WD_API)
-            except Exception:      # Wikidata throttled: the article still answers, fame is then unknown
-                d, sitelinks = {}, None
+                d = W.api({'action': 'wbgetentities', 'ids': qid, 'props': 'claims'}, tries=1, host=W.WD_API)
+            except Exception:      # Wikidata throttled: no P18 / heritage, the article's pictures still come
+                d = {}
             e = (d.get('entities') or {}).get(qid, {})
+            wd_ok = bool(e)
             if e:
-                sitelinks = len(e.get('sitelinks') or {})
-            cl = e.get('claims') or {}
-            heritage = [((c.get('mainsnak') or {}).get('datavalue') or {}).get('value', {}).get('id') for c in cl.get('P1435', [])]
-            v = ((((cl.get('P18') or [{}])[0]).get('mainsnak') or {}).get('datavalue') or {}).get('value')
-            p18 = (v or '').replace('_', ' ')
+                cl = e.get('claims') or {}
+                heritage = [((c.get('mainsnak') or {}).get('datavalue') or {}).get('value', {}).get('id') for c in cl.get('P1435', [])]
+                v = ((((cl.get('P18') or [{}])[0]).get('mainsnak') or {}).get('datavalue') or {}).get('value')
+                p18 = (v or '').replace('_', ' ')
         files = [f for f in [p18, page.get('image_file')] if f]
         files += [f for f in W.article_images([page['page_title']]).get(page['page_title'], []) if f not in files]
         info = W.fetch_images(files[:40]) if files else {}
@@ -192,16 +198,17 @@ class Agent:
             im = info.get(f)
             if not im or not (W.good_photo(f, im) or f in (p18, page.get('image_file'))):
                 continue
-            pics.append({'url': im[0], 'file': f, 'width': im[4], 'height': im[5], 'license': im[1], 'author': im[2],
+            pics.append({'url': im[0].split('?')[0], 'file': f, 'width': im[4], 'height': im[5], 'license': im[1], 'author': im[2],
                          'role': 'wikidata main image' if f == p18 else 'article lead image' if f == page.get('image_file') else 'article photo'})
-            self.pictures[im[0]] = pics[-1]
+            self.pictures[pics[-1]['url']] = pics[-1]
             if len(pics) >= 8:
                 break
         self.wiki[page['page_title']] = page
         return {'found': True, 'title': page['page_title'], 'url': 'https://en.wikipedia.org/wiki/' + page['page_title'].replace(' ', '_'),
                 'lat': page.get('lat'), 'lon': page.get('lon'), 'intro': page.get('extract', ''), 'wikidata': qid,
-                'sitelinks': sitelinks, 'heritage_designations': [h for h in heritage if h],
-                'unesco_world_heritage': 'Q9259' in heritage, 'pictures': pics}
+                'sitelinks': sitelinks, 'sitelinks_note': 'number of Wikipedia languages' if sitelinks else 'unknown: judge fame from the intro / web',
+                'heritage_designations': [h for h in heritage if h],
+                'unesco_world_heritage': ('Q9259' in heritage) if wd_ok else 'unknown (Wikidata unreachable): check on the web if it matters', 'pictures': pics}
 
     def download(self, url):
         """(bytes, mime) of a picture, or (None, error)."""
