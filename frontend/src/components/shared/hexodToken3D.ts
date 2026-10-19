@@ -15,7 +15,6 @@
  *
  * Uses the shared drawTokenFront from hexodTokenFace.ts so 2D and 3D share the face rendering.
  */
-import { rarityLabel } from '../../services/balance'
 import * as THREE from 'three'
 import {
   TIERS, type TierKey, drawHex, drawTokenFront, whenEngravingsReady,
@@ -538,18 +537,25 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     rule(s * 0.47, s * 0.2)
     engrave(b.owner ? `HELD BY ${b.owner.toUpperCase()}` : 'UNCLAIMED', s * 0.525, s * 0.038)
     if (b.capturedAt) engrave(`SINCE ${b.capturedAt}`, s * 0.575, s * 0.026, 700)
-    engrave(`${rarityLabel(b.rarity)} · ${Math.round(b.hexPerDay).toLocaleString()} HEX A DAY`, s * 0.635, s * 0.032)
-    if (b.resources.length) engrave(b.resources.slice(0, 3).map(r => `${r.name.toUpperCase()} +${r.bonusPct}% HEX`).join(' · '), s * 0.68, s * 0.024, 700)
-    rule(s * 0.725, s * 0.2)
-    // Edition (owner 2026-10-19): No 1 is the only copy until a conquest of the hex mints No 2
-    if (b.edition && b.edition > 1) {
-      engrave(`No ${b.edition} · VALUE 1/${b.edition}`, s * 0.765, s * 0.03)
-      engrave(b.minted && b.tokenId ? `TOKEN ${b.tokenId}` : 'MINTED BY CONQUEST', s * 0.8, s * 0.022, 700)
-    } else {
-      engrave('No 1 · THE ONLY ONE', s * 0.765, s * 0.03)
-      engrave('UNTIL A CONQUEST MINTS No 2', s * 0.8, s * 0.022, 700)
+    // The story, engraved (owner 2026-10-19: the description lives on the back, the front is all picture)
+    const story = (state.description || '').trim()
+    if (story) {
+      const fsz = s * 0.024, maxW = s * 0.56
+      bCtx.font = `700 ${fsz}px "Lilita One", Orbitron, sans-serif`
+      const words = story.split(/\s+/), lines: string[] = []
+      let cur = ''
+      for (const w of words) {
+        const t = cur ? `${cur} ${w}` : w
+        if (bCtx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; if (lines.length === 4) break } else cur = t
+      }
+      if (lines.length < 4 && cur) lines.push(cur)
+      if (lines.length === 4 && words.join(' ').length > lines.join(' ').length + 1) lines[3] = lines[3].replace(/\s+\S*$/, '') + '…'
+      lines.forEach((l, k) => engrave(l, s * 0.625 + k * fsz * 1.35, fsz, 700, '"Lilita One", Orbitron, sans-serif', maxW))
     }
-    engrave(b.h3Index, s * 0.838, s * 0.024, 700, '"Roboto Mono", "Courier New", monospace')
+    rule(s * 0.76, s * 0.2)
+    // Series number (#1 until a conquest mints #2) and the unique ID
+    engrave(`SERIES #${b.edition && b.edition > 1 ? b.edition : 1}${b.minted && b.tokenId ? ` · TOKEN ${b.tokenId}` : ''}`, s * 0.795, s * 0.03)
+    engrave(`ID ${b.h3Index}`, s * 0.835, s * 0.024, 700, '"Roboto Mono", "Courier New", monospace')
 
     bTex.needsUpdate = true
   }

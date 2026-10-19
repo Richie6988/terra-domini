@@ -324,8 +324,8 @@ const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', '
 /**
  * Collectible face, Sorare-grade (owner 2026-10-18: "think Sorare: clean, premium, the picture first").
  * Full-bleed sharp picture; centre: name with a dark outline; 3 bright lines of story; bottom: HEX / day.
- * The wide metal frame is engraved (owner 2026-10-19, v6): CATEGORY on the left edge, RARITY + ID on the right edge,
- * upper edges plain; bottom: main picto + "184 HEX". A dark glass panel sits
+ * The wide metal frame is engraved (owner 2026-10-19, v7): NAME top-left edge, HEX value top-right edge, CATEGORY left
+ * edge, RARITY + ID right edge — the picture fills the centre (the story is engraved on the back); bottom: main picto + "184 HEX". A dark glass panel sits
  * behind the name and the story for contrast. The inner line carries the rarity colour.
  */
 export function drawTokenFront(
@@ -368,7 +368,7 @@ export function drawTokenFront(
   top.addColorStop(0, 'rgba(0,0,0,0.55)'); top.addColorStop(1, 'rgba(0,0,0,0)')
   ctx.fillStyle = top; ctx.fillRect(0, 0, s, s * 0.22)
   const bot = ctx.createLinearGradient(0, s * 0.46, 0, s)
-  bot.addColorStop(0, 'rgba(4,6,12,0)'); bot.addColorStop(0.22, 'rgba(4,6,12,0.82)'); bot.addColorStop(0.45, 'rgba(4,6,12,0.96)'); bot.addColorStop(1, '#04060c')
+  bot.addColorStop(0, 'rgba(4,6,12,0)'); bot.addColorStop(0.7, 'rgba(4,6,12,0.25)'); bot.addColorStop(1, 'rgba(4,6,12,0.55)')
   ctx.fillStyle = bot; ctx.fillRect(0, s * 0.46, s, s * 0.54)
 
   // ── Gloss: one slow diagonal sheen; a faint prism only on rare+ ──
@@ -384,78 +384,6 @@ export function drawTokenFront(
     ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = holo; ctx.fillRect(0, 0, s, s); ctx.globalCompositeOperation = 'source-over'
   }
   ctx.restore()
-
-  // ── Title: a bit smaller, white with a dark outline so it reads on any photo ──
-  const name = (state.tokenName || '').toUpperCase()
-  const maxW = s * 0.7
-  let fs = s * 0.06
-  ctx.font = `900 ${fs}px ${SANS}`
-  let lines = [name]
-  if (ctx.measureText(name).width > maxW) {
-    const words = name.split(/\s+/)
-    let best = [name], bestW = Infinity
-    for (let k = 1; k < words.length; k++) {
-      const l = [words.slice(0, k).join(' '), words.slice(k).join(' ')]
-      const w = Math.max(...l.map(t => ctx.measureText(t).width))
-      if (w < bestW) { best = l; bestW = w }
-    }
-    lines = best
-    const w = Math.max(...lines.map(t => ctx.measureText(t).width))
-    if (w > maxW) fs = fs * maxW / w
-  }
-  const nameY = s * (lines.length > 1 ? 0.56 : 0.6)
-  {   // contrast panel: rounded dark glass behind the name and the story, edged with the rarity colour
-    const px = s * 0.17, pw = s * 0.66, py = nameY - fs * 0.85, ph = s * 0.8 - py
-    ctx.save(); drawHex(ctx, c, c, s * 0.47); ctx.clip()
-    ctx.beginPath(); (ctx as any).roundRect ? (ctx as any).roundRect(px, py, pw, ph, s * 0.03) : ctx.rect(px, py, pw, ph)
-    ctx.fillStyle = 'rgba(4,8,16,0.72)'; ctx.fill()
-    ctx.strokeStyle = rc + '55'; ctx.lineWidth = s * 0.003; ctx.stroke()
-    ctx.restore()
-  }
-  ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'
-  ctx.font = `900 ${fs}px ${SANS}`
-  lines.forEach((l, k) => {
-    const y = nameY + k * fs * 1.02
-    ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = s * 0.018
-    ctx.lineWidth = fs * 0.2; ctx.strokeStyle = 'rgba(0,0,0,0.95)'; ctx.strokeText(l, c, y)
-    ctx.shadowBlur = 0; ctx.fillStyle = '#ffffff'; ctx.fillText(l, c, y)
-  })
-  ctx.restore()
-
-  // ── Story: bigger, bright, 3 lines on the dark band ──
-  if (state.description) {
-    const dfs = s * 0.031
-    ctx.font = `700 ${dfs}px ${SANS}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-    const dw = s * 0.7, words = state.description.split(/\s+/), dl: string[] = []
-    let cur = ''
-    for (const w of words) {
-      const t = cur ? `${cur} ${w}` : w
-      if (ctx.measureText(t).width > dw && cur) { dl.push(cur); cur = w; if (dl.length === 3) break } else cur = t
-    }
-    if (dl.length < 3 && cur) dl.push(cur)
-    if (dl.length === 3 && words.join(' ').length > dl.join(' ').length + 1) dl[2] = dl[2].replace(/\s+\S*$/, '') + '…'
-    ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = s * 0.006; ctx.fillStyle = '#f8fafc'
-    const y0 = nameY + (lines.length - 1) * fs * 1.02 + fs * 0.62 + dfs * 0.9
-    dl.forEach((l, k) => ctx.fillText(l, c, y0 + k * dfs * 1.3))
-    ctx.restore()
-  }
-
-  // ── Bottom: main picto + value ("184 HEX") ──
-  const hv = state.hexPerDay ? `${Math.round(state.hexPerDay).toLocaleString()} HEX` : ''
-  const mainIcon = (state.pictos && state.pictos[0]) || state.iconSvg
-  if (hv || mainIcon) {
-    const hy = s * 0.845, isz = s * 0.06
-    ctx.font = `900 ${s * 0.052}px ${SANS}`
-    const hvW = hv ? ctx.measureText(hv).width : 0
-    const total = (mainIcon ? isz + s * 0.016 : 0) + hvW
-    let x = c - total / 2
-    if (mainIcon) { ctx.save(); ctx.translate(x + isz / 2, hy); engravedIcon(ctx, mainIcon, isz); ctx.restore(); x += isz + s * 0.016 }
-    if (hv) {
-      ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'
-      ctx.lineWidth = s * 0.008; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(hv, x, hy)
-      ctx.fillStyle = '#fcd34d'; ctx.fillText(hv, x, hy); ctx.restore()
-    }
-  }
 
   if (opts.enableFilmGrain !== false) {
     ctx.save(); ctx.globalAlpha = 0.01
@@ -491,7 +419,21 @@ export function drawTokenFront(
   }
   engrave(nice(state.category), -1)
   engrave([RARITY_NAME[rarity] || tier.id, state.tokenNo ? `#${String(state.tokenNo).replace(/^#/, '')}` : ''].filter(Boolean).join('  ·  '), 1)
-  // upper edges stay plain metal (owner 2026-10-19: no terrain, no engraved icons on the borders)
+  // Upper edges (owner 2026-10-19): the NAME on the top-left edge, the HEX value on the top-right edge — the picture
+  // keeps the whole centre. Same engraving as the vertical edges.
+  const rm = rb * Math.cos(Math.PI / 6)                       // centre → edge middle
+  const onEdge = (deg: number, rot: number, text: string, maxRatio: number) => {
+    if (!text) return
+    const a = deg * Math.PI / 180
+    ctx.save(); ctx.translate(c + rm * Math.cos(a), c + rm * Math.sin(a)); ctx.rotate(rot)
+    let ef = s * 0.036
+    ctx.font = `900 ${ef}px Orbitron, ${SANS}`; (ctx as any).letterSpacing = `${(s * 0.003).toFixed(1)}px`
+    while (ctx.measureText(text).width > rb * maxRatio && ef > s * 0.012) { ef -= s * 0.001; ctx.font = `900 ${ef}px Orbitron, ${SANS}` }
+    cutText(text, 0)
+    ;(ctx as any).letterSpacing = '0px'; ctx.restore()
+  }
+  onEdge(-120, -Math.PI / 6, (state.tokenName || '').toUpperCase(), 0.86)
+  onEdge(-60, Math.PI / 6, state.hexPerDay ? `${Math.round(state.hexPerDay).toLocaleString()} HEX` : '', 0.8)
 }
 
 // ══════════════════════════════════════════════════════════════════
