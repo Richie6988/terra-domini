@@ -264,3 +264,34 @@ def map_pois(request):
         'name': p['name'], 'category': p['category'], 'rarity': p['rarity'], 'lat': p['latitude'], 'lon': p['longitude'],
         'h3_index': p['h3_index'], 'owner': owners.get(p['h3_index']),
     } for p in rows]})
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def map_where(request):
+    """GET /api/map/where/?lat=&lon= — the map centre's biome for the AR layer: DB region (name, continent), terrain
+    (offline rules, no slow land-cover call) and what lives there (resources the region is known for)."""
+    try:
+        lat, lon = round(float(request.query_params['lat']), 2), round(float(request.query_params['lon']), 2)
+    except (KeyError, ValueError):
+        return Response({'error': 'lat, lon required'}, status=400)
+    from terra_domini.apps.economy.resources import biome_for, resources
+    from terra_domini.apps.territories.terrain_rules import terrain
+    b = biome_for(lat, lon)
+    try:
+        terr, _why = terrain(lat, lon, precise=False)
+    except Exception:
+        terr = ''
+    meta = resources()
+    res = [meta[r]['name'] for r in (b or {}).get('resource_ids', [])[:4] if r in meta]
+    region = b['name'] if b else None
+    if not region:     # gaps between the DB regions: the nearest known city names the place
+        try:
+            from terra_domini.apps.territories.terrain_rules import nearest_city
+            near = nearest_city(lat, lon)
+            if near and near[0] and near[1] < 80:
+                region = f"{near[0]['name']} area"
+        except Exception:
+            pass
+    return Response({'region': region, 'continent': b['continent'] if b else None,
+                     'type': b['type'] if b else None, 'terrain': terr, 'known_for': res})

@@ -312,19 +312,21 @@ function engravedIcon(ctx: CanvasRenderingContext2D, svg: string, size: number) 
   ctx.drawImage(im, -px / 2, -px / 2, px, px)
 }
 
-const nice = (v?: string) => (v || '').replace(/_/g, ' ').trim().toUpperCase()
+const SPECIES_LABEL: Record<string, string> = {
+  species_animal: 'ANIMAL', species_bird: 'BIRD', species_marine: 'MARINE LIFE', species_fossil: 'DINOSAUR',
+  species_insect: 'INSECT', species_vegetal: 'PLANT', species_mushroom: 'FUNGUS', species_microorganism: 'MICROBE',
+}
+const nice = (v?: string) => { const k = (v || '').toLowerCase().replace(/\s+/g, '_'); return SPECIES_LABEL[k] || (v || '').replace(/_/g, ' ').trim().toUpperCase() }
+const RARITY_NAME: Record<string, string> = { common: 'BRONZE', uncommon: 'SILVER', rare: 'GOLD', epic: 'EMERALD', legendary: 'DIAMOND', mythic: 'MYTHIC' }
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-const issuedLabel = (d?: string) => {
-  const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || '')
-  return m ? `${+m[3]} ${MONTHS[+m[2] - 1]} ${m[1]}` : ''
-}
 
 /**
  * Collectible face, Sorare-grade (owner 2026-10-18: "think Sorare: clean, premium, the picture first").
  * Full-bleed sharp picture; centre: name with a dark outline; 3 bright lines of story; bottom: HEX / day.
- * The wide metal frame is engraved (owner 2026-10-19): pictos on the top-left edge, category on the top-right edge,
- * terrain on the left edge, edition + issue date on the right edge. The inner line carries the rarity colour.
+ * The wide metal frame is engraved (owner 2026-10-19, v6): pictos on the top-left edge, terrain on the top-right edge,
+ * CATEGORY on the left edge, RARITY + ID on the right edge; bottom: main picto + "184 HEX". A dark glass panel sits
+ * behind the name and the story for contrast. The inner line carries the rarity colour.
  */
 export function drawTokenFront(
   ctx: CanvasRenderingContext2D,
@@ -366,7 +368,7 @@ export function drawTokenFront(
   top.addColorStop(0, 'rgba(0,0,0,0.55)'); top.addColorStop(1, 'rgba(0,0,0,0)')
   ctx.fillStyle = top; ctx.fillRect(0, 0, s, s * 0.22)
   const bot = ctx.createLinearGradient(0, s * 0.46, 0, s)
-  bot.addColorStop(0, 'rgba(4,6,12,0)'); bot.addColorStop(0.3, 'rgba(4,6,12,0.72)'); bot.addColorStop(0.55, 'rgba(4,6,12,0.92)'); bot.addColorStop(1, '#04060c')
+  bot.addColorStop(0, 'rgba(4,6,12,0)'); bot.addColorStop(0.22, 'rgba(4,6,12,0.82)'); bot.addColorStop(0.45, 'rgba(4,6,12,0.96)'); bot.addColorStop(1, '#04060c')
   ctx.fillStyle = bot; ctx.fillRect(0, s * 0.46, s, s * 0.54)
 
   // ── Gloss: one slow diagonal sheen; a faint prism only on rare+ ──
@@ -401,9 +403,17 @@ export function drawTokenFront(
     const w = Math.max(...lines.map(t => ctx.measureText(t).width))
     if (w > maxW) fs = fs * maxW / w
   }
+  const nameY = s * (lines.length > 1 ? 0.56 : 0.6)
+  {   // contrast panel: rounded dark glass behind the name and the story, edged with the rarity colour
+    const px = s * 0.17, pw = s * 0.66, py = nameY - fs * 0.85, ph = s * 0.8 - py
+    ctx.save(); drawHex(ctx, c, c, s * 0.47); ctx.clip()
+    ctx.beginPath(); (ctx as any).roundRect ? (ctx as any).roundRect(px, py, pw, ph, s * 0.03) : ctx.rect(px, py, pw, ph)
+    ctx.fillStyle = 'rgba(4,8,16,0.72)'; ctx.fill()
+    ctx.strokeStyle = rc + '55'; ctx.lineWidth = s * 0.003; ctx.stroke()
+    ctx.restore()
+  }
   ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'
   ctx.font = `900 ${fs}px ${SANS}`
-  const nameY = s * (lines.length > 1 ? 0.56 : 0.6)
   lines.forEach((l, k) => {
     const y = nameY + k * fs * 1.02
     ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = s * 0.018
@@ -430,18 +440,22 @@ export function drawTokenFront(
     ctx.restore()
   }
 
-  // ── Bottom: HEX / day ──
-  const hv = state.hexPerDay ? `+${Math.round(state.hexPerDay).toLocaleString()}` : '—'
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
-  ctx.font = `900 ${s * 0.05}px ${SANS}`
-  const hvW = ctx.measureText(hv).width
-  ctx.font = `800 ${s * 0.02}px Orbitron, ${SANS}`
-  const unitW = ctx.measureText('HEX / DAY').width
-  const gx = c - (hvW + s * 0.014 + unitW) / 2, hy = s * 0.845
-  ctx.save(); ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = s * 0.01
-  ctx.textAlign = 'left'; ctx.font = `900 ${s * 0.05}px ${SANS}`; ctx.fillStyle = '#fcd34d'; ctx.fillText(hv, gx, hy)
-  ctx.font = `800 ${s * 0.02}px Orbitron, ${SANS}`; ctx.fillStyle = 'rgba(253,230,138,0.85)'; ctx.fillText('HEX / DAY', gx + hvW + s * 0.014, hy + s * 0.006)
-  ctx.restore()
+  // ── Bottom: main picto + value ("184 HEX") ──
+  const hv = state.hexPerDay ? `${Math.round(state.hexPerDay).toLocaleString()} HEX` : ''
+  const mainIcon = (state.pictos && state.pictos[0]) || state.iconSvg
+  if (hv || mainIcon) {
+    const hy = s * 0.845, isz = s * 0.06
+    ctx.font = `900 ${s * 0.052}px ${SANS}`
+    const hvW = hv ? ctx.measureText(hv).width : 0
+    const total = (mainIcon ? isz + s * 0.016 : 0) + hvW
+    let x = c - total / 2
+    if (mainIcon) { ctx.save(); ctx.translate(x + isz / 2, hy); engravedIcon(ctx, mainIcon, isz); ctx.restore(); x += isz + s * 0.016 }
+    if (hv) {
+      ctx.save(); ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.lineJoin = 'round'
+      ctx.lineWidth = s * 0.008; ctx.strokeStyle = 'rgba(0,0,0,0.85)'; ctx.strokeText(hv, x, hy)
+      ctx.fillStyle = '#fcd34d'; ctx.fillText(hv, x, hy); ctx.restore()
+    }
+  }
 
   if (opts.enableFilmGrain !== false) {
     ctx.save(); ctx.globalAlpha = 0.01
@@ -475,15 +489,15 @@ export function drawTokenFront(
     cutText(text, 0)
     ;(ctx as any).letterSpacing = '0px'; ctx.restore()
   }
-  engrave(nice(state.terrain || state.biome), -1)
-  engrave([nice(state.edition) || 'GENESIS', issuedLabel(state.date)].filter(Boolean).join('  ·  '), 1)
+  engrave(nice(state.category), -1)
+  engrave([RARITY_NAME[rarity] || tier.id, state.tokenNo ? `#${String(state.tokenNo).replace(/^#/, '')}` : ''].filter(Boolean).join('  ·  '), 1)
   // upper edges: category on the top-right edge, every picto on the top-left edge
   const rm = rb * Math.cos(Math.PI / 6)                       // centre → edge middle
   const onEdge = (deg: number, rot: number, draw: () => void) => {
     const a = deg * Math.PI / 180
     ctx.save(); ctx.translate(c + rm * Math.cos(a), c + rm * Math.sin(a)); ctx.rotate(rot); draw(); ctx.restore()
   }
-  const cat = nice(state.category)
+  const cat = nice(state.terrain || state.biome)      // top-right edge: the terrain
   if (cat) onEdge(-60, Math.PI / 6, () => {
     let ef = s * 0.034
     ctx.font = `900 ${ef}px Orbitron, ${SANS}`; (ctx as any).letterSpacing = `${(s * 0.004).toFixed(1)}px`

@@ -28,7 +28,9 @@ import { BuildingsOverlayLayer } from './BuildingsOverlayLayer'
 import { TutorialArrow } from './TutorialArrow'
 import { latLngToCell, cellToBoundary, gridDisk } from 'h3-js'
 import { Layers, Plus, Minus, Check } from 'lucide-react'
+import { useQuery } from '@tanstack/react-query'
 import { IconSVG } from '../shared/iconBank'
+import { api } from '../../services/api'
 import { getIcon } from '../shared/iconBank'
 import type { TerritoryLight } from '../../types'
 
@@ -702,10 +704,16 @@ function MapControls({ arOn, onAr, zoom, onZoom }: { arOn: boolean; onAr: () => 
   )
 }
 
-/** AR layer (owner 2026-10-19: "satellite view with extra AR infos like a cartoon game"): a cartoon reticle at the
- * centre, the centre's coordinates, a scale bar and a north compass. Pointer-events off: the map stays playable. */
+/** AR layer (owner 2026-10-19: "satellite view with extra AR infos like a cartoon game"; no centre cursor): the biome
+ * the map centre is in (GET /api/map/where/: region, terrain, what it is known for), coordinates and a scale bar.
+ * Pointer-events off: the map stays playable. */
+const TERRAIN_ICON_AR: Record<string, string> = { ocean: 'ocean', lake: 'water_drop', ice: 'glacier', mountain: 'mountain', desert: 'desert',
+  forest: 'forest', urban: 'city', industrial: 'factory', farmland: 'wheat', grassland: 'sprout', wetland: 'leaf', coastal: 'ocean', rural: 'farm', tundra: 'tundra' }
 function MapARHud({ map, zoom, center }: { map: L.Map | null; zoom: number; center: [number, number] }) {
   const [lat, lon] = center
+  const key = `${lat.toFixed(1)},${lon.toFixed(1)}`
+  const { data: where } = useQuery<any>({ queryKey: ['map-where', key], staleTime: 600000,
+    queryFn: () => api.get('/map/where/', { params: { lat: lat.toFixed(2), lon: lon.toFixed(2) } }).then(r => r.data) })
   // metres per 100 px at this latitude and zoom → a round scale value
   const mpp = 156543.03392 * Math.cos(lat * Math.PI / 180) / Math.pow(2, zoom)
   const nice = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000]
@@ -717,18 +725,20 @@ function MapARHud({ map, zoom, center }: { map: L.Map | null; zoom: number; cent
   if (!map) return null
   return (
     <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 450 }}>
-      {/* reticle */}
-      <svg width="64" height="64" viewBox="-32 -32 64 64" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', overflow: 'visible' }}>
-        {[0, 90, 180, 270].map(a => (
-          <g key={a} transform={`rotate(${a})`}>
-            <path d="M-22 -14 L-22 -22 L-14 -22" fill="none" stroke={ink} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M-22 -14 L-22 -22 L-14 -22" fill="none" stroke="#fde68a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
-          </g>
-        ))}
-        <circle r="3.5" fill="#fde68a" stroke={ink} strokeWidth="2" />
-      </svg>
       {/* coordinates + scale */}
       <div style={{ position: 'absolute', left: 12, bottom: 'calc(150px + env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+        {where?.region && (
+          <span style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px 6px 7px', borderRadius: 14, maxWidth: 'min(320px, 70vw)',
+            background: 'rgba(11,22,38,0.82)', border: '2px solid rgba(253,230,138,0.6)', color: '#fff', textShadow: '0 1px 2px #000' }}>
+            <IconSVG id={TERRAIN_ICON_AR[where.terrain] || (where.type === 'ocean' ? 'ocean' : 'globe')} size={26} />
+            <span style={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+              <span style={{ font: "14px 'Lilita One', sans-serif", whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{where.region}</span>
+              <span style={{ font: "800 10px var(--font-body)", color: 'rgba(226,232,240,0.75)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {[where.terrain && where.terrain.replace(/_/g, ' '), where.continent, where.known_for?.length ? `known for ${where.known_for.slice(0, 2).join(', ').toLowerCase()}` : ''].filter(Boolean).join(' · ')}
+              </span>
+            </span>
+          </span>
+        )}
         <span style={{ padding: '4px 10px', borderRadius: 999, background: 'rgba(11,22,38,0.82)', border: '2px solid #fde68a', color: '#fde68a',
           font: "13px 'Lilita One', sans-serif", letterSpacing: 0.5, textShadow: '0 1px 2px #000' }}>
           {fmt(lat, 'N', 'S')} · {fmt(lon, 'E', 'W')}

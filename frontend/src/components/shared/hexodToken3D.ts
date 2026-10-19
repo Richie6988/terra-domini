@@ -29,7 +29,7 @@ export { TIERS, type TierKey }
 const CONFIG = {
   textureSize: 2048,
   textureSizeMobile: 1536,
-  cardThickness: 0.14,
+  cardThickness: 0.085,   // thinner coin (owner 2026-10-19)
   faceRadius: 1.5,
   bezelOuter: 1.6,
   bezelInner: 1.49,
@@ -309,13 +309,13 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
   geo.rotateX(Math.PI / 2)
   card.add(new THREE.Mesh(geo, [sMat, fMat, bMat]))
 
-  const lip = 0.05
+  const lip = 0.035
   const bezelDepth = CONFIG.cardThickness + lip * 2
   const bezelShape = new THREE.Shape(); hexPath(bezelShape, CONFIG.bezelOuter)
   const bezelHole = new THREE.Path(); hexPath(bezelHole, CONFIG.bezelInner)
   bezelShape.holes.push(bezelHole)
   const bezelGeo = new THREE.ExtrudeGeometry(bezelShape, {
-    depth: bezelDepth, bevelEnabled: true, bevelThickness: 0.035, bevelSize: 0.03, bevelSegments: 5, curveSegments: 1,
+    depth: bezelDepth, bevelEnabled: true, bevelThickness: 0.025, bevelSize: 0.028, bevelSegments: 5, curveSegments: 1,
   })
   bezelGeo.translate(0, 0, -bezelDepth / 2)
   bezelGeo.computeVertexNormals()
@@ -336,6 +336,44 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     }
   }
   card.add(gems)
+
+  // Edge decorations growing with the tier (owner 2026-10-19): SILVER a raised band on the edge, GOLD + rivets,
+  // EMERALD + a second band, DIAMOND glowing rivets. Rebuilt by applyTierLook.
+  const deco = new THREE.Group()
+  card.add(deco)
+  const decoMat = new THREE.MeshPhysicalMaterial({ metalness: 1, roughness: 0.18, clearcoat: 0.8 })
+  const rivetMat = new THREE.MeshPhysicalMaterial({ metalness: 1, roughness: 0.15, clearcoat: 1 })
+  function buildDeco(level: number, color: string, glow: string) {
+    deco.children.forEach(o => (o as THREE.Mesh).geometry?.dispose())
+    deco.clear()
+    decoMat.color.set(color).multiplyScalar(1.15)
+    rivetMat.color.set(level >= 4 ? glow : color)
+    rivetMat.emissive = new THREE.Color(level >= 4 ? glow : '#000000')
+    rivetMat.emissiveIntensity = level >= 4 ? 0.9 : 0
+    const R = CONFIG.bezelOuter + 0.028
+    const band = (z: number, h: number) => {        // raised stripe all around the edge
+      const sh = new THREE.Shape(); hexPath(sh, R + 0.012)
+      const hole = new THREE.Path(); hexPath(hole, R - 0.02); sh.holes.push(hole)
+      const g = new THREE.ExtrudeGeometry(sh, { depth: h, bevelEnabled: false, curveSegments: 1 })
+      g.translate(0, 0, z - h / 2)
+      deco.add(new THREE.Mesh(g, decoMat))
+    }
+    if (level >= 1) band(0, 0.022)
+    if (level >= 3) { band(bezelDepth * 0.32, 0.012); band(-bezelDepth * 0.32, 0.012) }
+    if (level >= 2) {                               // rivets on each of the 6 edge faces
+      const rg = new THREE.SphereGeometry(level >= 4 ? 0.026 : 0.021, 12, 8)
+      const per = level >= 4 ? 3 : 2
+      for (let i = 0; i < 6; i++) {
+        const a0 = (i * Math.PI) / 3 + Math.PI / 2, a1 = ((i + 1) * Math.PI) / 3 + Math.PI / 2
+        for (let k = 1; k <= per; k++) {
+          const t = k / (per + 1)
+          const x = (R + 0.016) * ((1 - t) * Math.cos(a0) + t * Math.cos(a1))
+          const y = (R + 0.016) * ((1 - t) * Math.sin(a0) + t * Math.sin(a1))
+          const m = new THREE.Mesh(rg, rivetMat); m.position.set(x, y, 0); deco.add(m)
+        }
+      }
+    }
+  }
 
   // Halo behind + light pool under the token (do not rotate with it)
   const haloTex = radialTexture([[0, 'rgba(255,255,255,0.9)'], [0.42, 'rgba(255,255,255,0.5)'], [0.7, 'rgba(255,255,255,0.14)'], [1, 'rgba(255,255,255,0)']])
@@ -389,6 +427,7 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     fMat.iridescenceIOR = 1.45
     fMat.iridescenceThicknessRange = [200, 700]
     gems.visible = !!L.gems
+    buildDeco(['BRONZE', 'SILVER', 'GOLD', 'EMERALD', 'DIAMOND'].indexOf(tierKey()), L.rim, L.halo)
     if (L.gems) gemMat.color.set(L.gems)
     haloMat.color.set(L.halo)
     poolMat.color.set(L.halo)

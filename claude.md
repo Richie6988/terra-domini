@@ -564,6 +564,8 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 - **Safari end**: after "IT IS HERE", tap a hex of the striped zone (`/safari/probe/ {h3}`, must be within capture range of the 'here' scan): right → `SafariReveal` (golden burst → 3D token → '+1' flies to the Codex dock button), wrong → ring distance, −1 scan.
 - **Shop (2026-10-19)**: compact single scroll — balance bar, 3 booster packs, active boosts, boosts grid with a category filter (only implemented items), GET HEX packs at the very bottom. `shop/openShop.ts` `openShop('hex')` opens it on the packs: used when the player is short of HEX (hex claim, auction, paid hunt, forces buy 402, kingdom upgrade).
 - **HUD layout**: left column = profile, MISSIONS, HARVEST pill (210 × 52, dark glass, progress ring + amount + time, separate HOME button), all aligned; right edge = compass (AR on) + Layers/zoom stack + Safari radar. Layers menu: token families on the map (`store.tokenFilter` places/resources/species, persisted; `/api/map/pois/?kinds=`; GameMap skips hidden families' free hexes and icons; `poiIcons.tokenKind`) + AR info toggle.
+- **Token face v6** (hexodTokenFace): left edge = CATEGORY (species_* → ANIMAL/BIRD/FUNGUS…), right edge = RARITY name + #ID, top-right = terrain, top-left = pictos; bottom = main picto + "184 HEX" (no /day); dark glass panel behind name + story. 3D (hexodToken3D): thinner (cardThickness 0.085), edge decorations by tier — SILVER band, GOLD + rivets, EMERALD + 2 bands, DIAMOND glowing rivets (`buildDeco`).
+- **AR layer**: no centre reticle; a biome card from `GET /api/map/where/?lat&lon` (DB region or "<nearest city> area", terrain, continent, known for), coordinates, scale.
 
 ## 12. KNOWN ISSUES PIPELINE (updated 2026-10-17)
 

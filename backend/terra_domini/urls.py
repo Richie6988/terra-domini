@@ -79,7 +79,7 @@ from terra_domini.apps.progression.clicker_views import ClickerViewSet
 from terra_domini.apps.progression.views import SkillTreeView, SkillUnlockView
 from terra_domini.apps.progression.leaderboard_views import LeaderboardViewSet
 from terra_domini.apps.events.resource_views import ResourcePOIViewSet
-from terra_domini.apps.events.poi_views import UnifiedPOIViewSet, map_pois
+from terra_domini.apps.events.poi_views import UnifiedPOIViewSet, map_pois, map_where
 from terra_domini.apps.territories.trade_views import ResourceTradeViewSet
 
 from terra_domini.apps.combat.views import BattleViewSet
@@ -148,6 +148,7 @@ urlpatterns = [
     path('api/loop/collect/',  loop_collect,  name='loop_collect'),
     path('api/codex/cards/',   codex_cards,   name='codex_cards'),
     path('api/map/pois/',      map_pois,      name='map_pois'),
+    path('api/map/where/',     map_where,     name='map_where'),
     path('api/map/states/',    map_states,    name='map_states'),
     path('api/shop/hex-packs/',             hex_packs,            name='hex_packs'),
     path('api/shop/hex-checkout/',          hex_checkout,         name='hex_checkout'),
