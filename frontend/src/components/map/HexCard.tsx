@@ -3,6 +3,7 @@
  * Opens Token3DViewer (Richard's holographic 3D token) as the PRIMARY experience.
  * Territory info panel overlaid on the left.
  */
+import { openShop } from '../shop/openShop'
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { createPortal } from 'react-dom'
 import { useQueryClient, useQuery } from '@tanstack/react-query'
@@ -129,7 +130,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
   }, [t.h3_index, player?.id, isFree, optsTry])
 
   // Not enough HEX: the shop sells HEX packs (real money only ever buys HEX)
-  const openShop = () => { onClose(); setTimeout(() => useStore.getState().setActivePanel('shop'), 100) }
+  const toShop = () => { onClose(); openShop('hex') }      // short of HEX → straight to the GET HEX packs
 
   const handleClaim = useCallback(async (method: string) => {
     if (claiming || !t.h3_index) return
@@ -344,7 +345,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
               </div>
             )}
             {isFree && player && claimOpts?.options?.filter((o: any) => o.method === 'unlock').map((opt: any) => (
-              <button key="unlock" onClick={() => opt.available ? handleClaim('unlock') : openShop()} disabled={claiming}
+              <button key="unlock" onClick={() => opt.available ? handleClaim('unlock') : toShop()} disabled={claiming}
                 className="btn-game btn-game-gold"
                 title={opt.available ? `Unlock this place now for ${opt.cost} HEX` : 'Not enough HEX: open the shop to get more'}
                 style={{ flex: '1 1 140px', minHeight: 44, display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8, fontSize: 13 }}>
@@ -365,7 +366,7 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
               const opt = { ...o0, cost: o0.cost != null ? Math.round(o0.cost * k) : o0.cost, hours: o0.hours != null ? o0.hours * k : o0.hours,
                             available: o0.method === 'buy' ? (o0.god_free || (o0.balance ?? 0) >= Math.round((o0.cost || 0) * k)) : o0.available }
               return (
-              <button key={opt.method} onClick={() => (opt.method === 'buy' && !opt.available ? openShop() : handleClaim(opt.method))}
+              <button key={opt.method} onClick={() => (opt.method === 'buy' && !opt.available ? toShop() : handleClaim(opt.method))}
                 disabled={claiming || (!opt.available && opt.method !== 'buy')}
                 className={`btn-game ${opt.method === 'free' ? 'btn-game-green' : opt.method === 'buy' ? 'btn-game-gold' : 'btn-game-blue'}`}
                 style={{

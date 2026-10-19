@@ -4,6 +4,7 @@
  * fortification → defense, education → spy, science → HEX —
  * POST /api/kingdom/<h3>/upgrade/).
  */
+import { openShop } from '../shop/openShop'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { FlaskConical, Radar, ShieldAlert, Castle, GraduationCap } from 'lucide-react'
@@ -37,6 +38,7 @@ export function KingdomArmyTab({ h3, onOpenMilitary }: { h3: string; onOpenMilit
       qc.invalidateQueries({ queryKey: ['player'] })
     } catch (e: any) {
       toast.error(e?.response?.data?.error || 'Upgrade failed')
+      if (String(e?.response?.data?.error || '').startsWith('Need')) openShop('hex')
     }
   }
 
@@ -82,7 +84,7 @@ export function KingdomArmyTab({ h3, onOpenMilitary }: { h3: string; onOpenMilit
                 </div>
                 {maxed
                   ? <span className="hx-chip" style={{ color: c }}>MAX</span>
-                  : <button onClick={() => buyUpgrade(u.key)} disabled={bal < u.cost} className="btn-game btn-game-gold"
+                  : <button onClick={() => bal < u.cost ? openShop('hex') : buyUpgrade(u.key)} className="btn-game btn-game-gold"
                             style={{ padding: '8px 10px', fontSize: 10, letterSpacing: 1, display: 'flex', alignItems: 'center', gap: 4,
                                      opacity: bal < u.cost ? 0.45 : 1, flexShrink: 0 }}>
                       <IconSVG id="hex_coin" size={12} />{u.cost.toLocaleString()}

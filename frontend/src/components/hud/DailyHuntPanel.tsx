@@ -8,6 +8,7 @@
  *
  * API: GET /safari/active/ · POST /safari/spawn/ · POST /safari/scan/ {lat,lon} · POST /safari/probe/ {lat,lon} · POST /safari/abandon/
  */
+import { openShop } from '../shop/openShop'
 import { rarityLabel } from '../../services/balance'
 import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
@@ -75,8 +76,8 @@ export function DailyHuntPanel({ onClose }: Props) {
       if (d.paid) { const st = useStore.getState(); st.setBalance({ ...(st.balance || {}), in_game: Number(st.balance?.in_game || 0) - d.paid } as any) }
       if (d.target?.mode === 'world') openRadarHunt(d.target)    // straight to the radar, in the clue's region
     },
-    onError: (e: any) => toast.error(e?.response?.data?.error
-      || (e?.response?.status >= 500 ? 'Safari is unavailable on the server (update pending?) — try again later' : 'Could not start a hunt')),
+    onError: (e: any) => { if (e?.response?.data?.shop) { onClose(); openShop('hex') }; toast.error(e?.response?.data?.error
+      || (e?.response?.status >= 500 ? 'Safari is unavailable on the server (update pending?) — try again later' : 'Could not start a hunt')) },
   })
   // 5 free hunts a day, then a price that climbs with each hunt until tomorrow (GET /safari/active/ next_hunt_cost)
   const price: number = data?.next_hunt_cost ?? 0

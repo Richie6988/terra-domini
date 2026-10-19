@@ -3,6 +3,7 @@
  * Bids are real and escrowed in HEX (POST /api/auctions/<id>/bid/): an outbid player is refunded at once,
  * a bid in the last 2 minutes extends the auction, the winner gets the territory and its card.
  */
+import { openShop } from '../shop/openShop'
 import { rarityLabel } from '../../services/balance'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -170,7 +171,7 @@ export function AuctionPanel({ onClose }: Props) {
     } catch (e: any) {
       const d = e?.response?.data
       toast.error(d?.error || 'Bid failed')
-      if (d?.shop) { onClose(); setTimeout(() => useStore.getState().setActivePanel('shop'), 100) }
+      if (d?.shop) { onClose(); openShop('hex') }
     } finally { setBidding(false) }
   }, [bidAmount, selected, qc, onClose])
 

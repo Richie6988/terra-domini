@@ -2,6 +2,7 @@
  * ForcesCounters — the 3 counters of a kingdom / territory (combat/forces.py): attack, defense, spy.
  * Buy points with HEX on that kingdom (POST /api/forces/buy/). Shared by Military and the kingdom ARMY tab.
  */
+import { openShop } from '../shop/openShop'
 import { useState } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -34,7 +35,10 @@ export function ForcesCounters({ h3, forces, pointCost, compact = false, multipl
       playSound('bonus'); toast.success(`+${r.qty} ${FORCE_META[kind].label.toLowerCase()} · −${r.cost.toLocaleString()} HEX`)
       const s = useStore.getState(); s.setBalance({ ...(s.balance || {}), in_game: r.balance } as any)
       ;['my-army', 'kingdom-overview', 'kingdoms', 'player'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
-    } catch (e: any) { toast.error(e?.response?.data?.error || 'Purchase failed') }
+    } catch (e: any) {
+      toast.error(e?.response?.data?.error || 'Purchase failed')
+      if (e?.response?.status === 402) openShop('hex')       // short of HEX → GET HEX packs
+    }
     setBusy(null)
   }
   return (

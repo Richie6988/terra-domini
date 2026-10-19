@@ -562,6 +562,7 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 - **Income shown = server value**: map-view returns `hex_per_day` + `token_count` per hex (tooltip); kingdom overview `income` (zones × 100, kingdom bonus, tokens, multipliers) → OwnedTerritoryHub KINGDOM tab `IncomeBreakdown`.
 - **Map**: satellite only (vivid filter `.hx-tiles-sat`), AR layer `MapARHud` (reticle, coordinates, scale, compass; Layers button toggles it). POI counters: one design (dark glass + gold ring). Outposts (≤ 2 hexes) under zoom 11: small emblem, no forces row; forces row hidden when all zero (zoom < 13).
 - **Safari end**: after "IT IS HERE", tap a hex of the striped zone (`/safari/probe/ {h3}`, must be within capture range of the 'here' scan): right → `SafariReveal` (golden burst → 3D token → '+1' flies to the Codex dock button), wrong → ring distance, −1 scan.
+- **Shop (2026-10-19)**: compact single scroll — balance bar, 3 booster packs, active boosts, boosts grid with a category filter (only implemented items), GET HEX packs at the very bottom. `shop/openShop.ts` `openShop('hex')` opens it on the packs: used when the player is short of HEX (hex claim, auction, paid hunt, forces buy 402, kingdom upgrade).
 
 ## 12. KNOWN ISSUES PIPELINE (updated 2026-10-17)
 
