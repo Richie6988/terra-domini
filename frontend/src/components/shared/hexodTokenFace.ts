@@ -83,6 +83,7 @@ export interface TokenFaceProps {
   terrain?: string       // urban / rural / mountain … (territory type)
   tokenNo?: string       // token id or album number
   cellId?: string        // H3 cell
+  series?: number        // series number (#1 until a conquest mints #2)
   pictos?: string[]      // raw SVGs: category · terrain · main resource — what makes this token unique (original design)
 }
 
@@ -325,7 +326,7 @@ const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', '
  * Collectible face, Sorare-grade (owner 2026-10-18: "think Sorare: clean, premium, the picture first").
  * Full-bleed sharp picture; centre: name with a dark outline; 3 bright lines of story; bottom: HEX / day.
  * The wide metal frame is engraved (owner 2026-10-19, v7): NAME top-left edge, HEX value top-right edge, CATEGORY left
- * edge, RARITY + ID right edge — the picture fills the centre (the story is engraved on the back); bottom: main picto + "184 HEX". A dark glass panel sits
+ * edge, RARITY right edge, ID bottom-left, series "#1" bottom-right — the picture fills the centre (the story is engraved on the back); bottom: main picto + "184 HEX". A dark glass panel sits
  * behind the name and the story for contrast. The inner line carries the rarity colour.
  */
 export function drawTokenFront(
@@ -399,6 +400,8 @@ export function drawTokenFront(
   ctx.strokeStyle = metal; ctx.lineWidth = band; ctx.lineJoin = 'miter'; drawHex(ctx, c, c, rb); ctx.stroke()
   ctx.strokeStyle = 'rgba(0,0,0,0.45)'; ctx.lineWidth = s * 0.003; drawHex(ctx, c, c, rb - band / 2); ctx.stroke()
   ctx.strokeStyle = rc; ctx.lineWidth = s * 0.005; drawHex(ctx, c, c, rb - band / 2 - s * 0.006); ctx.stroke()
+  // text radius: a hair inside the band's middle — the 3D lip hides the outer rim (owner: "trop à l'extérieur")
+  const rt = rb - band * 0.18
   // engraved text centred in the band's height: the cap box (not the font box) is centred on the band's middle line
   const cutText = (text: string, x: number) => {
     ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'
@@ -409,7 +412,7 @@ export function drawTokenFront(
   }
   const engrave = (text: string, side: -1 | 1) => {
     if (!text) return
-    const x = c + side * rb * Math.cos(Math.PI / 6)          // middle of the vertical edge's band
+    const x = c + side * rt * Math.cos(Math.PI / 6)          // middle of the vertical edge's band
     ctx.save(); ctx.translate(x, c); ctx.rotate(side * Math.PI / 2)
     let ef = s * 0.034
     ctx.font = `900 ${ef}px Orbitron, ${SANS}`; (ctx as any).letterSpacing = `${(s * 0.004).toFixed(1)}px`
@@ -418,10 +421,10 @@ export function drawTokenFront(
     ;(ctx as any).letterSpacing = '0px'; ctx.restore()
   }
   engrave(nice(state.category), -1)
-  engrave([RARITY_NAME[rarity] || tier.id, state.tokenNo ? `#${String(state.tokenNo).replace(/^#/, '')}` : ''].filter(Boolean).join('  ·  '), 1)
+  engrave(RARITY_NAME[rarity] || tier.id, 1)
   // Upper edges (owner 2026-10-19): the NAME on the top-left edge, the HEX value on the top-right edge — the picture
   // keeps the whole centre. Same engraving as the vertical edges.
-  const rm = rb * Math.cos(Math.PI / 6)                       // centre → edge middle
+  const rm = rt * Math.cos(Math.PI / 6)                       // centre → edge middle
   const onEdge = (deg: number, rot: number, text: string, maxRatio: number) => {
     if (!text) return
     const a = deg * Math.PI / 180
@@ -433,7 +436,11 @@ export function drawTokenFront(
     ;(ctx as any).letterSpacing = '0px'; ctx.restore()
   }
   onEdge(-120, -Math.PI / 6, (state.tokenName || '').toUpperCase(), 0.86)
-  onEdge(-60, Math.PI / 6, state.hexPerDay ? `${Math.round(state.hexPerDay).toLocaleString()} HEX` : '', 0.8)
+  onEdge(-60, Math.PI / 6, state.hexPerDay ? `HEX ${Math.round(state.hexPerDay).toLocaleString()}` : '', 0.8)
+  // Lower edges (owner 2026-10-19): the unique ID bottom-left, the series number bottom-right (read upright)
+  const uid = state.tokenNo ? `ID ${String(state.tokenNo).replace(/^#/, '')}` : state.cellId ? `ID ${state.cellId}` : ''
+  onEdge(120, Math.PI / 6, uid, 0.8)
+  onEdge(60, -Math.PI / 6, `#${state.series && state.series > 1 ? state.series : 1}`, 0.8)
 }
 
 // ══════════════════════════════════════════════════════════════════

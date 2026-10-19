@@ -236,7 +236,6 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
         // Hex emblem (tier colour) with tier digit, then size + label. Static strings only (no player text).
         const emblem = `<svg width="${tiny ? 14 : compact ? 18 : 22}" height="${tiny ? 14 : compact ? 18 : 22}" viewBox="0 0 24 24" style="flex-shrink:0;filter:drop-shadow(0 0 4px ${color}aa)">
             <path d="M12 1.5 21.1 6.75v10.5L12 22.5 2.9 17.25V6.75z" fill="${color}" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
-            <text x="12" y="16" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="10" font-weight="900" fill="#06101e">${k.tier}</text>
           </svg>`
         // Kingdom picture (uploaded /media/ file or https link), as a round avatar before the emblem
         const pic: string = (k as any).embed_url || ''

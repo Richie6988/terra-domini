@@ -312,7 +312,7 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
             marginTop: 4, letterSpacing: 1,
             textShadow: '0 1px 4px rgba(0,0,0,0.8)',
           }}>
-            {tokens.length} TERRITORIES · TIER {kingdom.tier || 1}
+            {tokens.length} TERRITORIES
           </div>
         </div>
       </div>
@@ -390,10 +390,11 @@ function IncomeBreakdown({ h3 }: { h3: string }) {
 }
 
 function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[] }) {
-  const totalIncome = tokens.reduce((s, t) => s + (t.income_per_day || 0), 0)
-  const totalDefense = tokens.reduce((s, t) => s + (t.defense_points || 0), 0)
-  const tier = kingdom.tier || 1
-  const tierColor = TIER_COLOR[Math.min(tier, 6)]
+  // Same query as IncomeBreakdown (cached): the 4 stats come from the kingdom's upgrades
+  const h3 = kingdom.h3_indexes?.[0] || tokens[0]?.h3_index || ''
+  const { data: ov } = useQuery<any>({ queryKey: ['kingdom-overview', h3], queryFn: () => api.get(`/kingdom/${h3}/overview/`).then(r => r.data),
+    enabled: !!h3, staleTime: 10000 })
+  const tierColor = ACCENT
 
   // Rarity distribution
   const rarityCount: Record<string, number> = {}
@@ -408,14 +409,17 @@ function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[]
     biomeCount[b] = (biomeCount[b] || 0) + 1
   })
 
-  // Backend rule (kingdom_engine.recompute_kingdoms): tier = min(6, size // 3)
   const size = kingdom.size || tokens.length
-  const nextAt = tier >= 6 ? null : (tier + 1) * 3
-  const tierPct = nextAt ? Math.max(0, Math.min(100, ((size - tier * 3) / 3) * 100)) : 100
+  const STATS: { key: string; label: string; icon: string; color: string }[] = [
+    { key: 'influence', label: 'ATTACK', icon: 'swords', color: '#ef4444' },
+    { key: 'fortification', label: 'DEFENSE', icon: 'shield', color: '#3b82f6' },
+    { key: 'education', label: 'SPY', icon: 'eye', color: '#a855f7' },
+    { key: 'science', label: 'HEX HARVEST', icon: 'hex_coin', color: '#f59e0b' },
+  ]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <IncomeBreakdown h3={kingdom.h3_indexes?.[0] || tokens[0]?.h3_index || ''} />
+      <IncomeBreakdown h3={h3} />
       {/* Hero */}
       <div className="hx-card" style={{
         padding: 16,
@@ -423,12 +427,6 @@ function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[]
         borderColor: `${tierColor}55`,
         textAlign: 'center',
       }}>
-        <div style={{
-          fontSize: 10, color: tierColor, letterSpacing: 3, fontWeight: 900,
-          fontFamily: "'Orbitron', sans-serif",
-        }}>
-          TIER {tier} KINGDOM
-        </div>
         <div style={{
           fontSize: 34, fontWeight: 900, color: '#e2e8f0',
           fontFamily: "'Share Tech Mono', monospace",
@@ -442,41 +440,24 @@ function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[]
         }}>
           TERRITORIES
         </div>
-        <div style={{ marginTop: 12, textAlign: 'left' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 9, letterSpacing: 1, fontFamily: HEAD, color: 'rgba(255,255,255,0.55)', marginBottom: 6 }}>
-            <span>{nextAt ? `NEXT: TIER ${tier + 1}` : 'MAX TIER'}</span>
-            <span style={{ fontFamily: MONO, color: tierColor }}>{nextAt ? `${size}/${nextAt} HEXES` : `${size} HEXES`}</span>
-          </div>
-          <div className="hx-progress" style={{ ['--accent' as any]: tierColor }}>
-            <div className="hx-progress__fill" style={{ width: `${tierPct}%` }} />
-          </div>
+        <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 6, fontFamily: MONO }}>
+          {tokens.filter(x => x.has_token).length} TOKEN{tokens.filter(x => x.has_token).length !== 1 ? 'S' : ''}
         </div>
       </div>
 
-      {/* Stats grid */}
+      {/* Kingdom stats: each upgrade multiplies one (owner 2026-10-19: influence → attack, fortification → defense,
+          education → spy, science → HEX) */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-        <div style={statCard('#f59e0b')}>
-          <div style={statLabel}>HEX / 24H</div>
-          <div style={statValue('#f59e0b')}>
-            <IconSVG id="hex_coin" size={12} /> {Math.round(kingdom.tdc_per_24h || totalIncome / 288 * 24)}
-          </div>
-        </div>
-        <div style={statCard('#3b82f6')}>
-          <div style={statLabel}>DEFENSE</div>
-          <div style={statValue('#3b82f6')}>
-            <IconSVG id="shield" size={12} /> {totalDefense.toLocaleString()}
-          </div>
-        </div>
-        <div style={statCard('#22c55e')}>
-          <div style={statLabel}>INCOME / DAY</div>
-          <div style={statValue('#22c55e')}>
-            +{totalIncome.toLocaleString()}
-          </div>
-        </div>
-        <div style={statCard('#7950f2')}>
-          <div style={statLabel}>TIER</div>
-          <div style={statValue('#7950f2')}>{tier}/6</div>
-        </div>
+        {STATS.map(st => {
+          const u = ov?.upgrades?.find((x: any) => x.key === st.key)
+          return (
+            <div key={st.key} style={statCard(st.color)}>
+              <div style={statLabel}>{st.label}</div>
+              <div style={statValue(st.color)}><IconSVG id={st.icon} size={12} /> x{u ? u.mult.toFixed(1) : '1.0'}</div>
+              <div style={{ fontSize: 9, color: 'var(--hx-text-3)', marginTop: 2, letterSpacing: 1 }}>
+                {u ? `${u.name.toUpperCase()} LV ${u.level}/${u.max_level}` : '…'}</div>
+            </div>)
+        })}
       </div>
 
       {/* Rarity breakdown */}
@@ -596,8 +577,8 @@ export function OwnedTerritoryHub({ kingdom, initialTab = 'gallery', onClose }: 
           : <Crown size={20} />}
         subtitle={
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ color: accentColor, fontWeight: 700 }}>TIER {kingdom.tier || 1}</span>
-            <span>· {kingdom.size || tokens.length} TERRITORIES</span>
+            <span>{kingdom.size || tokens.length} TERRITORIES</span>
+            <span style={{ color: accentColor, fontWeight: 700 }}>· {tokens.filter(x => x.has_token).length} TOKENS</span>
           </span>
         }
       >

@@ -456,7 +456,7 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
       date: state.date,
       iconSvg: state.iconSvg,
       rarity: state.rarity, hexPerDay: state.hexPerDay, region: state.region, country: state.country,
-      terrain: state.terrain, tokenNo: state.tokenNo, cellId: state.cellId, pictos: state.pictos,
+      terrain: state.terrain, tokenNo: state.tokenNo, cellId: state.cellId, pictos: state.pictos, series: state.back?.edition,
     }, {
       shineOffset: s * 0.15,
       holoAngle: Math.PI * 0.33,
@@ -537,7 +537,8 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     rule(s * 0.47, s * 0.2)
     engrave(b.owner ? `HELD BY ${b.owner.toUpperCase()}` : 'UNCLAIMED', s * 0.525, s * 0.038)
     if (b.capturedAt) engrave(`SINCE ${b.capturedAt}`, s * 0.575, s * 0.026, 700)
-    // The story, engraved (owner 2026-10-19: the description lives on the back, the front is all picture)
+    // The story, engraved (owner 2026-10-19: the description lives on the back, the front is all picture; ID + series moved
+    // to the front's lower edges so the story gets up to 7 lines)
     const story = (state.description || '').trim()
     if (story) {
       const fsz = s * 0.024, maxW = s * 0.56
@@ -546,16 +547,12 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
       let cur = ''
       for (const w of words) {
         const t = cur ? `${cur} ${w}` : w
-        if (bCtx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; if (lines.length === 4) break } else cur = t
+        if (bCtx.measureText(t).width > maxW && cur) { lines.push(cur); cur = w; if (lines.length === 7) break } else cur = t
       }
-      if (lines.length < 4 && cur) lines.push(cur)
-      if (lines.length === 4 && words.join(' ').length > lines.join(' ').length + 1) lines[3] = lines[3].replace(/\s+\S*$/, '') + '…'
+      if (lines.length < 7 && cur) lines.push(cur)
+      if (lines.length === 7 && words.join(' ').length > lines.join(' ').length + 1) lines[6] = lines[6].replace(/\s+\S*$/, '') + '…'
       lines.forEach((l, k) => engrave(l, s * 0.625 + k * fsz * 1.35, fsz, 700, '"Lilita One", Orbitron, sans-serif', maxW))
     }
-    rule(s * 0.76, s * 0.2)
-    // Series number (#1 until a conquest mints #2) and the unique ID
-    engrave(`SERIES #${b.edition && b.edition > 1 ? b.edition : 1}${b.minted && b.tokenId ? ` · TOKEN ${b.tokenId}` : ''}`, s * 0.795, s * 0.03)
-    engrave(`ID ${b.h3Index}`, s * 0.835, s * 0.024, 700, '"Roboto Mono", "Courier New", monospace')
 
     bTex.needsUpdate = true
   }
