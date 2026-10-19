@@ -91,7 +91,7 @@ from terra_domini.apps.economy.pickup_views import pickups_in_view, pickup_colle
 from terra_domini.apps.economy.map_resources import map_resources, map_states
 from terra_domini.apps.events import card_market_views as event_cards
 from terra_domini.apps.accounts.profile_views import profile_stats
-from terra_domini.apps.territories.kingdom_views import kingdom_overview, kingdom_upgrade, daily_draft
+from terra_domini.apps.territories.kingdom_views import kingdom_overview, kingdom_upgrade, daily_draft, my_regions
 from terra_domini.apps.combat.recruitment import (
     my_army as combat_my_army,
     recruit as combat_recruit,
@@ -173,6 +173,7 @@ urlpatterns = [
     path('api/event-cards/<uuid:card_id>/sell/',   event_cards.sell,   name='event_cards_sell'),
     path('api/event-cards/<uuid:card_id>/delist/', event_cards.delist, name='event_cards_delist'),
     path('api/event-cards/<uuid:card_id>/buy/',    event_cards.buy,    name='event_cards_buy'),
+    path('api/regions/',         my_regions,       name='my_regions'),
     path('api/combat/draft/',    daily_draft,      name='combat_draft'),
     path('api/kingdom/<str:h3_index>/overview/', kingdom_overview, name='kingdom_overview'),
     path('api/kingdom/<str:h3_index>/upgrade/',  kingdom_upgrade,  name='kingdom_upgrade'),

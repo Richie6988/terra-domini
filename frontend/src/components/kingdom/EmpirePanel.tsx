@@ -6,7 +6,8 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { Crown, Swords, BarChart3, MapPin, Timer } from 'lucide-react'
+import { Crown, Swords, BarChart3, MapPin, Timer, Flag } from 'lucide-react'
+import { RegionsTab } from './RegionsTab'
 import { GlassPanel } from '../shared/GlassPanel'
 import { api } from '../../services/api'
 import { usePlayer, useStore } from '../../store'
@@ -15,11 +16,12 @@ import { IconSVG } from '../shared/iconBank'
 
 
 interface Props { onClose: () => void }
-type Tab = 'kingdoms' | 'military' | 'stats'
+type Tab = 'kingdoms' | 'regions' | 'military' | 'stats'
 
 const ACCENT = '#cc8800'
 const TABS: { id: Tab; label: string; Icon: typeof Crown }[] = [
   { id: 'kingdoms', label: 'KINGDOMS', Icon: Crown },
+  { id: 'regions', label: 'REGIONS', Icon: Flag },
   { id: 'military', label: 'MILITARY', Icon: Swords },
   { id: 'stats', label: 'STATS', Icon: BarChart3 },
 ]
@@ -422,6 +424,7 @@ export function EmpirePanel({ onClose }: Props) {
       </div>
 
       {tab === 'kingdoms' && <KingdomsTab kingdoms={kingdoms} loading={isLoading && !!player} onTeleport={handleTeleport} />}
+      {tab === 'regions' && <RegionsTab />}
       {tab === 'military' && <MilitaryTab />}
       {tab === 'stats' && <StatsTab kingdoms={kingdoms} />}
     </GlassPanel>

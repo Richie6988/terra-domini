@@ -195,6 +195,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     // Teleport listener — fired from ProfilePanel territory click
     const onFlyTo = (e: Event) => {
       const { lat, lon, zoom } = (e as CustomEvent).detail
+      if (!(map as any)._mapPane) return            // map already destroyed (remount)
       map.flyTo([lat, lon], zoom ?? 15, { duration: 1.2 })
     }
     window.addEventListener('terra:flyto', onFlyTo)
@@ -343,7 +344,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         p => map.setView([p.coords.latitude, p.coords.longitude], 14), () => {}
       ))
 
-    return () => { clearTimeout(vpTimer.current); map.remove(); mapRef.current = null; selectedLayer.clearLayers() }
+    return () => { window.removeEventListener('terra:flyto', onFlyTo); clearTimeout(vpTimer.current); map.remove(); mapRef.current = null; selectedLayer.clearLayers() }
   }, []) // eslint-disable-line
 
   // ── Tile switch ───────────────────────────────────────────────────────────

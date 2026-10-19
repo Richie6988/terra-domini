@@ -33,7 +33,7 @@ interface ArmyData {
   training: TrainingItem[]
   force: { attack: number; defense: number }
   stations?: Station[]
-  draft?: { base: number; kingdoms: number; barracks: number; total: number; territories: number; available: boolean }
+  draft?: { base: number; kingdoms: number; barracks: number; regions?: number; total: number; territories: number; available: boolean }
 }
 
 const TABS = [
@@ -146,7 +146,7 @@ export function CombatPanel({ onClose }: Props) {
           <div style={{ flex: 1 }}>
             <div style={{ ...label, color: '#34d399' }}>DAILY DRAFT · {army.draft.total} FREE INFANTRY</div>
             <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 2 }}>
-              {army.draft.base} from {army.draft.territories} territories{army.draft.kingdoms ? ` · +${army.draft.kingdoms} kingdom size` : ''}{army.draft.barracks ? ` · +${army.draft.barracks} barracks` : ''}
+              {army.draft.base} from {army.draft.territories} territories{army.draft.kingdoms ? ` · +${army.draft.kingdoms} kingdom size` : ''}{army.draft.barracks ? ` · +${army.draft.barracks} barracks` : ''}{army.draft.regions ? ` · +${army.draft.regions} regions` : ''}
             </div>
           </div>
           {army.draft.available

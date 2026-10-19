@@ -198,9 +198,25 @@ def recompute_kingdoms(player) -> list[dict]:
                              .values_list('custom_name', 'border_color', 'fill_color')[:50])
             pick = lambda i: next((r[i] for r in cust_rows if r[i]), None)
             embed = _TC.objects.filter(territory__h3_index__in=list(component)).exclude(embed_url='').values_list('embed_url', flat=True).first()
+            # No custom name: named after its most notable place (was "Kingdom 6c63df")
+            order = {'mythic': 5, 'legendary': 4, 'epic': 3, 'rare': 2, 'uncommon': 1}
+            places = sorted(_T.objects.filter(h3_index__in=list(component)).values_list('rarity', 'poi_name', 'place_name'),
+                            key=lambda r: -order.get(r[0], 0))
+            place = next((pn or pl for _, pn, pl in places if pn or pl), '')
+            auto = (f'Kingdom of {place}' if size > 1 else place)[:60] if place else None
+            if not auto:          # wild land: named after its region (Sahara, Alps…)
+                from terra_domini.apps.territories.regions import region_at
+                from terra_domini.apps.territories.regions import standings
+                reg = region_at(centroid_lat, centroid_lon, component[0])
+                rname = reg and (reg[1] or standings().get(reg[0], {}).get('name', '').replace('Province of ', ''))
+                if rname == 'Unnamed province':
+                    rname = None
+                kind = 'Kingdom' if size > 1 else 'Outpost'
+                auto = (f'{kind} near {rname}' if rname else
+                        f"{kind} {abs(centroid_lat):.1f}°{'N' if centroid_lat >= 0 else 'S'} {abs(centroid_lon):.1f}°{'E' if centroid_lon >= 0 else 'W'}")[:60]
             result.append({
                 'cluster_id': cluster_id,
-                'name': pick(0), 'border_color': pick(1), 'fill_color': pick(2), 'embed_url': embed or None,
+                'name': pick(0) or auto, 'custom_name': pick(0), 'border_color': pick(1), 'fill_color': pick(2), 'embed_url': embed or None,
                 'size': size,
                 'is_main': is_main,
                 'tier': tier,

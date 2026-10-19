@@ -9,7 +9,7 @@ hex where it was bought; a kingdom's level = the best building inside it (split 
   science    +5 % HEX production of the kingdom per level                   (economy.balance.territory_rates)
   education  +5 % resource production of the kingdom per level             (economy.resources.player_resource_rates)
 Daily draft (Risk reinforcements): once a day, free infantry = max(3, territories / 3) + kingdom size bonuses
-(5+ hexes +2, 10+ +4, 20+ +8 each) + barracks.
+(5+ hexes +2, 10+ +4, 20+ +8 each) + barracks + 3 per controlled region (territories/regions.py).
 """
 from django.utils import timezone
 
@@ -94,8 +94,10 @@ def draft_size(player) -> dict:
     base = max(3, len(owned) // 3)
     size_bonus = sum(8 if len(c) >= 20 else 4 if len(c) >= 10 else 2 if len(c) >= 5 else 0 for c in comps)
     barracks = sum(levels_for(c)['barracks'] for c in comps) * UPGRADES['barracks']['per_level']
-    return {'base': base, 'kingdoms': size_bonus, 'barracks': barracks, 'total': base + size_bonus + barracks,
-            'territories': len(owned)}
+    from terra_domini.apps.territories.regions import controlled, REGION_DRAFT
+    regions = len(controlled(player.id)) * REGION_DRAFT                 # Risk continents
+    return {'base': base, 'kingdoms': size_bonus, 'barracks': barracks, 'regions': regions,
+            'total': base + size_bonus + barracks + regions, 'territories': len(owned)}
 
 
 def draft_available(player) -> bool:

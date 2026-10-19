@@ -130,3 +130,33 @@ def daily_draft(request):
         player.last_draft_at = timezone.now()
         player.save(update_fields=['last_draft_at'])
     return Response({'success': True, 'drafted': d['total'], 'unit_type': 'infantry', 'detail': d})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def my_regions(request):
+    """GET /api/regions/ — the regions where I hold land: my count, the controller, what it takes to win it."""
+    from terra_domini.apps.accounts.models import Player
+    from terra_domini.apps.territories import regions as R
+    me = str(request.user.id)
+    rows, leaders = [], set()
+    for rid, e in R.standings().items():
+        mine = e['counts'].get(me, 0)
+        if not mine:
+            continue
+        lead, lead_n = R.leader_of(e)
+        best_other = max((n for o, n in e['counts'].items() if o != me), default=0)
+        rows.append({'id': rid, 'name': e['name'], 'mine': mine, 'players': len(e['counts']),
+                     'controlled': lead == me, 'leader_id': lead, 'leader_count': lead_n,
+                     'rival_best': best_other,
+                     # territories to add to take (or keep a 1-hex margin on) the region
+                     'to_take': 0 if lead == me else max(R.REGION_MIN - mine, best_other - mine + 1)})
+        if lead:
+            leaders.add(lead)
+    names = {str(i): u for i, u in Player.objects.filter(id__in=list(leaders)).values_list('id', 'username')}
+    for r in rows:
+        r['leader'] = names.get(r.pop('leader_id') or '', None)
+    rows.sort(key=lambda r: (not r['controlled'], -r['mine'], r['to_take']))
+    n = sum(r['controlled'] for r in rows)
+    return Response({'regions': rows, 'controlled': n, 'bonus': {'draft': n * R.REGION_DRAFT, 'hex_pct': R.REGION_HEX_PCT},
+                     'rules': {'min': R.REGION_MIN, 'draft_per_region': R.REGION_DRAFT, 'hex_pct': R.REGION_HEX_PCT}})
