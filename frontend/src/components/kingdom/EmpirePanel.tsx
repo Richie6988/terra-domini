@@ -121,9 +121,10 @@ function KingdomsTab({ kingdoms, loading, onTeleport }: { kingdoms: Kingdom[]; l
               <div style={{ textAlign: 'right', flexShrink: 0 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
                   <IconSVG id="hex_coin" size={16} />
-                  <span style={{ fontSize: 18, fontWeight: 900, color: ACCENT, fontFamily: MONO }}>+{fmt(k.tdc_per_24h)}</span>
+                  {/* white on the gold main card, gold on the others (gold on gold was unreadable) */}
+                  <span style={{ fontSize: 18, fontWeight: 900, color: k.is_main ? '#fff' : '#fbbf24', fontFamily: MONO, textShadow: '0 2px 0 rgba(0,0,0,0.35)' }}>+{fmt(k.tdc_per_24h)}</span>
                 </div>
-                <div style={{ fontSize: 9, color: 'rgba(255,255,255,0.45)', letterSpacing: 1.5, fontFamily: HEAD, marginTop: 2 }}>HEX / DAY</div>
+                <div style={{ fontSize: 9, color: k.is_main ? 'rgba(255,255,255,0.75)' : 'rgba(255,255,255,0.45)', letterSpacing: 1.5, fontFamily: HEAD, marginTop: 2 }}>HEX / DAY</div>
               </div>
             </div>
 
