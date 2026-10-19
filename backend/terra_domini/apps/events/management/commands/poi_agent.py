@@ -7,6 +7,8 @@ row (ledger + game DB) and moves to the next one. Run it where Wikipedia is reac
   python manage.py poi_agent --limit 500            # a batch (resumable: stamped rows are skipped)
   python manage.py poi_agent --uid poi-100003       # one given row (re-checked even if already stamped)
   python manage.py poi_agent --kinds landmark,city  # only some kinds (default: landmark, history, city, country)
+CLI mode, no API key — the same tools driven by a Claude Code subagent (.claude/agents/poi-validator.md):
+  --next 3 · --row UID --lookup "Title" · --row UID --view URL · --row UID --submit result.json
 
 Needs ANTHROPIC_API_KEY (.env.prod). Model: POI_AGENT_MODEL (default claude-haiku-5-5).
 
@@ -142,6 +144,26 @@ class Agent:
         self.wiki = {}         # canonical title → facts
         self.usage = {'input': 0, 'output': 0, 'cache_read': 0, 'searches': 0, 'fetches': 0}
 
+    # ── CLI mode (Claude Code subagent drives the tools, no API key): the facts shown persist between calls ──
+    @staticmethod
+    def state_dir():
+        d = poi_validations.LEDGER.parent / 'poi_agent_state'
+        d.mkdir(parents=True, exist_ok=True)
+        return d
+
+    @classmethod
+    def restore(cls, row):
+        a = cls(row)
+        f = cls.state_dir() / f"{row['uid']}.json"
+        if f.exists():
+            s = json.loads(f.read_text())
+            a.pictures, a.seen, a.wiki = s['pictures'], set(s['seen']), s['wiki']
+        return a
+
+    def persist(self):
+        (self.state_dir() / f"{self.row['uid']}.json").write_text(json.dumps(
+            {'pictures': self.pictures, 'seen': sorted(self.seen), 'wiki': self.wiki}, ensure_ascii=False))
+
     # ── client tools ──
     def wiki_lookup(self, title):
         t = W.title_of(title) or title.strip()
@@ -151,9 +173,13 @@ class Agent:
         qid = page.get('wikidata', '')
         sitelinks, heritage, p18 = 0, [], ''
         if qid:
-            d = W.api({'action': 'wbgetentities', 'ids': qid, 'props': 'sitelinks|claims'}, host=W.WD_API)
+            try:
+                d = W.api({'action': 'wbgetentities', 'ids': qid, 'props': 'sitelinks|claims'}, host=W.WD_API)
+            except Exception:      # Wikidata throttled: the article still answers, fame is then unknown
+                d, sitelinks = {}, None
             e = (d.get('entities') or {}).get(qid, {})
-            sitelinks = len(e.get('sitelinks') or {})
+            if e:
+                sitelinks = len(e.get('sitelinks') or {})
             cl = e.get('claims') or {}
             heritage = [((c.get('mainsnak') or {}).get('datavalue') or {}).get('value', {}).get('id') for c in cl.get('P1435', [])]
             v = ((((cl.get('P18') or [{}])[0]).get('mainsnak') or {}).get('datavalue') or {}).get('value')
@@ -177,7 +203,8 @@ class Agent:
                 'sitelinks': sitelinks, 'heritage_designations': [h for h in heritage if h],
                 'unesco_world_heritage': 'Q9259' in heritage, 'pictures': pics}
 
-    def view_image(self, url):
+    def download(self, url):
+        """(bytes, mime) of a picture, or (None, error)."""
         if not url.startswith('https://upload.wikimedia.org/'):
             return None, 'Only https://upload.wikimedia.org/ pictures (from wiki_lookup) can be used.'
         req = Request(url, headers={'User-Agent': W.UA})
@@ -187,6 +214,12 @@ class Agent:
         if mime not in ('image/jpeg', 'image/png', 'image/webp', 'image/gif'):
             return None, f'Not a picture ({mime}).'
         self.seen.add(url)
+        return data, mime
+
+    def view_image(self, url):
+        data, mime = self.download(url)
+        if data is None:
+            return None, mime
         meta = self.pictures.get(url, {})
         return [{'type': 'image', 'source': {'type': 'base64', 'media_type': mime, 'data': base64.b64encode(data).decode()}},
                 {'type': 'text', 'text': f"{meta.get('file', url)} · {meta.get('width', '?')}x{meta.get('height', '?')} · "
@@ -272,13 +305,13 @@ class Agent:
         return None, 'too many turns'
 
 
-def stamp(row, s, agent):
+def stamp(row, s, agent, model=MODEL):
     """Ledger line + game DB update. Returns the ledger entry."""
     import h3
     from terra_domini.apps.events.unified_poi import UnifiedPOI
     from terra_domini.apps.territories.models import Territory
     now = timezone.now()
-    entry = {'uid': row['uid'], 'verdict': s['verdict'], 'validated_at': now.isoformat(), 'validator': VERSION, 'model': MODEL,
+    entry = {'uid': row['uid'], 'verdict': s['verdict'], 'validated_at': now.isoformat(), 'validator': VERSION, 'model': model,
              'confidence': s.get('confidence'), 'sources': s.get('sources') or [], 'corrections': s.get('corrections') or [],
              'usage': agent.usage, 'previous': {k: row.get(k) for k in ('name', 'lat', 'lon', 'rarity', 'country_code')}}
     if s['verdict'] == 'rejected':
@@ -310,8 +343,64 @@ class Command(BaseCommand):
         parser.add_argument('--limit', type=int, default=3)
         parser.add_argument('--uid', action='append', default=[])
         parser.add_argument('--kinds', default=','.join(DEFAULT_KINDS))
+        # CLI mode — the same tools for a Claude Code subagent (.claude/agents/poi-validator.md), no API key:
+        parser.add_argument('--next', type=int, help='print the next N unchecked rows (JSON)')
+        parser.add_argument('--row', help='uid of the row the tool call is about')
+        parser.add_argument('--lookup', help='wiki_lookup(title) for --row (JSON)')
+        parser.add_argument('--view', help='download a picture for --row, print the local file to look at')
+        parser.add_argument('--submit', help='JSON file with the submit_validation fields for --row')
+        parser.add_argument('--model', default='claude-code:haiku', help='model name written in the stamp (CLI mode)')
+
+    def cli(self, db, o):
+        done = poi_validations.load()
+        if o['next']:
+            kinds = set(o['kinds'].split(','))
+            rows = sorted((p for p in db['pois'] if p['kind'] in kinds and p['uid'] not in done), key=lambda p: not p.get('on_map'))
+            keys = ('uid', 'kind', 'name', 'game_category', 'lat', 'lon', 'country_code', 'wiki_url', 'title', 'description',
+                    'rarity', 'visitors_per_year', 'fun_fact_1', 'rare_fact')
+            self.stdout.write(json.dumps([{k: p.get(k) for k in keys if p.get(k) not in (None, '')} for p in rows[:o['next']]],
+                                         ensure_ascii=False, indent=1))
+            return
+        row = next((p for p in db['pois'] if p['uid'] == o['row']), None)
+        if not row:
+            raise CommandError('--row <uid> required (from --next)')
+        agent = Agent.restore(row)
+        try:
+            self._cli_call(agent, row, o)
+        except CommandError:
+            raise
+        except Exception as e:   # network: a clean message the agent can act on (retry later / another tool)
+            raise CommandError(f'{type(e).__name__}: {e} — retry in a minute or use web search')
+        finally:
+            agent.persist()
+
+    def _cli_call(self, agent, row, o):
+        if o['lookup']:
+            self.stdout.write(json.dumps(agent.wiki_lookup(o['lookup']), ensure_ascii=False, indent=1))
+        elif o['view']:
+            data, mime = agent.download(o['view'])
+            if data is None:
+                raise CommandError(mime)
+            f = agent.state_dir() / f"{row['uid']}_{len(agent.seen)}.{mime.split('/')[1]}"
+            f.write_bytes(data)
+            meta = agent.pictures.get(o['view'], {})
+            self.stdout.write(f"Look at this file now (Read tool): {f}\n{meta.get('file', '')} · {meta.get('width', '?')}x{meta.get('height', '?')} · "
+                              f"{meta.get('license', 'license unknown')}. Does it clearly show {row['name']}?")
+        elif o['submit']:
+            s = json.loads(Path(o['submit']).read_text())
+            errs = agent.check(s)
+            if errs:
+                raise CommandError('NOT STAMPED — fix and submit again: ' + ' '.join(errs))
+            e = stamp(row, s, agent, model=o['model'])
+            self.stdout.write(self.style.SUCCESS(f"STAMPED {e['verdict'].upper()} · {e.get('name', row['name'])} · "
+                                                 f"{e.get('rarity', '-')} → {e.get('hex_per_day', 0)} HEX/day"))
 
     def handle(self, *args, **o):
+        if o['next'] or o['row']:
+            db = hexod_db.load()
+            if not db:
+                raise CommandError(f'{hexod_db.DB_PATH} not found')
+            return self.cli(db, o)
         if not os.environ.get('ANTHROPIC_API_KEY'):
             raise CommandError('ANTHROPIC_API_KEY missing: add it to /home/hexod/terra-domini/.env.prod')
         db = hexod_db.load()

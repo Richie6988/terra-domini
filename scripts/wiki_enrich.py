@@ -50,7 +50,7 @@ def title_of(url: str) -> str:
     return unquote(m.group(1)).replace('_', ' ').strip() if m else ''
 
 
-def api(params: dict, tries=4, host=API) -> dict:
+def api(params: dict, tries=5, host=API) -> dict:
     params = {**params, 'format': 'json', 'formatversion': 2, 'maxlag': 5}
     for i in range(tries):
         try:
@@ -60,10 +60,13 @@ def api(params: dict, tries=4, host=API) -> dict:
             if d.get('error', {}).get('code') == 'maxlag':
                 time.sleep(5 * (i + 1)); continue
             return d
-        except Exception as e:   # network hiccup → back off
+        except Exception as e:   # network hiccup → back off (429: as long as the server asks, shared IPs get throttled)
             if i == tries - 1:
                 raise
-            print(f'  retry ({e})', file=sys.stderr); time.sleep(3 * (i + 1))
+            wait = 3 * (i + 1)
+            if getattr(e, 'code', None) == 429:
+                wait = min(60, int((e.headers or {}).get('Retry-After') or 0) or 10 * (i + 1))
+            print(f'  retry in {wait}s ({e})', file=sys.stderr); time.sleep(wait)
     return {}
 
 
