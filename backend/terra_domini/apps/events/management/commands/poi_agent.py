@@ -355,6 +355,7 @@ class Command(BaseCommand):
         parser.add_argument('--kinds', default=','.join(DEFAULT_KINDS))
         # CLI mode — the same tools for a Claude Code subagent (.claude/agents/poi-validator.md), no API key:
         parser.add_argument('--next', type=int, help='print the next N unchecked rows (JSON)')
+        parser.add_argument('--claim', help='worker name: --next reserves its rows for 3 h so parallel agents never share one')
         parser.add_argument('--row', help='uid of the row the tool call is about')
         parser.add_argument('--lookup', help='wiki_lookup(title) for --row (JSON)')
         parser.add_argument('--view', help='download a picture for --row, print the local file to look at')
@@ -366,6 +367,18 @@ class Command(BaseCommand):
         if o['next']:
             kinds = set(o['kinds'].split(','))
             rows = sorted((p for p in db['pois'] if p['kind'] in kinds and p['uid'] not in done), key=lambda p: not p.get('on_map'))
+            if o['claim']:
+                import fcntl
+                cf = Agent.state_dir() / 'claims.json'
+                with open(Agent.state_dir() / 'claims.lock', 'w') as lk:
+                    fcntl.flock(lk, fcntl.LOCK_EX)
+                    claims = json.loads(cf.read_text()) if cf.exists() else {}
+                    now = time.time()
+                    claims = {u: c for u, c in claims.items() if now - c['at'] < 3 * 3600 and u not in done}
+                    rows = [p for p in rows if p['uid'] not in claims or claims[p['uid']]['by'] == o['claim']][:o['next']]
+                    for p in rows:
+                        claims[p['uid']] = {'by': o['claim'], 'at': now}
+                    cf.write_text(json.dumps(claims))
             keys = ('uid', 'kind', 'name', 'game_category', 'lat', 'lon', 'country_code', 'wiki_url', 'title', 'description',
                     'rarity', 'visitors_per_year', 'fun_fact_1', 'rare_fact')
             self.stdout.write(json.dumps([{k: p.get(k) for k in keys if p.get(k) not in (None, '')} for p in rows[:o['next']]],
