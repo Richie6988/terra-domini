@@ -268,6 +268,44 @@ function pill(ctx: CanvasRenderingContext2D, x: number, y: number, w: number, h:
   ctx.fillStyle = fill; ctx.fill(); ctx.lineWidth = Math.max(2, h * 0.08); ctx.strokeStyle = stroke; ctx.stroke()
 }
 
+// ── Engraved icons (owner 2026-10-19): every picto of the token cut into the frame, monochrome so 1, 2 or 3 stay
+// clean. iconBank SVGs are multi-colour with a background disc and <g transform>: rendered as images (the browser
+// handles transforms), disc removed, then turned into a silhouette.
+const _engraveImgs: Record<string, HTMLImageElement> = {}
+function engraveImg(svg: string): HTMLImageElement {
+  let im = _engraveImgs[svg]
+  if (!im) {
+    let clean = svg.replace(/<circle cx="128" cy="128" r="9\d"[^>]*\/>/, '')     // background disc
+    if (!clean.includes('xmlns')) clean = clean.replace('<svg ', '<svg xmlns="http://www.w3.org/2000/svg" ')
+    clean = clean.replace('<svg ', '<svg width="256" height="256" ')
+    im = new Image(); im.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(clean)
+    _engraveImgs[svg] = im
+  }
+  return im
+}
+/** Resolves once the engraved icons can be drawn (callers repaint then). */
+export function whenEngravingsReady(svgs: (string | undefined)[]): Promise<void> {
+  return Promise.all(svgs.filter(Boolean).map(svg => new Promise<void>(res => {
+    const im = engraveImg(svg!)
+    if (im.complete) return res()
+    im.addEventListener('load', () => res(), { once: true }); im.addEventListener('error', () => res(), { once: true })
+  }))).then(() => undefined)
+}
+function engravedIcon(ctx: CanvasRenderingContext2D, svg: string, size: number) {
+  const im = engraveImg(svg)
+  if (!im.complete || !im.naturalWidth) return
+  const px = Math.ceil(size * 2.2)                          // the artwork fills ~45 % of the iconBank box: scale it up
+  const tint = (color: string) => {
+    const oc = document.createElement('canvas'); oc.width = oc.height = px
+    const o = oc.getContext('2d')!
+    o.drawImage(im, 0, 0, px, px)
+    o.globalCompositeOperation = 'source-in'; o.fillStyle = color; o.fillRect(0, 0, px, px)
+    return oc
+  }
+  ctx.drawImage(tint('rgba(255,255,255,0.65)'), -px / 2, -px / 2 + size * 0.06, px, px)   // bevel light
+  ctx.drawImage(tint('#1c1002'), -px / 2, -px / 2, px, px)                                 // cut into the metal
+}
+
 const nice = (v?: string) => (v || '').replace(/_/g, ' ').trim().toUpperCase()
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
@@ -278,9 +316,9 @@ const issuedLabel = (d?: string) => {
 
 /**
  * Collectible face, Sorare-grade (owner 2026-10-18: "think Sorare: clean, premium, the picture first").
- * Full-bleed sharp picture; top: category icon + name (ring = rarity colour); centre: name with a dark outline;
- * 3 bright lines of story; bottom: HEX / day. The wide metal frame is engraved: terrain on the left edge,
- * edition + issue date on the right edge (owner 2026-10-19).
+ * Full-bleed sharp picture; centre: name with a dark outline; 3 bright lines of story; bottom: HEX / day.
+ * The wide metal frame is engraved (owner 2026-10-19): pictos on the top-left edge, category on the top-right edge,
+ * terrain on the left edge, edition + issue date on the right edge. The inner line carries the rarity colour.
  */
 export function drawTokenFront(
   ctx: CanvasRenderingContext2D,
@@ -338,23 +376,6 @@ export function drawTokenFront(
     ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = holo; ctx.fillRect(0, 0, s, s); ctx.globalCompositeOperation = 'source-over'
   }
   ctx.restore()
-
-  // ── Top: category icon + category name (owner 2026-10-19) — the pill's ring carries the rarity colour ──
-  const catTxt = nice(state.category) || 'TERRITORY'
-  let pf = s * 0.028
-  ctx.font = `800 ${pf}px Orbitron, ${SANS}`
-  ;(ctx as any).letterSpacing = `${(s * 0.003).toFixed(1)}px`
-  while (ctx.measureText(catTxt).width > s * 0.34 && pf > s * 0.016) { pf -= s * 0.001; ctx.font = `800 ${pf}px Orbitron, ${SANS}` }
-  const ico = s * 0.05, hasIco = !!state.iconSvg
-  const tw = ctx.measureText(catTxt).width
-  const pw = tw + s * 0.06 + (hasIco ? ico + s * 0.012 : 0), ph = s * 0.064, py = s * 0.17   // inside the hex's narrow top
-  ctx.beginPath(); ctx.roundRect(c - pw / 2, py - ph / 2, pw, ph, ph / 2)
-  ctx.fillStyle = 'rgba(4,6,14,0.82)'; ctx.fill(); ctx.lineWidth = s * 0.004; ctx.strokeStyle = rc; ctx.stroke()
-  const x0 = c - pw / 2 + s * 0.03
-  if (hasIco) drawSVGIcon(ctx, x0 + ico / 2, py, ico, state.iconSvg!, state.catColor || rc, tier.metal)
-  ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#ffffff'
-  ctx.fillText(catTxt, x0 + (hasIco ? ico + s * 0.012 : 0), py + s * 0.002)
-  ;(ctx as any).letterSpacing = '0px'
 
   // ── Title: a bit smaller, white with a dark outline so it reads on any photo ──
   const name = (state.tokenName || '').toUpperCase()
@@ -444,6 +465,31 @@ export function drawTokenFront(
   }
   engrave(nice(state.terrain || state.biome), -1)
   engrave([nice(state.edition) || 'GENESIS', issuedLabel(state.date)].filter(Boolean).join('  ·  '), 1)
+  // upper edges: category on the top-right edge, every picto on the top-left edge
+  const rm = rb * Math.cos(Math.PI / 6)                       // centre → edge middle
+  const onEdge = (deg: number, rot: number, draw: () => void) => {
+    const a = deg * Math.PI / 180
+    ctx.save(); ctx.translate(c + rm * Math.cos(a), c + rm * Math.sin(a)); ctx.rotate(rot); draw(); ctx.restore()
+  }
+  const cat = nice(state.category)
+  if (cat) onEdge(-60, Math.PI / 6, () => {
+    let ef = s * 0.034
+    ctx.font = `900 ${ef}px Orbitron, ${SANS}`; (ctx as any).letterSpacing = `${(s * 0.004).toFixed(1)}px`
+    while (ctx.measureText(cat).width > rb * 0.78 && ef > s * 0.012) { ef -= s * 0.001; ctx.font = `900 ${ef}px Orbitron, ${SANS}` }
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle'
+    ctx.fillStyle = 'rgba(255,255,255,0.6)'; ctx.fillText(cat, 0, s * 0.0022)
+    ctx.fillStyle = 'rgba(28,16,2,0.92)'; ctx.fillText(cat, 0, 0)
+    ;(ctx as any).letterSpacing = '0px'
+  })
+  const icons = [...new Set((state.pictos && state.pictos.length ? state.pictos : [state.iconSvg]).filter(Boolean) as string[])].slice(0, 4)
+  if (icons.length) onEdge(-120, -Math.PI / 6, () => {
+    const isz = s * 0.046, gap = s * 0.03
+    const total = icons.length * isz + (icons.length - 1) * gap
+    icons.forEach((svg, k) => {
+      ctx.save(); ctx.translate(-total / 2 + isz / 2 + k * (isz + gap), 0); ctx.rotate(Math.PI / 6)   // icons stay upright
+      engravedIcon(ctx, svg, isz); ctx.restore()
+    })
+  })
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -495,6 +541,7 @@ export function createTokenFace2D(canvas: HTMLCanvasElement, props: TokenFace2DP
 
   // Async image load
   let aborted = false
+  whenEngravingsReady([...(props.pictos || []), props.iconSvg]).then(() => { if (!aborted) paint() })
   if (props.imageSrc) {
     const img = new Image()
     img.crossOrigin = 'anonymous'

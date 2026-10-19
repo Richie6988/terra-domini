@@ -17,7 +17,7 @@
  */
 import * as THREE from 'three'
 import {
-  TIERS, type TierKey, drawHex, drawTokenFront,
+  TIERS, type TierKey, drawHex, drawTokenFront, whenEngravingsReady,
 } from './hexodTokenFace'
 
 export { TIERS, type TierKey }
@@ -512,6 +512,7 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
   let disposed = false
   applyTierLook()
   drawFront()
+  whenEngravingsReady([...(state.pictos || []), state.iconSvg]).then(() => { if (!disposed) drawFront() })
   drawBack()
   cardImg.onload = () => { if (!disposed) drawFront() }
   if (state.imageSrc) cardImg.src = state.imageSrc
@@ -689,6 +690,7 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
       if (tierChanged) applyTierLook()
       drawFront()
       drawBack()
+      whenEngravingsReady([...(state.pictos || []), state.iconSvg]).then(() => { if (!disposed) drawFront() })
     },
     dispose() {
       disposed = true
