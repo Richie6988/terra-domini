@@ -9,6 +9,7 @@ import { useStore } from '../../store'
 import { api } from '../../services/api'
 import { NotificationBell } from './SessionLoop'
 import { IconSVG } from './iconBank'
+import { MapLayersBar } from '../map/MapLayersBar'
 import { emojiToIcon } from './emojiIcons'
 
 const AVATARS_SET = new Set(['eagle','dragon','lion','wolf','fox','bear','bat','shark','snake','scorpion','octopus','squid','crab','bee','butterfly','horse','deer','elephant','rhino','bison','crocodile','trex','whale','bug'])
@@ -141,32 +142,20 @@ export function HexodTopHUD() {
         </div>
       </div>
 
-      {/* God Mode — staff only */}
-      {p.is_staff && (
-        <button
-          className="hxh-god"
-          onClick={toggleGodMode}
-          role="switch"
-          aria-checked={godMode}
-          aria-label="God mode"
-          style={{
-            background: godMode ? 'linear-gradient(180deg, #fbbf24, #d97706)' : 'rgba(13,27,42,0.92)',
-            border: `1.5px solid ${godMode ? '#fde68a' : 'rgba(251,191,36,0.6)'}`,
-            color: godMode ? '#1a0a00' : '#fbbf24',
-            boxShadow: godMode ? '0 0 22px rgba(245,158,11,0.6), inset 0 1px 0 rgba(255,255,255,0.4)' : '0 4px 14px rgba(0,0,0,0.45)',
-          }}
-        >
-          <IconSVG id="crown" size={18} />
-          <span className="hxh-god__label">GOD MODE</span>
-          <span className="hxh-god__state" style={{
-            background: godMode ? 'rgba(26,10,0,0.85)' : 'rgba(255,255,255,0.08)',
-            color: godMode ? '#fbbf24' : 'rgba(255,255,255,0.7)',
-          }}>{godMode ? 'ON' : 'OFF'}</span>
-        </button>
-      )}
+      {/* Map layers — top centre */}
+      <MapLayersBar />
 
       {/* Right — notifications + HEX Balance */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, pointerEvents: 'auto' }}>
+      {/* God mode — staff only, a discreet dev switch */}
+      {p.is_staff && (
+        <button onClick={toggleGodMode} role="switch" aria-checked={godMode} aria-label="God mode" title={`God mode ${godMode ? 'ON' : 'OFF'} (staff)`}
+          style={{ width: 34, height: 34, borderRadius: 10, display: 'grid', placeItems: 'center', cursor: 'pointer',
+            background: godMode ? 'linear-gradient(180deg, #fbbf24, #d97706)' : 'rgba(13,27,42,0.85)',
+            border: `1px solid ${godMode ? '#fde68a' : 'rgba(255,255,255,0.12)'}`, opacity: godMode ? 1 : 0.6 }}>
+          <IconSVG id="crown" size={16} />
+        </button>
+      )}
       <NotificationBell />
       <div
         className="glass-panel hud-segment hxh-seg"

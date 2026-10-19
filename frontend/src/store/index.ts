@@ -65,6 +65,8 @@ interface UIState {
   // Token categories shown on the map (Layers menu) — persisted
   tokenFilter: Record<TokenKind, boolean>
   toggleTokenKind: (k: TokenKind) => void
+  mapInfo: boolean                 // AR layer (biome, coordinates, scale, compass)
+  toggleMapInfo: () => void
   sidebarOpen: boolean
   godMode: boolean
   toggleGodMode: () => void
@@ -217,6 +219,8 @@ export const useStore = create<Store>()(
       sidebarOpen: false,
       tokenFilter: { places: true, resources: true, species: true },
       toggleTokenKind: (k) => set((s) => ({ tokenFilter: { ...s.tokenFilter, [k]: !s.tokenFilter[k] } })),
+      mapInfo: true,
+      toggleMapInfo: () => set((s) => ({ mapInfo: !s.mapInfo })),
       godMode: false,
       toggleGodMode: () => set((s) => ({ godMode: !s.godMode })),
       pickingFavorite: false,
@@ -278,6 +282,7 @@ export const useStore = create<Store>()(
         sfxEnabled: state.sfxEnabled,
         mapTheme: state.mapTheme,
         tokenFilter: state.tokenFilter,
+        mapInfo: state.mapInfo,
         notificationsEnabled: state.notificationsEnabled,
         language: state.language,
       }) as any,
