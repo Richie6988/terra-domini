@@ -354,7 +354,7 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
 // KINGDOM TAB — full stats (was the Token3D overlay content)
 // ════════════════════════════════════════════════════════════════
 /** HEX harvesting of this kingdom, detailed (GET /kingdom/<h3>/overview/ income): zones × 100, kingdom bonus,
- * every token, then the multipliers (Science, starter boost, regions, events). */
+ * every token, then the multipliers (Production, starter boost, regions, events). */
 function IncomeBreakdown({ h3 }: { h3: string }) {
   const { data } = useQuery<any>({ queryKey: ['kingdom-overview', h3], queryFn: () => api.get(`/kingdom/${h3}/overview/`).then(r => r.data),
     enabled: !!h3, staleTime: 10000 })
@@ -383,7 +383,7 @@ function IncomeBreakdown({ h3 }: { h3: string }) {
       {inc.tokens.length > 8 && row(<span style={{ paddingLeft: 10 }}>+{inc.token_count - 8} more</span>, '')}
       <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 6, paddingTop: 6 }}>
         {row('Before multipliers', inc.before_multipliers.toLocaleString())}
-        {row(`Multipliers${inc.science > 1 ? ` · Science x${inc.science}` : ''}${inc.beginner > 1 ? ` · starter x${inc.beginner}` : ''}`, `x${inc.multiplier}`, '#86efac')}
+        {row(`Multipliers${inc.production > 1 ? ` · Production x${inc.production}` : ''}${inc.beginner > 1 ? ` · starter x${inc.beginner}` : ''}`, `x${inc.multiplier}`, '#86efac')}
       </div>
     </div>
   )
@@ -410,11 +410,11 @@ function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[]
   })
 
   const size = kingdom.size || tokens.length
-  const STATS: { key: string; label: string; icon: string; color: string }[] = [
-    { key: 'influence', label: 'ATTACK', icon: 'swords', color: '#ef4444' },
-    { key: 'fortification', label: 'DEFENSE', icon: 'shield', color: '#3b82f6' },
-    { key: 'education', label: 'SPY', icon: 'eye', color: '#a855f7' },
-    { key: 'science', label: 'HEX HARVEST', icon: 'hex_coin', color: '#f59e0b' },
+  const STATS: { key: string; label: string; icon: string; color: string; force: string; unit: string }[] = [
+    { key: 'attack', label: 'ATTACK', icon: 'swords', color: '#ef4444', force: 'attack', unit: 'armaments' },
+    { key: 'defense', label: 'DEFENSE', icon: 'shield', color: '#3b82f6', force: 'defense', unit: 'fortifications' },
+    { key: 'influence', label: 'INFLUENCE', icon: 'eye', color: '#a855f7', force: 'spy', unit: 'spies' },
+    { key: 'production', label: 'PRODUCTION', icon: 'hex_coin', color: '#f59e0b', force: '', unit: '' },
   ]
 
   return (
@@ -445,8 +445,7 @@ function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[]
         </div>
       </div>
 
-      {/* Kingdom stats: each upgrade multiplies one (owner 2026-10-19: influence → attack, fortification → defense,
-          education → spy, science → HEX) */}
+      {/* The 4 categories (owner 2026-10-19): attack, defense, influence, production — level, multiplier, and what the army bought */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         {STATS.map(st => {
           const u = ov?.upgrades?.find((x: any) => x.key === st.key)
@@ -455,7 +454,8 @@ function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[]
               <div style={statLabel}>{st.label}</div>
               <div style={statValue(st.color)}><IconSVG id={st.icon} size={12} /> x{u ? u.mult.toFixed(1) : '1.0'}</div>
               <div style={{ fontSize: 9, color: 'var(--hx-text-3)', marginTop: 2, letterSpacing: 1 }}>
-                {u ? `${u.name.toUpperCase()} LV ${u.level}/${u.max_level}` : '…'}</div>
+                {u ? `LV ${u.level}/${u.max_level}` : '…'}
+                {st.force ? ` · ${(ov?.forces?.[st.force] || 0).toLocaleString()} ${st.unit.toUpperCase()}` : ov?.income ? ` · ${ov.income.total.toLocaleString()} HEX/DAY` : ''}</div>
             </div>)
         })}
       </div>

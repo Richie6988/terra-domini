@@ -27,7 +27,7 @@ def _overview(player, h3_index):
     ups = []
     for key, u in U.UPGRADES.items():
         lvl = levels[key]
-        rng = lambda n: f" · +{n * U.RANGE_PER_INFLUENCE} hexes range" if key == 'influence' else ''
+        rng = lambda n: f" · +{n * U.RANGE_PER_ATTACK} hexes range" if key == 'attack' else ''
         ups.append({'key': key, 'name': u['name'], 'level': lvl, 'max_level': U.MAX_LEVEL, 'stat': u['stat'],
                     'mult': round(1 + lvl * u['per_level'] / 100, 2),
                     'effect': f"+{lvl * u['per_level']}{u['unit']}{rng(lvl)}",
@@ -52,14 +52,14 @@ def _overview(player, h3_index):
               'before_multipliers': raw, 'total': total,
               'multiplier': round(total / raw, 2) if raw else 1,
               'beginner': B.BEGINNER_MULT if B.is_beginner(player) else 1,
-              'science': round(U.kingdom_mult(hexes, 'science'), 2)}
+              'production': round(U.kingdom_mult(hexes, 'production'), 2)}
     return {
         'income': income,
         'h3': h3_index, 'name': t.custom_name or t.poi_name or t.place_name or f'Zone {h3_index[:8]}',
         'size': len(hexes), 'kind': 'kingdom' if len(hexes) > 1 else 'territory', 'hexes': sorted(hexes),
         'forces': Fz.pools(hexes), 'point_cost': Fz.POINT_COST,
-        'spy_discount': {'per_point': round(Fz.SPY_DISCOUNT * U.kingdom_mult(hexes, 'education'), 4), 'max_points': Fz.SPY_MAX},
-        # what each counter is worth in this kingdom (upgrades: influence, fortification, education, science)
+        'spy_discount': {'per_point': round(Fz.SPY_DISCOUNT * U.kingdom_mult(hexes, 'influence'), 4), 'max_points': Fz.SPY_MAX},
+        # what each counter is worth in this kingdom (the 4 categories: attack, defense, influence, production)
         'multipliers': {u['stat']: round(1 + levels[k] * u['per_level'] / 100, 2) for k, u in U.UPGRADES.items()},
         'under_attack': bool(t.is_under_attack),
         'shield_until': t.shield_until.isoformat() if t.shield_until and t.shield_until > timezone.now() else None,

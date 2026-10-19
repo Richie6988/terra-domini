@@ -218,7 +218,7 @@ def territory_rates(player) -> dict:
     except Exception:
         hot, EVENT_MULT = set(), 1
     from terra_domini.apps.territories.upgrades import hex_multipliers
-    sci = hex_multipliers(player.id, 'science')                      # kingdom Science upgrade: +5 % per level
+    sci = hex_multipliers(player.id, 'production')                   # kingdom Production level: +10 % each
     from terra_domini.apps.territories.regions import controlled, region_at, REGION_HEX_PCT
     mine = controlled(player.id)                                     # regions this player controls (Risk continents)
     reg = {h: 1 + REGION_HEX_PCT / 100 for h, (la, lo) in geo.items() if mine and (region_at(la, lo, h) or (None,))[0] in mine}
@@ -260,7 +260,7 @@ def discovery(player, h3_index: str, rarity: str = 'common', is_poi: bool = Fals
     disc = Fz.spy_discount(spies)
     if disc and near_hex:      # Education of that kingdom: each spy point cuts more (+10 % per level), capped at -60 %
         from terra_domini.apps.territories.upgrades import kingdom_mult
-        disc = min(0.6, disc * kingdom_mult(Fz.kingdom_hexes(player.id, near_hex), 'education'))
+        disc = min(0.6, disc * kingdom_mult(Fz.kingdom_hexes(player.id, near_hex), 'influence'))
     cost = int(round(DISCOVERY_COST * factor * RARITY_PRICE_MULT.get((rarity or 'common').lower(), 1) * (1 - disc)))
     hours = round(min(EXPLORE_MAX_HOURS, DISCOVERY_HOURS * factor) * (1 - disc), 2)
     from terra_domini.utils.god import is_god

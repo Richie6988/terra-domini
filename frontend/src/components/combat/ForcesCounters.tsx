@@ -1,5 +1,5 @@
 /**
- * ForcesCounters — the 3 counters of a kingdom / territory (combat/forces.py): attack, defense, spy.
+ * ForcesCounters — what the army buys (combat/forces.py): armaments (→ ATTACK), fortifications (→ DEFENSE), spies (→ INFLUENCE).
  * Buy points with HEX on that kingdom (POST /api/forces/buy/). Shared by Military and the kingdom ARMY tab.
  */
 import { openShop } from '../shop/openShop'
@@ -14,15 +14,15 @@ import { playSound } from '../../hooks/useSound'
 
 export type Forces = { attack: number; defense: number; spy: number }
 export const FORCE_META = {
-  attack:  { label: 'ATTACK',  color: '#f87171', Icon: Swords, help: 'Spent 1 for 1 against an enemy\'s defense' },
-  defense: { label: 'DEFENSE', color: '#60a5fa', Icon: Shield, help: 'Absorbs attacks on this kingdom, 1 for 1' },
-  spy:     { label: 'SPY',     color: '#c084fc', Icon: Eye,    help: '−5 % on a discovery\'s price and time each (max 10)' },
+  attack:  { label: 'ARMAMENTS',      color: '#f87171', Icon: Swords, help: 'ATTACK: spent 1 for 1 against an enemy\'s fortifications' },
+  defense: { label: 'FORTIFICATIONS', color: '#60a5fa', Icon: Shield, help: 'DEFENSE: absorbs attacks on this kingdom, 1 for 1' },
+  spy:     { label: 'SPIES',          color: '#c084fc', Icon: Eye,    help: 'INFLUENCE: −5 % on a discovery\'s price and time each (max 10)' },
 } as const
 const MONO = "'Share Tech Mono', monospace"
 
 export function ForcesCounters({ h3, forces, pointCost, compact = false, multipliers }: {
   h3: string; forces: Forces; pointCost: Record<string, number>; compact?: boolean
-  multipliers?: Record<string, number>     // kingdom upgrades: influence → attack, fortification → defense, education → spy
+  multipliers?: Record<string, number>     // kingdom categories: attack → armaments, defense → fortifications, influence → spies
 }) {
   const qc = useQueryClient()
   const god = useGodMode()

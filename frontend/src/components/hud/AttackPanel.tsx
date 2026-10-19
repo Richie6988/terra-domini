@@ -54,7 +54,7 @@ export function AttackPanel({ target, onClose }: Props) {
     staleTime: 5000,
   })
   const have = pv?.my_attack || 0
-  // attack × Influence must beat defense × Fortification (server: points_needed)
+  // armaments × Attack level must beat fortifications × Defense level (server: points_needed)
   const need = pv?.points_needed ?? (pv?.target_defense || 0) + 1
   // Default: just enough to win (or everything you have)
   useEffect(() => { if (pv) setPoints(Math.min(have, need)) }, [pv?.my_attack, pv?.target_defense]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -102,7 +102,7 @@ export function AttackPanel({ target, onClose }: Props) {
               <div className="hx-card" style={{ textAlign: 'center', borderColor: 'rgba(96,165,250,0.5)' }}>
                 <div style={{ fontSize: 9, letterSpacing: 1.5, fontWeight: 900, color: '#60a5fa', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}><Shield size={12} /> THEIR DEFENSE</div>
                 <div style={{ fontFamily: MONO, fontSize: 28, fontWeight: 900 }}>{isLoading ? '…' : (pv?.target_defense || 0).toLocaleString()}</div>
-                <div style={{ fontSize: 10, color: 'var(--hx-text-3)' }}>{pv?.owner || target.owner_username || 'enemy'}{pv?.target_size ? ` · ${pv.target_size} hexes` : ''}{(pv?.defense_mult || 1) > 1 ? ` · Fortification x${pv!.defense_mult!.toFixed(1)}` : ''}</div>
+                <div style={{ fontSize: 10, color: 'var(--hx-text-3)' }}>{pv?.owner || target.owner_username || 'enemy'}{pv?.target_size ? ` · ${pv.target_size} hexes` : ''}{(pv?.defense_mult || 1) > 1 ? ` · Defense x${pv!.defense_mult!.toFixed(1)}` : ''}</div>
               </div>
             </div>
 

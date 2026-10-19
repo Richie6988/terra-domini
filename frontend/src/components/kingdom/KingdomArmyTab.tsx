@@ -1,13 +1,12 @@
 /**
- * KingdomArmyTab — the "ARMY" tab of a kingdom / territory (GET /api/kingdom/<h3>/overview/): its 3 counters
- * (attack, defense, spy — combat/forces.py) to buy with HEX, and the kingdom upgrades that multiply them (influence → attack,
- * fortification → defense, education → spy, science → HEX —
- * POST /api/kingdom/<h3>/upgrade/).
+ * KingdomArmyTab — the "ARMY" tab of a kingdom / territory (GET /api/kingdom/<h3>/overview/): what the army buys with HEX
+ * (armaments, fortifications, spies — combat/forces.py) and the 4 categories it invests in for levels / multipliers
+ * (attack, defense, influence, production — POST /api/kingdom/<h3>/upgrade/).
  */
 import { openShop } from '../shop/openShop'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { FlaskConical, Radar, ShieldAlert, Castle, GraduationCap } from 'lucide-react'
+import { Factory, Radar, ShieldAlert, Castle, Swords, Eye } from 'lucide-react'
 import { IconSVG } from '../shared/iconBank'
 import { api } from '../../services/api'
 import { useStore, useGodMode } from '../../store'
@@ -15,8 +14,8 @@ import { playSound } from '../../hooks/useSound'
 import { celebrate } from '../shared/Celebrate'
 import { ForcesCounters } from '../combat/ForcesCounters'
 
-const UP_ICON: Record<string, typeof Radar> = { influence: Radar, fortification: Castle, education: GraduationCap, science: FlaskConical }
-const UP_COLOR: Record<string, string> = { influence: '#f87171', fortification: '#60a5fa', education: '#c084fc', science: '#fbbf24' }
+const UP_ICON: Record<string, typeof Radar> = { attack: Swords, defense: Castle, influence: Eye, production: Factory }
+const UP_COLOR: Record<string, string> = { attack: '#f87171', defense: '#60a5fa', influence: '#c084fc', production: '#fbbf24' }
 const label: React.CSSProperties = { fontSize: 9, letterSpacing: 1.5, color: 'var(--hx-text-3)', fontWeight: 700, fontFamily: "'Orbitron', sans-serif" }
 
 export function KingdomArmyTab({ h3, onOpenMilitary }: { h3: string; onOpenMilitary?: () => void }) {
@@ -54,12 +53,12 @@ export function KingdomArmyTab({ h3, onOpenMilitary }: { h3: string; onOpenMilit
       </div>
       <ForcesCounters h3={h3} forces={data.forces} pointCost={data.point_cost} multipliers={data.multipliers} />
       <div style={{ fontSize: 11, color: 'var(--hx-text-2)', textTransform: 'none', letterSpacing: 0, lineHeight: 1.45 }}>
-        Defense protects every hex of this kingdom: an attack takes a hex only with more points than this defense.
-        Attack points leave from the kingdom nearest to the target. Spies: −{Math.round(data.spy_discount.per_point * 100)}% on a discovery's price and time each (max {data.spy_discount.max_points}).
+        Fortifications protect every hex of this kingdom: an attack takes a hex only with more armaments than this defense.
+        Armaments leave from the kingdom nearest to the target. Spies: −{Math.round(data.spy_discount.per_point * 100)}% on a discovery's price and time each (max {data.spy_discount.max_points}).
       </div>
 
       <div>
-        <div style={{ ...label, marginBottom: 6 }}>UPGRADES · MULTIPLY THE WHOLE KINGDOM'S ATTACK, DEFENSE, SPIES AND HEX</div>
+        <div style={{ ...label, marginBottom: 6 }}>CATEGORIES · INVEST TO LEVEL UP THE KINGDOM'S MULTIPLIERS</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {data.upgrades.map((u: any) => {
             const Icon = UP_ICON[u.key] || Radar
@@ -79,7 +78,7 @@ export function KingdomArmyTab({ h3, onOpenMilitary }: { h3: string; onOpenMilit
                     </span>
                   </div>
                   <div style={{ fontSize: 10, color: 'var(--hx-text-2)', marginTop: 2 }}>
-                    {u.level ? u.effect : 'Not built'}{u.next_effect && <span style={{ color: c }}> → {u.next_effect}</span>}
+                    {u.level ? u.effect : 'Level 0'}{u.next_effect && <span style={{ color: c }}> → {u.next_effect}</span>}
                   </div>
                 </div>
                 {maxed

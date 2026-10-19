@@ -140,8 +140,8 @@ class BattleViewSet(viewsets.GenericViewSet):
         src = Fz.source_kingdom(request.user.id, t.h3_index)
         target = Fz.kingdom_hexes(t.owner_id, t.h3_index) if t.owner_id else [t.h3_index]
         from terra_domini.apps.territories import upgrades as U
-        am = U.kingdom_mult(src, 'influence') if src else 1.0
-        dm = U.kingdom_mult(target, 'fortification') if t.owner_id else 1.0
+        am = U.kingdom_mult(src, 'attack') if src else 1.0
+        dm = U.kingdom_mult(target, 'defense') if t.owner_id else 1.0
         dfn = Fz.pools(target)['defense']
         return Response({
             'can_attack': ok, 'reason': reason, 'owner': t.owner.username if t.owner else None,
@@ -253,8 +253,8 @@ def _battle_mults(battle, territory):
     from terra_domini.apps.territories import upgrades as U
     att = battle.participants.filter(side=BattleParticipant.Side.ATTACKER).first()
     src = (att.resources_contributed or {}).get('from') if att else None
-    am = U.kingdom_mult(Fz.kingdom_hexes(att.player_id, src), 'influence') if src else 1.0
-    dm = U.kingdom_mult(Fz.kingdom_hexes(territory.owner_id, territory.h3_index), 'fortification') if territory.owner_id else 1.0
+    am = U.kingdom_mult(Fz.kingdom_hexes(att.player_id, src), 'attack') if src else 1.0
+    dm = U.kingdom_mult(Fz.kingdom_hexes(territory.owner_id, territory.h3_index), 'defense') if territory.owner_id else 1.0
     return am, dm
 
 

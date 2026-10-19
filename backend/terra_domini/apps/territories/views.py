@@ -535,7 +535,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             'options': options,
             'distance': disc['distance'], 'factor': disc['factor'],
             'spy': {'have': spy_have, 'max_points': Fz.SPY_MAX,     # per point: x Education of the nearest kingdom
-                    'per_point': round(Fz.SPY_DISCOUNT * (kingdom_mult(Fz.kingdom_hexes(request.user.id, disc['near_hex']), 'education')
+                    'per_point': round(Fz.SPY_DISCOUNT * (kingdom_mult(Fz.kingdom_hexes(request.user.id, disc['near_hex']), 'influence')
                                                           if disc['near_hex'] else 1), 4)},
         })
 

@@ -295,8 +295,8 @@ class CombatEngine:
         # Upgrades: Influence of the attacking kingdom (where the points left from), Fortification of the defender
         from terra_domini.apps.territories import upgrades as U
         src = next((p.resources_contributed or {}).get('from') for p in attackers if (p.resources_contributed or {}).get('from')) if attackers else None
-        am = U.kingdom_mult(Fz.kingdom_hexes(attackers[0].player_id, src), 'influence') if src and attackers else 1.0
-        dm = U.kingdom_mult(kingdom, 'fortification') if territory.owner_id else 1.0
+        am = U.kingdom_mult(Fz.kingdom_hexes(attackers[0].player_id, src), 'attack') if src and attackers else 1.0
+        dm = U.kingdom_mult(kingdom, 'defense') if territory.owner_id else 1.0
         atk_power, def_power = n * am, dfn * dm
         attacker_wins = atk_power > def_power
         if attacker_wins:      # all the defense falls; the attack loses what it took to break it
