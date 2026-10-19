@@ -142,6 +142,10 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         except Exception:
             pass
 
+        # HEX/day of each hex: plain value (+ kingdom bonus) + its tokens (economy.balance.hex_income)
+        from terra_domini.apps.economy import balance as _B
+        tokens_at = _B.hex_tokens(hex_ids)
+
         result = []
         for hx in hex_ids:
             try:
@@ -198,6 +202,8 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 'poi_floor_price': poi.get('floor_price_tdi'),
                 'poi_visitors': poi.get('visitors_per_year'),
                 'poi_geo_score': poi.get('geopolitical_score'),
+                'token_count': len(tokens_at.get(hx, [])),
+                'hex_per_day': round(_B.hex_income(hx, bool(t and t.owner_id and kingdom_map.get(hx, {}).get('size', 1) > 1), tokens_at.get(hx, []))),
             })
         return Response(result)
 
@@ -495,6 +501,7 @@ class TerritoryViewSet(viewsets.ModelViewSet):
         from terra_domini.apps.combat import forces as Fz
         from terra_domini.apps.economy.balance import discovery, explore_slots, explore_speed_mult, has_boost, BLITZ_EXPLORE_HOURS
         from terra_domini.apps.territories.models import PendingClaim as _PC
+        from terra_domini.apps.territories.upgrades import kingdom_mult
         is_poi = bool(territory and (territory.is_landmark or territory.poi_name))
         disc = discovery(request.user, h3_index, (territory.rarity if territory else 'common'), is_poi)
         buy_cost = disc['cost']
@@ -527,7 +534,9 @@ class TerritoryViewSet(viewsets.ModelViewSet):
             'balance': balance,
             'options': options,
             'distance': disc['distance'], 'factor': disc['factor'],
-            'spy': {'have': spy_have, 'per_point': Fz.SPY_DISCOUNT, 'max_points': Fz.SPY_MAX},
+            'spy': {'have': spy_have, 'max_points': Fz.SPY_MAX,     # per point: x Education of the nearest kingdom
+                    'per_point': round(Fz.SPY_DISCOUNT * (kingdom_mult(Fz.kingdom_hexes(request.user.id, disc['near_hex']), 'education')
+                                                          if disc['near_hex'] else 1), 4)},
         })
 
     @action(detail=False, methods=['POST'], url_path='claim')
@@ -1206,10 +1215,10 @@ def _creature_info(uid):
     from terra_domini.apps.events.hexod_db import creature
     fx = next((f for f in SafariTarget.FANTASY if f[0] == uid), None)
     if fx:
-        return {'creature_category': 'fantasy', 'creature_description': fx[4], 'creature_wiki_url': ''}
+        return {'creature_category': 'fantasy', 'creature_description': fx[4], 'creature_wiki_url': '', 'creature_image': ''}
     c = creature(uid) or {}
     return {'creature_category': c.get('codex_category', ''), 'creature_description': c.get('description', ''),
-            'creature_wiki_url': c.get('wiki_url', '')}
+            'creature_wiki_url': c.get('wiki_url', ''), 'creature_image': c.get('image_url') or ''}
 
 
 SAFARI_HUNTS_PER_DAY = 5      # free hunts a day (economy.balance.ESCALATION['safari']); more cost more and more
@@ -1376,8 +1385,9 @@ class SafariViewSet(viewsets.GenericViewSet):
 
     @action(detail=False, methods=['POST'], url_path='probe')
     def probe(self, request):
-        """POST /api/safari/probe/ {h3} — scan one hex of the hunting ground.
-        Found → captured (HEX + card in the album). Missed → ring distance (1 = next to it). No tries left → it flees."""
+        """POST /api/safari/probe/ {h3} — tap one hex: in a radar hunt, a hex of the "it is here" zone.
+        Found → captured (HEX + card in the album + the hex). Missed → ring distance (1 = next to it), costs a scan.
+        No scans left → it flees."""
         import h3 as h3lib
         from django.db import transaction
         from django.db.models import F
@@ -1388,14 +1398,18 @@ class SafariViewSet(viewsets.GenericViewSet):
             target = SafariTarget.objects.select_for_update().filter(player=request.user, status='active').first()
             if not target or (not target.center_h3 and target.mode != 'world'):
                 return Response({'error': 'No active hunt'}, status=404)
-            if target.mode == 'world':   # radar hunt: the map centre must be within CAPTURE_KM of the creature
+            if target.mode == 'world':
+                # Radar hunt, last step (owner 2026-10-19): once the radar says "it is here", tap the hex you think
+                # hides it, inside the capture circle of that scan. Right hex → captured; wrong → its distance in hexes.
+                here = [p for p in target.probes if p.get('band') == 'here' and p.get('lat') is not None]
+                if not here:
+                    return Response({'error': 'Scan until the radar says IT IS HERE, then tap the hex hiding it'}, status=400)
                 try:
-                    km = _km(float(request.data['lat']), float(request.data['lon']), target.target_lat, target.target_lon)
-                except (KeyError, TypeError, ValueError):
-                    return Response({'error': 'lat, lon required'}, status=400)
-                if km > SafariTarget.CAPTURE_KM:
-                    return Response({'error': f'Not here — {km:.1f} km away. Scan again.'}, status=400)
-                cell = target.target_h3
+                    clat, clon = h3lib.cell_to_latlng(cell)
+                except Exception:
+                    return Response({'error': 'h3 required'}, status=400)
+                if _km(here[-1]['lat'], here[-1]['lon'], clat, clon) > SafariTarget.CAPTURE_KM + 0.5:
+                    return Response({'error': 'Tap a hex inside the striped zone'}, status=400)
             elif cell not in {g['h3'] for g in target.grid()}:
                 return Response({'error': 'That hex is outside the hunting ground'}, status=400)
             if any(p.get('h3') == cell for p in target.probes):

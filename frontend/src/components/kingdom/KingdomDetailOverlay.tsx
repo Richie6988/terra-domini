@@ -9,6 +9,7 @@
  * ENEMY KINGDOM:
  *   Intelligence view → Attack options → Spy → Diplomacy
  */
+import { rarityLabel } from '../../services/balance'
 import { useState, useEffect, useCallback, useMemo } from 'react'
 import { KingdomArmyTab } from './KingdomArmyTab'
 import { useQuery } from '@tanstack/react-query'
@@ -69,8 +70,8 @@ interface Props {
 
 // ═══ Rarity colors ═══
 const RC: Record<string, string> = {
-  common: '#9CA3AF', uncommon: '#10B981', rare: '#3B82F6',
-  epic: '#8B5CF6', legendary: '#F59E0B', mythic: '#EC4899',
+  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24',
+  epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
 }
 
 // ═══ STYLES ═══
@@ -200,7 +201,7 @@ function OwnTerritories({ k }: { k: KingdomData }) {
               <span style={{
                 padding: '1px 6px', borderRadius: 6, fontSize: 9, fontWeight: 700,
                 background: `${RC[t.rarity] || '#999'}15`, color: RC[t.rarity] || '#999',
-              }}>{t.rarity?.toUpperCase()}</span>
+              }}>{rarityLabel(t.rarity)}</span>
               <span style={{
                 padding: '1px 6px', borderRadius: 6, fontSize: 9, fontWeight: 600,
                 background: 'rgba(255,255,255,0.05)', color: 'rgba(255,255,255,0.55)',
@@ -329,7 +330,7 @@ function EnemyView({ k, onClose }: { k: KingdomData; onClose: () => void }) {
             <span style={{
               padding: '1px 6px', borderRadius: 6, fontSize: 9, fontWeight: 700,
               background: `${RC[t.rarity] || '#999'}15`, color: RC[t.rarity] || '#999',
-            }}>{t.rarity?.toUpperCase()}</span>
+            }}>{rarityLabel(t.rarity)}</span>
             <span style={{ fontSize: 9, color: '#e2e8f0', flex: 1 }}>{t.name || t.h3_index.slice(0, 12)}</span>
             <span style={{ fontSize: 9, color: '#3b82f6', fontWeight: 700 }}>DEF {t.defense_points}</span>
           </div>

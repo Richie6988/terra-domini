@@ -1,11 +1,12 @@
 /**
  * KingdomArmyTab — the "ARMY" tab of a kingdom / territory (GET /api/kingdom/<h3>/overview/): its 3 counters
- * (attack, defense, spy — combat/forces.py) to buy with HEX, and the kingdom upgrades (influence, science —
+ * (attack, defense, spy — combat/forces.py) to buy with HEX, and the kingdom upgrades that multiply them (influence → attack,
+ * fortification → defense, education → spy, science → HEX —
  * POST /api/kingdom/<h3>/upgrade/).
  */
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
-import { FlaskConical, Radar, ShieldAlert } from 'lucide-react'
+import { FlaskConical, Radar, ShieldAlert, Castle, GraduationCap } from 'lucide-react'
 import { IconSVG } from '../shared/iconBank'
 import { api } from '../../services/api'
 import { useStore, useGodMode } from '../../store'
@@ -13,8 +14,8 @@ import { playSound } from '../../hooks/useSound'
 import { celebrate } from '../shared/Celebrate'
 import { ForcesCounters } from '../combat/ForcesCounters'
 
-const UP_ICON: Record<string, typeof Radar> = { influence: Radar, science: FlaskConical }
-const UP_COLOR: Record<string, string> = { influence: '#fbbf24', science: '#a78bfa' }
+const UP_ICON: Record<string, typeof Radar> = { influence: Radar, fortification: Castle, education: GraduationCap, science: FlaskConical }
+const UP_COLOR: Record<string, string> = { influence: '#f87171', fortification: '#60a5fa', education: '#c084fc', science: '#fbbf24' }
 const label: React.CSSProperties = { fontSize: 9, letterSpacing: 1.5, color: 'var(--hx-text-3)', fontWeight: 700, fontFamily: "'Orbitron', sans-serif" }
 
 export function KingdomArmyTab({ h3, onOpenMilitary }: { h3: string; onOpenMilitary?: () => void }) {
@@ -49,14 +50,14 @@ export function KingdomArmyTab({ h3, onOpenMilitary }: { h3: string; onOpenMilit
         {data.under_attack && <span className="hx-chip" style={{ color: '#f87171', borderColor: '#7f1d1d' }}><ShieldAlert size={11} /> UNDER ATTACK</span>}
         {onOpenMilitary && <button onClick={onOpenMilitary} className="hx-chip" style={{ cursor: 'pointer' }}>ALL KINGDOMS</button>}
       </div>
-      <ForcesCounters h3={h3} forces={data.forces} pointCost={data.point_cost} />
+      <ForcesCounters h3={h3} forces={data.forces} pointCost={data.point_cost} multipliers={data.multipliers} />
       <div style={{ fontSize: 11, color: 'var(--hx-text-2)', textTransform: 'none', letterSpacing: 0, lineHeight: 1.45 }}>
         Defense protects every hex of this kingdom: an attack takes a hex only with more points than this defense.
         Attack points leave from the kingdom nearest to the target. Spies: −{Math.round(data.spy_discount.per_point * 100)}% on a discovery's price and time each (max {data.spy_discount.max_points}).
       </div>
 
       <div>
-        <div style={{ ...label, marginBottom: 6 }}>UPGRADES · APPLY TO THE WHOLE KINGDOM</div>
+        <div style={{ ...label, marginBottom: 6 }}>UPGRADES · MULTIPLY THE WHOLE KINGDOM'S ATTACK, DEFENSE, SPIES AND HEX</div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
           {data.upgrades.map((u: any) => {
             const Icon = UP_ICON[u.key] || Radar

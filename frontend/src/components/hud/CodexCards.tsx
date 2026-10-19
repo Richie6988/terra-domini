@@ -2,6 +2,7 @@
  * CodexCards — the three card families of the HEXOD master DB (GET /api/codex/cards/):
  * rare landmark cards, biome cards (named regions) and resource cards (daily production + stock).
  */
+import { rarityLabel } from '../../services/balance'
 import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Lock } from 'lucide-react'
@@ -15,7 +16,7 @@ import { Token3DViewer, RARITY_TIER } from '../shared/Token3DViewer'
 export type CardFamily = 'rare' | 'biomes' | 'resources' | 'creatures' | 'history' | 'events'
 
 const RARITY_COLOR: Record<string, string> = {
-  common: '#94a3b8', uncommon: '#22c55e', rare: '#3b82f6', epic: '#8b5cf6', legendary: '#f59e0b', mythic: '#ef4444',
+  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24', epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
 }
 const CONTINENT_ICON: Record<string, string> = {
   Africa: 'lion', Asia: 'mountain', Europe: 'castle', 'North America': 'bison', 'South America': 'forest',
@@ -194,7 +195,7 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
             {open.image_credit && <p style={{ fontSize: 10, color: 'var(--hx-text-3)', margin: '0 0 8px' }}>Photo: {open.image_credit}</p>}
           </>}
           {(family === 'history' || family === 'events') && <>
-            <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: '6px 0 0' }}>{dateLabel(open.event_date)}{open.location ? ` · ${open.location}` : ''} · {String(open.rarity).toUpperCase()}</p>
+            <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: '6px 0 0' }}>{dateLabel(open.event_date)}{open.location ? ` · ${open.location}` : ''} · {rarityLabel(open.rarity)}</p>
             {open.description && <p style={{ fontSize: 13, lineHeight: 1.45, margin: '8px 0' }}>{open.description}</p>}
           </>}
           {family === 'rare' && <>

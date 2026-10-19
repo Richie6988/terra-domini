@@ -19,7 +19,7 @@ export const TERRAIN_ICON: Record<string, string> = { lake: 'water_drop', ice: '
 
 // Game rarity → metal of the token (rare is no longer bronze like a common)
 export const RARITY_TIER: Record<string, TierKey> = {
-  common: 'BRONZE', uncommon: 'BRONZE', rare: 'SILVER', epic: 'GOLD', legendary: 'EMERALD', mythic: 'DIAMOND',
+  common: 'BRONZE', uncommon: 'SILVER', rare: 'GOLD', epic: 'EMERALD', legendary: 'DIAMOND', mythic: 'DIAMOND',
 }
 const label = (v?: string, d = '') => (v || d).replace(/_/g, ' ').toUpperCase()
 

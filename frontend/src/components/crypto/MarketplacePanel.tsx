@@ -11,6 +11,7 @@
  *   - Vendeur reçoit 95%
  *   - Paiement HEX Coin (tdc_in_game) pour V0
  */
+import { rarityLabel } from '../../services/balance'
 import { useState, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -23,8 +24,8 @@ import { EmojiIcon } from '../shared/emojiIcons'
 import { IconSVG } from '../shared/iconBank'
 
 const RARITY_C: Record<string, string> = {
-  common: '#9CA3AF', uncommon: '#10B981', rare: '#3B82F6',
-  epic: '#8B5CF6', legendary: '#F59E0B', mythic: '#EC4899',
+  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24',
+  epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
 }
 const toF = (v: unknown, d = 0) => parseFloat(String(v ?? 0)).toFixed(d)
 
@@ -34,7 +35,7 @@ function RarityBadge({ rarity, shiny }: { rarity: string; shiny?: boolean }) {
   return (
     <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, display: 'inline-flex', alignItems: 'center', gap: 4,
       background: `${c}1c`, color: c, border: `2px solid ${c}55`, fontWeight: 700, letterSpacing:0.5 }}>
-      {shiny ? <EmojiIcon emoji='sparkles' size={11} /> : null}{(rarity || '').toUpperCase()}
+      {shiny ? <EmojiIcon emoji='sparkles' size={11} /> : null}{rarityLabel(rarity)}
     </span>
   )
 }

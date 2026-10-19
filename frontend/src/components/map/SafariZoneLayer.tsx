@@ -4,12 +4,15 @@
  * player (GET /api/safari/active/: clue region + scans), never from the hidden hex:
  *  - no scan yet: the clue region (dashed savanna ring around clue_lat/lon)
  *  - after a scan: the sector it points to — bearing ± spread, between the band's min and max distance
- *  - "IT IS HERE": the hexes within capture range of that scan, striped amber / olive and pulsing
+ *  - "IT IS HERE": the hexes within capture range of that scan, striped amber / olive and pulsing — tap the one hiding
+ *    the creature (POST /safari/probe/ {h3}): right → SafariReveal; wrong → greyed with its distance in hexes
  * Every scan stays as a small dot in its band colour.
  */
 import { useEffect } from 'react'
 import L from 'leaflet'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import toast from 'react-hot-toast'
+import { playSound } from '../../hooks/useSound'
 import { cellToBoundary, gridDisk, latLngToCell, cellToLatLng } from 'h3-js'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
@@ -55,6 +58,7 @@ function stripe(path: L.Path) {
 
 export function SafariZoneLayer({ map }: { map: L.Map | null }) {
   const layer = useLeafletLayer(map)
+  const qc = useQueryClient()
   const isAuth = useStore(s => s.isAuthenticated)
   const { data } = useQuery<any>({ queryKey: ['safari-active'], queryFn: () => api.get('/safari/active/').then(r => r.data), enabled: isAuth, staleTime: 15000 })
   const t = data?.target
@@ -65,8 +69,26 @@ export function SafariZoneLayer({ map }: { map: L.Map | null }) {
     layer.clearLayers()
     if (!hunt) return
     const probes: any[] = hunt.probes || []
-    const last = probes[probes.length - 1]
-    const base = { interactive: false, bubblingMouseEvents: false }
+    const scans = probes.filter(p => p.band)                       // radar pings
+    const tried = new Map(probes.filter(p => p.h3 && p.ring != null).map(p => [p.h3, p.ring]))   // hexes tapped, wrong
+    const last = scans[scans.length - 1]
+    // own pane above the hex grid (overlayPane 400) so the zone hexes get the taps, below markers (600)
+    if (map && !map.getPane('hxSafari')) { map.createPane('hxSafari'); map.getPane('hxSafari')!.style.zIndex = '450' }
+    const base = { interactive: false, bubblingMouseEvents: false, pane: 'hxSafari' }
+    const tap = async (h3: string) => {
+      try {
+        const { data: r } = await api.post('/safari/probe/', { h3 })
+        if (r.result === 'captured') {
+          qc.setQueryData(['safari-active'], (o: any) => ({ ...o, target: null }))
+          window.dispatchEvent(new CustomEvent('hx:safari-reveal', { detail: { target: r.target, hex_earned: r.hex_earned, won_hex: r.won_hex } }))
+          ;['codex-cards', 'loop-status', 'player', 'kingdoms', 'territories', 'my-territories'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
+        } else {
+          qc.setQueryData(['safari-active'], (o: any) => ({ ...o, target: r.result === 'fled' ? null : r.target }))
+          if (r.result === 'fled') { playSound('flee'); toast.error(r.message) }
+          else { playSound('probe'); toast(`Not this one — ${r.ring} hex${r.ring > 1 ? 'es' : ''} away`, { duration: 2500 }) }
+        }
+      } catch (e: any) { toast.error(e?.response?.data?.error || 'Not here') }
+    }
 
     if (!last && hunt.clue_lat != null) {
       // Clue region: where to start scanning
@@ -80,11 +102,16 @@ export function SafariZoneLayer({ map }: { map: L.Map | null }) {
       gridDisk(latLngToCell(last.lat, last.lon, 8), 4).forEach((c, i) => {
         const ll = cellToLatLng(c) as [number, number]
         if (km(centre, ll) > cap) return
-        L.polygon(cellToBoundary(c) as L.LatLngTuple[], { ...base, color: INK, weight: 1.5, fillColor: i % 2 ? AMBER : OLIVE,
-          fillOpacity: 0.45, className: 'hx-safari-hex' }).addTo(layer)
+        const ring = tried.get(c)
+        const poly = L.polygon(cellToBoundary(c) as L.LatLngTuple[], ring != null
+          ? { ...base, color: INK, weight: 1.5, fillColor: '#334155', fillOpacity: 0.55 }
+          : { interactive: true, bubblingMouseEvents: false, pane: 'hxSafari', color: INK, weight: 1.5, fillColor: i % 2 ? AMBER : OLIVE,
+              fillOpacity: 0.45, className: 'hx-safari-hex' }).addTo(layer)
+        if (ring != null) L.marker(ll, { ...base, icon: label(String(ring), '#94a3b8') }).addTo(layer)
+        else poly.on('click', () => tap(c))
       })
       L.circle(centre, { ...base, radius: cap * 1000, color: BAND.here.color, weight: 3, dashArray: '6 6', fill: false }).addTo(layer)
-      L.marker(dest(last.lat, last.lon, cap, 0), { ...base, icon: label('IT IS HERE · CATCH IT', BAND.here.color) }).addTo(layer)
+      L.marker(dest(last.lat, last.lon, cap, 0), { ...base, icon: label('IT IS HERE · TAP THE HEX HIDING IT', BAND.here.color) }).addTo(layer)
     } else if (last && RANGE[last.band]) {
       // The sector the last scan points to
       const [r0, r1] = RANGE[last.band], s = SPREAD[last.band], pts: [number, number][] = []

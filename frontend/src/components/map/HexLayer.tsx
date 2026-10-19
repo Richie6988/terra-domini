@@ -8,6 +8,7 @@
  *   ENEMY      → blue/red depending on rarity
  *   FREE std   → invisible (only shown on hover)
  */
+import { rarityLabel } from '../../services/balance'
 import L from 'leaflet'
 import * as h3 from 'h3-js'
 import type { TerritoryLight } from '../../types'
@@ -18,8 +19,8 @@ import { hexPerDay } from '../../services/balance'
 const ENEMY_COLOR = '#FF4D5E'
 
 const RARITY_COLOR: Record<string, string> = {
-  common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6',
-  epic:'#8B5CF6', legendary:'#F59E0B', mythic:'#EC4899',
+  common:'#cd7f32', uncommon:'#cbd5e1', rare:'#fbbf24',
+  epic:'#10b981', legendary:'#67e8f9', mythic:'#ec4899',
 }
 
 /** Compute hex boundary from H3 index (client-side fallback) */
@@ -222,11 +223,13 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
   })
 
   // Tooltip
-  const income = hexPerDay(ta.rarity, ta.is_shiny)
+  // Server value (map-view): plain 100 (+10 in a kingdom) + the tokens on the hex
+  const income = Math.round((ta as any).hex_per_day ?? hexPerDay(ta.rarity, ta.is_shiny))
+  const nTok = (ta as any).token_count || 0
   const stateLabel = ta.is_control_tower ? 'Control tower'
-    : isOwn ? (hasPOI ? `Your territory · ${esc(rarity)}` : 'Your territory')
+    : isOwn ? (hasPOI ? `Your territory · ${esc(rarityLabel(rarity))}` : 'Your territory')
     : isEnemy ? esc(ta.owner_username)
-    : hasPOI ? `${esc((rarity || '').toUpperCase())} — Unclaimed`
+    : hasPOI ? `${esc(rarityLabel(rarity))} — Unclaimed`
     : 'Unclaimed'
 
   const stateColor = ta.is_control_tower ? '#FFD24A' : isOwn ? '#00FF87' : isEnemy ? ENEMY_COLOR : hasPOI ? rc : '#94A3B8'
@@ -244,7 +247,7 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
         <span style="width:7px;height:7px;border-radius:2px;transform:rotate(45deg);background:${stateColor};box-shadow:0 0 6px ${stateColor}"></span>${stateLabel}
       </div>
       ${hasPOI ? `<div style="color:${rc};font-size:10px;font-weight:700;margin-top:2px;text-transform:uppercase;letter-spacing:1px">${esc(ta.poi_category)}</div>` : ''}
-      <div style="margin-top:4px;color:#34D399;font-size:11px;font-family:'Share Tech Mono',monospace">+${income.toLocaleString()} HEX/day</div>
+      <div style="margin-top:4px;color:#34D399;font-size:11px;font-family:'Share Tech Mono',monospace">+${income.toLocaleString()} HEX/day${nTok ? ` · ${nTok} token${nTok > 1 ? 's' : ''}` : ''}</div>
       ${vulnHtml}
     </div>
   `, { className:'td-tooltip', direction:'top', sticky:true })

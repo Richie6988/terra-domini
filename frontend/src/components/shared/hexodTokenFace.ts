@@ -241,7 +241,7 @@ export function drawSVGIcon(
 // opts   : enableFilmGrain (true for 3D animated viewer, false for static 2D)
 // ══════════════════════════════════════════════════════════════════
 export const RARITY_COLORS: Record<string, string> = {
-  common: '#9ca3af', uncommon: '#22c55e', rare: '#3b82f6', epic: '#a855f7', legendary: '#f59e0b', mythic: '#ef4444',
+  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24', epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
 }
 
 /** Text with a dark outline: readable on any background (photo, holo, metal). */

@@ -148,12 +148,34 @@ def plain_hex_per_day(connected: bool = False) -> int:
     return PLAIN_HEX_PER_DAY + (KINGDOM_BONUS if connected else 0)
 
 
+# Species tokens pay a bonus by family (owner 2026-10-19: "variations between birds, dinosaurs, mushrooms…")
+SPECIES_BONUS = {'species_fossil': 100, 'species_marine': 80, 'species_microOrganism': 70, 'species_animal': 60,
+                 'species_bird': 50, 'species_mushroom': 40, 'species_insect': 30, 'species_vegetal': 20}
+
+
+SPECIES_LABEL = {'species_fossil': 'Dinosaur', 'species_marine': 'Marine life', 'species_microOrganism': 'Microbe',
+                 'species_animal': 'Animal', 'species_bird': 'Bird', 'species_mushroom': 'Fungus', 'species_insect': 'Insect',
+                 'species_vegetal': 'Plant'}
+
+
+def token_bonus(category: str):
+    """(label, %) of the family / resource bonus of a token category, or None."""
+    from terra_domini.apps.economy.resources import site_resource, RESOURCE_TOKEN_BONUS, resources
+    rid = site_resource(category)
+    if rid:
+        return resources()[rid]['name'], RESOURCE_TOKEN_BONUS.get(rid, 0)
+    if category in SPECIES_BONUS:
+        return SPECIES_LABEL[category], SPECIES_BONUS[category]
+    return None
+
+
 def token_hex_per_day(rarity: str, category: str = '') -> float:
-    """HEX/day one token adds to its hex."""
+    """HEX/day one token adds to its hex: its rarity's HEX × (1 + resource or species family bonus)."""
     from terra_domini.apps.economy.resources import site_resource, RESOURCE_TOKEN_BONUS
     v = HEX_PER_DAY.get((rarity or 'common').lower(), HEX_PER_DAY['common'])
     rid = site_resource(category)
-    return v * (1 + RESOURCE_TOKEN_BONUS.get(rid, 0) / 100) if rid else v
+    pct = RESOURCE_TOKEN_BONUS.get(rid, 0) if rid else SPECIES_BONUS.get(category or '', 0)
+    return v * (1 + pct / 100)
 
 
 def hex_tokens(h3_list) -> dict:
@@ -236,6 +258,9 @@ def discovery(player, h3_index: str, rarity: str = 'common', is_poi: bool = Fals
     d = 1 if first else max(1, dist)
     factor = min(DISCOVERY_MAX_FACTOR, 2 ** (d - 1))
     disc = Fz.spy_discount(spies)
+    if disc and near_hex:      # Education of that kingdom: each spy point cuts more (+10 % per level), capped at -60 %
+        from terra_domini.apps.territories.upgrades import kingdom_mult
+        disc = min(0.6, disc * kingdom_mult(Fz.kingdom_hexes(player.id, near_hex), 'education'))
     cost = int(round(DISCOVERY_COST * factor * RARITY_PRICE_MULT.get((rarity or 'common').lower(), 1) * (1 - disc)))
     hours = round(min(EXPLORE_MAX_HOURS, DISCOVERY_HOURS * factor) * (1 - disc), 2)
     from terra_domini.utils.god import is_god

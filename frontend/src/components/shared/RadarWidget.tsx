@@ -7,6 +7,7 @@
  * (POST /safari/probe/ {lat, lon}) → the creature's token goes into the album.
  * No hunt: a small radar button that opens the Safari panel.
  */
+import { rarityLabel } from '../../services/balance'
 import { useEffect, useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
@@ -14,7 +15,6 @@ import { IconSVG } from './iconBank'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
 import { playSound } from '../../hooks/useSound'
-import { celebrate } from './Celebrate'
 import { BAND } from '../hud/DailyHuntPanel'
 
 const CAT_ICON: Record<string, string> = { animal: 'lion', fossil: 'dinosaur', insect: 'butterfly', vegetal: 'orchid', mushroom: 'fungus', microOrganism: 'microscope', fantasy: 'dragon' }
@@ -28,7 +28,8 @@ export function RadarWidget() {
   const { data } = useQuery({ queryKey: ['safari-active'], queryFn: () => api.get('/safari/active/').then(r => r.data), enabled: isAuth, staleTime: 15000 })
   const t = data?.target
   const hunt = t && t.mode === 'world' && t.status === 'active' ? t : null
-  const last = hunt?.probes?.[hunt.probes.length - 1]
+  const scans = (hunt?.probes || []).filter((p: any) => p.band)        // radar pings (taps on hexes have no band)
+  const last = scans[scans.length - 1]
   const band = last ? BAND[last.band] : null
 
   useEffect(() => {
@@ -48,18 +49,10 @@ export function RadarWidget() {
     } catch (e: any) { toast.error(e?.response?.data?.error || 'Scan failed') }
     setBusy(false)
   }
-  const catchIt = async () => {
-    const [lat, lon] = useStore.getState().mapCenter
-    setBusy(true)
-    try {
-      const { data: r } = await api.post('/safari/probe/', { lat, lon })
-      qc.setQueryData(['safari-active'], (o: any) => ({ ...o, target: null }))
-      playSound('capture'); celebrate('big', r.target?.creature_name || 'Captured!')
-      toast.success(r.message, { duration: 5000 })
-      ;['loop-status', 'codex-cards', 'player'].forEach(k => qc.invalidateQueries({ queryKey: [k] }))
-      setOpen(false)
-    } catch (e: any) { toast.error(e?.response?.data?.error || 'Not here') }
-    setBusy(false)
+  // Last step: the striped zone is on the map — zoom on it and tap the hex hiding the creature (SafariZoneLayer)
+  const showZone = () => {
+    if (last) window.dispatchEvent(new CustomEvent('terra:flyto', { detail: { lat: last.lat, lon: last.lon, zoom: 14 } }))
+    setOpen(false)
   }
 
   if (!isAuth) return null
@@ -89,7 +82,7 @@ export function RadarWidget() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
         <IconSVG id={CAT_ICON[hunt.creature_category] || 'lion'} size={26} />
         <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1, fontFamily: 'var(--font-heading)' }}>??? · {String(hunt.rarity).toUpperCase()}</div>
+          <div style={{ fontSize: 11, fontWeight: 900, letterSpacing: 1, fontFamily: 'var(--font-heading)' }}>??? · {rarityLabel(hunt.rarity)}</div>
           <div style={{ fontSize: 10, color: '#fde68a', textTransform: 'none', lineHeight: 1.3 }}>{hunt.hint}</div>
         </div>
         <button onClick={() => setOpen(false)} aria-label="Minimise the radar" className="hx-chip" style={{ cursor: 'pointer' }}>—</button>
@@ -116,7 +109,7 @@ export function RadarWidget() {
           : <div style={{ fontSize: 11, color: 'var(--hx-text-2)', textTransform: 'none' }}>Move the map, then scan from its centre.</div>}
       </div>
       {last?.band === 'here'
-        ? <button onClick={catchIt} disabled={busy} className="btn-game btn-game-green" style={{ width: '100%', fontSize: 13, minHeight: 44 }}>CATCH IT</button>
+        ? <button onClick={showZone} className="btn-game btn-game-green" style={{ width: '100%', fontSize: 13, minHeight: 44 }}>SHOW THE ZONE · TAP THE RIGHT HEX</button>
         : <button onClick={scan} disabled={busy} className="btn-game btn-game-gold" style={{ width: '100%', fontSize: 13, minHeight: 44 }}>
             {busy ? 'SCANNING…' : `SCAN FROM MAP CENTRE · ${hunt.tries_left}/${hunt.scans_max ?? hunt.tries_left}`}</button>}
     </div>

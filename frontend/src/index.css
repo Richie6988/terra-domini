@@ -225,7 +225,7 @@ img { pointer-events: none; -webkit-user-drag: none; }
 }
 /* "Game" ambiance = OpenStreetMap recoloured as a night strategy board (no API key): dark land, blue water, green parks,
    so the coloured hexes and tokens pop. Vignette on the container. */
-.hx-tiles-game { filter: invert(1) hue-rotate(195deg) saturate(2.4) brightness(1.1) contrast(0.85); }
+.hx-tiles-sat { filter: saturate(1.35) contrast(1.08) brightness(1.04); }
 .hx-map--game::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 250;  /* above tiles (200), under hexes (400) */
   background: radial-gradient(ellipse at 50% 45%, transparent 55%, rgba(4,10,30,0.55) 100%); }
 .hx-map--satellite::after { content: ''; position: absolute; inset: 0; pointer-events: none; z-index: 250;  /* above tiles (200), under hexes (400) */
@@ -1092,16 +1092,20 @@ html {
 .hx-exploring { animation: hx-exp-pulse 2.4s ease-in-out infinite; }
 @keyframes hx-exp-pulse { 50% { fill-opacity: .35; } }
 @media (prefers-reduced-motion: reduce) { .hx-exploring { animation: none; } }
+.hx-poi__count, .hx-poi__cluster {      /* one counter design (owner 2026-10-19): the pin's dark glass, thin gold ring */
+  background: rgba(11,22,38,.92); color: #fde68a; border: 2px solid #fde68a;
+  font-family: 'Lilita One', sans-serif; text-align: center; text-shadow: 0 1px 2px #000;
+  box-shadow: 0 0 0 2px rgba(0,0,0,.5), 0 0 10px rgba(253,230,138,.35);
+}
 .hx-poi__count {
   position: absolute; top: -8px; right: -14px; min-width: 22px; height: 18px; padding: 0 5px; border-radius: 9px;
-  background: #ffd23f; color: #12245e; border: 2px solid #12245e; font: 900 11px/14px 'Nunito', sans-serif;
-  text-align: center; box-shadow: 0 2px 0 rgba(0,0,0,.45); pointer-events: none;
+  font-size: 11px; line-height: 14px; pointer-events: none;
 }
 .hx-poi__cluster {
-  border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer;
-  background: radial-gradient(circle at 35% 30%, rgba(79,141,255,.92), rgba(30,58,138,.92)); color: #fff; border: 2px solid rgba(255,255,255,.85);
-  font: 15px 'Lilita One', sans-serif; text-shadow: 0 1px 2px #000; box-shadow: 0 0 0 2px rgba(0,0,0,.5), 0 3px 8px rgba(0,0,0,.5);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px;
+  transition: transform .15s;
 }
+.hx-poi__cluster:hover { transform: scale(1.12); }
 
 /* Reward burst text (Celebrate.tsx) */
 .hx-celebrate { position: fixed; left: 50%; top: 42%; z-index: 2501; pointer-events: none; transform: translate(-50%, -50%);

@@ -17,10 +17,11 @@ import { createTokenFace2D } from '../shared/hexodTokenFace'
 import { iconFor } from '../shared/poiIcons'
 import type { TierKey } from '../shared/hexodTokenFace'
 import { playSound } from '../../hooks/useSound'
+import { RARITY_LABEL } from '../../services/balance'
 
-const RC: Record<string,string> = { common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6', epic:'#8B5CF6', legendary:'#F59E0B', mythic:'#EC4899' }
-const RL: Record<string,string> = { common:'Common', uncommon:'Uncommon', rare:'Rare', epic:'Epic', legendary:'Legendary', mythic:'Mythic' }
-const RT: Record<string, TierKey> = { common:'BRONZE', uncommon:'BRONZE', rare:'SILVER', epic:'GOLD', legendary:'EMERALD', mythic:'EMERALD' }
+const RC: Record<string,string> = { common:'#cd7f32', uncommon:'#cbd5e1', rare:'#fbbf24', epic:'#10b981', legendary:'#67e8f9', mythic:'#ec4899' }
+const RL: Record<string,string> = RARITY_LABEL
+const RT: Record<string, TierKey> = { common:'BRONZE', uncommon:'SILVER', rare:'GOLD', epic:'EMERALD', legendary:'DIAMOND', mythic:'DIAMOND' }
 const RK: Record<string,number> = { common:0, uncommon:1, rare:2, epic:3, legendary:4, mythic:5 }
 
 interface Card { h3_index: string; poi_name?: string; place_name?: string; rarity: string; biome?: string; territory_type?: string; is_shiny?: boolean }

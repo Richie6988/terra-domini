@@ -19,8 +19,9 @@ export const FORCE_META = {
 } as const
 const MONO = "'Share Tech Mono', monospace"
 
-export function ForcesCounters({ h3, forces, pointCost, compact = false }: {
+export function ForcesCounters({ h3, forces, pointCost, compact = false, multipliers }: {
   h3: string; forces: Forces; pointCost: Record<string, number>; compact?: boolean
+  multipliers?: Record<string, number>     // kingdom upgrades: influence → attack, fortification → defense, education → spy
 }) {
   const qc = useQueryClient()
   const god = useGodMode()
@@ -46,6 +47,7 @@ export function ForcesCounters({ h3, forces, pointCost, compact = false }: {
               background: `linear-gradient(180deg, ${m.color}1f, transparent)` }}>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5, fontSize: 9, fontWeight: 900, letterSpacing: 1.2, color: m.color }}>
                 <m.Icon size={12} /> {m.label}
+                {(multipliers?.[k] || 1) > 1 && <span style={{ color: '#fde68a' }}>x{multipliers![k].toFixed(1)}</span>}
               </div>
               <div style={{ fontFamily: MONO, fontSize: compact ? 20 : 24, fontWeight: 900, color: '#f1f5f9', lineHeight: 1.1, margin: '2px 0 6px' }}>
                 {(forces?.[k] || 0).toLocaleString()}

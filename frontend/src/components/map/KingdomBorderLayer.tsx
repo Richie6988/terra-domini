@@ -204,9 +204,11 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
       // Kingdom label + its forces (attack / defense / spy points, owner 2026-10-19: "visible above the kingdom or territory")
       if (k.centroid_lat && k.centroid_lon) {
         const compact = zoom < 12
-        const size = compact ? 26 : 32
+        // Outposts (1-2 hexes) zoomed out: a small hex emblem only, no forces row (owner 2026-10-19)
+        const tiny = zoom < 11 && k.size <= 2
+        const size = tiny ? 18 : compact ? 26 : 32
         // Hex emblem (tier colour) with tier digit, then size + label. Static strings only (no player text).
-        const emblem = `<svg width="${compact ? 18 : 22}" height="${compact ? 18 : 22}" viewBox="0 0 24 24" style="flex-shrink:0;filter:drop-shadow(0 0 4px ${color}aa)">
+        const emblem = `<svg width="${tiny ? 14 : compact ? 18 : 22}" height="${tiny ? 14 : compact ? 18 : 22}" viewBox="0 0 24 24" style="flex-shrink:0;filter:drop-shadow(0 0 4px ${color}aa)">
             <path d="M12 1.5 21.1 6.75v10.5L12 22.5 2.9 17.25V6.75z" fill="${color}" stroke="rgba(255,255,255,0.55)" stroke-width="1"/>
             <text x="12" y="16" text-anchor="middle" font-family="Orbitron,sans-serif" font-size="10" font-weight="900" fill="#06101e">${k.tier}</text>
           </svg>`
@@ -218,7 +220,7 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
         const icon = L.divIcon({
           html: `<div class="td-kingdom-pill" style="
             position:absolute;left:0;top:0;transform:translate(-50%,-50%);
-            height:${size}px;padding:0 ${compact ? 8 : 11}px 0 ${compact ? 4 : 5}px;
+            height:${size}px;padding:0 ${tiny ? 2 : compact ? 8 : 11}px 0 ${tiny ? 2 : compact ? 4 : 5}px;
             background:linear-gradient(180deg,rgba(14,26,44,0.94),rgba(6,12,24,0.94));
             border:1.5px solid ${color}cc;border-radius:999px;
             display:flex;align-items:center;gap:${compact ? 5 : 7}px;
@@ -226,12 +228,12 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
             cursor:pointer;white-space:nowrap;
           ">
             ${avatar}${emblem}
-            <span style="font-family:'Share Tech Mono',monospace;font-size:${compact ? 13 : 15}px;font-weight:700;color:#fff;line-height:1">${k.size}</span>
+            ${tiny ? '' : `<span style="font-family:'Share Tech Mono',monospace;font-size:${compact ? 13 : 15}px;font-weight:700;color:#fff;line-height:1">${k.size}</span>`}
             ${compact ? '' : `<span style="width:1px;height:14px;background:rgba(255,255,255,0.18)"></span>
             ${isMain ? crown : ''}
             <span style="font-family:'Orbitron',sans-serif;font-size:10px;font-weight:800;letter-spacing:1.5px;color:${isMain ? '#FCD34D' : 'rgba(255,255,255,0.8)'}">${kname || (isMain ? 'MAIN' : 'KINGDOM')}</span>`}
           </div>
-          ${k.forces ? `<div style="position:absolute;left:0;top:${size / 2 + 3}px;transform:translateX(-50%);display:flex;gap:4px;white-space:nowrap;pointer-events:none">
+          ${k.forces && !tiny && (zoom >= 13 || k.forces.attack + k.forces.defense + k.forces.spy > 0) ? `<div style="position:absolute;left:0;top:${size / 2 + 3}px;transform:translateX(-50%);display:flex;gap:4px;white-space:nowrap;pointer-events:none">
             ${[['#f87171', 'M14.5 17.5 3 6V3h3l11.5 11.5M13 19l6-6M16 16l4 4M19 21l2-2', k.forces.attack],
                ['#60a5fa', 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z', k.forces.defense],
                ['#c084fc', 'M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7zM12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z', k.forces.spy]]

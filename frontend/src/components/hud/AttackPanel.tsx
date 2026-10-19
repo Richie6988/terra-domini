@@ -27,6 +27,7 @@ const ATTACK_TYPES = [
 interface Preview {
   can_attack: boolean; reason: string; owner: string | null
   my_attack: number; source_size: number; target_defense: number; target_size: number
+  attack_mult?: number; defense_mult?: number; points_needed?: number
   point_cost: Record<string, number>; timer_seconds: Record<string, number>
 }
 
@@ -53,7 +54,8 @@ export function AttackPanel({ target, onClose }: Props) {
     staleTime: 5000,
   })
   const have = pv?.my_attack || 0
-  const need = (pv?.target_defense || 0) + 1                        // strictly more than the defense
+  // attack × Influence must beat defense × Fortification (server: points_needed)
+  const need = pv?.points_needed ?? (pv?.target_defense || 0) + 1
   // Default: just enough to win (or everything you have)
   useEffect(() => { if (pv) setPoints(Math.min(have, need)) }, [pv?.my_attack, pv?.target_defense]) // eslint-disable-line react-hooks/exhaustive-deps
   const wins = points >= need
@@ -94,13 +96,13 @@ export function AttackPanel({ target, onClose }: Props) {
               <div className="hx-card" style={{ textAlign: 'center', borderColor: 'rgba(248,113,113,0.5)' }}>
                 <div style={{ fontSize: 9, letterSpacing: 1.5, fontWeight: 900, color: '#f87171', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}><Swords size={12} /> YOUR ATTACK</div>
                 <div style={{ fontFamily: MONO, fontSize: 28, fontWeight: 900 }}>{isLoading ? '…' : have.toLocaleString()}</div>
-                <div style={{ fontSize: 10, color: 'var(--hx-text-3)' }}>nearest kingdom{pv?.source_size ? ` · ${pv.source_size} hexes` : ''}</div>
+                <div style={{ fontSize: 10, color: 'var(--hx-text-3)' }}>nearest kingdom{pv?.source_size ? ` · ${pv.source_size} hexes` : ''}{(pv?.attack_mult || 1) > 1 ? ` · Influence x${pv!.attack_mult!.toFixed(1)}` : ''}</div>
               </div>
               <span style={{ fontFamily: 'var(--font-heading)', fontSize: 18, color: '#fca5a5' }}>VS</span>
               <div className="hx-card" style={{ textAlign: 'center', borderColor: 'rgba(96,165,250,0.5)' }}>
                 <div style={{ fontSize: 9, letterSpacing: 1.5, fontWeight: 900, color: '#60a5fa', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}><Shield size={12} /> THEIR DEFENSE</div>
                 <div style={{ fontFamily: MONO, fontSize: 28, fontWeight: 900 }}>{isLoading ? '…' : (pv?.target_defense || 0).toLocaleString()}</div>
-                <div style={{ fontSize: 10, color: 'var(--hx-text-3)' }}>{pv?.owner || target.owner_username || 'enemy'}{pv?.target_size ? ` · ${pv.target_size} hexes` : ''}</div>
+                <div style={{ fontSize: 10, color: 'var(--hx-text-3)' }}>{pv?.owner || target.owner_username || 'enemy'}{pv?.target_size ? ` · ${pv.target_size} hexes` : ''}{(pv?.defense_mult || 1) > 1 ? ` · Fortification x${pv!.defense_mult!.toFixed(1)}` : ''}</div>
               </div>
             </div>
 
@@ -122,9 +124,9 @@ export function AttackPanel({ target, onClose }: Props) {
                 color: wins ? '#bbf7d0' : '#fecaca', background: wins ? 'rgba(34,197,94,0.12)' : 'rgba(239,68,68,0.12)',
                 border: `1px solid ${wins ? 'rgba(34,197,94,0.4)' : 'rgba(239,68,68,0.4)'}` }}>
                 {have < need
-                  ? `Not enough: their defense is ${pv?.target_defense ?? '…'}. Buy attack points on your nearest kingdom (Military).`
-                  : wins ? `Wins if they don't buy more than ${points - need} defense before the timer ends. ${points - need + 1} points would then hold the hex.`
-                         : `Too few: ${points} attack points would be absorbed by their ${pv?.target_defense} defense and lost.`}
+                  ? `Not enough: ${need} attack points needed against their defense. Buy attack points on your nearest kingdom (Military).`
+                  : wins ? `Wins unless they add defense before the timer ends. ${points - need} points to spare.`
+                         : `Too few: ${need} needed — ${points} attack points would be absorbed by their defense and lost.`}
               </div>
             </div>
 

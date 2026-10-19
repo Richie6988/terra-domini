@@ -4,6 +4,7 @@ Automated resolution: strategy > skill, no twitch mechanics.
 """
 import uuid
 import logging
+import math
 from decimal import Decimal
 from django.db import models
 from django.conf import settings
@@ -291,10 +292,19 @@ class CombatEngine:
         n = sum(int((p.units_deployed or {}).get('attack', 0)) for p in attackers)
         kingdom = Fz.kingdom_hexes(territory.owner_id, territory.h3_index) if territory.owner_id else [territory.h3_index]
         dfn = Fz.pools(kingdom)['defense']
-        attacker_wins = n > dfn
-        spent = min(n, dfn)
+        # Upgrades: Influence of the attacking kingdom (where the points left from), Fortification of the defender
+        from terra_domini.apps.territories import upgrades as U
+        src = next((p.resources_contributed or {}).get('from') for p in attackers if (p.resources_contributed or {}).get('from')) if attackers else None
+        am = U.kingdom_mult(Fz.kingdom_hexes(attackers[0].player_id, src), 'influence') if src and attackers else 1.0
+        dm = U.kingdom_mult(kingdom, 'fortification') if territory.owner_id else 1.0
+        atk_power, def_power = n * am, dfn * dm
+        attacker_wins = atk_power > def_power
+        if attacker_wins:      # all the defense falls; the attack loses what it took to break it
+            spent, used = dfn, min(n, math.ceil(def_power / am)) if am else n
+        else:                  # the attack is absorbed; the defense loses what it took to stop it
+            spent, used = min(dfn, math.ceil(atk_power / dm)) if dm else dfn, n
         Fz.take(kingdom, 'defense', spent)
-        leftover = n - spent if attacker_wins else 0
+        leftover = n - used if attacker_wins else 0
         winner = 'attacker' if attacker_wins else 'defender'
         outcome = {
             'winner': winner,
@@ -302,9 +312,10 @@ class CombatEngine:
             'attacker_casualties': {'attack': n - leftover},
             'defender_casualties': {'defense': spent},
             'resources_looted': {},
-            'combat_log': [{'event': 'clash', 'attack': n, 'defense': dfn, 'spent': spent, 'leftover': leftover},
+            'combat_log': [{'event': 'clash', 'attack': n, 'defense': dfn, 'attack_mult': am, 'defense_mult': dm,
+                            'spent': spent, 'leftover': leftover},
                            {'event': 'result', 'winner': winner}],
-            'atk_power': n, 'def_power': dfn, 'leftover': leftover,
+            'atk_power': round(atk_power), 'def_power': round(def_power), 'leftover': leftover,
         }
         cls._apply_battle_outcome(battle, territory, outcome)
         logger.info(f"Battle {battle.id} resolved. Winner: {winner}. ATK {n} vs DEF {dfn}")

@@ -490,9 +490,7 @@ def _yield_fields(h3_index, lat, lon, rarity, category, shiny, connected):
     """HEX/day of a hex: plain value (+ kingdom bonus) + each token on it (balance.hex_income)."""
     toks = B.hex_tokens([h3_index]).get(h3_index, [])
     tok = [{'name': n, 'category': c, 'rarity': r, 'hex_per_day': round(B.token_hex_per_day(r, c), 1)} for n, c, r in toks]
-    from terra_domini.apps.economy.resources import site_resource, RESOURCE_TOKEN_BONUS, resources as _res
-    bon = [{'resource': _res()[site_resource(t['category'])]['name'], 'pct': RESOURCE_TOKEN_BONUS.get(site_resource(t['category']), 0)}
-           for t in tok if site_resource(t['category'])]
+    bon = [{'resource': b[0], 'pct': b[1]} for b in (B.token_bonus(t['category']) for t in tok) if b]
     return {'hex_per_day': round(B.hex_income(h3_index, connected, toks), 1),
             'base_hex_per_day': B.plain_hex_per_day(connected), 'plain_hex_per_day': B.PLAIN_HEX_PER_DAY,
             'kingdom_bonus': B.KINGDOM_BONUS, 'tokens': tok, 'has_token': bool(tok),

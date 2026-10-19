@@ -189,11 +189,16 @@ GEO_WORDS = {'forest', 'forests', 'savannah', 'savanna', 'desert', 'basin', 'pla
              'lower', 'valley', 'delta', 'shelf', 'ridge', 'gulf', 'grasslands', 'wetlands', 'peninsula', 'arctic', 'tropical'}
 
 
+BIRD_RX = re.compile(r'\b(bird|birds|passerine|songbird|parrot|eagle|owl|hawk|falcon|heron|duck|goose|penguin|hummingbird|woodpecker|pigeon|finch|warbler)\b')
+
+
 def species_tokens(creatures) -> list:
     """Every placed copy of a species = a visible token on its hex (layer 3 of the fixed map table)."""
     out = []
     for c in creatures:
         fam = 'marine' if c.get('habitat') == 'sea' else (c.get('codex_category') or 'animal')
+        if fam == 'animal' and BIRD_RX.search((c.get('description') or '').lower()):
+            fam = 'bird'
         for k, (lat, lon) in enumerate(c.get('places') or [], 1):
             cell = h3.latlng_to_cell(lat, lon, H3_RES)
             clat, clon = h3.cell_to_latlng(cell)

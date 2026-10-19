@@ -2,6 +2,7 @@
 Combat views — launch attacks, view battles, join alliance assaults.
 """
 import logging
+import math
 from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -138,10 +139,16 @@ class BattleViewSet(viewsets.GenericViewSet):
         timer = CombatEngine._get_battle_timer(t)
         src = Fz.source_kingdom(request.user.id, t.h3_index)
         target = Fz.kingdom_hexes(t.owner_id, t.h3_index) if t.owner_id else [t.h3_index]
+        from terra_domini.apps.territories import upgrades as U
+        am = U.kingdom_mult(src, 'influence') if src else 1.0
+        dm = U.kingdom_mult(target, 'fortification') if t.owner_id else 1.0
+        dfn = Fz.pools(target)['defense']
         return Response({
             'can_attack': ok, 'reason': reason, 'owner': t.owner.username if t.owner else None,
             'my_attack': Fz.pools(src)['attack'] if src else 0, 'source_size': len(src),
-            'target_defense': Fz.pools(target)['defense'], 'target_size': len(target),
+            'target_defense': dfn, 'target_size': len(target),
+            'attack_mult': am, 'defense_mult': dm,
+            'points_needed': math.floor(dfn * dm / am) + 1,     # attack points that beat defense x Fortification
             'point_cost': Fz.POINT_COST, 'timer_seconds': {'conquest': timer, 'surprise': timer // 2},
         })
 
@@ -240,11 +247,23 @@ def _attack_points(battle) -> int:
     return sum(int((p.units_deployed or {}).get('attack', 0)) for p in battle.participants.filter(side=BattleParticipant.Side.ATTACKER))
 
 
+def _battle_mults(battle, territory):
+    """(attack multiplier of the attacking kingdom — Influence, defense multiplier of the target kingdom — Fortification)."""
+    from terra_domini.apps.combat import forces as Fz
+    from terra_domini.apps.territories import upgrades as U
+    att = battle.participants.filter(side=BattleParticipant.Side.ATTACKER).first()
+    src = (att.resources_contributed or {}).get('from') if att else None
+    am = U.kingdom_mult(Fz.kingdom_hexes(att.player_id, src), 'influence') if src else 1.0
+    dm = U.kingdom_mult(Fz.kingdom_hexes(territory.owner_id, territory.h3_index), 'fortification') if territory.owner_id else 1.0
+    return am, dm
+
+
 def _hold_chance(battle, territory) -> float:
-    """Deterministic now (1 for 1): the defender holds when the kingdom's defense ≥ the attack committed."""
+    """Deterministic: the defender holds when defense x Fortification >= attack x Influence."""
     from terra_domini.apps.combat import forces as Fz
     dfn = Fz.pools(Fz.kingdom_hexes(territory.owner_id, territory.h3_index))['defense'] if territory.owner_id else 0
-    return 1.0 if dfn >= _attack_points(battle) else 0.0
+    am, dm = _battle_mults(battle, territory)
+    return 1.0 if dfn * dm >= _attack_points(battle) * am else 0.0
 
 
 ACTIVE_STATUSES = [Battle.BattleStatus.PREPARING, Battle.BattleStatus.ACTIVE, Battle.BattleStatus.RESOLVING]
@@ -318,6 +337,7 @@ def _faceoff(battle, viewer):
     n = _attack_points(battle)
     kingdom = Fz.kingdom_hexes(t.owner_id, t.h3_index) if t.owner_id else [t.h3_index]
     dfn = Fz.pools(kingdom)['defense']
+    am, dm = _battle_mults(battle, t)
     is_def = battle.defender_id == viewer.id
     out = {
         **_battle_row(battle),
@@ -327,8 +347,9 @@ def _faceoff(battle, viewer):
         'attack': {'players': [p.player.username for p in atk_parts], 'points': n, 'surprise': battle.battle_type == Battle.BattleType.SURPRISE},
         'defense': {'player': battle.defender.username if battle.defender else None, 'points': dfn, 'kingdom_size': len(kingdom)},
         'hold_chance': _hold_chance(battle, t) if battle.status in ACTIVE_STATUSES else (1.0 if battle.winner == 'defender' else 0.0),
-        'missing': max(0, n - dfn + 1),       # defense points still needed to hold
+        'missing': max(0, math.floor(n * am / dm) + 1 - dfn),       # defense points still needed to hold
     }
+    out['attack']['mult'], out['defense']['mult'] = am, dm
     if is_def and battle.status == Battle.BattleStatus.ACTIVE:
         out['actions'] = {'point_cost': Fz.POINT_COST['defense']}
     return out

@@ -11,6 +11,7 @@
  * → opens Token3D), so it's still a featured experience — just no longer
  * the landing screen.
  */
+import { rarityLabel } from '../../services/balance'
 import { useState, useMemo, useEffect } from 'react'
 import { createPortal } from 'react-dom'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -20,7 +21,7 @@ import { GlassPanel } from '../shared/GlassPanel'
 import { IconSVG, getIcon } from '../shared/iconBank'
 import { Token3DViewer, RARITY_TIER, TERRAIN_ICON } from '../shared/Token3DViewer'
 import { TokenFace2D } from '../shared/TokenFace2D'
-import { iconFor } from '../shared/poiIcons'
+import { iconFor, iconIdFor } from '../shared/poiIcons'
 import { RES_ICON } from '../shared/resourceIcons'
 import { api } from '../../services/api'
 import { useServerKingdomCustom, useSaveKingdomCustom, withLegacy } from './kingdomCustom'
@@ -61,8 +62,8 @@ interface Props {
 }
 
 const RARITY_COLORS: Record<string, string> = {
-  common: '#94a3b8', uncommon: '#22c55e', rare: '#3b82f6',
-  epic: '#8b5cf6', legendary: '#f59e0b', mythic: '#ef4444',
+  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24',
+  epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
 }
 
 const TIER_COLOR: Record<number, string> = {
@@ -99,7 +100,7 @@ function RarityBar({ tokens }: { tokens: TokenInfo[] }) {
       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
         {RARITY_ORDER.filter(r => counts[r]).map(r => (
           <span key={r} className="hx-chip" style={{ color: RARITY_COLORS[r], borderColor: `${RARITY_COLORS[r]}55`, background: `${RARITY_COLORS[r]}14` }}>
-            {r.toUpperCase()} × {counts[r]}
+            {rarityLabel(r)} × {counts[r]}
           </span>
         ))}
       </div>
@@ -347,6 +348,42 @@ function CustomizeTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo
 // ════════════════════════════════════════════════════════════════
 // KINGDOM TAB — full stats (was the Token3D overlay content)
 // ════════════════════════════════════════════════════════════════
+/** HEX harvesting of this kingdom, detailed (GET /kingdom/<h3>/overview/ income): zones × 100, kingdom bonus,
+ * every token, then the multipliers (Science, starter boost, regions, events). */
+function IncomeBreakdown({ h3 }: { h3: string }) {
+  const { data } = useQuery<any>({ queryKey: ['kingdom-overview', h3], queryFn: () => api.get(`/kingdom/${h3}/overview/`).then(r => r.data),
+    enabled: !!h3, staleTime: 10000 })
+  const inc = data?.income
+  if (!inc) return <div className="hx-skeleton" style={{ height: 120, borderRadius: 12 }} />
+  const row = (label: React.ReactNode, value: React.ReactNode, color = '#e2e8f0') => (
+    <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, fontSize: 12, padding: '3px 0', textTransform: 'none', letterSpacing: 0 }}>
+      <span style={{ color: 'var(--hx-text-2)', minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{label}</span>
+      <span style={{ fontFamily: MONO, color, flexShrink: 0 }}>{value}</span>
+    </div>)
+  return (
+    <div className="hx-card" style={{ padding: '12px 14px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 6 }}>
+        <div className="hx-section-title" style={{ margin: 0 }}>HEX HARVESTING</div>
+        <div style={{ fontFamily: MONO, fontSize: 22, color: '#fde68a', display: 'flex', alignItems: 'center', gap: 4 }}>
+          <IconSVG id="hex_coin" size={16} />{inc.total.toLocaleString()}<span style={{ fontSize: 10, color: 'var(--hx-text-3)' }}>/DAY</span></div>
+      </div>
+      {row(`${inc.zones} zone${inc.zones > 1 ? 's' : ''} × ${inc.plain_each}`, `+${inc.plain.toLocaleString()}`)}
+      {inc.kingdom_bonus > 0 && row(`Kingdom bonus · ${inc.zones} × ${inc.kingdom_bonus_each}`, `+${inc.kingdom_bonus.toLocaleString()}`)}
+      {row(`${inc.token_count} token${inc.token_count !== 1 ? 's' : ''}`, `+${inc.tokens_total.toLocaleString()}`, '#fde68a')}
+      {inc.tokens.slice(0, 8).map((t: any, i: number) => row(
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, paddingLeft: 10 }}>
+          <IconSVG id={iconIdFor(t.category)} size={13} />{t.name}
+          <span style={{ fontSize: 9, color: RARITY_COLORS[t.rarity] || '#94a3b8' }}>{rarityLabel(t.rarity)}{t.bonus ? ` · +${t.bonus}%` : ''}</span></span>,
+        `+${t.hex_per_day.toLocaleString()}`, '#cbd5e1'))}
+      {inc.tokens.length > 8 && row(<span style={{ paddingLeft: 10 }}>+{inc.token_count - 8} more</span>, '')}
+      <div style={{ borderTop: '1px solid rgba(255,255,255,0.08)', marginTop: 6, paddingTop: 6 }}>
+        {row('Before multipliers', inc.before_multipliers.toLocaleString())}
+        {row(`Multipliers${inc.science > 1 ? ` · Science x${inc.science}` : ''}${inc.beginner > 1 ? ` · starter x${inc.beginner}` : ''}`, `x${inc.multiplier}`, '#86efac')}
+      </div>
+    </div>
+  )
+}
+
 function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[] }) {
   const totalIncome = tokens.reduce((s, t) => s + (t.income_per_day || 0), 0)
   const totalDefense = tokens.reduce((s, t) => s + (t.defense_points || 0), 0)
@@ -373,6 +410,7 @@ function KingdomTab({ kingdom, tokens }: { kingdom: Kingdom; tokens: TokenInfo[]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <IncomeBreakdown h3={kingdom.h3_indexes?.[0] || tokens[0]?.h3_index || ''} />
       {/* Hero */}
       <div className="hx-card" style={{
         padding: 16,

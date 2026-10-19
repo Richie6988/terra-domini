@@ -14,7 +14,7 @@ import { latLngToCell, cellToLatLng } from 'h3-js'
 import { useStore } from '../../store'
 
 const RARITY_COLOR: Record<string, string> = {
-  common: '#9CA3AF', uncommon: '#10B981', rare: '#3B82F6', epic: '#8B5CF6', legendary: '#F59E0B', mythic: '#EC4899',
+  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24', epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
 }
 const SIZE: Record<string, number> = { mythic: 40, legendary: 36, epic: 30, rare: 26, uncommon: 22, common: 20 }
 export const POI_OVERVIEW_MAX_ZOOM = 13

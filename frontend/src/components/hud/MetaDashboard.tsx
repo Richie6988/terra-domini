@@ -6,6 +6,7 @@
  * top joueurs, top alliances, territoires les plus contestés.
  * Permet à Alex d'adapter sa stratégie en fonction du méta courant.
  */
+import { rarityLabel } from '../../services/balance'
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -17,7 +18,7 @@ import { IconSVG } from '../shared/iconBank'
 
 const ACC = '#0CC5FF'
 /** Dark-theme rarity colours (claude.md §9) */
-const RAR: Record<string, string> = { common:'#94a3b8', uncommon:'#22c55e', rare:'#3b82f6', epic:'#8b5cf6', legendary:'#f59e0b', mythic:'#ef4444' }
+const RAR: Record<string, string> = { common:'#cd7f32', uncommon:'#cbd5e1', rare:'#fbbf24', epic:'#10b981', legendary:'#67e8f9', mythic:'#ec4899' }
 const RES_NAME: Record<string, [string, string]> = {
   petrole: ['Oil', 'res_petrole'], fer: ['Iron', 'res_fer'], donnees: ['Data', 'res_donnees'], influence: ['Influence', 'res_influence'],
   uranium: ['Uranium', 'res_uranium'], terrares: ['Rare earths', 'res_terres_rares'], terres_rares: ['Rare earths', 'res_terres_rares'],
@@ -107,7 +108,7 @@ export function MetaDashboard({ onClose }: Props) {
                             <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:5 }}>
                               <span style={{ display:'flex', alignItems:'center', gap:7, fontSize:11, color, fontWeight:700, letterSpacing:0.5 }}>
                                 <span style={{ width:8, height:8, borderRadius:2, transform:'rotate(45deg)', background:color, boxShadow:`0 4px 0 rgba(0,0,0,0.35)` }} />
-                                {(rarity || '').toUpperCase()}
+                                {rarityLabel(rarity)}
                               </span>
                               <span style={{ fontSize:12, color:'rgba(226,232,240,0.7)', fontFamily:"'Share Tech Mono', monospace" }}>
                                 {count.toLocaleString()} <span style={{ color:'rgba(226,232,240,0.45)' }}>· {pct.toFixed(1)}%</span>

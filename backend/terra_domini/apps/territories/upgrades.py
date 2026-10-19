@@ -3,17 +3,24 @@ Kingdom upgrades + daily supplies (simplified 2026-10-19: the military is 3 coun
 
 A kingdom = a connected group of owned hexes. Each upgrade has levels 0-5, bought with HEX, stored as a Building on the
 hex where it was bought; a kingdom's level = the best building inside it (split a kingdom and the building stays put).
-  influence  +2 hexes of attack range per level (the best kingdom counts)   (combat.engine.can_attack)
-  science    +5 % HEX production of the kingdom per level                   (economy.balance.territory_rates)
+Each upgrade multiplies one of the 4 numbers of the game by +10 % per level (owner 2026-10-19: "influence, science,
+education… in the end give multipliers on attack, defense, spy and HEX harvesting"):
+  influence      attack power of the kingdom's attack points (+ 2 hexes of attack range per level)  (combat.engine)
+  fortification  defense power of the kingdom's defense points                                        (combat.engine)
+  education      spy power: each spy point cuts a discovery's price and time more                     (economy.balance.discovery)
+  science        HEX production of the kingdom                                                         (economy.balance.territory_rates)
 Daily supplies: once a day, max(3, territories / 3) + kingdom size bonuses (5+ hexes +2, 10+ +4, 20+ +8 each)
 + 3 per controlled region (territories/regions.py), × SUPPLY_PER_DRAFT attack AND defense points on the biggest kingdom.
 """
 from django.utils import timezone
 
 UPGRADES = {
-    'influence': {'building': 'market',   'name': 'Influence', 'base_cost': 1500, 'per_level': 2,  'unit': ' hexes attack range'},
-    'science':   {'building': 'lab',      'name': 'Science',   'base_cost': 2000, 'per_level': 5,  'unit': '% HEX production'},
+    'influence':     {'building': 'market',  'name': 'Influence',     'base_cost': 1500, 'per_level': 10, 'stat': 'attack',  'unit': '% attack power'},
+    'fortification': {'building': 'fort',    'name': 'Fortification', 'base_cost': 1500, 'per_level': 10, 'stat': 'defense', 'unit': '% defense power'},
+    'education':     {'building': 'academy', 'name': 'Education',     'base_cost': 1200, 'per_level': 10, 'stat': 'spy',     'unit': '% spy power'},
+    'science':       {'building': 'lab',     'name': 'Science',       'base_cost': 2000, 'per_level': 10, 'stat': 'hex',     'unit': '% HEX harvesting'},
 }
+RANGE_PER_INFLUENCE = 2   # extra attack range (hexes) per Influence level
 MAX_LEVEL = 5
 SUPPLY_PER_DRAFT = 5      # daily supplies: 5 attack + 5 defense points per draft unit
 BUILDING_TO_UPGRADE = {v['building']: k for k, v in UPGRADES.items()}
@@ -101,4 +108,10 @@ def influence_rings(player_id) -> int:
     from terra_domini.apps.territories.models import Building
     lvl = max(Building.objects.filter(territory__owner_id=player_id, is_active=True, building_type=UPGRADES['influence']['building'])
               .values_list('level', flat=True), default=0)
-    return lvl * UPGRADES['influence']['per_level']
+    return lvl * RANGE_PER_INFLUENCE
+
+
+def kingdom_mult(hexes, key: str) -> float:
+    """Multiplier a kingdom's upgrade gives (1 + level × 10 %): influence → attack, fortification → defense,
+    education → spy, science → HEX."""
+    return 1 + levels_for(hexes).get(key, 0) * UPGRADES[key]['per_level'] / 100

@@ -9,12 +9,7 @@ import { TokenFace2D } from './TokenFace2D'
 import type { TierKey } from './hexodTokenFace'
 
 const RARITY_TO_TIER: Record<string, TierKey> = {
-  common: 'BRONZE',
-  uncommon: 'BRONZE',
-  rare: 'SILVER',
-  epic: 'SILVER',
-  legendary: 'GOLD',
-  mythic: 'EMERALD',
+  common: 'BRONZE', uncommon: 'SILVER', rare: 'GOLD', epic: 'EMERALD', legendary: 'DIAMOND', mythic: 'DIAMOND',
 }
 
 interface Props {

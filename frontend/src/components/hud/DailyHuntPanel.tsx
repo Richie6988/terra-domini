@@ -8,6 +8,7 @@
  *
  * API: GET /safari/active/ · POST /safari/spawn/ · POST /safari/scan/ {lat,lon} · POST /safari/probe/ {lat,lon} · POST /safari/abandon/
  */
+import { rarityLabel } from '../../services/balance'
 import { useEffect, useState } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { motion } from 'framer-motion'
@@ -21,7 +22,7 @@ import { playSound } from '../../hooks/useSound'
 interface Props { onClose: () => void }
 
 const RARITY_COLORS: Record<string, string> = {
-  common: '#94a3b8', uncommon: '#22c55e', rare: '#3b82f6', epic: '#8b5cf6', legendary: '#f59e0b', mythic: '#ef4444',
+  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24', epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
 }
 const CAT: Record<string, { label: string; icon: string }> = {
   animal: { label: 'Animal', icon: 'lion' }, fossil: { label: 'Dinosaur & fossil', icon: 'dinosaur' },
@@ -122,7 +123,7 @@ export function DailyHuntPanel({ onClose }: Props) {
               <div style={{ fontFamily: 'var(--font-heading)', fontSize: 18, color: '#fff', textShadow: '0 2px 0 rgba(0,0,0,0.45)' }}>
                 {revealed ? t.creature_name : '???'}
               </div>
-              <div style={{ fontSize: 12, fontWeight: 800, color: col }}>{t.rarity.toUpperCase()} · {(cat?.label || 'Creature').toUpperCase()}</div>
+              <div style={{ fontSize: 12, fontWeight: 800, color: col }}>{rarityLabel(t.rarity)} · {(cat?.label || 'Creature').toUpperCase()}</div>
             </div>
             <div className="hx-stat" style={{ alignItems: 'flex-end' }}>
               <span className="hx-stat__label">REWARD</span>

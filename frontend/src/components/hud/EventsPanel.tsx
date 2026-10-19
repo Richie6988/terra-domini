@@ -7,6 +7,7 @@
  * 
  * 3 tabs: Live | Upcoming | My Results
  */
+import { rarityLabel } from '../../services/balance'
 import { useState, useEffect, useCallback } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { motion, AnimatePresence } from 'framer-motion'
@@ -20,10 +21,10 @@ import type { TierKey } from '../shared/hexodTokenFace'
 import { FLAT_CATEGORIES } from '../shared/radarIconData'
 import { Clock, MapPin, Users, Check, CalendarClock, Trophy } from 'lucide-react'
 
-const RARITY_TIER: Record<string, TierKey> = { common: 'BRONZE', uncommon: 'BRONZE', rare: 'SILVER', epic: 'GOLD', legendary: 'EMERALD', mythic: 'DIAMOND' }
+const RARITY_TIER: Record<string, TierKey> = { common: 'BRONZE', uncommon: 'SILVER', rare: 'GOLD', epic: 'EMERALD', legendary: 'DIAMOND', mythic: 'DIAMOND' }
 const RARITY_COLORS: Record<string, string> = {
-  common: '#94a3b8', uncommon: '#22c55e', rare: '#3b82f6',
-  epic: '#8b5cf6', legendary: '#f59e0b', mythic: '#ef4444',
+  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24',
+  epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
 }
 
 interface Props { onClose: () => void }
@@ -182,7 +183,7 @@ export function EventsPanel({ onClose }: Props) {
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 6 }}>
                         <span className="hx-chip" style={{ color: cat.color, borderColor: cat.color + '66' }}><IconSVG id={ev.category || 'news'} size={12} /> {(cat.name || '').toUpperCase()}</span>
-                        <span className="hx-chip hx-chip--accent">{(ev.rarity || '').toUpperCase()}</span>
+                        <span className="hx-chip hx-chip--accent">{rarityLabel(ev.rarity)}</span>
                       </div>
                       <div style={{ fontSize: 12, fontWeight: 800, color: '#e2e8f0', letterSpacing: 1, lineHeight: 1.35, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{ev.headline}</div>
                       <div style={{ fontSize: 10, color: 'var(--hx-text-3)', marginTop: 4, display: 'flex', alignItems: 'center', gap: 4, ...body }}><MapPin size={11} /> {ev.location_name} · {ev.source_name}</div>
@@ -273,7 +274,7 @@ export function EventsPanel({ onClose }: Props) {
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 12, fontWeight: 800, color: '#e2e8f0', letterSpacing: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{ev.headline}</div>
                     <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-                      <span className="hx-chip hx-chip--accent">{(ev.rarity || '').toUpperCase()}</span>
+                      <span className="hx-chip hx-chip--accent">{rarityLabel(ev.rarity)}</span>
                       <span className="hx-chip"><MapPin size={11} /> {ev.location_name}</span>
                       <span className="hx-chip">{ev.registration_cost === 0 ? 'FREE' : `${ev.registration_cost} HEX`} · {ev.max_participants} MAX</span>
                     </div>
@@ -343,7 +344,7 @@ export function EventsPanel({ onClose }: Props) {
                         {r.headline}
                       </div>
                       <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-                        <span className="hx-chip" style={{ color, borderColor: color + '55' }}>{(r.rarity || "").toUpperCase()}</span>
+                        <span className="hx-chip" style={{ color, borderColor: color + '55' }}>{rarityLabel(r.rarity)}</span>
                         {r.result === 'won' && r.serial && <span className="hx-chip" style={{ fontFamily: mono }}>#{r.serial}/{r.max_serial}</span>}
                         {r.luck_bonus > 0 && <span className="hx-chip" style={{ color: '#c084fc' }}>+{r.luck_bonus} LUCK</span>}
                       </div>

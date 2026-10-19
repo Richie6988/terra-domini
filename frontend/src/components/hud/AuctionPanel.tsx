@@ -3,6 +3,7 @@
  * Bids are real and escrowed in HEX (POST /api/auctions/<id>/bid/): an outbid player is refunded at once,
  * a bid in the last 2 minutes extends the auction, the winner gets the territory and its card.
  */
+import { rarityLabel } from '../../services/balance'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { createPortal } from 'react-dom'
@@ -240,7 +241,7 @@ export function AuctionPanel({ onClose }: Props) {
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, fontWeight: 900, letterSpacing: 1.5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.tokenName}</div>
                   <div style={{ display: 'flex', gap: 6, marginTop: 6, flexWrap: 'wrap' }}>
-                    <span className="hx-chip hx-chip--accent">{(a.rarity || '').toUpperCase()}</span>
+                    <span className="hx-chip hx-chip--accent">{rarityLabel(a.rarity)}</span>
                     <span className="hx-chip">{a.edition}</span>
                   </div>
                   <div style={{ fontSize: 10, color: a.youLead ? '#22c55e' : 'var(--hx-text-3)', marginTop: 6 }}>
@@ -284,7 +285,7 @@ export function AuctionPanel({ onClose }: Props) {
               </div>
               <div style={{ display: 'flex', gap: 3, justifyContent: 'center', marginTop: 4 }}>
                 <span style={{ padding: '1px 6px', borderRadius: 8, fontSize: 9, fontWeight: 700, background: RARITY_COLORS[selected.rarity] + '15', color: RARITY_COLORS[selected.rarity] }}>
-                  {(selected.rarity || "").toUpperCase()}
+                  {rarityLabel(selected.rarity)}
                 </span>
                 <span style={{ fontSize: 9, color: 'rgba(255,255,255,0.25)' }}>{selected.edition}</span>
               </div>

@@ -27,16 +27,40 @@ def _overview(player, h3_index):
     ups = []
     for key, u in U.UPGRADES.items():
         lvl = levels[key]
-        ups.append({'key': key, 'name': u['name'], 'level': lvl, 'max_level': U.MAX_LEVEL,
-                    'effect': f"+{lvl * u['per_level']}{u['unit']}",
-                    'next_effect': f"+{(lvl + 1) * u['per_level']}{u['unit']}" if lvl < U.MAX_LEVEL else None,
+        rng = lambda n: f" · +{n * U.RANGE_PER_INFLUENCE} hexes range" if key == 'influence' else ''
+        ups.append({'key': key, 'name': u['name'], 'level': lvl, 'max_level': U.MAX_LEVEL, 'stat': u['stat'],
+                    'mult': round(1 + lvl * u['per_level'] / 100, 2),
+                    'effect': f"+{lvl * u['per_level']}{u['unit']}{rng(lvl)}",
+                    'next_effect': f"+{(lvl + 1) * u['per_level']}{u['unit']}{rng(lvl + 1)}" if lvl < U.MAX_LEVEL else None,
                     'cost': U.upgrade_cost(key, lvl) if lvl < U.MAX_LEVEL else None})
     d = U.draft_size(player)
+    # HEX harvesting of this kingdom, detailed: zones × plain value, kingdom bonus, every token, then the multipliers
+    from terra_domini.apps.economy import balance as B
+    connected = len(hexes) > 1
+    toks = B.hex_tokens(hexes)
+    token_rows = sorted(({'h3': h, 'name': n, 'category': c, 'rarity': r, 'hex_per_day': round(B.token_hex_per_day(r, c)),
+                          'bonus': (B.token_bonus(c) or (None, 0))[1]}
+                         for h, lst in toks.items() for n, c, r in lst), key=lambda x: -x['hex_per_day'])
+    base = len(hexes) * B.PLAIN_HEX_PER_DAY
+    kb = len(hexes) * B.KINGDOM_BONUS if connected else 0
+    raw = base + kb + sum(t['hex_per_day'] for t in token_rows)
+    rates = B.territory_rates(player)
+    total = round(sum(rates.get(h, 0) for h in hexes))
+    income = {'zones': len(hexes), 'plain_each': B.PLAIN_HEX_PER_DAY, 'plain': base,
+              'kingdom_bonus_each': B.KINGDOM_BONUS if connected else 0, 'kingdom_bonus': kb,
+              'tokens': token_rows[:50], 'token_count': len(token_rows), 'tokens_total': sum(t['hex_per_day'] for t in token_rows),
+              'before_multipliers': raw, 'total': total,
+              'multiplier': round(total / raw, 2) if raw else 1,
+              'beginner': B.BEGINNER_MULT if B.is_beginner(player) else 1,
+              'science': round(U.kingdom_mult(hexes, 'science'), 2)}
     return {
+        'income': income,
         'h3': h3_index, 'name': t.custom_name or t.poi_name or t.place_name or f'Zone {h3_index[:8]}',
         'size': len(hexes), 'kind': 'kingdom' if len(hexes) > 1 else 'territory', 'hexes': sorted(hexes),
         'forces': Fz.pools(hexes), 'point_cost': Fz.POINT_COST,
-        'spy_discount': {'per_point': Fz.SPY_DISCOUNT, 'max_points': Fz.SPY_MAX},
+        'spy_discount': {'per_point': round(Fz.SPY_DISCOUNT * U.kingdom_mult(hexes, 'education'), 4), 'max_points': Fz.SPY_MAX},
+        # what each counter is worth in this kingdom (upgrades: influence, fortification, education, science)
+        'multipliers': {u['stat']: round(1 + levels[k] * u['per_level'] / 100, 2) for k, u in U.UPGRADES.items()},
         'under_attack': bool(t.is_under_attack),
         'shield_until': t.shield_until.isoformat() if t.shield_until and t.shield_until > timezone.now() else None,
         'upgrades': ups,

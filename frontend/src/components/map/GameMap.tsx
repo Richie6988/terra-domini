@@ -16,6 +16,7 @@ import { injectGlowFilter, makeHexPolygon, injectHexAnimations, getVisibleHexes,
 import { KingdomBorderLayer } from './KingdomBorderLayer'
 import { PoiOverviewLayer } from './PoiOverviewLayer'
 import { SafariZoneLayer } from './SafariZoneLayer'
+import { SafariReveal } from '../shared/SafariReveal'
 import { CoinPickupLayer } from './CoinPickupLayer'
 import { HexStateLayer } from './HexStateLayer'
 import { iconIdFor } from '../shared/poiIcons'
@@ -35,12 +36,6 @@ interface GameMapProps {
   onTerritoryClick: (h3: string) => void
 }
 
-/** Mini preview gradients for the map-style picker */
-const TILE_SWATCH: Record<string, string> = {
-  game: 'linear-gradient(135deg,#1d3b6e 0%,#2f6f8f 45%,#5fae6b 100%)',
-  satellite: 'linear-gradient(135deg,#14321f 0%,#2f4f2a 50%,#5b6b3c 100%)',
-}
-
 /** POI category → iconBank id (categories without a dedicated icon) */
 const POI_ICON_ALIAS: Record<string, string> = {
   temple: 'cult', bridge: 'infrastructure', lake: 'ocean', battle: 'war', military: 'weapon',
@@ -48,20 +43,17 @@ const POI_ICON_ALIAS: Record<string, string> = {
   oil: 'oil_barrel', gas: 'res_gaz', uranium: 'nuclear',
 }
 const POI_RARITY_COLOR: Record<string, string> = {
-  common:'#9CA3AF', uncommon:'#10B981', rare:'#3B82F6', epic:'#8B5CF6', legendary:'#F59E0B', mythic:'#EC4899',
+  common:'#cd7f32', uncommon:'#cbd5e1', rare:'#fbbf24', epic:'#10b981', legendary:'#67e8f9', mythic:'#ec4899',
 }
 
 // No API key needed (Carto basemaps now require one on production domains → "API KEY REQUIRED" tiles)
-const OSM_URL = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png'
-const OSM_ATTR = '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>'
 // Two ambiances (owner 2026-10-18): a stylised game board (OSM recoloured in CSS: .hx-tiles-game) and real satellite imagery
 const ZOOM_MIN = 5, ZOOM_MAX = 16
 const TILES: Record<string, { label: string; url: string; maxZoom: number; overlay?: string; className?: string; attribution: string }> = {
-  game: { label: 'Game', url: OSM_URL, maxZoom: ZOOM_MAX, className: 'hx-tiles-game', attribution: OSM_ATTR },
   satellite: {
     label: 'Satellite',
     url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
-    maxZoom: ZOOM_MAX,
+    maxZoom: ZOOM_MAX, className: 'hx-tiles-sat',   // satellite only (owner 2026-10-19), a touch more vivid for the cartoon look
     overlay: 'https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}',
     attribution: 'Tiles &copy; Esri',
   },
@@ -89,7 +81,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       if (!localStorage.getItem('hx_tiles_sat')) { localStorage.setItem('hx_tiles_sat', '1'); setMapTheme('satellite' as any) }
     } catch { /* ignore */ }
   }, [setMapTheme])
-  const setTile = (t: keyof typeof TILES) => setMapTheme(t as any)
+  const [arOn, setAr] = useState(() => { try { return localStorage.getItem('hx_ar') !== '0' } catch { return true } })
   const [poiCatFilter, setPoiCatFilter] = useState<string[]>(['all'])
   const [poiRarFilter, setPoiRarFilter] = useState<string[]>(['all'])
   const [showOverlay,  setShowOverlay]  = useState(true)
@@ -531,13 +523,12 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         .td-zoom-range::-moz-range-thumb{width:14px;height:14px;border-radius:50%;background:#0CC5FF;border:2px solid #fff;}
       `}</style>
 
-      {/* Map controls — right edge: compact stack (style menu + zoom) */}
-      <MapControls
-        tile={tile as string}
-        onTile={k => setTile(k as keyof typeof TILES)}
-        zoom={zoom}
-        onZoom={z => mapRef.current?.setZoom(z)}
-      />
+      {/* AR layer over the satellite view: reticle, coordinates, scale, compass */}
+      {arOn && <MapARHud map={mapRef.current} zoom={zoom} center={center} />}
+
+      {/* Map controls — right edge: AR info toggle + zoom */}
+      <MapControls arOn={arOn} onAr={() => setAr(v => { try { localStorage.setItem('hx_ar', v ? '0' : '1') } catch { /* private mode */ } return !v })}
+        zoom={zoom} onZoom={z => mapRef.current?.setZoom(z)} />
 
       {/* Favorite pins — bottom left */}
       {showOverlay && <MapOverlayLayer map={mapRef.current} />}
@@ -563,6 +554,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       <KingdomBorderLayer map={mapRef.current} zoom={zoom} onKingdomClick={setSelectedKingdom} />
       <PoiOverviewLayer map={mapRef.current} zoom={zoom} center={center} />
       <SafariZoneLayer map={mapRef.current} />
+      <SafariReveal />
       <HexStateLayer map={mapRef.current} zoom={zoom} center={center} />
       <CoinPickupLayer map={mapRef.current} zoom={zoom} center={center} />
       <ExplorationLayer map={mapRef.current} />
@@ -632,41 +624,19 @@ function MapBtn({ onClick, children }: { onClick: () => void; children: React.Re
     </button>
   )
 }
-/** Compact, collapsible map control: style picker popover + zoom buttons. */
-function MapControls({ tile, onTile, zoom, onZoom }: {
-  tile: string; onTile: (k: string) => void; zoom: number; onZoom: (z: number) => void
-}) {
-  const [open, setOpen] = useState(false)
-  const rootRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    if (!open) return
-    const onDown = (e: MouseEvent | TouchEvent) => {
-      if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false)
-    }
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false) }
-    document.addEventListener('mousedown', onDown)
-    document.addEventListener('touchstart', onDown)
-    window.addEventListener('keydown', onKey)
-    return () => {
-      document.removeEventListener('mousedown', onDown)
-      document.removeEventListener('touchstart', onDown)
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [open])
-
+/** Compact map control: AR info toggle + zoom buttons (satellite is the only base map). */
+function MapControls({ arOn, onAr, zoom, onZoom }: { arOn: boolean; onAr: () => void; zoom: number; onZoom: (z: number) => void }) {
   const glass: React.CSSProperties = {
     background: 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(10,22,40,0.95))',
     backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
     border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12,
     boxShadow: '0 6px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)',
   }
-
   return (
-    <div ref={rootRef} style={{ position: 'absolute', top: '50%', right: 12, transform: 'translateY(-50%)', zIndex: 500 }}>
+    <div style={{ position: 'absolute', top: '50%', right: 12, transform: 'translateY(-50%)', zIndex: 500 }}>
       <div style={{ ...glass, display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
-        <button className="td-mapctl-btn" aria-label="Map style" aria-expanded={open} title="Map style"
-          onClick={() => setOpen(o => !o)}>
+        <button className="td-mapctl-btn" aria-label="Map info (coordinates, scale)" aria-pressed={arOn} title="Map info"
+          onClick={onAr} style={{ color: arOn ? '#fde68a' : undefined }}>
           <Layers size={18} />
         </button>
         <div style={{ width: 24, height: 1, background: 'rgba(255,255,255,0.08)' }} />
@@ -679,41 +649,51 @@ function MapControls({ tile, onTile, zoom, onZoom }: {
           <Minus size={17} />
         </button>
       </div>
+    </div>
+  )
+}
 
-      {open && (
-        <div className="hx-rise" role="dialog" aria-label="Map style" style={{
-          ...glass, position: 'absolute', right: 52, top: 0, width: 212, padding: 12,
-          borderRadius: 14,
-        }}>
-          <div style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 10, fontWeight: 800, letterSpacing: 2, color: 'rgba(255,255,255,0.7)', marginBottom: 10 }}>
-            MAP STYLE
-          </div>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {(Object.entries(TILES) as [string, { label: string }][]).map(([key, cfg]) => {
-              const active = tile === key
-              return (
-                <button key={key} className="td-mapstyle-opt" aria-pressed={active} onClick={() => onTile(key)}>
-                  <span style={{ position: 'relative', display: 'block', height: 34, borderRadius: 6, background: TILE_SWATCH[key], border: '1px solid rgba(255,255,255,0.1)' }}>
-                    {active && (
-                      <span style={{ position: 'absolute', top: 4, right: 4, width: 16, height: 16, borderRadius: '50%', background: '#0CC5FF', color: '#06101e', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <Check size={11} strokeWidth={3} />
-                      </span>
-                    )}
-                  </span>
-                  <span style={{ textAlign: 'left' }}>{cfg.label}</span>
-                </button>
-              )
-            })}
-          </div>
-          <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '12px 0 10px' }} />
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
-            <span style={{ fontFamily: "'Orbitron', sans-serif", fontSize: 9, fontWeight: 700, letterSpacing: 1.5, color: 'rgba(255,255,255,0.55)' }}>ZOOM</span>
-            <span style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 12, color: '#0CC5FF' }}>{zoom}</span>
-          </div>
-          <input type="range" className="td-zoom-range" min={3} max={19} step={1} value={zoom}
-            aria-label="Zoom level" onChange={e => onZoom(Number(e.target.value))} style={{ width: '100%' }} />
-        </div>
-      )}
+/** AR layer (owner 2026-10-19: "satellite view with extra AR infos like a cartoon game"): a cartoon reticle at the
+ * centre, the centre's coordinates, a scale bar and a north compass. Pointer-events off: the map stays playable. */
+function MapARHud({ map, zoom, center }: { map: L.Map | null; zoom: number; center: [number, number] }) {
+  const [lat, lon] = center
+  // metres per 100 px at this latitude and zoom → a round scale value
+  const mpp = 156543.03392 * Math.cos(lat * Math.PI / 180) / Math.pow(2, zoom)
+  const nice = [10, 20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000, 1000000]
+  const m = nice.find(v => v / mpp >= 60) || nice[nice.length - 1]
+  const px = Math.round(m / mpp)
+  const scale = m >= 1000 ? `${m / 1000} km` : `${m} m`
+  const fmt = (v: number, p: string, n: string) => `${Math.abs(v).toFixed(zoom >= 12 ? 4 : 2)}°${v >= 0 ? p : n}`
+  const ink = '#0b1626'
+  if (!map) return null
+  return (
+    <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 450 }}>
+      {/* reticle */}
+      <svg width="64" height="64" viewBox="-32 -32 64 64" style={{ position: 'absolute', left: '50%', top: '50%', transform: 'translate(-50%,-50%)', overflow: 'visible' }}>
+        {[0, 90, 180, 270].map(a => (
+          <g key={a} transform={`rotate(${a})`}>
+            <path d="M-22 -14 L-22 -22 L-14 -22" fill="none" stroke={ink} strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M-22 -14 L-22 -22 L-14 -22" fill="none" stroke="#fde68a" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+          </g>
+        ))}
+        <circle r="3.5" fill="#fde68a" stroke={ink} strokeWidth="2" />
+      </svg>
+      {/* coordinates + scale */}
+      <div style={{ position: 'absolute', left: 12, bottom: 'calc(150px + env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+        <span style={{ padding: '4px 10px', borderRadius: 999, background: 'rgba(11,22,38,0.82)', border: '2px solid #fde68a', color: '#fde68a',
+          font: "13px 'Lilita One', sans-serif", letterSpacing: 0.5, textShadow: '0 1px 2px #000' }}>
+          {fmt(lat, 'N', 'S')} · {fmt(lon, 'E', 'W')}
+        </span>
+        <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: '#fff', font: "12px 'Lilita One', sans-serif", textShadow: '0 1px 2px #000' }}>
+          <span style={{ width: px, height: 7, borderRadius: 4, border: `2px solid ${ink}`, background: 'linear-gradient(90deg,#fde68a 50%,#fff 50%)' }} />{scale}
+        </span>
+      </div>
+      {/* compass */}
+      <svg width="40" height="40" viewBox="-20 -20 40 40" style={{ position: 'absolute', right: 14, top: 'calc(50% - 130px)' }}>
+        <circle r="17" fill="rgba(11,22,38,0.82)" stroke="#fde68a" strokeWidth="2" />
+        <path d="M0 -13 L5 0 L0 -3 L-5 0 Z" fill="#f87171" stroke={ink} strokeWidth="1.2" />
+        <path d="M0 13 L5 0 L0 3 L-5 0 Z" fill="#e2e8f0" stroke={ink} strokeWidth="1.2" />
+      </svg>
     </div>
   )
 }
