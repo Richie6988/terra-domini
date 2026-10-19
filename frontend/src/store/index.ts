@@ -60,7 +60,11 @@ interface TDCState {
 
 // ─── UI Slice ─────────────────────────────────────────────────────────────────
 
+export type TokenKind = 'places' | 'resources' | 'species'
 interface UIState {
+  // Token categories shown on the map (Layers menu) — persisted
+  tokenFilter: Record<TokenKind, boolean>
+  toggleTokenKind: (k: TokenKind) => void
   sidebarOpen: boolean
   godMode: boolean
   toggleGodMode: () => void
@@ -211,6 +215,8 @@ export const useStore = create<Store>()(
 
       // ── UI ──────────────────────────────────────────────────────────────
       sidebarOpen: false,
+      tokenFilter: { places: true, resources: true, species: true },
+      toggleTokenKind: (k) => set((s) => ({ tokenFilter: { ...s.tokenFilter, [k]: !s.tokenFilter[k] } })),
       godMode: false,
       toggleGodMode: () => set((s) => ({ godMode: !s.godMode })),
       pickingFavorite: false,
@@ -271,6 +277,7 @@ export const useStore = create<Store>()(
         musicEnabled: state.musicEnabled,
         sfxEnabled: state.sfxEnabled,
         mapTheme: state.mapTheme,
+        tokenFilter: state.tokenFilter,
         notificationsEnabled: state.notificationsEnabled,
         language: state.language,
       }) as any,

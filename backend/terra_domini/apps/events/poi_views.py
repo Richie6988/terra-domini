@@ -230,6 +230,18 @@ def map_pois(request):
         if z >= mz:
             rarities = r
     qs = UnifiedPOI.objects.filter(is_active=True, rarity__in=rarities, latitude__range=(s, n))
+    # Token categories the player shows on the map (?kinds=places,resources,species — all when absent)
+    from django.db.models import Q
+    from terra_domini.apps.economy.resources import RESOURCE_SITES
+    kinds = {k for k in (request.query_params.get('kinds') or 'places,resources,species').split(',') if k}
+    kq = Q(pk__in=[])
+    if 'species' in kinds:
+        kq |= Q(category__startswith='species_')
+    if 'resources' in kinds:
+        kq |= Q(category__in=RESOURCE_SITES)
+    if 'places' in kinds:
+        kq |= ~Q(category__startswith='species_') & ~Q(category__in=RESOURCE_SITES)
+    qs = qs.filter(kq)
     qs = qs.filter(longitude__range=(w, e)) if w <= e else qs  # antimeridian: skip the lon filter
     order = {'mythic': 0, 'legendary': 1, 'epic': 2, 'rare': 3, 'uncommon': 4, 'common': 5}
     rows = sorted(qs.values('name', 'category', 'rarity', 'latitude', 'longitude', 'h3_index', 'is_featured')[:1500],
@@ -240,7 +252,7 @@ def map_pois(request):
     # Area counters: every active POI of the view grouped by an H3 cell sized for the zoom
     import h3 as _h3
     res = 1 if z <= 4 else 2 if z <= 6 else 3 if z <= 9 else 4
-    allq = UnifiedPOI.objects.filter(is_active=True, latitude__range=(s, n))
+    allq = UnifiedPOI.objects.filter(is_active=True, latitude__range=(s, n)).filter(kq)
     allq = allq.filter(longitude__range=(w, e)) if w <= e else allq
     groups = {}
     for la, lo, rar in allq.values_list('latitude', 'longitude', 'rarity')[:20000]:

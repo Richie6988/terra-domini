@@ -563,6 +563,7 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 - **Map**: satellite only (vivid filter `.hx-tiles-sat`), AR layer `MapARHud` (reticle, coordinates, scale, compass; Layers button toggles it). POI counters: one design (dark glass + gold ring). Outposts (≤ 2 hexes) under zoom 11: small emblem, no forces row; forces row hidden when all zero (zoom < 13).
 - **Safari end**: after "IT IS HERE", tap a hex of the striped zone (`/safari/probe/ {h3}`, must be within capture range of the 'here' scan): right → `SafariReveal` (golden burst → 3D token → '+1' flies to the Codex dock button), wrong → ring distance, −1 scan.
 - **Shop (2026-10-19)**: compact single scroll — balance bar, 3 booster packs, active boosts, boosts grid with a category filter (only implemented items), GET HEX packs at the very bottom. `shop/openShop.ts` `openShop('hex')` opens it on the packs: used when the player is short of HEX (hex claim, auction, paid hunt, forces buy 402, kingdom upgrade).
+- **HUD layout**: left column = profile, MISSIONS, HARVEST pill (210 × 52, dark glass, progress ring + amount + time, separate HOME button), all aligned; right edge = compass (AR on) + Layers/zoom stack + Safari radar. Layers menu: token families on the map (`store.tokenFilter` places/resources/species, persisted; `/api/map/pois/?kinds=`; GameMap skips hidden families' free hexes and icons; `poiIcons.tokenKind`) + AR info toggle.
 
 ## 12. KNOWN ISSUES PIPELINE (updated 2026-10-17)
 

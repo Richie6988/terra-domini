@@ -22,3 +22,9 @@ export const ICON_ALIAS: Record<string, string> = {
 /** Icon id for a POI category (falls back to the category itself) */
 export const iconIdFor = (id?: string) => { const k = (id || '').toLowerCase(); return ICON_ALIAS[k] || k || 'city' }
 export const iconFor = (id?: string) => getIcon(iconIdFor(id))
+
+/** Map filter family of a token category: species_* → species, extraction sites → resources, the rest → places. */
+const RESOURCE_SITES = new Set(['oil_field', 'gas_reserve', 'coal_mine', 'gold_mine', 'diamond_mine', 'rare_earth', 'iron_ore',
+  'copper_mine', 'lithium_deposit', 'uranium_mine'])
+export const tokenKind = (cat?: string | null): 'places' | 'resources' | 'species' =>
+  (cat || '').startsWith('species_') ? 'species' : RESOURCE_SITES.has(cat || '') ? 'resources' : 'places'

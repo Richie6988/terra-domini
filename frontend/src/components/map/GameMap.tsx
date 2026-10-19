@@ -19,7 +19,7 @@ import { SafariZoneLayer } from './SafariZoneLayer'
 import { SafariReveal } from '../shared/SafariReveal'
 import { CoinPickupLayer } from './CoinPickupLayer'
 import { HexStateLayer } from './HexStateLayer'
-import { iconIdFor } from '../shared/poiIcons'
+import { iconIdFor, tokenKind } from '../shared/poiIcons'
 import { ExplorationLayer } from './ExplorationLayer'
 import { OwnedTerritoryHub } from '../kingdom/OwnedTerritoryHub'
 import { KingdomDetailOverlay } from '../kingdom/KingdomDetailOverlay'
@@ -28,6 +28,7 @@ import { BuildingsOverlayLayer } from './BuildingsOverlayLayer'
 import { TutorialArrow } from './TutorialArrow'
 import { latLngToCell, cellToBoundary, gridDisk } from 'h3-js'
 import { Layers, Plus, Minus, Check } from 'lucide-react'
+import { IconSVG } from '../shared/iconBank'
 import { getIcon } from '../shared/iconBank'
 import type { TerritoryLight } from '../../types'
 
@@ -81,6 +82,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       if (!localStorage.getItem('hx_tiles_sat')) { localStorage.setItem('hx_tiles_sat', '1'); setMapTheme('satellite' as any) }
     } catch { /* ignore */ }
   }, [setMapTheme])
+  const tokenFilter = useStore(s => s.tokenFilter)
   const [arOn, setAr] = useState(() => { try { return localStorage.getItem('hx_ar') !== '0' } catch { return true } })
   const [poiCatFilter, setPoiCatFilter] = useState<string[]>(['all'])
   const [poiRarFilter, setPoiRarFilter] = useState<string[]>(['all'])
@@ -384,7 +386,10 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       dragon:'#dc2626', dinosaur:'#84cc16', alien:'#a3e635', mythic_creature:'#e879f9',
       oil:'#1e293b', mine:'#78716c', gas:'#94a3b8', uranium:'#facc15',
     }
-    territories.filter(t => t.owner_id || (t as any).is_landmark || (t as any).poi_name).forEach(t => {
+    // Token families hidden in the Layers menu: their free hexes are not drawn, owned ones keep the hex but lose the icon
+    const tf = useStore.getState().tokenFilter
+    const shown = (t: any) => !(t.poi_name || t.is_landmark) || tf[tokenKind(t.poi_category)] !== false
+    territories.filter(t => t.owner_id || (((t as any).is_landmark || (t as any).poi_name) && shown(t))).forEach(t => {
       const poly = makeHexPolygon({
         territory: t, playerId: player?.id,
         catFilter: poiCatFilter, rarFilter: poiRarFilter,
@@ -412,7 +417,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       // POI icon marker at hex center — visible on map for special territories
       const ta = t as any
-      if ((ta.poi_name || ta.is_landmark) && (ta.center_lat || ta.lat)) {
+      if ((ta.poi_name || ta.is_landmark) && shown(ta) && (ta.center_lat || ta.lat)) {
         const ringCol = POI_RARITY_COLOR[ta.rarity] || POI_CAT_COLORS[ta.poi_category] || '#6366f1'
         const iconKey = ta.poi_icon || POI_ICON_ALIAS[ta.poi_category] || iconIdFor(ta.poi_category || ta.territory_type || 'landmark')
         // Static iconBank SVG (trusted, not player-controlled)
@@ -434,7 +439,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         layer.addLayer(marker)
       }
     })
-  }, [territories, player?.id])
+  }, [territories, player?.id, tokenFilter])
 
   // ── Draw H3 grid overlay — visible at mid-zoom only, hidden at max zoom ──
   useEffect(() => {
@@ -624,20 +629,55 @@ function MapBtn({ onClick, children }: { onClick: () => void; children: React.Re
     </button>
   )
 }
-/** Compact map control: AR info toggle + zoom buttons (satellite is the only base map). */
+/** Right-edge stack: compass (AR on) · Layers menu (AR info + token families) · zoom. Satellite is the only base map. */
+const TOKEN_KINDS: { k: 'places' | 'resources' | 'species'; label: string; icon: string; color: string }[] = [
+  { k: 'places', label: 'Places', icon: 'monument', color: '#fbbf24' },
+  { k: 'resources', label: 'Resources', icon: 'oil_barrel', color: '#f97316' },
+  { k: 'species', label: 'Species', icon: 'lion', color: '#4ade80' },
+]
 function MapControls({ arOn, onAr, zoom, onZoom }: { arOn: boolean; onAr: () => void; zoom: number; onZoom: (z: number) => void }) {
+  const [open, setOpen] = useState(false)
+  const tf = useStore(s => s.tokenFilter)
+  const toggle = useStore(s => s.toggleTokenKind)
+  const rootRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const down = (e: MouseEvent | TouchEvent) => { if (rootRef.current && !rootRef.current.contains(e.target as Node)) setOpen(false) }
+    document.addEventListener('mousedown', down); document.addEventListener('touchstart', down)
+    return () => { document.removeEventListener('mousedown', down); document.removeEventListener('touchstart', down) }
+  }, [open])
   const glass: React.CSSProperties = {
     background: 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(10,22,40,0.95))',
     backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
     border: '1px solid rgba(255,255,255,0.1)', borderRadius: 12,
     boxShadow: '0 6px 24px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.05)',
   }
+  const hidden = TOKEN_KINDS.filter(t => !tf[t.k]).length
+  const row = (on: boolean, onClick: () => void, icon: string, label: string, color: string) => (
+    <button key={label} onClick={onClick} aria-pressed={on} style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 8px',
+      borderRadius: 10, cursor: 'pointer', border: `1px solid ${on ? color + '66' : 'rgba(255,255,255,0.08)'}`,
+      background: on ? `${color}1f` : 'transparent', color: on ? '#fff' : 'rgba(226,232,240,0.45)', font: "12px 'Lilita One', sans-serif", letterSpacing: 0.5 }}>
+      <span style={{ opacity: on ? 1 : 0.4, display: 'inline-flex' }}><IconSVG id={icon} size={18} /></span>
+      <span style={{ flex: 1, textAlign: 'left' }}>{label}</span>
+      <span style={{ width: 30, height: 16, borderRadius: 999, background: on ? color : 'rgba(255,255,255,0.15)', position: 'relative', transition: 'background .15s' }}>
+        <span style={{ position: 'absolute', top: 2, left: on ? 16 : 2, width: 12, height: 12, borderRadius: '50%', background: '#fff', transition: 'left .15s' }} />
+      </span>
+    </button>
+  )
   return (
-    <div style={{ position: 'absolute', top: '50%', right: 12, transform: 'translateY(-50%)', zIndex: 500 }}>
+    <div ref={rootRef} style={{ position: 'absolute', top: '50%', right: 12, transform: 'translateY(-50%)', zIndex: 500, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
+      {arOn && (   /* compass, part of the stack */
+        <svg width="40" height="40" viewBox="-20 -20 40 40" aria-hidden>
+          <circle r="17" fill="rgba(11,22,38,0.88)" stroke="#fde68a" strokeWidth="2" />
+          <path d="M0 -13 L5 0 L0 -3 L-5 0 Z" fill="#f87171" stroke="#0b1626" strokeWidth="1.2" />
+          <path d="M0 13 L5 0 L0 3 L-5 0 Z" fill="#e2e8f0" stroke="#0b1626" strokeWidth="1.2" />
+        </svg>
+      )}
       <div style={{ ...glass, display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
-        <button className="td-mapctl-btn" aria-label="Map info (coordinates, scale)" aria-pressed={arOn} title="Map info"
-          onClick={onAr} style={{ color: arOn ? '#fde68a' : undefined }}>
+        <button className="td-mapctl-btn" aria-label="Map layers" aria-expanded={open} title="Map layers" onClick={() => setOpen(o => !o)}
+          style={{ position: 'relative', color: open ? '#fde68a' : undefined }}>
           <Layers size={18} />
+          {hidden > 0 && <span style={{ position: 'absolute', top: 5, right: 5, width: 7, height: 7, borderRadius: '50%', background: '#f97316' }} />}
         </button>
         <div style={{ width: 24, height: 1, background: 'rgba(255,255,255,0.08)' }} />
         <button className="td-mapctl-btn" aria-label="Zoom in" title="Zoom in" onClick={() => onZoom(Math.min(19, zoom + 1))}>
@@ -649,6 +689,15 @@ function MapControls({ arOn, onAr, zoom, onZoom }: { arOn: boolean; onAr: () => 
           <Minus size={17} />
         </button>
       </div>
+      {open && (
+        <div className="hx-rise" role="dialog" aria-label="Map layers" style={{ ...glass, position: 'absolute', right: 52, top: arOn ? 48 : 0, width: 196, padding: 10,
+          display: 'flex', flexDirection: 'column', gap: 6, borderRadius: 14 }}>
+          <div style={{ font: "10px 'Lilita One', sans-serif", letterSpacing: 2, color: 'rgba(255,255,255,0.6)' }}>TOKENS ON THE MAP</div>
+          {TOKEN_KINDS.map(t => row(!!tf[t.k], () => toggle(t.k), t.icon, t.label, t.color))}
+          <div style={{ height: 1, background: 'rgba(255,255,255,0.08)', margin: '2px 0' }} />
+          {row(arOn, onAr, 'compass', 'Map info (AR)', '#fde68a')}
+        </div>
+      )}
     </div>
   )
 }
@@ -688,12 +737,6 @@ function MapARHud({ map, zoom, center }: { map: L.Map | null; zoom: number; cent
           <span style={{ width: px, height: 7, borderRadius: 4, border: `2px solid ${ink}`, background: 'linear-gradient(90deg,#fde68a 50%,#fff 50%)' }} />{scale}
         </span>
       </div>
-      {/* compass */}
-      <svg width="40" height="40" viewBox="-20 -20 40 40" style={{ position: 'absolute', right: 14, top: 'calc(50% - 130px)' }}>
-        <circle r="17" fill="rgba(11,22,38,0.82)" stroke="#fde68a" strokeWidth="2" />
-        <path d="M0 -13 L5 0 L0 -3 L-5 0 Z" fill="#f87171" stroke={ink} strokeWidth="1.2" />
-        <path d="M0 13 L5 0 L0 3 L-5 0 Z" fill="#e2e8f0" stroke={ink} strokeWidth="1.2" />
-      </svg>
     </div>
   )
 }

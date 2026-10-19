@@ -25,13 +25,16 @@ export function PoiOverviewLayer({ map, zoom, center }: { map: L.Map | null; zoo
   const layer = useLeafletLayer(map)
   const reqId = useRef(0)
   const hexCount = useStore(s => Object.keys(s.territories).length)   // re-run when hexes (and their icons) arrive
+  const tf = useStore(s => s.tokenFilter)                              // token families chosen in the Layers menu
+  const kinds = (Object.keys(tf) as (keyof typeof tf)[]).filter(k => tf[k]).join(',')
 
   useEffect(() => {
     if (!map || !layer) return
     if (zoom >= POI_OVERVIEW_MAX_ZOOM) { layer.clearLayers(); return }
     const b = map.getBounds().pad(0.15)
     const id = ++reqId.current
-    api.get('/map/pois/', { params: { south: b.getSouth(), west: b.getWest(), north: b.getNorth(), east: b.getEast(), zoom } })
+    if (!kinds) { layer.clearLayers(); return }
+    api.get('/map/pois/', { params: { south: b.getSouth(), west: b.getWest(), north: b.getNorth(), east: b.getEast(), zoom, kinds } })
       .then(({ data }) => {
         if (id !== reqId.current) return
         layer.clearLayers()
@@ -92,7 +95,7 @@ export function PoiOverviewLayer({ map, zoom, center }: { map: L.Map | null; zoo
         }
       })
       .catch(() => {})
-  }, [map, layer, zoom, center[0].toFixed(2), center[1].toFixed(2), hexCount])
+  }, [map, layer, zoom, center[0].toFixed(2), center[1].toFixed(2), hexCount, kinds])
 
   return null
 }

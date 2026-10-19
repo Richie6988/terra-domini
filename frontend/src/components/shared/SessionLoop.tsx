@@ -8,7 +8,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import toast from 'react-hot-toast'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Bell } from 'lucide-react'
+import { Bell, Home } from 'lucide-react'
 import { api } from '../../services/api'
 import { useStore } from '../../store'
 import { IconSVG } from './iconBank'
@@ -160,30 +160,24 @@ export function HarvestButton() {
   const exact = (h.cap_amount * pct) / 100
   const nextHexMin = h.rate_per_day > 0 ? Math.ceil(((1 - (exact % 1)) / h.rate_per_day) * 1440) : 0
 
+  // Compact pill (owner 2026-10-19): progress ring around the icon, amount, time left; separate HOME button
   return (
-    <button
-      className={`hx-harvest ${full ? 'is-full' : ''}`}
-      onClick={() => { if (pending > 0) collect.mutate(); goHome() }}
-      disabled={collect.isPending}
-      aria-label={pending > 0 ? `Collect ${pending} HEX and go to my kingdom` : 'Go to my kingdom'}
-      title="Collect and fly back to your kingdom"
-    >
-      <span className="hx-harvest__icon"><IconSVG id="wheat" size={30} /></span>
-      <span className="hx-harvest__body">
-        <span className="hx-harvest__label">{full ? 'STOCK FULL!' : 'HARVEST'}
-          <span style={{ marginLeft: 6, opacity: 0.85, display: 'inline-flex', verticalAlign: 'middle' }}><IconSVG id="castle" size={14} /></span></span>
-        <span className="hx-harvest__value">+{pending.toLocaleString()}</span>
-        <span className="hx-progress" style={{ ['--accent' as any]: full ? '#f59e0b' : '#34d058', height: 10 }}>
-          <span className="hx-progress__fill" style={{ width: `${pct}%` }} />
+    <div className={`hx-harvest ${full ? 'is-full' : ''}`}>
+      <button className="hx-harvest__main" onClick={() => { if (pending > 0) collect.mutate() }} disabled={collect.isPending || pending < 1}
+        aria-label={pending > 0 ? `Collect ${pending} HEX` : 'Harvest filling'} title="Collect your harvest">
+        <span className="hx-harvest__ring" style={{ ['--p' as any]: pct }}><span><IconSVG id="hex_coin" size={22} /></span></span>
+        <span className="hx-harvest__body">
+          <span className="hx-harvest__value">+{pending.toLocaleString()}</span>
+          <span className="hx-harvest__sub">{full
+            ? `FULL · ${(h.lost || 0).toLocaleString()} lost`
+            : pending < 1 ? `first HEX in ${nextHexMin} min` : `full in ${fmtIn(h.full_at)}`}
+            {(h.beginner_mult ?? 1) > 1 ? ` · x${h.beginner_mult}` : ''}</span>
         </span>
-        <span className="hx-harvest__sub">{full
-          ? `${(h.lost || 0).toLocaleString()} HEX lost so far`
-          : pending < 1
-            ? `First HEX in ${nextHexMin} min · ${Math.round(h.rate_per_day).toLocaleString()}/day`
-            : `Full in ${fmtIn(h.full_at)} · ${Math.round(h.rate_per_day).toLocaleString()}/day`}
-          {(h.beginner_mult ?? 1) > 1 ? ` · x${h.beginner_mult} starter` : ''}</span>
-      </span>
-    </button>
+      </button>
+      <button className="hx-harvest__home" onClick={goHome} aria-label="Back to my kingdom" title={`Back to my kingdom · ${Math.round(h.rate_per_day).toLocaleString()} HEX/day`}>
+        <Home size={18} strokeWidth={2.6} />
+      </button>
+    </div>
   )
 }
 

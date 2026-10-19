@@ -50,7 +50,7 @@ const HUD_CSS = `
 .hxh-god:active { transform: translate(-50%, -50%) scale(0.96); }
 .hxh-god__state { display: inline-flex; align-items: center; justify-content: center; min-width: 34px; height: 20px; padding: 0 6px;
   border-radius: 999px; font-size: 9px; letter-spacing: 1px; }
-.hxh-missions { position: relative; display: flex; align-items: center; gap: 10px; padding: 7px 14px 7px 7px; border-radius: 14px;
+.hxh-missions { position: relative; display: flex; align-items: center; gap: 10px; width: 210px; height: 52px; padding: 0 14px 0 7px; border-radius: 14px; box-sizing: border-box;
   cursor: pointer; pointer-events: auto; border: 1px solid rgba(251,191,36,0.35);
   background: linear-gradient(180deg, rgba(60,40,8,0.92), rgba(18,14,6,0.92));
   box-shadow: 0 4px 0 rgba(0,0,0,0.45), 0 8px 24px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.12);
@@ -216,7 +216,7 @@ export function MissionsButton() {
       aria-label="Missions"
       aria-pressed={active}
       onClick={() => setActivePanel(active ? null : 'tasks')}
-      style={{ position: 'fixed', top: 108, left: 16, zIndex: 900 }}
+      style={{ position: 'fixed', top: 106, left: 16, zIndex: 900 }}
     >
       <style>{HUD_CSS}</style>
       <span className="hxh-missions__hex"><IconSVG id="daily_task" size={30} /></span>
