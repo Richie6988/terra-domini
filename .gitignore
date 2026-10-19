@@ -46,3 +46,4 @@ backend/scripts/seed_pois_*.py
 
 # Terrain tiles (ESA WorldCover / AWS elevation) cached by territories/landcover.py
 data/tile_cache/
+data/hexod_db/poi_agent_state/
