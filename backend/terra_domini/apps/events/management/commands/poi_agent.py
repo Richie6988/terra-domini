@@ -60,6 +60,9 @@ For the POI you are given:
    The row's game_category and country_code say WHAT the token is: if the article / coordinates describe another kind
    of thing (category gas_reserve in QA but a granite dome in California), the row was mismatched: find the real place
    of that category and country and use its article. Never turn a token into another kind of thing.
+   But a real, famous place whose only fault is a wrong category label (e.g. Woodstock filed as world_heritage) is
+   KEPT (verdict corrected, note the label in corrections): reject only places that do not exist, cannot be located,
+   or duplicate another entry.
 2. Check the facts: exact name (English, as on Wikipedia), coordinates (use Wikipedia's when they exist), ISO 3166-1
    alpha-2 country code. Fix what is wrong (verdict "corrected") or confirm (verdict "validated").
 3. Write the card description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing you

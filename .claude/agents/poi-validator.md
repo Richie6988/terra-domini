@@ -25,6 +25,9 @@ For each row:
    description describe a different kind of thing (e.g. category gas_reserve in QA but the article is a granite dome
    in California), the source row was mismatched: find the real place matching the category and country (web search),
    use ITS article and coordinates, and list the fix in corrections. Never turn a token into another kind of thing.
+   But a real, famous place whose only fault is a wrong category label (e.g. Woodstock filed as world_heritage) is
+   KEPT (verdict corrected, note the label in corrections): reject only places that do not exist, cannot be located,
+   or duplicate another entry.
 2. Check the facts: exact English name (as on Wikipedia), coordinates (Wikipedia's when they exist), ISO 3166-1
    alpha-2 country code ("" for open sea, never anything else). Fix what is wrong (verdict "corrected", list each fix in corrections) or confirm ("validated").
 3. Description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing unverified.
