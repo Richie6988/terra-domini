@@ -15,10 +15,11 @@ from decimal import Decimal
 # ── Production ────────────────────────────────────────────────────────────────
 # Rarity pays much more (owner 2026-10-18): yield grows faster than price (RARITY_PRICE_MULT) → rare cards are worth chasing
 # 4 rarities (owner 2026-10-20): Silver (common) · Gold (uncommon) · Emerald (rare) · Diamond (epic);
-# legendary / mythic are old keys, paid as Diamond
+# legendary / mythic are old keys, paid as Diamond. A token already beats a plain hex (PLAIN_HEX_PER_DAY = 100):
+# Silver 150 (owner: "silver must already pay more than an ordinary territory")
 HEX_PER_DAY = {
-    'common': 60, 'uncommon': 150, 'rare': 450,
-    'epic': 1500, 'legendary': 1500, 'mythic': 1500,
+    'common': 150, 'uncommon': 400, 'rare': 1000,
+    'epic': 2500, 'legendary': 2500, 'mythic': 2500,
 }
 SHINY_MULT = 1.5
 KINGDOM_MULT = 1.15          # territory connected to a kingdom (cluster ≥ 2)

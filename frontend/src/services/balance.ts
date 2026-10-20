@@ -1,6 +1,6 @@
 /** Mirror of backend economy/balance.py — keep in sync. HEX produced per day, collected via the harvest stock. */
 export const HEX_PER_DAY: Record<string, number> = {
-  common: 60, uncommon: 150, rare: 450, epic: 1500, legendary: 1500, mythic: 1500,   // legendary / mythic = old keys, paid as Diamond
+  common: 150, uncommon: 400, rare: 1000, epic: 2500, legendary: 2500, mythic: 2500,   // Silver > plain hex (100); legendary / mythic = Diamond
 }
 // 4 rarities only (owner 2026-10-20): Silver 50 % · Gold 30 % · Emerald 15 % · Diamond 5 % — the name is the metal of
 // the token frame. Keys stay common / uncommon / rare / epic in the code and the API; old legendary / mythic = Diamond.
