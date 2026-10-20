@@ -257,6 +257,11 @@ class Agent:
         errs = []
         if s.get('verdict') == 'rejected':
             return [] if s.get('reject_reason') else ['reject_reason is required for a rejected row.']
+        same = next((u for u, v in poi_validations.load().items() if u != self.row['uid'] and v.get('verdict') != 'rejected'
+                     and (v.get('name') or '').strip().lower() == (s.get('name') or '').strip().lower()), None)
+        if same:
+            errs.append(f'{s.get("name")} is already token {same}: never duplicate a place. Keep this row\'s own subject (an event '
+                        'stays an event at its site, e.g. a disaster = history_event), or reject it as a duplicate.')
         cats = categories()
         if s.get('game_category') not in cats:
             errs.append('game_category must be one of the game categories (POI --categories), the one that fits the place: '
