@@ -1,24 +1,28 @@
 /** POI category → iconBank icon (shared by the token, the map overview and the codex). */
 import { getIcon } from './iconBank'
 
-// POI categories without a dedicated icon → closest icon (instead of the '?' fallback)
-export const ICON_ALIAS: Record<string, string> = {
-  capital_city: 'city', financial_hub: 'money_bag', stock_exchange: 'chart_up', trade_node: 'port', mega_port: 'port',
-  ancient_ruins: 'history', world_heritage: 'monument', religious_site: 'cult', royal_palace: 'castle',
-  nature_sanctuary: 'forest', ancient_forest: 'forest', mountain_peak: 'mountain', cave_system: 'cave',
-  coral_reef: 'ocean', oil_field: 'oil_barrel', gas_reserve: 'flame', gold_mine: 'mine', diamond_mine: 'diamond_blue',
-  copper_mine: 'mine', iron_ore: 'mine', coal_mine: 'mine', uranium_mine: 'nuclear', lithium_deposit: 'battery',
-  rare_earth: 'crystal', nuclear_plant: 'nuclear', space_center: 'rocket', military_base: 'war', naval_base: 'ship',
-  missile_site: 'bomb', intelligence_hq: 'intelligence', international_org: 'diplomacy', tech_giant: 'tech',
-  control_tower: 'tower', ancient_wonder: 'wonder', sports_arena: 'sport', freshwater: 'water_drop',
-  mega_dam: 'infrastructure', agri_megafarm: 'farm', research_station: 'science', particle_collider: 'science',
-  internet_cable: 'tech', data_center: 'tech', casino_resort: 'treasure', offshore_haven: 'money_bag',
-  secret_facility: 'conspiracy', oligarch_asset: 'treasure', media_hq: 'news', alliance_hq: 'diplomacy',
-  anomaly: 'mystery',
+// Every token category (POICategory in events/unified_poi.py + the species_* families) has its own icon in the
+// cat_<category> set of iconBank: one badge style, colour = family (places, nature, resources, strategic, economy,
+// tech, mystery, species).
+const TOKEN_CATEGORIES = [
+  'mountain_peak', 'volcano', 'canyon', 'waterfall', 'glacier', 'cave_system', 'coral_reef', 'ancient_forest',
+  'nature_sanctuary', 'island', 'desert',
+  'oil_field', 'gas_reserve', 'gold_mine', 'diamond_mine', 'rare_earth', 'lithium_deposit', 'uranium_mine', 'coal_mine',
+  'iron_ore', 'copper_mine', 'freshwater', 'fertile_land', 'agri_megafarm', 'seed_vault',
+  'military_base', 'naval_base', 'missile_site', 'intelligence_hq', 'chokepoint', 'alliance_hq',
+  'financial_hub', 'stock_exchange', 'trade_node', 'mega_port', 'offshore_haven', 'oligarch_asset', 'casino_resort',
+  'international_org', 'tech_giant', 'media_hq',
+  'nuclear_plant', 'space_center', 'data_center', 'semiconductor', 'internet_cable', 'ix_point', 'control_tower',
+  'mega_dam', 'water_treatment', 'desalination', 'steel_mill', 'pharma_hq', 'research_station', 'particle_collider',
+  'observatory', 'infrastructure',
+  'capital_city', 'country', 'world_heritage', 'ancient_ruins', 'religious_site', 'royal_palace', 'museum',
+  'ancient_wonder', 'history_event', 'news_event', 'sports_arena',
+  'conspiracy', 'secret_facility', 'anomaly',
   // Living species tokens (layer 3 of the fixed map table)
-  species_animal: 'lion', species_vegetal: 'orchid', species_mushroom: 'fungus', species_microorganism: 'microscope',
-  species_fossil: 'dinosaur', species_insect: 'butterfly', species_marine: 'whale', species_bird: 'eagle',
-}
+  'species_animal', 'species_bird', 'species_marine', 'species_fossil', 'species_insect', 'species_vegetal',
+  'species_mushroom', 'species_microorganism',
+]
+export const ICON_ALIAS: Record<string, string> = Object.fromEntries(TOKEN_CATEGORIES.map(c => [c, `cat_${c}`]))
 /** Icon id for a POI category (falls back to the category itself) */
 export const iconIdFor = (id?: string) => { const k = (id || '').toLowerCase(); return ICON_ALIAS[k] || k || 'city' }
 export const iconFor = (id?: string) => getIcon(iconIdFor(id))
