@@ -22,7 +22,13 @@ const TOKEN_CATEGORIES = [
   'species_animal', 'species_bird', 'species_marine', 'species_fossil', 'species_insect', 'species_vegetal',
   'species_mushroom', 'species_microorganism',
 ]
-export const ICON_ALIAS: Record<string, string> = Object.fromEntries(TOKEN_CATEGORIES.map(c => [c, `cat_${c}`]))
+// Resource tokens keep the owner's own resource icons (owner 2026-10-20: "my designs were better" — res_* set)
+const RESOURCE_ICON: Record<string, string> = {
+  oil_field: 'oil_barrel', gas_reserve: 'flame', coal_mine: 'res_charbon', gold_mine: 'res_or', iron_ore: 'res_fer',
+  copper_mine: 'res_composants', rare_earth: 'res_terres_rares', uranium_mine: 'res_uranium', lithium_deposit: 'res_lithium',
+  diamond_mine: 'diamond_blue', freshwater: 'water_drop', fertile_land: 'wheat', agri_megafarm: 'farm',
+}
+export const ICON_ALIAS: Record<string, string> = Object.fromEntries(TOKEN_CATEGORIES.map(c => [c, RESOURCE_ICON[c] || `cat_${c}`]))
 /** Icon id for a POI category (falls back to the category itself) */
 export const iconIdFor = (id?: string) => { const k = (id || '').toLowerCase(); return ICON_ALIAS[k] || k || 'city' }
 export const iconFor = (id?: string) => getIcon(iconIdFor(id))
