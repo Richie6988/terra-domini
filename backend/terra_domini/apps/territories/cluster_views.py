@@ -451,7 +451,7 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
         rows = c.fetchall()
         conn.close()
 
-        RARITY_LABELS = {1:'Common',2:'Uncommon',3:'Rare',4:'Epic',5:'Legendary',6:'Mythic'}
+        RARITY_LABELS = {1:'Curiosity',2:'Wonder',3:'Rare',4:'Epic',5:'Legendary',6:'Mythic'}
         RARITY_COLORS = {1:'#9CA3AF',2:'#10B981',3:'#3B82F6',4:'#8B5CF6',5:'#F59E0B',6:'#EC4899'}
 
         result = []
@@ -483,7 +483,7 @@ class TerritoryClusterViewSet(viewsets.GenericViewSet):
                 'daily_income':  round(float(daily_income or 0), 0),
                 'battles_won':   battles_won or 0,
                 'tdc_total':     round(float(tdc_total or 0), 0),
-                'max_rarity':    RARITY_LABELS.get(max_rar_rank, 'Common'),
+                'max_rarity':    RARITY_LABELS.get(max_rar_rank, 'Curiosity'),
                 'max_rarity_color': RARITY_COLORS.get(max_rar_rank, '#9CA3AF'),
                 'distance_km':   dist_km,
                 'is_me':         is_me,

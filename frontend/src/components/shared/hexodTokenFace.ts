@@ -318,7 +318,7 @@ const SPECIES_LABEL: Record<string, string> = {
   species_insect: 'INSECT', species_vegetal: 'PLANT', species_mushroom: 'FUNGUS', species_microorganism: 'MICROBE',
 }
 const nice = (v?: string) => { const k = (v || '').toLowerCase().replace(/\s+/g, '_'); return SPECIES_LABEL[k] || (v || '').replace(/_/g, ' ').trim().toUpperCase() }
-const RARITY_NAME: Record<string, string> = { common: 'BRONZE', uncommon: 'SILVER', rare: 'GOLD', epic: 'EMERALD', legendary: 'DIAMOND', mythic: 'MYTHIC' }
+const RARITY_NAME: Record<string, string> = { common: 'CURIOSITY', uncommon: 'WONDER', rare: 'RARE', epic: 'EPIC', legendary: 'LEGENDARY', mythic: 'MYTHIC' }
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 

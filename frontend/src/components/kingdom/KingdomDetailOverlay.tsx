@@ -137,7 +137,7 @@ function OwnOverview({ k }: { k: KingdomData }) {
               background: `${RC[r] || '#999'}15`, border: `1px solid ${RC[r] || '#999'}30`,
               fontSize: 9, fontWeight: 700, color: RC[r] || '#999',
             }}>
-              {c}× {r.toUpperCase()}
+              {c}× {rarityLabel(r)}
             </div>
           ))}
         </div>
