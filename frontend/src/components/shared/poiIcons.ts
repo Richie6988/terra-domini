@@ -4,7 +4,7 @@ import { getIcon } from './iconBank'
 // Every token category (POICategory in events/unified_poi.py + the species_* families) has its own icon in the
 // cat_<category> set of iconBank: one badge style, colour = family (places, nature, resources, strategic, economy,
 // tech, mystery, species).
-const TOKEN_CATEGORIES = [
+export const TOKEN_CATEGORIES = [
   'mountain_peak', 'volcano', 'canyon', 'waterfall', 'glacier', 'cave_system', 'coral_reef', 'ancient_forest',
   'nature_sanctuary', 'island', 'desert',
   'oil_field', 'gas_reserve', 'gold_mine', 'diamond_mine', 'rare_earth', 'lithium_deposit', 'uranium_mine', 'coal_mine',

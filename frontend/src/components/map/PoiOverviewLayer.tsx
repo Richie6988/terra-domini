@@ -26,6 +26,7 @@ export function PoiOverviewLayer({ map, zoom, center }: { map: L.Map | null; zoo
   const reqId = useRef(0)
   const hexCount = useStore(s => Object.keys(s.territories).length)   // re-run when hexes (and their icons) arrive
   const tf = useStore(s => s.tokenFilter)                              // token families chosen in the Layers menu
+  const hiddenCats = useStore(s => s.hiddenCats)                       // categories hidden in the filter panel
   const kinds = (Object.keys(tf) as (keyof typeof tf)[]).filter(k => tf[k]).join(',')
 
   useEffect(() => {
@@ -48,6 +49,7 @@ export function PoiOverviewLayer({ map, zoom, center }: { map: L.Map | null; zoo
         const drawn = useStore.getState().territories as Record<string, any>
         for (const p0 of data.pois || []) {
           if (p0.h3_index && (drawn[p0.h3_index]?.poi_name || drawn[p0.h3_index]?.is_landmark)) continue
+          if (hiddenCats.includes(p0.category)) continue
           let p = p0
           if (p0.h3_index) { try { const [la, lo] = cellToLatLng(p0.h3_index); p = { ...p0, lat: la, lon: lo } } catch { /* keep */ } }
           const pt = map.latLngToContainerPoint([p.lat, p.lon])
@@ -95,7 +97,7 @@ export function PoiOverviewLayer({ map, zoom, center }: { map: L.Map | null; zoo
         }
       })
       .catch(() => {})
-  }, [map, layer, zoom, center[0].toFixed(2), center[1].toFixed(2), hexCount, kinds])
+  }, [map, layer, zoom, center[0].toFixed(2), center[1].toFixed(2), hexCount, kinds, hiddenCats.join(',')])
 
   return null
 }

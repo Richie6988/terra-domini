@@ -22,6 +22,7 @@ import { HexStateLayer } from './HexStateLayer'
 import { iconIdFor, tokenKind } from '../shared/poiIcons'
 import { ExplorationLayer } from './ExplorationLayer'
 import { OwnedTerritoryHub } from '../kingdom/OwnedTerritoryHub'
+import { MapCategoryFilter } from './MapCategoryFilter'
 import { KingdomDetailOverlay } from '../kingdom/KingdomDetailOverlay'
 import { AttackAnimationLayer } from './AttackAnimationLayer'
 import { BuildingsOverlayLayer } from './BuildingsOverlayLayer'
@@ -85,6 +86,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     } catch { /* ignore */ }
   }, [setMapTheme])
   const tokenFilter = useStore(s => s.tokenFilter)
+  const hiddenCats = useStore(s => s.hiddenCats)
   const arOn = useStore(s => s.mapInfo)
   const [poiCatFilter, setPoiCatFilter] = useState<string[]>(['all'])
   const [poiRarFilter, setPoiRarFilter] = useState<string[]>(['all'])
@@ -390,7 +392,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     }
     // Token families hidden in the Layers menu: their free hexes are not drawn, owned ones keep the hex but lose the icon
     const tf = useStore.getState().tokenFilter
-    const shown = (t: any) => !(t.poi_name || t.is_landmark) || tf[tokenKind(t.poi_category)] !== false
+    const hidden = new Set(useStore.getState().hiddenCats)   // category filter panel
+    const shown = (t: any) => !(t.poi_name || t.is_landmark) || (tf[tokenKind(t.poi_category)] !== false && !hidden.has(t.poi_category))
     territories.filter(t => t.owner_id || (((t as any).is_landmark || (t as any).poi_name) && shown(t))).forEach(t => {
       const poly = makeHexPolygon({
         territory: t, playerId: player?.id,
@@ -441,7 +444,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         layer.addLayer(marker)
       }
     })
-  }, [territories, player?.id, tokenFilter])
+  }, [territories, player?.id, tokenFilter, hiddenCats])
 
   // ── Draw H3 grid overlay — visible at mid-zoom only, hidden at max zoom ──
   useEffect(() => {
@@ -532,6 +535,7 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
 
       {/* AR layer over the satellite view: reticle, coordinates, scale, compass */}
       {arOn && <MapARHud map={mapRef.current} zoom={zoom} center={center} />}
+      <MapCategoryFilter />
 
       {/* Map controls — right edge: AR info toggle + zoom */}
       <MapControls arOn={arOn} zoom={zoom} onZoom={z => mapRef.current?.setZoom(z)} />
@@ -682,8 +686,8 @@ function MapARHud({ map, zoom, center }: { map: L.Map | null; zoom: number; cent
   if (!map) return null
   return (
     <div aria-hidden style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 450 }}>
-      {/* coordinates + scale */}
-      <div style={{ position: 'absolute', left: 12, bottom: 'calc(150px + env(safe-area-inset-bottom))', display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-start' }}>
+      {/* biome on top (owner 2026-10-20), coordinates + scale around the radar (bottom right) */}
+      <div className="hx-ar-biome">
         {where?.region && (
           <span style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px 6px 7px', borderRadius: 14, maxWidth: 'min(320px, 70vw)',
             background: 'rgba(11,22,38,0.82)', border: '2px solid rgba(253,230,138,0.6)', color: '#fff', textShadow: '0 1px 2px #000' }}>
@@ -696,6 +700,8 @@ function MapARHud({ map, zoom, center }: { map: L.Map | null; zoom: number; cent
             </span>
           </span>
         )}
+      </div>
+      <div className="hx-ar-coords">
         <span style={{ padding: '4px 10px', borderRadius: 999, background: 'rgba(11,22,38,0.82)', border: '2px solid #fde68a', color: '#fde68a',
           font: "13px 'Lilita One', sans-serif", letterSpacing: 0.5, textShadow: '0 1px 2px #000' }}>
           {fmt(lat, 'N', 'S')} · {fmt(lon, 'E', 'W')}

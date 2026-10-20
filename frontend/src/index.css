@@ -1211,3 +1211,27 @@ html {
 @keyframes hx-safari-hex { 0%, 100% { fill-opacity: 0.35 } 50% { fill-opacity: 0.65 } }
 .hx-safari-hex { animation: hx-safari-hex 1.2s ease-in-out infinite }
 @media (prefers-reduced-motion: reduce) { .hx-safari-hex { animation: none } }
+
+/* ═══ Map category filter (left column: below HARVEST, above the saved places) ═══ */
+.hx-catfilter { position: fixed; left: 16px; top: 228px; z-index: 900; }
+.hx-catfilter__btn { display: flex; align-items: center; gap: 7px; height: 38px; padding: 0 12px; border-radius: 12px; cursor: pointer;
+  background: rgba(11,22,38,0.88); border: 1px solid rgba(255,255,255,0.18); color: #e2e8f0;
+  font: 13px 'Lilita One', sans-serif; letter-spacing: 1px; box-shadow: 0 3px 0 rgba(0,0,0,0.45); }
+.hx-catfilter__count { min-width: 20px; height: 20px; border-radius: 999px; background: #fde68a; color: #0b1626; font-size: 11px; display: grid; place-items: center; padding: 0 5px; }
+.hx-catfilter__panel { position: absolute; top: 46px; left: 0; width: min(380px, calc(100vw - 32px)); max-height: 62vh; overflow-y: auto; padding: 12px; }
+.hx-catfilter__cat { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 5px 2px; border-radius: 10px; cursor: pointer;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); color: var(--hx-text-2);
+  font: 700 9px var(--font-body); text-transform: capitalize; line-height: 1.1; text-align: center; }
+.hx-catfilter__cat span { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (max-width: 640px) {
+  .hx-catfilter { top: auto; left: 10px; bottom: 160px; }
+  .hx-catfilter__panel { top: auto; bottom: 46px; max-height: 56vh; }
+}
+
+/* Map AR info (owner 2026-10-20): biome card on top, coordinates + scale beside the Safari radar */
+.hx-ar-biome { position: absolute; top: 66px; left: 50%; transform: translateX(-50%); display: flex; justify-content: center; }
+.hx-ar-coords { position: absolute; right: 104px; bottom: calc(116px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
+@media (max-width: 640px) {
+  .hx-ar-biome { top: 156px; }
+  .hx-ar-coords { right: 12px; bottom: calc(194px + env(safe-area-inset-bottom)); }   /* phones: just above the radar */
+}
