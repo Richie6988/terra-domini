@@ -29,6 +29,8 @@ For each row:
    But a real, famous place whose only fault is a wrong category label (e.g. Woodstock filed as world_heritage) is
    KEPT (verdict corrected, note the label in corrections): reject only places that do not exist, cannot be located,
    or duplicate another entry.
+   A famous range, region, archipelago or sea area is kept as itself (coordinates of its article), never swapped for a
+   lesser sub-site (Drakensberg stays Drakensberg, Andaman Islands stay the Andaman Islands).
 2. Check the facts: exact English name (as on Wikipedia), coordinates (Wikipedia's when they exist), ISO 3166-1
    alpha-2 country code ("" for open sea, never anything else). Fix what is wrong (verdict "corrected", list each fix in corrections) or confirm ("validated").
 2b. Category: the token category must fit the place, rationally (owner 2026-10-20). `POI --categories` lists them.
