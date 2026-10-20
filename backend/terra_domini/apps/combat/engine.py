@@ -451,8 +451,10 @@ class CombatEngine:
             territory.previous_owner = prev_owner
             territory.defense_points = int(territory.max_defense_points * 0.3)  # Captured at 30% defense
             fields = ['owner', 'captured_at', 'previous_owner', 'defense_points']
-            if territory.poi_name or territory.is_landmark:
-                # Conquering a place card issues a new edition: more copies in circulation → each edition is worth less
+            from terra_domini.apps.events.unified_poi import UnifiedPOI
+            if UnifiedPOI.objects.filter(h3_index=territory.h3_index, is_active=True).exists():
+                # Conquering a hex with a token mints its next edition (v2, v3…) into the winner's album; the loser keeps
+                # their card but it stops paying (owner 2026-10-20)
                 territory.nft_version = (territory.nft_version or 1) + 1
                 fields.append('nft_version')
             territory.save(update_fields=fields)

@@ -266,13 +266,18 @@ def codex_cards(request):
     db = hexod_db.load()
     player = request.user
     owned = set(Territory.objects.filter(owner=player).values_list('h3_index', flat=True))
+    # Album = every token edition the player ever took (CollectedToken); only the hexes held now produce (owner 2026-10-20)
+    from terra_domini.apps.territories.models import CollectedToken
+    coll = {}
+    for h, ed in CollectedToken.objects.filter(player=player).values_list('h3_index', 'edition'):
+        coll[h] = max(coll.get(h, 0), ed)
     rare = []
     on_map = [p for p in db.get('pois', []) if p.get('on_map')]
     for no, p in enumerate(on_map, 1):   # album number = position in the master DB
         mine = p.get('h3_r8') in owned
         if p.get('kind') in ('species', 'resource'):     # their own albums (creatures, resources)
             continue
-        if p['rarity'] not in ('rare', 'epic', 'legendary', 'mythic') and not mine:
+        if p['rarity'] not in ('rare', 'epic', 'legendary', 'mythic') and not mine and p.get('h3_r8') not in coll:
             continue
         rare.append({
             'uid': p['uid'], 'name': p['name'], 'rarity': p['rarity'], 'category': p.get('codex_category') or '',
@@ -353,6 +358,12 @@ def codex_cards(request):
         'serial': e.serial, 'max_supply': e.max_supply, 'price': e.price_hex,     # x/10 edition, on sale if price
     } for n, e in enumerate(EventCard.objects.filter(player=player).order_by('event_date'), 1)]
 
+    for lst in (rare, res, history):     # owned = in the album, producing = hex held now, edition = the player's copy
+        for c in lst:
+            held = c['owned']
+            c['producing'] = held
+            c['owned'] = held or c.get('h3_index') in coll
+            c['edition'] = coll.get(c.get('h3_index')) or (1 if held else None)
     return Response({
         'rare': rare, 'biomes': biomes, 'resources': res, 'creatures': creatures, 'history': history, 'events': events,
         'creature_families': [{'id': k, 'total': v, 'owned': by_cat.get(k, 0)} for k, v in totals.most_common()],

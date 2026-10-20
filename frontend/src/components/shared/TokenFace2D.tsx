@@ -45,6 +45,7 @@ export interface TokenFace2DProps {
   country?: string
   terrain?: string
   tokenNo?: string
+  series?: number          // the player's edition (#1, #2 after a conquest…)
   pictos?: string[]
 }
 
@@ -67,7 +68,7 @@ export function TokenFace2D({
   onClick,
   style,
   clipToHex = true,
-  rarity, hexPerDay, region, country, terrain, tokenNo, pictos,
+  rarity, hexPerDay, region, country, terrain, tokenNo, series, pictos,
 }: TokenFace2DProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
@@ -97,13 +98,13 @@ export function TokenFace2D({
       iconSvg,
       imageSrc: imageSrc || '',   // no random stock photo: the face draws a designed plate until the real picture exists
       clipToHex,
-      rarity, hexPerDay, region, country, terrain, tokenNo,
+      rarity, hexPerDay, region, country, terrain, tokenNo, series,
       pictos: pictos || (iconSvg ? [iconSvg] : []),
     })
 
     return cleanup
   }, [tier, category, catId, catColor, biome, tokenName, description, edition, serial, maxSupply, owner, date, iconId, imageSrc, size, clipToHex,
-      rarity, hexPerDay, region, country, terrain, tokenNo, pictos])
+      rarity, hexPerDay, region, country, terrain, tokenNo, series, pictos])
 
   return (
     <canvas

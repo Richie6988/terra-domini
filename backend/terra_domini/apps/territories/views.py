@@ -1082,7 +1082,12 @@ class TerritoryViewSet(viewsets.ModelViewSet):
                 territory.owner = attacker
                 territory.captured_at = timezone.now()
                 territory.defense_points = float(territory.max_defense_points or 100) * 0.25
-                territory.save(update_fields=['owner', 'captured_at', 'defense_points'])
+                fields = ['owner', 'captured_at', 'defense_points']
+                from terra_domini.apps.events.unified_poi import UnifiedPOI
+                if UnifiedPOI.objects.filter(h3_index=territory.h3_index, is_active=True).exists():
+                    territory.nft_version = (territory.nft_version or 1) + 1      # conquest mints the next edition
+                    fields.append('nft_version')
+                territory.save(update_fields=fields)
                 P.objects.filter(id=attacker.id).update(
                     territories_captured=F('territories_captured') + 1,
                     battles_won=F('battles_won') + 1,

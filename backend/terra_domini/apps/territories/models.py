@@ -722,3 +722,40 @@ class SafariCapture(models.Model):
     class Meta:
         db_table = 'safari_captures'
         ordering = ['-captured_at']
+
+
+class CollectedToken(models.Model):
+    """A token card a player holds in their codex for good (owner 2026-10-20): taking a hex with a token mints that
+    edition into the taker's album (conquest → the next edition, v2, v3…). Lose the hex and the card stays in the
+    album but pays nothing: income only comes from hexes you hold (economy.balance.territory_rates)."""
+    player = models.ForeignKey('accounts.Player', on_delete=models.CASCADE, related_name='collected_tokens')
+    h3_index = models.CharField(max_length=20, db_index=True)
+    edition = models.PositiveIntegerField(default=1)
+    name = models.CharField(max_length=300, blank=True, default='')
+    acquired_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'collected_tokens'
+        unique_together = [('player', 'h3_index', 'edition')]
+        ordering = ['-acquired_at']
+
+
+def _remember_owner(sender, instance, **kwargs):
+    instance._owner_at_load = instance.__dict__.get('owner_id')
+
+
+def _collect_on_take(sender, instance, created, **kwargs):
+    """New holder of a hex with a token → that edition goes into their album."""
+    owner = instance.__dict__.get('owner_id')
+    if not owner or owner == getattr(instance, '_owner_at_load', None):
+        return
+    instance._owner_at_load = owner
+    from terra_domini.apps.events.unified_poi import UnifiedPOI
+    names = list(UnifiedPOI.objects.filter(h3_index=instance.h3_index, is_active=True).values_list('name', flat=True)[:1])
+    if names:
+        CollectedToken.objects.get_or_create(player_id=owner, h3_index=instance.h3_index, edition=instance.nft_version or 1,
+                                             defaults={'name': names[0][:300]})
+
+
+models.signals.post_init.connect(_remember_owner, sender=Territory)
+models.signals.post_save.connect(_collect_on_take, sender=Territory)

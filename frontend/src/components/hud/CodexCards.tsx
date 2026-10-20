@@ -88,13 +88,18 @@ function faceOf(family: CardFamily, c: any) {
 
 /** One album slot: the token (greyed + locked while not collected) and its number. */
 function AlbumToken({ family, c, onOpen }: { family: CardFamily; c: any; onOpen: () => void }) {
-  const f = faceOf(family, c)
+  const f = { ...faceOf(family, c), ...(c.edition ? { series: c.edition } : {}) }
   return (
     <button onClick={onOpen} title={c.name} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', position: 'relative',
       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
       <TokenFace2D {...f} tier={RARITY_TIER[f.rarity] || 'SILVER'} size={132}
         style={c.owned ? { filter: 'drop-shadow(0 6px 10px rgba(0,0,0,0.55))' } : { filter: 'grayscale(1) brightness(0.55)', opacity: 0.8 }} />
       {!c.owned && <Lock size={18} style={{ position: 'absolute', top: 56, color: '#fff', filter: 'drop-shadow(0 1px 2px #000)' }} />}
+      {/* in the album but the hex was lost: the card stays, it pays nothing (owner 2026-10-20) */}
+      {c.owned && c.producing === false && (
+        <span style={{ position: 'absolute', top: 54, padding: '2px 7px', borderRadius: 999, background: 'rgba(6,12,24,0.88)',
+          border: '1px solid #94a3b8', color: '#cbd5e1', fontSize: 9, fontWeight: 900, letterSpacing: 1 }}>
+          #{c.edition || 1} · NOT PRODUCING</span>)}
       <span style={{ fontSize: 10, fontWeight: 800, color: c.owned ? 'var(--hx-text-1)' : 'var(--hx-text-3)', maxWidth: 132,
         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>#{String(c.no ?? '').padStart(3, '0')} {c.name}</span>
     </button>
@@ -207,7 +212,7 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
           </p>}
           {family === 'resources' && <p style={{ fontSize: 13, margin: '8px 0' }}>
             {rarityLabel(open.rarity)} {open.resource} card · {(open.hex_per_day || 0).toLocaleString()} HEX a day. {open.description}
-            {open.owned ? ' It is yours.' : ' Claim its hex (or take it from its holder) to own it.'}
+            {open.producing ? ' It is yours and it pays.' : open.owned ? ` Your card #${open.edition || 1} stays in your album, but its hex was taken: it pays nothing until you take it back.` : ' Claim its hex (or take it from its holder) to own it.'}
           </p>}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {(open.lat !== undefined || open.center) && (
