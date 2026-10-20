@@ -1,6 +1,7 @@
 /**
  * MapCategoryFilter — left column button (below HARVEST, above the saved places) opening the token category filter
- * (owner 2026-10-20): every category with its icon (poiIcons cat_ set), tap to hide / show it on the map.
+ * (owner 2026-10-20): every category with its icon (poiIcons cat_ set), tap to hide / show it on the map; it replaced
+ * the places / resources / species bar. MAP INFO toggles the AR layer (biome, coordinates, scale, compass).
  * store.hiddenCats is read by GameMap (hex icons) and PoiOverviewLayer (zoomed-out markers).
  */
 import { useState } from 'react'
@@ -25,6 +26,8 @@ export function MapCategoryFilter() {
   const [open, setOpen] = useState(false)
   const hidden = useStore(s => s.hiddenCats)
   const setHidden = useStore(s => s.setHiddenCats)
+  const mapInfo = useStore(s => s.mapInfo)
+  const toggleMapInfo = useStore(s => s.toggleMapInfo)
   const toggle = (c: string) => setHidden(hidden.includes(c) ? hidden.filter(x => x !== c) : [...hidden, c])
   const setFamily = (cats: string[], show: boolean) =>
     setHidden(show ? hidden.filter(x => !cats.includes(x)) : [...new Set([...hidden, ...cats])])
@@ -41,6 +44,7 @@ export function MapCategoryFilter() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
             <span className="hx-section-title" style={{ margin: 0 }}>TOKEN CATEGORIES</span>
             <span style={{ display: 'flex', gap: 6 }}>
+              <button className="hx-chip" onClick={toggleMapInfo} style={mapInfo ? { color: '#fde68a', borderColor: '#fde68a' } : undefined}>MAP INFO</button>
               <button className="hx-chip" onClick={() => setHidden([])}>ALL</button>
               <button className="hx-chip" onClick={() => setHidden([...TOKEN_CATEGORIES])}>NONE</button>
             </span>

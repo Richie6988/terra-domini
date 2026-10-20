@@ -9,7 +9,6 @@ import { useStore } from '../../store'
 import { api } from '../../services/api'
 import { NotificationBell } from './SessionLoop'
 import { IconSVG } from './iconBank'
-import { MapLayersBar } from '../map/MapLayersBar'
 import { emojiToIcon } from './emojiIcons'
 
 const AVATARS_SET = new Set(['eagle','dragon','lion','wolf','fox','bear','bat','shark','snake','scorpion','octopus','squid','crab','bee','butterfly','horse','deer','elephant','rhino','bison','crocodile','trex','whale','bug'])
@@ -143,7 +142,6 @@ export function HexodTopHUD() {
       </div>
 
       {/* Map layers — top centre */}
-      <MapLayersBar />
 
       {/* Right — notifications + HEX Balance */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, pointerEvents: 'auto' }}>

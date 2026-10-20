@@ -25,9 +25,8 @@ export function PoiOverviewLayer({ map, zoom, center }: { map: L.Map | null; zoo
   const layer = useLeafletLayer(map)
   const reqId = useRef(0)
   const hexCount = useStore(s => Object.keys(s.territories).length)   // re-run when hexes (and their icons) arrive
-  const tf = useStore(s => s.tokenFilter)                              // token families chosen in the Layers menu
   const hiddenCats = useStore(s => s.hiddenCats)                       // categories hidden in the filter panel
-  const kinds = (Object.keys(tf) as (keyof typeof tf)[]).filter(k => tf[k]).join(',')
+  const kinds = 'places,resources,species'    // every family: the FILTER panel hides categories (families bar removed 2026-10-20)
 
   useEffect(() => {
     if (!map || !layer) return

@@ -1229,7 +1229,7 @@ html {
 }
 
 /* Map AR info (owner 2026-10-20): biome card on top, coordinates + scale beside the Safari radar */
-.hx-ar-biome { position: absolute; top: 66px; left: 50%; transform: translateX(-50%); display: flex; justify-content: center; }
+.hx-ar-biome { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); display: flex; justify-content: center; }
 .hx-ar-coords { position: absolute; right: 104px; bottom: calc(116px + env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 6px; align-items: flex-end; }
 @media (max-width: 640px) {
   .hx-ar-biome { top: 156px; }

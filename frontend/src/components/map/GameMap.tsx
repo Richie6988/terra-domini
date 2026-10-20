@@ -19,7 +19,7 @@ import { SafariZoneLayer } from './SafariZoneLayer'
 import { SafariReveal } from '../shared/SafariReveal'
 import { CoinPickupLayer } from './CoinPickupLayer'
 import { HexStateLayer } from './HexStateLayer'
-import { iconIdFor, tokenKind } from '../shared/poiIcons'
+import { iconIdFor } from '../shared/poiIcons'
 import { ExplorationLayer } from './ExplorationLayer'
 import { OwnedTerritoryHub } from '../kingdom/OwnedTerritoryHub'
 import { MapCategoryFilter } from './MapCategoryFilter'
@@ -391,9 +391,8 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       oil:'#1e293b', mine:'#78716c', gas:'#94a3b8', uranium:'#facc15',
     }
     // Token families hidden in the Layers menu: their free hexes are not drawn, owned ones keep the hex but lose the icon
-    const tf = useStore.getState().tokenFilter
     const hidden = new Set(useStore.getState().hiddenCats)   // category filter panel
-    const shown = (t: any) => !(t.poi_name || t.is_landmark) || (tf[tokenKind(t.poi_category)] !== false && !hidden.has(t.poi_category))
+    const shown = (t: any) => !(t.poi_name || t.is_landmark) || !hidden.has(t.poi_category)   // FILTER panel only (families bar removed)
     territories.filter(t => t.owner_id || (((t as any).is_landmark || (t as any).poi_name) && shown(t))).forEach(t => {
       const poly = makeHexPolygon({
         territory: t, playerId: player?.id,
@@ -634,7 +633,7 @@ function MapBtn({ onClick, children }: { onClick: () => void; children: React.Re
     </button>
   )
 }
-/** Right-edge stack: compass (map info on) + zoom. Token families and map info are in the top bar (MapLayersBar). */
+/** Right-edge stack: compass (map info on) + zoom. Token categories and map info are in the FILTER panel (MapCategoryFilter). */
 function MapControls({ arOn, zoom, onZoom }: { arOn: boolean; zoom: number; onZoom: (z: number) => void }) {
   const glass: React.CSSProperties = {
     background: 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(10,22,40,0.95))',
