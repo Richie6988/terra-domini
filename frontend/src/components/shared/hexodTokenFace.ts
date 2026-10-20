@@ -242,7 +242,7 @@ export function drawSVGIcon(
 // opts   : enableFilmGrain (true for 3D animated viewer, false for static 2D)
 // ══════════════════════════════════════════════════════════════════
 export const RARITY_COLORS: Record<string, string> = {
-  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24', epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
+  common: '#cbd5e1', uncommon: '#fbbf24', rare: '#10b981', epic: '#67e8f9', legendary: '#67e8f9', mythic: '#67e8f9',
 }
 
 /** Text with a dark outline: readable on any background (photo, holo, metal). */
@@ -318,7 +318,7 @@ const SPECIES_LABEL: Record<string, string> = {
   species_insect: 'INSECT', species_vegetal: 'PLANT', species_mushroom: 'FUNGUS', species_microorganism: 'MICROBE',
 }
 const nice = (v?: string) => { const k = (v || '').toLowerCase().replace(/\s+/g, '_'); return SPECIES_LABEL[k] || (v || '').replace(/_/g, ' ').trim().toUpperCase() }
-const RARITY_NAME: Record<string, string> = { common: 'CURIOSITY', uncommon: 'WONDER', rare: 'RARE', epic: 'EPIC', legendary: 'LEGENDARY', mythic: 'MYTHIC' }
+const RARITY_NAME: Record<string, string> = { common: 'SILVER', uncommon: 'GOLD', rare: 'EMERALD', epic: 'DIAMOND', legendary: 'DIAMOND', mythic: 'DIAMOND' }
 
 const MONTHS = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
 

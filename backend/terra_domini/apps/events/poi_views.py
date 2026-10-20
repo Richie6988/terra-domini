@@ -208,10 +208,10 @@ class UnifiedPOIViewSet(viewsets.GenericViewSet):
 
 
 # ── Map overview: points of interest readable from far away (owner 2026-10-18) ──
-MAP_ZOOM_RARITIES = [   # (min zoom, rarities shown) — the further out, the rarer
-    (3, ('mythic', 'legendary')),
-    (5, ('mythic', 'legendary', 'epic')),
-    (7, ('mythic', 'legendary', 'epic', 'rare')),
+MAP_ZOOM_RARITIES = [   # (min zoom, rarities shown) — the further out, the rarer (Diamond · Emerald · Gold · Silver)
+    (3, ('mythic', 'legendary', 'epic')),
+    (5, ('mythic', 'legendary', 'epic', 'rare')),
+    (7, ('mythic', 'legendary', 'epic', 'rare', 'uncommon')),
     (9, ('mythic', 'legendary', 'epic', 'rare', 'uncommon', 'common')),
 ]
 

@@ -18,7 +18,7 @@ import { IconSVG } from '../shared/iconBank'
 
 const ACC = '#0CC5FF'
 /** Dark-theme rarity colours (claude.md §9) */
-const RAR: Record<string, string> = { common:'#cd7f32', uncommon:'#cbd5e1', rare:'#fbbf24', epic:'#10b981', legendary:'#67e8f9', mythic:'#ec4899' }
+const RAR: Record<string, string> = { common:'#cbd5e1', uncommon:'#fbbf24', rare:'#10b981', epic:'#67e8f9', legendary:'#67e8f9', mythic:'#67e8f9' }
 const RES_NAME: Record<string, [string, string]> = {
   petrole: ['Oil', 'res_petrole'], fer: ['Iron', 'res_fer'], donnees: ['Data', 'res_donnees'], influence: ['Influence', 'res_influence'],
   uranium: ['Uranium', 'res_uranium'], terrares: ['Rare earths', 'res_terres_rares'], terres_rares: ['Rare earths', 'res_terres_rares'],

@@ -63,8 +63,8 @@ interface Props {
 }
 
 const RARITY_COLORS: Record<string, string> = {
-  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24',
-  epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
+  common: '#cbd5e1', uncommon: '#fbbf24', rare: '#10b981',
+  epic: '#67e8f9', legendary: '#67e8f9', mythic: '#67e8f9',
 }
 
 const TIER_COLOR: Record<number, string> = {
@@ -132,7 +132,7 @@ function GalleryToken({ token, onOpen }: { token: TokenInfo; onOpen: () => void 
   return (
     <button onClick={onOpen} aria-label={`Inspect ${token.name || 'token'} in 3D`} title={token.name}
       style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, color: 'inherit' }}>
-      <TokenFace2D tier={RARITY_TIER[rarity] || 'BRONZE'} rarity={rarity} size={132}
+      <TokenFace2D tier={RARITY_TIER[rarity] || 'SILVER'} rarity={rarity} size={132}
         tokenName={token.name} category={(d?.poi_category || token.poi_category || d?.terrain || token.biome || 'TERRITORY').replace(/_/g, ' ')}
         iconId={iconId} imageSrc={d?.image_url || d?.satellite_url || ''} pictos={pictos}
         hexPerDay={d?.hex_per_day} terrain={d?.terrain} country={d?.country_code} tokenNo={d?.token_id ? String(d.token_id) : ''}
@@ -618,11 +618,7 @@ export function OwnedTerritoryHub({ kingdom, initialTab = 'gallery', onClose }: 
           category={(token3D.poi_category || token3D.biome || 'TERRITORY').toUpperCase()}
           catColor={RARITY_COLORS[(token3D.rarity || 'common').toLowerCase()] || '#94a3b8'}
           iconId={token3D.poi_icon || token3D.poi_category?.toLowerCase() || token3D.biome || 'city'}
-          tier={
-            (token3D.rarity || '').toLowerCase() === 'mythic' ? 'EMERALD' :
-            (token3D.rarity || '').toLowerCase() === 'legendary' ? 'GOLD' :
-            (token3D.rarity || '').toLowerCase() === 'epic' ? 'SILVER' : 'BRONZE'
-          }
+          tier={RARITY_TIER[(token3D.rarity || '').toLowerCase()] || 'SILVER'}
           serial={1}
           maxSupply={10000}
           edition="GENESIS"

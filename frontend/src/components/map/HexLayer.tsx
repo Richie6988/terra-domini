@@ -19,8 +19,8 @@ import { hexPerDay } from '../../services/balance'
 const ENEMY_COLOR = '#FF4D5E'
 
 const RARITY_COLOR: Record<string, string> = {
-  common:'#cd7f32', uncommon:'#cbd5e1', rare:'#fbbf24',
-  epic:'#10b981', legendary:'#67e8f9', mythic:'#ec4899',
+  common:'#cbd5e1', uncommon:'#fbbf24', rare:'#10b981',
+  epic:'#67e8f9', legendary:'#67e8f9', mythic:'#67e8f9',
 }
 
 /** Compute hex boundary from H3 index (client-side fallback) */

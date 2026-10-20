@@ -9,7 +9,7 @@ import { TokenFace2D } from './TokenFace2D'
 import type { TierKey } from './hexodTokenFace'
 
 const RARITY_TO_TIER: Record<string, TierKey> = {
-  common: 'BRONZE', uncommon: 'SILVER', rare: 'GOLD', epic: 'EMERALD', legendary: 'DIAMOND', mythic: 'DIAMOND',
+  common: 'SILVER', uncommon: 'GOLD', rare: 'EMERALD', epic: 'DIAMOND', legendary: 'DIAMOND', mythic: 'DIAMOND',
 }
 
 interface Props {
@@ -41,7 +41,7 @@ export function TokenHexPreview({
 }: Props) {
   return (
     <TokenFace2D
-      tier={RARITY_TO_TIER[(rarity || 'common').toLowerCase()] || 'BRONZE'}
+      tier={RARITY_TO_TIER[(rarity || 'common').toLowerCase()] || 'SILVER'}
       category={(iconId || 'TERRITORY').toUpperCase().replace(/_/g, ' ')}
       catColor={catColor}
       biome={(biome || iconId || 'RURAL').toUpperCase().replace(/_/g, ' ')}

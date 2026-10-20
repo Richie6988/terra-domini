@@ -14,9 +14,11 @@ from decimal import Decimal
 
 # ── Production ────────────────────────────────────────────────────────────────
 # Rarity pays much more (owner 2026-10-18): yield grows faster than price (RARITY_PRICE_MULT) → rare cards are worth chasing
+# 4 rarities (owner 2026-10-20): Silver (common) · Gold (uncommon) · Emerald (rare) · Diamond (epic);
+# legendary / mythic are old keys, paid as Diamond
 HEX_PER_DAY = {
-    'common': 60, 'uncommon': 130, 'rare': 360,
-    'epic': 900, 'legendary': 2400, 'mythic': 6000,
+    'common': 60, 'uncommon': 150, 'rare': 450,
+    'epic': 1500, 'legendary': 1500, 'mythic': 1500,
 }
 SHINY_MULT = 1.5
 KINGDOM_MULT = 1.15          # territory connected to a kingdom (cluster ≥ 2)

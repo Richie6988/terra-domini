@@ -19,7 +19,7 @@ export const TERRAIN_ICON: Record<string, string> = { lake: 'water_drop', ice: '
 
 // Game rarity → metal of the token (rare is no longer bronze like a common)
 export const RARITY_TIER: Record<string, TierKey> = {
-  common: 'BRONZE', uncommon: 'SILVER', rare: 'GOLD', epic: 'EMERALD', legendary: 'DIAMOND', mythic: 'DIAMOND',
+  common: 'SILVER', uncommon: 'GOLD', rare: 'EMERALD', epic: 'DIAMOND', legendary: 'DIAMOND', mythic: 'DIAMOND',
 }
 const label = (v?: string, d = '') => (v || d).replace(/_/g, ' ').toUpperCase()
 
@@ -64,7 +64,7 @@ export function Token3DViewer(props: Token3DProps) {
     description, imageSrc, owner, date,
     infoPanel, h3Index, rarityKey, face,
   } = props
-  const tierKey: TierKey = tier || RARITY_TIER[rarityKey || ''] || 'BRONZE'
+  const tierKey: TierKey = tier || RARITY_TIER[rarityKey || ''] || 'SILVER'
 
   const containerRef = useRef<HTMLDivElement>(null)
   // Height of the info sheet: the 3D stage stops above it so the sheet never hides the token

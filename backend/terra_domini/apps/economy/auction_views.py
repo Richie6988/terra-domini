@@ -26,7 +26,7 @@ from terra_domini.apps.economy.models import AuctionBid, DailyAuction
 PER_DAY = 10
 MIN_RAISE = 0.05
 SNIPE_WINDOW = timedelta(minutes=2)
-RARE_PLUS = ('rare', 'epic', 'legendary', 'mythic')
+RARE_PLUS = ('rare', 'epic', 'legendary', 'mythic')   # Emerald + Diamond (legendary / mythic = old keys)
 
 
 def create_daily(n=PER_DAY) -> int:

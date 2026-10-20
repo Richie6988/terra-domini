@@ -18,9 +18,9 @@ import type { TierKey } from '../shared/hexodTokenFace'
 import { playSound } from '../../hooks/useSound'
 import { RARITY_LABEL } from '../../services/balance'
 
-const RC: Record<string,string> = { common:'#cd7f32', uncommon:'#cbd5e1', rare:'#fbbf24', epic:'#10b981', legendary:'#67e8f9', mythic:'#ec4899' }
+const RC: Record<string,string> = { common:'#cbd5e1', uncommon:'#fbbf24', rare:'#10b981', epic:'#67e8f9', legendary:'#67e8f9', mythic:'#67e8f9' }
 const RL: Record<string,string> = RARITY_LABEL
-const RT: Record<string, TierKey> = { common:'BRONZE', uncommon:'SILVER', rare:'GOLD', epic:'EMERALD', legendary:'DIAMOND', mythic:'DIAMOND' }
+const RT: Record<string, TierKey> = { common: 'SILVER', uncommon: 'GOLD', rare: 'EMERALD', epic: 'DIAMOND', legendary: 'DIAMOND', mythic: 'DIAMOND' }
 const RK: Record<string,number> = { common:0, uncommon:1, rare:2, epic:3, legendary:4, mythic:5 }
 
 // A booster card (economy.views._open_booster_pack): a shop boost, a HEX amount, or a POI (rarer)

@@ -56,6 +56,13 @@ class Command(BaseCommand):
         pois, n_valid, n_rej = poi_validations.overlay([dict(p) for p in pois])
         if n_valid or n_rej:
             self.stdout.write(f'POI agent ledger: {n_valid} validated rows applied, {n_rej} rejected rows left out')
+        # 4 rarities, 50 / 30 / 15 / 5 % per kind of token: ranked by the checked rarity, then the master DB score
+        species = [p for p in pois if p.get('creature_uid')]
+        hexod_db.apply_quotas([p for p in pois if not p.get('creature_uid')], family=lambda p: p.get('kind') or '',
+                              score=lambda p: p.get('score') or 0)
+        for p in species:                 # a species token has its creature's rarity (creatures are cut by the same shares)
+            c = hexod_db.creature(p['creature_uid'])
+            p['rarity'] = (c or {}).get('rarity') or 'common'
 
         # One POI per hex on the map — keep the rarest (admin-edited tokens keep their own territory)
         admin_uids = set(UnifiedPOI.objects.filter(source='admin').exclude(db_uid='').values_list('db_uid', flat=True))

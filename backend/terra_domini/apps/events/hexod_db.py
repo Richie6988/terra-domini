@@ -20,8 +20,29 @@ _env_db = os.environ.get('HEXOD_DB_JSON')
 DB_PATH = Path(_env_db) if _env_db and Path(_env_db).exists() else REPO_DB
 
 # Safari spawn odds by rarity and HEX reward on capture
-SPAWN_WEIGHTS = {'common': 55, 'uncommon': 25, 'rare': 13, 'epic': 6, 'legendary': 1}
+SPAWN_WEIGHTS = {'common': 50, 'uncommon': 30, 'rare': 15, 'epic': 5}
 CAPTURE_REWARD = {'common': 50, 'uncommon': 100, 'rare': 200, 'epic': 450, 'legendary': 1000}
+
+
+# 4 rarities only (owner 2026-10-20): Silver 50 % · Gold 30 % · Emerald 15 % · Diamond 5 % (keys common / uncommon / rare
+# / epic). Each family is ranked (best rarity first, then score) and cut by these shares; legendary / mythic fold into epic.
+RARITY_QUOTAS = (('epic', 0.05), ('rare', 0.20), ('uncommon', 0.50), ('common', 1.0))
+RANK = {'common': 0, 'uncommon': 1, 'rare': 2, 'epic': 3, 'legendary': 4, 'mythic': 5}
+
+
+def apply_quotas(rows, family, score=lambda r: 0):
+    """Rarity of every row from its rank inside its family (in place)."""
+    groups = {}
+    for i, r in enumerate(rows):
+        groups.setdefault(family(r), []).append((i, r))
+    for items in groups.values():
+        ranked = sorted(items, key=lambda x: (-RANK.get(x[1].get('rarity') or 'common', 0), -(score(x[1]) or 0), x[0]))
+        n, i = len(ranked), 0
+        for rarity, cum in RARITY_QUOTAS:
+            stop = n if rarity == 'common' else max(i, min(n, round(n * cum)))
+            for _, r in ranked[i:stop]:
+                r['rarity'] = rarity
+            i = stop
 
 
 TEXT_FIELDS = ('description', 'title', 'fun_fact_1', 'fun_fact_2', 'fun_fact_3', 'rare_fact')
@@ -48,6 +69,7 @@ def load() -> dict:
             for f in TEXT_FIELDS:
                 if isinstance(row.get(f), str):
                     row[f] = clean_text(row[f])
+    apply_quotas(db.get('creatures', []), family=lambda c: c.get('codex_category') or '')
     return db
 
 

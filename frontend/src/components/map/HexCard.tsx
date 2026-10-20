@@ -32,12 +32,12 @@ const RARITY: Record<string, {
   borderStyle: 'solid'|'dashed'|'double'
   serieMax: number  // max per rarity for serie #X/MAX display
 }> = {
-  common:   { c:'#cd7f32', bg:'#0d0f18', accent:'#f3c69a', label:'Bronze',    grade:'F',  metalness:0.1, roughness:0.9, foil:'none',        glow:0,   scanlines:false, particles:false, borderStyle:'solid',  serieMax:10000 },
-  uncommon: { c:'#cbd5e1', bg:'#04100a', accent:'#f1f5f9', label:'Silver',  grade:'C',  metalness:0.3, roughness:0.7, foil:'subtle',      glow:4,   scanlines:false, particles:false, borderStyle:'solid',  serieMax:5000  },
-  rare:     { c:'#fbbf24', bg:'#030a1a', accent:'#fde68a', label:'Gold',      grade:'B',  metalness:0.5, roughness:0.5, foil:'shimmer',     glow:8,   scanlines:true,  particles:false, borderStyle:'solid',  serieMax:1000  },
-  epic:     { c:'#10b981', bg:'#07030f', accent:'#6ee7b7', label:'Emerald',      grade:'A',  metalness:0.7, roughness:0.3, foil:'holographic', glow:14,  scanlines:true,  particles:false, borderStyle:'double', serieMax:250   },
+  common:   { c:'#cbd5e1', bg:'#0d0f18', accent:'#f1f5f9', label:'Silver',    grade:'F',  metalness:0.1, roughness:0.9, foil:'none',        glow:0,   scanlines:false, particles:false, borderStyle:'solid',  serieMax:10000 },
+  uncommon: { c:'#fbbf24', bg:'#04100a', accent:'#fde68a', label:'Gold',  grade:'C',  metalness:0.3, roughness:0.7, foil:'subtle',      glow:4,   scanlines:false, particles:false, borderStyle:'solid',  serieMax:5000  },
+  rare:     { c:'#10b981', bg:'#030a1a', accent:'#6ee7b7', label:'Emerald',      grade:'B',  metalness:0.5, roughness:0.5, foil:'shimmer',     glow:8,   scanlines:true,  particles:false, borderStyle:'solid',  serieMax:1000  },
+  epic:     { c:'#67e8f9', bg:'#07030f', accent:'#cffafe', label:'Diamond',      grade:'A',  metalness:0.7, roughness:0.3, foil:'holographic', glow:14,  scanlines:true,  particles:false, borderStyle:'double', serieMax:250   },
   legendary:{ c:'#67e8f9', bg:'#0f0700', accent:'#cffafe', label:'Diamond', grade:'S',  metalness:0.9, roughness:0.1, foil:'rainbow',     glow:22,  scanlines:true,  particles:true,  borderStyle:'double', serieMax:50    },
-  mythic:   { c:'#ec4899', bg:'#0f0008', accent:'#f9a8d4', label:'Mythic',    grade:'SS', metalness:0.95,roughness:0.05,foil:'prismatic',   glow:32,  scanlines:true,  particles:true,  borderStyle:'double', serieMax:10    },
+  mythic:   { c:'#67e8f9', bg:'#0f0008', accent:'#cffafe', label:'Diamond',    grade:'SS', metalness:0.95,roughness:0.05,foil:'prismatic',   glow:32,  scanlines:true,  particles:true,  borderStyle:'double', serieMax:10    },
 }
 type RK = keyof typeof RARITY
 

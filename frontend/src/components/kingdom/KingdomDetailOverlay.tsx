@@ -70,8 +70,8 @@ interface Props {
 
 // ═══ Rarity colors ═══
 const RC: Record<string, string> = {
-  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24',
-  epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
+  common: '#cbd5e1', uncommon: '#fbbf24', rare: '#10b981',
+  epic: '#67e8f9', legendary: '#67e8f9', mythic: '#67e8f9',
 }
 
 // ═══ STYLES ═══

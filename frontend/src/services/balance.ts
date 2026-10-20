@@ -1,11 +1,11 @@
 /** Mirror of backend economy/balance.py — keep in sync. HEX produced per day, collected via the harvest stock. */
 export const HEX_PER_DAY: Record<string, number> = {
-  common: 60, uncommon: 130, rare: 360, epic: 900, legendary: 2400, mythic: 6000,
+  common: 60, uncommon: 150, rare: 450, epic: 1500, legendary: 1500, mythic: 1500,   // legendary / mythic = old keys, paid as Diamond
 }
-// Rarity names shown to players (owner 2026-10-20: "no common & uncommon: curiosity, wonder, then rare…");
-// the keys stay common…mythic everywhere in the code and the API; the token frame metals stay bronze…diamond
+// 4 rarities only (owner 2026-10-20): Silver 50 % · Gold 30 % · Emerald 15 % · Diamond 5 % — the name is the metal of
+// the token frame. Keys stay common / uncommon / rare / epic in the code and the API; old legendary / mythic = Diamond.
 export const RARITY_LABEL: Record<string, string> = {
-  common: 'Curiosity', uncommon: 'Wonder', rare: 'Rare', epic: 'Epic', legendary: 'Legendary', mythic: 'Mythic',
+  common: 'Silver', uncommon: 'Gold', rare: 'Emerald', epic: 'Diamond', legendary: 'Diamond', mythic: 'Diamond',
 }
 export const rarityLabel = (r?: string | null) => (RARITY_LABEL[(r || 'common').toLowerCase()] || r || '').toUpperCase()
 export const STORAGE_CAP_HOURS = 8

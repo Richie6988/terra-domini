@@ -33,8 +33,8 @@ export const COLOR = {
   borderSubtle: 'rgba(0, 60, 100, 0.15)',
   borderHover: 'rgba(0, 60, 100, 0.3)',
   // Rarity
-  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24',
-  epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
+  common: '#cbd5e1', uncommon: '#fbbf24', rare: '#10b981',
+  epic: '#67e8f9', legendary: '#67e8f9', mythic: '#67e8f9',
   // Semantic
   danger: '#dc2626', warning: '#F59E0B', success: '#10B981', info: '#3B82F6',
 } as const
@@ -53,8 +53,8 @@ export const CATEGORY_COLOR: Record<string, string> = {
 }
 
 export const RARITY_COLOR: Record<string, string> = {
-  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24',
-  epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
+  common: '#cbd5e1', uncommon: '#fbbf24', rare: '#10b981',
+  epic: '#67e8f9', legendary: '#67e8f9', mythic: '#67e8f9',
 }
 
 export const BIOME_COLOR: Record<string, string> = {

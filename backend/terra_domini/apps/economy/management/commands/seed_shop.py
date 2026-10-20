@@ -9,9 +9,9 @@ from django.core.management.base import BaseCommand
 
 ITEMS = [
     # Boosters
-    {'code': 'booster_standard', 'name': 'Standard Booster', 'category': 'boosters', 'price_tdc': 200, 'description': '3 free territories. Common to Rare (Epic/Legendary rare).', 'rarity': 'common', 'effect_type': 'booster_pack', 'effect_value': 3.0},
-    {'code': 'booster_rare', 'name': 'Rare Booster', 'category': 'boosters', 'price_tdc': 500, 'description': '4 free territories. Guaranteed 1 Rare or better.', 'rarity': 'rare', 'effect_type': 'booster_pack', 'effect_value': 4.0},
-    {'code': 'booster_legendary', 'name': 'Legendary Booster', 'category': 'boosters', 'price_tdc': 1200, 'description': '5 free territories. Guaranteed 1 Legendary.', 'rarity': 'legendary', 'effect_type': 'booster_pack', 'effect_value': 5.0},
+    {'code': 'booster_standard', 'name': 'Standard Booster', 'category': 'boosters', 'price_tdc': 200, 'description': '3 cards: boosts, HEX and sometimes a Gold to Diamond place.', 'rarity': 'common', 'effect_type': 'booster_pack', 'effect_value': 3.0},
+    {'code': 'booster_rare', 'name': 'Emerald Booster', 'category': 'boosters', 'price_tdc': 500, 'description': '4 cards: boosts, HEX and sometimes a Gold to Diamond place.', 'rarity': 'rare', 'effect_type': 'booster_pack', 'effect_value': 4.0},
+    {'code': 'booster_legendary', 'name': 'Diamond Booster', 'category': 'boosters', 'price_tdc': 1200, 'description': '5 cards, one real place guaranteed (Emerald or Diamond).', 'rarity': 'epic', 'effect_type': 'booster_pack', 'effect_value': 5.0},
 
     # Attack bonuses
     {'code': 'atk_2x_army', 'name': '2X Army Power', 'category': 'attack', 'price_tdc': 300, 'description': 'Double army ATK for 24h', 'effect_type': 'atk_multiplier', 'effect_value': 2.0, 'duration': 86400},

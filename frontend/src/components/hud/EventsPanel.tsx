@@ -21,10 +21,10 @@ import type { TierKey } from '../shared/hexodTokenFace'
 import { FLAT_CATEGORIES } from '../shared/radarIconData'
 import { Clock, MapPin, Users, Check, CalendarClock, Trophy } from 'lucide-react'
 
-const RARITY_TIER: Record<string, TierKey> = { common: 'BRONZE', uncommon: 'SILVER', rare: 'GOLD', epic: 'EMERALD', legendary: 'DIAMOND', mythic: 'DIAMOND' }
+const RARITY_TIER: Record<string, TierKey> = { common: 'SILVER', uncommon: 'GOLD', rare: 'EMERALD', epic: 'DIAMOND', legendary: 'DIAMOND', mythic: 'DIAMOND' }
 const RARITY_COLORS: Record<string, string> = {
-  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24',
-  epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
+  common: '#cbd5e1', uncommon: '#fbbf24', rare: '#10b981',
+  epic: '#67e8f9', legendary: '#67e8f9', mythic: '#67e8f9',
 }
 
 interface Props { onClose: () => void }
@@ -169,7 +169,7 @@ export function EventsPanel({ onClose }: Props) {
                   <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 3, background: cat.color, boxShadow: `0 0 10px ${cat.color}` }} />
                   <div style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                     <TokenFace2D
-                      tier={RARITY_TIER[ev.rarity] || 'BRONZE'}
+                      tier={RARITY_TIER[ev.rarity] || 'SILVER'}
                       category={ev.category?.toUpperCase() || 'EVENT'}
                       catColor={color}
                       biome={ev.location_name || 'GLOBAL'}
@@ -262,7 +262,7 @@ export function EventsPanel({ onClose }: Props) {
                   display: 'flex', alignItems: 'center', gap: 12, borderColor: isSoon ? color + '66' : undefined,
                 }}>
                   <TokenFace2D
-                    tier={RARITY_TIER[ev.rarity] || 'BRONZE'}
+                    tier={RARITY_TIER[ev.rarity] || 'SILVER'}
                     category={ev.category?.toUpperCase() || 'EVENT'}
                     catColor={color}
                     biome={ev.location_name || 'GLOBAL'}
@@ -328,7 +328,7 @@ export function EventsPanel({ onClose }: Props) {
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <TokenFace2D
-                      tier={RARITY_TIER[(r.rarity || "").toLowerCase()] || 'BRONZE'}
+                      tier={RARITY_TIER[(r.rarity || "").toLowerCase()] || 'SILVER'}
                       category={r.category?.toUpperCase() || 'EVENT'}
                       catColor={color}
                       biome={r.location_name || 'EVENT'}

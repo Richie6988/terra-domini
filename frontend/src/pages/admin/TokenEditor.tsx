@@ -18,8 +18,8 @@ interface Token {
   country_code: string; wiki_url: string; image_url: string; is_active: boolean; is_featured: boolean
   source?: string; validated_by?: string | null; validated_at?: string | null; owner?: string | null
 }
-const RARITY_TIER: Record<string, TierKey> = { common: 'BRONZE', uncommon: 'SILVER', rare: 'GOLD', epic: 'EMERALD', legendary: 'DIAMOND', mythic: 'DIAMOND' }
-const RARITY_COLOR: Record<string, string> = { common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24', epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899' }
+const RARITY_TIER: Record<string, TierKey> = { common: 'SILVER', uncommon: 'GOLD', rare: 'EMERALD', epic: 'DIAMOND', legendary: 'DIAMOND', mythic: 'DIAMOND' }
+const RARITY_COLOR: Record<string, string> = { common: '#cbd5e1', uncommon: '#fbbf24', rare: '#10b981', epic: '#67e8f9', legendary: '#67e8f9', mythic: '#67e8f9' }
 const EMPTY: Token = { name: '', title: '', description: '', fun_fact: '', category: 'anomaly', rarity: 'common', color: '#3b82f6',
   lat: 48.8566, lon: 2.3522, country_code: '', wiki_url: '', image_url: '', is_active: true, is_featured: false }
 const fmtDate = (iso?: string | null) => iso ? new Date(iso).toLocaleDateString('fr-FR') : ''
@@ -36,7 +36,7 @@ function Preview({ t }: { t: Token }) {
   }, [])
   useEffect(() => {
     viewer.current?.update({
-      tier: RARITY_TIER[t.rarity] || 'BRONZE', category: (t.category || '').replace(/_/g, ' ').toUpperCase(), catColor: t.color,
+      tier: RARITY_TIER[t.rarity] || 'SILVER', category: (t.category || '').replace(/_/g, ' ').toUpperCase(), catColor: t.color,
       tokenName: (t.name || 'NEW TOKEN').toUpperCase(), biome: (t.country_code || 'WORLD').toUpperCase(),
       description: [t.title, t.description].filter(Boolean).join(' — ').slice(0, 240), iconSvg: iconFor(t.category),
       imageSrc: t.image_url || undefined,

@@ -16,7 +16,7 @@ import { Token3DViewer, RARITY_TIER } from '../shared/Token3DViewer'
 export type CardFamily = 'rare' | 'biomes' | 'resources' | 'creatures' | 'history' | 'events'
 
 const RARITY_COLOR: Record<string, string> = {
-  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24', epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
+  common: '#cbd5e1', uncommon: '#fbbf24', rare: '#10b981', epic: '#67e8f9', legendary: '#67e8f9', mythic: '#67e8f9',
 }
 const CONTINENT_ICON: Record<string, string> = {
   Africa: 'lion', Asia: 'mountain', Europe: 'castle', 'North America': 'bison', 'South America': 'forest',
@@ -92,7 +92,7 @@ function AlbumToken({ family, c, onOpen }: { family: CardFamily; c: any; onOpen:
   return (
     <button onClick={onOpen} title={c.name} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', position: 'relative',
       display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4 }}>
-      <TokenFace2D {...f} tier={RARITY_TIER[f.rarity] || 'BRONZE'} size={132}
+      <TokenFace2D {...f} tier={RARITY_TIER[f.rarity] || 'SILVER'} size={132}
         style={c.owned ? { filter: 'drop-shadow(0 6px 10px rgba(0,0,0,0.55))' } : { filter: 'grayscale(1) brightness(0.55)', opacity: 0.8 }} />
       {!c.owned && <Lock size={18} style={{ position: 'absolute', top: 56, color: '#fff', filter: 'drop-shadow(0 1px 2px #000)' }} />}
       <span style={{ fontSize: 10, fontWeight: 800, color: c.owned ? 'var(--hx-text-1)' : 'var(--hx-text-3)', maxWidth: 132,

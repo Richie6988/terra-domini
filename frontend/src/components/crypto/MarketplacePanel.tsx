@@ -24,8 +24,8 @@ import { EmojiIcon } from '../shared/emojiIcons'
 import { IconSVG } from '../shared/iconBank'
 
 const RARITY_C: Record<string, string> = {
-  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24',
-  epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
+  common: '#cbd5e1', uncommon: '#fbbf24', rare: '#10b981',
+  epic: '#67e8f9', legendary: '#67e8f9', mythic: '#67e8f9',
 }
 const toF = (v: unknown, d = 0) => parseFloat(String(v ?? 0)).toFixed(d)
 
@@ -148,7 +148,7 @@ function ExplorerTab({ onSell }: { onSell?: () => void }) {
 
       {/* Filters */}
       <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-        {['', 'uncommon', 'rare', 'epic', 'legendary', 'mythic'].map(r => {
+        {['', 'uncommon', 'rare', 'epic'].map(r => {
           const c = RARITY_C[r] || '#f59e0b'
           const on = rarity === r
           return (

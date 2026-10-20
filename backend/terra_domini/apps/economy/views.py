@@ -890,9 +890,9 @@ def _apply_item_effect(player, item, quantity, territory_h3=None):
 
 BOOSTER_RULES = {   # owner 2026-10-19: boosters only give shop boosts, some HEX and (rarer) POIs
     #               cards  odds (boost, hex, poi)   HEX range       POI rarity weights                      guarantee
-    'booster_standard':  (3, (0.62, 0.33, 0.05), (80, 300),   {'rare': 70, 'epic': 25, 'legendary': 5},   None),
-    'booster_rare':      (4, (0.52, 0.30, 0.18), (200, 700),  {'rare': 50, 'epic': 38, 'legendary': 12}, None),
-    'booster_legendary': (5, (0.40, 0.28, 0.32), (500, 1500), {'epic': 55, 'legendary': 38, 'mythic': 7}, 'poi'),
+    'booster_standard':  (3, (0.62, 0.33, 0.05), (80, 300),   {'uncommon': 70, 'rare': 25, 'epic': 5},   None),
+    'booster_rare':      (4, (0.52, 0.30, 0.18), (200, 700),  {'uncommon': 50, 'rare': 38, 'epic': 12}, None),
+    'booster_legendary': (5, (0.40, 0.28, 0.32), (500, 1500), {'rare': 55, 'epic': 45}, 'poi'),
 }
 BOOSTER_RULES['booster_premium'] = BOOSTER_RULES['booster_rare']        # legacy codes
 BOOSTER_RULES['booster_mythic'] = BOOSTER_RULES['booster_legendary']
@@ -922,7 +922,7 @@ def _open_booster_pack(item_code: str, player=None) -> dict:
         if kind == 'poi':
             # a free real place (landmark / city token, not a deposit or a species), rarity drawn from the pack
             rarity = random.choices(list(poi_w), weights=list(poi_w.values()))[0]
-            order = ['rare', 'epic', 'legendary', 'mythic']
+            order = ['uncommon', 'rare', 'epic']      # Gold · Emerald · Diamond (falls back to the tier below)
             t = None
             for r in [rarity] + [x for x in reversed(order[:order.index(rarity)])]:
                 hexes = list(UnifiedPOI.objects.filter(is_active=True, rarity=r).exclude(category__startswith='species_')

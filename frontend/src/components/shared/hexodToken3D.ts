@@ -184,7 +184,7 @@ function shade(hex: string, k: number) {
 // ═══════════════════════════════════════════════════════════════
 export function createTokenViewer(container: HTMLElement, initial: TokenViewerProps = {}): ViewerHandle {
   const state = {
-    tier: TIERS[initial.tier || 'BRONZE'],
+    tier: TIERS[initial.tier || 'SILVER'],
     category: initial.category || 'TERRITORY',
     catId: initial.catId || 'XXX',
     catColor: initial.catColor || '#39FF14',
@@ -204,7 +204,7 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     pictos: initial.pictos || [] as string[],
   }
   const tierKey = (): TierKey =>
-    (Object.keys(TIERS) as TierKey[]).find(k => TIERS[k] === state.tier) || 'BRONZE'
+    (Object.keys(TIERS) as TierKey[]).find(k => TIERS[k] === state.tier) || 'SILVER'
 
   const reducedMotion = typeof window.matchMedia === 'function'
     && window.matchMedia('(prefers-reduced-motion: reduce)').matches

@@ -23,7 +23,7 @@ import { playSound } from '../../hooks/useSound'
 interface Props { onClose: () => void }
 
 const RARITY_COLORS: Record<string, string> = {
-  common: '#cd7f32', uncommon: '#cbd5e1', rare: '#fbbf24', epic: '#10b981', legendary: '#67e8f9', mythic: '#ec4899',
+  common: '#cbd5e1', uncommon: '#fbbf24', rare: '#10b981', epic: '#67e8f9', legendary: '#67e8f9', mythic: '#67e8f9',
 }
 const CAT: Record<string, { label: string; icon: string }> = {
   animal: { label: 'Animal', icon: 'lion' }, fossil: { label: 'Dinosaur & fossil', icon: 'dinosaur' },

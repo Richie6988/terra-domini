@@ -34,9 +34,9 @@ const CATS = [
 const BOOSTERS = [
   { id:'booster_standard',  name:'STANDARD BOOSTER', icon:'box', price:200,  color:'#0099cc',
     desc:'3 cards: boosts & HEX\nSmall POI chance', code:'booster_standard' },
-  { id:'booster_rare',      name:'RARE BOOSTER',     icon:'heart_purple', price:500,  color:'#8b5cf6',
+  { id:'booster_rare',      name:'EMERALD BOOSTER',     icon:'heart_purple', price:500,  color:'#8b5cf6',
     desc:'4 cards · more HEX\nBetter POI chance', code:'booster_rare' },
-  { id:'booster_legendary', name:'LEGENDARY BOOSTER', icon:'crown', price:1200, color:'#cc8800',
+  { id:'booster_legendary', name:'DIAMOND BOOSTER', icon:'crown', price:1200, color:'#cc8800',
     desc:'5 cards · 1 POI guaranteed\nBig HEX, rare places', code:'booster_legendary' },
 ]
 
@@ -85,8 +85,8 @@ const EFFECT_LABEL: Record<string,string> = {
   soc_vip:           'VIP Access',
   hex_bonus:         'HEX Bonus',
   booster_standard:  'Standard Booster',
-  booster_rare:      'Rare Booster',
-  booster_legendary: 'Legendary Booster',
+  booster_rare:      'Emerald Booster',
+  booster_legendary: 'Diamond Booster',
   custom_flag:       'Custom Flag',
   border_color:      'Kingdom Colors',
 }

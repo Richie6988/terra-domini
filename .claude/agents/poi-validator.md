@@ -29,27 +29,25 @@ For each row:
    alpha-2 country code ("" for open sea, never anything else). Fix what is wrong (verdict "corrected", list each fix in corrections) or confirm ("validated").
 3. Description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing unverified.
    Absolute rule: never "--", never an em dash or en dash; commas and full stops only.
-4. Rarity, measured (langs = sitelinks):
-   - Landmarks / history: legendary = universal icon known on every continent (langs >= 120: Eiffel Tower, Machu
-     Picchu, Great Wall); epic = major world heritage or national icon (langs 70-119, or UNESCO + famous); rare = well
-     known in its country and to travellers (35-69); uncommon = regional (12-34); common = local (< 12).
-   - Resource / strategic sites (game_category is a mine, oil / gas field, port, canal, dam, airport...): rate by world
-     rank, not by languages: world's largest or #1 = epic, top 10 in the world = rare, top in its country = uncommon.
-   - Cities: legendary = global megacity icon (Paris, London, New York, Tokyo); epic = capital or world-famous city; rare =
-     major national city; uncommon = regional city; common = small city.
-   - Countries: legendary = world powers; epic = major regional powers or globally famous; rare / uncommon / common by
-     size and influence.
+4. Rarity: only 4 (owner 2026-10-20), shares fixed at import: Silver 50 % · Gold 30 % · Emerald 15 % · Diamond 5 %.
+   Submit the key: "epic" = Diamond, "rare" = Emerald, "uncommon" = Gold, "common" = Silver. Your tier ranks the token
+   inside its kind; the import then cuts each kind by the shares, so rank honestly (langs = sitelinks):
+   - epic (Diamond): universal icons known on every continent, world #1 of their kind (Eiffel Tower, Machu Picchu,
+     Great Wall, Everest, Paris, the largest gas field on Earth); landmarks usually langs >= 100.
+   - rare (Emerald): world-famous or national icons, UNESCO stars, world top 10 resource sites (langs 50-99).
+   - uncommon (Gold): well known in the country and to travellers, top resource site of a country (langs 20-49).
+   - common (Silver): regional / local (langs < 20).
+   Resource / strategic sites (mine, oil / gas field, port, canal, dam, airport...) rank by world rank, not languages.
    Fame is measured on the article players know the place by: for the headquarters / site of a famous organisation
-   (CIA, NASA...), the organisation's article (usually the row's wiki_url).
-   Only 1% of tokens are legendary and 4% epic: when in doubt, the lower tier. Never "mythic". rarity_reason says which
-   numbers decided (langs, UNESCO, visitors). The HEX income follows the rarity automatically: do not set it.
+   (CIA, NASA...), the organisation's article. A control tower token is its airport. When in doubt, the lower tier.
+   rarity_reason says which numbers decided (langs, UNESCO, world rank). The HEX income follows automatically.
 5. Picture: from the pictures `--lookup` returned only. `--view` your choice, Read the file and check it clearly shows
    THIS place (the building / site / city itself, beautiful, sharp) — no map, flag, logo, plan, diagram, crowd
    close-up or unrelated detail. If it fails, view the next one. If none is right, image_url "" (a wrong picture is
    worse than none).
 6. Write the result JSON with the Write tool, then `--submit` it:
    {"verdict": "validated|corrected|rejected", "name": "...", "wiki_title": "...", "lat": 0.0, "lon": 0.0,
-    "country_code": "FR", "description": "...", "rarity": "common|uncommon|rare|epic|legendary", "rarity_reason": "...",
+    "country_code": "FR", "description": "...", "rarity": "common|uncommon|rare|epic", "rarity_reason": "...",
     "image_url": "https://upload.wikimedia.org/...", "corrections": ["..."], "sources": ["https://..."],
     "confidence": 0.0-1.0, "reject_reason": "..."}
 7. Next row.
