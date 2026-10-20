@@ -380,7 +380,7 @@ export function drawTokenFront(
   if (['rare', 'epic', 'legendary', 'mythic'].includes(rarity)) {
     const hr = s * 0.5, a = anim.holoAngle
     const holo = ctx.createLinearGradient(c + Math.cos(a) * hr, c + Math.sin(a) * hr, c - Math.cos(a) * hr, c - Math.sin(a) * hr)
-    const f = rarity === 'rare' ? 0.05 : rarity === 'epic' ? 0.08 : 0.12
+    const f = rarity === 'rare' ? 0.02 : rarity === 'epic' ? 0.03 : 0.04   // faint foil: never a glare over the photo
     holo.addColorStop(0, `rgba(255,0,140,${f})`); holo.addColorStop(0.5, `rgba(0,220,255,${f})`); holo.addColorStop(1, `rgba(255,230,0,${f})`)
     ctx.globalCompositeOperation = 'overlay'; ctx.fillStyle = holo; ctx.fillRect(0, 0, s, s); ctx.globalCompositeOperation = 'source-over'
   }
@@ -435,7 +435,24 @@ export function drawTokenFront(
     cutText(text, 0)
     ;(ctx as any).letterSpacing = '0px'; ctx.restore()
   }
-  onEdge(-120, -Math.PI / 6, (state.tokenName || '').toUpperCase(), 0.86)
+  // The NAME stands out (owner 2026-10-20): bigger, bright on a dark inlaid plate along the top-left edge
+  const name = (state.tokenName || '').toUpperCase()
+  if (name) {
+    const a = -120 * Math.PI / 180
+    ctx.save(); ctx.translate(c + rm * Math.cos(a), c + rm * Math.sin(a)); ctx.rotate(-Math.PI / 6)
+    let ef = s * 0.044
+    ctx.font = `900 ${ef}px Orbitron, ${SANS}`; (ctx as any).letterSpacing = `${(s * 0.003).toFixed(1)}px`
+    while (ctx.measureText(name).width > rb * 0.84 && ef > s * 0.014) { ef -= s * 0.001; ctx.font = `900 ${ef}px Orbitron, ${SANS}` }
+    const w = ctx.measureText(name).width, ph = band * 0.84, pw = Math.min(rb * 0.95, w + band * 0.9)
+    ctx.beginPath(); (ctx as any).roundRect ? (ctx as any).roundRect(-pw / 2, -ph / 2, pw, ph, ph / 2) : ctx.rect(-pw / 2, -ph / 2, pw, ph)
+    ctx.fillStyle = 'rgba(6,10,20,0.82)'; ctx.fill()
+    ctx.strokeStyle = tier.title; ctx.lineWidth = s * 0.003; ctx.stroke()
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'
+    const m = ctx.measureText(name), y = (m.actualBoundingBoxAscent - m.actualBoundingBoxDescent) / 2
+    ctx.shadowColor = 'rgba(0,0,0,0.9)'; ctx.shadowBlur = s * 0.006
+    ctx.fillStyle = '#ffffff'; ctx.fillText(name, 0, y)
+    ;(ctx as any).letterSpacing = '0px'; ctx.restore()
+  }
   onEdge(-60, Math.PI / 6, state.hexPerDay ? `HEX ${Math.round(state.hexPerDay).toLocaleString()}` : '', 0.8)
   // Lower edges (owner 2026-10-19): the unique ID bottom-left, the series number bottom-right (read upright)
   const uid = state.tokenNo ? `ID ${String(state.tokenNo).replace(/^#/, '')}` : state.cellId ? `ID ${state.cellId}` : ''

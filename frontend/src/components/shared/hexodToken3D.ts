@@ -272,13 +272,9 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
   bTex.colorSpace = THREE.SRGBColorSpace
 
   // ─── Materials ───────────────────────────────────────────
-  // Glossy printed face: dielectric + clearcoat, with a little emissive so it is always legible.
-  const fMat = new THREE.MeshPhysicalMaterial({
-    map: fTex, emissiveMap: fTex, emissive: 0xffffff, emissiveIntensity: 0.42,
-    roughness: 0.55, metalness: 0.0, specularIntensity: 0.3,
-    clearcoat: 0.45, clearcoatRoughness: 0.14,
-    envMapIntensity: 0.22,
-  })
+  // Printed face, unlit (owner 2026-10-20: "careful with the reflections on the token pictures"): no lighting, no
+  // reflection, no iridescence on the photo; the 3D frame, edge and rivets keep all the shine.
+  const fMat = new THREE.MeshBasicMaterial({ map: fTex })   // unlit: the photo keeps its true colours, no veil, no glare
   const bMat = new THREE.MeshPhysicalMaterial({
     map: bTex, emissiveMap: bTex, emissive: 0xffffff, emissiveIntensity: 0.3,
     roughness: 0.3, metalness: 0.35,
@@ -422,9 +418,6 @@ export function createTokenViewer(container: HTMLElement, initial: TokenViewerPr
     rimMat.iridescence = L.rimIri
     rimMat.envMapIntensity = L.envI
     sMat.color.set(L.rim).multiplyScalar(0.55)
-    fMat.iridescence = L.faceIri
-    fMat.iridescenceIOR = 1.45
-    fMat.iridescenceThicknessRange = [200, 700]
     gems.visible = !!L.gems
     buildDeco(['BRONZE', 'SILVER', 'GOLD', 'EMERALD', 'DIAMOND'].indexOf(tierKey()), L.rim, L.halo)
     if (L.gems) gemMat.color.set(L.gems)

@@ -14,6 +14,10 @@ import { getIcon } from './iconBank'
 import { api } from '../../services/api'
 import { iconFor } from './poiIcons'
 import { RES_ICON } from './resourceIcons'
+import { rarityLabel } from '../../services/balance'
+
+const RARITY_COLOR: Record<string, string> = { common: '#cbd5e1', uncommon: '#fbbf24', rare: '#10b981', epic: '#67e8f9', legendary: '#67e8f9', mythic: '#67e8f9' }
+const PANEL_W = 380
 
 export const TERRAIN_ICON: Record<string, string> = { lake: 'water_drop', ice: 'glacier', farmland: 'wheat', grassland: 'sprout', wetland: 'leaf', water: 'ocean', arctic: 'tundra' }
 
@@ -73,6 +77,14 @@ export function Token3DViewer(props: Token3DProps) {
   const viewerRef = useRef<ReturnType<typeof createTokenViewer> | null>(null)
   const [mounted, setMounted] = useState(false)
   const [credit, setCredit] = useState<{ text: string; wiki: string } | null>(null)   // picture author + license (CC BY-SA)
+  // Reading panel (owner 2026-10-20: "name and description written in the panel, easier to read than on the small shiny token")
+  const [info, setInfo] = useState<{ desc?: string; rarity?: string; country?: string; hexPerDay?: number; when?: string; region?: string }>({})
+  const [wide, setWide] = useState(typeof window !== 'undefined' && window.innerWidth >= 900)
+  useEffect(() => {
+    const on = () => setWide(window.innerWidth >= 900)
+    window.addEventListener('resize', on)
+    return () => window.removeEventListener('resize', on)
+  }, [])
   // Stable fallback image — generated once, doesn't change on re-render
 
   const onCloseRef = useRef(onClose)
@@ -136,6 +148,8 @@ export function Token3DViewer(props: Token3DProps) {
       const front = [when, d.description || d.title].filter(Boolean).join(' — ') || d.fun_fact
       setCredit(d.image_url && d.image_credit ? { text: d.image_credit, wiki: d.wiki_url || '' } : null)
       if (front) viewerRef.current.update({ description: front.length > 240 ? front.slice(0, 237).replace(/\s+\S*$/, '') + '…' : front })
+      setInfo({ desc: d.description || d.title || d.fun_fact || '', rarity: d.rarity, country: d.country_code || '', hexPerDay: d.hex_per_day,
+                when, region: d.region?.name || '' })
       // Picture: the token's Wikipedia photo, else the real satellite view of its hex (never a stock photo)
       if (d.image_url || d.satellite_url) viewerRef.current.update({ imageSrc: d.image_url || d.satellite_url })
       viewerRef.current.update({
@@ -170,7 +184,7 @@ export function Token3DViewer(props: Token3DProps) {
     ro.observe(el)
     setInfoH(el.offsetHeight)
     return () => ro.disconnect()
-  }, [visible, !!infoPanel])
+  }, [visible, wide])
 
   if (!visible) return null
 
@@ -218,37 +232,50 @@ export function Token3DViewer(props: Token3DProps) {
 
       <div
         ref={containerRef}
-        // With an info sheet the stage ends 12px above it (sheet sits at bottom: 30); hexodToken3D refits on resize
-        style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: infoPanel && infoH ? infoH + 42 : 0, zIndex: 1 }}
+        // Wide screens (owner 2026-10-20): the reading panel as a left column (1/3), the 3D token on the right 2/3. Narrow: the panel is a bottom sheet and
+        // the stage stops above it (hexodToken3D refits on resize)
+        style={{ position: 'absolute', top: 0, zIndex: 1,
+          ...(wide ? { left: '33.333%', right: 0, bottom: 0 } : { left: 0, right: 0, bottom: infoH ? infoH + 24 : 0 }) }}
       />
 
-      {credit && (
-        <a href={credit.wiki || undefined} target="_blank" rel="noreferrer" style={{
-          position: 'absolute', top: 18, left: 16, zIndex: 6, maxWidth: '60%', fontFamily: 'var(--font-body)', fontSize: 10,
-          color: 'rgba(255,255,255,0.55)', textDecoration: 'none', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-        }}>Photo: {credit.text} · Wikipedia</a>
-      )}
+      <div style={{
+        position: 'absolute', zIndex: 4, pointerEvents: 'none', fontFamily: 'var(--font-body)', fontSize: 11, fontWeight: 700,
+        color: 'rgba(255,255,255,0.4)', letterSpacing: 0.5, textAlign: 'center',
+        ...(wide ? { bottom: 18, left: '33.333%', right: 0 } : { top: 18, left: 0, right: 0 }),
+      }}>Drag to rotate</div>
 
-      {!infoPanel && (
-        <div style={{
-          position: 'absolute', bottom: 22, left: 0, right: 0, textAlign: 'center', zIndex: 4,
-          pointerEvents: 'none', fontFamily: 'var(--font-body)', fontSize: 12, fontWeight: 700,
-          color: 'rgba(255,255,255,0.45)', letterSpacing: 0.5,
-        }}>
-          Drag to rotate
-        </div>
-      )}
-
-      {infoPanel && (
-        <div ref={infoRef} style={{
-          position: 'absolute', bottom: 22, left: '50%', transform: 'translateX(-50%)',
-          zIndex: 5, pointerEvents: 'auto', paddingBottom: 8,
-          // cap the sheet so the token keeps ~60% of the screen; extra sheet content scrolls
-          maxHeight: '36vh', overflowY: 'auto', borderRadius: 18,
-        }}>
-          {infoPanel}
-        </div>
-      )}
+      <div ref={infoRef} className="hx-card" onMouseDown={e => e.stopPropagation()} style={{
+        position: 'absolute', zIndex: 5, pointerEvents: 'auto', overflowY: 'auto', borderRadius: 18,
+        display: 'flex', flexDirection: 'column', gap: 10, padding: 18, textTransform: 'none', letterSpacing: 0,
+        background: 'rgba(8,14,28,0.92)', borderColor: `${RARITY_COLOR[info.rarity || rarityKey || ''] || '#94a3b8'}66`,
+        ...(wide ? { top: 24, left: 24, bottom: 24, width: 'calc(33.333% - 36px)', minWidth: PANEL_W - 60, justifyContent: 'center' }
+                 : { left: 12, right: 12, bottom: 12, maxHeight: '46vh' }),
+      }}>
+        {(() => {
+          const rk = info.rarity || rarityKey || ''
+          const col = RARITY_COLOR[rk] || '#cbd5e1'
+          return (<>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, alignItems: 'center' }}>
+              {rk && <span style={{ padding: '3px 10px', borderRadius: 999, border: `1px solid ${col}`, color: col, fontSize: 11, fontWeight: 900,
+                letterSpacing: 1.5, fontFamily: "'Orbitron', sans-serif" }}>{rarityLabel(rk)}</span>}
+              {category && <span style={{ fontSize: 11, fontWeight: 800, color: 'var(--hx-text-2)', letterSpacing: 1 }}>{label(category)}</span>}
+              {(info.country || face?.country) && <span style={{ fontSize: 11, color: 'var(--hx-text-3)' }}>· {info.country || face?.country}</span>}
+            </div>
+            <div style={{ fontFamily: "'Lilita One', sans-serif", fontSize: wide ? 30 : 24, lineHeight: 1.1, color: '#fff' }}>{tokenName || 'HEXOD TERRITORY'}</div>
+            {(info.when || info.region) && <div style={{ fontSize: 12, color: 'var(--hx-text-3)' }}>{[info.when, info.region].filter(Boolean).join(' · ')}</div>}
+            {(info.hexPerDay || face?.hexPerDay) ? (
+              <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 16, color: '#fde68a' }}>
+                HEX {Math.round(info.hexPerDay || face?.hexPerDay || 0).toLocaleString()} <span style={{ fontSize: 11, color: 'var(--hx-text-3)' }}>per day while you hold its hex</span>
+              </div>) : null}
+            {(info.desc || description) && <p style={{ margin: 0, fontSize: 14, lineHeight: 1.55, color: 'var(--hx-text-1)' }}>{info.desc || description}</p>}
+            {credit && <a href={credit.wiki || undefined} target="_blank" rel="noreferrer" style={{ fontSize: 10, color: 'var(--hx-text-3)', textDecoration: 'none' }}>
+              Photo: {credit.text} · Wikipedia</a>}
+            {infoPanel && <div className="hx-t3d-extra" style={{ marginTop: 4 }}>
+              <style>{'.hx-t3d-extra > .hx-card { width: auto !important; max-width: 100% !important; background: transparent; border: none; box-shadow: none; padding: 0; }'}</style>
+              {infoPanel}</div>}
+          </>)
+        })()}
+      </div>
     </div>
   )
 }

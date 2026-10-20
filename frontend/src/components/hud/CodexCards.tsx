@@ -187,32 +187,22 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
         <Token3DViewer visible onClose={() => setOpen(null)} {...(({ rarity, country, terrain, tokenNo, hexPerDay, ...rest }) => ({
             ...rest, rarityKey: rarity, face: { country, terrain, tokenNo, hexPerDay } }))(faceOf(family, open) as any)}
           h3Index={family === 'rare' || family === 'history' ? open.h3_index : undefined}
+          description={open.description}
           infoPanel={
-        <div className="hx-card" style={{ width: 'min(560px, calc(100vw - 32px))', borderColor: 'var(--hx-accent, #7950f2)', textTransform: 'none', letterSpacing: 0 }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10 }}>
-            <div className="hx-section-title" style={{ margin: 0 }}>{open.name}</div>
-            <button className="hx-nudge__x" aria-label="Close card" onClick={() => setOpen(null)}>×</button>
-          </div>
+        // Name, rarity and story are in the viewer's reading panel: only the extras + actions here
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, textTransform: 'none', letterSpacing: 0 }}>
           {family === 'creatures' && <>
-            <p style={{ fontSize: 13, lineHeight: 1.45, margin: '8px 0' }}>{open.description}</p>
-            {open.fossil_count > 0 && <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: '0 0 8px' }}>
+            {open.fossil_count > 0 && <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: 0 }}>
               {open.fossil_count.toLocaleString()} fossil finds recorded (Paleobiology Database), e.g. near {open.fossil_sites.slice(0, 3).map((p: number[]) => `${p[0]}°, ${p[1]}°`).join(' · ')}.</p>}
-            {open.image_credit && <p style={{ fontSize: 10, color: 'var(--hx-text-3)', margin: '0 0 8px' }}>Photo: {open.image_credit}</p>}
+            {open.image_credit && <p style={{ fontSize: 10, color: 'var(--hx-text-3)', margin: 0 }}>Photo: {open.image_credit}</p>}
           </>}
-          {(family === 'history' || family === 'events') && <>
-            <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: '6px 0 0' }}>{dateLabel(open.event_date)}{open.location ? ` · ${open.location}` : ''} · {rarityLabel(open.rarity)}</p>
-            {open.description && <p style={{ fontSize: 13, lineHeight: 1.45, margin: '8px 0' }}>{open.description}</p>}
-          </>}
-          {family === 'rare' && <>
-            <p style={{ fontSize: 13, lineHeight: 1.45, margin: '8px 0' }}>{open.description}</p>
-            {open.fun_fact && <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: '0 0 8px' }}>Did you know? {open.fun_fact}</p>}
-          </>}
-          {family === 'biomes' && <p style={{ fontSize: 13, margin: '8px 0' }}>
-            {open.owned ? ` You hold ${open.territories} territor${open.territories > 1 ? 'ies' : 'y'} here.` : ' Claim a territory in this region to unlock it.'}
+          {(family === 'history' || family === 'events') && open.location && <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: 0 }}>{open.location}</p>}
+          {family === 'rare' && open.fun_fact && <p style={{ fontSize: 12, color: 'var(--hx-text-2)', margin: 0 }}>Did you know? {open.fun_fact}</p>}
+          {family === 'biomes' && <p style={{ fontSize: 13, margin: 0 }}>
+            {open.owned ? `You hold ${open.territories} territor${open.territories > 1 ? 'ies' : 'y'} here.` : 'Claim a territory in this region to unlock it.'}
           </p>}
-          {family === 'resources' && <p style={{ fontSize: 13, margin: '8px 0' }}>
-            {rarityLabel(open.rarity)} {open.resource} card · {(open.hex_per_day || 0).toLocaleString()} HEX a day. {open.description}
-            {open.producing ? ' It is yours and it pays.' : open.owned ? ` Your card #${open.edition || 1} stays in your album, but its hex was taken: it pays nothing until you take it back.` : ' Claim its hex (or take it from its holder) to own it.'}
+          {['rare', 'resources', 'history'].includes(family) && <p style={{ fontSize: 13, margin: 0, color: open.producing ? '#86efac' : open.owned ? '#cbd5e1' : 'var(--hx-text-2)' }}>
+            {open.producing ? 'Yours, and it pays every day.' : open.owned ? `Your card #${open.edition || 1} stays in your album, but its hex was taken: it pays nothing until you take it back.` : 'Claim its hex (or take it from its holder) to own it.'}
           </p>}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {(open.lat !== undefined || open.center) && (
