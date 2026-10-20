@@ -47,7 +47,13 @@ API_URL = 'https://api.anthropic.com/v1/messages'
 MODEL = os.environ.get('POI_AGENT_MODEL', 'claude-haiku-5-5')
 VERSION = 'poi-agent/1'
 RARITIES = ('common', 'uncommon', 'rare', 'epic')   # Silver · Gold · Emerald · Diamond (4 rarities only)
-DEFAULT_KINDS = ('landmark', 'history', 'city', 'country')       # generated deposits and species copies have no single real place
+DEFAULT_KINDS = ('landmark', 'history', 'city', 'country')
+
+
+def categories() -> dict:
+    """The game's token categories {value: label} (events.unified_poi.POICategory), species excluded."""
+    from terra_domini.apps.events.unified_poi import POICategory
+    return {v: l for v, l in POICategory.choices if not v.startswith('species_')}       # generated deposits and species copies have no single real place
 MAX_TURNS = 14
 
 SYSTEM = """You are the HEXOD POI agent. HEXOD is a geo-strategy collection game: every real place on Earth is a token on a
@@ -65,6 +71,10 @@ For the POI you are given:
    or duplicate another entry.
 2. Check the facts: exact name (English, as on Wikipedia), coordinates (use Wikipedia's when they exist), ISO 3166-1
    alpha-2 country code. Fix what is wrong (verdict "corrected") or confirm (verdict "validated").
+2b. Category: the token category must fit the place, rationally (owner 2026-10-20). The allowed values are checked on submit.
+   A stadium is sports_arena, a festival site or a battle is history_event, a museum is museum, an airport is
+   control_tower / airport... If the row's game_category is wrong, put the right one in game_category and say why in
+   corrections; if it is right, repeat it. game_category is required in every result.
 3. Write the card description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing you
    could not verify. Absolute rule: never "--", never an em dash or en dash; commas and full stops only.
 4. Give the rarity: only 4 (owner 2026-10-20), shares fixed at import: Silver 50 % · Gold 30 % · Emerald 15 % · Diamond 5 %.
@@ -103,6 +113,7 @@ TOOLS = [
          'wiki_title': {'type': 'string'},
          'description': {'type': 'string', 'description': '2 factual sentences, <= 280 chars'},
          'rarity': {'type': 'string', 'enum': list(RARITIES)},
+         'game_category': {'type': 'string', 'description': 'The token category that fits the place (one of the game categories)'},
          'rarity_reason': {'type': 'string'},
          'image_url': {'type': 'string', 'description': 'A picture you viewed, or ""'},
          'corrections': {'type': 'array', 'items': {'type': 'string'}, 'description': 'What was wrong in the input row'},
@@ -246,6 +257,10 @@ class Agent:
         errs = []
         if s.get('verdict') == 'rejected':
             return [] if s.get('reject_reason') else ['reject_reason is required for a rejected row.']
+        cats = categories()
+        if s.get('game_category') not in cats:
+            errs.append('game_category must be one of the game categories (POI --categories), the one that fits the place: '
+                        + ', '.join(sorted(cats)))
         if s.get('rarity') not in RARITIES:
             errs.append(f'rarity must be one of {RARITIES}.')
         cc = s.get('country_code') or ''
@@ -345,12 +360,12 @@ def stamp(row, s, agent, model=MODEL):
         hpd = round(token_hex_per_day(s['rarity'], row.get('game_category', '')))
         entry.update(name=s['name'][:300], lat=lat, lon=lon, h3_r8=hexes, country_code=(s.get('country_code') or '').upper()[:2],
                      description=s.get('description', '')[:300], rarity=s['rarity'], rarity_reason=s.get('rarity_reason', ''),
-                     hex_per_day=hpd, wiki_title=s.get('wiki_title', ''), image_url=s.get('image_url') or '',
+                     hex_per_day=hpd, wiki_title=s.get('wiki_title', ''), game_category=s.get('game_category') or row.get('game_category'), image_url=s.get('image_url') or '',
                      image_credit=f"{pic.get('author') or 'Unknown author'} · {pic.get('license', '')} · Wikimedia Commons" if pic else '',
                      image_file=pic.get('file', ''))
         UnifiedPOI.objects.filter(db_uid=row['uid']).update(
             name=entry['name'], latitude=lat, longitude=lon, h3_index=hexes, country_code=entry['country_code'],
-            description=entry['description'], rarity=s['rarity'], tdc_per_24h=hpd,
+            description=entry['description'], rarity=s['rarity'], tdc_per_24h=hpd, category=entry['game_category'][:30],
             image_url=entry['image_url'], image_credit=entry['image_credit'][:300], verified=True, validated_at=now)
         Territory.objects.filter(h3_index=row.get('h3_r8'), poi_name=row['name'][:200]).update(rarity=s['rarity'])
     poi_validations.append(entry)
@@ -372,9 +387,37 @@ class Command(BaseCommand):
         parser.add_argument('--view', help='download a picture for --row, print the local file to look at')
         parser.add_argument('--submit', help='JSON file with the submit_validation fields for --row')
         parser.add_argument('--model', default='claude-code:haiku', help='model name written in the stamp (CLI mode)')
+        parser.add_argument('--categories', action='store_true', help='list the game token categories')
+        parser.add_argument('--set-category', help='category audit: re-stamp --row with this category (keeps the rest)')
+        parser.add_argument('--reason', default='', help='why the category changes (with --set-category)')
+        parser.add_argument('--stamped', action='store_true', help='with --next: list stamped rows (uid, name, category, description)')
 
     def cli(self, db, o):
         done = poi_validations.load()
+        if o['categories']:
+            for v, l in sorted(categories().items()):
+                self.stdout.write(f'{v}: {l}')
+            return
+        if o['stamped']:
+            rows = [v for v in done.values() if v.get('verdict') != 'rejected'][:o['next'] or 10000]
+            self.stdout.write(json.dumps([{'uid': v['uid'], 'name': v.get('name'), 'category': v.get('game_category') or next(
+                (p.get('game_category') for p in db['pois'] if p['uid'] == v['uid']), ''), 'description': v.get('description', '')}
+                for v in rows], ensure_ascii=False, indent=0))
+            return
+        if o['set_category']:
+            if o['set_category'] not in categories():
+                raise CommandError('unknown category: ' + o['set_category'])
+            v = dict(done.get(o['row']) or {})
+            if not v:
+                raise CommandError('row not stamped yet')
+            old = v.get('game_category') or next((p.get('game_category') for p in db['pois'] if p['uid'] == o['row']), '')
+            v.update(game_category=o['set_category'], validated_at=timezone.now().isoformat(),
+                     corrections=(v.get('corrections') or []) + [f"category {old} -> {o['set_category']}: {o['reason']}"])
+            poi_validations.append(v)
+            from terra_domini.apps.events.unified_poi import UnifiedPOI
+            UnifiedPOI.objects.filter(db_uid=o['row']).update(category=o['set_category'][:30])
+            self.stdout.write(f"CATEGORY {o['row']}: {old} -> {o['set_category']}")
+            return
         if o['next']:
             kinds = set(o['kinds'].split(','))
             rows = sorted((p for p in db['pois'] if p['kind'] in kinds and p['uid'] not in done), key=lambda p: not p.get('on_map'))
@@ -430,7 +473,7 @@ class Command(BaseCommand):
                                                  f"{e.get('rarity', '-')} → {e.get('hex_per_day', 0)} HEX/day"))
 
     def handle(self, *args, **o):
-        if o['next'] or o['row']:
+        if o['next'] or o['row'] or o['categories'] or o['stamped']:
             db = hexod_db.load()
             if not db:
                 raise CommandError(f'{hexod_db.DB_PATH} not found')

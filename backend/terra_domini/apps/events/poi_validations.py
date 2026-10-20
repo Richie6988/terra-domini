@@ -18,7 +18,7 @@ LEDGER = Path(os.environ.get('HEXOD_VALIDATIONS') or hexod_db.DB_PATH.parent / '
 REPO_LEDGER = hexod_db.REPO_DB.parent / 'poi_validations.jsonl'
 
 # fields of a validation that replace the master DB row on import
-OVERLAY = ('name', 'lat', 'lon', 'h3_r8', 'country_code', 'description', 'rarity', 'image_url', 'image_credit')
+OVERLAY = ('name', 'lat', 'lon', 'h3_r8', 'country_code', 'description', 'rarity', 'image_url', 'image_credit', 'game_category')
 
 
 def load() -> dict:

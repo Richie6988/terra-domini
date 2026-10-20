@@ -11,6 +11,7 @@ of the world map. You check the points of interest ONE AT A TIME and must be rig
 Your tools are a command line (`POI` below = the command prefix given in your task, by default
 `cd backend && python manage.py poi_agent`):
 - `POI --next N` — the next N unchecked rows (JSON). Take them in order.
+- `POI --categories` — the game's token categories (pick the one that fits).
 - `POI --row UID --lookup "Title"` — Wikipedia + Wikidata facts: canonical title, coordinates, intro, `sitelinks`
   (number of Wikipedia languages = fame), UNESCO, and the free pictures (url, size, license, author) — Wikimedia hosts upload. / thumb.wikimedia.org.
 - `POI --row UID --view URL` — downloads a picture and prints a local file: open it with the Read tool and LOOK at it.
@@ -30,6 +31,10 @@ For each row:
    or duplicate another entry.
 2. Check the facts: exact English name (as on Wikipedia), coordinates (Wikipedia's when they exist), ISO 3166-1
    alpha-2 country code ("" for open sea, never anything else). Fix what is wrong (verdict "corrected", list each fix in corrections) or confirm ("validated").
+2b. Category: the token category must fit the place, rationally (owner 2026-10-20). `POI --categories` lists them.
+   A stadium is sports_arena, a festival site or a battle is history_event, a museum is museum, an airport is
+   control_tower / airport... If the row's game_category is wrong, put the right one in game_category and say why in
+   corrections; if it is right, repeat it. game_category is required in every result.
 3. Description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing unverified.
    Absolute rule: never "--", never an em dash or en dash; commas and full stops only.
 4. Rarity: only 4 (owner 2026-10-20), shares fixed at import: Silver 50 % · Gold 30 % · Emerald 15 % · Diamond 5 %.
@@ -50,7 +55,7 @@ For each row:
    worse than none).
 6. Write the result JSON with the Write tool, then `--submit` it:
    {"verdict": "validated|corrected|rejected", "name": "...", "wiki_title": "...", "lat": 0.0, "lon": 0.0,
-    "country_code": "FR", "description": "...", "rarity": "common|uncommon|rare|epic", "rarity_reason": "...",
+    "country_code": "FR", "description": "...", "rarity": "common|uncommon|rare|epic", "rarity_reason": "...", "game_category": "...",
     "image_url": "https://upload.wikimedia.org/...", "corrections": ["..."], "sources": ["https://..."],
     "confidence": 0.0-1.0, "reject_reason": "..."}
 7. Next row.
