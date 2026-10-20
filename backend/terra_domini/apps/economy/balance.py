@@ -163,22 +163,15 @@ SPECIES_LABEL = {'species_fossil': 'Dinosaur', 'species_marine': 'Marine life', 
 
 def token_bonus(category: str):
     """(label, %) of the family / resource bonus of a token category, or None."""
-    from terra_domini.apps.economy.resources import site_resource, RESOURCE_TOKEN_BONUS, resources
-    rid = site_resource(category)
-    if rid:
-        return resources()[rid]['name'], RESOURCE_TOKEN_BONUS.get(rid, 0)
-    if category in SPECIES_BONUS:
+    if category in SPECIES_BONUS:      # resources have no bonus (their card rarity pays)
         return SPECIES_LABEL[category], SPECIES_BONUS[category]
     return None
 
 
 def token_hex_per_day(rarity: str, category: str = '') -> float:
-    """HEX/day one token adds to its hex: its rarity's HEX × (1 + resource or species family bonus)."""
-    from terra_domini.apps.economy.resources import site_resource, RESOURCE_TOKEN_BONUS
+    """HEX/day one token adds to its hex: its rarity's HEX × (1 + species family bonus). Resource tokens: rarity only."""
     v = HEX_PER_DAY.get((rarity or 'common').lower(), HEX_PER_DAY['common'])
-    rid = site_resource(category)
-    pct = RESOURCE_TOKEN_BONUS.get(rid, 0) if rid else SPECIES_BONUS.get(category or '', 0)
-    return v * (1 + pct / 100)
+    return v * (1 + SPECIES_BONUS.get(category or '', 0) / 100)
 
 
 def hex_tokens(h3_list) -> dict:

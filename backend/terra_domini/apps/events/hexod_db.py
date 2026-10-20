@@ -69,7 +69,15 @@ def load() -> dict:
             for f in TEXT_FIELDS:
                 if isinstance(row.get(f), str):
                     row[f] = clean_text(row[f])
+            if k == 'pois' and isinstance(row.get('description'), str):   # no resource bonus any more (owner 2026-10-20)
+                row['description'] = re.sub(r'\s*Holding this hex pays \+\d+% HEX on top of its rarity\.', '', row['description'])
     apply_quotas(db.get('creatures', []), family=lambda c: c.get('codex_category') or '')
+    apply_quotas([p for p in db.get('pois', []) if p.get('on_map') and not p.get('creature_uid')],
+                 family=lambda p: p.get('kind') or '', score=lambda p: p.get('score') or 0)
+    by_uid = {c['uid']: c for c in db.get('creatures', [])}
+    for p in db.get('pois', []):
+        if p.get('creature_uid') in by_uid:
+            p['rarity'] = by_uid[p['creature_uid']].get('rarity') or 'common'
     return db
 
 

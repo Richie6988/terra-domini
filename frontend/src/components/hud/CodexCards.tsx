@@ -80,9 +80,9 @@ function faceOf(family: CardFamily, c: any) {
     case 'events': return { ...base, category: c.category === 'sport' ? 'SPORT EVENT' : 'WORLD EVENT', iconId: 'trophy', edition: dateLabel(c.event_date) }
     case 'creatures': return { ...base, category: CREATURE_FAMILY[c.category]?.label || 'CREATURE', iconId: CREATURE_FAMILY[c.category]?.icon || 'animal', edition: c.count > 1 ? `x${c.count}` : '' }
     case 'biomes': return { ...base, rarity: c.type === 'ocean' ? 'rare' : 'uncommon', category: `BIOME · ${c.continent}`, iconId: CONTINENT_ICON[c.continent] || 'globe', terrain: c.type }
-    // Resource token = a real extraction site (oil field, gold mine…): pays +bonus % HEX
+    // Resource card (oil field, copper deposit…): its own rarity, Silver to Diamond, pays like any token
     default: return { ...base, category: `RESOURCE · ${c.resource || ''}`, iconId: RES_ICON[c.id] || 'box', country: c.country_code,
-      edition: `+${c.bonus_pct}% HEX` }
+      hexPerDay: c.hex_per_day }
   }
 }
 
@@ -206,7 +206,7 @@ export function CodexCards({ family, filter }: { family: CardFamily; filter: str
             {open.owned ? ` You hold ${open.territories} territor${open.territories > 1 ? 'ies' : 'y'} here.` : ' Claim a territory in this region to unlock it.'}
           </p>}
           {family === 'resources' && <p style={{ fontSize: 13, margin: '8px 0' }}>
-            {open.resource} token · pays +{open.bonus_pct}% HEX on top of its rarity. {open.description}
+            {rarityLabel(open.rarity)} {open.resource} card · {(open.hex_per_day || 0).toLocaleString()} HEX a day. {open.description}
             {open.owned ? ' It is yours.' : ' Claim its hex (or take it from its holder) to own it.'}
           </p>}
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>

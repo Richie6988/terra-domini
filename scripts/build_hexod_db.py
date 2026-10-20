@@ -114,7 +114,6 @@ SITE_CATEGORY = {'oil': 'oil_field', 'gas': 'gas_reserve', 'coal': 'coal_mine', 
 DEPOSITS_PER_REGION = {'oil': 40, 'gas': 40, 'coal': 40, 'copper': 40, 'diamonds': 12, 'rareearthelements': 12}
 SITE_FLOOR = {'oil_field': 'rare', 'gas_reserve': 'rare', 'coal_mine': 'rare', 'iron_ore': 'rare', 'copper_mine': 'rare',
               'gold_mine': 'epic', 'diamond_mine': 'epic', 'rare_earth': 'epic', 'lithium_deposit': 'epic', 'uranium_mine': 'epic'}
-RES_TOKEN_BONUS = {'oil': 150, 'gas': 120, 'coal': 80, 'copper': 100, 'diamonds': 250, 'rareearthelements': 220}   # = economy/resources.py
 
 
 def add_resource_tokens(pois, biomes, resources):
@@ -155,7 +154,6 @@ def add_resource_tokens(pois, biomes, resources):
                     'lat': round(clat, 5), 'lon': round(clon, 5), 'h3_r8': cell, 'country_code': '',
                     'title': f"{names.get(rid, rid)} deposit",
                     'description': (f"Resource token: the {b['name']} holds {names.get(rid, rid).lower()} (HEXOD resource database). "
-                                    f"Holding this hex pays +{RES_TOKEN_BONUS[rid]}% HEX on top of its rarity. "
                                     "Game placement inside the region, not a surveyed site."),
                     'fun_fact_1': '', 'fun_fact_2': '', 'fun_fact_3': '', 'rare_fact': '', 'visitors_per_year': None,
                     'visitors_score': None, 'geopolitical_score': None, 'grade': '', 'wiki_url': '', 'image': '',

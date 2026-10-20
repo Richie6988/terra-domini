@@ -5,7 +5,7 @@ Resource & biome cards (2026-10-18) — data from the HEXOD master DB (apps/even
   land region containing its centre (ocean regions only if no land region matches).
 - Resources (owner 2026-10-19, simpler): no stock, no collecting. A resource only exists as a RARE TOKEN — a real
   extraction site of the DB (Prudhoe Bay oil, North Dome gas, Witwatersrand gold, Orapa diamonds…). Holding one
-  pays far more HEX than a regular territory (RESOURCE_TOKEN_BONUS). Regular hexes carry no resource.
+  is a card with its own rarity (Silver to Diamond), paid like any token. Regular hexes carry no resource.
 """
 from functools import lru_cache
 
@@ -88,11 +88,8 @@ def player_biomes(player) -> dict:
 # ── HEX yield of a territory varies with what it sits on (owner 2026-10-18) ──
 # Bonus % on the territory's HEX/day for each resource it produces (region + POI), capped; plus a stable
 # per-hex variation so two neighbouring commons are not identical.
-# A resource token pays its rarity's HEX × (1 + bonus): the rarer the resource, the bigger
-RESOURCE_TOKEN_BONUS = {
-    'oil': 150, 'gas': 120, 'coal': 80, 'iron': 80, 'copper': 100, 'gold': 200, 'diamonds': 250,
-    'rareearthelements': 220, 'lithium': 200, 'uranium': 220,
-}
+# No resource bonus any more (owner 2026-10-20): a resource token is a card with its own rarity (a Silver copper,
+# an Emerald copper, a Diamond copper…) and pays that rarity's HEX like any token.
 HEX_VARIATION = 15      # ± % per hex, deterministic
 
 
@@ -103,8 +100,7 @@ def hex_variation_pct(h3_index: str) -> int:
 
 def hex_yield(h3_index, lat, lon, rarity='common', poi_category='') -> dict:
     """{'mult', 'bonuses': [(resource name, pct)], 'variation_pct'} for one territory."""
-    rid = site_resource(poi_category)
-    bonuses = [(resources()[rid]['name'], RESOURCE_TOKEN_BONUS.get(rid, 100))] if rid else []
-    total = sum(p for _, p in bonuses)
+    bonuses = []
+    total = 0
     var = hex_variation_pct(h3_index)
     return {'mult': (1 + total / 100) * (1 + var / 100), 'bonuses': bonuses, 'bonus_pct': total, 'variation_pct': var}

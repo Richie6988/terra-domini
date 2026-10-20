@@ -301,13 +301,13 @@ def codex_cards(request):
             continue
         res.append({
             'uid': p['uid'], 'id': rid, 'resource': meta[rid]['name'], 'name': p['name'], 'rarity': p['rarity'],
-            'category': meta[rid]['name'], 'bonus_pct': R.RESOURCE_TOKEN_BONUS.get(rid, 100),
+            'category': meta[rid]['name'], 'hex_per_day': round(B.token_hex_per_day(p['rarity'])),
             'h3_index': p.get('h3_r8'), 'lat': p.get('lat'), 'lon': p.get('lon'), 'country_code': p.get('country_code') or '',
             'description': (p.get('description') or '')[:400], 'wiki_url': p.get('wiki_url') or '', 'image_url': p.get('image_url') or '',
             'satellite_url': satellite_tile_url(p['lat'], p['lon']) if p.get('lat') is not None else '',
             'owned': p.get('h3_r8') in owned, 'no': no,
         })
-    res.sort(key=lambda r: (not r['owned'], -r['bonus_pct'], r['name']))
+    res.sort(key=lambda r: (not r['owned'], -r['hex_per_day'], r['name']))
 
     # Creatures album: every capture is a card (numbered like the DB); counts per family for the empty slots
     from terra_domini.apps.territories.models import SafariCapture
@@ -534,7 +534,7 @@ def territory_card(request, h3_index):
         'connected': connected,
         'region': {'id': region['id'], 'name': region['name'], 'continent': region['continent']} if region else None,
         # resource token (real extraction site): its resource and the HEX bonus it pays — regular hexes: []
-        'resources': [{'id': k, 'name': meta[k]['name'], 'bonus_pct': R.RESOURCE_TOKEN_BONUS.get(k, 100)} for k in rates],
+        'resources': [{'id': k, 'name': meta[k]['name']} for k in rates],
         'poi_name': poi.get('name'), 'poi_category': poi.get('category'), 'token_id': (t.token_id if t else None) or poi.get('token_id'),
         # Front of the token: texts from the HEXOD master DB
         'title': poi.get('real_output') or '', 'description': poi.get('description') or _place_description(t, _terrain_of(t, lat, lon), region, rates, meta),
