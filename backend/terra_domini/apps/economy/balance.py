@@ -151,27 +151,14 @@ def plain_hex_per_day(connected: bool = False) -> int:
     return PLAIN_HEX_PER_DAY + (KINGDOM_BONUS if connected else 0)
 
 
-# Species tokens pay a bonus by family (owner 2026-10-19: "variations between birds, dinosaurs, mushrooms…")
-SPECIES_BONUS = {'species_fossil': 100, 'species_marine': 80, 'species_microOrganism': 70, 'species_animal': 60,
-                 'species_bird': 50, 'species_mushroom': 40, 'species_insect': 30, 'species_vegetal': 20}
-
-
-SPECIES_LABEL = {'species_fossil': 'Dinosaur', 'species_marine': 'Marine life', 'species_microOrganism': 'Microbe',
-                 'species_animal': 'Animal', 'species_bird': 'Bird', 'species_mushroom': 'Fungus', 'species_insect': 'Insect',
-                 'species_vegetal': 'Plant'}
-
-
 def token_bonus(category: str):
-    """(label, %) of the family / resource bonus of a token category, or None."""
-    if category in SPECIES_BONUS:      # resources have no bonus (their card rarity pays)
-        return SPECIES_LABEL[category], SPECIES_BONUS[category]
+    """No family / resource bonus any more (owner 2026-10-20: "a Silver bird is 100 + 150, full stop"): always None."""
     return None
 
 
 def token_hex_per_day(rarity: str, category: str = '') -> float:
-    """HEX/day one token adds to its hex: its rarity's HEX × (1 + species family bonus). Resource tokens: rarity only."""
-    v = HEX_PER_DAY.get((rarity or 'common').lower(), HEX_PER_DAY['common'])
-    return v * (1 + SPECIES_BONUS.get(category or '', 0) / 100)
+    """HEX/day one token adds to its hex: its rarity's HEX, nothing else (species, resources, landmarks alike)."""
+    return float(HEX_PER_DAY.get((rarity or 'common').lower(), HEX_PER_DAY['common']))
 
 
 def hex_tokens(h3_list) -> dict:
