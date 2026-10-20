@@ -33,7 +33,7 @@ For each row:
    alpha-2 country code ("" for open sea, never anything else). Fix what is wrong (verdict "corrected", list each fix in corrections) or confirm ("validated").
 2b. Category: the token category must fit the place, rationally (owner 2026-10-20). `POI --categories` lists them.
    A stadium is sports_arena, a festival site or a battle is history_event, a museum is museum, an airport is
-   control_tower / airport... If the row's game_category is wrong, put the right one in game_category and say why in
+   control_tower (airports)... If the row's game_category is wrong, put the right one in game_category and say why in
    corrections; if it is right, repeat it. game_category is required in every result.
 3. Description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing unverified.
    Absolute rule: never "--", never an em dash or en dash; commas and full stops only.
