@@ -12,7 +12,7 @@ import { TOKEN_CATEGORIES, iconIdFor } from '../shared/poiIcons'
 
 const FAMILIES: [string, string[]][] = [
   ['PLACES', ['capital_city', 'country', 'world_heritage', 'ancient_ruins', 'ancient_wonder', 'religious_site', 'royal_palace', 'museum', 'history_event', 'news_event', 'sports_arena']],
-  ['NATURE', ['mountain_peak', 'volcano', 'canyon', 'waterfall', 'glacier', 'cave_system', 'coral_reef', 'ancient_forest', 'nature_sanctuary', 'island', 'desert']],
+  ['NATURE', ['mountain_peak', 'volcano', 'canyon', 'waterfall', 'glacier', 'cave_system', 'coral_reef', 'ancient_forest', 'nature_sanctuary', 'island', 'lake', 'desert']],
   ['RESOURCES', ['oil_field', 'gas_reserve', 'gold_mine', 'diamond_mine', 'rare_earth', 'lithium_deposit', 'uranium_mine', 'coal_mine', 'iron_ore', 'copper_mine', 'freshwater', 'fertile_land', 'agri_megafarm', 'seed_vault']],
   ['STRATEGIC', ['military_base', 'naval_base', 'missile_site', 'intelligence_hq', 'chokepoint', 'alliance_hq', 'control_tower']],
   ['ECONOMY & TECH', ['financial_hub', 'stock_exchange', 'trade_node', 'mega_port', 'offshore_haven', 'oligarch_asset', 'casino_resort', 'international_org', 'tech_giant', 'media_hq',

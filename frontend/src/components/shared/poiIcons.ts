@@ -6,7 +6,7 @@ import { getIcon } from './iconBank'
 // tech, mystery, species).
 export const TOKEN_CATEGORIES = [
   'mountain_peak', 'volcano', 'canyon', 'waterfall', 'glacier', 'cave_system', 'coral_reef', 'ancient_forest',
-  'nature_sanctuary', 'island', 'desert',
+  'nature_sanctuary', 'island', 'lake', 'desert',
   'oil_field', 'gas_reserve', 'gold_mine', 'diamond_mine', 'rare_earth', 'lithium_deposit', 'uranium_mine', 'coal_mine',
   'iron_ore', 'copper_mine', 'freshwater', 'fertile_land', 'agri_megafarm', 'seed_vault',
   'military_base', 'naval_base', 'missile_site', 'intelligence_hq', 'chokepoint', 'alliance_hq',

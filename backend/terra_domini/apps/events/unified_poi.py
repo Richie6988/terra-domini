@@ -21,6 +21,7 @@ class POICategory(models.TextChoices):
     ANCIENT_FOREST   = 'ancient_forest',   'Ancient Forest'
     NATURE_SANCTUARY = 'nature_sanctuary', 'Nature Sanctuary'
     ISLAND           = 'island',           'Strategic Island'
+    LAKE             = 'lake',             'Lake'   # owner 2026-10-20: salt and fresh lakes (Dead Sea, Titicaca…)
     # 💎 Resources
     OIL_FIELD        = 'oil_field',        'Oil Field'
     GAS_RESERVE      = 'gas_reserve',      'Gas Reserve'
@@ -108,6 +109,7 @@ POI_VISUAL = {
     'coral_reef':       {'emoji': '🪸', 'color': '#EC4899', 'size': 'md', 'rarity': 'rare',      'game_resource': 'food',      'bonus': 45},
     'ancient_forest':   {'emoji': '🌲', 'color': '#15803D', 'size': 'md', 'rarity': 'uncommon',  'game_resource': 'food',      'bonus': 35},
     'nature_sanctuary': {'emoji': '🌿', 'color': '#10B981', 'size': 'md', 'rarity': 'uncommon',  'game_resource': 'culture',   'bonus': 40},
+    'lake':             {'emoji': '', 'color': '#0EA5E9', 'size': 'md', 'rarity': 'rare',      'game_resource': 'credits',   'bonus': 30},
     'island':           {'emoji': '🏝️', 'color': '#0EA5E9', 'size': 'md', 'rarity': 'rare',      'game_resource': 'credits',   'bonus': 60},
     'oil_field':        {'emoji': '🛢️', 'color': '#1F2937', 'size': 'lg', 'rarity': 'common',    'game_resource': 'energy',    'bonus': 50},
     'gas_reserve':      {'emoji': '🔥', 'color': '#D97706', 'size': 'md', 'rarity': 'common',    'game_resource': 'energy',    'bonus': 35},
