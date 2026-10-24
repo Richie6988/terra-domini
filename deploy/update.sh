@@ -36,6 +36,10 @@ systemctl restart hexod
 sleep 3
 systemctl is-active hexod && echo "site restarted"
 
+# token pictures copied on our server (resumable, skips the ones already there)
+sudo -u hexod -H env DJANGO_SETTINGS_MODULE=terra_domini.settings.prod nohup "$PY" manage.py mirror_images >> /home/hexod/data/mirror_images.log 2>&1 &
+echo "pictures copy running in the background — log: /home/hexod/data/mirror_images.log"
+
 if [ "$1" = "--data" ]; then
   mkdir -p /home/hexod/data && chown hexod: /home/hexod/data
   sudo -u hexod -H nohup bash "$APP/deploy/wiki_refresh.sh" --external > /home/hexod/data/data_refresh.log 2>&1 &

@@ -19,3 +19,5 @@ M=/home/hexod/terra-domini/.venv/bin/python /home/hexod/terra-domini/backend/man
 7 * * * *    cd /home/hexod/terra-domini/backend && $M daily_auctions >> /home/hexod/data/cron.log 2>&1
 # Open databases (Wikidata categories, iNaturalist photos, PBDB fossils) then Wikipedia check — Sundays
 15 4 * * 0   cd /home/hexod/terra-domini && bash deploy/wiki_refresh.sh --external >> /home/hexod/data/cron.log 2>&1
+# Token pictures copied on our server (MEDIA_ROOT/poi_img) so a file deleted on Wikimedia never leaves a card blank — nightly, after wiki_refresh
+30 5 * * *   cd /home/hexod/terra-domini/backend && $M mirror_images >> /home/hexod/data/cron.log 2>&1

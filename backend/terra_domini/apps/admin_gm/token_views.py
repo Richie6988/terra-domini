@@ -21,6 +21,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from terra_domini.apps.economy.balance import HEX_PER_DAY
+from terra_domini.apps.events import image_mirror
 from terra_domini.apps.events.unified_poi import POICategory, UnifiedPOI
 
 RARITIES = ['common', 'uncommon', 'rare', 'epic', 'legendary', 'mythic']
@@ -105,7 +106,7 @@ def _apply(p: UnifiedPOI, data: dict) -> tuple[list, str | None]:
     for f in ('wiki_url', 'image_url'):
         if f in src:
             v = str(src[f] or '').strip()
-            if v and not v.startswith('https://'):
+            if v and not v.startswith('https://') and not (f == 'image_url' and v.startswith(image_mirror.served_prefix())):
                 return [], f'{f} must start with https://'
             if getattr(p, f) != v:
                 setattr(p, f, v); changed.append(f)

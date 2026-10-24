@@ -19,7 +19,7 @@ from django.db import transaction
 from django.utils.dateparse import parse_datetime
 
 from terra_domini.apps.economy.balance import HEX_PER_DAY
-from terra_domini.apps.events import hexod_db
+from terra_domini.apps.events import hexod_db, image_mirror
 from terra_domini.apps.events.unified_poi import POI_VISUAL, RARITY_TDC, UnifiedPOI
 from terra_domini.apps.territories.models import Territory
 from terra_domini.apps.territories.territory_engine import _biome_from_category
@@ -101,7 +101,7 @@ class Command(BaseCommand):
                     real_output=(p.get('title') or '')[:200],
                     wiki_url=p['wiki_url'] if len(p.get('wiki_url') or '') <= 200 else '', fun_fact=_fun_fact(p),
                     is_active=True, is_featured=p.get('quality') == 'premium', verified=True, source='hexod_db', db_uid=p['uid'][:60],
-                    image_url=p['image_url'] if str(p.get('image_url', '')).startswith('https://') else '',
+                    image_url=image_mirror.served_url(p['image_url']) if str(p.get('image_url', '')).startswith('https://') else '',
                     image_credit=(p.get('image_credit') or '')[:300], event_date=(p.get('event_date') or '')[:10],
                     token_id=p.get('token_id') or None, visitors_per_year=int(p.get('visitors_per_year') or 0),
                     geopolitical_score=int(p.get('geopolitical_score') or 0),
