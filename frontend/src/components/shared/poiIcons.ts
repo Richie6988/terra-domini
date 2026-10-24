@@ -5,7 +5,7 @@ import { getIcon } from './iconBank'
 // cat_<category> set of iconBank: one badge style, colour = family (places, nature, resources, strategic, economy,
 // tech, mystery, species).
 export const TOKEN_CATEGORIES = [
-  'mountain_peak', 'volcano', 'canyon', 'waterfall', 'glacier', 'cave_system', 'coral_reef', 'ancient_forest',
+  'mountain_peak', 'mountain_range', 'volcano', 'canyon', 'waterfall', 'glacier', 'cave_system', 'coral_reef', 'ancient_forest',
   'nature_sanctuary', 'island', 'lake', 'desert',
   'oil_field', 'gas_reserve', 'gold_mine', 'diamond_mine', 'rare_earth', 'lithium_deposit', 'uranium_mine', 'coal_mine',
   'iron_ore', 'copper_mine', 'freshwater', 'fertile_land', 'agri_megafarm', 'seed_vault',
@@ -15,7 +15,7 @@ export const TOKEN_CATEGORIES = [
   'nuclear_plant', 'space_center', 'data_center', 'semiconductor', 'internet_cable', 'ix_point', 'control_tower',
   'mega_dam', 'water_treatment', 'desalination', 'steel_mill', 'pharma_hq', 'research_station', 'particle_collider',
   'observatory', 'infrastructure',
-  'capital_city', 'country', 'world_heritage', 'ancient_ruins', 'religious_site', 'royal_palace', 'museum',
+  'capital_city', 'country', 'world_heritage', 'ancient_ruins', 'religious_site', 'royal_palace', 'museum', 'theatre',
   'ancient_wonder', 'history_event', 'news_event', 'sports_arena',
   'conspiracy', 'secret_facility', 'anomaly',
   // Living species tokens (layer 3 of the fixed map table)

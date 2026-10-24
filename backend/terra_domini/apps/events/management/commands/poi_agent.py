@@ -74,7 +74,7 @@ For the POI you are given:
 2. Check the facts: exact name (English, as on Wikipedia), coordinates (use Wikipedia's when they exist), ISO 3166-1
    alpha-2 country code. Fix what is wrong (verdict "corrected") or confirm (verdict "validated").
 2b. Category: the token category must fit the place, rationally (owner 2026-10-20). The allowed values are checked on submit.
-   A stadium is sports_arena, a festival site or a battle is history_event, a museum is museum, a lake or inland sea (salt or fresh) is lake, an airport is
+   A stadium is sports_arena, a festival site or a battle is history_event, a museum is museum, a lake or inland sea (salt or fresh) is lake, a mountain range / highlands is mountain_range (a single summit stays mountain_peak), a theatre or opera house is theatre, an airport is
    control_tower (airports)... If the row's game_category is wrong, put the right one in game_category and say why in
    corrections; if it is right, repeat it. game_category is required in every result.
 3. Write the card description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing you
