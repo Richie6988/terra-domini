@@ -380,7 +380,9 @@ class Agent:
         page = self.wiki.get(s.get('wiki_title') or '') or next(iter(self.wiki.values()), None)
         if page and page.get('lat') not in (None, '') and s.get('lat') is not None:
             d = km((float(page['lat']), float(page['lon'])), (s['lat'], s.get('lon') or 0))
-            if d > 25:
+            # an event point at sea moves to the nearest linked coastal place (owner rule: tokens sit on land)
+            ashore = d <= 150 and any(w in ' '.join(map(str, s.get('corrections') or [])).lower() for w in ('on land', 'coast'))
+            if d > 25 and not ashore:
                 errs.append(f'coordinates are {d:.0f} km from Wikipedia\'s ({page["lat"]}, {page["lon"]}): use them or explain in corrections.')
         return errs
 
