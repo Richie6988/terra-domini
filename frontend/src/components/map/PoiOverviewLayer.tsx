@@ -34,7 +34,7 @@ export function PoiOverviewLayer({ map, zoom, center }: { map: L.Map | null; zoo
     const b = map.getBounds().pad(0.15)
     const id = ++reqId.current
     if (!kinds) { layer.clearLayers(); return }
-    api.get('/map/pois/', { params: { south: b.getSouth(), west: b.getWest(), north: b.getNorth(), east: b.getEast(), zoom, kinds } })
+    api.get('/map/pois/', { params: { south: b.getSouth(), west: b.getWest(), north: b.getNorth(), east: b.getEast(), zoom, kinds, hidden: hiddenCats.join(',') } })
       .then(({ data }) => {
         if (id !== reqId.current) return
         layer.clearLayers()

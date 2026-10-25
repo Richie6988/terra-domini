@@ -164,7 +164,8 @@ export function Token3DViewer(props: Token3DProps) {
         h3Index: d.h3_index, lat: d.lat, lon: d.lon, rarity: d.rarity, owner: d.owner, capturedAt: d.captured_at,
         hexPerDay: d.hex_per_day, region: d.region?.name ?? null, continent: d.region?.continent ?? null,
         resources: (d.resources || []).map((r: any) => ({ name: r.name, bonusPct: r.bonus_pct })),
-        tokenId: d.token_id ?? null, minted: !!d.minted, edition: d.edition || 1,
+        // a resource deposit shows its unique number among that resource's tokens as "#n" (owner 2026-10-25)
+        tokenId: d.token_id ?? null, minted: !!d.minted, edition: d.card_number || d.edition || 1,
       } })
     }).catch(() => {})
     return () => { alive = false }

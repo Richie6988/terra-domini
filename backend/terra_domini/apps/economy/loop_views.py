@@ -310,7 +310,7 @@ def codex_cards(request):
             'h3_index': p.get('h3_r8'), 'lat': p.get('lat'), 'lon': p.get('lon'), 'country_code': p.get('country_code') or '',
             'description': (p.get('description') or '')[:400], 'wiki_url': p.get('wiki_url') or '', 'image_url': p.get('image_url') or '',
             'satellite_url': satellite_tile_url(p['lat'], p['lon']) if p.get('lat') is not None else '',
-            'owned': p.get('h3_r8') in owned, 'no': no,
+            'owned': p.get('h3_r8') in owned, 'no': no, 'card_number': p.get('card_number'),   # "#n": unique per resource
         })
     res.sort(key=lambda r: (not r['owned'], -r['hex_per_day'], r['name']))
 
@@ -524,7 +524,7 @@ def territory_card(request, h3_index):
         return Response({'error': 'Invalid hex'}, status=400)
     t = Territory.objects.select_related('owner').filter(h3_index=h3_index).first()
     poi = UnifiedPOI.objects.filter(h3_index=h3_index, is_active=True).values(
-        'name', 'category', 'token_id', 'real_output', 'description', 'fun_fact', 'wiki_url', 'image_url', 'image_credit', 'event_date', 'rarity', 'country_code').first() or {}
+        'name', 'category', 'token_id', 'card_number', 'real_output', 'description', 'fun_fact', 'wiki_url', 'image_url', 'image_credit', 'event_date', 'rarity', 'country_code').first() or {}
     rarity = (t.rarity if t else None) or 'common'
     connected = False
     if t and t.owner_id:
@@ -536,6 +536,7 @@ def territory_card(request, h3_index):
     return Response({
         'h3_index': h3_index, 'lat': round(lat, 4), 'lon': round(lon, 4),
         'edition': (t.nft_version if t else 1) or 1, 'edition_label': B.edition_label(t.nft_version if t else 1),
+        'card_number': poi.get('card_number'),     # resource deposit: its unique number among that resource's tokens
         'edition_value_mult': B.edition_value_mult(t.nft_version if t else 1),
         'terrain': _terrain_of(t, lat, lon), 'country_code': (t.country_code if t else '') or poi.get('country_code', '') or '',
         'rarity': rarity, 'is_shiny': bool(t and t.is_shiny),

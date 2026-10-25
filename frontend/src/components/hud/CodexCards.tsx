@@ -81,8 +81,9 @@ function faceOf(family: CardFamily, c: any) {
     case 'creatures': return { ...base, category: CREATURE_FAMILY[c.category]?.label || 'CREATURE', iconId: CREATURE_FAMILY[c.category]?.icon || 'animal', edition: c.count > 1 ? `x${c.count}` : '' }
     case 'biomes': return { ...base, rarity: c.type === 'ocean' ? 'rare' : 'uncommon', category: `BIOME · ${c.continent}`, iconId: CONTINENT_ICON[c.continent] || 'globe', terrain: c.type }
     // Resource card (oil field, copper deposit…): its own rarity, Silver to Diamond, pays like any token
+    // its "#n" is the deposit's unique number among the tokens of the same resource (owner 2026-10-25)
     default: return { ...base, category: `RESOURCE · ${c.resource || ''}`, iconId: RES_ICON[c.id] || 'box', country: c.country_code,
-      hexPerDay: c.hex_per_day }
+      hexPerDay: c.hex_per_day, ...(c.card_number ? { series: c.card_number } : {}) }
   }
 }
 

@@ -241,6 +241,10 @@ def map_pois(request):
         kq |= Q(category__in=RESOURCE_SITES)
     if 'places' in kinds:
         kq |= ~Q(category__startswith='species_') & ~Q(category__in=RESOURCE_SITES)
+    # categories hidden in the FILTER panel are neither drawn nor counted (owner 2026-10-25: counters over-counted)
+    hidden = [c for c in (request.query_params.get('hidden') or '').split(',') if c]
+    if hidden:
+        kq &= ~Q(category__in=hidden)
     qs = qs.filter(kq)
     qs = qs.filter(longitude__range=(w, e)) if w <= e else qs  # antimeridian: skip the lon filter
     order = {'mythic': 0, 'legendary': 1, 'epic': 2, 'rare': 3, 'uncommon': 4, 'common': 5}
@@ -249,13 +253,18 @@ def map_pois(request):
     from terra_domini.apps.territories.models import Territory
     owners = dict(Territory.objects.filter(h3_index__in=[p['h3_index'] for p in rows], owner__isnull=False)
                   .values_list('h3_index', 'owner__username'))
-    # Area counters: every active POI of the view grouped by an H3 cell sized for the zoom
+    # Area counters: what the map really shows once zoomed in = one hex per POI hex (several tokens on one hex are
+    # one hex on the map, owner 2026-10-25), hidden categories left out, grouped by an H3 cell sized for the zoom
     import h3 as _h3
     res = 1 if z <= 4 else 2 if z <= 6 else 3 if z <= 9 else 4
     allq = UnifiedPOI.objects.filter(is_active=True, latitude__range=(s, n)).filter(kq)
     allq = allq.filter(longitude__range=(w, e)) if w <= e else allq
-    groups = {}
-    for la, lo, rar in allq.values_list('latitude', 'longitude', 'rarity')[:20000]:
+    groups, seen = {}, set()
+    for la, lo, rar, hx in allq.values_list('latitude', 'longitude', 'rarity', 'h3_index')[:20000]:
+        if hx:
+            if hx in seen:
+                continue
+            seen.add(hx)
         cell = _h3.latlng_to_cell(la, lo, res)
         g = groups.setdefault(cell, [0, 0.0, 0.0, {}])
         g[0] += 1; g[1] += la; g[2] += lo; g[3][rar] = g[3].get(rar, 0) + 1

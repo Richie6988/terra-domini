@@ -128,6 +128,7 @@ def add_resource_tokens(pois, biomes, resources):
     names = {r['id']: r['name'] for r in resources}
     used = {(p.get('h3_r8'), p.get('game_category')) for p in pois}
     added = 0
+    serial = {}     # one running number per resource, unique (owner 2026-10-25: the # of the token, not in its name)
     for b in biomes:
         sea = b['type'] != 'land'          # offshore oil and gas, deep-sea rare earths: placed at sea
         for rid in [x.strip() for x in (b.get('resources') or '').split(',') if x.strip() in SITE_CATEGORY]:
@@ -144,15 +145,16 @@ def add_resource_tokens(pois, biomes, resources):
                 if (cell, cat) in used:
                     continue
                 used.add((cell, cat)); k += 1; added += 1
+                serial[rid] = serial.get(rid, 0) + 1
                 x = rng.random()
                 rarity = (('epic' if x < 0.1 else 'rare' if x < 0.4 else 'uncommon') if precious
                           else ('rare' if x < 0.04 else 'uncommon' if x < 0.2 else 'common'))
                 clat, clon = h3.cell_to_latlng(cell)
                 pois.append({
                     'uid': f"res-{b['id']}-{rid}-{k}", 'source': 'generated:resource', 'kind': 'resource', 'quality': '',
-                    'name': f"{names.get(rid, rid)} deposit {k} · {b['name']}", 'game_category': cat, 'codex_category': 'resource',
+                    'name': f"{names.get(rid, rid)} · {b['name']}", 'card_number': serial[rid], 'game_category': cat, 'codex_category': 'resource',
                     'lat': round(clat, 5), 'lon': round(clon, 5), 'h3_r8': cell, 'country_code': '',
-                    'title': f"{names.get(rid, rid)} deposit",
+                    'title': names.get(rid, rid),
                     'description': (f"Resource token: the {b['name']} holds {names.get(rid, rid).lower()} (HEXOD resource database). "
                                     "Game placement inside the region, not a surveyed site."),
                     'fun_fact_1': '', 'fun_fact_2': '', 'fun_fact_3': '', 'rare_fact': '', 'visitors_per_year': None,
