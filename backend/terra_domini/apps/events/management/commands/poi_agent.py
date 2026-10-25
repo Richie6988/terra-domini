@@ -201,6 +201,23 @@ def duplicates(db, done, kinds=DEFAULT_KINDS):
                 for j in range(i + 1, len(g)):
                     if not same_kind or (g[i]['kind'] in TOWN) == (g[j]['kind'] in TOWN):
                         pair(g[i], g[j], why, dist)
+    # the same edition of an event filed twice ("Qatar 2022 World Cup" / "2022 World Cup final"): same year, two shared
+    # words, < 60 km; the precise one (final, opening: a venue) is kept
+    year = collections.defaultdict(list)
+    for r in rows:
+        m = re.search(r'\b(1[5-9]\d\d|20\d\d)\b', r['name'])
+        if m and r['kind'] == 'history':
+            year[m.group(1)].append(r)
+    words = lambda r: set(re.findall(r'[a-z]+', _ascii(r['name']))) - {'the', 'of', 'in', 'and'}
+    venue = lambda r: bool(re.search(r'\b(final|opening)\b', r['name'].lower()))
+    for g in year.values():
+        for i in range(len(g)):
+            for j in range(i + 1, len(g)):
+                a, b = g[i], g[j]
+                if len(words(a) & words(b)) >= 2 and km((a['lat'], a['lon']), (b['lat'], b['lon'])) < 60:
+                    keep, drop = (a, b) if (a['stamped'], venue(a)) >= (b['stamped'], venue(b)) else (b, a)
+                    if not drop['stamped'] and drop['uid'] not in out:
+                        out[drop['uid']] = (drop, keep, 'same event edition')
     return list(out.values())
 
 
