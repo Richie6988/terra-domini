@@ -49,7 +49,7 @@ For each row:
    - common (Silver): regional / local (langs < 20).
    Resource / strategic sites (mine, oil / gas field, port, canal, dam, airport...) rank by world rank, not languages.
    Fame is measured on the article players know the place by: for the headquarters / site of a famous organisation
-   (CIA, NASA...), the organisation's article. A control tower token is its airport. When in doubt, the lower tier.
+   (CIA, NASA...), the organisation's article. A control tower token is its airport. Small national capitals (Bissau, Dili, Honiara...) have langs inflated by bot articles: rank cities by real fame and size, a small capital is uncommon at most. A UNESCO World Heritage site is at least rare. When in doubt, the lower tier.
    rarity_reason says which numbers decided (langs, UNESCO, world rank). The HEX income follows automatically.
 5. Picture: from the pictures `--lookup` returned only. `--view` your choice, Read the file and check it clearly shows
    THIS place (the building / site / city itself, beautiful, sharp) — no map, flag, logo, plan, diagram, crowd
