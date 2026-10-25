@@ -377,7 +377,7 @@ class Agent:
             errs.append('image_url must be one of the pictures wiki_lookup returned.')
         elif img and img not in self.seen:
             errs.append('call view_image on image_url before choosing it.')
-        page = self.wiki.get(s.get('wiki_title') or '') or next(iter(self.wiki.values()), None)
+        page = self.wiki.get((s.get('wiki_title') or '').replace('_', ' ')) or next(iter(self.wiki.values()), None)
         if page and page.get('lat') not in (None, '') and s.get('lat') is not None:
             d = km((float(page['lat']), float(page['lon'])), (s['lat'], s.get('lon') or 0))
             # an event point at sea moves to the nearest linked coastal place (owner rule: tokens sit on land)
