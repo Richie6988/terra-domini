@@ -183,8 +183,8 @@ def duplicates(db, done, kinds=DEFAULT_KINDS):
         if km((a['lat'], a['lon']), (b['lat'], b['lon'])) >= dist:
             return
         keep, drop = (a, b) if rank(a) >= rank(b) else (b, a)
-        if drop['stamped'] or drop['uid'] in out:
-            return
+        if drop['stamped'] or drop['uid'] in out or drop['kind'] == 'country':
+            return   # country cards live off the map, never a duplicate of a place
         if drop['kind'] in TOWN and keep['kind'] not in TOWN and not keep['stamped']:
             return   # a city row is never dropped for an unchecked site that only shares its article
         out[drop['uid']] = (drop, keep, why)
