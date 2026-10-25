@@ -319,8 +319,9 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
             if (claimOpts.is_first) lines.push('Your first zone is free. It starts filling your HARVEST stock right away.')
             else {
               lines.push(claimOpts.is_adjacent || claimOpts.distance === 1
-                ? 'Next to your land: best price (1000 HEX or 1 h of exploring).'
+                ? 'Next to your land: best distance price (1 h of exploring).'
                 : `${claimOpts.distance} hexes from your land: price and time x${claimOpts.factor}. Closer is cheaper; spies cut both.`)
+              if (claimOpts.size_factor > 1) lines.push(`Your kingdom has ${claimOpts.kingdom_size} zones: each new zone costs x${claimOpts.size_factor}. Bigger kingdoms pay more to grow.`)
               if (buy && !buy.available) lines.push(`You have ${bal.toLocaleString()} HEX: ${Math.ceil(buy.cost - bal).toLocaleString()} more needed. Collect your harvest or claim mission rewards.`)
               if (exp && exp.available) lines.push(`Explore is free but takes ${fmtHours(exp.hours)}. Come back after that and tap EXPLORE again to take the zone.`)
               if (exp && !exp.available) lines.push(`You already have ${exp.running} exploration${exp.running > 1 ? 's' : ''} running (${exp.slots} at a time). Wait for it, or get an Extra Explorer in the Shop.`)

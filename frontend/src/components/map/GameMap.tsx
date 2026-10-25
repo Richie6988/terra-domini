@@ -52,7 +52,7 @@ const POI_RARITY_COLOR: Record<string, string> = {
 
 // No API key needed (Carto basemaps now require one on production domains → "API KEY REQUIRED" tiles)
 // Two ambiances (owner 2026-10-18): a stylised game board (OSM recoloured in CSS: .hx-tiles-game) and real satellite imagery
-const ZOOM_MIN = 5, ZOOM_MAX = 16
+const ZOOM_MIN = 4, ZOOM_MAX = 17   // owner 2026-10-25 (17 capped where Esri has no imagery, see tileerror)
 const TILES: Record<string, { label: string; url: string; maxZoom: number; overlay?: string; className?: string; attribution: string }> = {
   satellite: {
     label: 'Satellite',
@@ -64,8 +64,10 @@ const TILES: Record<string, { label: string; url: string; maxZoom: number; overl
 }
 const tileLayerFor = (cfg: typeof TILES[string]) =>
   // OSM's tile policy requires a Referer header (blocked otherwise)
-  L.tileLayer(cfg.url, { maxZoom: cfg.maxZoom ?? 19, className: cfg.className, attribution: cfg.attribution,
-    referrerPolicy: 'strict-origin-when-cross-origin' } as L.TileLayerOptions)
+  // blankTile=false: Esri answers 404 where it has no imagery at that zoom (instead of a grey "no data" tile), so the
+  // map can stop zooming there (owner 2026-10-25: zoom 4-17 except zones without images)
+  L.tileLayer(cfg.url + (cfg.url.includes('arcgisonline') ? '?blankTile=false' : ''), { maxZoom: cfg.maxZoom ?? 19,
+    className: cfg.className, attribution: cfg.attribution, referrerPolicy: 'strict-origin-when-cross-origin' } as L.TileLayerOptions)
 
 export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
   const mapRef       = useRef<L.Map | null>(null)
@@ -122,8 +124,13 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
       // Backend accepts float zoom via int(float(zoom))
       zoomSnap: 0,
       zoomDelta: 1,                // button clicks still jump whole levels
-      wheelPxPerZoomLevel: 10,     // responsive to touchpad
+      wheelPxPerZoomLevel: 10,     // responsive to touchpad (zoom OUT keeps this smooth wheel)
       wheelDebounceTime: 5,       // low debounce = immediate response
+      // endless map feeling (owner 2026-10-25): wraps east-west, stops at the poles (Mercator has no rows above 85°),
+      // the container background is the ocean colour so the edge never shows grey
+      worldCopyJump: true,
+      maxBounds: L.latLngBounds([-85, -1e6], [85, 1e6]),
+      maxBoundsViscosity: 1,
       zoomAnimation: true,
       fadeAnimation: true,
       markerZoomAnimation: true,
@@ -138,6 +145,26 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
     hexRef.current  = L.layerGroup().addTo(map)
     gridRef.current = L.layerGroup().addTo(map)
     mapRef.current  = map
+
+    // Wheel zoom IN goes one whole level per notch (owner 2026-10-25); zoom out keeps Leaflet's smooth wheel.
+    // Capture phase on the container: runs before Leaflet's own wheel handler, which never sees the zoom-in notches.
+    let lastStep = 0
+    const onWheelIn = (ev: WheelEvent) => {
+      if (ev.deltaY >= 0) return
+      ev.preventDefault(); ev.stopPropagation()
+      const now = Date.now()
+      if (now - lastStep < 220) return              // one level per notch, not per touchpad pixel burst
+      lastStep = now
+      const target = Math.min(map.getMaxZoom(), Math.floor(map.getZoom() + 1e-6) + 1)
+      if (target > map.getZoom()) map.setZoomAround(map.mouseEventToContainerPoint(ev as any), target)
+    }
+    containerRef.current.addEventListener('wheel', onWheelIn, { capture: true, passive: false })
+    // No satellite imagery at this zoom here (Esri 404 with blankTile=false): cap the zoom to the last level with images
+    tileRef.current?.on('tileerror', (e: any) => {
+      const z = e.coords?.z
+      if (z && z > 12 && map.getMaxZoom() >= z) { map.setMaxZoom(z - 1); if (map.getZoom() > z - 1) map.setZoom(z - 1) }
+    })
+    map.on('moveend', () => { if (map.getMaxZoom() < ZOOM_MAX && map.getZoom() < map.getMaxZoom()) map.setMaxZoom(ZOOM_MAX) })
 
     // Force Leaflet to recalculate container size (React mount timing issue)
     setTimeout(() => map.invalidateSize(), 200)
@@ -233,9 +260,10 @@ export function GameMap({ onViewportChange, onTerritoryClick }: GameMapProps) {
         const owned = useStore.getState().territories[hx]
         const isMine = !!owned?.owner_id && owned.owner_id === useStore.getState().player?.id
         const col = !owned?.owner_id ? '#00FF87' : isMine ? '#7CFFC4' : '#FF4D5E'
+        const seeThrough = map.getZoom() >= 14 && !!((owned as any)?.poi_name || (owned as any)?.is_landmark)
         const boundary = cellToBoundary(hx).map((p: number[]) => [p[0], p[1]])
         hoverPoly = L.polygon(boundary as L.LatLngTuple[], {
-          fillColor: col, fillOpacity: 0.16,
+          fillColor: col, fillOpacity: seeThrough ? 0 : 0.16,
           color: col, weight: 2, opacity: 0.95, interactive: false,
           dashArray: owned?.owner_id ? '' : '5,4',
         })
@@ -633,7 +661,7 @@ function MapBtn({ onClick, children }: { onClick: () => void; children: React.Re
     </button>
   )
 }
-/** Right-edge stack: compass (map info on) + zoom. Token categories and map info are in the FILTER panel (MapCategoryFilter). */
+/** Right-edge stack: zoom (the compass is gone: the map is always north up, owner 2026-10-25). Token categories and map info are in the FILTER panel (MapCategoryFilter). */
 function MapControls({ arOn, zoom, onZoom }: { arOn: boolean; zoom: number; onZoom: (z: number) => void }) {
   const glass: React.CSSProperties = {
     background: 'linear-gradient(180deg, rgba(13,27,42,0.95), rgba(10,22,40,0.95))',
@@ -643,20 +671,13 @@ function MapControls({ arOn, zoom, onZoom }: { arOn: boolean; zoom: number; onZo
   }
   return (
     <div style={{ position: 'absolute', top: '50%', right: 12, transform: 'translateY(-50%)', zIndex: 500, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
-      {arOn && (
-        <svg width="40" height="40" viewBox="-20 -20 40 40" aria-hidden>
-          <circle r="17" fill="rgba(11,22,38,0.88)" stroke="#fde68a" strokeWidth="2" />
-          <path d="M0 -13 L5 0 L0 -3 L-5 0 Z" fill="#f87171" stroke="#0b1626" strokeWidth="1.2" />
-          <path d="M0 13 L5 0 L0 3 L-5 0 Z" fill="#e2e8f0" stroke="#0b1626" strokeWidth="1.2" />
-        </svg>
-      )}
       <div style={{ ...glass, display: 'flex', flexDirection: 'column', alignItems: 'center', overflow: 'hidden' }}>
-        <button className="td-mapctl-btn" aria-label="Zoom in" title="Zoom in" onClick={() => onZoom(Math.min(19, zoom + 1))}>
+        <button className="td-mapctl-btn" aria-label="Zoom in" title="Zoom in" onClick={() => onZoom(Math.min(ZOOM_MAX, zoom + 1))}>
           <Plus size={17} />
         </button>
         <div style={{ fontFamily: "'Share Tech Mono', monospace", fontSize: 11, color: '#0CC5FF', lineHeight: '14px', userSelect: 'none' }}
           aria-label={`Zoom level ${zoom}`}>{zoom}</div>
-        <button className="td-mapctl-btn" aria-label="Zoom out" title="Zoom out" onClick={() => onZoom(Math.max(3, zoom - 1))}>
+        <button className="td-mapctl-btn" aria-label="Zoom out" title="Zoom out" onClick={() => onZoom(Math.max(ZOOM_MIN, zoom - 1))}>
           <Minus size={17} />
         </button>
       </div>

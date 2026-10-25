@@ -231,6 +231,10 @@ def is_beginner(player) -> bool:
 DISCOVERY_COST = 1000
 DISCOVERY_HOURS = 1.0
 DISCOVERY_MAX_FACTOR = 16
+# The bigger the kingdom a new hex joins (the kingdom of the nearest owned hex), the more it costs (owner 2026-10-25):
+# x(1 + 6 % per hex already in it), capped x10. Distance keeps its own factor; both multiply the price, not the time.
+KINGDOM_SIZE_STEP = 0.06
+KINGDOM_SIZE_MAX = 10.0
 
 
 def discovery(player, h3_index: str, rarity: str = 'common', is_poi: bool = False, spies: int = 0) -> dict:
@@ -244,13 +248,17 @@ def discovery(player, h3_index: str, rarity: str = 'common', is_poi: bool = Fals
     if disc and near_hex:      # Education of that kingdom: each spy point cuts more (+10 % per level), capped at -60 %
         from terra_domini.apps.territories.upgrades import kingdom_mult
         disc = min(0.6, disc * kingdom_mult(Fz.kingdom_hexes(player.id, near_hex), 'influence'))
-    cost = int(round(DISCOVERY_COST * factor * RARITY_PRICE_MULT.get((rarity or 'common').lower(), 1) * (1 - disc)))
+    size = len(Fz.kingdom_hexes(player.id, near_hex)) if near_hex else 0
+    size_factor = round(min(KINGDOM_SIZE_MAX, 1 + KINGDOM_SIZE_STEP * max(0, size - 1)), 2)
+    cost = int(round(DISCOVERY_COST * factor * size_factor * RARITY_PRICE_MULT.get((rarity or 'common').lower(), 1) * (1 - disc)))
     hours = round(min(EXPLORE_MAX_HOURS, DISCOVERY_HOURS * factor) * (1 - disc), 2)
     from terra_domini.utils.god import is_god
     if is_god(player):          # god mode: real price shown but not charged, instant, anywhere (POIs included)
-        return {'distance': None if first else dist, 'factor': factor, 'cost': cost, 'hours': BLITZ_EXPLORE_HOURS, 'first': first,
+        return {'distance': None if first else dist, 'factor': factor, 'kingdom_size': size, 'size_factor': size_factor,
+                'cost': cost, 'hours': BLITZ_EXPLORE_HOURS, 'first': first,
                 'locked': False, 'spy_discount': disc, 'near_hex': near_hex, 'god_free': True}
-    return {'distance': None if first else dist, 'factor': factor, 'cost': cost, 'hours': hours, 'first': first,
+    return {'distance': None if first else dist, 'factor': factor, 'kingdom_size': size, 'size_factor': size_factor,
+            'cost': cost, 'hours': hours, 'first': first,
             'locked': bool(is_poi and not first and d > 1),     # POIs: be right next to them
             'spy_discount': disc, 'near_hex': near_hex}
 

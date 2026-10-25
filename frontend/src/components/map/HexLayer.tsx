@@ -252,6 +252,11 @@ export function makeHexPolygon({ territory: t, playerId, onClick, catFilter, rar
     </div>
   `, { className:'td-tooltip', direction:'top', sticky:true })
 
+  // POI hex at a high zoom: hovering clears its fill so the place itself shows through (owner 2026-10-25)
+  if (hasPOI) {
+    poly.on('mouseover', () => { const m = (poly as any)._map; if (m && m.getZoom() >= 14) poly.setStyle({ fillOpacity: 0 }) })
+    poly.on('mouseout', () => poly.setStyle({ fillOpacity: fillOp }))
+  }
   poly.on('click', () => onClick(t))
   return poly
 }
