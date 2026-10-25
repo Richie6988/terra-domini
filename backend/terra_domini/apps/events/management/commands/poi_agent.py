@@ -349,7 +349,9 @@ class Agent:
         errs = []
         if s.get('verdict') == 'rejected':
             return [] if s.get('reject_reason') else ['reject_reason is required for a rejected row.']
+        country = self.row.get('kind') == 'country'     # country flag cards live off the map: only another country is a duplicate
         same = next((u for u, v in poi_validations.load().items() if u != self.row['uid'] and v.get('verdict') != 'rejected'
+                     and u.startswith('country-') == country
                      and (v.get('name') or '').strip().lower() == (s.get('name') or '').strip().lower()), None)
         if same:
             errs.append(f'{s.get("name")} is already token {same}: never duplicate a place. Keep this row\'s own subject (an event '
