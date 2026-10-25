@@ -50,7 +50,7 @@ POI_BIOME_MAP = {
     'capital_city':'urban',     'financial_hub':'urban',   'stock_exchange':'urban',
     'museum':'urban',           'palace':'urban',          'stadium':'urban',
     'world_heritage':'landmark','ancient_ruins':'landmark','religious_site':'landmark',
-    'mountain_peak':'mountain', 'volcano':'mountain',
+    'mountain_peak':'mountain', 'volcano':'mountain',      'ski_resort':'mountain',   'mountain_range':'mountain',
     'nature_sanctuary':'forest','forest':'forest',
     'coastal':'coastal',        'port':'coastal',          'island':'coastal',
     'oil_field':'desert',       'nuclear_plant':'industrial','military_base':'industrial',

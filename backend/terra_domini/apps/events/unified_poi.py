@@ -23,6 +23,7 @@ class POICategory(models.TextChoices):
     ISLAND           = 'island',           'Strategic Island'
     MOUNTAIN_RANGE   = 'mountain_range',   'Mountain Range'   # owner 2026-10-24
     THEATRE          = 'theatre',          'Theatre / Opera House'   # owner 2026-10-24
+    SKI_RESORT       = 'ski_resort',       'Ski Resort'   # owner 2026-10-25 (Zermatt, Courchevel... were sports_arena)
     LAKE             = 'lake',             'Lake'   # owner 2026-10-20: salt and fresh lakes (Dead Sea, Titicaca…)
     # 💎 Resources
     OIL_FIELD        = 'oil_field',        'Oil Field'
@@ -112,6 +113,7 @@ POI_VISUAL = {
     'ancient_forest':   {'emoji': '🌲', 'color': '#15803D', 'size': 'md', 'rarity': 'uncommon',  'game_resource': 'food',      'bonus': 35},
     'nature_sanctuary': {'emoji': '🌿', 'color': '#10B981', 'size': 'md', 'rarity': 'uncommon',  'game_resource': 'culture',   'bonus': 40},
     'mountain_range':   {'emoji': '', 'color': '#64748B', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'credits',   'bonus': 30},
+    'ski_resort':       {'emoji': '', 'color': '#38BDF8', 'size': 'md', 'rarity': 'uncommon',  'game_resource': 'culture',   'bonus': 40},
     'theatre':          {'emoji': '', 'color': '#B91C1C', 'size': 'md', 'rarity': 'rare',      'game_resource': 'credits',   'bonus': 30},
     'lake':             {'emoji': '', 'color': '#0EA5E9', 'size': 'md', 'rarity': 'rare',      'game_resource': 'credits',   'bonus': 30},
     'island':           {'emoji': '🏝️', 'color': '#0EA5E9', 'size': 'md', 'rarity': 'rare',      'game_resource': 'credits',   'bonus': 60},
