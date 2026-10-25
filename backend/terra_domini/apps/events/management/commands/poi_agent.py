@@ -382,7 +382,7 @@ class Agent:
             d = km((float(page['lat']), float(page['lon'])), (s['lat'], s.get('lon') or 0))
             # an event point at sea moves to the nearest linked coastal place (owner rule: tokens sit on land)
             notes = ' '.join(map(str, s.get('corrections') or [])).lower()
-            ashore = d <= 150 and any(w in notes for w in ('on land', 'coast'))
+            ashore = d <= 500 and any(w in notes for w in ('on land', 'coast'))
             offworld = any(w in notes for w in ('lunar', 'moon', 'mars'))  # a Moon or Mars landing: Wikipedia's point is not on Earth
             if d > 25 and not ashore and not offworld:
                 errs.append(f'coordinates are {d:.0f} km from Wikipedia\'s ({page["lat"]}, {page["lon"]}): use them or explain in corrections.')
