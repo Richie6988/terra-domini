@@ -280,7 +280,7 @@ class Agent:
         if not page.get('exists'):
             return {'found': False, 'title': t, 'hint': 'Not on English Wikipedia under this title: try another title or web_search.'}
         qid = page.get('wikidata', '')
-        sitelinks, heritage, p18, wd_ok = 0, [], '', False
+        sitelinks, heritage, p18, flag, wd_ok = 0, [], '', '', False
         # fame = number of Wikipedia languages (langlinks + English), from Wikipedia itself (Wikidata throttles shared IPs)
         try:
             ll = W.api({'action': 'query', 'titles': page['page_title'], 'prop': 'langlinks', 'lllimit': 'max'})
@@ -299,17 +299,19 @@ class Agent:
                 heritage = [((c.get('mainsnak') or {}).get('datavalue') or {}).get('value', {}).get('id') for c in cl.get('P1435', [])]
                 v = ((((cl.get('P18') or [{}])[0]).get('mainsnak') or {}).get('datavalue') or {}).get('value')
                 p18 = (v or '').replace('_', ' ')
+                v = ((((cl.get('P41') or [{}])[0]).get('mainsnak') or {}).get('datavalue') or {}).get('value')
+                flag = (v or '').replace('_', ' ')   # country tokens are flag cards (owner 2026-10-25)
         lead = (page.get('image_file') or '').replace('_', ' ')    # pageimages gives underscores, imageinfo titles have spaces
-        files = [f for f in [p18, lead] if f]
+        files = [f for f in [flag, p18, lead] if f]
         files += [f for f in W.article_images([page['page_title']]).get(page['page_title'], []) if f not in files]
         info = W.fetch_images(files[:40]) if files else {}
         pics = []
         for f in files:
             im = info.get(f)
-            if not im or not (W.good_photo(f, im) or f in (p18, lead)):
+            if not im or not (W.good_photo(f, im) or f in (flag, p18, lead)):
                 continue
             pics.append({'url': im[0].split('?')[0], 'file': f, 'width': im[4], 'height': im[5], 'license': im[1], 'author': im[2],
-                         'role': 'wikidata main image' if f == p18 else 'article lead image' if f == lead else 'article photo'})
+                         'role': 'national flag' if f == flag else 'wikidata main image' if f == p18 else 'article lead image' if f == lead else 'article photo'})
             self.pictures[pics[-1]['url']] = pics[-1]
             if len(pics) >= 8:
                 break
@@ -485,6 +487,7 @@ class Command(BaseCommand):
         parser.add_argument('--categories', action='store_true', help='list the game token categories')
         parser.add_argument('--set-category', help='category audit: re-stamp --row with this category (keeps the rest)')
         parser.add_argument('--reason', default='', help='why the category changes (with --set-category)')
+        parser.add_argument('--flags', action='store_true', help='country tokens are flag cards: stamp the national flag on stamped countries without one')
         parser.add_argument('--dedupe', action='store_true', help='list unchecked rows that duplicate another place (--apply rejects them)')
         parser.add_argument('--apply', action='store_true', help='with --dedupe: stamp the duplicates rejected in the ledger')
         parser.add_argument('--stamped', action='store_true', help='with --next: list stamped rows (uid, name, category, description)')
@@ -494,6 +497,25 @@ class Command(BaseCommand):
         if o['categories']:
             for v, l in sorted(categories().items()):
                 self.stdout.write(f'{v}: {l}')
+            return
+        if o['flags']:
+            rows = {p['uid']: p for p in db['pois'] if p['kind'] == 'country'}
+            for uid, v in sorted(done.items()):
+                if uid not in rows or v.get('verdict') == 'rejected' or 'flag' in (v.get('image_file') or v.get('image_url') or '').lower():
+                    continue
+                agent = Agent.restore(rows[uid])
+                try:
+                    look = agent.wiki_lookup(v.get('wiki_title') or v.get('name') or rows[uid]['name'])
+                except Exception as e:  # noqa: BLE001
+                    self.stderr.write(f'{uid}: {e}'); continue
+                pic = next((x for x in look.get('pictures', []) if x['role'] == 'national flag' or 'flag' in x['file'].lower()), None)
+                if not pic:
+                    self.stdout.write(f'{uid} {v.get("name")}: no flag found'); continue
+                e = dict(v, image_url=pic['url'], image_file=pic['file'], validated_at=timezone.now().isoformat(),
+                         image_credit=f"{pic.get('author') or 'Unknown author'} · {pic.get('license', '')} · Wikimedia Commons",
+                         corrections=(v.get('corrections') or []) + ['picture set to the national flag: country tokens are flag cards (owner 2026-10-25)'])
+                poi_validations.append(e)
+                self.stdout.write(f'{uid} {v.get("name")}: {pic["file"]}')
             return
         if o['dedupe']:
             dups = duplicates(db, done, set(o['kinds'].split(',')))
@@ -581,7 +603,7 @@ class Command(BaseCommand):
                                                  f"{e.get('rarity', '-')} → {e.get('hex_per_day', 0)} HEX/day"))
 
     def handle(self, *args, **o):
-        if o['next'] or o['row'] or o['categories'] or o['stamped'] or o['dedupe']:
+        if o['next'] or o['row'] or o['categories'] or o['stamped'] or o['dedupe'] or o['flags']:
             db = hexod_db.load()
             if not db:
                 raise CommandError(f'{hexod_db.DB_PATH} not found')

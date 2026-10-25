@@ -54,7 +54,7 @@ For each row:
 5. Picture: from the pictures `--lookup` returned only. `--view` your choice, Read the file and check it clearly shows
    THIS place (the building / site / city itself, beautiful, sharp) — no map, flag, logo, plan, diagram, crowd
    close-up or unrelated detail. If it fails, view the next one. If none is right, image_url "" (a wrong picture is
-   worse than none). A country or city token: a famous landmark or landscape clearly in that country / city is its picture (the Eiffel Tower for France, the Great Wall for China), never a flag or a map.
+   worse than none). A COUNTRY token is a flag card (owner 2026-10-25): its picture is the national flag (role "national flag", or the article lead image when it is the flag), nothing else. A CITY token: a famous landmark or skyline clearly in that city, never a flag or a map.
 6. Write the result JSON with the Write tool, then `--submit` it:
    {"verdict": "validated|corrected|rejected", "name": "...", "wiki_title": "...", "lat": 0.0, "lon": 0.0,
     "country_code": "FR", "description": "...", "rarity": "common|uncommon|rare|epic", "rarity_reason": "...", "game_category": "...",
