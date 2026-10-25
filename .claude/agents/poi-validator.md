@@ -34,7 +34,7 @@ For each row:
 2. Check the facts: exact English name (as on Wikipedia), coordinates (Wikipedia's when they exist), ISO 3166-1
    alpha-2 country code ("" for open sea, never anything else). Fix what is wrong (verdict "corrected", list each fix in corrections) or confirm ("validated").
 2b. Category: the token category must fit the place, rationally (owner 2026-10-20). `POI --categories` lists them.
-   A stadium is sports_arena, a festival site or a battle is history_event, a museum is museum, a lake or inland sea (salt or fresh) is lake, a mountain range / highlands is mountain_range (a single summit stays mountain_peak), a theatre or opera house is theatre, a national capital is capital_city, any other living city or town is trade_node, an airport is
+   A stadium is sports_arena, a festival site or a battle is history_event, a museum is museum, a lake or inland sea (salt or fresh) is lake, a mountain range / highlands is mountain_range (a single summit stays mountain_peak), a theatre or opera house is theatre, a national capital is capital_city, any other living city or town is trade_node, a chip maker or fab (TSMC, ASML, SK Hynix...) is semiconductor, an airport is
    control_tower (airports)... If the row's game_category is wrong, put the right one in game_category and say why in
    corrections; if it is right, repeat it. game_category is required in every result.
 3. Description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing unverified.
