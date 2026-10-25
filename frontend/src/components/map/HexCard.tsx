@@ -189,7 +189,8 @@ export function HexCard({ territory:t, onClose, onRequestClaim, onAttack, isNewC
 
   // Owned hex: the token opens first; its button leads to DEFENSE (lone territory) or KINGDOM (connected hexes),
   // both on the ARMY tab where the stationed troops, defense and upgrades are (owner 2026-10-19)
-  const [hub, setHub] = useState(false)
+  // own hex: straight to the kingdom hub, no bottom card (owner 2026-10-25)
+  const [hub, setHub] = useState(isOwned)
   // Forces shown on the card (combat/forces.py): the target kingdom's defense for an enemy hex, your counters for yours
   const { data: fz } = useQuery<any>({
     queryKey: isEnemy ? ['combat-preview', t.h3_index] : ['kingdom-overview', t.h3_index],

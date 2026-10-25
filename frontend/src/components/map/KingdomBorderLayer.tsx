@@ -139,6 +139,9 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
     const kingdoms: Kingdom[] = data?.kingdoms ?? []
     if (!kingdoms.length) return
 
+    const ownedBy = (k: Kingdom) => !!player && ((k as any).owner_id === player.id || k.is_main || k.h3_indexes.some((h: string) =>
+      (window as any).__HEXOD_TERRITORIES__?.[h]?.owner_id === player.id))
+
     kingdoms.forEach(k => {
       // Player customisation (server) first, tier colour otherwise
       const color = (k as any).border_color || TIER_COLOR[Math.min(k.tier, 6)]
@@ -161,15 +164,7 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
               color: 'transparent', weight: 0,
               interactive: true,
             })
-            poly.on('click', () => {
-              if (onKingdomClick) {
-                const isOwn = !!player && k.h3_indexes.some((h: string) => {
-                  const t = (window as any).__HEXOD_TERRITORIES__?.[h]
-                  return t?.owner_id === player.id
-                })
-                onKingdomClick({ ...k, isOwn } as any)
-              }
-            })
+            poly.on('click', () => { if (onKingdomClick) onKingdomClick({ ...k, isOwn: ownedBy(k) } as any) })
             layer.addLayer(poly)
             polys.push(poly)
           } catch (_) {}
@@ -273,11 +268,8 @@ export function KingdomBorderLayer({ map, zoom, onKingdomClick }: Props) {
           icon, zIndexOffset: isMain ? 800 : 600, interactive: true,
         })
 
-        marker.on('click', () => {
-          if (onKingdomClick) {
-            onKingdomClick({ ...k, isOwn: isMain } as any)
-          }
-        })
+        // own outposts too, not only the main kingdom: the label opens the kingdom hub, never the enemy view (owner 2026-10-25)
+        marker.on('click', () => { if (onKingdomClick) onKingdomClick({ ...k, isOwn: ownedBy(k) } as any) })
 
         marker.bindTooltip(
           `<div style="font-size:11px;line-height:1.5;font-family:system-ui,sans-serif;letter-spacing:0">
