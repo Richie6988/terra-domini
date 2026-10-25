@@ -133,6 +133,77 @@ def km(a, b):
     return 12742 * math.asin(math.sqrt(h))
 
 
+# ── duplicate clean-up of the queue (owner 2026-10-25): a row that repeats another place never reaches a worker ──
+DUP_WORDS = re.compile(r'\b(national parks?|mount|mt|islands?|the|of|reserve|world heritage site|site)\b')
+TOWN = ('city', 'country')
+
+
+def _ascii(s):
+    import unicodedata
+    return unicodedata.normalize('NFKD', s or '').encode('ascii', 'ignore').decode().lower()
+
+
+def _key(s):
+    return re.sub(r'[^a-z0-9]', '', _ascii(s))
+
+
+def _core(s):
+    """name without parentheses and generic words, words sorted (Lake Skadar = Skadar Lake)"""
+    s = DUP_WORDS.sub(' ', re.sub(r'\(.*?\)', '', _ascii(s)))
+    return ''.join(sorted(re.sub(r'[^a-z0-9 ]', ' ', s).split()))
+
+
+def _article(r):
+    from urllib.parse import unquote
+    if r.get('wiki_title'):
+        return _key(r['wiki_title'])
+    u = r.get('wiki_url') or ''
+    return _key(unquote(u.split('/wiki/')[-1]).replace('_', ' ')) if '/wiki/' in u else ''
+
+
+def duplicates(db, done, kinds=DEFAULT_KINDS):
+    """[(drop_row, keep_row, why)]: unchecked rows that repeat a stamped or better row of the same place.
+    Same place = same Wikipedia article within 100 km, same name within 50 km, or same core name within 25 km
+    (cities and countries only match cities and countries). Kept: stamped, then on the map, then poi- rows."""
+    import collections
+    rows = []
+    for p in db['pois']:
+        v = done.get(p['uid'])
+        if p['kind'] not in kinds or p.get('lat') is None or (v and v.get('verdict') == 'rejected'):
+            continue
+        r = dict(p, stamped=bool(v))
+        for f in ('name', 'lat', 'lon', 'wiki_title'):
+            if v and v.get(f) not in (None, ''):
+                r[f] = v[f]
+        rows.append(r)
+    rank = lambda r: (r['stamped'], bool(r.get('on_map')), r['uid'].startswith('poi-'), bool(r.get('wiki_url')), -len(r['uid']))
+    out = {}
+
+    def pair(a, b, why, dist):
+        if km((a['lat'], a['lon']), (b['lat'], b['lon'])) >= dist:
+            return
+        keep, drop = (a, b) if rank(a) >= rank(b) else (b, a)
+        if drop['stamped'] or drop['uid'] in out:
+            return
+        if drop['kind'] in TOWN and keep['kind'] not in TOWN and not keep['stamped']:
+            return   # a city row is never dropped for an unchecked site that only shares its article
+        out[drop['uid']] = (drop, keep, why)
+
+    for key, why, dist, same_kind in ((_article, 'same Wikipedia article', 100, False), (lambda r: _key(r['name']), 'same name', 50, False),
+                                      (lambda r: _core(r['name']), 'same name', 25, True)):
+        groups = collections.defaultdict(list)
+        for r in rows:
+            k = key(r)
+            if len(k) >= 4:
+                groups[k].append(r)
+        for g in groups.values():
+            for i in range(len(g)):
+                for j in range(i + 1, len(g)):
+                    if not same_kind or (g[i]['kind'] in TOWN) == (g[j]['kind'] in TOWN):
+                        pair(g[i], g[j], why, dist)
+    return list(out.values())
+
+
 def call_api(messages):
     body = json.dumps({'model': MODEL, 'max_tokens': 2048, 'tools': TOOLS, 'messages': messages,
                        'system': [{'type': 'text', 'text': SYSTEM, 'cache_control': {'type': 'ephemeral'}}]}).encode()
@@ -397,6 +468,8 @@ class Command(BaseCommand):
         parser.add_argument('--categories', action='store_true', help='list the game token categories')
         parser.add_argument('--set-category', help='category audit: re-stamp --row with this category (keeps the rest)')
         parser.add_argument('--reason', default='', help='why the category changes (with --set-category)')
+        parser.add_argument('--dedupe', action='store_true', help='list unchecked rows that duplicate another place (--apply rejects them)')
+        parser.add_argument('--apply', action='store_true', help='with --dedupe: stamp the duplicates rejected in the ledger')
         parser.add_argument('--stamped', action='store_true', help='with --next: list stamped rows (uid, name, category, description)')
 
     def cli(self, db, o):
@@ -404,6 +477,17 @@ class Command(BaseCommand):
         if o['categories']:
             for v, l in sorted(categories().items()):
                 self.stdout.write(f'{v}: {l}')
+            return
+        if o['dedupe']:
+            dups = duplicates(db, done, set(o['kinds'].split(',')))
+            now = timezone.now().isoformat()
+            for drop, keep, why in dups:
+                self.stdout.write(f"{drop['uid']} {drop['name']!r} -> {keep['uid']} {keep['name']!r} ({why})")
+                if o['apply']:
+                    poi_validations.append({'uid': drop['uid'], 'verdict': 'rejected', 'validated_at': now, 'validator': 'dedupe/1',
+                                            'reject_reason': f"duplicate of {keep['uid']} ({keep['name']}): {why}",
+                                            'previous': {k: drop.get(k) for k in ('name', 'lat', 'lon', 'rarity', 'country_code')}})
+            self.stdout.write(f"{len(dups)} duplicates{' rejected in the ledger' if o['apply'] else ' (dry run: add --apply)'}")
             return
         if o['stamped']:
             rows = [v for v in done.values() if v.get('verdict') != 'rejected'][:o['next'] or 10000]
@@ -480,7 +564,7 @@ class Command(BaseCommand):
                                                  f"{e.get('rarity', '-')} → {e.get('hex_per_day', 0)} HEX/day"))
 
     def handle(self, *args, **o):
-        if o['next'] or o['row'] or o['categories'] or o['stamped']:
+        if o['next'] or o['row'] or o['categories'] or o['stamped'] or o['dedupe']:
             db = hexod_db.load()
             if not db:
                 raise CommandError(f'{hexod_db.DB_PATH} not found')
