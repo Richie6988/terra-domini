@@ -384,7 +384,8 @@ class Agent:
             notes = ' '.join(map(str, s.get('corrections') or [])).lower()
             ashore = d <= 500 and any(w in notes for w in ('on land', 'coast'))
             offworld = any(w in notes for w in ('lunar', 'moon', 'mars'))  # a Moon or Mars landing: Wikipedia's point is not on Earth
-            if d > 25 and not ashore and not offworld:
+            museum = 'museum' in notes  # Wikipedia's point is the museum that now holds the object, not where the event happened
+            if d > 25 and not ashore and not offworld and not museum:
                 errs.append(f'coordinates are {d:.0f} km from Wikipedia\'s ({page["lat"]}, {page["lon"]}): use them or explain in corrections.')
         return errs
 
