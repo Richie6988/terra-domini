@@ -86,7 +86,7 @@ const EFFECT_LABEL: Record<string,string> = {
   hex_bonus:         'HEX Bonus',
   booster_standard:  'Standard Booster',
   booster_rare:      'Emerald Booster',
-  booster_legendary: 'Diamond Booster',
+  booster_legendary: 'Legendary Booster',
   custom_flag:       'Custom Flag',
   border_color:      'Kingdom Colors',
 }

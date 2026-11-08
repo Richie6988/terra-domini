@@ -46,7 +46,7 @@ import wiki_enrich as W  # noqa: E402  (stdlib Wikipedia helpers: pages, Wikidat
 API_URL = 'https://api.anthropic.com/v1/messages'
 MODEL = os.environ.get('POI_AGENT_MODEL', 'claude-haiku-5-5')
 VERSION = 'poi-agent/1'
-RARITIES = ('common', 'uncommon', 'rare', 'epic')   # Silver · Gold · Emerald · Diamond (4 rarities only)
+RARITIES = ('common', 'uncommon', 'rare', 'epic')   # Local · Renowned · Emerald · Legendary (4 rarities only)
 DEFAULT_KINDS = ('landmark', 'history', 'city', 'country')
 
 
@@ -79,14 +79,14 @@ For the POI you are given:
    corrections; if it is right, repeat it. game_category is required in every result.
 3. Write the card description: 2 short factual sentences, English, max 280 characters, no hype, no emoji, nothing you
    could not verify. Absolute rule: never "--", never an em dash or en dash; commas and full stops only.
-4. Give the rarity: only 4 (owner 2026-10-20), shares fixed at import: Silver 50 % · Gold 30 % · Emerald 15 % · Diamond 5 %.
-   Submit the key: "epic" = Diamond, "rare" = Emerald, "uncommon" = Gold, "common" = Silver. Your tier ranks the token
+4. Give the rarity: only 4 (owner 2026-10-20), shares fixed at import: Local 50 % · Renowned 30 % · Emerald 15 % · Legendary 5 %.
+   Submit the key: "epic" = Legendary (old "legendary" key too), "rare" = Emerald, "uncommon" = Renowned, "common" = Local. Your tier ranks the token
    inside its kind; the import then cuts each kind by the shares, so rank honestly (langs = sitelinks):
-   - epic (Diamond): universal icons known on every continent, world #1 of their kind (Eiffel Tower, Machu Picchu,
+   - epic (Legendary): universal icons known on every continent, world #1 of their kind (Eiffel Tower, Machu Picchu,
      Great Wall, Everest, Paris, the largest gas field on Earth); landmarks usually langs >= 100.
    - rare (Emerald): world-famous or national icons, UNESCO stars, world top 10 resource sites (langs 50-99).
-   - uncommon (Gold): well known in the country and to travellers, top resource site of a country (langs 20-49).
-   - common (Silver): regional / local (langs < 20).
+   - uncommon (Renowned): well known in the country and to travellers, top resource site of a country (langs 20-49).
+   - common (Local): regional / local (langs < 20).
    Resource / strategic sites (mine, oil / gas field, port, canal, dam, airport...) rank by world rank, not languages.
    Fame is measured on the article players know the place by: for the headquarters / site of a famous organisation
    (CIA, NASA...), the organisation's article. A control tower token is its airport. When in doubt, the lower tier.

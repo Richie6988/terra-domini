@@ -5,7 +5,7 @@ export const HEX_PER_DAY: Record<string, number> = {
 // 4 rarities only (owner 2026-10-20): Silver 50 % · Gold 30 % · Emerald 15 % · Diamond 5 % — the name is the metal of
 // the token frame. Keys stay common / uncommon / rare / epic in the code and the API; old legendary / mythic = Diamond.
 export const RARITY_LABEL: Record<string, string> = {
-  common: 'Silver', uncommon: 'Gold', rare: 'Emerald', epic: 'Diamond', legendary: 'Diamond', mythic: 'Diamond',
+  common: 'Local', uncommon: 'Renowned', rare: 'Emerald', epic: 'Legendary', legendary: 'Legendary', mythic: 'Legendary',
 }
 export const rarityLabel = (r?: string | null) => (RARITY_LABEL[(r || 'common').toLowerCase()] || r || '').toUpperCase()
 export const STORAGE_CAP_HOURS = 8
