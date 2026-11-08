@@ -326,10 +326,19 @@ class Agent:
         """(bytes, mime) of a picture, or (None, error)."""
         if not url.startswith(W.WM_HOSTS):
             return None, 'Only Wikimedia pictures (from wiki_lookup) can be used.'
-        req = Request(url, headers={'User-Agent': W.UA})
-        with urlopen(req, timeout=60) as r:
-            mime = (r.headers.get('Content-Type') or 'image/jpeg').split(';')[0]
-            data = r.read(6_000_000)
+        # upload.wikimedia.org often answers 429 to this machine: same picture through its 1280px thumbnail
+        thumb = re.sub(r'^https://upload\.wikimedia\.org/wikipedia/commons/(.)/(..)/([^/]+)$',
+                       r'https://upload.wikimedia.org/wikipedia/commons/thumb/\1/\2/\3/1280px-\3', url)
+        for i, u in enumerate(dict.fromkeys([url, thumb])):
+            try:
+                with urlopen(Request(u, headers={'User-Agent': W.UA}), timeout=60) as r:
+                    mime = (r.headers.get('Content-Type') or 'image/jpeg').split(';')[0]
+                    data = r.read(6_000_000)
+                break
+            except HTTPError:
+                if u == thumb:
+                    raise
+                time.sleep(5)
         if mime not in ('image/jpeg', 'image/png', 'image/webp', 'image/gif'):
             return None, f'Not a picture ({mime}).'
         self.seen.add(url)
