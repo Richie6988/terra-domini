@@ -371,7 +371,10 @@ class Agent:
                         + ', '.join(sorted(cats)))
         if s.get('rarity') not in RARITIES:
             errs.append(f'rarity must be one of {RARITIES}.')
-        cc = s.get('country_code') or ''
+        _rank = {'common': 0, 'uncommon': 1, 'rare': 2, 'epic': 3, 'legendary': 3, 'mythic': 3}
+        if _rank.get(s.get('rarity'), 0) < _rank.get(self.row.get('rarity'), 0):
+            errs.append(f'rarity {s.get("rarity")} is below the row rarity {self.row.get("rarity")}: never lower a rarity.')
+        cc =s.get('country_code') or ''
         if cc and not re.fullmatch(r'[A-Za-z]{2}', cc):
             errs.append('country_code: 2 letters (ISO 3166-1 alpha-2), or "" for open sea.')
         for k in ('lat', 'lon', 'description'):
