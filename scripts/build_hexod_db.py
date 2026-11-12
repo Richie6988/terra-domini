@@ -523,7 +523,7 @@ def city_index(pois):
     for p in pois:
         if p.get('lat') is None or p.get('lon') is None:
             continue
-        is_city = p['kind'] == 'city' or p.get('game_category') in ('capital_city', 'trade_node')
+        is_city = p['kind'] == 'city' or p.get('game_category') in ('capital_city', 'city', 'trade_node')
         if not is_city:
             continue
         pop = p.get('population') or 0

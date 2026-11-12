@@ -27,7 +27,7 @@ POI_RESOURCE = {
     'naval_base': 'strategicposition', 'world_heritage': 'culturalheritage', 'ancient_ruins': 'culturalheritage',
     'religious_site': 'culturalheritage', 'royal_palace': 'culturalheritage', 'museum': 'culturalheritage',
     'ancient_wonder': 'culturalheritage', 'capital_city': 'humancapital', 'financial_hub': 'humancapital',
-    'stock_exchange': 'humancapital', 'tech_giant': 'humancapital', 'trade_node': 'humancapital',
+    'stock_exchange': 'humancapital', 'tech_giant': 'humancapital', 'trade_node': 'humancapital', 'city': 'humancapital',
 }
 
 

@@ -74,7 +74,7 @@ def match_venue(venue: str, city: str, pois: list):
     cn = _norm(city).strip()
     if cn:
         for p in pois:
-            if p['category'] in ('trade_node', 'capital_city') and _norm(p['name']).strip() == cn:
+            if p['category'] in ('trade_node', 'city', 'capital_city') and _norm(p['name']).strip() == cn:
                 return p
     return None
 

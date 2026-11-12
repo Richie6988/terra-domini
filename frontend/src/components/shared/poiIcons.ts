@@ -15,7 +15,7 @@ export const TOKEN_CATEGORIES = [
   'nuclear_plant', 'space_center', 'data_center', 'semiconductor', 'internet_cable', 'ix_point', 'control_tower',
   'mega_dam', 'water_treatment', 'desalination', 'steel_mill', 'pharma_hq', 'research_station', 'particle_collider',
   'observatory', 'infrastructure',
-  'capital_city', 'country', 'world_heritage', 'ancient_ruins', 'religious_site', 'royal_palace', 'museum', 'theatre',
+  'capital_city', 'city', 'country', 'world_heritage', 'ancient_ruins', 'religious_site', 'royal_palace', 'museum', 'theatre',
   'ancient_wonder', 'history_event', 'news_event', 'sports_arena', 'ski_resort',
   'conspiracy', 'secret_facility', 'anomaly',
   // Living species tokens (layer 3 of the fixed map table)

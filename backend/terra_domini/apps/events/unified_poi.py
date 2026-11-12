@@ -71,6 +71,7 @@ class POICategory(models.TextChoices):
     # 🎮 Game-specific
     CONTROL_TOWER    = 'control_tower',    'Control Tower'
     TRADE_NODE       = 'trade_node',       'Trade Node'
+    CITY             = 'city',             'City'
     ANCIENT_WONDER   = 'ancient_wonder',   'Ancient Wonder'
     ANOMALY          = 'anomaly',          'Anomaly Zone'
     # 💧 Water Infrastructure
@@ -160,6 +161,7 @@ POI_VISUAL = {
     'tech_giant':       {'emoji': '💻', 'color': '#6366F1', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'intel',     'bonus': 170},
     'media_hq':         {'emoji': '📡', 'color': '#EC4899', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'culture',   'bonus': 75},
     'control_tower':    {'emoji': '🗼', 'color': '#FFB800', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'credits',   'bonus': 200},
+    'city':             {'emoji': '🏙️', 'color': '#8B5CF6', 'size': 'lg', 'rarity': 'uncommon',  'game_resource': 'credits',   'bonus': 70},
     'trade_node':       {'emoji': '🔄', 'color': '#10B981', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'credits',   'bonus': 80},
     'ancient_wonder':   {'emoji': '✨', 'color': '#F59E0B', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'culture',   'bonus': 250},
     'anomaly':          {'emoji': '🌀', 'color': '#8B5CF6', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'intel',     'bonus': 300},
