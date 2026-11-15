@@ -125,6 +125,9 @@ def add_resource_tokens(pois, biomes, resources):
         floor = SITE_FLOOR.get(p.get('game_category'))
         if floor and ranks.index(p['rarity']) < ranks.index(floor):
             p['rarity'] = floor
+    # Owner 2026-11-15: no more generated deposits (thousands of copies, random points, no article): they flooded the
+    # map for nothing. Only real, Wikipedia-backed mines and oil or gas fields stay as resource tokens (floor above).
+    return
     names = {r['id']: r['name'] for r in resources}
     used = {(p.get('h3_r8'), p.get('game_category')) for p in pois}
     added = 0
