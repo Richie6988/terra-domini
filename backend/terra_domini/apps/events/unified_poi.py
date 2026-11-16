@@ -72,6 +72,9 @@ class POICategory(models.TextChoices):
     CONTROL_TOWER    = 'control_tower',    'Control Tower'
     TRADE_NODE       = 'trade_node',       'Trade Node'
     CITY             = 'city',             'City'
+    MONUMENT         = 'monument',         'Monument'
+    CASTLE           = 'castle',           'Castle'
+    AMUSEMENT_PARK   = 'amusement_park',   'Amusement Park'
     ANCIENT_WONDER   = 'ancient_wonder',   'Ancient Wonder'
     ANOMALY          = 'anomaly',          'Anomaly Zone'
     # 💧 Water Infrastructure
@@ -161,6 +164,9 @@ POI_VISUAL = {
     'tech_giant':       {'emoji': '💻', 'color': '#6366F1', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'intel',     'bonus': 170},
     'media_hq':         {'emoji': '📡', 'color': '#EC4899', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'culture',   'bonus': 75},
     'control_tower':    {'emoji': '🗼', 'color': '#FFB800', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'credits',   'bonus': 200},
+    'monument':         {'emoji': '🗽', 'color': '#94A3B8', 'size': 'lg', 'rarity': 'uncommon',  'game_resource': 'culture',   'bonus': 70},
+    'castle':           {'emoji': '🏰', 'color': '#A16207', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'culture',   'bonus': 80},
+    'amusement_park':   {'emoji': '🎡', 'color': '#EC4899', 'size': 'lg', 'rarity': 'uncommon',  'game_resource': 'credits',   'bonus': 70},
     'city':             {'emoji': '🏙️', 'color': '#8B5CF6', 'size': 'lg', 'rarity': 'uncommon',  'game_resource': 'credits',   'bonus': 70},
     'trade_node':       {'emoji': '🔄', 'color': '#10B981', 'size': 'lg', 'rarity': 'rare',      'game_resource': 'credits',   'bonus': 80},
     'ancient_wonder':   {'emoji': '✨', 'color': '#F59E0B', 'size': 'xl', 'rarity': 'legendary', 'game_resource': 'culture',   'bonus': 250},

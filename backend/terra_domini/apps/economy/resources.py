@@ -28,6 +28,7 @@ POI_RESOURCE = {
     'religious_site': 'culturalheritage', 'royal_palace': 'culturalheritage', 'museum': 'culturalheritage',
     'ancient_wonder': 'culturalheritage', 'capital_city': 'humancapital', 'financial_hub': 'humancapital',
     'stock_exchange': 'humancapital', 'tech_giant': 'humancapital', 'trade_node': 'humancapital', 'city': 'humancapital',
+    'monument': 'culturalheritage', 'castle': 'culturalheritage', 'amusement_park': 'humancapital',
 }
 
 
