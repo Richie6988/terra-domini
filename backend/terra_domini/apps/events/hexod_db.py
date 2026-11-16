@@ -14,6 +14,8 @@ import re
 from functools import lru_cache
 from pathlib import Path
 
+from terra_domini.apps.events import tokens_format
+
 REPO_DB = Path(__file__).resolve().parents[4] / 'data' / 'hexod_db' / 'hexod_db.json'
 # One source (owner 2026-11-16): the game always reads the repo DB, cleaned and validated in git. No server-side copy.
 DB_PATH = REPO_DB
@@ -30,7 +32,8 @@ RANK = {'common': 0, 'uncommon': 1, 'rare': 2, 'epic': 3, 'legendary': 4, 'mythi
 
 
 def apply_quotas(rows, family, score=lambda r: 0):
-    """Rarity of every row from its rank inside its family (in place)."""
+    """Rarity of every row from its rank inside its family (in place). A row checked by the agents keeps its rarity."""
+    rows = [r for r in rows if not r.get('verdict')]
     groups = {}
     for i, r in enumerate(rows):
         groups.setdefault(family(r), []).append((i, r))
@@ -63,6 +66,10 @@ def load() -> dict:
         return {}
     with open(DB_PATH, encoding='utf-8') as f:
         db = json.load(f)
+    # one token base (owner 2026-11-16), validations already folded in: pois / creatures are read-only views of it
+    if 'tokens' not in db:
+        db = tokens_format.from_legacy(db)
+    db['pois'], db['creatures'] = tokens_format.views(db)
     for k in ('pois', 'creatures'):
         for row in db.get(k, []):
             for f in TEXT_FIELDS:
@@ -70,7 +77,6 @@ def load() -> dict:
                     row[f] = clean_text(row[f])
             if k == 'pois' and isinstance(row.get('description'), str):   # no resource bonus any more (owner 2026-10-20)
                 row['description'] = re.sub(r'\s*Holding this hex pays \+\d+% HEX on top of its rarity\.', '', row['description'])
-    overlay_creatures(db)
     apply_quotas(db.get('creatures', []), family=lambda c: c.get('codex_category') or '')
     apply_quotas([p for p in db.get('pois', []) if p.get('on_map') and not p.get('creature_uid')],
                  family=lambda p: p.get('kind') or '', score=lambda p: p.get('score') or 0)
@@ -81,65 +87,6 @@ def load() -> dict:
     return db
 
 
-# ── Creature validation ledger (owner 2026-10-25, the dinosaur agent first): creature_validations.jsonl next to the
-#    master DB (repo copy + server copy, last line of a uid wins). A validated creature keeps its checked fields; its
-#    species tokens move to the checked places (fossil sites for dinosaurs); a rejected creature leaves the game. ──
-CREATURE_FIELDS = ('name', 'description', 'rarity', 'codex_category', 'habitat', 'wiki_url', 'image_url', 'image_credit',
-                   'fossil_count', 'fossil_sites', 'period', 'places')
-
-
-def creature_ledger() -> dict:
-    out = {}
-    for path in [REPO_DB.parent / 'creature_validations.jsonl']:
-        if not path.exists():
-            continue
-        for line in path.read_text(encoding='utf-8').splitlines():
-            try:
-                v = json.loads(line)
-                if v['uid'] not in out or (v.get('validated_at') or '') >= (out[v['uid']].get('validated_at') or ''):
-                    out[v['uid']] = v
-            except (ValueError, KeyError):
-                continue
-    return out
-
-
-def overlay_creatures(db: dict) -> None:
-    led = creature_ledger()
-    if not led:
-        return
-    import h3
-    rejected = {u for u, v in led.items() if v.get('verdict') == 'rejected'}
-    db['creatures'] = [c for c in db.get('creatures', []) if c['uid'] not in rejected]
-    moved = {}
-    for c in db['creatures']:
-        v = led.get(c['uid'])
-        if not v:
-            continue
-        for f in CREATURE_FIELDS:
-            if v.get(f) not in (None, '', []):
-                c[f] = clean_text(v[f]) if f == 'description' else v[f]
-        c['validated_at'] = v.get('validated_at')
-        if v.get('places'):
-            moved[c['uid']] = c
-    pois, tpl = [], {}
-    for p in db.get('pois', []):
-        cu = p.get('creature_uid')
-        if cu in rejected:
-            continue
-        if cu in moved:
-            tpl.setdefault(cu, p)
-            continue
-        pois.append(p)
-    for cu, c in moved.items():
-        base = tpl.get(cu)
-        if not base:
-            continue
-        cat = 'species_' + (c.get('codex_category') or 'animal')
-        for i, (la, lo) in enumerate(c['places'][:12], 1):
-            pois.append(dict(base, uid=f"sp-{cu}-{i}", name=c['name'], game_category=cat, codex_category=c.get('codex_category'),
-                             lat=round(la, 5), lon=round(lo, 5), h3_r8=h3.latlng_to_cell(la, lo, 8),
-                             description=c.get('description', ''), image_url=c.get('image_url', '')))
-    db['pois'] = pois
 
 
 # Safari = living nature only (owner 2026-10-19): fauna (animals, insects), flora (plants, fungi), micro-organisms, dinosaurs

@@ -41,7 +41,7 @@ class Command(BaseCommand):
         parser.add_argument('--pause', type=float, default=1.0, help='seconds between downloads')
 
     def handle(self, *args, **opts):
-        pois, _, _ = poi_validations.overlay([dict(p) for p in hexod_db.load()['pois'] if p.get('on_map') and p.get('h3_r8')])
+        pois = [p for p in hexod_db.load()['pois'] if p.get('on_map') and p.get('h3_r8')]
         urls = {p.get('image_url') or '' for p in pois}
         urls |= set(UnifiedPOI.objects.values_list('image_url', flat=True))
         urls = sorted(u for u in urls if u.startswith('https://'))

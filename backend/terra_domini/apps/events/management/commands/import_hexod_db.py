@@ -51,11 +51,8 @@ class Command(BaseCommand):
         if res != 8:
             raise CommandError(f'expected H3 resolution 8, got {res}')
         pois = [p for p in db['pois'] if p.get('on_map') and p.get('h3_r8')]
-        # POI agent stamps (poi_validations.jsonl): checked rows keep their checked data, rejected rows leave the map
-        from terra_domini.apps.events import poi_validations
-        pois, n_valid, n_rej = poi_validations.overlay([dict(p) for p in pois])
-        if n_valid or n_rej:
-            self.stdout.write(f'POI agent ledger: {n_valid} validated rows applied, {n_rej} rejected rows left out')
+        pois = [dict(p) for p in pois]   # the agents' validations are already in the token base (scripts/fold_validations.py)
+        self.stdout.write(f"token base: {len(db.get('tokens', []))} tokens, {sum(1 for p in pois if p.get('verdict'))} on the map checked by the agents")
         # 4 rarities, 50 / 30 / 15 / 5 % per kind of token: ranked by the checked rarity, then the master DB score
         species = [p for p in pois if p.get('creature_uid')]
         hexod_db.apply_quotas([p for p in pois if not p.get('creature_uid')], family=lambda p: p.get('kind') or '',

@@ -484,11 +484,11 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 ## 11c. HEXOD MASTER DATABASE (2026-10-18) — one source for POIs, creatures, biomes, resources
 
 - Sources (owner spreadsheets, never edit by hand): `data/hexod_db/sources/*.xlsx` (+ `data/hexod_db/sources/legacy_pois.csv` legacy seed).
-- ONE SOURCE (owner 2026-11-16): the VPS reads this repo file, no server copy (wiki_refresh.sh retired, HEXOD_DB_JSON removed by update.sh).
-- THE database (owner 2026-11-16): `data/hexod_db/hexod_db.json`, complete, validations folded in (see data/hexod_db/README.md).
-- Build: `python scripts/build_hexod_db.py` (needs `openpyxl wordninja`) → `data/hexod_db/hexod_db.json`, then folds
-  `poi_validations.jsonl` + `creature_validations.jsonl` into it (`scripts/fold_validations.py`, run it after every agent batch).
-  The `HEXOD_MASTER_DB.xlsx` export is untracked.
+- ONE TOKEN BASE (owner 2026-11-16): `data/hexod_db/hexod_db.json` → `tokens`, one row per token (a species = one token per
+  place, `species_id` groups them). No POI / creature split in the file; `apps/events/tokens_format.py` derives the
+  pois / creatures views the code uses. The VPS reads this git file only (no server copy). See data/hexod_db/README.md.
+- After every agent batch: `python3 scripts/fold_validations.py` (ledgers → tokens), then commit. Rarity quotas never touch a checked token.
+- New places: `python3 scripts/add_tokens.py OTHER_DB.json` (unchecked, off the map until validated).
 - Rarity = combined score (visitors + geopolitical + rare fact + premium), then quotas legendary 1% / epic 4% / rare 10% / uncommon 25%.
 - POIs are located at **H3 res 8** (the map grid). Duplicates on the same cell are merged (`aliases`, sheet MERGED_DUPLICATES).
   Countries are codex-only (no hex); cities go on the map as `trade_node`.

@@ -1022,9 +1022,8 @@ def write(cats, resources, biomes, biome_res, pois, creatures, backlog, issues, 
     data = {'version': 1, 'h3_resolution': H3_RES, 'categories': cats, 'resources': resources, 'biomes': biomes,
             'biome_resources': biome_res, 'pois': pois, 'creatures': creatures, 'cities': city_index(pois)}
     sys.path.insert(0, str(Path(__file__).parent))
-    from fold_validations import fold   # one complete DB: the agents' validations are folded in (owner 2026-11-16)
-    print(fold(data, [ROOT / 'data' / 'hexod_db', OUT]))
-    (OUT / 'hexod_db.json').write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')
+    import fold_validations   # one token base with the agents' validations folded in (owner 2026-11-16)
+    fold_validations.save(fold_validations.fold(dict(data)), OUT / 'hexod_db.json')
 
     wb = openpyxl.Workbook()
     ws = wb.active; ws.title = 'README'
