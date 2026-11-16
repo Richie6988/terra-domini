@@ -15,9 +15,8 @@ from functools import lru_cache
 from pathlib import Path
 
 REPO_DB = Path(__file__).resolve().parents[4] / 'data' / 'hexod_db' / 'hexod_db.json'
-# On the VPS the refreshed DB (Wikipedia pictures, verified candidates) lives outside the repo: HEXOD_DB_JSON in .env.prod
-_env_db = os.environ.get('HEXOD_DB_JSON')
-DB_PATH = Path(_env_db) if _env_db and Path(_env_db).exists() else REPO_DB
+# One source (owner 2026-11-16): the game always reads the repo DB, cleaned and validated in git. No server-side copy.
+DB_PATH = REPO_DB
 
 # Safari spawn odds by rarity and HEX reward on capture
 SPAWN_WEIGHTS = {'common': 50, 'uncommon': 30, 'rare': 15, 'epic': 5}
@@ -91,7 +90,7 @@ CREATURE_FIELDS = ('name', 'description', 'rarity', 'codex_category', 'habitat',
 
 def creature_ledger() -> dict:
     out = {}
-    for path in dict.fromkeys([REPO_DB.parent / 'creature_validations.jsonl', DB_PATH.parent / 'creature_validations.jsonl']):
+    for path in [REPO_DB.parent / 'creature_validations.jsonl']:
         if not path.exists():
             continue
         for line in path.read_text(encoding='utf-8').splitlines():

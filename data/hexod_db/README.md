@@ -2,7 +2,7 @@
 
 **`hexod_db.json` is the one database of the game.** It holds every POI, species, category, biome and resource,
 with the validated values already applied (`verdict` and `validated_at` on each checked row; rejected rows are gone).
-`manage.py import_hexod_db` loads it on every deploy.
+`manage.py import_hexod_db` loads it on every deploy (`deploy/update.sh`). The server never keeps its own copy: this file in git is the only source.
 
 | File | What it is |
 |---|---|

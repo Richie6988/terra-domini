@@ -484,6 +484,7 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 ## 11c. HEXOD MASTER DATABASE (2026-10-18) — one source for POIs, creatures, biomes, resources
 
 - Sources (owner spreadsheets, never edit by hand): `data/hexod_db/sources/*.xlsx` (+ `data/hexod_db/sources/legacy_pois.csv` legacy seed).
+- ONE SOURCE (owner 2026-11-16): the VPS reads this repo file, no server copy (wiki_refresh.sh retired, HEXOD_DB_JSON removed by update.sh).
 - THE database (owner 2026-11-16): `data/hexod_db/hexod_db.json`, complete, validations folded in (see data/hexod_db/README.md).
 - Build: `python scripts/build_hexod_db.py` (needs `openpyxl wordninja`) → `data/hexod_db/hexod_db.json`, then folds
   `poi_validations.jsonl` + `creature_validations.jsonl` into it (`scripts/fold_validations.py`, run it after every agent batch).

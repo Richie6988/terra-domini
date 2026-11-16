@@ -13,7 +13,7 @@ from pathlib import Path
 
 from terra_domini.apps.events import hexod_db
 
-LEDGER = Path(os.environ.get('HEXOD_VALIDATIONS') or hexod_db.DB_PATH.parent / 'poi_validations.jsonl')
+LEDGER = hexod_db.REPO_DB.parent / 'poi_validations.jsonl'   # one source: the repo ledger (owner 2026-11-16)
 # stamps made in Claude Code sessions (poi-validator subagent) travel with git, then merge with the VPS ledger
 REPO_LEDGER = hexod_db.REPO_DB.parent / 'poi_validations.jsonl'
 
