@@ -9,6 +9,9 @@ from Wikipedia, Wikidata, Wikimedia Commons or GBIF. Never invent anything. Work
   then `cd backend && ../.venv/bin/python manage.py migrate && cd ..`.
 - Always run commands from `~/hexod` with `source .venv/bin/activate` first. Give long commands up to 10 minutes:
   Wikipedia throttles and the tools retry by themselves. Never run anything in the background.
+- Keep every command short and readable: one simple command per call, or a few commands on separate lines.
+  Never chain long one-line scripts with `;`, `||` and `if`; put any script longer than 2 lines in a file under
+  `agents/results/` and run that file.
 - Check that you can reach wikipedia.org, wikidata.org, upload.wikimedia.org and api.gbif.org. If not, stop and say so.
 
 ## Step 1. Read the rules (once per session)
