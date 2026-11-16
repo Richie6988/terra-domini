@@ -106,6 +106,9 @@ def fold(data: dict, poi_ledger: dict, species_ledger: dict) -> str:
                 if v.get(f) not in (None, '', []):
                     t[f] = v[f]
             t['verdict'], t['validated_at'] = v.get('verdict'), v.get('validated_at')
+            if t.get('kind') != 'country' and t.get('h3_r8'):   # a checked place goes on the map (countries are Codex cards)
+                t['on_map'] = True
+                t['source'] = (t.get('source') or '').replace(', to check)', ')')
             pv += 1
         tokens.append(t)
     sv, sr = 0, 0
