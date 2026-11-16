@@ -483,10 +483,11 @@ grep -rn "api\\.\\(get\\|post\\)(\\'/api/" frontend/src/                  # 0 (d
 
 ## 11c. HEXOD MASTER DATABASE (2026-10-18) — one source for POIs, creatures, biomes, resources
 
-- Sources (owner spreadsheets, never edit by hand): `data/hexod_db/sources/*.xlsx` (+ `backend/terra_domini_pois.csv` legacy seed).
-- Build: `python scripts/build_hexod_db.py` (needs `openpyxl wordninja`) → `data/hexod_db/HEXOD_MASTER_DB.xlsx`
-  (sheets README, POI, CREATURE, CATEGORY, BIOME, BIOME_RESOURCE, RESOURCE, UNLOCATED, MERGED_DUPLICATES, ISSUES)
-  and `data/hexod_db/hexod_db.json` (what the game reads).
+- Sources (owner spreadsheets, never edit by hand): `data/hexod_db/sources/*.xlsx` (+ `data/hexod_db/sources/legacy_pois.csv` legacy seed).
+- THE database (owner 2026-11-16): `data/hexod_db/hexod_db.json`, complete, validations folded in (see data/hexod_db/README.md).
+- Build: `python scripts/build_hexod_db.py` (needs `openpyxl wordninja`) → `data/hexod_db/hexod_db.json`, then folds
+  `poi_validations.jsonl` + `creature_validations.jsonl` into it (`scripts/fold_validations.py`, run it after every agent batch).
+  The `HEXOD_MASTER_DB.xlsx` export is untracked.
 - Rarity = combined score (visitors + geopolitical + rare fact + premium), then quotas legendary 1% / epic 4% / rare 10% / uncommon 25%.
 - POIs are located at **H3 res 8** (the map grid). Duplicates on the same cell are merged (`aliases`, sheet MERGED_DUPLICATES).
   Countries are codex-only (no hex); cities go on the map as `trade_node`.
@@ -912,7 +913,7 @@ Even outside a full 10-agent audit, mentally run these 4 before every commit:
 
 **Unused data:**
 - `frontend/public/press-kit.html`
-- *(KEPT: `backend/terra_domini_pois.csv` — will be used)*
+- *(KEPT: `data/hexod_db/sources/legacy_pois.csv` — will be used)*
 
 **Superseded scripts (10 files):**
 - `scripts/seed_dev.py`, `seed_pois.py`, `seed_events_calendar.py`, `smoke_test.sh`
@@ -934,7 +935,7 @@ Even outside a full 10-agent audit, mentally run these 4 before every commit:
 - `contracts/` — Solidity contracts for Polygon blockchain plan
 - `frontend/dist/` — REQUIRED for Windows-no-Node setup
 - `backend/scripts/ensure_db.py`, `setup_db.sh` — active
-- `backend/terra_domini_pois.csv` — reseed data source (per Richard)
+- `data/hexod_db/sources/legacy_pois.csv` — reseed data source (per Richard)
 - `scripts/init_db.sql` — Postgres prod init
 - `docker-compose.yml` + `docker-compose.dev.yml` — future prod
 - `nginx/nginx.conf` — future prod

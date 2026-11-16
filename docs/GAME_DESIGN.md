@@ -18,7 +18,7 @@ and you brag at the coffee machine on Monday.
 Missing a window costs you (stock full, hex lost, event missed) → FOMO without paying.
 
 ## One world, three card families (one database: data/hexod_db)
-Every card is real data from HEXOD_MASTER_DB.xlsx and has a number in the album.
+Every card is real data from data/hexod_db/hexod_db.json and has a number in the album.
 1. **Place cards** (1,745 POIs on the map + countries in the codex): landmarks, cities, and every
    **strategic point** of the globe (Pentagon, dams, straits, canals, ports, launch sites, nuclear plants,
    data hubs). Owning the hex = owning the card. Rarity = visitors + geopolitical weight + uniqueness.

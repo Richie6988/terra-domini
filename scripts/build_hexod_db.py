@@ -3,7 +3,7 @@
 Build the single HEXOD game database from the owner's messy extracts.
 
     python scripts/build_hexod_db.py            # reads data/hexod_db/sources/*.xlsx
-    → data/hexod_db/HEXOD_MASTER_DB.xlsx      (human-editable, one sheet per table)
+    → data/hexod_db/HEXOD_MASTER_DB.xlsx      (read-only spreadsheet export, not tracked in git)
     → data/hexod_db/hexod_db.json             (loaded by `manage.py import_hexod_db`)
 
 Sources (copied in data/hexod_db/sources/):
@@ -11,7 +11,7 @@ Sources (copied in data/hexod_db/sources/):
   webtoclean_in.xlsx     same POIs + rare_fact
   wiki_full_extract.xlsx BRUT (2786, 1119 located) — extra located POIs not in Token
   city_full_extract.xlsx · country_full_extract.xlsx · nature_full_extract.xlsx (creatures, no coords)
-  ../../backend/terra_domini_pois.csv  legacy seed currently in the game (merged, deduplicated)
+  legacy_pois.csv                      legacy seed currently in the game (merged, deduplicated)
 
 Rarity = combined score (visitors + geopolitics + rare fact, or fame proxy) ranked inside each
 family, then cut by quotas: legendary 1% · epic 4% · rare 10% · uncommon 25% · common 60%.
@@ -29,7 +29,7 @@ import wordninja
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT / 'data' / 'hexod_db' / 'sources'
 OUT = Path(os.environ.get('HEXOD_DB_OUT') or ROOT / 'data' / 'hexod_db')   # the VPS writes outside the repo (deploy/wiki_refresh.sh)
-LEGACY_CSV = ROOT / 'backend' / 'terra_domini_pois.csv'
+LEGACY_CSV = SRC / 'legacy_pois.csv'
 H3_RES = 8  # the game grid (claude.md: ALWAYS resolution 8)
 
 QUOTAS = [('legendary', 0.01), ('epic', 0.04), ('rare', 0.10), ('uncommon', 0.25), ('common', 1.0)]
@@ -1021,6 +1021,9 @@ def write(cats, resources, biomes, biome_res, pois, creatures, backlog, issues, 
     OUT.mkdir(parents=True, exist_ok=True)
     data = {'version': 1, 'h3_resolution': H3_RES, 'categories': cats, 'resources': resources, 'biomes': biomes,
             'biome_resources': biome_res, 'pois': pois, 'creatures': creatures, 'cities': city_index(pois)}
+    sys.path.insert(0, str(Path(__file__).parent))
+    from fold_validations import fold   # one complete DB: the agents' validations are folded in (owner 2026-11-16)
+    print(fold(data, [ROOT / 'data' / 'hexod_db', OUT]))
     (OUT / 'hexod_db.json').write_text(json.dumps(data, ensure_ascii=False, indent=1), encoding='utf-8')
 
     wb = openpyxl.Workbook()
