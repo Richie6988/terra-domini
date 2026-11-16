@@ -281,4 +281,5 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
-print(f"⚙️  DEV settings — DB: {'PostgreSQL' if _use_postgres else 'SQLite'} · Cache: {'Redis' if _redis_host else 'Memory'} · Celery: {'Broker' if _broker else 'Sync'}")
+if os.environ.get("DJANGO_SETTINGS_MODULE", "").endswith(".dev"):
+    print(f"⚙️  DEV settings — DB: {'PostgreSQL' if _use_postgres else 'SQLite'} · Cache: {'Redis' if _redis_host else 'Memory'} · Celery: {'Broker' if _broker else 'Sync'}")
