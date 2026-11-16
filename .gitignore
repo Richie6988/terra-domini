@@ -49,3 +49,7 @@ data/tile_cache/
 data/hexod_db/poi_agent_state/
 .claude/worktrees/
 data/hexod_db/HEXOD_MASTER_DB.xlsx
+
+# local agent runs (agents/README.md): claims and result files stay local, reports are committed
+agents/state/
+agents/results/
