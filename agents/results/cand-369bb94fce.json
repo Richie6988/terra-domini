@@ -1,0 +1,53 @@
+{
+  "uid": "cand-369bb94cce",
+  "name": "Chihuly Garden and Glass",
+  "kind": "museum",
+  "game_category": "museum",
+  "lat": 47.62062,
+  "lon": -122.35007,
+  "country_code": "US",
+  "wiki_url": "https://en.wikipedia.org/wiki/Chihuly_Garden_and_Glass",
+  "rarity": "common",
+  "visitors_per_year": 0,
+  "pictures": {
+    "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ce/Chihuly_Entrance.jpg/1280px-Chihuly_Entrance.jpg": {
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/1280x994",
+      "file": "Chihuly_Entrance",
+      "width": 3710,
+      "height": 2881,
+      "license": "CC BY-SA 4.0",
+      "author": "BrandieBreezy",
+      "role": "wikidata main image"
+    },
+    "https://thumb.wikimedia.org/wikipedia/8/8b/Chihuly_Garden_and_1280px-2014_09-CHIHULY-GARDEN-AND-GLASS.jpg": {
+      "url": "https://thumb.wikimedia.org/1280",
+      "file": "Chihuly_Garden_and",
+      "width": 2592,
+      "height": 1728,
+      "license": "CC BY-SA 4.0",
+      "author": "Jllm06",
+      "role": "article photo"
+    },
+    "https://thumb.wikimedia.org/wikipedia/thumbs/thumb/9/9a/Swan_of_Glass.jpg/1280": {
+      "url": "https://thumb.wikimedia.org/9/1280",
+      "file": "Swan_of_Glass",
+      "width": 1920,
+      "height": 2560,
+      "license": "Public domain",
+      "author": "Jorge Barrios",
+      "role": "article photo"
+    }
+  },
+  "wiki": {
+    "Chihuly Garden and Glass": {
+      "title": "Chihuly Garden and Glass",
+      "exists": 1,
+      "page_title": "Chihuly Garden and Glass",
+      "lat": 47.620062,
+      "lon": -122.357307,
+      "image_file": "Chihuly_Garden_and_Log",
+      "extract": "Chihuly Garden and Glass is an exhibit in the Seattle Center directly next to the Space Needle, showcasing the studio glass of Dale Chihuly. It opened on May 21, 2012 at the former site of the defunct Fun Forest amusement park.\nThe project features three primary components: the Garden, the Glasshouse, and the Interior Exhibits, with significant secondary spaces including a bar featuring both all-ages seating and a separate area for guests age 21+, a 50-seat multi-use theater and lecture space, retail and lobby spaces, and extensive public site enhancements beyond the Garden.",
+      "wikidata": "Q5097315"
+    }
+  }
+}
