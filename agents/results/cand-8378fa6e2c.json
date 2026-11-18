@@ -1,0 +1,30 @@
+{
+  "verdict": "validated",
+  "name": "Bellagio, Resort",
+  "wiki_title": "Bellagio (resort)",
+  "lat": 36.11305556,
+  "lon": -115.17638889,
+  "kind": "landmark",
+  "game_category": "casino_resort",
+  "country_code": "US",
+  "wiki_url": "https://en.wikipedia.org/wiki/Bellagio_(resort)",
+  "rarity": "rare",
+  "visitors_per_year": 0,
+  "sitelinks": 30,
+  "heritage_designations": [],
+  "unesco_world_heritage": false,
+  "pictures": [
+    {
+      "url": "https://upload.wikimedia.org/wikipedia/commons/1/1d/Bellagio_outside.jpg",
+      "file": "Bellagio outside.jpg",
+      "width": 1159,
+      "height": 882,
+      "license": "CC BY 3.0",
+      "author": "Blane",
+      "role": "wikidata main image"
+    }
+  ],
+  "token_uid": "poi-20260012",
+  "is_duplicate": false,
+  "description": "Bellagio is a resort, luxury hotel, and casino on the Las Vegas Strip in Paradise, Nevada. It is owned by Blackstone Inc. and operated by MGM Resorts International."
+}

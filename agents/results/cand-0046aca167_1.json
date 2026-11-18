@@ -1,0 +1,54 @@
+{
+ "uid": "cand-0046aca167",
+ "kind": "landmark",
+ "name": "Sphere (venue)",
+ "wiki_title": "Sphere (venue)",
+ "game_category": "museum",
+ "coordinates": {
+  "lat": 36.12111111,
+  "lon": -115.16194444
+ },
+ "intro": "Sphere (also known as Sphere at the Venetian Resort or Las Vegas Sphere) is a music and entertainment arena in Paradise, Nevada, United States, east of the Las Vegas Strip. Designed by Populous, the project was announced by the Madison Square Garden Company in 2018, known then as the MSG Sphere. The venue, which seats 17,600 people and has total capacity of 20,000, is being marketed for its immersive video and audio capabilities.",
+ "sitelinks": 29,
+ "sitelinks_note": "number of Wikipedia languages",
+ "pictures": [
+  {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/67/Sphere-exosphere-on-Jan-26-2024.jpg/1280px-Sphere-exosphere-on-Jan-26-2024.jpg",
+   "file": "Sphere-exosphere-on-Jan-26-2024.jpg",
+   "width": 5424,
+   "height": 3616,
+   "license": "CC BY 4.0",
+   "author": "Y2kcrazyjoker4",
+   "role": "wikidata main image"
+  }
+ ],
+ "corrections": "Coordinates updated from (36.1209, -115.1666) to (36.12111111, -115.16194444) based on Wikipedia data.",
+ "final_verdict": "STAMPED"
+} } } }
+{
+ "uid": "cand-0046aca167",
+ "kind": "landmark",
+ "name": "Sphere (venue)",
+ "wiki_title": "Sphere (venue)",
+ "game_category": "museum",
+ "coordinates": {
+  "lat": 36.12111111,
+  "lon": -115.16194444
+ },
+ "intro": "Sphere (also known as Sphere at the Venetian Resort or Las Vegas Sphere) is a music and entertainment arena in Paradise, Nevada, United States, east of the Las Vegas Strip. Designed by Populous, the project was announced by the Madison Square Garden Company in 2018, known then as the MSG Sphere. The venue, which seats 17,600 people and has total capacity of 20,000, is being marketed for its immersive video and audio capabilities.",
+ "sitelinks": 29,
+ "sitelinks_note": "number of Wikipedia languages",
+ "pictures": [
+  {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/67/Sphere-exosphere-on-Jan-26-2024.jpg/1280px-Sphere-exosphere-on-Jan-26-2024.jpg",
+   "file": "Sphere-exosphere-on-Jan-26-2024.jpg",
+   "width": 5424,
+   "height": 3616,
+   "license": "CC BY 4.0",
+   "author": "Y2kcrazyjoker4",
+   "role": "wikidata main image"
+  }
+ ],
+ "corrections": "Coordinates updated from (36.1209, -115.1666) to (36.12111111, -115.16194444) based on Wikipedia data.",
+ "final_verdict": "STAMPED"
+} } } }

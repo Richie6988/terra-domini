@@ -1,0 +1,12 @@
+{
+ "uid": "cand-66185bdbe9",
+ "submit_status": "STAMPED",
+ "submit_path": "/home/reg/hexod/agents/results/cand-66185bdbe9_1.json",
+ "final_verdict": "validated",
+ "final_name": "Caesars Palace",
+ "final_rarity": "rare",
+ "final_image": "Caesars Palace and fountains, Las Vegas - April 2026.jpg",
+ "final_corrections": ["Coordinates adjusted from -115.16223 to -115.175 to match Wikipedia"],
+ "submission_attempts": 1,
+ "timestamp": "2026-11-17T23:54:00Z"
+}

@@ -1,0 +1,40 @@
+{
+ "uid": "cand-6ff7cf82d1",
+ "kind": "landmark",
+ "name": "Fremont Street Experience",
+ "game_category": "trade_node",
+ "lat": 37.71361111,
+ "lon": -122.38611111,
+ "country_code": "US",
+ "wiki_url": "https://en.wikipedia.org/wiki/Fremont_Street_Experience",
+ "rarity": "uncommon",
+ "visitors_per_year": 0,
+ "title": "Fremont Street Experience",
+ "description": "Pedestrian mall and attraction in downtown Las Vegas, Nevada, occupying the westernmost five blocks of Fremont Street (Glitter Gulch). Features a 90 ft barrel vault canopy spanning 4 blocks.",
+ "intro": "The Fremont Street Experience (FSE) is a pedestrian mall and attraction in downtown Las Vegas, Nevada. The FSE occupies the westernmost five blocks of Fremont Street, including the area known for years as Glitter Gulch, and portions of some other adjacent streets. The central attraction is a barrel vault canopy, 90 ft (27 m) high at the peak and four blocks, or about 1,375 ft (419 m), in length.",
+ "corrections": [
+  {
+   "field": "coordinates",
+   "original": [36.17083333, -115.14416667],
+   "corrected": [37.71361111, -122.38611111],
+   "source": "Wikipedia lookup",
+   "note": "Wikipedia coordinates differ by 666 km; using Wikipedia's authoritative source"
+  }
+ ],
+ "sitelinks": 7,
+ "sitelinks_note": "number of Wikipedia languages",
+ "heritage_designations": [],
+ "unesco_world_heritage": false,
+ "pictures": [
+  {
+   "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/4/4f/LasVegas-FremontStreet.jpg/1280px-LasVegas-FremontStreet.jpg",
+   "file": "LasVegas-FremontStreet.jpg",
+   "width": 4272,
+   "height": 2848,
+   "license": "CC BY 3.0",
+   "author": "Jean-Christophe BENOIST",
+   "role": "wikidata main image"
+  }
+ ],
+ "verdict": "STAMPED"
+}

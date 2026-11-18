@@ -1,0 +1,30 @@
+{
+  "verdict": "validated",
+  "name": "Horseshoe Bend",
+  "wiki_title": "Horseshoe Bend (Arizona)",
+  "lat": 36.879047,
+  "lon": -111.510498,
+  "kind": "landmark",
+  "game_category": "canyon",
+  "country_code": "US",
+  "wiki_url": "https://en.wikipedia.org/wiki/Horseshoe_Bend_(Arizona)",
+  "rarity": "rare",
+  "visitors_per_year": 0,
+  "sitelinks": 15,
+  "heritage_designations": [],
+  "unesco_world_heritage": false,
+  "pictures": [
+    {
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b9/Horseshoe_Bend_13_February_2023.jpg/1280px-Horseshoe_Bend_13_February_2023.jpg",
+      "file": "Horseshoe_Bend_13_February_2023.jpg",
+      "width": 1280,
+      "height": 720,
+      "license": "CC BY-SA 4.0",
+      "author": "Charles Wang",
+      "role": "article photo"
+    }
+  ],
+  "token_uid": "poi-20260011",
+  "is_duplicate": false,
+  "description": "Horseshoe Bend is a horseshoe-shaped incised meander of the Colorado River located near the town of Page, Arizona, United States. It is also referred to as the \"east rim of the Grand Canyon.\""
+}
