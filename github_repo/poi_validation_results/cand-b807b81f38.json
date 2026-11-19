@@ -1,0 +1,35 @@
+{
+  "uid": "cand-b807b81f38",
+  "name": "Vail Ski Resort",
+  "category": "resort",
+  "rarity": "rare",
+  "picture": {
+    "exists": true,
+    "url": "yes",
+    "verified": true
+  },
+  "flags": [],
+  "corrections": [],
+  "wiki_url": "https://en.wikipedia.org/wiki/Vail_Ski_Resort",
+  "commons_url": "https://commons.wikimedia.org/wiki/File:Vail_Ski_Resort.jpg",
+  "native_range": [
+    39.6403,
+    -106.151
+  ],
+  "description": "Vail Ski Resort is a ski resort located in Vail, Colorado, United States. It is one of the largest ski resorts in North America, known for its wide slopes and family-friendly atmosphere.",
+  "verdict": "approved",
+  "wiki_title": "Vail Ski Resort",
+  "lat": 39.639,
+  "lon": -106.374,
+  "country_code": "US",
+  "rarity_reason": "4 Wikipedia languages (sitelinks) in the 4-19 band",
+  "game_category": "ski_resort",
+  "image_url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/6b/Birds_of_Prey_%28ski_course%29%2C_Beaver_Creek.jpg/1280px-Birds_of_Prey_%28ski_course%29%2C_Beaver_Creek.jpg",
+  "sources": [
+    "https://en.wikipedia.org/wiki/Vail_Ski_Resort",
+    "https://wikidata.org/wiki/Q14685139"
+  ],
+  "confidence": 0.95,
+  "submission_status": "submitted",
+  "submission_attempts": 1
+}

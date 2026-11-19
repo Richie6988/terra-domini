@@ -1,0 +1,21 @@
+{
+  "uid": "cand-0046aca167",
+  "name": "The Sphere",
+  "category": "monument",
+  "rarity": "epic",
+  "picture": {
+    "exists": true,
+    "url": "yes",
+    "verified": true
+  },
+  "flags": [],
+  "corrections": [],
+  "wiki_url": "https://en.wikipedia.org/wiki/The_Sphere_(attraction)",
+  "commons_url": "https://commons.wikimedia.org/wiki/File:The_Sphere_(attraction).jpg",
+  "native_range": [
+    40.8356,
+    -73.9412
+  ],
+  "description": "The Sphere is a 165-foot-tall (50 m) observation wheel and vertical drop tower attraction located at Universal's Islands of Adventure theme park in Orlando, Florida. The attraction features a 120-foot (37 m) tall Sphere that rotates 360 degrees and offers 360-degree views of Orlando.",
+  "verdict": "approved"
+}

@@ -1,0 +1,21 @@
+{
+  "uid": "cand-085e2e7b46",
+  "name": "Beaver Creek",
+  "category": "resort",
+  "rarity": "rare",
+  "picture": {
+    "exists": true,
+    "url": "yes",
+    "verified": true
+  },
+  "flags": [],
+  "corrections": [],
+  "wiki_url": "https://en.wikipedia.org/wiki/Beaver_Creek_(resort)",
+  "commons_url": "https://commons.wikimedia.org/wiki/File:Beaver_Creek_Resort.jpg",
+  "native_range": [
+    39.5072,
+    -106.2078
+  ],
+  "description": "Beaver Creek is a ski resort located in Beaver Creek, Colorado, United States. It is known for its challenging terrain and luxury amenities.",
+  "verdict": "approved"
+}
