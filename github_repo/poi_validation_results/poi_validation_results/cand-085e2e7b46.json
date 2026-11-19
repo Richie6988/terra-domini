@@ -1,0 +1,27 @@
+{
+  "uid": "cand-085e2e7b46",
+  "name": "Beaver Creek",
+  "category": "resort",
+  "rarity": "rare",
+  "picture": "yes",
+  "flags": ["API_KEY_OK"],
+  "corrections": [],
+  "wiki_url": "https://en.wikipedia.org/wiki/Beaver_Creek_(resort)",
+  "commons_url": "https://commons.wikimedia.org/wiki/File:Beaver_Creek_Resort.jpg",
+  "native_range": [39.5072, -106.2078],
+  "description": "Beaver Creek is a ski resort located in Beaver Creek, Colorado, United States. It is known for its challenging terrain and luxury amenities."
+}
+{
+  "uid": "cand-085e2e7b46",
+  "name": "Beaver Creek",
+  "category": "resort",
+  "rarity": "rare",
+  "picture": {
+    "exists": true,
+    "url": "https://upload.wikimedia.org/wikipedia/commons/thumb/6/6b/Birds_of_Prey_%28ski_course%29%2C_Beaver_Creek.jpg/1280px-Birds_of_Prey_%28ski_course%29%2C_Beaver_Creek.jpg",
+    "verified": true
+  },
+  "flags": [],
+  "corrections": [],
+  "verdict": "approved"
+}
