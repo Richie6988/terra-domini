@@ -1,0 +1,98 @@
+{
+  "uid": "cand-ab42b073f1",
+  "wiki_url": "https://en.wikipedia.org/wiki/Sedona,_Arizona",
+  "lat": 34.86972222,
+  "lon": -111.76111111,
+  "intro": "Sedona ( si-DOH-n\u0259) is a city straddling the county line between Coconino and Yavapai counties in the northern Verde Valley region of Arizona, United States. As of the 2020 census, Sedona had a population of 9,684. The city is within the Coconino National Forest.",
+  "wikidata": "Q80041",
+  "sitelinks": 55,
+  "heritage_designations": [
+    "Q72114249"
+  ],
+  "unesco_world_heritage": false,
+  "pictures": [
+    {
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/7/72/Cathedral_Rock_at_Red_Rock_Crossing.jpg/1280px-Cathedral_Rock_at_Red_Rock_Crossing.jpg",
+      "file": "Cathedral Rock at Red Rock Crossing.jpg",
+      "width": 3872,
+      "height": 2592,
+      "license": "CC BY 2.0",
+      "author": "Adam Baker from Houston / Moscow / Toulouse (travel a lot)",
+      "role": "wikidata main image"
+    },
+    {
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/b/b0/Cathedral_Rock_-_Sedona_AZ-1.jpg/1280px-Cathedral_Rock_-_Sedona_AZ-1.jpg",
+      "file": "Cathedral Rock - Sedona AZ-1.jpg",
+      "width": 4608,
+      "height": 3456,
+      "license": "CC BY-SA 3.0",
+      "author": "Terrydarc",
+      "role": "article lead image"
+    },
+    {
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/3/32/Chapel_of_the_Holy_Cross%2C_Sedona%2C_AZ.jpg/1280px-Chapel_of_the_Holy_Cross%2C_Sedona%2C_AZ.jpg",
+      "file": "Chapel of the Holy Cross, Sedona, AZ.jpg",
+      "width": 5616,
+      "height": 3744,
+      "license": "CC BY-SA 3.0",
+      "author": "Matthew P. Del Buono",
+      "role": "article photo"
+    },
+    {
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/6/65/SedonaAirport.JPG/1280px-SedonaAirport.JPG",
+      "file": "SedonaAirport.JPG",
+      "width": 3872,
+      "height": 2592,
+      "license": "CC BY-SA 4.0",
+      "author": "Shane.torgerson",
+      "role": "article photo"
+    },
+    {
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/8/88/Sedona_-_Hiking_above_Oak_Creek.jpg/1280px-Sedona_-_Hiking_above_Oak_Creek.jpg",
+      "file": "Sedona - Hiking above Oak Creek.jpg",
+      "width": 3617,
+      "height": 2247,
+      "license": "CC BY-SA 4.0",
+      "author": "Scotwriter21",
+      "role": "article photo"
+    },
+    {
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/ad/Sedona_SW02.jpg/1280px-Sedona_SW02.jpg",
+      "file": "Sedona SW02.jpg",
+      "width": 2608,
+      "height": 1952,
+      "license": "CC BY-SA 4.0",
+      "author": "Scotwriter21",
+      "role": "article photo"
+    },
+    {
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/c/ca/Sedona_-_Route_89A.jpg/1280px-Sedona_-_Route_89A.jpg",
+      "file": "Sedona - Route 89A.jpg",
+      "width": 3896,
+      "height": 1674,
+      "license": "CC BY-SA 2.0",
+      "author": "Ken Lund",
+      "role": "article photo"
+    },
+    {
+      "url": "https://thumb.wikimedia.org/wikipedia/commons/thumb/a/af/Teal_McDonald%27s_Arches.jpeg/1280px-Teal_McDonald%27s_Arches.jpeg",
+      "file": "Teal McDonald's Arches.jpeg",
+      "width": 3264,
+      "height": 2448,
+      "license": "CC BY 2.0",
+      "author": "midiman",
+      "role": "article photo"
+    }
+  ],
+  "category": "city",
+  "native_range": "Arizona, US",
+  "description": "Sedona ( si-DOH-n\u0259) is a city straddling the county line between Coconino and Yavapai counties in the northern Verde Valley region of Arizona, United States. As of the 2020 census, Sedona had a population of 9,684. The city is within the Coconino National Forest.",
+  "rarity": "rare",
+  "corrections": "Initial lookup confirmed. Image verified as showing Cathedral Rock in Sedona. Category set to city (confirmed as a city). Rarity set to rare (55 sitelinks > 40 threshold).",
+  "game_category": "trade_node",
+  "ve_valid": true,
+  "ve_valid_date": "2026-11-18",
+  "ve_worker": "w1",
+  "verdict": "approved",
+  "name": "Sedona, Arizona"
+}
